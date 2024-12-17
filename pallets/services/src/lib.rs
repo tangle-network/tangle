@@ -31,7 +31,6 @@ use sp_runtime::{traits::Get, DispatchResult};
 mod functions;
 mod impls;
 mod rpc;
-pub mod traits;
 pub mod types;
 
 #[cfg(test)]
@@ -48,7 +47,6 @@ pub mod weights;
 
 pub use module::*;
 use tangle_primitives::BlueprintId;
-pub use traits::*;
 pub use weights::WeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -58,15 +56,23 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
-	use frame_support::dispatch::PostDispatchInfo;
-	use frame_support::traits::fungibles::{Inspect, Mutate};
-	use frame_support::traits::tokens::Preservation;
+	use frame_support::{
+		dispatch::PostDispatchInfo,
+		traits::{
+			fungibles::{Inspect, Mutate},
+			tokens::Preservation,
+		},
+	};
 	use sp_core::H160;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
-	use sp_runtime::Percent;
+	use sp_runtime::{
+		traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero},
+		Percent,
+	};
 	use sp_std::vec::Vec;
-	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-	use tangle_primitives::{services::*, Account, MultiAssetDelegationInfo};
+	use tangle_primitives::{
+		services::{MasterBlueprintServiceManagerRevision, *},
+		Account, MultiAssetDelegationInfo,
+	};
 	use types::*;
 
 	#[pallet::config]
@@ -87,14 +93,14 @@ pub mod module {
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
-		type EvmRunner: traits::EvmRunner<Self>;
+		type EvmRunner: tangle_primitives::services::EvmRunner<Self>;
 
 		/// A type that implements the `EvmGasWeightMapping` trait for the conversion of EVM gas to
 		/// Substrate weight and vice versa.
-		type EvmGasWeightMapping: traits::EvmGasWeightMapping;
+		type EvmGasWeightMapping: tangle_primitives::services::EvmGasWeightMapping;
 
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
-		type EvmAddressMapping: traits::EvmAddressMapping<Self::AccountId>;
+		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
 
 		/// The asset ID type.
 		type AssetId: AtLeast32BitUnsigned
@@ -201,7 +207,8 @@ pub mod module {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
 			// Ensure that the pallet's configuration is valid.
-			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM address.
+			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM
+			//    address.
 			let account_id = T::EvmAddressMapping::into_account_id(Self::address());
 			assert_eq!(account_id, Self::account_id(), "Services: AccountId mapping is incorrect.");
 		}
@@ -1067,7 +1074,8 @@ pub mod module {
 						ApprovalState::Approved { restaking_percent } => {
 							Some((v, restaking_percent))
 						},
-						// N.B: this should not happen, as all operators are approved and checked above.
+						// N.B: this should not happen, as all operators are approved and checked
+						// above.
 						_ => None,
 					})
 					.collect::<Vec<_>>();
@@ -1391,11 +1399,12 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+		/// Slash an operator (offender) for a service id with a given percent of their exposed
+		/// stake for that service.
 		///
 		/// The caller needs to be an authorized Slash Origin for this service.
-		/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-		/// by another entity.
+		/// Note that this does not apply the slash directly, but instead schedules a deferred call
+		/// to apply the slash by another entity.
 		pub fn slash(
 			origin: OriginFor<T>,
 			offender: T::AccountId,
@@ -1457,7 +1466,8 @@ pub mod module {
 
 		/// Dispute an [UnappliedSlash] for a given era and index.
 		///
-		/// The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash].
+		/// The caller needs to be an authorized Dispute Origin for the service in the
+		/// [UnappliedSlash].
 		pub fn dispute(
 			origin: OriginFor<T>,
 			#[pallet::compact] era: u32,

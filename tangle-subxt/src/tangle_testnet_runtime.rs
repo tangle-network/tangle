@@ -3373,9 +3373,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				80u8, 141u8, 11u8, 219u8, 6u8, 178u8, 239u8, 224u8, 24u8, 145u8, 113u8, 85u8, 28u8,
-				230u8, 209u8, 8u8, 141u8, 24u8, 185u8, 56u8, 183u8, 59u8, 40u8, 156u8, 46u8, 220u8,
-				13u8, 52u8, 211u8, 39u8, 99u8, 68u8,
+				5u8, 154u8, 107u8, 119u8, 72u8, 89u8, 231u8, 249u8, 39u8, 36u8, 249u8, 86u8, 39u8,
+				140u8, 38u8, 112u8, 243u8, 211u8, 184u8, 137u8, 34u8, 181u8, 172u8, 240u8, 164u8,
+				7u8, 196u8, 85u8, 203u8, 55u8, 246u8, 216u8,
 			]
 	}
 	pub mod system {
@@ -4493,9 +4493,9 @@ pub mod api {
 						"Events",
 						(),
 						[
-							120u8, 166u8, 58u8, 107u8, 246u8, 11u8, 96u8, 144u8, 72u8, 132u8,
-							146u8, 200u8, 157u8, 71u8, 162u8, 168u8, 117u8, 62u8, 31u8, 62u8, 7u8,
-							68u8, 102u8, 178u8, 57u8, 35u8, 146u8, 167u8, 3u8, 160u8, 81u8, 176u8,
+							24u8, 134u8, 233u8, 26u8, 20u8, 180u8, 116u8, 72u8, 248u8, 72u8, 166u8,
+							122u8, 46u8, 77u8, 208u8, 24u8, 23u8, 26u8, 84u8, 76u8, 170u8, 24u8,
+							138u8, 174u8, 253u8, 229u8, 251u8, 6u8, 118u8, 104u8, 193u8, 7u8,
 						],
 					)
 				}
@@ -5146,9 +5146,9 @@ pub mod api {
 						"sudo",
 						types::Sudo { call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							85u8, 102u8, 44u8, 84u8, 251u8, 205u8, 199u8, 246u8, 22u8, 90u8, 100u8,
-							37u8, 128u8, 197u8, 219u8, 168u8, 239u8, 85u8, 163u8, 2u8, 85u8, 168u8,
-							203u8, 145u8, 51u8, 15u8, 180u8, 185u8, 158u8, 248u8, 25u8, 212u8,
+							208u8, 49u8, 34u8, 70u8, 241u8, 219u8, 96u8, 19u8, 119u8, 128u8, 125u8,
+							60u8, 40u8, 230u8, 90u8, 40u8, 219u8, 138u8, 131u8, 170u8, 98u8, 36u8,
+							83u8, 173u8, 7u8, 246u8, 145u8, 14u8, 170u8, 0u8, 224u8, 245u8,
 						],
 					)
 				}
@@ -5170,10 +5170,9 @@ pub mod api {
 							weight,
 						},
 						[
-							89u8, 47u8, 52u8, 100u8, 155u8, 129u8, 224u8, 158u8, 9u8, 94u8, 42u8,
-							43u8, 58u8, 89u8, 97u8, 181u8, 165u8, 155u8, 116u8, 104u8, 180u8,
-							197u8, 119u8, 121u8, 120u8, 240u8, 219u8, 248u8, 21u8, 180u8, 83u8,
-							9u8,
+							144u8, 58u8, 10u8, 185u8, 102u8, 31u8, 8u8, 164u8, 133u8, 102u8, 14u8,
+							66u8, 222u8, 250u8, 80u8, 70u8, 76u8, 174u8, 36u8, 65u8, 117u8, 163u8,
+							109u8, 182u8, 5u8, 62u8, 80u8, 155u8, 252u8, 169u8, 154u8, 149u8,
 						],
 					)
 				}
@@ -5209,10 +5208,10 @@ pub mod api {
 						"sudo_as",
 						types::SudoAs { who, call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							219u8, 18u8, 110u8, 149u8, 233u8, 148u8, 26u8, 179u8, 15u8, 157u8,
-							189u8, 43u8, 251u8, 179u8, 179u8, 7u8, 12u8, 159u8, 252u8, 36u8, 113u8,
-							199u8, 25u8, 142u8, 69u8, 208u8, 234u8, 253u8, 198u8, 136u8, 150u8,
-							215u8,
+							175u8, 220u8, 140u8, 145u8, 165u8, 60u8, 117u8, 2u8, 161u8, 250u8,
+							71u8, 177u8, 33u8, 30u8, 186u8, 186u8, 172u8, 166u8, 212u8, 97u8,
+							134u8, 234u8, 0u8, 219u8, 138u8, 61u8, 123u8, 223u8, 184u8, 41u8,
+							253u8, 29u8,
 						],
 					)
 				}
@@ -15463,10 +15462,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							80u8, 130u8, 130u8, 0u8, 201u8, 192u8, 141u8, 199u8, 219u8, 157u8,
-							31u8, 126u8, 20u8, 8u8, 102u8, 21u8, 157u8, 93u8, 154u8, 250u8, 54u8,
-							209u8, 125u8, 63u8, 35u8, 233u8, 180u8, 165u8, 69u8, 79u8, 180u8,
-							219u8,
+							151u8, 243u8, 56u8, 5u8, 25u8, 51u8, 158u8, 177u8, 194u8, 23u8, 61u8,
+							148u8, 69u8, 59u8, 0u8, 133u8, 211u8, 254u8, 22u8, 130u8, 22u8, 37u8,
+							44u8, 237u8, 223u8, 249u8, 235u8, 145u8, 94u8, 18u8, 124u8, 220u8,
 						],
 					)
 				}
@@ -15499,9 +15497,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							176u8, 138u8, 95u8, 94u8, 49u8, 75u8, 75u8, 70u8, 96u8, 28u8, 122u8,
-							214u8, 6u8, 134u8, 203u8, 77u8, 174u8, 41u8, 78u8, 170u8, 61u8, 92u8,
-							18u8, 44u8, 138u8, 116u8, 128u8, 229u8, 51u8, 178u8, 114u8, 106u8,
+							190u8, 252u8, 150u8, 81u8, 94u8, 170u8, 96u8, 254u8, 98u8, 120u8, 39u8,
+							21u8, 240u8, 196u8, 127u8, 150u8, 43u8, 177u8, 113u8, 128u8, 40u8,
+							189u8, 78u8, 243u8, 220u8, 171u8, 203u8, 192u8, 221u8, 44u8, 38u8,
+							107u8,
 						],
 					)
 				}
@@ -15883,10 +15882,9 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							122u8, 85u8, 141u8, 87u8, 254u8, 93u8, 115u8, 216u8, 136u8, 51u8,
-							131u8, 220u8, 158u8, 86u8, 163u8, 216u8, 68u8, 200u8, 220u8, 45u8,
-							135u8, 38u8, 69u8, 15u8, 183u8, 247u8, 87u8, 170u8, 95u8, 2u8, 216u8,
-							145u8,
+							49u8, 191u8, 165u8, 123u8, 184u8, 2u8, 47u8, 239u8, 144u8, 167u8,
+							191u8, 21u8, 64u8, 62u8, 6u8, 47u8, 179u8, 238u8, 103u8, 2u8, 240u8,
+							97u8, 226u8, 51u8, 9u8, 80u8, 222u8, 5u8, 166u8, 243u8, 11u8, 165u8,
 						],
 					)
 				}
@@ -15906,10 +15904,9 @@ pub mod api {
 						"ProposalOf",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							122u8, 85u8, 141u8, 87u8, 254u8, 93u8, 115u8, 216u8, 136u8, 51u8,
-							131u8, 220u8, 158u8, 86u8, 163u8, 216u8, 68u8, 200u8, 220u8, 45u8,
-							135u8, 38u8, 69u8, 15u8, 183u8, 247u8, 87u8, 170u8, 95u8, 2u8, 216u8,
-							145u8,
+							49u8, 191u8, 165u8, 123u8, 184u8, 2u8, 47u8, 239u8, 144u8, 167u8,
+							191u8, 21u8, 64u8, 62u8, 6u8, 47u8, 179u8, 238u8, 103u8, 2u8, 240u8,
+							97u8, 226u8, 51u8, 9u8, 80u8, 222u8, 5u8, 166u8, 243u8, 11u8, 165u8,
 						],
 					)
 				}
@@ -31303,9 +31300,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							214u8, 69u8, 165u8, 202u8, 122u8, 71u8, 224u8, 70u8, 147u8, 64u8, 20u8,
-							11u8, 236u8, 192u8, 233u8, 19u8, 75u8, 207u8, 133u8, 12u8, 89u8, 203u8,
-							125u8, 144u8, 213u8, 41u8, 75u8, 151u8, 15u8, 217u8, 1u8, 57u8,
+							199u8, 56u8, 239u8, 224u8, 183u8, 223u8, 102u8, 228u8, 68u8, 96u8,
+							85u8, 216u8, 183u8, 55u8, 0u8, 29u8, 253u8, 63u8, 126u8, 182u8, 190u8,
+							143u8, 248u8, 194u8, 184u8, 188u8, 196u8, 183u8, 213u8, 98u8, 203u8,
+							14u8,
 						],
 					)
 				}
@@ -31347,9 +31345,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							249u8, 19u8, 218u8, 154u8, 87u8, 150u8, 3u8, 147u8, 1u8, 221u8, 122u8,
-							26u8, 72u8, 122u8, 77u8, 151u8, 144u8, 85u8, 134u8, 65u8, 33u8, 182u8,
-							201u8, 223u8, 134u8, 145u8, 60u8, 28u8, 19u8, 134u8, 1u8, 231u8,
+							101u8, 248u8, 172u8, 212u8, 27u8, 151u8, 85u8, 78u8, 19u8, 155u8,
+							249u8, 230u8, 229u8, 142u8, 24u8, 136u8, 135u8, 162u8, 163u8, 245u8,
+							57u8, 242u8, 145u8, 105u8, 25u8, 106u8, 216u8, 224u8, 16u8, 154u8,
+							37u8, 7u8,
 						],
 					)
 				}
@@ -31387,9 +31386,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							179u8, 11u8, 205u8, 94u8, 110u8, 169u8, 53u8, 165u8, 57u8, 107u8,
-							162u8, 240u8, 65u8, 52u8, 73u8, 96u8, 15u8, 26u8, 117u8, 20u8, 192u8,
-							79u8, 98u8, 73u8, 81u8, 35u8, 45u8, 15u8, 140u8, 70u8, 180u8, 251u8,
+							42u8, 118u8, 58u8, 127u8, 142u8, 66u8, 3u8, 95u8, 28u8, 90u8, 44u8,
+							129u8, 152u8, 178u8, 0u8, 225u8, 186u8, 106u8, 175u8, 47u8, 66u8,
+							172u8, 216u8, 35u8, 5u8, 53u8, 160u8, 14u8, 27u8, 42u8, 73u8, 169u8,
 						],
 					)
 				}
@@ -31413,10 +31412,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							62u8, 93u8, 159u8, 43u8, 150u8, 67u8, 181u8, 131u8, 170u8, 114u8,
-							170u8, 226u8, 60u8, 13u8, 192u8, 68u8, 119u8, 21u8, 162u8, 73u8, 239u8,
-							168u8, 161u8, 96u8, 250u8, 66u8, 183u8, 136u8, 197u8, 180u8, 244u8,
-							202u8,
+							144u8, 7u8, 34u8, 230u8, 179u8, 226u8, 63u8, 197u8, 27u8, 183u8, 253u8,
+							252u8, 140u8, 85u8, 204u8, 78u8, 26u8, 99u8, 11u8, 180u8, 206u8, 178u8,
+							161u8, 42u8, 28u8, 192u8, 138u8, 42u8, 216u8, 30u8, 178u8, 244u8,
 						],
 					)
 				}
@@ -36061,9 +36059,9 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							13u8, 227u8, 65u8, 138u8, 249u8, 203u8, 144u8, 123u8, 159u8, 216u8,
-							77u8, 124u8, 68u8, 161u8, 42u8, 13u8, 223u8, 134u8, 79u8, 91u8, 216u8,
-							30u8, 126u8, 206u8, 135u8, 219u8, 45u8, 91u8, 96u8, 247u8, 82u8, 250u8,
+							187u8, 197u8, 139u8, 185u8, 162u8, 29u8, 179u8, 225u8, 225u8, 87u8,
+							87u8, 97u8, 3u8, 241u8, 151u8, 104u8, 91u8, 214u8, 0u8, 190u8, 251u8,
+							169u8, 127u8, 160u8, 7u8, 243u8, 206u8, 61u8, 106u8, 174u8, 62u8, 80u8,
 						],
 					)
 				}
@@ -36093,9 +36091,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							60u8, 23u8, 76u8, 83u8, 52u8, 90u8, 188u8, 236u8, 116u8, 28u8, 197u8,
-							201u8, 14u8, 45u8, 137u8, 212u8, 140u8, 194u8, 46u8, 45u8, 13u8, 228u8,
-							226u8, 35u8, 176u8, 151u8, 222u8, 152u8, 92u8, 4u8, 196u8, 225u8,
+							200u8, 142u8, 140u8, 129u8, 212u8, 157u8, 85u8, 182u8, 92u8, 141u8,
+							55u8, 157u8, 229u8, 7u8, 109u8, 74u8, 53u8, 68u8, 5u8, 242u8, 149u8,
+							73u8, 93u8, 111u8, 29u8, 89u8, 197u8, 13u8, 244u8, 68u8, 40u8, 237u8,
 						],
 					)
 				}
@@ -36121,10 +36119,10 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							133u8, 33u8, 247u8, 105u8, 15u8, 197u8, 167u8, 223u8, 193u8, 155u8,
-							199u8, 145u8, 191u8, 248u8, 43u8, 208u8, 81u8, 222u8, 27u8, 199u8,
-							168u8, 21u8, 79u8, 178u8, 190u8, 42u8, 173u8, 182u8, 212u8, 92u8,
-							135u8, 62u8,
+							188u8, 180u8, 80u8, 179u8, 215u8, 76u8, 79u8, 192u8, 191u8, 209u8,
+							131u8, 116u8, 125u8, 253u8, 138u8, 200u8, 196u8, 84u8, 44u8, 164u8,
+							72u8, 208u8, 228u8, 58u8, 224u8, 245u8, 125u8, 94u8, 12u8, 229u8,
+							240u8, 10u8,
 						],
 					)
 				}
@@ -36147,9 +36145,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							59u8, 214u8, 230u8, 214u8, 170u8, 168u8, 146u8, 241u8, 44u8, 150u8,
-							234u8, 35u8, 212u8, 45u8, 7u8, 143u8, 150u8, 202u8, 241u8, 38u8, 87u8,
-							217u8, 173u8, 49u8, 237u8, 252u8, 14u8, 96u8, 106u8, 59u8, 38u8, 251u8,
+							125u8, 114u8, 90u8, 64u8, 203u8, 224u8, 129u8, 14u8, 186u8, 249u8,
+							62u8, 217u8, 172u8, 46u8, 75u8, 204u8, 88u8, 117u8, 65u8, 205u8, 165u8,
+							48u8, 69u8, 33u8, 133u8, 184u8, 1u8, 111u8, 4u8, 29u8, 159u8, 109u8,
 						],
 					)
 				}
@@ -36175,10 +36173,10 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							222u8, 162u8, 149u8, 127u8, 45u8, 118u8, 65u8, 250u8, 133u8, 153u8,
-							207u8, 79u8, 244u8, 112u8, 199u8, 211u8, 12u8, 165u8, 125u8, 181u8,
-							120u8, 85u8, 55u8, 144u8, 139u8, 198u8, 12u8, 120u8, 144u8, 200u8,
-							65u8, 36u8,
+							82u8, 217u8, 53u8, 168u8, 130u8, 159u8, 59u8, 212u8, 65u8, 114u8,
+							250u8, 62u8, 219u8, 28u8, 88u8, 213u8, 183u8, 124u8, 33u8, 232u8,
+							115u8, 234u8, 89u8, 41u8, 46u8, 13u8, 179u8, 50u8, 174u8, 141u8, 139u8,
+							35u8,
 						],
 					)
 				}
@@ -36201,10 +36199,10 @@ pub mod api {
 							weight,
 						},
 						[
-							118u8, 214u8, 245u8, 97u8, 253u8, 124u8, 182u8, 221u8, 157u8, 186u8,
-							66u8, 39u8, 26u8, 121u8, 237u8, 101u8, 17u8, 226u8, 236u8, 161u8,
-							227u8, 158u8, 191u8, 31u8, 38u8, 33u8, 184u8, 199u8, 24u8, 225u8,
-							112u8, 24u8,
+							37u8, 181u8, 151u8, 119u8, 179u8, 146u8, 97u8, 56u8, 238u8, 16u8,
+							125u8, 45u8, 0u8, 130u8, 176u8, 80u8, 113u8, 69u8, 90u8, 198u8, 55u8,
+							59u8, 23u8, 247u8, 107u8, 135u8, 26u8, 118u8, 97u8, 210u8, 169u8,
+							255u8,
 						],
 					)
 				}
@@ -36645,9 +36643,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							88u8, 136u8, 209u8, 57u8, 169u8, 7u8, 205u8, 168u8, 240u8, 9u8, 17u8,
-							185u8, 233u8, 239u8, 138u8, 51u8, 193u8, 96u8, 4u8, 132u8, 127u8,
-							178u8, 181u8, 180u8, 173u8, 46u8, 6u8, 19u8, 24u8, 126u8, 107u8, 134u8,
+							210u8, 155u8, 101u8, 173u8, 10u8, 201u8, 67u8, 235u8, 171u8, 217u8,
+							56u8, 204u8, 166u8, 107u8, 217u8, 81u8, 95u8, 73u8, 118u8, 208u8, 22u8,
+							210u8, 95u8, 117u8, 101u8, 246u8, 218u8, 26u8, 93u8, 193u8, 10u8, 24u8,
 						],
 					)
 				}
@@ -36709,10 +36707,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							107u8, 148u8, 123u8, 24u8, 194u8, 73u8, 145u8, 208u8, 45u8, 97u8,
-							124u8, 103u8, 21u8, 0u8, 237u8, 179u8, 86u8, 166u8, 2u8, 66u8, 112u8,
-							223u8, 166u8, 73u8, 103u8, 249u8, 126u8, 53u8, 86u8, 149u8, 43u8,
-							252u8,
+							70u8, 226u8, 2u8, 214u8, 151u8, 211u8, 61u8, 151u8, 233u8, 219u8, 64u8,
+							54u8, 62u8, 202u8, 250u8, 254u8, 145u8, 193u8, 134u8, 35u8, 194u8,
+							39u8, 184u8, 221u8, 96u8, 141u8, 202u8, 80u8, 39u8, 102u8, 242u8, 11u8,
 						],
 					)
 				}
@@ -39631,9 +39628,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							38u8, 176u8, 175u8, 97u8, 38u8, 215u8, 45u8, 159u8, 78u8, 85u8, 202u8,
-							29u8, 189u8, 27u8, 153u8, 104u8, 106u8, 207u8, 245u8, 221u8, 94u8,
-							29u8, 221u8, 9u8, 232u8, 243u8, 154u8, 61u8, 250u8, 33u8, 246u8, 205u8,
+							58u8, 167u8, 95u8, 35u8, 187u8, 56u8, 40u8, 175u8, 114u8, 203u8, 0u8,
+							180u8, 200u8, 254u8, 201u8, 53u8, 48u8, 41u8, 164u8, 180u8, 22u8, 69u8,
+							157u8, 116u8, 151u8, 21u8, 238u8, 217u8, 47u8, 27u8, 151u8, 207u8,
 						],
 					)
 				}
@@ -39889,10 +39886,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							190u8, 59u8, 19u8, 149u8, 211u8, 63u8, 97u8, 202u8, 183u8, 33u8, 51u8,
-							61u8, 156u8, 166u8, 25u8, 83u8, 124u8, 179u8, 243u8, 185u8, 125u8,
-							122u8, 188u8, 238u8, 9u8, 142u8, 138u8, 72u8, 229u8, 235u8, 164u8,
-							31u8,
+							126u8, 176u8, 126u8, 188u8, 213u8, 58u8, 46u8, 193u8, 84u8, 247u8,
+							17u8, 63u8, 205u8, 250u8, 73u8, 63u8, 139u8, 186u8, 187u8, 244u8, 20u8,
+							171u8, 220u8, 48u8, 183u8, 90u8, 116u8, 38u8, 116u8, 248u8, 74u8,
+							191u8,
 						],
 					)
 				}
@@ -40523,11 +40520,14 @@ pub mod api {
 				pub struct Deposit {
 					pub asset_id: deposit::AssetId,
 					pub amount: deposit::Amount,
+					pub evm_address: deposit::EvmAddress,
 				}
 				pub mod deposit {
 					use super::runtime_types;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Amount = ::core::primitive::u128;
+					pub type EvmAddress = ::core::option::Option<::subxt_core::utils::H160>;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for Deposit {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40553,7 +40553,8 @@ pub mod api {
 				}
 				pub mod schedule_withdraw {
 					use super::runtime_types;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Amount = ::core::primitive::u128;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for ScheduleWithdraw {
@@ -40574,7 +40575,13 @@ pub mod api {
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Executes a scheduled withdraw request."]
-				pub struct ExecuteWithdraw;
+				pub struct ExecuteWithdraw {
+					pub evm_address: execute_withdraw::EvmAddress,
+				}
+				pub mod execute_withdraw {
+					use super::runtime_types;
+					pub type EvmAddress = ::core::option::Option<::subxt_core::utils::H160>;
+				}
 				impl ::subxt_core::blocks::StaticExtrinsic for ExecuteWithdraw {
 					const PALLET: &'static str = "MultiAssetDelegation";
 					const CALL: &'static str = "execute_withdraw";
@@ -40599,7 +40606,8 @@ pub mod api {
 				}
 				pub mod cancel_withdraw {
 					use super::runtime_types;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Amount = ::core::primitive::u128;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for CancelWithdraw {
@@ -40629,7 +40637,8 @@ pub mod api {
 				pub mod delegate {
 					use super::runtime_types;
 					pub type Operator = ::subxt_core::utils::AccountId32;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Amount = ::core::primitive::u128;
 					pub type BlueprintSelection = runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > ;
 				}
@@ -40659,7 +40668,8 @@ pub mod api {
 				pub mod schedule_delegator_unstake {
 					use super::runtime_types;
 					pub type Operator = ::subxt_core::utils::AccountId32;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Amount = ::core::primitive::u128;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for ScheduleDelegatorUnstake {
@@ -40707,7 +40717,8 @@ pub mod api {
 				pub mod cancel_delegator_unstake {
 					use super::runtime_types;
 					pub type Operator = ::subxt_core::utils::AccountId32;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Amount = ::core::primitive::u128;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for CancelDelegatorUnstake {
@@ -40795,7 +40806,8 @@ pub mod api {
 				pub mod manage_asset_in_vault {
 					use super::runtime_types;
 					pub type VaultId = ::core::primitive::u128;
-					pub type AssetId = ::core::primitive::u128;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 					pub type Action =
 						runtime_types::pallet_multi_asset_delegation::types::rewards::AssetAction;
 				}
@@ -41019,16 +41031,17 @@ pub mod api {
 					&self,
 					asset_id: types::deposit::AssetId,
 					amount: types::deposit::Amount,
+					evm_address: types::deposit::EvmAddress,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::Deposit> {
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
 						"deposit",
-						types::Deposit { asset_id, amount },
+						types::Deposit { asset_id, amount, evm_address },
 						[
-							25u8, 39u8, 77u8, 183u8, 182u8, 45u8, 116u8, 55u8, 125u8, 104u8, 78u8,
-							42u8, 142u8, 86u8, 182u8, 200u8, 101u8, 149u8, 90u8, 22u8, 156u8,
-							217u8, 246u8, 111u8, 114u8, 255u8, 241u8, 215u8, 111u8, 223u8, 141u8,
-							76u8,
+							58u8, 72u8, 176u8, 66u8, 51u8, 188u8, 190u8, 38u8, 13u8, 234u8, 239u8,
+							113u8, 157u8, 64u8, 109u8, 91u8, 0u8, 242u8, 157u8, 176u8, 126u8,
+							250u8, 133u8, 66u8, 172u8, 17u8, 254u8, 231u8, 124u8, 159u8, 248u8,
+							101u8,
 						],
 					)
 				}
@@ -41043,25 +41056,25 @@ pub mod api {
 						"schedule_withdraw",
 						types::ScheduleWithdraw { asset_id, amount },
 						[
-							40u8, 210u8, 230u8, 206u8, 225u8, 11u8, 174u8, 19u8, 194u8, 166u8,
-							107u8, 100u8, 26u8, 173u8, 183u8, 29u8, 19u8, 216u8, 240u8, 58u8, 39u8,
-							135u8, 143u8, 252u8, 235u8, 221u8, 152u8, 255u8, 108u8, 134u8, 78u8,
-							103u8,
+							151u8, 83u8, 1u8, 25u8, 237u8, 166u8, 220u8, 253u8, 160u8, 43u8, 229u8,
+							21u8, 247u8, 247u8, 110u8, 119u8, 99u8, 12u8, 213u8, 134u8, 181u8,
+							30u8, 13u8, 11u8, 133u8, 131u8, 2u8, 79u8, 48u8, 65u8, 144u8, 77u8,
 						],
 					)
 				}
 				#[doc = "Executes a scheduled withdraw request."]
 				pub fn execute_withdraw(
 					&self,
+					evm_address: types::execute_withdraw::EvmAddress,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::ExecuteWithdraw> {
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"MultiAssetDelegation",
 						"execute_withdraw",
-						types::ExecuteWithdraw {},
+						types::ExecuteWithdraw { evm_address },
 						[
-							113u8, 223u8, 166u8, 138u8, 53u8, 85u8, 30u8, 76u8, 4u8, 251u8, 52u8,
-							29u8, 41u8, 224u8, 40u8, 64u8, 67u8, 230u8, 19u8, 43u8, 114u8, 166u8,
-							56u8, 18u8, 19u8, 208u8, 3u8, 93u8, 131u8, 140u8, 223u8, 28u8,
+							192u8, 219u8, 87u8, 231u8, 26u8, 7u8, 60u8, 107u8, 41u8, 80u8, 25u8,
+							90u8, 189u8, 215u8, 113u8, 78u8, 93u8, 147u8, 56u8, 175u8, 57u8, 75u8,
+							117u8, 131u8, 227u8, 252u8, 16u8, 241u8, 170u8, 241u8, 77u8, 124u8,
 						],
 					)
 				}
@@ -41076,9 +41089,9 @@ pub mod api {
 						"cancel_withdraw",
 						types::CancelWithdraw { asset_id, amount },
 						[
-							153u8, 92u8, 147u8, 28u8, 101u8, 84u8, 56u8, 240u8, 202u8, 89u8, 138u8,
-							195u8, 166u8, 73u8, 49u8, 48u8, 119u8, 135u8, 221u8, 36u8, 92u8, 223u8,
-							46u8, 152u8, 252u8, 193u8, 43u8, 214u8, 175u8, 33u8, 128u8, 110u8,
+							18u8, 80u8, 162u8, 132u8, 33u8, 12u8, 254u8, 88u8, 103u8, 101u8, 227u8,
+							4u8, 12u8, 113u8, 76u8, 143u8, 80u8, 89u8, 50u8, 188u8, 233u8, 184u8,
+							102u8, 60u8, 245u8, 21u8, 95u8, 250u8, 78u8, 193u8, 28u8, 242u8,
 						],
 					)
 				}
@@ -41095,10 +41108,10 @@ pub mod api {
 						"delegate",
 						types::Delegate { operator, asset_id, amount, blueprint_selection },
 						[
-							229u8, 174u8, 212u8, 104u8, 133u8, 233u8, 29u8, 42u8, 84u8, 225u8,
-							15u8, 137u8, 245u8, 47u8, 206u8, 52u8, 134u8, 101u8, 122u8, 114u8,
-							184u8, 61u8, 228u8, 27u8, 245u8, 185u8, 31u8, 161u8, 244u8, 130u8,
-							183u8, 243u8,
+							122u8, 21u8, 147u8, 191u8, 103u8, 51u8, 255u8, 119u8, 157u8, 35u8,
+							16u8, 92u8, 138u8, 149u8, 215u8, 86u8, 170u8, 106u8, 101u8, 232u8,
+							96u8, 14u8, 80u8, 242u8, 180u8, 96u8, 86u8, 78u8, 237u8, 155u8, 3u8,
+							88u8,
 						],
 					)
 				}
@@ -41114,9 +41127,9 @@ pub mod api {
 						"schedule_delegator_unstake",
 						types::ScheduleDelegatorUnstake { operator, asset_id, amount },
 						[
-							59u8, 253u8, 25u8, 246u8, 47u8, 194u8, 135u8, 112u8, 106u8, 76u8, 33u8,
-							166u8, 129u8, 10u8, 202u8, 94u8, 0u8, 22u8, 17u8, 52u8, 93u8, 95u8,
-							136u8, 18u8, 216u8, 102u8, 20u8, 20u8, 183u8, 199u8, 55u8, 116u8,
+							244u8, 2u8, 144u8, 12u8, 8u8, 144u8, 76u8, 125u8, 36u8, 206u8, 176u8,
+							88u8, 49u8, 6u8, 202u8, 23u8, 225u8, 231u8, 241u8, 133u8, 69u8, 214u8,
+							67u8, 79u8, 174u8, 140u8, 28u8, 167u8, 84u8, 227u8, 88u8, 130u8,
 						],
 					)
 				}
@@ -41147,10 +41160,10 @@ pub mod api {
 						"cancel_delegator_unstake",
 						types::CancelDelegatorUnstake { operator, asset_id, amount },
 						[
-							148u8, 108u8, 146u8, 167u8, 117u8, 105u8, 88u8, 221u8, 166u8, 87u8,
-							52u8, 24u8, 132u8, 99u8, 15u8, 48u8, 217u8, 247u8, 225u8, 253u8, 40u8,
-							225u8, 173u8, 59u8, 75u8, 189u8, 118u8, 122u8, 135u8, 60u8, 168u8,
-							169u8,
+							230u8, 243u8, 246u8, 127u8, 75u8, 179u8, 58u8, 225u8, 144u8, 194u8,
+							15u8, 13u8, 172u8, 162u8, 88u8, 181u8, 223u8, 191u8, 89u8, 231u8,
+							168u8, 91u8, 170u8, 199u8, 178u8, 151u8, 49u8, 58u8, 166u8, 208u8,
+							159u8, 220u8,
 						],
 					)
 				}
@@ -41207,9 +41220,9 @@ pub mod api {
 						"manage_asset_in_vault",
 						types::ManageAssetInVault { vault_id, asset_id, action },
 						[
-							148u8, 94u8, 58u8, 190u8, 112u8, 51u8, 136u8, 40u8, 105u8, 143u8, 71u8,
-							172u8, 40u8, 71u8, 175u8, 236u8, 203u8, 248u8, 29u8, 86u8, 112u8, 66u8,
-							33u8, 197u8, 130u8, 45u8, 66u8, 182u8, 231u8, 151u8, 170u8, 241u8,
+							164u8, 251u8, 229u8, 192u8, 83u8, 53u8, 179u8, 154u8, 228u8, 245u8,
+							116u8, 154u8, 100u8, 198u8, 182u8, 69u8, 90u8, 178u8, 237u8, 99u8, 0u8,
+							160u8, 243u8, 162u8, 69u8, 87u8, 26u8, 61u8, 82u8, 151u8, 100u8, 251u8,
 						],
 					)
 				}
@@ -41529,7 +41542,8 @@ pub mod api {
 				use super::runtime_types;
 				pub type Who = ::subxt_core::utils::AccountId32;
 				pub type Amount = ::core::primitive::u128;
-				pub type AssetId = ::core::primitive::u128;
+				pub type AssetId =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 			}
 			impl ::subxt_core::events::StaticEvent for Deposited {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -41558,7 +41572,8 @@ pub mod api {
 				use super::runtime_types;
 				pub type Who = ::subxt_core::utils::AccountId32;
 				pub type Amount = ::core::primitive::u128;
-				pub type AssetId = ::core::primitive::u128;
+				pub type AssetId =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 			}
 			impl ::subxt_core::events::StaticEvent for Scheduledwithdraw {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -41639,7 +41654,8 @@ pub mod api {
 				pub type Who = ::subxt_core::utils::AccountId32;
 				pub type Operator = ::subxt_core::utils::AccountId32;
 				pub type Amount = ::core::primitive::u128;
-				pub type AssetId = ::core::primitive::u128;
+				pub type AssetId =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 			}
 			impl ::subxt_core::events::StaticEvent for Delegated {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -41670,7 +41686,8 @@ pub mod api {
 				pub type Who = ::subxt_core::utils::AccountId32;
 				pub type Operator = ::subxt_core::utils::AccountId32;
 				pub type Amount = ::core::primitive::u128;
-				pub type AssetId = ::core::primitive::u128;
+				pub type AssetId =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 			}
 			impl ::subxt_core::events::StaticEvent for ScheduledDelegatorBondLess {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -41804,7 +41821,8 @@ pub mod api {
 				use super::runtime_types;
 				pub type Who = ::subxt_core::utils::AccountId32;
 				pub type VaultId = ::core::primitive::u128;
-				pub type AssetId = ::core::primitive::u128;
+				pub type AssetId =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 				pub type Action =
 					runtime_types::pallet_multi_asset_delegation::types::rewards::AssetAction;
 			}
@@ -41866,6 +41884,37 @@ pub mod api {
 				const PALLET: &'static str = "MultiAssetDelegation";
 				const EVENT: &'static str = "DelegatorSlashed";
 			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "EVM execution reverted with a reason."]
+			pub struct EvmReverted {
+				pub from: evm_reverted::From,
+				pub to: evm_reverted::To,
+				pub data: evm_reverted::Data,
+				pub reason: evm_reverted::Reason,
+			}
+			pub mod evm_reverted {
+				use super::runtime_types;
+				pub type From = ::subxt_core::utils::H160;
+				pub type To = ::subxt_core::utils::H160;
+				pub type Data = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+				pub type Reason = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+			}
+			impl ::subxt_core::events::StaticEvent for EvmReverted {
+				const PALLET: &'static str = "MultiAssetDelegation";
+				const EVENT: &'static str = "EvmReverted";
+			}
 		}
 		pub mod storage {
 			use super::runtime_types;
@@ -41893,13 +41942,16 @@ pub mod api {
 				}
 				pub mod reward_vaults {
 					use super::runtime_types;
-					pub type RewardVaults = ::subxt_core::alloc::vec::Vec<::core::primitive::u128>;
+					pub type RewardVaults = ::subxt_core::alloc::vec::Vec<
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>,
+					>;
 					pub type Param0 = ::core::primitive::u128;
 				}
 				pub mod asset_lookup_reward_vaults {
 					use super::runtime_types;
 					pub type AssetLookupRewardVaults = ::core::primitive::u128;
-					pub type Param0 = ::core::primitive::u128;
+					pub type Param0 =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 				}
 				pub mod reward_config_storage {
 					use super::runtime_types;
@@ -41927,9 +41979,9 @@ pub mod api {
 						"Operators",
 						(),
 						[
-							96u8, 12u8, 202u8, 32u8, 26u8, 119u8, 119u8, 77u8, 133u8, 40u8, 41u8,
-							55u8, 220u8, 158u8, 30u8, 147u8, 39u8, 168u8, 231u8, 231u8, 102u8,
-							161u8, 66u8, 27u8, 228u8, 0u8, 123u8, 144u8, 205u8, 235u8, 186u8, 91u8,
+							181u8, 37u8, 69u8, 139u8, 18u8, 44u8, 99u8, 55u8, 186u8, 237u8, 91u8,
+							83u8, 53u8, 119u8, 142u8, 206u8, 254u8, 203u8, 89u8, 154u8, 138u8,
+							163u8, 29u8, 141u8, 7u8, 161u8, 54u8, 162u8, 48u8, 28u8, 70u8, 0u8,
 						],
 					)
 				}
@@ -41949,9 +42001,9 @@ pub mod api {
 						"Operators",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							96u8, 12u8, 202u8, 32u8, 26u8, 119u8, 119u8, 77u8, 133u8, 40u8, 41u8,
-							55u8, 220u8, 158u8, 30u8, 147u8, 39u8, 168u8, 231u8, 231u8, 102u8,
-							161u8, 66u8, 27u8, 228u8, 0u8, 123u8, 144u8, 205u8, 235u8, 186u8, 91u8,
+							181u8, 37u8, 69u8, 139u8, 18u8, 44u8, 99u8, 55u8, 186u8, 237u8, 91u8,
+							83u8, 53u8, 119u8, 142u8, 206u8, 254u8, 203u8, 89u8, 154u8, 138u8,
+							163u8, 29u8, 141u8, 7u8, 161u8, 54u8, 162u8, 48u8, 28u8, 70u8, 0u8,
 						],
 					)
 				}
@@ -41992,9 +42044,10 @@ pub mod api {
 						"AtStake",
 						(),
 						[
-							225u8, 39u8, 121u8, 190u8, 208u8, 227u8, 9u8, 44u8, 140u8, 28u8, 13u8,
-							112u8, 213u8, 80u8, 240u8, 250u8, 179u8, 121u8, 82u8, 26u8, 136u8,
-							62u8, 197u8, 86u8, 231u8, 210u8, 155u8, 245u8, 36u8, 251u8, 0u8, 193u8,
+							156u8, 26u8, 172u8, 63u8, 87u8, 150u8, 192u8, 117u8, 222u8, 34u8,
+							191u8, 110u8, 251u8, 174u8, 184u8, 171u8, 73u8, 48u8, 79u8, 87u8,
+							175u8, 216u8, 132u8, 96u8, 217u8, 232u8, 148u8, 89u8, 181u8, 39u8,
+							219u8, 106u8,
 						],
 					)
 				}
@@ -42014,9 +42067,10 @@ pub mod api {
 						"AtStake",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							225u8, 39u8, 121u8, 190u8, 208u8, 227u8, 9u8, 44u8, 140u8, 28u8, 13u8,
-							112u8, 213u8, 80u8, 240u8, 250u8, 179u8, 121u8, 82u8, 26u8, 136u8,
-							62u8, 197u8, 86u8, 231u8, 210u8, 155u8, 245u8, 36u8, 251u8, 0u8, 193u8,
+							156u8, 26u8, 172u8, 63u8, 87u8, 150u8, 192u8, 117u8, 222u8, 34u8,
+							191u8, 110u8, 251u8, 174u8, 184u8, 171u8, 73u8, 48u8, 79u8, 87u8,
+							175u8, 216u8, 132u8, 96u8, 217u8, 232u8, 148u8, 89u8, 181u8, 39u8,
+							219u8, 106u8,
 						],
 					)
 				}
@@ -42043,9 +42097,10 @@ pub mod api {
 							::subxt_core::storage::address::StaticStorageKey::new(_1.borrow()),
 						),
 						[
-							225u8, 39u8, 121u8, 190u8, 208u8, 227u8, 9u8, 44u8, 140u8, 28u8, 13u8,
-							112u8, 213u8, 80u8, 240u8, 250u8, 179u8, 121u8, 82u8, 26u8, 136u8,
-							62u8, 197u8, 86u8, 231u8, 210u8, 155u8, 245u8, 36u8, 251u8, 0u8, 193u8,
+							156u8, 26u8, 172u8, 63u8, 87u8, 150u8, 192u8, 117u8, 222u8, 34u8,
+							191u8, 110u8, 251u8, 174u8, 184u8, 171u8, 73u8, 48u8, 79u8, 87u8,
+							175u8, 216u8, 132u8, 96u8, 217u8, 232u8, 148u8, 89u8, 181u8, 39u8,
+							219u8, 106u8,
 						],
 					)
 				}
@@ -42064,10 +42119,10 @@ pub mod api {
 						"Delegators",
 						(),
 						[
-							186u8, 236u8, 239u8, 183u8, 201u8, 64u8, 123u8, 184u8, 5u8, 98u8, 2u8,
-							199u8, 173u8, 253u8, 72u8, 182u8, 3u8, 142u8, 163u8, 56u8, 162u8,
-							106u8, 229u8, 144u8, 49u8, 151u8, 144u8, 111u8, 12u8, 187u8, 73u8,
-							108u8,
+							208u8, 190u8, 90u8, 169u8, 30u8, 169u8, 192u8, 170u8, 53u8, 227u8,
+							128u8, 145u8, 223u8, 226u8, 166u8, 141u8, 222u8, 141u8, 6u8, 136u8,
+							232u8, 114u8, 217u8, 222u8, 129u8, 124u8, 160u8, 239u8, 33u8, 211u8,
+							10u8, 156u8,
 						],
 					)
 				}
@@ -42087,10 +42142,10 @@ pub mod api {
 						"Delegators",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							186u8, 236u8, 239u8, 183u8, 201u8, 64u8, 123u8, 184u8, 5u8, 98u8, 2u8,
-							199u8, 173u8, 253u8, 72u8, 182u8, 3u8, 142u8, 163u8, 56u8, 162u8,
-							106u8, 229u8, 144u8, 49u8, 151u8, 144u8, 111u8, 12u8, 187u8, 73u8,
-							108u8,
+							208u8, 190u8, 90u8, 169u8, 30u8, 169u8, 192u8, 170u8, 53u8, 227u8,
+							128u8, 145u8, 223u8, 226u8, 166u8, 141u8, 222u8, 141u8, 6u8, 136u8,
+							232u8, 114u8, 217u8, 222u8, 129u8, 124u8, 160u8, 239u8, 33u8, 211u8,
+							10u8, 156u8,
 						],
 					)
 				}
@@ -42109,10 +42164,10 @@ pub mod api {
 						"RewardVaults",
 						(),
 						[
-							107u8, 40u8, 83u8, 145u8, 146u8, 241u8, 12u8, 112u8, 110u8, 211u8,
-							66u8, 186u8, 13u8, 229u8, 71u8, 181u8, 174u8, 19u8, 143u8, 231u8,
-							242u8, 61u8, 45u8, 254u8, 61u8, 113u8, 204u8, 68u8, 51u8, 82u8, 212u8,
-							248u8,
+							30u8, 97u8, 236u8, 132u8, 229u8, 86u8, 124u8, 248u8, 89u8, 52u8, 91u8,
+							194u8, 48u8, 44u8, 236u8, 142u8, 251u8, 192u8, 107u8, 103u8, 244u8,
+							170u8, 94u8, 57u8, 146u8, 82u8, 122u8, 212u8, 228u8, 119u8, 152u8,
+							57u8,
 						],
 					)
 				}
@@ -42132,10 +42187,10 @@ pub mod api {
 						"RewardVaults",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							107u8, 40u8, 83u8, 145u8, 146u8, 241u8, 12u8, 112u8, 110u8, 211u8,
-							66u8, 186u8, 13u8, 229u8, 71u8, 181u8, 174u8, 19u8, 143u8, 231u8,
-							242u8, 61u8, 45u8, 254u8, 61u8, 113u8, 204u8, 68u8, 51u8, 82u8, 212u8,
-							248u8,
+							30u8, 97u8, 236u8, 132u8, 229u8, 86u8, 124u8, 248u8, 89u8, 52u8, 91u8,
+							194u8, 48u8, 44u8, 236u8, 142u8, 251u8, 192u8, 107u8, 103u8, 244u8,
+							170u8, 94u8, 57u8, 146u8, 82u8, 122u8, 212u8, 228u8, 119u8, 152u8,
+							57u8,
 						],
 					)
 				}
@@ -42154,10 +42209,10 @@ pub mod api {
 						"AssetLookupRewardVaults",
 						(),
 						[
-							46u8, 208u8, 170u8, 41u8, 111u8, 195u8, 130u8, 114u8, 204u8, 158u8,
-							215u8, 207u8, 211u8, 217u8, 51u8, 244u8, 150u8, 215u8, 253u8, 106u8,
-							106u8, 142u8, 208u8, 128u8, 25u8, 0u8, 123u8, 33u8, 0u8, 233u8, 72u8,
-							186u8,
+							128u8, 153u8, 122u8, 108u8, 34u8, 110u8, 223u8, 199u8, 51u8, 251u8,
+							55u8, 208u8, 134u8, 89u8, 137u8, 250u8, 251u8, 211u8, 107u8, 114u8,
+							38u8, 28u8, 52u8, 98u8, 234u8, 110u8, 226u8, 205u8, 105u8, 195u8,
+							149u8, 113u8,
 						],
 					)
 				}
@@ -42179,10 +42234,10 @@ pub mod api {
 						"AssetLookupRewardVaults",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							46u8, 208u8, 170u8, 41u8, 111u8, 195u8, 130u8, 114u8, 204u8, 158u8,
-							215u8, 207u8, 211u8, 217u8, 51u8, 244u8, 150u8, 215u8, 253u8, 106u8,
-							106u8, 142u8, 208u8, 128u8, 25u8, 0u8, 123u8, 33u8, 0u8, 233u8, 72u8,
-							186u8,
+							128u8, 153u8, 122u8, 108u8, 34u8, 110u8, 223u8, 199u8, 51u8, 251u8,
+							55u8, 208u8, 134u8, 89u8, 137u8, 250u8, 251u8, 211u8, 107u8, 114u8,
+							38u8, 28u8, 52u8, 98u8, 234u8, 110u8, 226u8, 205u8, 105u8, 195u8,
+							149u8, 113u8,
 						],
 					)
 				}
@@ -42594,6 +42649,7 @@ pub mod api {
 				#[doc = "operators that will run your service. Optionally, you can customize who is permitted"]
 				#[doc = "caller of this service, by default only the caller is allowed to call the service."]
 				pub struct Request {
+					pub evm_origin: request::EvmOrigin,
 					#[codec(compact)]
 					pub blueprint_id: request::BlueprintId,
 					pub permitted_callers: request::PermittedCallers,
@@ -42608,6 +42664,7 @@ pub mod api {
 				}
 				pub mod request {
 					use super::runtime_types;
+					pub type EvmOrigin = ::core::option::Option<::subxt_core::utils::H160>;
 					pub type BlueprintId = ::core::primitive::u64;
 					pub type PermittedCallers =
 						::subxt_core::alloc::vec::Vec<::subxt_core::utils::AccountId32>;
@@ -42798,11 +42855,12 @@ pub mod api {
 				# [codec (crate = :: subxt_core :: ext :: codec)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed stake for that service."]
+				#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed"]
+				#[doc = "stake for that service."]
 				#[doc = ""]
 				#[doc = "The caller needs to be an authorized Slash Origin for this service."]
-				#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash"]
-				#[doc = "by another entity."]
+				#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call"]
+				#[doc = "to apply the slash by another entity."]
 				pub struct Slash {
 					pub offender: slash::Offender,
 					#[codec(compact)]
@@ -42835,7 +42893,8 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Dispute an [UnappliedSlash] for a given era and index."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash]."]
+				#[doc = "The caller needs to be an authorized Dispute Origin for the service in the"]
+				#[doc = "[UnappliedSlash]."]
 				pub struct Dispute {
 					#[codec(compact)]
 					pub era: dispute::Era,
@@ -42996,6 +43055,7 @@ pub mod api {
 				#[doc = "caller of this service, by default only the caller is allowed to call the service."]
 				pub fn request(
 					&self,
+					evm_origin: types::request::EvmOrigin,
 					blueprint_id: types::request::BlueprintId,
 					permitted_callers: types::request::PermittedCallers,
 					operators: types::request::Operators,
@@ -43009,6 +43069,7 @@ pub mod api {
 						"Services",
 						"request",
 						types::Request {
+							evm_origin,
 							blueprint_id,
 							permitted_callers,
 							operators,
@@ -43019,10 +43080,10 @@ pub mod api {
 							value,
 						},
 						[
-							44u8, 199u8, 194u8, 99u8, 16u8, 16u8, 204u8, 77u8, 89u8, 63u8, 128u8,
-							231u8, 49u8, 38u8, 217u8, 90u8, 110u8, 121u8, 182u8, 100u8, 192u8,
-							195u8, 32u8, 70u8, 198u8, 126u8, 114u8, 138u8, 40u8, 45u8, 204u8,
-							238u8,
+							239u8, 112u8, 229u8, 145u8, 173u8, 9u8, 69u8, 119u8, 15u8, 142u8, 38u8,
+							190u8, 184u8, 7u8, 192u8, 144u8, 170u8, 45u8, 45u8, 161u8, 217u8,
+							190u8, 35u8, 153u8, 9u8, 37u8, 231u8, 191u8, 139u8, 174u8, 211u8,
+							148u8,
 						],
 					)
 				}
@@ -43120,11 +43181,12 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed stake for that service."]
+				#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed"]
+				#[doc = "stake for that service."]
 				#[doc = ""]
 				#[doc = "The caller needs to be an authorized Slash Origin for this service."]
-				#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash"]
-				#[doc = "by another entity."]
+				#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call"]
+				#[doc = "to apply the slash by another entity."]
 				pub fn slash(
 					&self,
 					offender: types::slash::Offender,
@@ -43144,7 +43206,8 @@ pub mod api {
 				}
 				#[doc = "Dispute an [UnappliedSlash] for a given era and index."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash]."]
+				#[doc = "The caller needs to be an authorized Dispute Origin for the service in the"]
+				#[doc = "[UnappliedSlash]."]
 				pub fn dispute(
 					&self,
 					era: types::dispute::Era,
@@ -43802,6 +43865,16 @@ pub mod api {
 					pub type OperatorsProfile =
 						runtime_types::tangle_primitives::services::OperatorProfile;
 					pub type Param0 = ::subxt_core::utils::AccountId32;
+				}
+				pub mod staging_service_payments {
+					use super::runtime_types;
+					pub type StagingServicePayments =
+						runtime_types::tangle_primitives::services::StagingServicePayment<
+							::subxt_core::utils::AccountId32,
+							::core::primitive::u128,
+							::core::primitive::u128,
+						>;
+					pub type Param0 = ::core::primitive::u64;
 				}
 			}
 			pub struct StorageApi;
@@ -44468,6 +44541,61 @@ pub mod api {
 							89u8, 71u8, 163u8, 108u8, 71u8, 192u8, 181u8, 164u8, 168u8, 126u8,
 							228u8, 122u8, 159u8, 83u8, 66u8, 59u8, 179u8, 218u8, 96u8, 67u8, 172u8,
 							65u8, 62u8, 156u8, 69u8, 85u8, 38u8, 217u8, 93u8, 8u8, 58u8, 115u8,
+						],
+					)
+				}
+				#[doc = " Holds the service payment information for a service request."]
+				#[doc = " Once the service is initiated, the payment is transferred to the MBSM and this"]
+				#[doc = " information is removed."]
+				#[doc = ""]
+				#[doc = " Service Requst ID -> Service Payment"]
+				pub fn staging_service_payments_iter(
+					&self,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(),
+					types::staging_service_payments::StagingServicePayments,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"Services",
+						"StagingServicePayments",
+						(),
+						[
+							192u8, 196u8, 170u8, 27u8, 123u8, 252u8, 120u8, 33u8, 138u8, 77u8,
+							224u8, 10u8, 9u8, 100u8, 175u8, 118u8, 86u8, 82u8, 147u8, 139u8, 223u8,
+							187u8, 42u8, 108u8, 143u8, 226u8, 174u8, 159u8, 195u8, 179u8, 246u8,
+							28u8,
+						],
+					)
+				}
+				#[doc = " Holds the service payment information for a service request."]
+				#[doc = " Once the service is initiated, the payment is transferred to the MBSM and this"]
+				#[doc = " information is removed."]
+				#[doc = ""]
+				#[doc = " Service Requst ID -> Service Payment"]
+				pub fn staging_service_payments(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::staging_service_payments::Param0>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					::subxt_core::storage::address::StaticStorageKey<
+						types::staging_service_payments::Param0,
+					>,
+					types::staging_service_payments::StagingServicePayments,
+					::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"Services",
+						"StagingServicePayments",
+						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+						[
+							192u8, 196u8, 170u8, 27u8, 123u8, 252u8, 120u8, 33u8, 138u8, 77u8,
+							224u8, 10u8, 9u8, 100u8, 175u8, 118u8, 86u8, 82u8, 147u8, 139u8, 223u8,
+							187u8, 42u8, 108u8, 143u8, 226u8, 174u8, 159u8, 195u8, 179u8, 246u8,
+							28u8,
 						],
 					)
 				}
@@ -55145,7 +55273,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The callable functions (extrinsics) of the pallet."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Allows an account to join as an operator by providing a stake."] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "Schedules an operator to leave."] schedule_leave_operators , # [codec (index = 2)] # [doc = "Cancels a scheduled leave for an operator."] cancel_leave_operators , # [codec (index = 3)] # [doc = "Executes a scheduled leave for an operator."] execute_leave_operators , # [codec (index = 4)] # [doc = "Allows an operator to increase their stake."] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Schedules an operator to decrease their stake."] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Executes a scheduled stake decrease for an operator."] execute_operator_unstake , # [codec (index = 7)] # [doc = "Cancels a scheduled stake decrease for an operator."] cancel_operator_unstake , # [codec (index = 8)] # [doc = "Allows an operator to go offline."] go_offline , # [codec (index = 9)] # [doc = "Allows an operator to go online."] go_online , # [codec (index = 10)] # [doc = "Allows a user to deposit an asset."] deposit { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "Schedules an withdraw request."] schedule_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "Executes a scheduled withdraw request."] execute_withdraw , # [codec (index = 13)] # [doc = "Cancels a scheduled withdraw request."] cancel_withdraw { asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "Allows a user to delegate an amount of an asset to an operator."] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 15)] # [doc = "Schedules a request to reduce a delegator's stake."] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Executes a scheduled request to reduce a delegator's stake."] execute_delegator_unstake , # [codec (index = 17)] # [doc = "Cancels a scheduled request to reduce a delegator's stake."] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : :: core :: primitive :: u128 , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "Sets the APY and cap for a specific asset."] # [doc = "The APY is the annual percentage yield that the asset will earn."] # [doc = "The cap is the amount of assets required to be deposited to distribute the entire APY."] # [doc = "The APY is capped at 10% and will require runtime upgrade to change."] # [doc = ""] # [doc = "While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`."] set_incentive_apy_and_cap { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Whitelists a blueprint for rewards."] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Manage asset id to vault rewards"] manage_asset_in_vault { vault_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , # [codec (index = 22)] # [doc = "Adds a blueprint ID to a delegator's selection."] add_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 23)] # [doc = "Removes a blueprint ID from a delegator's selection."] remove_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , }
+					# [codec (index = 0)] # [doc = "Allows an account to join as an operator by providing a stake."] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "Schedules an operator to leave."] schedule_leave_operators , # [codec (index = 2)] # [doc = "Cancels a scheduled leave for an operator."] cancel_leave_operators , # [codec (index = 3)] # [doc = "Executes a scheduled leave for an operator."] execute_leave_operators , # [codec (index = 4)] # [doc = "Allows an operator to increase their stake."] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Schedules an operator to decrease their stake."] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Executes a scheduled stake decrease for an operator."] execute_operator_unstake , # [codec (index = 7)] # [doc = "Cancels a scheduled stake decrease for an operator."] cancel_operator_unstake , # [codec (index = 8)] # [doc = "Allows an operator to go offline."] go_offline , # [codec (index = 9)] # [doc = "Allows an operator to go online."] go_online , # [codec (index = 10)] # [doc = "Allows a user to deposit an asset."] deposit { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 11)] # [doc = "Schedules an withdraw request."] schedule_withdraw { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "Executes a scheduled withdraw request."] execute_withdraw { evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 13)] # [doc = "Cancels a scheduled withdraw request."] cancel_withdraw { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "Allows a user to delegate an amount of an asset to an operator."] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 15)] # [doc = "Schedules a request to reduce a delegator's stake."] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Executes a scheduled request to reduce a delegator's stake."] execute_delegator_unstake , # [codec (index = 17)] # [doc = "Cancels a scheduled request to reduce a delegator's stake."] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "Sets the APY and cap for a specific asset."] # [doc = "The APY is the annual percentage yield that the asset will earn."] # [doc = "The cap is the amount of assets required to be deposited to distribute the entire APY."] # [doc = "The APY is capped at 10% and will require runtime upgrade to change."] # [doc = ""] # [doc = "While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`."] set_incentive_apy_and_cap { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Whitelists a blueprint for rewards."] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Manage asset id to vault rewards"] manage_asset_in_vault { vault_id : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , # [codec (index = 22)] # [doc = "Adds a blueprint ID to a delegator's selection."] add_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 23)] # [doc = "Removes a blueprint ID from a delegator's selection."] remove_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -55302,6 +55430,15 @@ pub mod api {
 					#[codec(index = 46)]
 					#[doc = "The blueprint is not selected"]
 					BlueprintNotSelected,
+					#[codec(index = 47)]
+					#[doc = "Erc20 transfer failed"]
+					ERC20TransferFailed,
+					#[codec(index = 48)]
+					#[doc = "EVM encode error"]
+					EVMAbiEncode,
+					#[codec(index = 49)]
+					#[doc = "EVM decode error"]
+					EVMAbiDecode,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -55318,7 +55455,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events emitted by the pallet."]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "An operator has joined."] OperatorJoined { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 1)] # [doc = "An operator has scheduled to leave."] OperatorLeavingScheduled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 2)] # [doc = "An operator has cancelled their leave request."] OperatorLeaveCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 3)] # [doc = "An operator has executed their leave request."] OperatorLeaveExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 4)] # [doc = "An operator has increased their stake."] OperatorBondMore { who : :: subxt_core :: utils :: AccountId32 , additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "An operator has scheduled to decrease their stake."] OperatorBondLessScheduled { who : :: subxt_core :: utils :: AccountId32 , unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "An operator has executed their stake decrease."] OperatorBondLessExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 7)] # [doc = "An operator has cancelled their stake decrease request."] OperatorBondLessCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "An operator has gone offline."] OperatorWentOffline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 9)] # [doc = "An operator has gone online."] OperatorWentOnline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 10)] # [doc = "A deposit has been made."] Deposited { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "An withdraw has been scheduled."] Scheduledwithdraw { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "An withdraw has been executed."] Executedwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 13)] # [doc = "An withdraw has been cancelled."] Cancelledwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 14)] # [doc = "A delegation has been made."] Delegated { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 15)] # [doc = "A delegator unstake request has been scheduled."] ScheduledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "A delegator unstake request has been executed."] ExecutedDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 17)] # [doc = "A delegator unstake request has been cancelled."] CancelledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 18)] # [doc = "Event emitted when an incentive APY and cap are set for a reward vault"] IncentiveAPYAndCapSet { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Event emitted when a blueprint is whitelisted for rewards"] BlueprintWhitelisted { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Asset has been updated to reward vault"] AssetUpdatedInVault { who : :: subxt_core :: utils :: AccountId32 , vault_id : :: core :: primitive :: u128 , asset_id : :: core :: primitive :: u128 , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , # [codec (index = 21)] # [doc = "Operator has been slashed"] OperatorSlashed { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 22)] # [doc = "Delegator has been slashed"] DelegatorSlashed { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , }
+					# [codec (index = 0)] # [doc = "An operator has joined."] OperatorJoined { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 1)] # [doc = "An operator has scheduled to leave."] OperatorLeavingScheduled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 2)] # [doc = "An operator has cancelled their leave request."] OperatorLeaveCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 3)] # [doc = "An operator has executed their leave request."] OperatorLeaveExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 4)] # [doc = "An operator has increased their stake."] OperatorBondMore { who : :: subxt_core :: utils :: AccountId32 , additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "An operator has scheduled to decrease their stake."] OperatorBondLessScheduled { who : :: subxt_core :: utils :: AccountId32 , unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "An operator has executed their stake decrease."] OperatorBondLessExecuted { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 7)] # [doc = "An operator has cancelled their stake decrease request."] OperatorBondLessCancelled { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "An operator has gone offline."] OperatorWentOffline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 9)] # [doc = "An operator has gone online."] OperatorWentOnline { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 10)] # [doc = "A deposit has been made."] Deposited { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , } , # [codec (index = 11)] # [doc = "An withdraw has been scheduled."] Scheduledwithdraw { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , } , # [codec (index = 12)] # [doc = "An withdraw has been executed."] Executedwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 13)] # [doc = "An withdraw has been cancelled."] Cancelledwithdraw { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 14)] # [doc = "A delegation has been made."] Delegated { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , } , # [codec (index = 15)] # [doc = "A delegator unstake request has been scheduled."] ScheduledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , } , # [codec (index = 16)] # [doc = "A delegator unstake request has been executed."] ExecutedDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 17)] # [doc = "A delegator unstake request has been cancelled."] CancelledDelegatorBondLess { who : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 18)] # [doc = "Event emitted when an incentive APY and cap are set for a reward vault"] IncentiveAPYAndCapSet { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Event emitted when a blueprint is whitelisted for rewards"] BlueprintWhitelisted { blueprint_id : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Asset has been updated to reward vault"] AssetUpdatedInVault { who : :: subxt_core :: utils :: AccountId32 , vault_id : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , # [codec (index = 21)] # [doc = "Operator has been slashed"] OperatorSlashed { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 22)] # [doc = "Delegator has been slashed"] DelegatorSlashed { who : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 23)] # [doc = "EVM execution reverted with a reason."] EvmReverted { from : :: subxt_core :: utils :: H160 , to : :: subxt_core :: utils :: H160 , data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , reason : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , }
 			}
 			pub mod types {
 				use super::runtime_types;
@@ -55337,7 +55474,7 @@ pub mod api {
 					# [codec (crate = :: subxt_core :: ext :: codec)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct BondInfoDelegator < _0 , _1 , _2 , _3 > { pub operator : _0 , pub amount : _1 , pub asset_id : _2 , pub blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < _3 > , }
+					pub struct BondInfoDelegator < _0 , _1 , _2 , _3 > { pub operator : _0 , pub amount : _1 , pub asset_id : runtime_types :: tangle_primitives :: services :: Asset < _1 > , pub blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < _3 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,
 						:: subxt_core :: ext :: codec :: Encode,
@@ -55351,7 +55488,7 @@ pub mod api {
 					# [codec (crate = :: subxt_core :: ext :: codec)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct BondLessRequest < _0 , _1 , _2 , _3 > { pub operator : _0 , pub asset_id : _1 , pub amount : _2 , pub requested_round : :: core :: primitive :: u32 , pub blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < _3 > , }
+					pub struct BondLessRequest < _0 , _1 , _2 , _3 > { pub operator : _0 , pub asset_id : runtime_types :: tangle_primitives :: services :: Asset < _1 > , pub amount : _2 , pub requested_round : :: core :: primitive :: u32 , pub blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < _3 > , }
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,
 						:: subxt_core :: ext :: codec :: Encode,
@@ -55389,7 +55526,7 @@ pub mod api {
 					# [codec (crate = :: subxt_core :: ext :: codec)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct DelegatorMetadata < _0 , _1 , _2 , _3 , _4 , _5 , _6 > { pub deposits : :: subxt_core :: utils :: KeyedVec < _1 , _1 > , pub withdraw_requests : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: WithdrawRequest < _1 , _1 > > , pub delegations : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondInfoDelegator < _0 , _1 , _1 , _6 > > , pub delegator_unstake_requests : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondLessRequest < _0 , _1 , _1 , _6 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < (_2 , _4 , _3 , _5) > }
+					pub struct DelegatorMetadata < _0 , _1 , _2 , _3 , _4 , _5 , _6 > { pub deposits : :: subxt_core :: utils :: KeyedVec < runtime_types :: tangle_primitives :: services :: Asset < _1 > , _1 > , pub withdraw_requests : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: WithdrawRequest < _1 , _1 > > , pub delegations : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondInfoDelegator < _0 , _1 , _1 , _6 > > , pub delegator_unstake_requests : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondLessRequest < _0 , _1 , _1 , _6 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < (_2 , _4 , _3 , _5) > }
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,
 						:: subxt_core :: ext :: codec :: Encode,
@@ -55423,7 +55560,7 @@ pub mod api {
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct WithdrawRequest<_0, _1> {
-						pub asset_id: _0,
+						pub asset_id: runtime_types::tangle_primitives::services::Asset<_0>,
 						pub amount: _1,
 						pub requested_round: ::core::primitive::u32,
 					}
@@ -55446,7 +55583,9 @@ pub mod api {
 					pub struct DelegatorBond<_0, _1, _2> {
 						pub delegator: _0,
 						pub amount: _1,
-						pub asset_id: _2,
+						pub asset_id: runtime_types::tangle_primitives::services::Asset<_1>,
+						#[codec(skip)]
+						pub __ignore: ::core::marker::PhantomData<_2>,
 					}
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,
@@ -57865,6 +58004,7 @@ pub mod api {
 					#[doc = "operators that will run your service. Optionally, you can customize who is permitted"]
 					#[doc = "caller of this service, by default only the caller is allowed to call the service."]
 					request {
+						evm_origin: ::core::option::Option<::subxt_core::utils::H160>,
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
 						permitted_callers:
@@ -57937,11 +58077,12 @@ pub mod api {
 						>,
 					},
 					#[codec(index = 11)]
-					#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed stake for that service."]
+					#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed"]
+					#[doc = "stake for that service."]
 					#[doc = ""]
 					#[doc = "The caller needs to be an authorized Slash Origin for this service."]
-					#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash"]
-					#[doc = "by another entity."]
+					#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call"]
+					#[doc = "to apply the slash by another entity."]
 					slash {
 						offender: ::subxt_core::utils::AccountId32,
 						#[codec(compact)]
@@ -57952,7 +58093,8 @@ pub mod api {
 					#[codec(index = 12)]
 					#[doc = "Dispute an [UnappliedSlash] for a given era and index."]
 					#[doc = ""]
-					#[doc = "The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash]."]
+					#[doc = "The caller needs to be an authorized Dispute Origin for the service in the"]
+					#[doc = "[UnappliedSlash]."]
 					dispute {
 						#[codec(compact)]
 						era: ::core::primitive::u32,
@@ -58102,6 +58244,15 @@ pub mod api {
 					#[codec(index = 39)]
 					#[doc = "The ERC20 transfer failed."]
 					ERC20TransferFailed,
+					#[codec(index = 40)]
+					#[doc = "Missing EVM Origin for the EVM execution."]
+					MissingEVMOrigin,
+					#[codec(index = 41)]
+					#[doc = "Expected the account to be an EVM address."]
+					ExpectedEVMAddress,
+					#[codec(index = 42)]
+					#[doc = "Expected the account to be an account ID."]
+					ExpectedAccountId,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -63582,6 +63733,25 @@ pub mod api {
 					Debug,
 					Eq,
 					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				pub struct StagingServicePayment<_0, _1, _2> {
+					pub request_id: ::core::primitive::u64,
+					pub refund_to: runtime_types::tangle_primitives::types::Account<_0>,
+					pub asset: runtime_types::tangle_primitives::services::Asset<_1>,
+					pub amount: _2,
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
 					serde :: Deserialize,
 					serde :: Serialize,
 				)]
@@ -63667,6 +63837,28 @@ pub mod api {
 					Wasmtime,
 					#[codec(index = 1)]
 					Wasmer,
+				}
+			}
+			pub mod types {
+				use super::runtime_types;
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				pub enum Account<_0> {
+					#[codec(index = 0)]
+					Id(_0),
+					#[codec(index = 1)]
+					Address(::subxt_core::utils::H160),
 				}
 			}
 		}

@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate::{
-	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
-	ServicesPrecompile, ServicesPrecompileCall,
+use crate as pallet_multi_asset_delegation;
+use crate::mock::{
+	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use fp_evm::FeeCalculator;
 use frame_support::{
@@ -26,23 +26,54 @@ use frame_support::{
 	PalletId,
 };
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
-use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
-use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
+use pallet_evm::{
+	EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping, OnChargeEVMTransaction,
+};
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
-	traits::{DispatchInfoOf, Dispatchable},
+	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
 	transaction_validity::{TransactionValidity, TransactionValidityError},
 	ConsensusEngineId,
 };
-use tangle_primitives::services::EvmRunner;
 
-pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, ServicesPrecompile<R>>,)>;
+use pallet_evm_precompile_blake2::Blake2F;
+use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
+use pallet_evm_precompile_modexp::Modexp;
+use pallet_evm_precompile_sha3fips::Sha3FIPS256;
+use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 
-pub type PCall = ServicesPrecompileCall<Runtime>;
+use precompile_utils::precompile_set::{
+	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, PrecompileAt,
+	PrecompileSetBuilder, PrecompilesInRangeInclusive,
+};
+
+type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
+
+#[precompile_utils::precompile_name_from_address]
+pub type DefaultPrecompiles = (
+	// Ethereum precompiles:
+	PrecompileAt<AddressU64<1>, ECRecover, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<2>, Sha256, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<3>, Ripemd160, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<4>, Identity, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<5>, Modexp, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<6>, Bn128Add, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<7>, Bn128Mul, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<8>, Bn128Pairing, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<9>, Blake2F, EthereumPrecompilesChecks>,
+	PrecompileAt<AddressU64<1024>, Sha3FIPS256, (CallableByContract, CallableByPrecompile)>,
+	PrecompileAt<AddressU64<1026>, ECRecoverPublicKey, (CallableByContract, CallableByPrecompile)>,
+);
+
+pub type TanglePrecompiles<R> = PrecompileSetBuilder<
+	R,
+	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), DefaultPrecompiles>,),
+>;
 
 parameter_types! {
 	pub const MinimumPeriod: u64 = 6000 / 2;
+
+	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<_>::new();
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -56,25 +87,6 @@ pub struct FixedGasPrice;
 impl FeeCalculator for FixedGasPrice {
 	fn min_gas_price() -> (U256, Weight) {
 		(1.into(), Weight::zero())
-	}
-}
-
-pub struct EnsureAddressAlways;
-impl<OuterOrigin> EnsureAddressOrigin<OuterOrigin> for EnsureAddressAlways {
-	type Success = ();
-
-	fn try_address_origin(
-		_address: &H160,
-		_origin: OuterOrigin,
-	) -> Result<Self::Success, OuterOrigin> {
-		Ok(())
-	}
-
-	fn ensure_address_origin(
-		_address: &H160,
-		_origin: OuterOrigin,
-	) -> Result<Self::Success, sp_runtime::traits::BadOrigin> {
-		Ok(())
 	}
 }
 
@@ -95,7 +107,6 @@ parameter_types! {
 	pub const TransactionByteFee: u64 = 1;
 	pub const ChainId: u64 = 42;
 	pub const EVMModuleId: PalletId = PalletId(*b"py/evmpa");
-	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
 	pub BlockGasLimit: U256 = U256::from(BLOCK_GAS_LIMIT);
 	pub const GasLimitPovSizeRatio: u64 = BLOCK_GAS_LIMIT.saturating_div(MAX_POV_SIZE);
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
@@ -149,9 +160,10 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		who: &H160,
 		fee: U256,
 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
-		// Make pallet services account free to use
-		if who == &pallet_services_address {
+		let pallet_multi_asset_delegation_address =
+			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
+		// Make pallet multi_asset_delegation account free to use
+		if who == &pallet_multi_asset_delegation_address {
 			return Ok(None);
 		}
 		// fallback to the default implementation
@@ -166,9 +178,10 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		base_fee: U256,
 		already_withdrawn: Self::LiquidityInfo,
 	) -> Self::LiquidityInfo {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
-		// Make pallet services account free to use
-		if who == &pallet_services_address {
+		let pallet_multi_asset_delegation_address =
+			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
+		// Make pallet multi_asset_delegation account free to use
+		if who == &pallet_multi_asset_delegation_address {
 			return already_withdrawn;
 		}
 		// fallback to the default implementation
@@ -189,12 +202,12 @@ impl pallet_evm::Config for Runtime {
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
 	type WeightPerGas = WeightPerGas;
 	type BlockHashMapping = EthereumBlockHashMapping<Self>;
-	type CallOrigin = EnsureAddressAlways;
+	type CallOrigin = EnsureAddressRoot<AccountId>;
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = crate::mock::TestAccount;
+	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
 	type RuntimeEvent = RuntimeEvent;
-	type PrecompilesType = Precompiles<Self>;
+	type PrecompilesType = TanglePrecompiles<Runtime>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
@@ -277,7 +290,7 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 
 pub struct MockedEvmRunner;
 
-impl EvmRunner<Runtime> for MockedEvmRunner {
+impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 	type Error = pallet_evm::Error<Runtime>;
 
 	fn call(

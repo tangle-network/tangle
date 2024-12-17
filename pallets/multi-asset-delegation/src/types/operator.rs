@@ -16,10 +16,12 @@
 
 use super::*;
 use frame_support::{pallet_prelude::*, BoundedVec};
+use tangle_primitives::services::Asset;
 
 /// A snapshot of the operator state at the start of the round.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations: Get<u32>> {
+pub struct OperatorSnapshot<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
+{
 	/// The total value locked by the operator.
 	pub stake: Balance,
 
@@ -28,14 +30,14 @@ pub struct OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations: Get<u32
 	pub delegations: BoundedVec<DelegatorBond<AccountId, Balance, AssetId>, MaxDelegations>,
 }
 
-impl<AccountId, Balance, AssetId, MaxDelegations: Get<u32>>
+impl<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
 	OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations>
 where
 	AssetId: PartialEq + Ord + Copy,
 	Balance: Default + core::ops::AddAssign + Copy,
 {
 	/// Calculates the total stake for a specific asset ID from all delegations.
-	pub fn get_stake_by_asset_id(&self, asset_id: AssetId) -> Balance {
+	pub fn get_stake_by_asset_id(&self, asset_id: Asset<AssetId>) -> Balance {
 		let mut total_stake = Balance::default();
 		for stake in &self.delegations {
 			if stake.asset_id == asset_id {
@@ -46,8 +48,8 @@ where
 	}
 
 	/// Calculates the total stake for each asset and returns a list of (asset_id, total_stake).
-	pub fn get_total_stake_by_assets(&self) -> Vec<(AssetId, Balance)> {
-		let mut stake_by_asset: BTreeMap<AssetId, Balance> = BTreeMap::new();
+	pub fn get_total_stake_by_assets(&self) -> Vec<(Asset<AssetId>, Balance)> {
+		let mut stake_by_asset: BTreeMap<Asset<AssetId>, Balance> = BTreeMap::new();
 
 		for stake in &self.delegations {
 			let entry = stake_by_asset.entry(stake.asset_id).or_default();
@@ -84,7 +86,7 @@ pub struct OperatorBondLessRequest<Balance> {
 pub struct OperatorMetadata<
 	AccountId,
 	Balance,
-	AssetId,
+	AssetId: Encode + Decode,
 	MaxDelegations: Get<u32>,
 	MaxBlueprints: Get<u32>,
 > {
@@ -103,8 +105,13 @@ pub struct OperatorMetadata<
 	pub blueprint_ids: BoundedVec<u32, MaxBlueprints>,
 }
 
-impl<AccountId, Balance, AssetId, MaxDelegations: Get<u32>, MaxBlueprints: Get<u32>> Default
-	for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
+impl<
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode,
+		MaxDelegations: Get<u32>,
+		MaxBlueprints: Get<u32>,
+	> Default for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
 where
 	Balance: Default,
 {
@@ -122,129 +129,11 @@ where
 
 /// Represents a stake for an operator
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct DelegatorBond<AccountId, Balance, AssetId> {
+pub struct DelegatorBond<AccountId, Balance, AssetId: Encode + Decode> {
 	/// The account ID of the delegator.
 	pub delegator: AccountId,
 	/// The amount bonded.
 	pub amount: Balance,
 	/// The ID of the bonded asset.
-	pub asset_id: AssetId,
-}
-
-// ------ Test for helper functions ------ //
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use core::ops::Add;
-	use frame_support::{parameter_types, BoundedVec};
-	use sp_runtime::traits::Zero;
-
-	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Default)]
-	pub struct MockBalance(pub u32);
-
-	impl Zero for MockBalance {
-		fn zero() -> Self {
-			MockBalance(0)
-		}
-
-		fn is_zero(&self) -> bool {
-			self.0 == 0
-		}
-	}
-
-	impl Add for MockBalance {
-		type Output = Self;
-
-		fn add(self, other: Self) -> Self {
-			Self(self.0 + other.0)
-		}
-	}
-
-	impl core::ops::AddAssign for MockBalance {
-		fn add_assign(&mut self, other: Self) {
-			self.0 += other.0;
-		}
-	}
-
-	#[derive(Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy)]
-	pub struct MockAccountId(pub u32);
-
-	#[derive(
-		Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, Clone, Copy, Ord, PartialOrd,
-	)]
-	pub struct MockAssetId(pub u32);
-
-	parameter_types! {
-		pub const MaxDelegators: u32 = 10;
-		pub const MaxUnstakeRequests: u32 = 10;
-		pub const MaxBlueprints: u32 = 10;
-	}
-
-	#[test]
-	fn get_stake_by_asset_id_should_work() {
-		let snapshot: OperatorSnapshot<MockAccountId, MockBalance, MockAssetId, MaxDelegators> =
-			OperatorSnapshot {
-				stake: MockBalance(100),
-				delegations: BoundedVec::try_from(vec![
-					DelegatorBond {
-						delegator: MockAccountId(1),
-						amount: MockBalance(50),
-						asset_id: MockAssetId(1),
-					},
-					DelegatorBond {
-						delegator: MockAccountId(2),
-						amount: MockBalance(75),
-						asset_id: MockAssetId(1),
-					},
-					DelegatorBond {
-						delegator: MockAccountId(3),
-						amount: MockBalance(25),
-						asset_id: MockAssetId(2),
-					},
-				])
-				.unwrap(),
-			};
-
-		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(1)).0, 125);
-		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(2)).0, 25);
-		assert_eq!(snapshot.get_stake_by_asset_id(MockAssetId(3)).0, 0);
-	}
-
-	#[test]
-	fn get_total_stake_by_assets_should_work() {
-		let snapshot: OperatorSnapshot<MockAccountId, MockBalance, MockAssetId, MaxDelegators> =
-			OperatorSnapshot {
-				stake: MockBalance(100),
-				delegations: BoundedVec::try_from(vec![
-					DelegatorBond {
-						delegator: MockAccountId(1),
-						amount: MockBalance(50),
-						asset_id: MockAssetId(1),
-					},
-					DelegatorBond {
-						delegator: MockAccountId(2),
-						amount: MockBalance(75),
-						asset_id: MockAssetId(1),
-					},
-					DelegatorBond {
-						delegator: MockAccountId(3),
-						amount: MockBalance(25),
-						asset_id: MockAssetId(2),
-					},
-					DelegatorBond {
-						delegator: MockAccountId(4),
-						amount: MockBalance(100),
-						asset_id: MockAssetId(2),
-					},
-				])
-				.unwrap(),
-			};
-
-		let result = snapshot.get_total_stake_by_assets();
-		let expected_result =
-			vec![(MockAssetId(1), MockBalance(125)), (MockAssetId(2), MockBalance(125))];
-
-		assert_eq!(result, expected_result);
-	}
+	pub asset_id: Asset<AssetId>,
 }

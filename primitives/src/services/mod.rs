@@ -15,12 +15,13 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Services primitives.
-
+use crate::Weight;
 use educe::Educe;
+use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, ByteArray, RuntimeDebug};
+use sp_core::{ecdsa, ByteArray, RuntimeDebug, H160, U256};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
@@ -347,12 +348,13 @@ pub struct ServiceBlueprint<C: Constraints> {
 	/// The request hook that will be called before creating a service from the service blueprint.
 	/// The parameters that are required for the service request.
 	pub request_params: BoundedVec<FieldType, C::MaxFields>,
-	/// A Blueprint Manager is a smart contract that implements the `IBlueprintServiceManager` interface.
+	/// A Blueprint Manager is a smart contract that implements the `IBlueprintServiceManager`
+	/// interface.
 	pub manager: BlueprintServiceManager,
 	/// The Revision number of the Master Blueprint Service Manager.
 	///
-	/// If not sure what to use, use `MasterBlueprintServiceManagerRevision::default()` which will use
-	/// the latest revision available.
+	/// If not sure what to use, use `MasterBlueprintServiceManagerRevision::default()` which will
+	/// use the latest revision available.
 	pub master_manager_revision: MasterBlueprintServiceManagerRevision,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget<C>,
@@ -610,8 +612,9 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	/// The Permitted caller(s) of the service.
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// The Selected operators(s) for this service with their restaking Percentage.
-	// This a Vec instead of a BTreeMap because the number of operators is expected to be small (smaller than 512)
-	// and the overhead of a BTreeMap is not worth it, plus BoundedBTreeMap is not serde compatible.
+	// This a Vec instead of a BTreeMap because the number of operators is expected to be small
+	// (smaller than 512) and the overhead of a BTreeMap is not worth it, plus BoundedBTreeMap is
+	// not serde compatible.
 	pub operators: BoundedVec<(AccountId, Percent), C::MaxOperatorsPerService>,
 	/// Asset(s) used to secure the service instance.
 	pub assets: BoundedVec<AssetId, C::MaxAssetsPerService>,
@@ -641,7 +644,19 @@ pub enum ApprovalState {
 }
 
 /// Different types of assets that can be used.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[derive(
+	PartialEq,
+	Eq,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	Copy,
+	Clone,
+	MaxEncodedLen,
+	Ord,
+	PartialOrd,
+)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Asset<AssetId> {
 	/// Use the specified AssetId.
@@ -659,7 +674,7 @@ impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
 	}
 }
 
-impl<AssetId: Encode> Asset<AssetId> {
+impl<AssetId: Encode + Decode> Asset<AssetId> {
 	pub fn to_ethabi_param_type() -> ethabi::ParamType {
 		ethabi::ParamType::Tuple(vec![
 			// Kind of the Asset
@@ -1118,4 +1133,51 @@ pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, Asse
 	pub blueprint: ServiceBlueprint<C>,
 	/// The services instances of that blueprint.
 	pub services: Vec<Service<C, AccountId, BlockNumber, AssetId>>,
+}
+
+#[derive(Debug)]
+pub struct RunnerError<E: Into<sp_runtime::DispatchError>> {
+	pub error: E,
+	pub weight: Weight,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub trait EvmRunner<T: frame_system::Config> {
+	type Error: Into<sp_runtime::DispatchError>;
+
+	fn call(
+		source: H160,
+		target: H160,
+		input: Vec<u8>,
+		value: U256,
+		gas_limit: u64,
+		is_transactional: bool,
+		validate: bool,
+	) -> Result<CallInfo, RunnerError<Self::Error>>;
+}
+
+/// A mapping function that converts EVM gas to Substrate weight and vice versa
+pub trait EvmGasWeightMapping {
+	/// Convert EVM gas to Substrate weight
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight;
+	/// Convert Substrate weight to EVM gas
+	fn weight_to_gas(weight: Weight) -> u64;
+}
+
+impl EvmGasWeightMapping for () {
+	fn gas_to_weight(_gas: u64, _without_base_weight: bool) -> Weight {
+		Default::default()
+	}
+	fn weight_to_gas(_weight: Weight) -> u64 {
+		Default::default()
+	}
+}
+
+/// Trait to be implemented for evm address mapping.
+pub trait EvmAddressMapping<A> {
+	/// Convert an address to an account id.
+	fn into_account_id(address: H160) -> A;
+
+	/// Convert an account id to an address.
+	fn into_address(account_id: A) -> H160;
 }

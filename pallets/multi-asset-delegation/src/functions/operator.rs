@@ -17,19 +17,17 @@
 /// Functions for the pallet.
 use super::*;
 use crate::{types::*, Pallet};
-use frame_support::traits::Currency;
-use frame_support::traits::ExistenceRequirement;
-use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
-	traits::{Get, ReservableCurrency},
+	traits::{Currency, ExistenceRequirement, Get, ReservableCurrency},
+	BoundedVec,
 };
-use sp_runtime::traits::{CheckedAdd, CheckedSub};
-use sp_runtime::DispatchError;
-use sp_runtime::Percent;
-use tangle_primitives::BlueprintId;
-use tangle_primitives::ServiceManager;
+use sp_runtime::{
+	traits::{CheckedAdd, CheckedSub},
+	DispatchError, Percent,
+};
+use tangle_primitives::{BlueprintId, ServiceManager};
 
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.

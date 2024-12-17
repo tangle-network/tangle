@@ -9,8 +9,7 @@ use pallet_services::types::BalanceOf;
 use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
-use sp_runtime::traits::Dispatchable;
-use sp_runtime::Percent;
+use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{Asset, Field, OperatorPreferences, ServiceBlueprint};
 
@@ -353,11 +352,12 @@ where
 		Ok(())
 	}
 
-	/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+	/// Slash an operator (offender) for a service id with a given percent of their exposed stake
+	/// for that service.
 	///
 	/// The caller needs to be an authorized Slash Origin for this service.
-	/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-	/// by another entity.
+	/// Note that this does not apply the slash directly, but instead schedules a deferred call to
+	/// apply the slash by another entity.
 	#[precompile::public("slash(bytes,uint256,uint8)")]
 	fn slash(
 		handle: &mut impl PrecompileHandle,

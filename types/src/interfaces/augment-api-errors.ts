@@ -1090,6 +1090,18 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       DuplicateBlueprintId: AugmentedError<ApiType>;
       /**
+       * Erc20 transfer failed
+       **/
+      ERC20TransferFailed: AugmentedError<ApiType>;
+      /**
+       * EVM decode error
+       **/
+      EVMAbiDecode: AugmentedError<ApiType>;
+      /**
+       * EVM encode error
+       **/
+      EVMAbiEncode: AugmentedError<ApiType>;
+      /**
        * The account has insufficient balance.
        **/
       InsufficientBalance: AugmentedError<ApiType>;
@@ -1546,6 +1558,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
       /**
+       * The ERC20 transfer failed.
+       **/
+      ERC20TransferFailed: AugmentedError<ApiType>;
+      /**
        * An error occurred while decoding the EVM ABI.
        **/
       EVMAbiDecode: AugmentedError<ApiType>;
@@ -1553,6 +1569,14 @@ declare module '@polkadot/api-base/types/errors' {
        * An error occurred while encoding the EVM ABI.
        **/
       EVMAbiEncode: AugmentedError<ApiType>;
+      /**
+       * Expected the account to be an account ID.
+       **/
+      ExpectedAccountId: AugmentedError<ApiType>;
+      /**
+       * Expected the account to be an EVM address.
+       **/
+      ExpectedEVMAddress: AugmentedError<ApiType>;
       /**
        * The caller does not have the requirements to call a job.
        **/
@@ -1611,6 +1635,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The maximum number of services per user has been exceeded.
        **/
       MaxServicesPerUserExceeded: AugmentedError<ApiType>;
+      /**
+       * Missing EVM Origin for the EVM execution.
+       **/
+      MissingEVMOrigin: AugmentedError<ApiType>;
       /**
        * No assets provided for the service, at least one asset is required.
        **/

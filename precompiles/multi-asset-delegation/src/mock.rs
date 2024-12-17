@@ -16,28 +16,28 @@
 
 //! Test utilities
 use super::*;
-use crate::{MultiAssetDelegationPrecompile, MultiAssetDelegationPrecompileCall};
-use frame_support::derive_impl;
+use crate::mock_evm::*;
 use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU64},
 	weights::Weight,
 	PalletId,
 };
-use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
+use pallet_evm::GasWeightMapping;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
 	sr25519::{Public as sr25519Public, Signature},
-	ConstU32, H160, U256,
+	ConstU32, H160,
 };
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
+use tangle_primitives::services::EvmAddressMapping;
+use tangle_primitives::services::EvmGasWeightMapping;
 use tangle_primitives::ServiceManager;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
@@ -158,6 +158,7 @@ construct_runtime!(
 		System: frame_system,
 		Balances: pallet_balances,
 		Evm: pallet_evm,
+		Ethereum: pallet_ethereum,
 		Timestamp: pallet_timestamp,
 		Assets: pallet_assets,
 		MultiAssetDelegation: pallet_multi_asset_delegation,
@@ -212,77 +213,6 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 }
 
-pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, MultiAssetDelegationPrecompile<R>>,)>;
-
-pub type PCall = MultiAssetDelegationPrecompileCall<Runtime>;
-
-pub struct EnsureAddressAlways;
-impl<OuterOrigin> EnsureAddressOrigin<OuterOrigin> for EnsureAddressAlways {
-	type Success = ();
-
-	fn try_address_origin(
-		_address: &H160,
-		_origin: OuterOrigin,
-	) -> Result<Self::Success, OuterOrigin> {
-		Ok(())
-	}
-
-	fn ensure_address_origin(
-		_address: &H160,
-		_origin: OuterOrigin,
-	) -> Result<Self::Success, sp_runtime::traits::BadOrigin> {
-		Ok(())
-	}
-}
-
-const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
-
-parameter_types! {
-	pub BlockGasLimit: U256 = U256::from(u64::MAX);
-	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
-	pub const WeightPerGas: Weight = Weight::from_parts(1, 0);
-	pub GasLimitPovSizeRatio: u64 = {
-		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
-		block_gas_limit.saturating_div(MAX_POV_SIZE)
-	};
-	pub SuicideQuickClearLimit: u32 = 0;
-
-}
-impl pallet_evm::Config for Runtime {
-	type FeeCalculator = ();
-	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
-	type WeightPerGas = WeightPerGas;
-	type CallOrigin = EnsureAddressAlways;
-	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = TestAccount;
-	type Currency = Balances;
-	type RuntimeEvent = RuntimeEvent;
-	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type PrecompilesType = Precompiles<Self>;
-	type PrecompilesValue = PrecompilesValue;
-	type ChainId = ();
-	type OnChargeTransaction = ();
-	type BlockGasLimit = BlockGasLimit;
-	type BlockHashMapping = SubstrateBlockHashMapping<Self>;
-	type FindAuthor = ();
-	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
-	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
-	type Timestamp = Timestamp;
-	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const MinimumPeriod: u64 = 5;
-}
-impl pallet_timestamp::Config for Runtime {
-	type Moment = u64;
-	type OnTimestampSet = ();
-	type MinimumPeriod = MinimumPeriod;
-	type WeightInfo = ();
-}
-
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
@@ -328,6 +258,35 @@ impl ServiceManager<AccountId, Balance> for MockServiceManager {
 	}
 }
 
+pub struct PalletEVMGasWeightMapping;
+
+impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
+	}
+
+	fn weight_to_gas(weight: Weight) -> u64 {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
+	}
+}
+
+pub struct PalletEVMAddressMapping;
+
+impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+
+	fn into_address(account_id: AccountId) -> H160 {
+		account_id.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			H160(addr)
+		})
+	}
+}
+
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const MaxLocks: u32 = 50;
@@ -354,6 +313,9 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type BondDuration = BondDuration;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
+	type EvmRunner = MockedEvmRunner;
+	type EvmAddressMapping = PalletEVMAddressMapping;
+	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;
 	type DelegationBondLessDelay = ConstU32<5>;

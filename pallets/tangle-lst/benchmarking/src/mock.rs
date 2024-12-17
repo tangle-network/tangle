@@ -2,30 +2,20 @@
 
 use super::*;
 use frame_election_provider_support::VoteWeight;
-use frame_support::traits::AsEnsureOriginWithArg;
-use frame_support::traits::Hooks;
-use frame_support::traits::OnFinalize;
-use frame_support::{assert_ok, derive_impl, parameter_types, PalletId};
+use frame_support::{
+	assert_ok, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, Hooks, OnFinalize},
+	PalletId,
+};
 use frame_system::RawOrigin;
-use pallet_tangle_lst::BondedPools;
-use pallet_tangle_lst::Config;
-use pallet_tangle_lst::Event;
-use pallet_tangle_lst::LastPoolId;
-use pallet_tangle_lst::PoolId;
-use pallet_tangle_lst::PoolState;
+use pallet_tangle_lst::{BondedPools, Config, Event, LastPoolId, PoolId, PoolState};
 use sp_core::U256;
-use sp_runtime::traits::ConstU128;
-use sp_runtime::traits::ConstU32;
-use sp_runtime::traits::ConstU64;
-use sp_runtime::traits::Convert;
-use sp_runtime::traits::Zero;
-use sp_runtime::DispatchError;
-use sp_runtime::DispatchResult;
-use sp_runtime::Perbill;
-use sp_runtime::{BuildStorage, FixedU128};
+use sp_runtime::{
+	traits::{ConstU128, ConstU32, ConstU64, Convert, Zero},
+	BuildStorage, DispatchError, DispatchResult, FixedU128, Perbill,
+};
 use sp_runtime_interface::sp_tracing;
-use sp_staking::EraIndex;
-use sp_staking::{OnStakingUpdate, Stake};
+use sp_staking::{EraIndex, OnStakingUpdate, Stake};
 use sp_std::collections::btree_map::BTreeMap;
 
 pub type BlockNumber = u64;

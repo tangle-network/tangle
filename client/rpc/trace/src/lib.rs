@@ -21,8 +21,8 @@
 //! The implementation is composed of multiple tasks :
 //! - Many calls the RPC handler `Trace::filter`, communicating with the main task.
 //! - A main `CacheTask` managing the cache and the communication between tasks.
-//! - For each traced block an async task responsible to wait for a permit, spawn a blocking
-//!   task and waiting for the result, then send it to the main `CacheTask`.
+//! - For each traced block an async task responsible to wait for a permit, spawn a blocking task
+//!   and waiting for the result, then send it to the main `CacheTask`.
 
 use futures::{select, stream::FuturesUnordered, FutureExt, StreamExt};
 use std::{collections::BTreeMap, future::Future, marker::PhantomData, sync::Arc, time::Duration};
@@ -595,9 +595,9 @@ where
 
 	/// Handle a request to get the traces of the provided block.
 	/// - If the result is stored in the cache, it sends it immediatly.
-	/// - If the block is currently being pooled, it is added in this block cache waiting list,
-	///   and all requests concerning this block will be satisfied when the tracing for this block
-	///   is finished.
+	/// - If the block is currently being pooled, it is added in this block cache waiting list, and
+	///   all requests concerning this block will be satisfied when the tracing for this block is
+	///   finished.
 	/// - If this block is missing from the cache, it means no batch asked for it. All requested
 	///   blocks should be contained in a batch beforehand, and thus an error is returned.
 	#[instrument(skip(self))]

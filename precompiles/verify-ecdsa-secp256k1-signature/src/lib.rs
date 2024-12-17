@@ -58,25 +58,14 @@ impl<Runtime: pallet_evm::Config> EcdsaSecp256k1Precompile<Runtime> {
 
 		let maybe_pub_key_point = k256::AffinePoint::from_bytes(public_bytes.as_slice().into());
 
-		let pub_key_point = if let Some(x) = maybe_pub_key_point.into() {
-			x
-		} else {
-			return Ok(false);
-		};
+		let pub_key_point =
+			if let Some(x) = maybe_pub_key_point.into() { x } else { return Ok(false) };
 
 		let maybe_verifying_key = k256::ecdsa::VerifyingKey::from_affine(pub_key_point);
-		let verifying_key = if let Ok(x) = maybe_verifying_key {
-			x
-		} else {
-			return Ok(false);
-		};
+		let verifying_key = if let Ok(x) = maybe_verifying_key { x } else { return Ok(false) };
 
 		let maybe_signature = k256::ecdsa::Signature::from_slice(signature_bytes.as_slice());
-		let signature = if let Ok(x) = maybe_signature {
-			x
-		} else {
-			return Ok(false);
-		};
+		let signature = if let Ok(x) = maybe_signature { x } else { return Ok(false) };
 
 		let is_confirmed =
 			verifying_key.verify_prehash(&message, &signature).map(|_| signature).is_ok();
