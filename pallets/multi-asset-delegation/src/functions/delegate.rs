@@ -412,7 +412,7 @@ impl<T: Config> Pallet<T> {
 						slashed_amount_recipient_evm,
 						slash_amount,
 					)
-					.map_err(|e| Error::<T>::ERC20TransferFailed)?;
+					.map_err(|_| Error::<T>::ERC20TransferFailed)?;
 					ensure!(success, Error::<T>::ERC20TransferFailed);
 				},
 			}

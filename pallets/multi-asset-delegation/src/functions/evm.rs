@@ -72,22 +72,6 @@ impl<T: Config> Pallet<T> {
 		Ok((success, weight))
 	}
 
-	/// Dispatches a hook to the EVM and returns if the result with the used weight.
-	fn dispatch_evm_call(
-		contract: H160,
-		f: Function,
-		args: &[ethabi::Token],
-		value: BalanceOf<T>,
-	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
-		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
-		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
-		let value = value.using_encoded(U256::from_little_endian);
-		let info = Self::evm_call(Self::pallet_evm_account(), contract, value, data, gas_limit)?;
-		let weight = Self::weight_from_call_info(&info);
-		Ok((info, weight))
-	}
-
 	/// Dispatches a call to the EVM and returns the result.
 	fn evm_call(
 		from: H160,

@@ -288,7 +288,7 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 
 pub struct MockedEvmRunner;
 
-impl pallet_services::EvmRunner<Runtime> for MockedEvmRunner {
+impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 	type Error = pallet_evm::Error<Runtime>;
 
 	fn call(

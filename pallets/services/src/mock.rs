@@ -25,6 +25,7 @@ use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 };
+use tangle_primitives::services::EvmRunner;
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;

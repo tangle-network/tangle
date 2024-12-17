@@ -22,7 +22,7 @@ use tangle_primitives::{services::Asset, RoundIndex};
 
 impl<T: Config> Pallet<T> {
 	#[allow(clippy::type_complexity)]
-	pub fn distribute_rewards(round: RoundIndex) -> DispatchResult {
+	pub fn distribute_rewards(_round: RoundIndex) -> DispatchResult {
 		// let mut delegation_info: BTreeMap<
 		// 	T::AssetId,
 		// 	Vec<DelegatorBond<T::AccountId, BalanceOf<T>, T::AssetId>>,
@@ -75,7 +75,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	fn calculate_total_reward(
+	fn _calculate_total_reward(
 		apy: sp_runtime::Percent,
 		total_amount: BalanceOf<T>,
 	) -> Result<BalanceOf<T>, DispatchError> {
@@ -83,7 +83,7 @@ impl<T: Config> Pallet<T> {
 		Ok(total_reward)
 	}
 
-	fn distribute_reward_to_delegator(
+	fn _distribute_reward_to_delegator(
 		delegator: &T::AccountId,
 		reward: BalanceOf<T>,
 	) -> DispatchResult {

@@ -16,7 +16,7 @@
 #![allow(clippy::all)]
 use crate::{
 	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
-	ServicesPrecompile, ServicesPrecompileCall,
+	MultiAssetDelegationPrecompile, MultiAssetDelegationPrecompileCall,
 };
 use fp_evm::FeeCalculator;
 use frame_support::{
@@ -37,9 +37,9 @@ use sp_runtime::{
 use tangle_primitives::services::EvmRunner;
 
 pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, ServicesPrecompile<R>>,)>;
+	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, MultiAssetDelegationPrecompile<R>>,)>;
 
-pub type PCall = ServicesPrecompileCall<Runtime>;
+pub type PCall = MultiAssetDelegationPrecompileCall<Runtime>;
 
 parameter_types! {
 	pub const MinimumPeriod: u64 = 6000 / 2;
@@ -149,9 +149,10 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		who: &H160,
 		fee: U256,
 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		let pallet_multi_asset_delegation_address =
+			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet services account free to use
-		if who == &pallet_services_address {
+		if who == &pallet_multi_asset_delegation_address {
 			return Ok(None);
 		}
 		// fallback to the default implementation
@@ -166,9 +167,10 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		base_fee: U256,
 		already_withdrawn: Self::LiquidityInfo,
 	) -> Self::LiquidityInfo {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		let pallet_multi_asset_delegation_address =
+			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet services account free to use
-		if who == &pallet_services_address {
+		if who == &pallet_multi_asset_delegation_address {
 			return already_withdrawn;
 		}
 		// fallback to the default implementation

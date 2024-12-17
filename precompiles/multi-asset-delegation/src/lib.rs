@@ -250,7 +250,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("deposit(uint256,uint256)")]
+	#[precompile::public("deposit(uint256,address,uint256)")]
 	fn deposit(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -262,7 +262,7 @@ where
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
 			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
-			(_other_asset_id, _erc20_token) => {
+			_ => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
 		};
@@ -284,7 +284,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("schedule_withdraw(uint256,uint256)")]
+	#[precompile::public("schedule_withdraw(uint256,address,uint256)")]
 	fn schedule_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -302,7 +302,7 @@ where
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) => (Asset::Erc20(erc20_token.into()), amount),
-			(other_asset_id, zero_address) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, _zero_address) => (Asset::Custom(other_asset_id.into()), amount),
 			(_other_asset_id, _erc20_token) => {
 				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
 			},
@@ -331,7 +331,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("cancel_withdraw(uint256,uint256)")]
+	#[precompile::public("cancel_withdraw(uint256,address,uint256)")]
 	fn cancel_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -364,7 +364,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("delegate(bytes32,uint256,uint256,uint64[])")]
+	#[precompile::public("delegate(bytes32,uint256,address,uint256,uint64[])")]
 	fn delegate(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
@@ -411,7 +411,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("schedule_delegator_unstake(bytes32,uint256,uint256)")]
+	#[precompile::public("schedule_delegator_unstake(bytes32,uint256,address,uint256)")]
 	fn schedule_delegator_unstake(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
@@ -460,7 +460,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("cancelDelegatorUnstake(bytes32,uint256,uint256)")]
+	#[precompile::public("cancelDelegatorUnstake(bytes32,uint256,address,uint256)")]
 	fn cancel_delegator_unstake(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
