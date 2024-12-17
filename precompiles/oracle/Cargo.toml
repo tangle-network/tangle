@@ -16,6 +16,7 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-oracle = { workspace = true }
 pallet-timestamp = { workspace = true }
 parity-scale-codec = { workspace = true, features = [ "max-encoded-len" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
@@ -52,6 +53,7 @@ std = [
 	"pallet-assets/std",
 	"pallet-balances/std",
 	"pallet-evm/std",
+	"pallet-oracle/std",
 	"pallet-timestamp/std",
 	"parity-scale-codec/std",
 	"precompile-utils/std",

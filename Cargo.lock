@@ -7231,24 +7231,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
-name = "orml-oracle"
-version = "1.1.0"
-dependencies = [
- "frame-benchmarking",
- "frame-support",
- "frame-system",
- "parity-scale-codec",
- "scale-info",
- "serde",
- "sp-application-crypto",
- "sp-core",
- "sp-io",
- "sp-runtime",
- "sp-std",
- "tangle-primitives",
-]
-
-[[package]]
 name = "overload"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7806,6 +7788,34 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "sp-staking",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-evm-precompile-oracle"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "hex-literal 0.4.1",
+ "libsecp256k1",
+ "pallet-assets",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-oracle",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "paste",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
  "sp-std",
  "tangle-primitives",
 ]
@@ -8432,6 +8442,24 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-staking",
+]
+
+[[package]]
+name = "pallet-oracle"
+version = "1.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "tangle-primitives",
 ]
 
 [[package]]

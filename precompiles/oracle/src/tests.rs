@@ -1,185 +1,51 @@
-use crate::{mock::*, U256};
-use frame_support::traits::fungibles::Inspect;
-use precompile_utils::testing::*;
-use sp_core::H160;
+use super::*;
+use crate::{mock::*, OraclePrecompile, OraclePrecompileCall};
+use frame_support::{assert_ok, BoundedVec};
+use precompile_utils::{
+	precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder},
+	testing::PrecompileTesterExt,
+};
+use sp_core::{H160, U256};
+
+pub type PCall = OraclePrecompileCall<Runtime>;
+pub type Precompiles =
+	PrecompileSetBuilder<Runtime, (PrecompileAt<AddressU64<1>, OraclePrecompile<Runtime>>,)>;
+
+fn precompiles() -> Precompiles {
+	Precompiles::new()
+}
 
 #[test]
-fn test_selector_less_than_four_bytes_reverts() {
+fn feed_values_works() {
 	ExtBuilder::default().build().execute_with(|| {
-		PrecompilesValue::get()
-			.prepare_test(Alice, Precompile1, vec![1u8, 2, 3])
-			.execute_reverts(|output| output == b"Tried to read selector out of bounds");
+		// Create a bounded vector for feed values
+		let mut feed_values = Vec::new();
+		feed_values.push((1u32, 100u64));
+		feed_values.push((2u32, 200u64));
+		let bounded_feed_values: BoundedVec<_, _> = feed_values.try_into().unwrap();
+
+		assert_ok!(Oracle::feed_values(
+			RuntimeOrigin::signed(TestAccount::Alice),
+			bounded_feed_values
+		));
 	});
 }
 
 #[test]
-fn test_unimplemented_selector_reverts() {
+fn precompile_feed_values_works() {
 	ExtBuilder::default().build().execute_with(|| {
-		PrecompilesValue::get()
-			.prepare_test(Alice, Precompile1, vec![1u8, 2, 3, 4])
-			.execute_reverts(|output| output == b"Unknown selector");
-	});
-}
+		// Test data
+		let key1: U256 = U256::from(1u32);
+		let value1: U256 = U256::from(100u64);
+		let key2: U256 = U256::from(2u32);
+		let value2: U256 = U256::from(200u64);
 
-#[test]
-fn test_create_asset() {
-	ExtBuilder::default().build().execute_with(|| {
-		PrecompilesValue::get()
+		precompiles()
 			.prepare_test(
-				TestAccount::Alex,
+				TestAccount::Alice,
 				H160::from_low_u64_be(1),
-				PCall::create {
-					id: U256::from(1),
-					admin: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-					min_balance: U256::from(1),
-				},
-			)
-			.execute_returns(());
-
-		// Verify asset was created
-		assert!(Assets::asset_exists(1));
-	});
-}
-
-#[test]
-fn test_mint_asset() {
-	ExtBuilder::default().build().execute_with(|| {
-		// First create the asset
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::create {
-					id: U256::from(1),
-					admin: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-					min_balance: U256::from(1),
-				},
-			)
-			.execute_returns(());
-
-		// Then mint some tokens
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::mint {
-					id: U256::from(1),
-					beneficiary: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-					amount: U256::from(100),
-				},
+				PCall::feed_values { keys: vec![key1, key2], values: vec![value1, value2] },
 			)
 			.execute_returns(());
 	});
-}
-
-#[test]
-fn test_transfer_asset() {
-	ExtBuilder::default().build().execute_with(|| {
-		let admin = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let to = sp_core::sr25519::Public::from(TestAccount::Bob);
-
-		// Create asset
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::create {
-					id: U256::from(1),
-					admin: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-					min_balance: U256::from(1),
-				},
-			)
-			.execute_returns(());
-
-		// Mint tokens to sender
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::mint {
-					id: U256::from(1),
-					beneficiary: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-					amount: U256::from(100),
-				},
-			)
-			.execute_returns(());
-
-		// Transfer tokens
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::transfer {
-					id: U256::from(1),
-					target: precompile_utils::prelude::Address(H160::repeat_byte(0x02)),
-					amount: U256::from(50),
-				},
-			)
-			.execute_returns(());
-
-		// Verify balances
-		assert_eq!(Assets::balance(1, admin), 50);
-		assert_eq!(Assets::balance(1, to), 50);
-	});
-}
-
-#[test]
-fn test_start_destroy() {
-	ExtBuilder::default().build().execute_with(|| {
-		// Create asset
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::create {
-					id: U256::from(1),
-					admin: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-					min_balance: U256::from(1),
-				},
-			)
-			.execute_returns(());
-
-		// Start destroy
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::start_destroy { id: U256::from(1) },
-			)
-			.execute_returns(());
-
-		// Verify asset is being destroyed
-		assert!(Assets::asset_exists(1)); // Still exists but in "destroying" state
-	});
-}
-
-#[test]
-fn test_mint_insufficient_permissions() {
-	ExtBuilder::default().build().execute_with(|| {
-        // Create asset
-        PrecompilesValue::get()
-            .prepare_test(
-                TestAccount::Alex,
-                H160::from_low_u64_be(1),
-                PCall::create {
-                    id: U256::from(1),
-                    admin: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-                    min_balance: U256::from(1),
-                },
-            )
-            .execute_returns(());
-
-        // Try to mint without permission
-        PrecompilesValue::get()
-            .prepare_test(
-                TestAccount::Bob,
-                H160::from_low_u64_be(1),
-                PCall::mint {
-                    id: U256::from(1),
-                    beneficiary: precompile_utils::prelude::Address(H160::repeat_byte(0x01)),
-                    amount: U256::from(100),
-                },
-            )
-            .execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 4, error: [2, 0, 0, 0], message: Some(\"NoPermission\") })");
-    });
 }

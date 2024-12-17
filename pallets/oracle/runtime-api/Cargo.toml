@@ -1,10 +1,10 @@
 [package]
-name = "orml-oracle-runtime-api"
+name = "pallet-oracle-runtime-api"
 version = "1.1.0"
 authors = ["Laminar Developers <hello@laminar.one>"]
 edition = "2021"
 license = "Apache-2.0"
-description = "Runtime API module for orml-oracle."
+description = "Runtime API module for pallet-oracle."
 repository = "https://github.com/open-web3-stack/open-runtime-module-library"
 
 [dependencies]
