@@ -106,7 +106,7 @@ fn multiple_deposit_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&amount * 2));
+		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&(amount * 2)));
 		assert_eq!(
 			System::events().last().unwrap().event,
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {

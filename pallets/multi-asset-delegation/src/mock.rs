@@ -36,6 +36,7 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde_json::json;
 use sp_core::{sr25519, H160};
+use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
@@ -51,9 +52,6 @@ pub type AccountId = AccountId32;
 pub type Balance = u128;
 type Nonce = u32;
 pub type AssetId = u128;
-
-// AssetIds for tests
-pub const VDOT: AssetId = 1;
 
 // AccountIds for tests
 pub const ALICE: u8 = 1;
@@ -302,7 +300,7 @@ parameter_types! {
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
-	pub SlashedAmountRecipient : AccountId = ALICE.into();
+	pub SlashedAmountRecipient : AccountId = AccountKeyring::Alice.into();
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -399,18 +397,31 @@ pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const HOOKS_TEST: H160 = H160([0x22; 20]);
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 
-pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
 pub const WBTC: AssetId = 3;
+pub const VDOT: AssetId = 4;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let authorities = vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3)];
-	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
+	let authorities: Vec<AccountId> = vec![
+		AccountKeyring::Alice.into(),
+		AccountKeyring::Bob.into(),
+		AccountKeyring::Charlie.into(),
+	];
+	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 200_000_u128)).collect();
+
+	// Add test accounts with enough balance
+	let test_accounts = vec![
+		AccountKeyring::Dave.into(),
+		AccountKeyring::Eve.into(),
+		MultiAssetDelegation::pallet_account(),
+	];
+	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_u128)));
+
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
@@ -464,34 +475,41 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 
 	evm_config.assimilate_storage(&mut t).unwrap();
 
-	let assets_config = pallet_assets::GenesisConfig::<Runtime> {
-		assets: vec![
-			(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
-			(WETH, authorities[1].clone(), true, 100),     // 100 wei.
-			(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
-		],
-		metadata: vec![
-			(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
-			(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
-			(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
-		],
-		accounts: vec![
-			(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
-			(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
-			(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
-			//
-			(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
-			(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
-			(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
-			//
-			(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
-			(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
-			(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
-		],
-		next_asset_id: Some(4),
-	};
+	// let assets_config = pallet_assets::GenesisConfig::<Runtime> {
+	// 	assets: vec![
+	// 		(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
+	// 		(WETH, authorities[1].clone(), true, 100),     // 100 wei.
+	// 		(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
+	// 		(VDOT, authorities[0].clone(), true, 100),
+	// 	],
+	// 	metadata: vec![
+	// 		(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
+	// 		(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
+	// 		(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
+	// 		(VDOT, Vec::from(b"VeChain"), Vec::from(b"VDOT"), 18),
+	// 	],
+	// 	accounts: vec![
+	// 		(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
+	// 		(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
+	// 		(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
+	// 		//
+	// 		(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
+	// 		(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
+	// 		(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
+	// 		//
+	// 		(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
+	// 		(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
+	// 		(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
 
-	assets_config.assimilate_storage(&mut t).unwrap();
+	// 		//
+	// 		(VDOT, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
+	// 		(VDOT, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
+	// 		(VDOT, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
+	// 	],
+	// 	next_asset_id: Some(4),
+	// };
+
+	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
 	ext.execute_with(|| System::set_block_number(1));

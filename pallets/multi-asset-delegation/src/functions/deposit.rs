@@ -55,7 +55,7 @@ impl<T: Config> Pallet<T> {
 					&Self::pallet_account(),
 					amount,
 					Preservation::Expendable,
-				);
+				)?;
 			},
 			Asset::Erc20(asset_address) => {
 				let sender = evm_sender.ok_or(Error::<T>::ERC20TransferFailed)?;

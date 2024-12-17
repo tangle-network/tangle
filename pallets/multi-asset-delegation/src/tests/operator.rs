@@ -83,11 +83,11 @@ fn join_operator_insufficient_bond() {
 #[test]
 fn join_operator_insufficient_funds() {
 	new_test_ext().execute_with(|| {
-		let bond_amount = 15_000; // User 4 has only 5_000
+		let bond_amount = 350_000; // User 4 has only 200_000
 
 		assert_noop!(
 			MultiAssetDelegation::join_operators(
-				RuntimeOrigin::signed(Eve.to_account_id()),
+				RuntimeOrigin::signed(Alice.to_account_id()),
 				bond_amount
 			),
 			pallet_balances::Error::<Runtime, _>::InsufficientBalance
@@ -259,7 +259,7 @@ fn operator_bond_more_not_an_operator() {
 fn operator_bond_more_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let additional_bond = 115_000; // Exceeds available balance
+		let additional_bond = 1150_000; // Exceeds available balance
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
