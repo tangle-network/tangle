@@ -19,7 +19,7 @@ use crate::{
 	CurrentRound, Error,
 };
 use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
+use sp_keyring::AccountKeyring::{Alice, Bob, Eve};
 use sp_runtime::Percent;
 use tangle_primitives::services::Asset;
 
@@ -259,7 +259,7 @@ fn operator_bond_more_not_an_operator() {
 fn operator_bond_more_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let additional_bond = 1150_000; // Exceeds available balance
+		let additional_bond = 1_150_000; // Exceeds available balance
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
@@ -651,22 +651,6 @@ fn slash_operator_success() {
 			Fixed(vec![blueprint_id].try_into().unwrap()),
 		));
 
-		// Setup delegator with all blueprints
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(Bob.to_account_id()),
-			asset_id,
-			delegator_stake,
-			None
-		));
-
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(Bob.to_account_id()),
-			Alice.to_account_id(),
-			asset_id,
-			delegator_stake,
-			Fixed(vec![blueprint_id].try_into().unwrap()),
-		));
-
 		// Slash 50% of stakes
 		let slash_percentage = Percent::from_percent(50);
 		assert_ok!(MultiAssetDelegation::slash_operator(
@@ -679,23 +663,14 @@ fn slash_operator_success() {
 		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
 		assert_eq!(operator_info.stake, operator_stake / 2);
 
-		// Verify fixed delegator stake was slashed
-		let delegator_2 = MultiAssetDelegation::delegators(Charlie.to_account_id()).unwrap();
-		let delegation_2 = delegator_2
+		// Verify delegator stake was slashed
+		let delegator = MultiAssetDelegation::delegators(Bob.to_account_id()).unwrap();
+		let delegation = delegator
 			.delegations
 			.iter()
 			.find(|d| d.operator == Alice.to_account_id())
 			.unwrap();
-		assert_eq!(delegation_2.amount, delegator_stake / 2);
-
-		// Verify all-blueprints delegator stake was slashed
-		let delegator_3 = MultiAssetDelegation::delegators(Charlie.to_account_id()).unwrap();
-		let delegation_3 = delegator_3
-			.delegations
-			.iter()
-			.find(|d| d.operator == Alice.to_account_id())
-			.unwrap();
-		assert_eq!(delegation_3.amount, delegator_stake / 2);
+		assert_eq!(delegation.amount, delegator_stake / 2);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorSlashed {

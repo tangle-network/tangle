@@ -36,6 +36,8 @@
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
+mod mock_evm;
+#[cfg(test)]
 mod tests;
 
 use fp_evm::{PrecompileFailure, PrecompileHandle};
@@ -122,12 +124,6 @@ where
 {
 	// Errors for the `MultiAssetDelegation` precompile.
 
-	/// Found an invalid amount / value.
-	const INVALID_AMOUNT: [u8; 32] = keccak256!("InvalidAmount()");
-	/// Value must be zero for ERC20 payment asset.
-	const VALUE_NOT_ZERO_FOR_ERC20: [u8; 32] = keccak256!("ValueMustBeZeroForERC20()");
-	/// Value must be zero for custom payment asset.
-	const VALUE_NOT_ZERO_FOR_CUSTOM_ASSET: [u8; 32] = keccak256!("ValueMustBeZeroForCustomAsset()");
 	/// Payment asset should be either custom or ERC20.
 	const PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20: [u8; 32] =
 		keccak256!("PaymentAssetShouldBeCustomOrERC20()");

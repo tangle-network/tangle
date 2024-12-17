@@ -28,7 +28,6 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 	PalletId,
 };
-use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
@@ -40,10 +39,10 @@ use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
-	traits::{ConstU64, ConvertInto, IdentityLookup},
+	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner, RunnerError};
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -428,7 +427,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 
 	let mut evm_accounts = BTreeMap::new();
 
-	let mut create_contract = |bytecode: &str, address: H160| {
+	let create_contract = |bytecode: &str, address: H160| {
 		let mut raw_hex = bytecode.replace("0x", "").replace("\n", "");
 		// fix odd length
 		if raw_hex.len() % 2 != 0 {

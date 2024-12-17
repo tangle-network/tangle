@@ -179,9 +179,11 @@ impl<T: Config> Pallet<T> {
 			let delay = T::LeaveDelegatorsDelay::get();
 
 			// Process all ready withdraw requests
-			metadata.withdraw_requests.retain(|request| {
+			let mut i = 0;
+			while i < metadata.withdraw_requests.len() {
+				let request = &metadata.withdraw_requests[i];
 				if current_round >= delay + request.requested_round {
-					match request.asset_id {
+					let transfer_success = match request.asset_id {
 						Asset::Custom(asset_id) => T::Fungibles::transfer(
 							asset_id,
 							&Self::pallet_account(),
@@ -206,11 +208,19 @@ impl<T: Config> Pallet<T> {
 								false
 							}
 						},
+					};
+
+					if transfer_success {
+						// Remove the completed request
+						metadata.withdraw_requests.remove(i);
+					} else {
+						// Only increment if we didn't remove the request
+						i += 1;
 					}
 				} else {
-					true
+					i += 1;
 				}
-			});
+			}
 
 			Ok(())
 		})

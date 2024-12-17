@@ -16,7 +16,7 @@
 use super::*;
 use crate::{types::DelegatorStatus, CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve, Ferdie, One, Two};
+use sp_keyring::AccountKeyring::Bob;
 use sp_runtime::ArithmeticError;
 use tangle_primitives::services::Asset;
 

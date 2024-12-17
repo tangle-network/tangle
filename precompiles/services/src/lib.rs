@@ -199,18 +199,18 @@ where
 				.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?
 		};
 
-		const zero_address: [u8; 20] = [0; 20];
+		const ZERO_ADDRESS: [u8; 20] = [0; 20];
 
 		let (payment_asset, amount) = match (payment_asset_id.as_u32(), payment_token_address.0 .0)
 		{
-			(0, zero_address) => (Asset::Custom(0u32.into()), value),
+			(0, ZERO_ADDRESS) => (Asset::Custom(0u32.into()), value),
 			(0, erc20_token) => {
 				if value != Default::default() {
 					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_ERC20));
 				}
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
-			(other_asset_id, zero_address) => {
+			(other_asset_id, ZERO_ADDRESS) => {
 				if value != Default::default() {
 					return Err(revert_custom_error(Self::VALUE_NOT_ZERO_FOR_CUSTOM_ASSET));
 				}

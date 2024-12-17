@@ -16,7 +16,7 @@
 use super::*;
 use crate::CurrentRound;
 use frame_support::assert_ok;
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
 use tangle_primitives::services::Asset;
 
 #[test]

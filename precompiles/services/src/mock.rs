@@ -30,7 +30,6 @@ use frame_support::{
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
-use pallet_services::{traits::EvmRunner, EvmAddressMapping, EvmGasWeightMapping};
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
@@ -42,6 +41,7 @@ use sp_runtime::{
 	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -418,14 +418,14 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Self::AssetId,
+		_asset_id: &Asset<Self::AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
 		Default::default()
 	}
 

@@ -15,11 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use super::*;
-use crate::{types::*, CurrentRound, Error};
+use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve, Ferdie, One, Two};
-use sp_runtime::Percent;
-use std::collections::BTreeMap;
+use sp_keyring::AccountKeyring::{Alice, Bob};
 use tangle_primitives::services::Asset;
 
 #[test]

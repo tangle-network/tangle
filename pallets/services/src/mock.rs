@@ -37,6 +37,8 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
+use tangle_primitives::services::Asset;
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -290,14 +292,14 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Self::AssetId,
+		_asset_id: &Asset<Self::AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
 		Default::default()
 	}
 

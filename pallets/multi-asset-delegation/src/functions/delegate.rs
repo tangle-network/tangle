@@ -25,6 +25,7 @@ use sp_runtime::{
 	DispatchError, Percent,
 };
 use sp_std::vec::Vec;
+use tangle_primitives::services::EvmAddressMapping;
 use tangle_primitives::{services::Asset, BlueprintId};
 
 impl<T: Config> Pallet<T> {
@@ -403,10 +404,16 @@ impl<T: Config> Pallet<T> {
 					);
 				},
 				Asset::Erc20(address) => {
-					// TODO : Handle it
-					// let (success, _weight) =
-					// 		Self::erc20_transfer(address, &caller, Self::address(), value)?;
-					// 	ensure!(success, Error::<T>::ERC20TransferFailed);
+					let slashed_amount_recipient_evm =
+						T::EvmAddressMapping::into_address(T::SlashedAmountRecipient::get());
+					let (success, _weight) = Self::erc20_transfer(
+						address,
+						&Self::pallet_evm_account(),
+						slashed_amount_recipient_evm,
+						slash_amount,
+					)
+					.map_err(|e| Error::<T>::ERC20TransferFailed)?;
+					ensure!(success, Error::<T>::ERC20TransferFailed);
 				},
 			}
 
