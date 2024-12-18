@@ -133,7 +133,7 @@ impl<C> VerifyingShare<C>
 where
 	C: Ciphersuite,
 {
-	/// Create a new [`VerifyingShare`] from a element.
+	/// Create a new [`VerifyingShare`] from an element.
 	pub fn new(element: Element<C>) -> Self {
 		Self(element)
 	}
