@@ -34,7 +34,7 @@ where
 	/// This feature is not part of the specification and is just a convenient
 	/// way of creating identifiers.
 	///
-	/// Each possible byte string will map to an uniformly random identifier.
+	/// Each possible byte string will map to a uniformly random identifier.
 	/// Returns an error if the ciphersuite does not support identifier derivation,
 	/// or if the mapped identifier is zero (which is unpredictable, but should happen
 	/// with negligible probability).
