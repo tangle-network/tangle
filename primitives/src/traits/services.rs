@@ -1,4 +1,5 @@
 use scale_info::prelude::vec::Vec;
+
 /// A trait to manage and query services and blueprints for operators.
 ///
 /// This trait defines methods to retrieve information about the number of active

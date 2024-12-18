@@ -17,16 +17,15 @@
 //! Testing utilities.
 
 use super::*;
-use frame_support::derive_impl;
-use frame_support::{construct_runtime, parameter_types, weights::Weight};
-use pallet_evm::AddressMapping;
-use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
-use precompile_utils::testing::{Bob, CryptoAlith, CryptoBaltathar, Precompile1};
-use precompile_utils::{precompile_set::*, testing::MockAccount};
+use frame_support::{construct_runtime, derive_impl, parameter_types, weights::Weight};
+use pallet_evm::{AddressMapping, EnsureAddressNever, EnsureAddressRoot};
+use precompile_utils::{
+	precompile_set::*,
+	testing::{Bob, CryptoAlith, CryptoBaltathar, MockAccount, Precompile1},
+};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
-use sp_core::{ConstU32, U256};
-use sp_core::{Decode, Encode, MaxEncodedLen, H160};
+use sp_core::{ConstU32, Decode, Encode, MaxEncodedLen, H160, U256};
 use sp_runtime::BuildStorage;
 use sp_std::ops::Deref;
 

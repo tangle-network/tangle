@@ -6,9 +6,8 @@ use sp_std::convert::TryFrom;
 // The testing primitives are very useful for avoiding having to work with signatures
 // or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
 use crate::{pallet as pallet_airdrop_claims, sr25519_utils::sub, tests::get_bounded_vec};
-use frame_support::derive_impl;
 use frame_support::{
-	ord_parameter_types, parameter_types,
+	derive_impl, ord_parameter_types, parameter_types,
 	traits::{OnFinalize, OnInitialize, WithdrawReasons},
 };
 use pallet_balances;

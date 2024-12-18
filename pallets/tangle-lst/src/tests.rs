@@ -16,7 +16,10 @@
 // the License.
 
 use super::*;
-use crate::{mock::Currency, mock::*, Event};
+use crate::{
+	mock::{Currency, *},
+	Event,
+};
 use frame_support::traits::Currency as CurrencyT;
 
 mod bond_extra;

@@ -19,11 +19,9 @@ use super::*;
 use frame_support::{assert_err, assert_ok};
 use k256::ecdsa::{SigningKey, VerifyingKey};
 use mock::*;
-use sp_core::{bounded_vec, ecdsa, ByteArray};
-use sp_core::{Pair, U256};
+use sp_core::{bounded_vec, ecdsa, ByteArray, U256};
 use sp_runtime::{KeyTypeId, Percent};
-use tangle_primitives::services::*;
-use tangle_primitives::MultiAssetDelegationInfo;
+use tangle_primitives::{services::*, MultiAssetDelegationInfo};
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;

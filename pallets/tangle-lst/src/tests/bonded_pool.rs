@@ -1,7 +1,6 @@
 use super::*;
 use crate::mock::Currency;
-use frame_support::traits::Currency as CurrencyT;
-use frame_support::{assert_noop, assert_ok};
+use frame_support::{assert_noop, assert_ok, traits::Currency as CurrencyT};
 
 #[test]
 fn test_setup_works() {
