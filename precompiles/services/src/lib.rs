@@ -286,20 +286,6 @@ where
 		Ok(())
 	}
 
-	/// Terminate a service by the owner of the service.
-	#[precompile::public("terminate(uint256)")]
-	fn terminate(handle: &mut impl PrecompileHandle, service_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let service_id: u64 = service_id.as_u64();
-
-		let call = pallet_services::Call::<Runtime>::terminate { service_id };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	/// Call a job in the service.
 	#[precompile::public("callJob(uint256,uint8,bytes)")]
 	fn call_job(

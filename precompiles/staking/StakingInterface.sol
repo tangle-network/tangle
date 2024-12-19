@@ -37,11 +37,6 @@ interface Staking {
     /// @return Max validator count
     function maxValidatorCount() external view returns (uint32);
 
-    /// @dev Check whether the specified address is a validator
-    /// @param stash the address that we want to confirm is a validator
-    /// @return A boolean confirming whether the address is a validator
-    function isValidator(address stash) external view returns (bool);
-
     /// @dev Check whether the specified address is a nominator
     /// @param stash the address that we want to confirm is a nominator
     /// @return A boolean confirming whether the address is a nominator

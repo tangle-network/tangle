@@ -8417,6 +8417,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-oracle"
+version = "1.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-application-crypto",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-preimage"
 version = "37.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#b5eb098d8797cb64eabab99ec894b9225d06787b"
@@ -14306,6 +14324,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "hex",
+ "impl-trait-for-tuples",
  "log",
  "parity-scale-codec",
  "scale-info",

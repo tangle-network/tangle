@@ -48,6 +48,7 @@ use sp_io::{
 	crypto::{secp256k1_ecdsa_recover, sr25519_verify},
 	hashing::keccak_256,
 };
+use sp_runtime::Saturating;
 use sp_runtime::{
 	traits::{CheckedSub, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
@@ -334,7 +335,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			ensure_root(origin)?;
 
-			<Total<T>>::mutate(|t| *t += value);
+			<Total<T>>::mutate(|t| *t = t.saturating_add(value));
 			<Claims<T>>::insert(who.clone(), value);
 			if let Some(vs) = vesting_schedule {
 				<Vesting<T>>::insert(who.clone(), vs);

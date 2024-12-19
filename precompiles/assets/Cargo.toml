@@ -8,7 +8,7 @@ version = "0.1.0"
 [dependencies]
 paste = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate

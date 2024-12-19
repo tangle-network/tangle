@@ -7,7 +7,7 @@ description = "A Precompile to dispatch a call with a ERC712 permit."
 
 [dependencies]
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 use super::*;
+pub mod ordered_set;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};

@@ -8,7 +8,7 @@ description = "A Precompile to make Substrate's pallet-democracy accessible to p
 [dependencies]
 log = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate
@@ -31,7 +31,7 @@ derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate

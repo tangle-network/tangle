@@ -15,7 +15,7 @@ substrate-prometheus-endpoint = { workspace = true }
 tokio = { workspace = true, features = ["sync", "time"] }
 tracing = { workspace = true }
 
-# Moonbeam
+
 client-evm-tracing = { workspace = true }
 rpc-core-trace = { workspace = true }
 rpc-core-types = { workspace = true }

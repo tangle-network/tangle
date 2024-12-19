@@ -7,7 +7,7 @@ interface TangleLst {
     /// @dev Join a pool with a specified amount.
     /// @param amount The amount to join with.
     /// @param poolId The ID of the pool to join.
-    function join(uint256 amount, uint256 poolId) external returns (uint8);
+    function join(uint256 amount, uint256 poolId) external;
 
     /// @dev Bond extra to a pool.
     /// @param poolId The ID of the pool.

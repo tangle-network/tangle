@@ -11,7 +11,7 @@ jsonrpsee = { workspace = true, features = ["macros", "server"] }
 serde = { workspace = true, features = ["derive"] }
 sha3 = { workspace = true }
 
-# Moonbeam
+
 rpc-core-txpool = { workspace = true }
 rpc-primitives-txpool = { workspace = true, features = ["std"] }
 

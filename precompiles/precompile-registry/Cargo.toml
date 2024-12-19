@@ -8,7 +8,7 @@ description = "Registry of active precompiles"
 [dependencies]
 log = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate
@@ -28,7 +28,7 @@ derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate
