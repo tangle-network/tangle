@@ -257,8 +257,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
-	///   indicating
-	///  whether the unregistration is allowed and the weight of the operation.
+	///   indicating whether the unregistration is allowed and the weight of the operation.
 	pub fn on_unregister_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -298,8 +297,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
-	///   indicating
-	///  whether the price targets update is allowed and the weight of the operation.
+	///   indicating whether the price targets update is allowed and the weight of the operation.
 	pub fn on_update_price_targets(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -553,8 +551,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
-	///   indicating
-	///  whether the request is allowed and the weight of the operation.
+	///   indicating whether the request is allowed and the weight of the operation.
 	pub fn on_service_init_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -642,8 +639,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
-	///   indicating
-	/// whether the request is allowed and the weight of the operation.
+	///   indicating whether the request is allowed and the weight of the operation.
 	pub fn on_service_termination_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,

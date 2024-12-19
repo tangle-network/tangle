@@ -32,7 +32,6 @@ use frost_secp256k1::Secp256K1Sha256;
 use frost_ed448::Ed448Shake256;
 use frost_p384::P384Sha384;
 use frost_secp256k1_tr::Secp256K1Sha256TR;
-use tg_frost_core;
 
 #[cfg(test)]
 mod mock;

@@ -19,7 +19,7 @@ use super::*;
 use frame_support::{assert_err, assert_ok};
 use k256::ecdsa::{SigningKey, VerifyingKey};
 use mock::*;
-use sp_core::{bounded_vec, ecdsa, ByteArray, U256};
+use sp_core::{bounded_vec, ecdsa, ByteArray, Pair, U256};
 use sp_runtime::{KeyTypeId, Percent};
 use tangle_primitives::{services::*, MultiAssetDelegationInfo};
 

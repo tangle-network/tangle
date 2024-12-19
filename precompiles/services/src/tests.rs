@@ -9,7 +9,7 @@ use k256::ecdsa::{SigningKey, VerifyingKey};
 use pallet_services::{types::ConstraintsOf, Instances, Operators, OperatorsProfile};
 use parity_scale_codec::Encode;
 use precompile_utils::{prelude::UnboundedBytes, testing::*};
-use sp_core::{ecdsa, H160, U256};
+use sp_core::{ecdsa, Pair, H160, U256};
 use sp_runtime::{bounded_vec, AccountId32};
 use tangle_primitives::services::{
 	BlueprintServiceManager, FieldType, JobDefinition, JobMetadata,
