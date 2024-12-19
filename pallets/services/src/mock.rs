@@ -37,9 +37,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::services::Asset;
-use tangle_primitives::services::EvmRunner;
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
+use tangle_primitives::services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};

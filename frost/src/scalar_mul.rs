@@ -9,7 +9,8 @@ use core::{
 	fmt::{Debug, Result},
 	marker::PhantomData,
 };
-use sp_std::{vec, vec::Vec};
+
+use alloc::vec::Vec;
 
 use crate::{Ciphersuite, Element, Field, Group, Scalar};
 

@@ -112,7 +112,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Schedules an withdraw request for a delegator.
+	/// Schedules a withdraw request for a delegator.
 	///
 	/// # Arguments
 	///
@@ -155,7 +155,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Executes an withdraw request for a delegator.
+	/// Executes a withdraw request for a delegator.
 	///
 	/// # Arguments
 	///
@@ -226,7 +226,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Cancels an withdraw request for a delegator.
+	/// Cancels a withdraw request for a delegator.
 	///
 	/// # Arguments
 	///
