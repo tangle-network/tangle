@@ -339,8 +339,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
-	///   indicating
-	/// whether the approve is allowed and the weight of the operation.
+	///   indicating whether the approve is allowed and the weight of the operation.
 	pub fn on_approve_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
@@ -397,8 +396,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
-	///   indicating
-	/// whether the reject is allowed and the weight of the operation.
+	///   indicating whether the reject is allowed and the weight of the operation.
 	pub fn on_reject_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
