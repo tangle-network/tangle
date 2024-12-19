@@ -812,8 +812,11 @@ impl<'de> serde::de::Visitor<'de> for OperatorPreferencesVisitor {
 		let price_targets = seq
 			.next_element::<PriceTargets>()?
 			.ok_or_else(|| serde::de::Error::custom("price_targets is missing"))?;
-		let mut key_arr = [0u8; 65];
-		key_arr.copy_from_slice(&key);
+		let key_arr: [u8; 65] = key.try_into().map_err(|_| {
+			serde::de::Error::custom(
+				"key must be in the uncompressed format with length of 65 bytes",
+			)
+		})?;
 		Ok(OperatorPreferences { key: key_arr, price_targets })
 	}
 }

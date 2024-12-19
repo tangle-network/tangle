@@ -181,12 +181,13 @@ fn register_on_blueprint() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
 
 		let registration_call = Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			OperatorPreferences {
-				key: test_ecdsa_key(),
+				key: bob_ecdsa_key,
 				price_targets: price_targets(MachineKind::Large),
 			},
 			Default::default(),
@@ -194,16 +195,15 @@ fn register_on_blueprint() {
 		);
 		assert_ok!(registration_call);
 
-		// TODO: Figure out why event isn't being found
-		// assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
-		// 	provider: bob.clone(),
-		// 	blueprint_id: 0,
-		// 	preferences: OperatorPreferences {
-		// 		key: test_ecdsa_key(),
-		// 		price_targets: price_targets(MachineKind::Large),
-		// 	},
-		// 	registration_args: Default::default(),
-		// })]);
+		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
+			provider: bob.clone(),
+			blueprint_id: 0,
+			preferences: OperatorPreferences {
+				key: bob_ecdsa_key,
+				price_targets: price_targets(MachineKind::Large),
+			},
+			registration_args: Default::default(),
+		})]);
 
 		// The blueprint should be added to my blueprints in my profile.
 		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
@@ -214,7 +214,7 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(bob),
 				0,
-				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+				OperatorPreferences { key: bob_ecdsa_key, price_targets: Default::default() },
 				Default::default(),
 				0,
 			),
