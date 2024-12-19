@@ -24,17 +24,19 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 parity-scale-codec = { workspace = true }
 ed448-goldilocks = { git = "https://github.com/webb-tools/Ed448-Goldilocks", package = "ed448-goldilocks-plus", default-features = false, features = ["zeroize"] }
-frost-core = { workspace = true }
-rand_core = { workspace = true, optional = true }
+sp-std = { workspace = true }
+tg-frost-core = { workspace = true, features = ["internals"] }
+rand_core = { workspace = true }
 sha3 = { version = "0.10", default-features = false }
 subtle = { workspace = true }
 
 [features]
 default = ["std"]
 std = [
+    "sp-std/std",
     "rand_core/std",
     "parity-scale-codec/std",
     "sha3/std",
-    "frost-core/std",
+    "tg-frost-core/std",
     "ed448-goldilocks/std"
 ]

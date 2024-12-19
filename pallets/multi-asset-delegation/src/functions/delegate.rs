@@ -25,8 +25,10 @@ use sp_runtime::{
 	DispatchError, Percent,
 };
 use sp_std::vec::Vec;
-use tangle_primitives::services::EvmAddressMapping;
-use tangle_primitives::{services::Asset, BlueprintId};
+use tangle_primitives::{
+	services::{Asset, EvmAddressMapping},
+	BlueprintId,
+};
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.

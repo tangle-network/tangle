@@ -1,5 +1,5 @@
 [package]
-name = "frost-taproot"
+name = "frost-secp256k1-tr"
 edition = "2021"
 # When releasing to crates.io:
 # - Update html_root_url
@@ -24,8 +24,9 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 parity-scale-codec = { workspace = true }
 k256 = { workspace = true, default-features = false, features = ["arithmetic", "schnorr", "expose-field", "hash2curve", "alloc", "pkcs8"] }
-frost-core = { workspace = true }
-rand_core = { workspace = true, optional = true }
+tg-frost-core = { workspace = true, features = ["internals"] }
+sp-std = { workspace = true }
+rand_core = { workspace = true }
 sha2 = { workspace = true }
 signature = { workspace = true }
 subtle = { workspace = true }
@@ -35,6 +36,8 @@ default = ["std"]
 std = [
     "parity-scale-codec/std",
     "rand_core/std",
+    "tg-frost-core/std",
+    "sp-std/std",
     "k256/std",
     "sha2/std",
 ]

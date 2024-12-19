@@ -61,3 +61,12 @@ std = [
   "pallet-assets/std",
   "pallet-tangle-lst/std",
 ]
+runtime-benchmarks = [
+  "frame-support/runtime-benchmarks",
+  "frame-system/runtime-benchmarks",
+  "pallet-balances/runtime-benchmarks",
+  "pallet-evm/runtime-benchmarks",
+  "pallet-multi-asset-delegation/runtime-benchmarks",
+  "pallet-assets/runtime-benchmarks",
+  "pallet-tangle-lst/runtime-benchmarks",
+]

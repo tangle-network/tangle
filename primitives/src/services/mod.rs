@@ -19,9 +19,10 @@ use crate::Weight;
 use educe::Educe;
 use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
+use serde::Deserializer;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, ByteArray, RuntimeDebug, H160, U256};
+use sp_core::{ByteArray, RuntimeDebug, H160, U256};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
@@ -769,12 +770,65 @@ impl PriceTargets {
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct OperatorPreferences {
 	/// The operator ECDSA public key.
-	pub key: ecdsa::Public,
+	pub key: [u8; 65],
 	/// The pricing targets for the operator's resources.
 	pub price_targets: PriceTargets,
+}
+
+#[cfg(feature = "std")]
+impl Serialize for OperatorPreferences {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer,
+	{
+		use serde::ser::SerializeTuple;
+		let mut tup = serializer.serialize_tuple(2)?;
+		tup.serialize_element(&self.key[..])?;
+		tup.serialize_element(&self.price_targets)?;
+		tup.end()
+	}
+}
+
+#[cfg(feature = "std")]
+struct OperatorPreferencesVisitor;
+
+#[cfg(feature = "std")]
+impl<'de> serde::de::Visitor<'de> for OperatorPreferencesVisitor {
+	type Value = OperatorPreferences;
+
+	fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+		formatter.write_str("a tuple of 2 elements")
+	}
+
+	fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+	where
+		A: serde::de::SeqAccess<'de>,
+	{
+		let key = seq
+			.next_element::<Vec<u8>>()?
+			.ok_or_else(|| serde::de::Error::custom("key is missing"))?;
+		let price_targets = seq
+			.next_element::<PriceTargets>()?
+			.ok_or_else(|| serde::de::Error::custom("price_targets is missing"))?;
+		let key_arr: [u8; 65] = key.try_into().map_err(|_| {
+			serde::de::Error::custom(
+				"key must be in the uncompressed format with length of 65 bytes",
+			)
+		})?;
+		Ok(OperatorPreferences { key: key_arr, price_targets })
+	}
+}
+
+#[cfg(feature = "std")]
+impl<'de> Deserialize<'de> for OperatorPreferences {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		deserializer.deserialize_tuple(2, OperatorPreferencesVisitor)
+	}
 }
 
 impl OperatorPreferences {
@@ -802,7 +856,7 @@ impl OperatorPreferences {
 	pub fn to_ethabi(&self) -> ethabi::Token {
 		ethabi::Token::Tuple(vec![
 			// operator public key
-			ethabi::Token::Bytes(self.key.0.to_vec()),
+			ethabi::Token::Bytes(self.key.to_vec()),
 			// price targets
 			self.price_targets.to_ethabi(),
 		])

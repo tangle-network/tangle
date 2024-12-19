@@ -36,9 +36,10 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
-use tangle_primitives::services::EvmAddressMapping;
-use tangle_primitives::services::EvmGasWeightMapping;
-use tangle_primitives::ServiceManager;
+use tangle_primitives::{
+	services::{EvmAddressMapping, EvmGasWeightMapping},
+	ServiceManager,
+};
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;

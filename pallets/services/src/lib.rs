@@ -789,7 +789,6 @@ pub mod module {
 			});
 
 			// TODO: update weight for the registration.
-
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 

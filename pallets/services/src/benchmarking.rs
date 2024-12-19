@@ -9,8 +9,13 @@ use tangle_primitives::services::*;
 
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 
-fn zero_key() -> ecdsa::Public {
-	ecdsa::Public::from([0; 33])
+fn test_ecdsa_key() -> [u8; 65] {
+	let (ecdsa_key, _) = ecdsa::Pair::generate();
+	let secret = SigningKey::from_slice(&ecdsa_key.seed())
+		.expect("Should be able to create a secret key from a seed");
+	let verifying_key = VerifyingKey::from(secret);
+	let public_key = verifying_key.to_encoded_point(false);
+	public_key.to_bytes().to_vec().try_into().unwrap()
 }
 
 fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
@@ -18,7 +23,7 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 }
 
 fn operator_preferences<T: Config>() -> OperatorPreferences {
-	OperatorPreferences { key: zero_key(), price_targets: Default::default() }
+	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() }
 }
 
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
