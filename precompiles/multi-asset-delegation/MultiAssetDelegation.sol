@@ -46,42 +46,48 @@ interface MultiAssetDelegation {
     function goOnline() external returns (uint8);
 
     /// @dev Deposit an amount of an asset.
-    /// @param assetId The ID of the asset.
+    /// @param assetId The ID of the asset (0 for ERC20).
+    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
     /// @param amount The amount to deposit.
-    function deposit(uint256 assetId, uint256 amount) external returns (uint8);
+    function deposit(uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
 
     /// @dev Schedule a withdrawal of an amount of an asset.
-    /// @param assetId The ID of the asset.
+    /// @param assetId The ID of the asset (0 for ERC20).
+    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
     /// @param amount The amount to withdraw.
-    function scheduleWithdraw(uint256 assetId, uint256 amount) external returns (uint8);
+    function scheduleWithdraw(uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
 
     /// @dev Execute the scheduled withdrawal.
     function executeWithdraw() external returns (uint8);
 
     /// @dev Cancel the scheduled withdrawal.
-    /// @param assetId The ID of the asset.
+    /// @param assetId The ID of the asset (0 for ERC20).
+    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
     /// @param amount The amount to cancel withdrawal.
-    function cancelWithdraw(uint256 assetId, uint256 amount) external returns (uint8);
+    function cancelWithdraw(uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
 
     /// @dev Delegate an amount of an asset to an operator.
     /// @param operator The address of the operator.
-    /// @param assetId The ID of the asset.
+    /// @param assetId The ID of the asset (0 for ERC20).
+    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
     /// @param amount The amount to delegate.
     /// @param blueprintSelection The blueprint selection.
-    function delegate(bytes32 operator, uint256 assetId, uint256 amount, uint64[] memory blueprintSelection) external returns (uint8);
+    function delegate(bytes32 operator, uint256 assetId, address tokenAddress, uint256 amount, uint64[] memory blueprintSelection) external returns (uint8);
 
     /// @dev Schedule an unstake of an amount of an asset as a delegator.
     /// @param operator The address of the operator.
-    /// @param assetId The ID of the asset.
+    /// @param assetId The ID of the asset (0 for ERC20).
+    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
     /// @param amount The amount to unstake.
-    function scheduleDelegatorUnstake(bytes32 operator, uint256 assetId, uint256 amount) external returns (uint8);
+    function scheduleDelegatorUnstake(bytes32 operator, uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
 
     /// @dev Execute the scheduled unstake as a delegator.
     function executeDelegatorUnstake() external returns (uint8);
 
     /// @dev Cancel the scheduled unstake as a delegator.
     /// @param operator The address of the operator.
-    /// @param assetId The ID of the asset.
+    /// @param assetId The ID of the asset (0 for ERC20).
+    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
     /// @param amount The amount to cancel unstake.
-    function cancelDelegatorUnstake(bytes32 operator, uint256 assetId, uint256 amount) external returns (uint8);
+    function cancelDelegatorUnstake(bytes32 operator, uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
 }
