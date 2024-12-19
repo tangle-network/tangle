@@ -129,10 +129,14 @@ starknet-crypto = { version = "0.7.1", default-features = false, features = ["si
 
 frost-core = { version = "2.0.0", default-features = false }
 frost-ed25519 = { version = "2.0.0", default-features = false }
-frost-ed448 = { version = "2.0.0", default-features = false }
 frost-ristretto255 = { version = "2.0.0", default-features = false }
 frost-secp256k1 = { version = "2.0.0", default-features = false }
 frost-p256 = { version = "2.0.0", default-features = false }
+
+tg-frost-core = { path = "frost", default-features = false }
+frost-p384 = { path = "frost/frost-p384", default-features = false }
+frost-ed448 = { path = "frost/frost-ed448", default-features = false }
+frost-secp256k1-tr = { path = "frost/frost-secp256k1-tr", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }

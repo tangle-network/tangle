@@ -22,7 +22,7 @@ use frame_support::pallet_prelude::*;
 use serde::Deserializer;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, ByteArray, RuntimeDebug, H160, U256};
+use sp_core::{ByteArray, RuntimeDebug, H160, U256};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]

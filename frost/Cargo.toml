@@ -1,0 +1,61 @@
+[package]
+name = "tg-frost-core"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+homepage = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+byteorder = { version = "1.4", default-features = false }
+const-crc32 = { version = "1.2.0", package = "const-crc32-nostd" }
+document-features = "0.2.7"
+debugless-unwrap = "0.0.4"
+derive-getters = "0.5.0"
+hex = { workspace = true, features = ["alloc"] }
+itertools = { version = "0.13.0", default-features = false }
+parity-scale-codec = { workspace = true }
+postcard = { version = "1.0.0", default-features = false, features = ["alloc"], optional = true }
+rand_core = { workspace = true }
+serde = { workspace = true, optional = true }
+serdect = { workspace = true, features = ["alloc"], optional = true }
+sp-std = { workspace = true }
+subtle = { workspace = true }
+thiserror = { version = "2.0.3", default-features = false, optional = true }
+thiserror-nostd-notrait = { version = "1.0.29", default-features = false }
+visibility = "0.1.0"
+zeroize = { version = "1.8.1", default-features = false, features = ["derive"] }
+
+# Test dependencies used with the test-impl feature
+proptest = { version = "1.0", optional = true }
+serde_json = { version = "1.0", optional = true }
+criterion = { version = "0.5", optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.5" }
+lazy_static = "1.4"
+proptest = "1.0"
+rand = "0.8"
+rand_chacha = "0.3"
+serde_json = "1.0"
+
+[features]
+default = ["serialization", "cheater-detection", "std"]
+std = [
+  "byteorder/std",
+  "rand_core/std",
+  "hex/std",
+  "sp-std/std",
+  "dep:thiserror",
+
+]
+## Expose internal types, which do not have SemVer guarantees. This is an advanced
+## feature which can be useful if you need to build a modified version of FROST.
+## The docs won't list them, you will need to check the source code.
+internals = []
+# Exposes ciphersuite-generic tests for other crates to use
+test-impl = ["dep:proptest", "dep:serde_json", "dep:criterion"]
+serialization = ["serde", "dep:postcard"]
+serde = ["dep:serde", "dep:serdect"]
+cheater-detection = []

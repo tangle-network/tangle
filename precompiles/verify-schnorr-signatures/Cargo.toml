@@ -8,12 +8,18 @@ description = "A Precompile to verify schnorr signatures"
 [dependencies]
 precompile-utils = { workspace = true }
 
+# Using remote crates
 frost-core = { workspace = true, default-features = false }
 frost-ed25519 = { workspace = true, default-features = false }
-frost-ed448 = { workspace = true, default-features = false }
 frost-ristretto255 = { workspace = true, default-features = false }
 frost-secp256k1 = { workspace = true, default-features = false }
 frost-p256 = { workspace = true, default-features = false }
+
+# Using local crates
+tg-frost-core = { workspace = true, default-features = false }
+frost-p384 = { workspace = true, default-features = false }
+frost-secp256k1-tr = { workspace = true, default-features = false }
+frost-ed448 = { workspace = true, default-features = false }
 
 # Substrate
 sp-core = { workspace = true }
@@ -54,8 +60,11 @@ std = [
   "sp-io/std",
   "frost-core/std",
   "frost-ed25519/std",
-  "frost-ed448/std",
   "frost-ristretto255/std",
   "frost-secp256k1/std",
   "frost-p256/std",
+  "tg-frost-core/std",
+  "frost-p384/std",
+  "frost-secp256k1-tr/std",
+  "frost-ed448/std",
 ]
