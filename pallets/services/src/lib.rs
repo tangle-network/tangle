@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ use sp_runtime::{traits::Get, DispatchResult};
 mod functions;
 mod impls;
 mod rpc;
-pub mod traits;
 pub mod types;
 
 #[cfg(test)]
@@ -48,7 +47,6 @@ pub mod weights;
 
 pub use module::*;
 use tangle_primitives::BlueprintId;
-pub use traits::*;
 pub use weights::WeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -58,15 +56,23 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
-	use frame_support::dispatch::PostDispatchInfo;
-	use frame_support::traits::fungibles::{Inspect, Mutate};
-	use frame_support::traits::tokens::Preservation;
+	use frame_support::{
+		dispatch::PostDispatchInfo,
+		traits::{
+			fungibles::{Inspect, Mutate},
+			tokens::Preservation,
+		},
+	};
 	use sp_core::H160;
-	use sp_runtime::traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero};
-	use sp_runtime::Percent;
+	use sp_runtime::{
+		traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero},
+		Percent,
+	};
 	use sp_std::vec::Vec;
-	use tangle_primitives::services::MasterBlueprintServiceManagerRevision;
-	use tangle_primitives::{services::*, MultiAssetDelegationInfo};
+	use tangle_primitives::{
+		services::{MasterBlueprintServiceManagerRevision, *},
+		Account, MultiAssetDelegationInfo,
+	};
 	use types::*;
 
 	#[pallet::config]
@@ -87,14 +93,14 @@ pub mod module {
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
-		type EvmRunner: traits::EvmRunner<Self>;
+		type EvmRunner: tangle_primitives::services::EvmRunner<Self>;
 
 		/// A type that implements the `EvmGasWeightMapping` trait for the conversion of EVM gas to
 		/// Substrate weight and vice versa.
-		type EvmGasWeightMapping: traits::EvmGasWeightMapping;
+		type EvmGasWeightMapping: tangle_primitives::services::EvmGasWeightMapping;
 
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
-		type EvmAddressMapping: traits::EvmAddressMapping<Self::AccountId>;
+		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
 
 		/// The asset ID type.
 		type AssetId: AtLeast32BitUnsigned
@@ -201,7 +207,8 @@ pub mod module {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
 			// Ensure that the pallet's configuration is valid.
-			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM address.
+			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM
+			//    address.
 			let account_id = T::EvmAddressMapping::into_account_id(Self::address());
 			assert_eq!(account_id, Self::account_id(), "Services: AccountId mapping is incorrect.");
 		}
@@ -291,6 +298,12 @@ pub mod module {
 		MaxMasterBlueprintServiceManagerVersionsExceeded,
 		/// The ERC20 transfer failed.
 		ERC20TransferFailed,
+		/// Missing EVM Origin for the EVM execution.
+		MissingEVMOrigin,
+		/// Expected the account to be an EVM address.
+		ExpectedEVMAddress,
+		/// Expected the account to be an account ID.
+		ExpectedAccountId,
 	}
 
 	#[pallet::event]
@@ -622,6 +635,15 @@ pub mod module {
 		OperatorProfile<T::Constraints>,
 		ResultQuery<Error<T>::OperatorProfileNotFound>,
 	>;
+	/// Holds the service payment information for a service request.
+	/// Once the service is initiated, the payment is transferred to the MBSM and this
+	/// information is removed.
+	///
+	/// Service Requst ID -> Service Payment
+	#[pallet::storage]
+	#[pallet::getter(fn service_payment)]
+	pub type StagingServicePayments<T: Config> =
+		StorageMap<_, Identity, u64, StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>>;
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -846,6 +868,7 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
+			evm_origin: Option<H160>,
 			#[pallet::compact] blueprint_id: u64,
 			permitted_callers: Vec<T::AccountId>,
 			operators: Vec<T::AccountId>,
@@ -871,10 +894,11 @@ pub mod module {
 			}
 
 			let mut native_value = Zero::zero();
+			let request_id = NextServiceRequestId::<T>::get();
 
 			if value != Zero::zero() {
 				// Payment transfer
-				match payment_asset {
+				let refund_to = match payment_asset {
 					// Handle the case of native currency.
 					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
 						T::Currency::transfer(
@@ -884,6 +908,7 @@ pub mod module {
 							ExistenceRequirement::KeepAlive,
 						)?;
 						native_value = value;
+						Account::id(caller.clone())
 					},
 					Asset::Custom(asset_id) => {
 						T::Fungibles::transfer(
@@ -893,16 +918,31 @@ pub mod module {
 							value,
 							Preservation::Preserve,
 						)?;
+						Account::id(caller.clone())
 					},
 					Asset::Erc20(token) => {
+						// origin check.
+						let evm_origin = evm_origin.ok_or(Error::<T>::MissingEVMOrigin)?;
+						let mapped_origin = T::EvmAddressMapping::into_account_id(evm_origin);
+						ensure!(mapped_origin == caller, DispatchError::BadOrigin);
 						let (success, _weight) =
-							Self::erc20_transfer(token, &caller, Self::address(), value)?;
+							Self::erc20_transfer(token, evm_origin, Self::address(), value)?;
 						ensure!(success, Error::<T>::ERC20TransferFailed);
+						Account::from(evm_origin)
 					},
 				};
+
+				// Save the payment information for the service request.
+				let payment = StagingServicePayment {
+					request_id,
+					refund_to,
+					asset: payment_asset,
+					amount: value,
+				};
+
+				StagingServicePayments::<T>::insert(request_id, payment);
 			}
 
-			let request_id = NextServiceRequestId::<T>::get();
 			let (allowed, _weight) = Self::on_request_hook(
 				&blueprint,
 				blueprint_id,
@@ -1034,7 +1074,8 @@ pub mod module {
 						ApprovalState::Approved { restaking_percent } => {
 							Some((v, restaking_percent))
 						},
-						// N.B: this should not happen, as all operators are approved and checked above.
+						// N.B: this should not happen, as all operators are approved and checked
+						// above.
 						_ => None,
 					})
 					.collect::<Vec<_>>();
@@ -1067,6 +1108,44 @@ pub mod module {
 						.try_insert(service_id)
 						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 				})?;
+
+				// Payment
+				if let Some(payment) = Self::service_payment(request_id) {
+					// send payments to the MBSM
+					let mbsm_address = Self::mbsm_address_of(&blueprint)?;
+					let mbsm_account_id = T::EvmAddressMapping::into_account_id(mbsm_address);
+					match payment.asset {
+						Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+							T::Currency::transfer(
+								&Self::account_id(),
+								&mbsm_account_id,
+								payment.amount,
+								ExistenceRequirement::AllowDeath,
+							)?;
+						},
+						Asset::Custom(asset_id) => {
+							T::Fungibles::transfer(
+								asset_id,
+								&Self::account_id(),
+								&mbsm_account_id,
+								payment.amount,
+								Preservation::Expendable,
+							)?;
+						},
+						Asset::Erc20(token) => {
+							let (success, _weight) = Self::erc20_transfer(
+								token,
+								Self::address(),
+								mbsm_address,
+								payment.amount,
+							)?;
+							ensure!(success, Error::<T>::ERC20TransferFailed);
+						},
+					}
+
+					// Remove the payment information.
+					StagingServicePayments::<T>::remove(request_id);
+				}
 
 				let (allowed, _weight) = Self::on_service_init_hook(
 					&blueprint,
@@ -1130,6 +1209,51 @@ pub mod module {
 				blueprint_id: request.blueprint,
 				request_id,
 			});
+
+			// Refund the payment
+			if let Some(payment) = Self::service_payment(request_id) {
+				match payment.asset {
+					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+						let refund_to = payment
+							.refund_to
+							.try_into_account_id()
+							.map_err(|_| Error::<T>::ExpectedAccountId)?;
+						T::Currency::transfer(
+							&Self::account_id(),
+							&refund_to,
+							payment.amount,
+							ExistenceRequirement::AllowDeath,
+						)?;
+					},
+					Asset::Custom(asset_id) => {
+						let refund_to = payment
+							.refund_to
+							.try_into_account_id()
+							.map_err(|_| Error::<T>::ExpectedAccountId)?;
+						T::Fungibles::transfer(
+							asset_id,
+							&Self::account_id(),
+							&refund_to,
+							payment.amount,
+							Preservation::Expendable,
+						)?;
+					},
+					Asset::Erc20(token) => {
+						let refund_to = payment
+							.refund_to
+							.try_into_address()
+							.map_err(|_| Error::<T>::ExpectedEVMAddress)?;
+						let (success, _weight) = Self::erc20_transfer(
+							token,
+							Self::address(),
+							refund_to,
+							payment.amount,
+						)?;
+						ensure!(success, Error::<T>::ERC20TransferFailed);
+					},
+				}
+				StagingServicePayments::<T>::remove(request_id);
+			}
 
 			// TODO: make use of the returned weight from the hook.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
@@ -1275,11 +1399,12 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+		/// Slash an operator (offender) for a service id with a given percent of their exposed
+		/// stake for that service.
 		///
 		/// The caller needs to be an authorized Slash Origin for this service.
-		/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-		/// by another entity.
+		/// Note that this does not apply the slash directly, but instead schedules a deferred call
+		/// to apply the slash by another entity.
 		pub fn slash(
 			origin: OriginFor<T>,
 			offender: T::AccountId,
@@ -1341,7 +1466,8 @@ pub mod module {
 
 		/// Dispute an [UnappliedSlash] for a given era and index.
 		///
-		/// The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash].
+		/// The caller needs to be an authorized Dispute Origin for the service in the
+		/// [UnappliedSlash].
 		pub fn dispute(
 			origin: OriginFor<T>,
 			#[pallet::compact] era: u32,

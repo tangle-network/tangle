@@ -1,6 +1,5 @@
+use crate::{services::Asset, types::RoundIndex};
 use sp_std::prelude::*;
-
-use crate::types::RoundIndex;
 
 /// A trait to provide information about multi-asset delegation.
 ///
@@ -81,7 +80,10 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 	/// # Returns
 	///
 	/// The total delegation amount as a `Balance`.
-	fn get_total_delegation_by_asset_id(operator: &AccountId, asset_id: &Self::AssetId) -> Balance;
+	fn get_total_delegation_by_asset_id(
+		operator: &AccountId,
+		asset_id: &Asset<Self::AssetId>,
+	) -> Balance;
 
 	/// Get all delegators for a specific operator.
 	///
@@ -98,7 +100,7 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 	/// delegator account identifier, delegation amount, and asset identifier.
 	fn get_delegators_for_operator(
 		operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)>;
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)>;
 
 	fn slash_operator(
 		operator: &AccountId,

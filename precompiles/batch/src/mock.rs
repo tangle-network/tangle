@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-batch package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-batch package used in Tangle Network in terms of GPLv3.
@@ -18,8 +18,7 @@
 
 //! Test utilities
 use super::*;
-use frame_support::derive_impl;
-use frame_support::{construct_runtime, parameter_types, weights::Weight};
+use frame_support::{construct_runtime, derive_impl, parameter_types, weights::Weight};
 use pallet_evm::{EnsureAddressNever, EnsureAddressRoot};
 use precompile_utils::{mock_account, precompile_set::*, testing::MockAccount};
 use sp_runtime::{BuildStorage, Perbill};

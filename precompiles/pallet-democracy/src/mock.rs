@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-democracy package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-democracy package used in Tangle Network in terms of GPLv3.
@@ -18,9 +18,8 @@
 
 //! Test utilities
 use super::*;
-use frame_support::derive_impl;
 use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, derive_impl, parameter_types,
 	traits::{EqualPrivilegeOnly, OnFinalize, OnInitialize, StorePreimage},
 	weights::Weight,
 };

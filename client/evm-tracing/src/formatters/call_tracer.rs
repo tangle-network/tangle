@@ -154,7 +154,7 @@ impl super::ResponseFormatter for Formatter {
 				//
 				// We consider an item to be `Ordering::Less` when:
 				// 	- Is closer to the root or
-				//	- Is greater than its sibling.
+				// 	- Is greater than its sibling.
 				result.sort_by(|a, b| match (a, b) {
 					(
 						Call::CallTracer(CallTracerCall { trace_address: Some(a), .. }),

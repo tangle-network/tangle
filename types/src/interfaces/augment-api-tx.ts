@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesServicesAsset, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -2319,7 +2319,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Cancels a scheduled request to reduce a delegator's stake.
        **/
-      cancelDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
+      cancelDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset, u128]>;
       /**
        * Cancels a scheduled leave for an operator.
        **/
@@ -2331,15 +2331,15 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Cancels a scheduled withdraw request.
        **/
-      cancelWithdraw: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
+      cancelWithdraw: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128]>;
       /**
        * Allows a user to delegate an amount of an asset to an operator.
        **/
-      delegate: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array, blueprintSelection: PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection | { Fixed: any } | { All: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection]>;
+      delegate: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array, blueprintSelection: PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection | { Fixed: any } | { All: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset, u128, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection]>;
       /**
        * Allows a user to deposit an asset.
        **/
-      deposit: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
+      deposit: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array, evmAddress: Option<H160> | null | Uint8Array | H160 | string) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128, Option<H160>]>;
       /**
        * Executes a scheduled request to reduce a delegator's stake.
        **/
@@ -2355,7 +2355,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Executes a scheduled withdraw request.
        **/
-      executeWithdraw: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      executeWithdraw: AugmentedSubmittable<(evmAddress: Option<H160> | null | Uint8Array | H160 | string) => SubmittableExtrinsic<ApiType>, [Option<H160>]>;
       /**
        * Allows an operator to go offline.
        **/
@@ -2371,7 +2371,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Manage asset id to vault rewards
        **/
-      manageAssetInVault: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128, PalletMultiAssetDelegationRewardsAssetAction]>;
+      manageAssetInVault: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, TanglePrimitivesServicesAsset, PalletMultiAssetDelegationRewardsAssetAction]>;
       /**
        * Allows an operator to increase their stake.
        **/
@@ -2383,7 +2383,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Schedules a request to reduce a delegator's stake.
        **/
-      scheduleDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
+      scheduleDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset, u128]>;
       /**
        * Schedules an operator to leave.
        **/
@@ -2395,7 +2395,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Schedules an withdraw request.
        **/
-      scheduleWithdraw: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
+      scheduleWithdraw: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128]>;
       /**
        * Sets the APY and cap for a specific asset.
        * The APY is the annual percentage yield that the asset will earn.
@@ -3143,7 +3143,8 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Dispute an [UnappliedSlash] for a given era and index.
        * 
-       * The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash].
+       * The caller needs to be an authorized Dispute Origin for the service in the
+       * [UnappliedSlash].
        **/
       dispute: AugmentedSubmittable<(era: Compact<u32> | AnyNumber | Uint8Array, index: Compact<u32> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u32>, Compact<u32>]>;
       /**
@@ -3173,16 +3174,17 @@ declare module '@polkadot/api-base/types/submittable' {
       reject: AugmentedSubmittable<(requestId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
       /**
        * Request a new service to be initiated using the provided blueprint with a list of
-       * operators that will run your service. Optionally, you can specifiy who is permitted
+       * operators that will run your service. Optionally, you can customize who is permitted
        * caller of this service, by default only the caller is allowed to call the service.
        **/
-      request: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], operators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], assets: Vec<u128> | (u128 | AnyNumber | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Vec<TanglePrimitivesServicesField>, Vec<u128>, Compact<u64>, Compact<u128>]>;
+      request: AugmentedSubmittable<(evmOrigin: Option<H160> | null | Uint8Array | H160 | string, blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], operators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], assets: Vec<u128> | (u128 | AnyNumber | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, paymentAsset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Option<H160>, Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Vec<TanglePrimitivesServicesField>, Vec<u128>, Compact<u64>, TanglePrimitivesServicesAsset, Compact<u128>]>;
       /**
-       * Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+       * Slash an operator (offender) for a service id with a given percent of their exposed
+       * stake for that service.
        * 
        * The caller needs to be an authorized Slash Origin for this service.
-       * Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-       * by another entity.
+       * Note that this does not apply the slash directly, but instead schedules a deferred call
+       * to apply the slash by another entity.
        **/
       slash: AugmentedSubmittable<(offender: AccountId32 | string | Uint8Array, serviceId: Compact<u64> | AnyNumber | Uint8Array, percent: Compact<Percent> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, Compact<u64>, Compact<Percent>]>;
       /**
@@ -3201,6 +3203,11 @@ declare module '@polkadot/api-base/types/submittable' {
        * and slashed.
        **/
       unregister: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
+      /**
+       * Adds a new Master Blueprint Service Manager to the list of revisions.
+       * 
+       * The caller needs to be an authorized Master Blueprint Service Manager Update Origin.
+       **/
       updateMasterBlueprintServiceManager: AugmentedSubmittable<(address: H160 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [H160]>;
       /**
        * Update the price targets for the caller for a specific service blueprint.

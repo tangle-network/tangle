@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,10 +32,9 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
-use frame_support::derive_impl;
-use frame_support::genesis_builder_helper::build_state;
-use frame_support::genesis_builder_helper::get_preset;
 use frame_support::{
+	derive_impl,
+	genesis_builder_helper::{build_state, get_preset},
 	traits::{
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
 		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
@@ -1273,6 +1272,9 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxWithdrawRequests = MaxWithdrawRequests;
 	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type MaxDelegations = MaxDelegations;
+	type EvmRunner = crate::tangle_services::PalletEvmRunner;
+	type EvmGasWeightMapping = crate::tangle_services::PalletEVMGasWeightMapping;
+	type EvmAddressMapping = crate::tangle_services::PalletEVMAddressMapping;
 	type WeightInfo = ();
 }
 

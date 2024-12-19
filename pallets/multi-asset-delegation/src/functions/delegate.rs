@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,14 +15,18 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use frame_support::traits::fungibles::Mutate;
-use frame_support::traits::tokens::Preservation;
-use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
-use sp_runtime::traits::{CheckedSub, Zero};
-use sp_runtime::DispatchError;
-use sp_runtime::Percent;
+use frame_support::{
+	ensure,
+	pallet_prelude::DispatchResult,
+	traits::{fungibles::Mutate, tokens::Preservation, Get},
+};
+use sp_runtime::{
+	traits::{CheckedSub, Zero},
+	DispatchError, Percent,
+};
 use sp_std::vec::Vec;
-use tangle_primitives::BlueprintId;
+use tangle_primitives::services::EvmAddressMapping;
+use tangle_primitives::{services::Asset, BlueprintId};
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
@@ -42,7 +46,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_delegate(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 	) -> DispatchResult {
@@ -141,7 +145,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_schedule_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
@@ -272,7 +276,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
@@ -388,14 +392,30 @@ impl<T: Config> Pallet<T> {
 				.checked_sub(&slash_amount)
 				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
 
-			// Transfer slashed amount to the treasury
-			let _ = T::Fungibles::transfer(
-				delegation.asset_id,
-				&Self::pallet_account(),
-				&T::SlashedAmountRecipient::get(),
-				slash_amount,
-				Preservation::Expendable,
-			);
+			match delegation.asset_id {
+				Asset::Custom(asset_id) => {
+					// Transfer slashed amount to the treasury
+					let _ = T::Fungibles::transfer(
+						asset_id,
+						&Self::pallet_account(),
+						&T::SlashedAmountRecipient::get(),
+						slash_amount,
+						Preservation::Expendable,
+					);
+				},
+				Asset::Erc20(address) => {
+					let slashed_amount_recipient_evm =
+						T::EvmAddressMapping::into_address(T::SlashedAmountRecipient::get());
+					let (success, _weight) = Self::erc20_transfer(
+						address,
+						&Self::pallet_evm_account(),
+						slashed_amount_recipient_evm,
+						slash_amount,
+					)
+					.map_err(|_| Error::<T>::ERC20TransferFailed)?;
+					ensure!(success, Error::<T>::ERC20TransferFailed);
+				},
+			}
 
 			// emit event
 			Self::deposit_event(Event::DelegatorSlashed {

@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-call-permit package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-call-permit package used in Tangle Network in terms of GPLv3.

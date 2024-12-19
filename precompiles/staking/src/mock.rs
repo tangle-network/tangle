@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-staking package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-staking package used in Tangle Network in terms of GPLv3.
@@ -21,9 +21,8 @@
 #![allow(clippy::all)]
 use super::*;
 use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
-use frame_support::derive_impl;
 use frame_support::{
-	assert_ok, construct_runtime,
+	assert_ok, construct_runtime, derive_impl,
 	pallet_prelude::Hooks,
 	parameter_types,
 	traits::{ConstU64, OnFinalize, OnInitialize, OneSessionHandler},

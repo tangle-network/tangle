@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,17 +15,61 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
-use frame_support::traits::fungibles::Mutate;
-use frame_support::{ensure, pallet_prelude::DispatchResult};
 use frame_support::{
+	ensure,
+	pallet_prelude::DispatchResult,
 	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
-	traits::{tokens::Preservation, Get},
+	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
+use sp_core::H160;
+use tangle_primitives::services::{Asset, EvmAddressMapping};
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
 	pub fn pallet_account() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
+	}
+
+	/// Returns the EVM account id of the pallet.
+	///
+	/// This function retrieves the account id associated with the pallet by converting
+	/// the pallet evm address to an account id.
+	///
+	/// # Returns
+	/// * `T::AccountId` - The account id of the pallet.
+	pub fn pallet_evm_account() -> H160 {
+		T::EvmAddressMapping::into_address(Self::pallet_account())
+	}
+
+	pub fn handle_transfer_to_pallet(
+		sender: &T::AccountId,
+		asset_id: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
+		evm_sender: Option<H160>,
+	) -> DispatchResult {
+		match asset_id {
+			Asset::Custom(asset_id) => {
+				T::Fungibles::transfer(
+					asset_id,
+					sender,
+					&Self::pallet_account(),
+					amount,
+					Preservation::Expendable,
+				)?;
+			},
+			Asset::Erc20(asset_address) => {
+				let sender = evm_sender.ok_or(Error::<T>::ERC20TransferFailed)?;
+				let (success, _weight) = Self::erc20_transfer(
+					asset_address,
+					&sender,
+					Self::pallet_evm_account(),
+					amount,
+				)
+				.map_err(|_| Error::<T>::ERC20TransferFailed)?;
+				ensure!(success, Error::<T>::ERC20TransferFailed);
+			},
+		}
+		Ok(())
 	}
 
 	/// Processes the deposit of assets into the pallet.
@@ -42,19 +86,14 @@ impl<T: Config> Pallet<T> {
 	/// the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
+		evm_address: Option<H160>,
 	) -> DispatchResult {
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
 		// Transfer the amount to the pallet account
-		T::Fungibles::transfer(
-			asset_id,
-			&who,
-			&Self::pallet_account(),
-			amount,
-			Preservation::Expendable,
-		)?;
+		Self::handle_transfer_to_pallet(&who, asset_id, amount, evm_address)?;
 
 		// Update storage
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
@@ -87,7 +126,7 @@ impl<T: Config> Pallet<T> {
 	/// asset is not supported.
 	pub fn process_schedule_withdraw(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
@@ -126,7 +165,10 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the user is not a delegator, if there are no withdraw requests, or if
 	/// the withdraw request is not ready.
-	pub fn process_execute_withdraw(who: T::AccountId) -> DispatchResult {
+	pub fn process_execute_withdraw(
+		who: T::AccountId,
+		evm_address: Option<H160>,
+	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
@@ -137,23 +179,48 @@ impl<T: Config> Pallet<T> {
 			let delay = T::LeaveDelegatorsDelay::get();
 
 			// Process all ready withdraw requests
-			metadata.withdraw_requests.retain(|request| {
+			let mut i = 0;
+			while i < metadata.withdraw_requests.len() {
+				let request = &metadata.withdraw_requests[i];
 				if current_round >= delay + request.requested_round {
-					// Transfer the amount back to the delegator
-					T::Fungibles::transfer(
-						request.asset_id,
-						&Self::pallet_account(),
-						&who,
-						request.amount,
-						Preservation::Expendable,
-					)
-					.expect("Transfer should not fail");
+					let transfer_success = match request.asset_id {
+						Asset::Custom(asset_id) => T::Fungibles::transfer(
+							asset_id,
+							&Self::pallet_account(),
+							&who,
+							request.amount,
+							Preservation::Expendable,
+						)
+						.is_ok(),
+						Asset::Erc20(asset_address) => {
+							if let Some(evm_addr) = evm_address {
+								if let Ok((success, _weight)) = Self::erc20_transfer(
+									asset_address,
+									&Self::pallet_evm_account(),
+									evm_addr,
+									request.amount,
+								) {
+									success
+								} else {
+									false
+								}
+							} else {
+								false
+							}
+						},
+					};
 
-					false // Remove this request
+					if transfer_success {
+						// Remove the completed request
+						metadata.withdraw_requests.remove(i);
+					} else {
+						// Only increment if we didn't remove the request
+						i += 1;
+					}
 				} else {
-					true // Keep this request
+					i += 1;
 				}
-			});
+			}
 
 			Ok(())
 		})
@@ -172,7 +239,7 @@ impl<T: Config> Pallet<T> {
 	/// Returns an error if the user is not a delegator or if there is no matching withdraw request.
 	pub fn process_cancel_withdraw(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {

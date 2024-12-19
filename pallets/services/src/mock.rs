@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,10 +22,9 @@ use frame_election_provider_support::{
 	onchain, SequentialPhragmen,
 };
 use frame_support::{
-	construct_runtime, parameter_types,
-	traits::{ConstU128, ConstU32, OneSessionHandler},
+	construct_runtime, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 };
-use frame_support::{derive_impl, traits::AsEnsureOriginWithArg};
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
@@ -38,6 +37,9 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
+use tangle_primitives::services::Asset;
+use tangle_primitives::services::EvmRunner;
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -232,11 +234,7 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	}
 
 	fn into_address(account_id: AccountId) -> H160 {
-		account_id.using_encoded(|b| {
-			let mut addr = [0u8; 20];
-			addr.copy_from_slice(&b[0..20]);
-			H160(addr)
-		})
+		H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 	}
 }
 
@@ -295,14 +293,14 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Self::AssetId,
+		_asset_id: &Asset<Self::AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
 		Default::default()
 	}
 
@@ -473,7 +471,16 @@ pub fn mock_pub_key(id: u8) -> AccountId {
 }
 
 pub fn mock_address(id: u8) -> H160 {
-	H160([id; 20])
+	H160::from_slice(&[id; 20])
+}
+
+pub fn account_id_to_address(account_id: AccountId) -> H160 {
+	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
+}
+
+pub fn address_to_account_id(address: H160) -> AccountId {
+	use pallet_evm::AddressMapping;
+	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
 }
 
 pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
@@ -560,6 +567,18 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	for i in 1..=authorities.len() {
 		evm_accounts.insert(
 			mock_address(i as u8),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
+	}
+
+	for a in &authorities {
+		evm_accounts.insert(
+			account_id_to_address(a.clone()),
 			fp_evm::GenesisAccount {
 				code: vec![],
 				storage: Default::default(),
