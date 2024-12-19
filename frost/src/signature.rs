@@ -54,7 +54,8 @@ where
 
 		let R_serialization = &R_bytes.try_into().map_err(|_| Error::MalformedSignature)?;
 
-		// We extract the exact length of bytes we expect, not just the remaining bytes with `bytes[R_bytes_len..]`
+		// We extract the exact length of bytes we expect, not just the remaining bytes with
+		// `bytes[R_bytes_len..]`
 		z_bytes[..].copy_from_slice(
 			bytes
 				.get(R_bytes_len..R_bytes_len + z_bytes_len)

@@ -22,7 +22,6 @@ use crate::{Ciphersuite, Element, Field, Group, Scalar};
 ///
 /// This function is similar to `div_ceil` that is [available on
 /// Nightly](https://github.com/rust-lang/rust/issues/88581).
-///
 // TODO: remove this function and use `div_ceil()` instead when `int_roundings`
 // is stabilized.
 const fn div_ceil(lhs: usize, rhs: usize) -> usize {
@@ -117,7 +116,8 @@ where
 				// If the window value is even, preserve the carry and continue.
 				// Why is the carry preserved?
 				// If carry == 0 and window & 1 == 0, then the next carry should be 0
-				// If carry == 1 and window & 1 == 0, then bit_buf & 1 == 1 so the next carry should be 1
+				// If carry == 1 and window & 1 == 0, then bit_buf & 1 == 1 so the next carry should
+				// be 1
 				pos += 1;
 				continue;
 			}

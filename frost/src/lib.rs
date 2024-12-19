@@ -34,8 +34,7 @@ mod scalar_mul;
 pub mod serialization;
 mod signature;
 mod signing_key;
-#[cfg(any(test, feature = "test-impl"))]
-pub mod tests;
+
 mod traits;
 mod verifying_key;
 
@@ -560,8 +559,8 @@ where
 	let (signing_package, signature_shares, pubkeys) =
 		<C>::pre_aggregate(signing_package, signature_shares, pubkeys)?;
 
-	// Encodes the signing commitment list produced in round one as part of generating [`BindingFactor`], the
-	// binding factor.
+	// Encodes the signing commitment list produced in round one as part of generating
+	// [`BindingFactor`], the binding factor.
 	let binding_factor_list: BindingFactorList<C> =
 		compute_binding_factor_list(&signing_package, &pubkeys.verifying_key, &[])?;
 	// Compute the group commitment from signing commitments produced in round one.
@@ -584,8 +583,8 @@ where
 	// Verify the aggregate signature
 	let verification_result = pubkeys.verifying_key.verify(signing_package.message(), &signature);
 
-	// Only if the verification of the aggregate signature failed; verify each share to find the cheater.
-	// This approach is more efficient since we don't need to verify all shares
+	// Only if the verification of the aggregate signature failed; verify each share to find the
+	// cheater. This approach is more efficient since we don't need to verify all shares
 	// if the aggregate signature is valid (which should be the common case).
 	#[cfg(feature = "cheater-detection")]
 	if verification_result.is_err() {
@@ -673,8 +672,8 @@ pub fn verify_signature_share<C: Ciphersuite>(
 		.get(&identifier)
 		.expect("pre_aggregate() must keep the identifiers");
 
-	// Encodes the signing commitment list produced in round one as part of generating [`BindingFactor`], the
-	// binding factor.
+	// Encodes the signing commitment list produced in round one as part of generating
+	// [`BindingFactor`], the binding factor.
 	let binding_factor_list: BindingFactorList<C> =
 		compute_binding_factor_list(&signing_package, verifying_key, &[])?;
 

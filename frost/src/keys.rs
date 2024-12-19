@@ -336,8 +336,8 @@ where
 /// `n` is the total number of shares and `t` is the threshold required to reconstruct the secret;
 /// in this case we use Shamir's secret sharing.
 ///
-/// As a solution to the secret polynomial _f_ (a 'point'), the `identifier` is the x-coordinate, and the
-/// `value` is the y-coordinate.
+/// As a solution to the secret polynomial _f_ (a 'point'), the `identifier` is the x-coordinate,
+/// and the `value` is the y-coordinate.
 ///
 /// To derive a FROST keypair, the receiver of the [`SecretShare`] *must* call
 /// .into(), which under the hood also performs validation.
@@ -393,15 +393,13 @@ where
 		if !(f_result == result) {
 			// The culprit needs to be identified by the caller if needed,
 			// because this function is called in two different contexts:
-			// - after trusted dealer key generation, by the participant who
-			//   receives the SecretShare. In that case it does not make sense
-			//   to identify themselves as the culprit, since the issue was with
-			//   the Coordinator or in the communication.
-			// - during DKG, where a "fake" SecretShare is built just to reuse
-			//   the verification logic and it does make sense to identify the
-			//   culprit. Note that in this case, self.identifier is the caller's
-			//   identifier and not the culprit's, so we couldn't identify
-			//   the culprit inside this function anyway.
+			// - after trusted dealer key generation, by the participant who receives the
+			//   SecretShare. In that case it does not make sense to identify themselves as the
+			//   culprit, since the issue was with the Coordinator or in the communication.
+			// - during DKG, where a "fake" SecretShare is built just to reuse the verification
+			//   logic and it does make sense to identify the culprit. Note that in this case,
+			//   self.identifier is the caller's identifier and not the culprit's, so we couldn't
+			//   identify the culprit inside this function anyway.
 			return Err(Error::InvalidSecretShare { culprit: None });
 		}
 

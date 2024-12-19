@@ -314,8 +314,8 @@ pub mod keys {
 	/// Contains the commitments to the coefficients for our secret polynomial _f_,
 	/// used to generate participants' key shares.
 	///
-	/// [`VerifiableSecretSharingCommitment`] contains a set of commitments to the coefficients (which
-	/// themselves are scalars) for a secret polynomial f, where f is used to
+	/// [`VerifiableSecretSharingCommitment`] contains a set of commitments to the coefficients
+	/// (which themselves are scalars) for a secret polynomial f, where f is used to
 	/// generate each ith participant's key share f(i). Participants use this set of
 	/// commitments to perform verifiable secret sharing.
 	///
@@ -368,8 +368,8 @@ pub type SigningPackage = frost::SigningPackage<P>;
 pub mod round2 {
 	use super::*;
 
-	/// A FROST(P-384, SHA-384) participant's signature share, which the Coordinator will aggregate with all other signer's
-	/// shares into the joint signature.
+	/// A FROST(P-384, SHA-384) participant's signature share, which the Coordinator will aggregate
+	/// with all other signer's shares into the joint signature.
 	pub type SignatureShare = frost::round2::SignatureShare<P>;
 
 	/// Performed once by each participant selected for the signing operation.

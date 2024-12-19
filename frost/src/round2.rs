@@ -3,9 +3,7 @@
 use core::fmt::{self, Debug};
 
 use crate as frost;
-use crate::{
-	Challenge, Ciphersuite, Error, Field, Group, {round1, *},
-};
+use crate::{round1, Challenge, Ciphersuite, Error, Field, Group, *};
 
 /// A participant's signature share, which the coordinator will aggregate with all other signer's
 /// shares into the joint signature.
@@ -138,8 +136,8 @@ pub fn sign<C: Ciphersuite>(
 	let (signing_package, signer_nonces, key_package) =
 		<C>::pre_sign(signing_package, signer_nonces, key_package)?;
 
-	// Encodes the signing commitment list produced in round one as part of generating [`BindingFactor`], the
-	// binding factor.
+	// Encodes the signing commitment list produced in round one as part of generating
+	// [`BindingFactor`], the binding factor.
 	let binding_factor_list: BindingFactorList<C> =
 		compute_binding_factor_list(&signing_package, &key_package.verifying_key, &[])?;
 	let binding_factor: frost::BindingFactor<C> = binding_factor_list

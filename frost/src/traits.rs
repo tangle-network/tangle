@@ -205,7 +205,8 @@ pub trait Ciphersuite: Copy + Clone + PartialEq + Debug + 'static {
 	/// It can return None if DKG is not supported by the Ciphersuite. This is
 	/// the default implementation.
 	///
-	/// Maps arbitrary inputs to non-zero `Self::Scalar` elements of the prime-order group scalar field.
+	/// Maps arbitrary inputs to non-zero `Self::Scalar` elements of the prime-order group scalar
+	/// field.
 	fn HDKG(_m: &[u8]) -> Option<<<Self::Group as Group>::Field as Field>::Scalar> {
 		None
 	}
@@ -216,7 +217,8 @@ pub trait Ciphersuite: Copy + Clone + PartialEq + Debug + 'static {
 	/// way of creating identifiers. Therefore it can return None if this is not supported by the
 	/// Ciphersuite. This is the default implementation.
 	///
-	/// Maps arbitrary inputs to non-zero `Self::Scalar` elements of the prime-order group scalar field.
+	/// Maps arbitrary inputs to non-zero `Self::Scalar` elements of the prime-order group scalar
+	/// field.
 	fn HID(_m: &[u8]) -> Option<<<Self::Group as Group>::Field as Field>::Scalar> {
 		None
 	}

@@ -1,15 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(non_snake_case)]
 
-use sp_std::vec;
-use sp_std::{borrow::Cow, collections::btree_map::BTreeMap, vec::Vec};
+use sp_std::{borrow::Cow, collections::btree_map::BTreeMap, vec, vec::Vec};
 
-use k256::elliptic_curve::ops::Reduce;
 use k256::{
 	elliptic_curve::{
 		bigint::U256,
 		group::prime::PrimeCurveAffine,
 		hash2curve::{hash_to_field, ExpandMsgXmd},
+		ops::Reduce,
 		point::AffineCoordinates,
 		sec1::{FromEncodedPoint, ToEncodedPoint},
 		Field as FFField, PrimeField,
@@ -23,8 +22,7 @@ use tg_frost_core as frost_core;
 
 use frost_core::{self as frost, random_nonzero};
 
-use keys::EvenY;
-use keys::Tweak;
+use keys::{EvenY, Tweak};
 
 // Re-exports in our public API
 pub use frost_core::{
@@ -523,8 +521,8 @@ pub mod keys {
 	///
 	/// # Security
 	///
-	/// To derive a FROST(secp256k1, SHA-256) keypair, the receiver of the [`SecretShare`] *must* call
-	/// .into(), which under the hood also performs validation.
+	/// To derive a FROST(secp256k1, SHA-256) keypair, the receiver of the [`SecretShare`] *must*
+	/// call .into(), which under the hood also performs validation.
 	pub type SecretShare = frost::keys::SecretShare<S>;
 
 	/// A secret scalar value representing a signer's share of the group secret.
@@ -533,8 +531,8 @@ pub mod keys {
 	/// A public group element that represents a single signer's public verification share.
 	pub type VerifyingShare = frost::keys::VerifyingShare<S>;
 
-	/// A FROST(secp256k1, SHA-256) keypair, which can be generated either by a trusted dealer or using
-	/// a DKG.
+	/// A FROST(secp256k1, SHA-256) keypair, which can be generated either by a trusted dealer or
+	/// using a DKG.
 	///
 	/// When using a central dealer, [`SecretShare`]s are distributed to
 	/// participants, who then perform verification, before deriving
@@ -550,8 +548,8 @@ pub mod keys {
 	/// Contains the commitments to the coefficients for our secret polynomial _f_,
 	/// used to generate participants' key shares.
 	///
-	/// [`VerifiableSecretSharingCommitment`] contains a set of commitments to the coefficients (which
-	/// themselves are scalars) for a secret polynomial f, where f is used to
+	/// [`VerifiableSecretSharingCommitment`] contains a set of commitments to the coefficients
+	/// (which themselves are scalars) for a secret polynomial f, where f is used to
 	/// generate each ith participant's key share f(i). Participants use this set of
 	/// commitments to perform verifiable secret sharing.
 	///
@@ -793,8 +791,8 @@ pub mod round2 {
 
 	use super::*;
 
-	/// A FROST(secp256k1, SHA-256) participant's signature share, which the Coordinator will aggregate with all other signer's
-	/// shares into the joint signature.
+	/// A FROST(secp256k1, SHA-256) participant's signature share, which the Coordinator will
+	/// aggregate with all other signer's shares into the joint signature.
 	pub type SignatureShare = frost::round2::SignatureShare<S>;
 
 	/// Performed once by each participant selected for the signing operation.
