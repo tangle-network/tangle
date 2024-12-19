@@ -26,7 +26,7 @@ impl frame_system::Config for Test {
 }
 
 thread_local! {
-	static TIME: RefCell<u32> = RefCell::new(0);
+	static TIME: RefCell<u32> = const { RefCell::new(0) };
 	static MEMBERS: RefCell<Vec<AccountId>> = RefCell::new(vec![1, 2, 3]);
 }
 

@@ -7,7 +7,7 @@ description = "A Precompile to make pallet-multi-asset-delegation calls encoding
 
 [dependencies]
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate
@@ -33,7 +33,7 @@ serde = { workspace = true }
 sha3 = { workspace = true }
 sp-staking = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate

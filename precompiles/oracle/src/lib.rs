@@ -16,19 +16,19 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use core::str::FromStr;
-use fp_evm::{PrecompileHandle, PrecompileOutput};
-use frame_support::{
-	dispatch::{Dispatchable, GetDispatchInfo, PostDispatchInfo},
-	traits::Get,
+use fp_evm::{
+    ExitError, ExitSucceed, LinearCostPrecompile, PrecompileFailure, PrecompileHandle,
+    PrecompileOutput,
 };
+use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_evm::AddressMapping;
 use pallet_oracle::TimestampedValue;
 use precompile_utils::{
-	prelude::*,
-	solidity::{codec::Writer, modifier::FunctionModifier, revert::revert},
+    prelude::*,
+    solidity::{codec::Writer, revert::revert},
 };
 use sp_core::U256;
+use sp_runtime::traits::{Dispatchable, UniqueSaturatedInto};
 use sp_std::{marker::PhantomData, prelude::*};
 
 #[cfg(test)]
@@ -36,11 +36,13 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-#[precompile_utils::generate_function_selector]
-#[derive(Debug, PartialEq)]
-pub enum Action {
-	GetValue = "getValue(uint256)",
-	FeedValues = "feedValues(uint256[],uint256[])",
+/// The selector values for each function in the precompile.
+/// These are calculated using the first 4 bytes of the Keccak hash of the function signature.
+pub mod selectors {
+    /// Selector for the getValue(uint256) function
+    pub const GET_VALUE: u32 = 0x20965255;
+    /// Selector for the feedValues(uint256[],uint256[]) function
+    pub const FEED_VALUES: u32 = 0x983b2d56;
 }
 
 /// A precompile to wrap the functionality from pallet_oracle.
@@ -48,78 +50,99 @@ pub struct OraclePrecompile<Runtime>(PhantomData<Runtime>);
 
 impl<Runtime> OraclePrecompile<Runtime>
 where
-	Runtime: pallet_oracle::Config + pallet_evm::Config,
-	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
-	Runtime::RuntimeCall: From<pallet_oracle::Call<Runtime>>,
+    Runtime: pallet_oracle::Config<OracleKey = u32, OracleValue = u64> + pallet_evm::Config,
+    Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+    Runtime::RuntimeCall: From<pallet_oracle::Call<Runtime>>,
 {
-	pub fn new() -> Self {
-		Self(PhantomData)
-	}
+    pub fn new() -> Self {
+        Self(PhantomData)
+    }
 
-	fn get_value(handle: &mut impl PrecompileHandle, key: U256) -> EvmResult<PrecompileOutput> {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+    fn get_value_impl(input: &[u8]) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+        let key = U256::from_big_endian(&input[4..]);
+        let key: u32 = key.low_u32();
+        let value = <pallet_oracle::Pallet<Runtime>>::get(&key);
 
-		let key: u32 = key.try_into().map_err(|_| revert("Invalid key"))?;
+        let mut writer = Writer::default();
 
-		let value = <pallet_oracle::Pallet<Runtime>>::get(&key);
+        if let Some(TimestampedValue { value, timestamp }) = value {
+            let mut writer = writer.write(U256::from(value));
+            let timestamp_u64: u64 = UniqueSaturatedInto::<u64>::unique_saturated_into(timestamp);
+            writer = writer.write(U256::from(timestamp_u64));
+            Ok((ExitSucceed::Returned, writer.build()))
+        } else {
+            let mut writer = writer.write(U256::zero());
+            writer = writer.write(U256::zero());
+            Ok((ExitSucceed::Returned, writer.build()))
+        }
+    }
 
-		let mut writer = Writer::new_with_selector(Action::GetValue);
+    fn feed_values_impl(input: &[u8]) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+        let mut keys = Vec::new();
+        let mut values = Vec::new();
 
-		if let Some(TimestampedValue { value, timestamp }) = value {
-			writer.write(U256::from(value));
-			writer.write(U256::from(timestamp));
-		} else {
-			writer.write(U256::zero());
-			writer.write(U256::zero());
-		}
+        // Read the length of the arrays
+        let keys_len = U256::from_big_endian(&input[4..36]).as_usize();
+        let mut pos = 36;
 
-		Ok(PrecompileOutput { exit_status: ExitSucceed::Returned, output: writer.build() })
-	}
+        // Read keys
+        for _ in 0..keys_len {
+            keys.push(U256::from_big_endian(&input[pos..pos + 32]));
+            pos += 32;
+        }
 
-	fn feed_values(
-		handle: &mut impl PrecompileHandle,
-		keys: Vec<U256>,
-		values: Vec<U256>,
-	) -> EvmResult<PrecompileOutput> {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+        // Read values
+        let values_len = U256::from_big_endian(&input[pos..pos + 32]).as_usize();
+        pos += 32;
 
-		let caller = Runtime::AddressMapping::into_account_id(handle.context().caller);
+        for _ in 0..values_len {
+            values.push(U256::from_big_endian(&input[pos..pos + 32]));
+            pos += 32;
+        }
 
-		let mut feed_values = Vec::new();
-		for (key, value) in keys.iter().zip(values.iter()) {
-			let key: u32 = key.try_into().map_err(|_| revert("Invalid key"))?;
-			let value: u64 = value.try_into().map_err(|_| revert("Invalid value"))?;
-			feed_values.push((key, value));
-		}
+        let mut feed_values = Vec::new();
+        for (key, value) in keys.iter().zip(values.iter()) {
+            let key: u32 = key.low_u32();
+            let value: u64 = value.low_u64();
+            feed_values.push((key, value));
+        }
 
-		let bounded_feed_values = feed_values.try_into().map_err(|_| revert("Too many values"))?;
+        let bounded_feed_values = feed_values.try_into().map_err(|_| PrecompileFailure::Error {
+            exit_status: ExitError::Other("Too many values".into()),
+        })?;
 
-		let call = pallet_oracle::Call::<Runtime>::feed_values { feed_values: bounded_feed_values };
+        let call = pallet_oracle::Call::<Runtime>::feed_values { values: bounded_feed_values };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(caller).into(), call)?;
-
-		Ok(PrecompileOutput { exit_status: ExitSucceed::Returned, output: vec![] })
-	}
+        Ok((ExitSucceed::Returned, vec![]))
+    }
 }
 
-impl<Runtime> Precompile for OraclePrecompile<Runtime>
+impl<Runtime> LinearCostPrecompile for OraclePrecompile<Runtime>
 where
-	Runtime: pallet_oracle::Config + pallet_evm::Config,
-	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
-	Runtime::RuntimeCall: From<pallet_oracle::Call<Runtime>>,
+    Runtime: pallet_oracle::Config<OracleKey = u32, OracleValue = u64> + pallet_evm::Config,
+    Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+    Runtime::RuntimeCall: From<pallet_oracle::Call<Runtime>>,
 {
-	fn execute(handle: &mut impl PrecompileHandle) -> EvmResult<PrecompileOutput> {
-		let selector = handle.read_selector()?;
+    const BASE: u64 = 20;
+    const WORD: u64 = 10;
 
-		match selector {
-			Action::GetValue => Self::get_value(handle, handle.read_u256()?),
-			Action::FeedValues => {
-				let keys = handle.read_u256_array()?;
-				let values = handle.read_u256_array()?;
-				Self::feed_values(handle, keys, values)
-			},
-		}
-	}
+    fn execute(
+        input: &[u8],
+        _target_gas: u64,
+    ) -> Result<(ExitSucceed, Vec<u8>), PrecompileFailure> {
+        let selector = input.get(0..4).ok_or_else(|| {
+            PrecompileFailure::Error { exit_status: ExitError::Other("Invalid selector".into()) }
+        })?;
+        let selector = u32::from_be_bytes(selector.try_into().unwrap());
+
+        match selector {
+            selectors::GET_VALUE => Self::get_value_impl(input),
+            selectors::FEED_VALUES => Self::feed_values_impl(input),
+            _ => Err(PrecompileFailure::Error {
+                exit_status: ExitError::Other("Unknown selector".into()),
+            }),
+        }
+    }
 }

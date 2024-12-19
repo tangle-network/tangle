@@ -291,7 +291,7 @@ fn should_clear_data_for_removed_members() {
 
 		ModuleOracle::change_members_sorted(&[4], &[1], &[2, 3, 4]);
 
-		assert_eq!(ModuleOracle::raw_values(&1, 50), None);
+		assert_eq!(ModuleOracle::raw_values(1, 50), None);
 	});
 }
 

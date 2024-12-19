@@ -96,10 +96,10 @@ mod tests {
 	use sp_std::cell::RefCell;
 
 	thread_local! {
-		static MOCK_PRICE_1: RefCell<Option<u8>> = RefCell::new(None);
-		static MOCK_PRICE_2: RefCell<Option<u8>> = RefCell::new(None);
-		static MOCK_PRICE_3: RefCell<Option<u8>> = RefCell::new(None);
-		static MOCK_PRICE_4: RefCell<Option<u8>> = RefCell::new(None);
+		static MOCK_PRICE_1: RefCell<Option<u8>> = const { RefCell::new(None) };
+		static MOCK_PRICE_2: RefCell<Option<u8>> = const { RefCell::new(None) };
+		static MOCK_PRICE_3: RefCell<Option<u8>> = const { RefCell::new(None) };
+		static MOCK_PRICE_4: RefCell<Option<u8>> = const { RefCell::new(None) };
 	}
 
 	macro_rules! mock_data_provider {

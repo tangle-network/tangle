@@ -12,7 +12,7 @@ hex-literal = { workspace = true }
 jsonrpsee = { workspace = true, features = ["macros", "server"] }
 tokio = { workspace = true, features = ["sync", "time"] }
 
-# Moonbeam
+
 client-evm-tracing = { workspace = true }
 rpc-core-debug = { workspace = true }
 rpc-core-types = { workspace = true }

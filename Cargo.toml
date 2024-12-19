@@ -29,7 +29,6 @@ members = [
     "precompiles/pallet-democracy",
     "precompiles/batch",
     "precompiles/call-permit",
-    "precompiles/oracle",
     "precompiles/proxy",
     "precompiles/preimage",
     "precompiles/balances-erc20",
