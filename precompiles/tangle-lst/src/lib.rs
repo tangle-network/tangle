@@ -351,7 +351,7 @@ where
 		Ok(addr)
 	}
 
-	/// Helper for converting from u8 to RewardDestination
+	/// Helper for converting from H256 to AccountId
 	fn convert_to_account_id(payee: H256) -> EvmResult<Runtime::AccountId> {
 		let payee = match payee {
 			H256(

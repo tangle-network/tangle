@@ -7,7 +7,7 @@ license = "GPL-3.0-only"
 repository = { workspace = true }
 
 [dependencies]
-# Moonbeam
+
 evm-tracing-events = { workspace = true }
 
 # Substrate

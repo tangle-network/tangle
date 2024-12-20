@@ -1,7 +1,7 @@
 [package]
-name = "pallet-evm-precompileset-assets-erc20"
+name = "pallet-evm-precompile-oracle"
 authors = { workspace = true }
-description = "A Precompile to expose Assets pallet through an ERC20-compliant interface."
+description = "A Precompile to expose Oracle pallet."
 edition = "2021"
 version = "0.1.0"
 
@@ -16,6 +16,7 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
+pallet-oracle = { workspace = true }
 pallet-timestamp = { workspace = true }
 parity-scale-codec = { workspace = true, features = [ "max-encoded-len" ] }
 scale-info = { workspace = true, features = [ "derive" ] }
@@ -23,6 +24,7 @@ sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+tangle-primitives = { workspace = true }
 
 # Frontier
 fp-evm = { workspace = true }
@@ -34,7 +36,6 @@ hex-literal = { workspace = true }
 libsecp256k1 = { workspace = true }
 serde = { workspace = true }
 sha3 = { workspace = true }
-
 
 precompile-utils = { workspace = true, features = [ "std", "testing" ] }
 
@@ -52,6 +53,7 @@ std = [
 	"pallet-assets/std",
 	"pallet-balances/std",
 	"pallet-evm/std",
+	"pallet-oracle/std",
 	"pallet-timestamp/std",
 	"parity-scale-codec/std",
 	"precompile-utils/std",
@@ -59,4 +61,5 @@ std = [
 	"sp-io/std",
 	"sp-runtime/std",
 	"sp-std/std",
+	"tangle-primitives/std",
 ]
