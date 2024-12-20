@@ -57,11 +57,11 @@
 
 pub use pallet::*;
 
-#[cfg(test)]
-mod mock;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod mock;
 
-#[cfg(test)]
-mod mock_evm;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod mock_evm;
 
 #[cfg(test)]
 mod tests;

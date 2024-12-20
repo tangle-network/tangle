@@ -35,7 +35,12 @@
             pkgs.openssl
             # Needed for rocksdb-sys
             pkgs.clang
+            pkgs.gcc
+            pkgs.libbfd
+            pkgs.libunwind
+            pkgs.libblocksruntime
             pkgs.libclang.lib
+            pkgs.libgcc
             pkgs.rustPlatform.bindgenHook
             # Mold Linker for faster builds (only on Linux)
             (lib.optionals pkgs.stdenv.isLinux pkgs.mold)
@@ -44,6 +49,8 @@
             (lib.optionals pkgs.stdenv.isDarwin
               pkgs.darwin.apple_sdk.frameworks.SystemConfiguration)
           ];
+          # Fortify causes build failures: 'str*' defined both normally and as 'alias' attribute
+          hardeningDisable = [ "fortify" ];
           buildInputs = [
             # Nodejs for test suite
             pkgs.nodePackages.typescript-language-server
@@ -53,8 +60,12 @@
             toolchain
             pkgs.foundry-bin
           ];
-          packages =
-            [ pkgs.taplo pkgs.harper pkgs.cargo-nextest pkgs.cargo-tarpaulin ];
+          packages = [
+            pkgs.taplo
+            pkgs.harper
+            pkgs.cargo-nextest
+            pkgs.cargo-tarpaulin
+          ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
           # Needed for running DKG Node.
@@ -62,7 +73,12 @@
             pkgs.gmp
             pkgs.openssl
             pkgs.libclang
+            pkgs.libgcc
             pkgs.stdenv.cc.cc
+            pkgs.libbfd
+            pkgs.libunwind
+            pkgs.libblocksruntime
+            pkgs.libopcodes
           ];
         };
       });
