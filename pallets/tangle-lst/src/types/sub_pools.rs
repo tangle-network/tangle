@@ -107,7 +107,7 @@ impl<T: Config> RewardPool<T> {
 
 		// Split the `current_payout_balance` into claimable rewards and claimable commission
 		// according to the current commission rate.
-		let new_pending_commission = commission * current_payout_balance;
+		let new_pending_commission = commission.mul_floor(current_payout_balance);
 		let new_pending_rewards = current_payout_balance.saturating_sub(new_pending_commission);
 
 		// * accuracy notes regarding the multiplication in `checked_from_rational`:

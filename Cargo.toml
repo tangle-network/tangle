@@ -10,41 +10,39 @@ exclude = ["examples"]
 
 [workspace]
 members = [
- "primitives",
- "primitives/crypto",
- "primitives/rpc/*",
- "primitives/ext",
- "client/evm-tracing",
- "client/rpc/*",
- "client/rpc-core/*",
- "node",
- "runtime/testnet",
- "runtime/mainnet",
- "pallets/*",
- "pallets/multi-asset-delegation/fuzzer",
- "pallets/services/rpc",
- "pallets/services/rpc/runtime-api",
- "pallets/tangle-lst/benchmarking",
- "frost",
- "frost/frost-*",
- "precompiles/pallet-democracy",
- "precompiles/batch",
- "precompiles/call-permit",
- "precompiles/proxy",
- "precompiles/preimage",
- "precompiles/balances-erc20",
- "precompiles/assets-erc20",
- "precompiles/verify-ecdsa-secp256k1-signature",
- "precompiles/verify-ecdsa-secp256r1-signature",
- "precompiles/verify-ecdsa-stark-signature",
- "precompiles/verify-schnorr-signatures",
- "precompiles/verify-bls381-signature",
- "precompiles/multi-asset-delegation",
- "precompiles/services",
- "precompiles/tangle-lst",
- "precompiles/assets",
- "tangle-subxt",
- "evm-tracer",
+    "primitives",
+    "primitives/crypto",
+    "primitives/rpc/*",
+    "primitives/ext",
+    "client/evm-tracing",
+    "client/rpc/*",
+    "client/rpc-core/*",
+    "node",
+    "runtime/testnet",
+    "runtime/mainnet",
+    "pallets/*",
+    "pallets/services/rpc",
+    "pallets/services/rpc/runtime-api",
+    "pallets/tangle-lst/benchmarking",
+    "pallets/multi-asset-delegation/fuzzer",
+    "precompiles/pallet-democracy",
+    "precompiles/batch",
+    "precompiles/call-permit",
+    "precompiles/proxy",
+    "precompiles/preimage",
+    "precompiles/balances-erc20",
+    "precompiles/assets-erc20",
+    "precompiles/verify-ecdsa-secp256k1-signature",
+    "precompiles/verify-ecdsa-secp256r1-signature",
+    "precompiles/verify-ecdsa-stark-signature",
+    "precompiles/verify-schnorr-signatures",
+    "precompiles/verify-bls381-signature",
+    "precompiles/multi-asset-delegation",
+    "precompiles/services",
+    "precompiles/tangle-lst",
+    "precompiles/assets",
+    "tangle-subxt",
+    "evm-tracer",
 ]
 resolver = "2"
 
@@ -125,20 +123,23 @@ pallet-services-rpc-runtime-api = { path = "pallets/services/rpc/runtime-api", d
 pallet-services-rpc = { path = "pallets/services/rpc" }
 pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", default-features = false }
 pallet-tangle-lst-benchmarking = { path = "pallets/tangle-lst/benchmarking", default-features = false }
+pallet-oracle = { path = "pallets/oracle", default-features = false }
 
 k256 = { version = "0.13.3", default-features = false }
 p256 = { version = "0.13.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.7.1", default-features = false, features = ["signature-display", "alloc"] }
 
-frost-core = { path = "frost", default-features = false }
-frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
-frost-ed448 = { path = "frost/frost-ed448", default-features = false }
-frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = false }
-frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
-frost-p256 = { path = "frost/frost-p256", default-features = false }
+frost-core = { version = "2.0.0", default-features = false }
+frost-ed25519 = { version = "2.0.0", default-features = false }
+frost-ristretto255 = { version = "2.0.0", default-features = false }
+frost-secp256k1 = { version = "2.0.0", default-features = false }
+frost-p256 = { version = "2.0.0", default-features = false }
+
+tg-frost-core = { path = "frost", default-features = false }
 frost-p384 = { path = "frost/frost-p384", default-features = false }
-frost-taproot = { path = "frost/frost-taproot", default-features = false }
+frost-ed448 = { path = "frost/frost-ed448", default-features = false }
+frost-secp256k1-tr = { path = "frost/frost-secp256k1-tr", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
@@ -372,16 +373,6 @@ polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-
 subxt = { version = "0.37.0", default-features = false }
 subxt-core = { version = "0.37.0", default-features = false }
 subxt-signer = { version = "0.37.0", default-features = false }
-
-# Sygma
-# sygma-access-segregator = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-basic-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-traits = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-fee-handler-router = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-percentage-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
 
 [profile.release]
 panic = "unwind"

@@ -7,7 +7,7 @@ description = "A Precompile to batch multiple calls."
 
 [dependencies]
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate
