@@ -72,14 +72,18 @@ fn get_value_works() {
 }
 
 #[test]
-fn get_value_fails_for_non_existent_key() {
+fn get_value_returns_zero_for_non_existent_key() {
     ExtBuilder::default().build().execute_with(|| {
         let mut tester = PrecompileTester::new(precompiles(), H160::repeat_byte(0x01), PRECOMPILE_ADDRESS);
 
         // Try to read a non-existent key
-        tester
+        let (value, timestamp): (U256, U256) = tester
             .call("getValue(uint256)", U256::from(999u32))
             .expect_no_logs()
-            .execute_reverts(|output| output == b"No value found for key");
+            .execute_returns();
+
+        // Should return zero values for both value and timestamp
+        assert_eq!(value, U256::zero());
+        assert_eq!(timestamp, U256::zero());
     });
 }

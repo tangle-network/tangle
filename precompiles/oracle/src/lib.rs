@@ -52,7 +52,7 @@ where
         keys: Vec<U256>,
         values: Vec<U256>,
     ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost() * keys.len())?;
 
         let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
@@ -83,9 +83,9 @@ where
 
         let key = Self::u256_to_key(key)?;
         
-        // Get the value from the oracle
+        // Get the value from the oracle, return (0, 0) if not found
         let TimestampedValue { value, timestamp } = pallet_oracle::Pallet::<Runtime>::get(key)
-            .ok_or_else(|| revert("No value found for key"))?;
+            .unwrap_or(TimestampedValue { value: 0, timestamp: 0 });
 
         Ok((value.into(), timestamp.into()))
     }
