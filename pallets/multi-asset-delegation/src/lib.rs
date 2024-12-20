@@ -311,7 +311,7 @@ pub mod pallet {
 		/// Event emitted when an incentive APY and cap are set for a reward vault
 		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
-		BlueprintWhitelisted { blueprint_id: u32 },
+		BlueprintWhitelisted { blueprint_id: BlueprintId },
 		/// Asset has been updated to reward vault
 		AssetUpdatedInVault {
 			who: T::AccountId,
@@ -716,7 +716,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn whitelist_blueprint_for_rewards(
 			origin: OriginFor<T>,
-			blueprint_id: u32,
+			blueprint_id: BlueprintId,
 		) -> DispatchResult {
 			// Ensure that the origin is authorized
 			T::ForceOrigin::ensure_origin(origin)?;

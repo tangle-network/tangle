@@ -54,6 +54,8 @@ pub type Nonce = u32;
 pub type AssetId = u128;
 pub type BlockNumber = BlockNumberFor<Runtime>;
 
+pub use tangle_primitives::services::Asset;
+
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
 	type BaseCallFilter = frame_support::traits::Everything;

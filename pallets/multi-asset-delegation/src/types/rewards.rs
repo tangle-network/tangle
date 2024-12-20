@@ -32,7 +32,7 @@ pub struct RewardConfig<VaultId, Balance> {
 	// A map of asset IDs to their respective reward configurations.
 	pub configs: BTreeMap<VaultId, RewardConfigForAssetVault<Balance>>,
 	// A list of blueprint IDs that are whitelisted for rewards.
-	pub whitelisted_blueprint_ids: Vec<u32>,
+	pub whitelisted_blueprint_ids: Vec<u64>,
 }
 
 /// Asset action for vaults

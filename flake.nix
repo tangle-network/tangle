@@ -65,6 +65,7 @@
             pkgs.harper
             pkgs.cargo-nextest
             pkgs.cargo-tarpaulin
+            pkgs.lldb
           ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
