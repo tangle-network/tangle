@@ -1,17 +1,39 @@
 //! Serialization support.
 
-use crate::error::Error;
+use alloc::vec::Vec;
 
-use super::traits::{Ciphersuite, Field, Group};
-use alloc::string::String;
-use sp_std::{vec, vec::Vec};
+use crate::{Ciphersuite, FieldError};
 
+use crate::{Element, Error, Field, Group};
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "internals", visibility::make(pub))]
+#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
 /// Helper struct to serialize a Scalar.
-pub struct ScalarSerialization<C: Ciphersuite>(
-	pub <<<C as Ciphersuite>::Group as Group>::Field as Field>::Serialization,
+pub(crate) struct SerializableScalar<C: Ciphersuite>(
+	pub <<<C as Ciphersuite>::Group as Group>::Field as Field>::Scalar,
 );
 
-impl<C> serde::Serialize for ScalarSerialization<C>
+impl<C> SerializableScalar<C>
+where
+	C: Ciphersuite,
+{
+	/// Serialize a Scalar.
+	pub fn serialize(&self) -> Vec<u8> {
+		<<C::Group as Group>::Field>::serialize(&self.0).as_ref().to_vec()
+	}
+
+	/// Deserialize a Scalar from a serialized buffer.
+	pub fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
+		let serialized: <<C::Group as Group>::Field as Field>::Serialization =
+			bytes.to_vec().try_into().map_err(|_| FieldError::MalformedScalar)?;
+		let scalar = <<C::Group as Group>::Field>::deserialize(&serialized)?;
+		Ok(Self(scalar))
+	}
+}
+
+#[cfg(feature = "serde")]
+impl<C> serde::Serialize for SerializableScalar<C>
 where
 	C: Ciphersuite,
 {
@@ -19,11 +41,13 @@ where
 	where
 		S: serde::Serializer,
 	{
-		serdect::array::serialize_hex_lower_or_bin(&self.0.as_ref(), serializer)
+		let serialized = <<C as Ciphersuite>::Group as Group>::Field::serialize(&self.0);
+		serdect::array::serialize_hex_lower_or_bin(&serialized.as_ref(), serializer)
 	}
 }
 
-impl<'de, C> serde::Deserialize<'de> for ScalarSerialization<C>
+#[cfg(feature = "serde")]
+impl<'de, C> serde::Deserialize<'de> for SerializableScalar<C>
 where
 	C: Ciphersuite,
 {
@@ -39,15 +63,36 @@ where
 		serdect::array::deserialize_hex_or_bin(&mut bytes[..], deserializer)?;
 		let array =
 			bytes.try_into().map_err(|_| serde::de::Error::custom("invalid byte length"))?;
-		Ok(Self(array))
+		<<C as Ciphersuite>::Group as Group>::Field::deserialize(&array)
+			.map(|scalar| Self(scalar))
+			.map_err(serde::de::Error::custom)
 	}
 }
 
-pub struct ElementSerialization<C: Ciphersuite>(
-	pub <<C as Ciphersuite>::Group as Group>::Serialization,
-);
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) struct SerializableElement<C: Ciphersuite>(pub(crate) Element<C>);
 
-impl<C> serde::Serialize for ElementSerialization<C>
+impl<C> SerializableElement<C>
+where
+	C: Ciphersuite,
+{
+	/// Serialize an Element. Returns an error if it's the identity.
+	pub fn serialize(&self) -> Result<Vec<u8>, Error<C>> {
+		Ok(<C::Group as Group>::serialize(&self.0)?.as_ref().to_vec())
+	}
+
+	/// Deserialize an Element. Returns an error if it's malformed or is the
+	/// identity.
+	pub fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
+		let serialized: <C::Group as Group>::Serialization =
+			bytes.to_vec().try_into().map_err(|_| FieldError::MalformedScalar)?;
+		let scalar = <C::Group as Group>::deserialize(&serialized)?;
+		Ok(Self(scalar))
+	}
+}
+
+#[cfg(feature = "serde")]
+impl<C> serde::Serialize for SerializableElement<C>
 where
 	C: Ciphersuite,
 {
@@ -55,11 +100,14 @@ where
 	where
 		S: serde::Serializer,
 	{
-		serdect::array::serialize_hex_lower_or_bin(&self.0.as_ref(), serializer)
+		let serialized =
+			<C::Group as Group>::serialize(&self.0).map_err(serde::ser::Error::custom)?;
+		serdect::array::serialize_hex_lower_or_bin(&serialized.as_ref(), serializer)
 	}
 }
 
-impl<'de, C> serde::Deserialize<'de> for ElementSerialization<C>
+#[cfg(feature = "serde")]
+impl<'de, C> serde::Deserialize<'de> for SerializableElement<C>
 where
 	C: Ciphersuite,
 {
@@ -69,29 +117,34 @@ where
 	{
 		// Get size from the size of the generator
 		let generator = <C::Group>::generator();
-		let len = <C::Group>::serialize(&generator).as_ref().len();
+		let len = <C::Group>::serialize(&generator)
+			.expect("serializing the generator always works")
+			.as_ref()
+			.len();
 
 		let mut bytes = vec![0u8; len];
 		serdect::array::deserialize_hex_or_bin(&mut bytes[..], deserializer)?;
 		let array =
 			bytes.try_into().map_err(|_| serde::de::Error::custom("invalid byte length"))?;
-		Ok(Self(array))
+		<C::Group as Group>::deserialize(&array)
+			.map(|element| Self(element))
+			.map_err(serde::de::Error::custom)
 	}
 }
 
 // The short 4-byte ID. Derived as the CRC-32 of the UTF-8
 // encoded ID in big endian format.
-#[allow(unused)]
+#[cfg(feature = "serde")]
 const fn short_id<C>() -> [u8; 4]
 where
 	C: Ciphersuite,
 {
-	super::const_crc32::crc32(C::ID.as_bytes()).to_be_bytes()
+	const_crc32::crc32(C::ID.as_bytes()).to_be_bytes()
 }
 
 /// Serialize a placeholder ciphersuite field with the ciphersuite ID string.
-#[allow(unused)]
-pub fn ciphersuite_serialize<S, C>(_: &(), s: S) -> Result<S::Ok, S::Error>
+#[cfg(feature = "serde")]
+pub(crate) fn ciphersuite_serialize<S, C>(_: &(), s: S) -> Result<S::Ok, S::Error>
 where
 	S: serde::Serializer,
 	C: Ciphersuite,
@@ -99,21 +152,21 @@ where
 	use serde::Serialize;
 
 	if s.is_human_readable() {
-		s.serialize_str(C::ID)
+		C::ID.serialize(s)
 	} else {
 		serde::Serialize::serialize(&short_id::<C>(), s)
 	}
 }
 
 /// Deserialize a placeholder ciphersuite field, checking if it's the ciphersuite ID string.
-#[allow(unused)]
-pub fn ciphersuite_deserialize<'de, D, C>(deserializer: D) -> Result<(), D::Error>
+#[cfg(feature = "serde")]
+pub(crate) fn ciphersuite_deserialize<'de, D, C>(deserializer: D) -> Result<(), D::Error>
 where
 	D: serde::Deserializer<'de>,
 	C: Ciphersuite,
 {
 	if deserializer.is_human_readable() {
-		let s: String = serde::de::Deserialize::deserialize(deserializer)?;
+		let s: alloc::string::String = serde::de::Deserialize::deserialize(deserializer)?;
 		if s != C::ID {
 			Err(serde::de::Error::custom("wrong ciphersuite"))
 		} else {
@@ -131,8 +184,8 @@ where
 
 /// Deserialize a version. For now, since there is a single version 0,
 /// simply validate if it's 0.
-#[allow(unused)]
-pub fn version_deserialize<'de, D>(deserializer: D) -> Result<u8, D::Error>
+#[cfg(feature = "serde")]
+pub(crate) fn version_deserialize<'de, D>(deserializer: D) -> Result<u8, D::Error>
 where
 	D: serde::Deserializer<'de>,
 {
@@ -152,26 +205,30 @@ where
 // parametrized with the ciphersuite, but trait aliases are not currently
 // supported: <https://github.com/rust-lang/rust/issues/41517>
 
-pub trait Serialize {
+#[cfg(feature = "serialization")]
+pub(crate) trait Serialize<C: Ciphersuite> {
 	/// Serialize the struct into a Vec.
-	fn serialize(&self) -> Result<Vec<u8>, Error>;
+	fn serialize(&self) -> Result<Vec<u8>, Error<C>>;
 }
 
-pub trait Deserialize {
+#[cfg(feature = "serialization")]
+pub(crate) trait Deserialize<C: Ciphersuite> {
 	/// Deserialize the struct from a slice of bytes.
-	fn deserialize(bytes: &[u8]) -> Result<Self, Error>
+	fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>>
 	where
 		Self: core::marker::Sized;
 }
 
-impl<T: serde::Serialize> Serialize for T {
-	fn serialize(&self) -> Result<Vec<u8>, Error> {
+#[cfg(feature = "serialization")]
+impl<T: serde::Serialize, C: Ciphersuite> Serialize<C> for T {
+	fn serialize(&self) -> Result<Vec<u8>, Error<C>> {
 		postcard::to_allocvec(self).map_err(|_| Error::SerializationError)
 	}
 }
 
-impl<T: for<'de> serde::Deserialize<'de>> Deserialize for T {
-	fn deserialize(bytes: &[u8]) -> Result<Self, Error> {
+#[cfg(feature = "serialization")]
+impl<T: for<'de> serde::Deserialize<'de>, C: Ciphersuite> Deserialize<C> for T {
+	fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
 		postcard::from_bytes(bytes).map_err(|_| Error::DeserializationError)
 	}
 }
