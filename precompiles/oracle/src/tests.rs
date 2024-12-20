@@ -1,14 +1,11 @@
 use super::*;
-use crate::{mock::*, selectors, OraclePrecompile};
+use crate::mock::*;
 use frame_support::{assert_ok, BoundedVec};
+use precompile_utils::{testing::*, prelude::*};
 use sp_core::{H160, U256};
 
-fn evm_test_context() -> Context {
-    Context {
-        address: Default::default(),
-        caller: H160::from_low_u64_be(1),
-        apparent_value: Default::default(),
-    }
+fn precompiles() -> PrecompileSet {
+    PrecompilesValue::get()
 }
 
 #[test]
@@ -21,7 +18,7 @@ fn feed_values_works() {
         let bounded_feed_values: BoundedVec<_, _> = feed_values.try_into().unwrap();
 
         assert_ok!(Oracle::feed_values(
-            RuntimeOrigin::signed(TestAccount::Alice),
+            RuntimeOrigin::signed(H160::repeat_byte(0x01)),
             bounded_feed_values
         ));
     });
@@ -30,42 +27,59 @@ fn feed_values_works() {
 #[test]
 fn precompile_feed_values_works() {
     ExtBuilder::default().build().execute_with(|| {
+        let mut tester = PrecompileTester::new(precompiles(), H160::repeat_byte(0x01), PRECOMPILE_ADDRESS);
+
         // Test data
-        let key1: U256 = U256::from(1u32);
-        let value1: U256 = U256::from(100u64);
-        let key2: U256 = U256::from(2u32);
-        let value2: U256 = U256::from(200u64);
+        let keys = vec![U256::from(1u32), U256::from(2u32)];
+        let values = vec![U256::from(100u64), U256::from(200u64)];
 
-        // Build input data
-        let mut input = Vec::new();
-        input.extend_from_slice(&selectors::FEED_VALUES.to_be_bytes());
-        
-        // Write array lengths and data
-        let mut key_data = vec![0u8; 32];
-        U256::from(2u32).to_big_endian(&mut key_data);
-        input.extend_from_slice(&key_data);
+        // Call the precompile
+        tester.call("feedValues(uint256[],uint256[])", (keys.clone(), values.clone()))
+            .expect_no_logs()
+            .execute_returns(());
 
-        let mut key1_data = vec![0u8; 32];
-        key1.to_big_endian(&mut key1_data);
-        input.extend_from_slice(&key1_data);
+        // Verify values were stored
+        let value1 = Oracle::get(1u32).unwrap();
+        let value2 = Oracle::get(2u32).unwrap();
+        assert_eq!(value1.value, 100u64);
+        assert_eq!(value2.value, 200u64);
+    });
+}
 
-        let mut key2_data = vec![0u8; 32];
-        key2.to_big_endian(&mut key2_data);
-        input.extend_from_slice(&key2_data);
+#[test]
+fn get_value_works() {
+    ExtBuilder::default().build().execute_with(|| {
+        let mut tester = PrecompileTester::new(precompiles(), H160::repeat_byte(0x01), PRECOMPILE_ADDRESS);
 
-        let mut value_data = vec![0u8; 32];
-        U256::from(2u32).to_big_endian(&mut value_data);
-        input.extend_from_slice(&value_data);
+        // First feed a value
+        let mut feed_values = Vec::new();
+        feed_values.push((1u32, 100u64));
+        let bounded_feed_values: BoundedVec<_, _> = feed_values.try_into().unwrap();
+        assert_ok!(Oracle::feed_values(
+            RuntimeOrigin::signed(H160::repeat_byte(0x01)),
+            bounded_feed_values
+        ));
 
-        let mut value1_data = vec![0u8; 32];
-        value1.to_big_endian(&mut value1_data);
-        input.extend_from_slice(&value1_data);
+        // Now try to read it through the precompile
+        let (value, timestamp): (U256, U256) = tester
+            .call("getValue(uint256)", U256::from(1u32))
+            .expect_no_logs()
+            .execute_returns();
 
-        let mut value2_data = vec![0u8; 32];
-        value2.to_big_endian(&mut value2_data);
-        input.extend_from_slice(&value2_data);
+        assert_eq!(value, U256::from(100u64));
+        assert!(timestamp > U256::zero());
+    });
+}
 
-        let result = OraclePrecompile::<Runtime>::execute(&input, u64::MAX);
-        assert!(result.is_ok());
+#[test]
+fn get_value_fails_for_non_existent_key() {
+    ExtBuilder::default().build().execute_with(|| {
+        let mut tester = PrecompileTester::new(precompiles(), H160::repeat_byte(0x01), PRECOMPILE_ADDRESS);
+
+        // Try to read a non-existent key
+        tester
+            .call("getValue(uint256)", U256::from(999u32))
+            .expect_no_logs()
+            .execute_reverts(|output| output == b"No value found for key");
     });
 }
