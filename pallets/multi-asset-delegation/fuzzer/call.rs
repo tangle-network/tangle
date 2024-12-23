@@ -15,12 +15,12 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! # Running
-//! Running this fuzzer can be done with `cargo hfuzz run call`. `honggfuzz` CLI
+//! Running this fuzzer can be done with `cargo hfuzz run mad-fuzzer`. `honggfuzz` CLI
 //! options can be used by setting `HFUZZ_RUN_ARGS`, such as `-n 4` to use 4 threads.
 //!
 //! # Debugging a panic
 //! Once a panic is found, it can be debugged with
-//! `cargo hfuzz run-debug per_thing_rational hfuzz_workspace/call/*.fuzz`.
+//! `cargo hfuzz run-debug mad-fuzzer hfuzz_workspace/mad-fuzzer/*.fuzz`.
 
 use frame_support::traits::{Currency, GetCallName, Hooks, UnfilteredDispatchable};
 use honggfuzz::fuzz;
