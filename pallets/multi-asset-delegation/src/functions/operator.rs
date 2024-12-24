@@ -238,6 +238,9 @@ impl<T: Config> Pallet<T> {
 			.checked_sub(&request.amount)
 			.ok_or(Error::<T>::UnstakeAmountTooLarge)?;
 
+		// Unreserve the unstaked amount and clear the request
+		T::Currency::unreserve(who, request.amount);
+
 		operator.request = None;
 		Operators::<T>::insert(who, operator);
 
