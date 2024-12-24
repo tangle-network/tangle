@@ -401,15 +401,18 @@ fn execute_operator_unstake_success() {
 		// Set the current round to simulate passage of time
 		<CurrentRound<Runtime>>::put(15);
 
+		let reserved_balance = Balances::reserved_balance(Alice.to_account_id());
 		// Execute unstake
 		assert_ok!(MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
 			Alice.to_account_id()
 		)));
 
+		let reserved_balance_after = Balances::reserved_balance(Alice.to_account_id());
 		// Verify operator metadata
 		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
 		assert_eq!(operator_info.stake, bond_amount - unstake_amount);
 		assert_eq!(operator_info.request, None);
+		assert_eq!(reserved_balance - reserved_balance_after, unstake_amount);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(

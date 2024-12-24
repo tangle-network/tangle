@@ -24,6 +24,7 @@ members = [
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
     "pallets/tangle-lst/benchmarking",
+    "pallets/multi-asset-delegation/fuzzer",
     "precompiles/pallet-democracy",
     "precompiles/batch",
     "precompiles/call-permit",
@@ -94,6 +95,7 @@ snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", defa
 primitive-types = { version = "0.12.2", default-features = false, features = ["scale-info", "serde_no_std"] }
 fixed = { version = "1.28.0", default-features = false }
 educe = { version = "0.6.0", default-features = false }
+honggfuzz = { version = "0.5.55" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -329,9 +331,7 @@ signature = { version = "2.2", default-features = false }
 # EVM & Ethereum
 # (wasm)
 ethereum-types = { version = "0.14.1", default-features = false }
-ethereum = { version = "0.15.0", default-features = false, features = [
-	"with-codec",
-] }
+ethereum = { version = "0.15.0", default-features = false, features = ["with-codec"] }
 evm = { version = "0.41.1", default-features = false }
 evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
