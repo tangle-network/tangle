@@ -22,11 +22,18 @@
 //! Once a panic is found, it can be debugged with
 //! `cargo hfuzz run-debug mad-fuzzer hfuzz_workspace/mad-fuzzer/*.fuzz`.
 
-use frame_support::traits::{Currency, GetCallName, Hooks, UnfilteredDispatchable};
+use frame_support::{
+	dispatch::PostDispatchInfo,
+	traits::{Currency, Get, GetCallName, Hooks, UnfilteredDispatchable},
+};
+use frame_system::ensure_signed_or_root;
 use honggfuzz::fuzz;
 use pallet_multi_asset_delegation::{mock::*, pallet as mad, types::*};
 use rand::{seq::SliceRandom, Rng};
-use sp_runtime::Percent;
+use sp_runtime::{
+	traits::{Scale, Zero},
+	Percent,
+};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
@@ -65,7 +72,22 @@ fn fund_account<R: Rng>(rng: &mut R, account: &AccountId) {
 	assert!(Balances::free_balance(account) >= target_amount);
 }
 
-fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
+/// Join operators call.
+fn join_operators_call<R: Rng>(
+	rng: &mut R,
+	origin: RuntimeOrigin,
+	who: &AccountId,
+) -> (mad::Call<Runtime>, RuntimeOrigin) {
+	let minimum_bond = <<Runtime as mad::Config>::MinOperatorBondAmount as Get<Balance>>::get();
+	let multiplier = rng.gen_range(1..50u128);
+	let _ = Balances::deposit_creating(&who, minimum_bond.mul(multiplier));
+	let bond_amount = minimum_bond.mul(multiplier);
+	(mad::Call::join_operators { bond_amount }, origin)
+}
+
+fn random_calls<R: Rng>(
+	mut rng: &mut R,
+) -> impl IntoIterator<Item = (mad::Call<Runtime>, RuntimeOrigin)> {
 	let op = <mad::Call<Runtime> as GetCallName>::get_call_names()
 		.choose(rng)
 		.cloned()
@@ -76,64 +98,96 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			// join_operators
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			let bond_amount = random_ed_multiple(&mut rng);
-			(mad::Call::join_operators { bond_amount }, origin)
+			[join_operators_call(&mut rng, origin, &who)].to_vec()
 		},
 		"schedule_leave_operators" => {
 			// Schedule leave operators
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::schedule_leave_operators {}, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::schedule_leave_operators {}, origin),
+			]
+			.to_vec()
 		},
 		"cancel_leave_operators" => {
 			// Cancel leave operators
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::cancel_leave_operators {}, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::cancel_leave_operators {}, origin),
+			]
+			.to_vec()
 		},
 		"execute_leave_operators" => {
 			// Execute leave operators
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::execute_leave_operators {}, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::execute_leave_operators {}, origin),
+			]
+			.to_vec()
 		},
 		"operator_bond_more" => {
 			// Operator bond more
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
 			let additional_bond = random_ed_multiple(&mut rng);
-			(mad::Call::operator_bond_more { additional_bond }, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::operator_bond_more { additional_bond }, origin),
+			]
+			.to_vec()
 		},
 		"schedule_operator_unstake" => {
 			// Schedule operator unstake
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
 			let unstake_amount = random_ed_multiple(&mut rng);
-			(mad::Call::schedule_operator_unstake { unstake_amount }, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::schedule_operator_unstake { unstake_amount }, origin),
+			]
+			.to_vec()
 		},
 		"execute_operator_unstake" => {
 			// Execute operator unstake
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::execute_operator_unstake {}, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::execute_operator_unstake {}, origin),
+			]
+			.to_vec()
 		},
 		"cancel_operator_unstake" => {
 			// Cancel operator unstake
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::cancel_operator_unstake {}, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::cancel_operator_unstake {}, origin),
+			]
+			.to_vec()
 		},
 		"go_offline" => {
 			// Go offline
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::go_offline {}, origin)
+			[
+				join_operators_call(&mut rng, origin.clone(), &who),
+				(mad::Call::go_offline {}, origin),
+			]
+			.to_vec()
 		},
 		"go_online" => {
 			// Go online
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::go_online {}, origin)
+			[join_operators_call(&mut rng, origin.clone(), &who), (mad::Call::go_online {}, origin)]
+				.to_vec()
 		},
 		"deposit" => {
 			// Deposit
@@ -143,7 +197,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			let amount = random_ed_multiple(&mut rng);
 			let evm_address =
 				if rng.gen_bool(0.5) { Some(rng.gen::<[u8; 20]>().into()) } else { None };
-			(mad::Call::deposit { asset_id, amount, evm_address }, origin)
+			[(mad::Call::deposit { asset_id, amount, evm_address }, origin)].to_vec()
 		},
 		"schedule_withdraw" => {
 			// Schedule withdraw
@@ -151,7 +205,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			fund_account(&mut rng, &who);
 			let asset_id = random_asset(&mut rng);
 			let amount = random_ed_multiple(&mut rng);
-			(mad::Call::schedule_withdraw { asset_id, amount }, origin)
+			[(mad::Call::schedule_withdraw { asset_id, amount }, origin)].to_vec()
 		},
 		"execute_withdraw" => {
 			// Execute withdraw
@@ -159,7 +213,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			fund_account(&mut rng, &who);
 			let evm_address =
 				if rng.gen_bool(0.5) { Some(rng.gen::<[u8; 20]>().into()) } else { None };
-			(mad::Call::execute_withdraw { evm_address }, origin)
+			[(mad::Call::execute_withdraw { evm_address }, origin)].to_vec()
 		},
 		"cancel_withdraw" => {
 			// Cancel withdraw
@@ -167,13 +221,13 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			fund_account(&mut rng, &who);
 			let asset_id = random_asset(&mut rng);
 			let amount = random_ed_multiple(&mut rng);
-			(mad::Call::cancel_withdraw { asset_id, amount }, origin)
+			[(mad::Call::cancel_withdraw { asset_id, amount }, origin)].to_vec()
 		},
 		"delegate" => {
 			// Delegate
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			let operator = random_account_id(&mut rng);
+			let (operator_origin, operator) = random_signed_origin(&mut rng);
 			let asset_id = random_asset(&mut rng);
 			let amount = random_ed_multiple(&mut rng);
 			let blueprint_selection = {
@@ -191,31 +245,43 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 					)
 				}
 			};
-			(mad::Call::delegate { operator, asset_id, amount, blueprint_selection }, origin)
+			[
+				join_operators_call(&mut rng, operator_origin.clone(), &operator),
+				(mad::Call::delegate { operator, asset_id, amount, blueprint_selection }, origin),
+			]
+			.to_vec()
 		},
 		"schedule_delegator_unstake" => {
 			// Schedule delegator unstakes
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			let operator = random_account_id(&mut rng);
+			let (operator_origin, operator) = random_signed_origin(&mut rng);
 			let asset_id = random_asset(&mut rng);
 			let amount = random_ed_multiple(&mut rng);
-			(mad::Call::schedule_delegator_unstake { operator, asset_id, amount }, origin)
+			[
+				join_operators_call(&mut rng, operator_origin.clone(), &operator),
+				(mad::Call::schedule_delegator_unstake { operator, asset_id, amount }, origin),
+			]
+			.to_vec()
 		},
 		"execute_delegator_unstake" => {
 			// Execute delegator unstake
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			(mad::Call::execute_delegator_unstake {}, origin)
+			[(mad::Call::execute_delegator_unstake {}, origin)].to_vec()
 		},
 		"cancel_delegator_unstake" => {
 			// Cancel delegator unstake
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
-			let operator = random_account_id(&mut rng);
+			let (operator_origin, operator) = random_signed_origin(&mut rng);
 			let asset_id = random_asset(&mut rng);
 			let amount = random_ed_multiple(&mut rng);
-			(mad::Call::cancel_delegator_unstake { operator, asset_id, amount }, origin)
+			[
+				join_operators_call(&mut rng, operator_origin.clone(), &operator),
+				(mad::Call::cancel_delegator_unstake { operator, asset_id, amount }, origin),
+			]
+			.to_vec()
 		},
 		"set_incentive_apy_and_cap" => {
 			// Set incentive APY and cap
@@ -229,7 +295,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			let vault_id = rng.gen();
 			let apy = Percent::from_percent(rng.gen_range(0..100));
 			let cap = rng.gen_range(0..Balance::MAX);
-			(mad::Call::set_incentive_apy_and_cap { vault_id, apy, cap }, origin)
+			[(mad::Call::set_incentive_apy_and_cap { vault_id, apy, cap }, origin)].to_vec()
 		},
 		"whitelist_blueprint_for_rewards" => {
 			// Whitelist blueprint for rewards
@@ -241,7 +307,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			};
 			fund_account(&mut rng, &who);
 			let blueprint_id = rng.gen::<u64>();
-			(mad::Call::whitelist_blueprint_for_rewards { blueprint_id }, origin)
+			[(mad::Call::whitelist_blueprint_for_rewards { blueprint_id }, origin)].to_vec()
 		},
 		"manage_asset_in_vault" => {
 			// Manage asset in vault
@@ -255,7 +321,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			let asset_id = random_asset(&mut rng);
 			let vault_id = rng.gen();
 			let action = if rng.gen() { AssetAction::Add } else { AssetAction::Remove };
-			(mad::Call::manage_asset_in_vault { asset_id, vault_id, action }, origin)
+			[(mad::Call::manage_asset_in_vault { asset_id, vault_id, action }, origin)].to_vec()
 		},
 		"add_blueprint_id" => {
 			// Add blueprint ID
@@ -267,7 +333,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			};
 			fund_account(&mut rng, &who);
 			let blueprint_id = rng.gen::<u64>();
-			(mad::Call::add_blueprint_id { blueprint_id }, origin)
+			[(mad::Call::add_blueprint_id { blueprint_id }, origin)].to_vec()
 		},
 		"remove_blueprint_id" => {
 			// Remove blueprint ID
@@ -279,7 +345,7 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 			};
 			fund_account(&mut rng, &who);
 			let blueprint_id = rng.gen::<u64>();
-			(mad::Call::remove_blueprint_id { blueprint_id }, origin)
+			[(mad::Call::remove_blueprint_id { blueprint_id }, origin)].to_vec()
 		},
 		_ => {
 			unimplemented!("unknown call name: {}", op)
@@ -290,75 +356,208 @@ fn random_call<R: Rng>(mut rng: &mut R) -> (mad::Call<Runtime>, RuntimeOrigin) {
 fn main() {
 	sp_tracing::try_init_simple();
 	let mut ext = sp_io::TestExternalities::new_empty();
-	let mut events_histogram = Vec::<(mad::Event<Runtime>, u32)>::default();
-	let mut iteration = 0 as BlockNumber;
-	let mut ok = 0;
-	let mut err = 0;
-
-	ext.execute_with(|| {
-		System::set_block_number(1);
-		Session::on_initialize(1);
-		<Staking as Hooks<u64>>::on_initialize(1);
-	});
-
+	let mut block_number = 1;
 	loop {
 		fuzz!(|seed: [u8; 32]| {
 			use ::rand::{rngs::SmallRng, SeedableRng};
 			let mut rng = SmallRng::from_seed(seed);
 
 			ext.execute_with(|| {
-				let (call, origin) = random_call(&mut rng);
-				let outcome = call.clone().dispatch_bypass_filter(origin.clone());
-				iteration += 1;
-				match outcome {
-					Ok(_) => ok += 1,
-					Err(_) => err += 1,
-				};
+				System::set_block_number(block_number);
+				Session::on_initialize(block_number);
+				Staking::on_initialize(block_number);
 
-				sp_tracing::trace!(
-					%iteration,
-					?call,
-					?origin,
-					?outcome,
-					%ok,
-					%err,
-					"fuzzed call"
-				);
+				for (call, origin) in random_calls(&mut rng) {
+					let outcome = call.clone().dispatch_bypass_filter(origin.clone());
+					sp_tracing::trace!(?call, ?origin, ?outcome, "fuzzed call");
 
-				// execute sanity checks at a fixed interval, possibly on every block.
-				if iteration
-					% (std::env::var("SANITY_CHECK_INTERVAL")
-						.ok()
-						.and_then(|x| x.parse::<u64>().ok()))
-					.unwrap_or(1) == 0
-				{
-					sp_tracing::info!("running sanity checks at {}", iteration);
-					// TODO
+					// execute sanity checks at a fixed interval, possibly on every block.
+					if let Ok(out) = outcome {
+						sp_tracing::info!("running sanity checks..");
+						do_sanity_checks(call.clone(), origin.clone(), out);
+					}
 				}
 
-				// collect and reset events.
-				System::events()
-					.into_iter()
-					.map(|r| r.event)
-					.filter_map(|e| {
-						if let RuntimeEvent::MultiAssetDelegation(inner) = e {
-							Some(inner)
+				System::reset_events();
+				block_number += 1;
+			});
+		})
+	}
+}
+
+/// Perform sanity checks on the state after a call is executed successfully.
+#[allow(unused)]
+fn do_sanity_checks(call: mad::Call<Runtime>, origin: RuntimeOrigin, outcome: PostDispatchInfo) {
+	let caller = match ensure_signed_or_root(origin).unwrap() {
+		Some(signer) => signer,
+		None =>
+		/*Root */
+		{
+			[0u8; 32].into()
+		},
+	};
+	match call {
+		mad::Call::join_operators { bond_amount } => {
+			assert!(mad::Operators::<Runtime>::contains_key(&caller), "operator not found");
+			assert_eq!(
+				MultiAssetDelegation::operator_info(&caller).unwrap_or_default().stake,
+				bond_amount
+			);
+			assert!(
+				Balances::reserved_balance(&caller).ge(&bond_amount),
+				"bond amount not reserved"
+			);
+		},
+		mad::Call::schedule_leave_operators {} => {
+			assert!(mad::Operators::<Runtime>::contains_key(&caller), "operator not found");
+			let current_round = mad::CurrentRound::<Runtime>::get();
+			let leaving_time =
+				<<Runtime as mad::Config>::LeaveOperatorsDelay as Get<u32>>::get() + current_round;
+			assert_eq!(
+				mad::Operators::<Runtime>::get(&caller).unwrap_or_default().status,
+				OperatorStatus::Leaving(leaving_time)
+			);
+		},
+		mad::Call::cancel_leave_operators {} => {
+			assert_eq!(
+				mad::Operators::<Runtime>::get(&caller).unwrap_or_default().status,
+				OperatorStatus::Active
+			);
+		},
+		mad::Call::execute_leave_operators {} => {
+			assert!(!mad::Operators::<Runtime>::contains_key(&caller), "operator not removed");
+			assert!(Balances::reserved_balance(&caller).is_zero(), "bond amount not unreserved");
+		},
+		mad::Call::operator_bond_more { additional_bond } => {
+			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			assert!(info.stake.ge(&additional_bond), "bond amount not increased");
+			assert!(
+				Balances::reserved_balance(&caller).ge(&additional_bond),
+				"bond amount not reserved"
+			);
+		},
+		mad::Call::schedule_operator_unstake { unstake_amount } => {
+			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let current_round = MultiAssetDelegation::current_round();
+			let unstake_request =
+				OperatorBondLessRequest { amount: unstake_amount, request_time: current_round };
+			assert_eq!(info.request, Some(unstake_request), "unstake request not set");
+		},
+		mad::Call::execute_operator_unstake {} => {
+			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			assert!(info.request.is_none(), "unstake request not removed");
+			// reserved balance should be reduced and equal to the stake
+			assert!(
+				Balances::reserved_balance(&caller).eq(&info.stake),
+				"reserved balance not equal to stake"
+			);
+		},
+		mad::Call::cancel_operator_unstake {} => {
+			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			assert!(info.request.is_none(), "unstake request not removed");
+		},
+		mad::Call::go_offline {} => {
+			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			assert_eq!(info.status, OperatorStatus::Inactive, "status not set to inactive");
+		},
+		mad::Call::go_online {} => {
+			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			assert_eq!(info.status, OperatorStatus::Active, "status not set to active");
+		},
+		mad::Call::deposit { asset_id, amount, .. } => {
+			match asset_id {
+				Asset::Custom(id) => {
+					let pallet_balance =
+						Assets::balance(id, MultiAssetDelegation::pallet_account());
+					assert!(pallet_balance.ge(&amount), "pallet balance not enough");
+				},
+				Asset::Erc20(token) => {
+					let pallet_balance = MultiAssetDelegation::query_erc20_balance_of(
+						token,
+						MultiAssetDelegation::pallet_evm_account(),
+					)
+					.unwrap_or_default()
+					.0;
+					assert!(pallet_balance.ge(&amount.into()), "pallet balance not enough");
+				},
+			};
+
+			assert_eq!(
+				MultiAssetDelegation::delegators(&caller)
+					.unwrap_or_default()
+					.calculate_delegation_by_asset(asset_id),
+				amount
+			);
+		},
+		mad::Call::schedule_withdraw { asset_id, amount } => {
+			let round = MultiAssetDelegation::current_round();
+			assert!(
+				MultiAssetDelegation::delegators(&caller)
+					.unwrap_or_default()
+					.get_withdraw_requests()
+					.contains(&WithdrawRequest { asset_id, amount, requested_round: round }),
+				"withdraw request not found"
+			);
+		},
+		mad::Call::execute_withdraw { .. } => {
+			assert!(
+				MultiAssetDelegation::delegators(&caller)
+					.unwrap_or_default()
+					.get_withdraw_requests()
+					.is_empty(),
+				"withdraw requests not removed"
+			);
+		},
+		mad::Call::cancel_withdraw { asset_id, amount } => {
+			let round = MultiAssetDelegation::current_round();
+			assert!(
+				!MultiAssetDelegation::delegators(&caller)
+					.unwrap_or_default()
+					.get_withdraw_requests()
+					.contains(&WithdrawRequest { asset_id, amount, requested_round: round }),
+				"withdraw request not removed"
+			);
+		},
+		mad::Call::delegate { operator, asset_id, amount, .. } => {
+			let delegator = MultiAssetDelegation::delegators(&caller).unwrap_or_default();
+			let operator_info = MultiAssetDelegation::operator_info(&operator).unwrap_or_default();
+			assert!(
+				delegator
+					.calculate_delegation_by_operator(operator)
+					.iter()
+					.find_map(|x| {
+						if x.asset_id == asset_id {
+							Some(x.amount)
 						} else {
 							None
 						}
 					})
-					.for_each(|e| {
-						if let Some((_, c)) = events_histogram
-							.iter_mut()
-							.find(|(x, _)| std::mem::discriminant(x) == std::mem::discriminant(&e))
-						{
-							*c += 1;
+					.ge(&Some(amount)),
+				"delegation amount not set"
+			);
+			assert!(
+				operator_info
+					.delegations
+					.iter()
+					.find_map(|x| {
+						if x.delegator == caller && x.asset_id == asset_id {
+							Some(x.amount)
 						} else {
-							events_histogram.push((e, 1))
+							None
 						}
-					});
-				System::reset_events();
-			})
-		})
+					})
+					.ge(&Some(amount)),
+				"delegator not added to operator"
+			);
+		},
+		mad::Call::schedule_delegator_unstake { operator, asset_id, amount } => {},
+		mad::Call::execute_delegator_unstake {} => {},
+		mad::Call::cancel_delegator_unstake { operator, asset_id, amount } => {},
+		mad::Call::set_incentive_apy_and_cap { vault_id, apy, cap } => {},
+		mad::Call::whitelist_blueprint_for_rewards { blueprint_id } => {},
+		mad::Call::manage_asset_in_vault { vault_id, asset_id, action } => {},
+		mad::Call::add_blueprint_id { blueprint_id } => {},
+		mad::Call::remove_blueprint_id { blueprint_id } => {},
+		other => unimplemented!("sanity checks for call: {other:?} not implemented"),
 	}
 }
