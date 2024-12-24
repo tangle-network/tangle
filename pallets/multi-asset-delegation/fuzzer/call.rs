@@ -80,7 +80,7 @@ fn join_operators_call<R: Rng>(
 ) -> (mad::Call<Runtime>, RuntimeOrigin) {
 	let minimum_bond = <<Runtime as mad::Config>::MinOperatorBondAmount as Get<Balance>>::get();
 	let multiplier = rng.gen_range(1..50u128);
-	let _ = Balances::deposit_creating(&who, minimum_bond.mul(multiplier));
+	let _ = Balances::deposit_creating(who, minimum_bond.mul(multiplier));
 	let bond_amount = minimum_bond.mul(multiplier);
 	(mad::Call::join_operators { bond_amount }, origin)
 }
