@@ -7,7 +7,7 @@ use tangle_primitives::services::Asset;
 
 // Helper function for creating and minting tokens
 pub fn create_and_mint_tokens(
-	asset_id: u32,
+	asset_id: u128,
 	recipient: <Runtime as frame_system::Config>::AccountId,
 	amount: Balance,
 ) {

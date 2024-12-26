@@ -75,7 +75,7 @@ fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
 fn fund_account<R: Rng>(rng: &mut R, address: &Address) {
 	let target_amount = random_ed_multiple(rng);
 	let signer = <TestAccount as AddressMapping<AccountId>>::into_account_id(address.0);
-	if let Some(top_up) = target_amount.checked_sub(Balances::free_balance(&signer)) {
+	if let Some(top_up) = target_amount.checked_sub(Balances::free_balance(signer)) {
 		let _ = Balances::deposit_creating(&signer, top_up);
 	}
 	assert!(Balances::free_balance(signer) >= target_amount);
@@ -88,7 +88,7 @@ fn join_operators_call<R: Rng>(rng: &mut R, who: &Address) -> (PCall, Address) {
 	let who_account_id = <TestAccount as AddressMapping<AccountId>>::into_account_id(who.0);
 	let _ = Balances::deposit_creating(&who_account_id, minimum_bond.mul(multiplier));
 	let bond_amount = minimum_bond.mul(multiplier).into();
-	(PCall::join_operators { bond_amount }, who.clone())
+	(PCall::join_operators { bond_amount }, *who)
 }
 
 fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Address)> {
@@ -326,7 +326,7 @@ fn main() {
 					// execute sanity checks at a fixed interval, possibly on every block.
 					if let Ok(out) = outcome {
 						sp_tracing::info!("running sanity checks..");
-						do_sanity_checks(call_clone, who.clone(), out);
+						do_sanity_checks(call_clone, who, out);
 					}
 				}
 
@@ -343,46 +343,46 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 	let caller = <TestAccount as AddressMapping<AccountId>>::into_account_id(origin.0);
 	match call {
 		PCall::join_operators { bond_amount } => {
-			assert!(mad::Operators::<Runtime>::contains_key(&caller), "operator not found");
+			assert!(mad::Operators::<Runtime>::contains_key(caller), "operator not found");
 			assert_eq!(
-				MultiAssetDelegation::operator_info(&caller).unwrap_or_default().stake,
+				MultiAssetDelegation::operator_info(caller).unwrap_or_default().stake,
 				bond_amount.as_u64()
 			);
 			assert!(
-				Balances::reserved_balance(&caller).ge(&bond_amount.as_u64()),
+				Balances::reserved_balance(caller).ge(&bond_amount.as_u64()),
 				"bond amount not reserved"
 			);
 		},
 		PCall::schedule_leave_operators {} => {
-			assert!(mad::Operators::<Runtime>::contains_key(&caller), "operator not found");
+			assert!(mad::Operators::<Runtime>::contains_key(caller), "operator not found");
 			let current_round = mad::CurrentRound::<Runtime>::get();
 			let leaving_time =
 				<<Runtime as mad::Config>::LeaveOperatorsDelay as Get<u32>>::get() + current_round;
 			assert_eq!(
-				mad::Operators::<Runtime>::get(&caller).unwrap_or_default().status,
+				mad::Operators::<Runtime>::get(caller).unwrap_or_default().status,
 				OperatorStatus::Leaving(leaving_time)
 			);
 		},
 		PCall::cancel_leave_operators {} => {
 			assert_eq!(
-				mad::Operators::<Runtime>::get(&caller).unwrap_or_default().status,
+				mad::Operators::<Runtime>::get(caller).unwrap_or_default().status,
 				OperatorStatus::Active
 			);
 		},
 		PCall::execute_leave_operators {} => {
-			assert!(!mad::Operators::<Runtime>::contains_key(&caller), "operator not removed");
-			assert!(Balances::reserved_balance(&caller).is_zero(), "bond amount not unreserved");
+			assert!(!mad::Operators::<Runtime>::contains_key(caller), "operator not removed");
+			assert!(Balances::reserved_balance(caller).is_zero(), "bond amount not unreserved");
 		},
 		PCall::operator_bond_more { additional_bond } => {
-			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
 			assert!(info.stake.ge(&additional_bond.as_u64()), "bond amount not increased");
 			assert!(
-				Balances::reserved_balance(&caller).ge(&additional_bond.as_u64()),
+				Balances::reserved_balance(caller).ge(&additional_bond.as_u64()),
 				"bond amount not reserved"
 			);
 		},
 		PCall::schedule_operator_unstake { unstake_amount } => {
-			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
 			let current_round = MultiAssetDelegation::current_round();
 			let unstake_request = OperatorBondLessRequest {
 				amount: unstake_amount.as_u64(),
@@ -391,24 +391,24 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			assert_eq!(info.request, Some(unstake_request), "unstake request not set");
 		},
 		PCall::execute_operator_unstake {} => {
-			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
 			assert!(info.request.is_none(), "unstake request not removed");
 			// reserved balance should be reduced and equal to the stake
 			assert!(
-				Balances::reserved_balance(&caller).eq(&info.stake),
+				Balances::reserved_balance(caller).eq(&info.stake),
 				"reserved balance not equal to stake"
 			);
 		},
 		PCall::cancel_operator_unstake {} => {
-			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
 			assert!(info.request.is_none(), "unstake request not removed");
 		},
 		PCall::go_offline {} => {
-			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
 			assert_eq!(info.status, OperatorStatus::Inactive, "status not set to inactive");
 		},
 		PCall::go_online {} => {
-			let info = MultiAssetDelegation::operator_info(&caller).unwrap_or_default();
+			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
 			assert_eq!(info.status, OperatorStatus::Active, "status not set to active");
 		},
 		PCall::deposit { asset_id, amount, token_address } => {
@@ -431,12 +431,12 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 					)
 					.unwrap_or_default()
 					.0;
-					assert!(pallet_balance.ge(&amount.into()), "pallet balance not enough");
+					assert!(pallet_balance.ge(&amount), "pallet balance not enough");
 				},
 			};
 
 			assert_eq!(
-				MultiAssetDelegation::delegators(&caller)
+				MultiAssetDelegation::delegators(caller)
 					.unwrap_or_default()
 					.calculate_delegation_by_asset(deposit_asset),
 				amount.as_u64()
@@ -451,7 +451,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			};
 			let round = MultiAssetDelegation::current_round();
 			assert!(
-				MultiAssetDelegation::delegators(&caller)
+				MultiAssetDelegation::delegators(caller)
 					.unwrap_or_default()
 					.get_withdraw_requests()
 					.contains(&WithdrawRequest {
@@ -464,7 +464,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		},
 		PCall::execute_withdraw { .. } => {
 			assert!(
-				MultiAssetDelegation::delegators(&caller)
+				MultiAssetDelegation::delegators(caller)
 					.unwrap_or_default()
 					.get_withdraw_requests()
 					.is_empty(),
@@ -481,7 +481,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 				(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 			};
 			assert!(
-				!MultiAssetDelegation::delegators(&caller)
+				!MultiAssetDelegation::delegators(caller)
 					.unwrap_or_default()
 					.get_withdraw_requests()
 					.contains(&WithdrawRequest {
@@ -500,9 +500,9 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 				(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 			};
 			let operator_account = AccountId::from(operator.0);
-			let delegator = MultiAssetDelegation::delegators(&caller).unwrap_or_default();
+			let delegator = MultiAssetDelegation::delegators(caller).unwrap_or_default();
 			let operator_info =
-				MultiAssetDelegation::operator_info(&operator_account).unwrap_or_default();
+				MultiAssetDelegation::operator_info(operator_account).unwrap_or_default();
 			assert!(
 				delegator
 					.calculate_delegation_by_operator(operator_account)
