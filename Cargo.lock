@@ -8116,6 +8116,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-evm-precompile-multi-asset-delegation-fuzzer"
+version = "2.0.0"
+dependencies = [
+ "fp-evm",
+ "frame-support",
+ "frame-system",
+ "honggfuzz",
+ "log",
+ "pallet-evm",
+ "pallet-evm-precompile-multi-asset-delegation",
+ "pallet-multi-asset-delegation",
+ "precompile-utils",
+ "rand",
+ "sp-io",
+ "sp-runtime",
+ "sp-tracing",
+]
+
+[[package]]
 name = "pallet-evm-precompile-preimage"
 version = "0.1.0"
 dependencies = [
