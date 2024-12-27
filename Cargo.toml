@@ -10,40 +10,40 @@ exclude = ["examples"]
 
 [workspace]
 members = [
- "primitives",
- "primitives/crypto",
- "primitives/rpc/*",
- "primitives/ext",
- "client/evm-tracing",
- "client/rpc/*",
- "client/rpc-core/*",
- "node",
- "runtime/testnet",
- "runtime/mainnet",
- "pallets/*",
- "pallets/services/rpc",
- "pallets/services/rpc/runtime-api",
- "pallets/tangle-lst/benchmarking",
- "pallets/multi-asset-delegation/fuzzer",
- "precompiles/pallet-democracy",
- "precompiles/batch",
- "precompiles/call-permit",
- "precompiles/proxy",
- "precompiles/preimage",
- "precompiles/balances-erc20",
- "precompiles/assets-erc20",
- "precompiles/verify-ecdsa-secp256k1-signature",
- "precompiles/verify-ecdsa-secp256r1-signature",
- "precompiles/verify-ecdsa-stark-signature",
- "precompiles/verify-schnorr-signatures",
- "precompiles/verify-bls381-signature",
- "precompiles/multi-asset-delegation",
- "precompiles/multi-asset-delegation/fuzzer",
- "precompiles/services",
- "precompiles/tangle-lst",
- "precompiles/assets",
- "tangle-subxt",
- "evm-tracer",
+    "primitives",
+    "primitives/crypto",
+    "primitives/rpc/*",
+    "primitives/ext",
+    "client/evm-tracing",
+    "client/rpc/*",
+    "client/rpc-core/*",
+    "node",
+    "runtime/testnet",
+    "runtime/mainnet",
+    "pallets/*",
+    "pallets/services/rpc",
+    "pallets/services/rpc/runtime-api",
+    "pallets/tangle-lst/benchmarking",
+    "pallets/multi-asset-delegation/fuzzer",
+    "precompiles/pallet-democracy",
+    "precompiles/batch",
+    "precompiles/call-permit",
+    "precompiles/proxy",
+    "precompiles/preimage",
+    "precompiles/balances-erc20",
+    "precompiles/assets-erc20",
+    "precompiles/verify-ecdsa-secp256k1-signature",
+    "precompiles/verify-ecdsa-secp256r1-signature",
+    "precompiles/verify-ecdsa-stark-signature",
+    "precompiles/verify-schnorr-signatures",
+    "precompiles/verify-bls381-signature",
+    "precompiles/multi-asset-delegation",
+    "precompiles/multi-asset-delegation/fuzzer",
+    "precompiles/services",
+    "precompiles/tangle-lst",
+    "precompiles/assets",
+    "tangle-subxt",
+    "evm-tracer",
 ]
 resolver = "2"
 
@@ -272,17 +272,17 @@ fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "stable2
 
 # Frontier Primitive
 fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 
