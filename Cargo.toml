@@ -38,6 +38,7 @@ members = [
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
+    "precompiles/multi-asset-delegation/fuzzer",
     "precompiles/services",
     "precompiles/tangle-lst",
     "precompiles/assets",
@@ -271,17 +272,17 @@ fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "stable2
 
 # Frontier Primitive
 fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 
