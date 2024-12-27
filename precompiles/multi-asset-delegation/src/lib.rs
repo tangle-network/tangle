@@ -242,7 +242,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("schedule_withdraw(uint256,address,uint256)")]
+	#[precompile::public("scheduleWithdraw(uint256,address,uint256)")]
 	fn schedule_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -275,7 +275,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("cancel_withdraw(uint256,address,uint256)")]
+	#[precompile::public("cancelWithdraw(uint256,address,uint256)")]
 	fn cancel_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -351,7 +351,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("schedule_delegator_unstake(bytes32,uint256,address,uint256)")]
+	#[precompile::public("scheduleDelegatorUnstake(bytes32,uint256,address,uint256)")]
 	fn schedule_delegator_unstake(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
