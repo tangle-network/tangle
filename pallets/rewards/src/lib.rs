@@ -19,30 +19,6 @@
 //! This pallet provides a reward management system for the Tangle network, enabling users to
 //! accumulate and claim rewards.
 //!
-//! ## Key Components
-//!
-//! - **Rewards**: Users can earn rewards through various network activities. These rewards are
-//!   tracked and stored until claimed.
-//! - **Claimable Rewards**: The system maintains a record of rewards that are available for
-//!   claiming by each user.
-//! - **Total Rewards**: The system tracks the total amount of rewards that have been distributed
-//!   across the network.
-//!
-//! ## Workflow
-//!
-//! 1. **Earning Rewards**: Users earn rewards through their participation in network activities.
-//!    These rewards are added to their account by authorized entities.
-//!
-//! 2. **Claiming Rewards**: Users can claim their accumulated rewards at any time. When claimed,
-//!    the rewards are transferred to the user's account and removed from their claimable balance.
-//!
-//! ## Features
-//!
-//! - **Secure Storage**: All reward balances are securely stored and tracked on-chain
-//! - **Root-Only Additions**: Only root accounts can add rewards, ensuring security
-//! - **Safe Transfers**: Claims are validated to ensure sufficient balance before processing
-//! - **Event Tracking**: All reward additions and claims are tracked through events
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;

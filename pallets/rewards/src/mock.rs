@@ -370,10 +370,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 200_000_u128)).collect();
 
 	// Add test accounts with enough balance
-	let test_accounts = vec![
-		AccountKeyring::Dave.into(),
-		AccountKeyring::Eve.into(),
-	];
+	let test_accounts = vec![AccountKeyring::Dave.into(), AccountKeyring::Eve.into()];
 
 	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_u128)));
 
