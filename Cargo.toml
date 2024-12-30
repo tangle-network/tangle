@@ -24,8 +24,7 @@ members = [
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
     "pallets/tangle-lst/benchmarking",
-    "frost",
-    "frost/frost-*",
+    "pallets/multi-asset-delegation/fuzzer",
     "precompiles/pallet-democracy",
     "precompiles/batch",
     "precompiles/call-permit",
@@ -39,6 +38,7 @@ members = [
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
+    "precompiles/multi-asset-delegation/fuzzer",
     "precompiles/services",
     "precompiles/tangle-lst",
     "precompiles/assets",
@@ -96,6 +96,7 @@ snowbridge-milagro-bls = { git = "https://github.com/Snowfork/milagro_bls", defa
 primitive-types = { version = "0.12.2", default-features = false, features = ["scale-info", "serde_no_std"] }
 fixed = { version = "1.28.0", default-features = false }
 educe = { version = "0.6.0", default-features = false }
+honggfuzz = { version = "0.5.55" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -130,14 +131,16 @@ p256 = { version = "0.13.2", default-features = false }
 ecdsa-core = { package = "ecdsa", version = "0.16.9", default-features = false }
 starknet-crypto = { version = "0.7.1", default-features = false, features = ["signature-display", "alloc"] }
 
-frost-core = { path = "frost", default-features = false }
-frost-ed25519 = { path = "frost/frost-ed25519", default-features = false }
-frost-ed448 = { path = "frost/frost-ed448", default-features = false }
-frost-ristretto255 = { path = "frost/frost-ristretto255", default-features = false }
-frost-secp256k1 = { path = "frost/frost-secp256k1", default-features = false }
-frost-p256 = { path = "frost/frost-p256", default-features = false }
+frost-core = { version = "2.0.0", default-features = false }
+frost-ed25519 = { version = "2.0.0", default-features = false }
+frost-ristretto255 = { version = "2.0.0", default-features = false }
+frost-secp256k1 = { version = "2.0.0", default-features = false }
+frost-p256 = { version = "2.0.0", default-features = false }
+
+tg-frost-core = { path = "frost", default-features = false }
 frost-p384 = { path = "frost/frost-p384", default-features = false }
-frost-taproot = { path = "frost/frost-taproot", default-features = false }
+frost-ed448 = { path = "frost/frost-ed448", default-features = false }
+frost-secp256k1-tr = { path = "frost/frost-secp256k1-tr", default-features = false }
 
 # Substrate dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
@@ -269,17 +272,17 @@ fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "stable2
 
 # Frontier Primitive
 fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
- "serde",
+    "serde",
 ] }
 fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 
@@ -329,9 +332,7 @@ signature = { version = "2.2", default-features = false }
 # EVM & Ethereum
 # (wasm)
 ethereum-types = { version = "0.14.1", default-features = false }
-ethereum = { version = "0.15.0", default-features = false, features = [
-	"with-codec",
-] }
+ethereum = { version = "0.15.0", default-features = false, features = ["with-codec"] }
 evm = { version = "0.41.1", default-features = false }
 evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
@@ -373,16 +374,6 @@ polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-
 subxt = { version = "0.37.0", default-features = false }
 subxt-core = { version = "0.37.0", default-features = false }
 subxt-signer = { version = "0.37.0", default-features = false }
-
-# Sygma
-# sygma-access-segregator = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-basic-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-traits = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-fee-handler-router = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-percentage-feehandler = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-bridge = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-runtime-api = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
-# sygma-rpc = { git = "https://github.com/sygmaprotocol/sygma-substrate-pallets", branch = "stable2407", default-features = false }
 
 [profile.release]
 panic = "unwind"

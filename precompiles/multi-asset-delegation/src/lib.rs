@@ -33,10 +33,10 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(test)]
-mod mock;
-#[cfg(test)]
-mod mock_evm;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod mock;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod mock_evm;
 #[cfg(test)]
 mod tests;
 
@@ -70,7 +70,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u128>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	#[precompile::public("joinOperators(uint256)")]
@@ -220,7 +220,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -242,7 +242,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("schedule_withdraw(uint256,address,uint256)")]
+	#[precompile::public("scheduleWithdraw(uint256,address,uint256)")]
 	fn schedule_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -254,7 +254,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -275,7 +275,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("cancel_withdraw(uint256,address,uint256)")]
+	#[precompile::public("cancelWithdraw(uint256,address,uint256)")]
 	fn cancel_withdraw(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -287,7 +287,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -324,7 +324,7 @@ where
 		let operator =
 			Runtime::AddressMapping::into_account_id(H160::from_slice(&operator.0[12..]));
 
-		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -351,7 +351,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("schedule_delegator_unstake(bytes32,uint256,address,uint256)")]
+	#[precompile::public("scheduleDelegatorUnstake(bytes32,uint256,address,uint256)")]
 	fn schedule_delegator_unstake(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
@@ -366,7 +366,7 @@ where
 		let operator =
 			Runtime::AddressMapping::into_account_id(H160::from_slice(&operator.0[12..]));
 
-		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -414,7 +414,7 @@ where
 		let operator =
 			Runtime::AddressMapping::into_account_id(H160::from_slice(&operator.0[12..]));
 
-		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},

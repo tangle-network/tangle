@@ -5,10 +5,11 @@ use crate::{
 	mock_evm::{PCall, PrecompilesValue},
 };
 use frame_support::assert_ok;
+use k256::ecdsa::{SigningKey, VerifyingKey};
 use pallet_services::{types::ConstraintsOf, Instances, Operators, OperatorsProfile};
 use parity_scale_codec::Encode;
 use precompile_utils::{prelude::UnboundedBytes, testing::*};
-use sp_core::{ecdsa, H160, U256};
+use sp_core::{ecdsa, Pair, H160, U256};
 use sp_runtime::{bounded_vec, AccountId32};
 use tangle_primitives::services::{
 	BlueprintServiceManager, FieldType, JobDefinition, JobMetadata,
@@ -16,8 +17,13 @@ use tangle_primitives::services::{
 	ServiceMetadata,
 };
 
-fn zero_key() -> ecdsa::Public {
-	ecdsa::Public::from([0; 33])
+fn test_ecdsa_key() -> [u8; 65] {
+	let (ecdsa_key, _) = ecdsa::Pair::generate();
+	let secret = SigningKey::from_slice(&ecdsa_key.seed())
+		.expect("Should be able to create a secret key from a seed");
+	let verifying_key = VerifyingKey::from(secret);
+	let public_key = verifying_key.to_encoded_point(false);
+	public_key.to_bytes().to_vec().try_into().unwrap()
 }
 
 #[allow(dead_code)]
@@ -115,7 +121,7 @@ fn test_register_operator() {
 
 		// Now register operator
 		let preferences_data = OperatorPreferences {
-			key: zero_key(),
+			key: test_ecdsa_key(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -157,7 +163,7 @@ fn test_request_service() {
 
 		// Now register operator
 		let preferences_data = OperatorPreferences {
-			key: zero_key(),
+			key: test_ecdsa_key(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -230,7 +236,7 @@ fn test_request_service_with_erc20() {
 
 		// Now register operator
 		let preferences_data = OperatorPreferences {
-			key: zero_key(),
+			key: test_ecdsa_key(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -317,7 +323,7 @@ fn test_request_service_with_asset() {
 
 		// Now register operator
 		let preferences_data = OperatorPreferences {
-			key: zero_key(),
+			key: test_ecdsa_key(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -396,7 +402,7 @@ fn test_unregister_operator() {
 			.execute_returns(());
 
 		let preferences_data = OperatorPreferences {
-			key: zero_key(),
+			key: test_ecdsa_key(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();
@@ -446,7 +452,7 @@ fn test_terminate_service() {
 			.execute_returns(());
 
 		let preferences_data = OperatorPreferences {
-			key: zero_key(),
+			key: test_ecdsa_key(),
 			price_targets: price_targets(MachineKind::Large),
 		}
 		.encode();

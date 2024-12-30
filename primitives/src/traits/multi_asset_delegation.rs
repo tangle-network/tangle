@@ -74,8 +74,7 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 	/// # Parameters
 	///
 	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `asset_id`: A reference to the asset identifier for which the total
-	/// delegation amount is requested.
+	/// * `asset_id`: A reference to the asset identifier for which the total delegation amount is requested.
 	///
 	/// # Returns
 	///

@@ -36,15 +36,16 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
-use tangle_primitives::services::EvmAddressMapping;
-use tangle_primitives::services::EvmGasWeightMapping;
-use tangle_primitives::ServiceManager;
+use tangle_primitives::{
+	services::{EvmAddressMapping, EvmGasWeightMapping},
+	ServiceManager,
+};
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
-type AssetId = u32;
+type AssetId = u128;
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -217,7 +218,7 @@ impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
 	type AssetId = AssetId;
-	type AssetIdParameter = u32;
+	type AssetIdParameter = u128;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -336,14 +337,14 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
 #[derive(Default)]
-pub(crate) struct ExtBuilder {
+pub struct ExtBuilder {
 	/// Endowed accounts with balances
 	balances: Vec<(AccountId, Balance)>,
 }
 
 impl ExtBuilder {
 	/// Build the test externalities for use in tests
-	pub(crate) fn build(self) -> sp_io::TestExternalities {
+	pub fn build(self) -> sp_io::TestExternalities {
 		let mut t = frame_system::GenesisConfig::<Runtime>::default()
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");

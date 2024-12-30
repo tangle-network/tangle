@@ -22,14 +22,16 @@ use sp_core::{sr25519, ConstU32};
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256};
 use sp_std::{marker::PhantomData, prelude::*};
 
-use frost_core::{signature::Signature, verifying_key::VerifyingKey};
+use frost_core::{Signature, VerifyingKey};
 use frost_ed25519::Ed25519Sha512;
-use frost_ed448::Ed448Shake256;
 use frost_p256::P256Sha256;
-use frost_p384::P384Sha384;
+
 use frost_ristretto255::Ristretto255Sha512;
 use frost_secp256k1::Secp256K1Sha256;
-use frost_taproot::Secp256K1Taproot;
+
+use frost_ed448::Ed448Shake256;
+use frost_p384::P384Sha384;
+use frost_secp256k1_tr::Secp256K1Sha256TR;
 
 #[cfg(test)]
 mod mock;
@@ -44,6 +46,18 @@ macro_rules! verify_signature {
 				.map_err(|_| revert("InvalidVerifyingKeyDeserialization"))?;
 		let sig: Signature<$impl_type> =
 			Signature::deserialize($signature.try_into().unwrap_or($sig_default))
+				.map_err(|_| revert("InvalidSignatureDeserialization"))?;
+		verifying_key.verify($msg, &sig).map_err(|_| revert("InvalidSignature"))?
+	}};
+}
+
+macro_rules! verify_tg_frost_signature {
+	($impl_type:ty, $key:expr, $signature:expr, $msg:expr, $key_default:expr, $sig_default:expr) => {{
+		let verifying_key: tg_frost_core::VerifyingKey<$impl_type> =
+			tg_frost_core::VerifyingKey::deserialize($key.try_into().unwrap_or($key_default))
+				.map_err(|_| revert("InvalidVerifyingKeyDeserialization"))?;
+		let sig: tg_frost_core::Signature<$impl_type> =
+			tg_frost_core::Signature::deserialize($signature.try_into().unwrap_or($sig_default))
 				.map_err(|_| revert("InvalidSignatureDeserialization"))?;
 		verifying_key.verify($msg, &sig).map_err(|_| revert("InvalidSignature"))?
 	}};
@@ -119,8 +133,8 @@ impl<Runtime: pallet_evm::Config> SchnorrSecp256k1Precompile<Runtime> {
 			public_bytes.as_slice(),
 			signature_bytes.as_slice(),
 			&message,
-			[0u8; 33],
-			[0u8; 65]
+			&[0u8; 33],
+			&[0u8; 65]
 		);
 
 		Ok(false)
@@ -150,39 +164,8 @@ impl<Runtime: pallet_evm::Config> SchnorrEd25519Precompile<Runtime> {
 			public_bytes.as_slice(),
 			signature_bytes.as_slice(),
 			&message,
-			[0u8; 32],
-			[0u8; 64]
-		);
-
-		Ok(false)
-	}
-}
-
-/// A precompile to verify SchnorrEd448 signature
-pub struct SchnorrEd448Precompile<Runtime>(PhantomData<Runtime>);
-
-#[precompile_utils::precompile]
-impl<Runtime: pallet_evm::Config> SchnorrEd448Precompile<Runtime> {
-	#[precompile::public("verify(bytes,bytes,bytes)")]
-	#[precompile::view]
-	fn verify(
-		_handle: &mut impl PrecompileHandle,
-		public_bytes: BoundedBytes<ConstU32<57>>,
-		signature_bytes: BoundedBytes<ConstU32<114>>,
-		message: UnboundedBytes,
-	) -> EvmResult<bool> {
-		// Parse arguments
-		let public_bytes: Vec<u8> = public_bytes.into();
-		let signature_bytes: Vec<u8> = signature_bytes.into();
-		let message: Vec<u8> = message.into();
-
-		verify_signature!(
-			Ed448Shake256,
-			public_bytes.as_slice(),
-			signature_bytes.as_slice(),
-			&message,
-			[0u8; 57],
-			[0u8; 114]
+			&[0u8; 32],
+			&[0u8; 64]
 		);
 
 		Ok(false)
@@ -212,39 +195,8 @@ impl<Runtime: pallet_evm::Config> SchnorrP256Precompile<Runtime> {
 			public_bytes.as_slice(),
 			signature_bytes.as_slice(),
 			&message,
-			[0u8; 33],
-			[0u8; 65]
-		);
-
-		Ok(false)
-	}
-}
-
-/// A precompile to verify SchnorrP384 signature
-pub struct SchnorrP384Precompile<Runtime>(PhantomData<Runtime>);
-
-#[precompile_utils::precompile]
-impl<Runtime: pallet_evm::Config> SchnorrP384Precompile<Runtime> {
-	#[precompile::public("verify(bytes,bytes,bytes)")]
-	#[precompile::view]
-	fn verify(
-		_handle: &mut impl PrecompileHandle,
-		public_bytes: BoundedBytes<ConstU32<49>>,
-		signature_bytes: BoundedBytes<ConstU32<97>>,
-		message: UnboundedBytes,
-	) -> EvmResult<bool> {
-		// Parse arguments
-		let public_bytes: Vec<u8> = public_bytes.into();
-		let signature_bytes: Vec<u8> = signature_bytes.into();
-		let message: Vec<u8> = message.into();
-
-		verify_signature!(
-			P384Sha384,
-			public_bytes.as_slice(),
-			signature_bytes.as_slice(),
-			&message,
-			[0u8; 49],
-			[0u8; 97]
+			&[0u8; 33],
+			&[0u8; 65]
 		);
 
 		Ok(false)
@@ -274,8 +226,41 @@ impl<Runtime: pallet_evm::Config> SchnorrRistretto255Precompile<Runtime> {
 			public_bytes.as_slice(),
 			signature_bytes.as_slice(),
 			&message,
-			[0u8; 32],
-			[0u8; 64]
+			&[0u8; 32],
+			&[0u8; 64]
+		);
+
+		Ok(false)
+	}
+}
+
+/* THESE LIBS USING LOCAL CUSTOM TG FROST CORE DUE TO NO_STD AND PUBLIC ISSUES */
+
+/// A precompile to verify SchnorrEd448 signature
+pub struct SchnorrEd448Precompile<Runtime>(PhantomData<Runtime>);
+
+#[precompile_utils::precompile]
+impl<Runtime: pallet_evm::Config> SchnorrEd448Precompile<Runtime> {
+	#[precompile::public("verify(bytes,bytes,bytes)")]
+	#[precompile::view]
+	fn verify(
+		_handle: &mut impl PrecompileHandle,
+		public_bytes: BoundedBytes<ConstU32<57>>,
+		signature_bytes: BoundedBytes<ConstU32<114>>,
+		message: UnboundedBytes,
+	) -> EvmResult<bool> {
+		// Parse arguments
+		let public_bytes: Vec<u8> = public_bytes.into();
+		let signature_bytes: Vec<u8> = signature_bytes.into();
+		let message: Vec<u8> = message.into();
+
+		verify_tg_frost_signature!(
+			Ed448Shake256,
+			public_bytes.as_slice(),
+			signature_bytes.as_slice(),
+			&message,
+			&[0u8; 57],
+			&[0u8; 114]
 		);
 
 		Ok(false)
@@ -300,13 +285,44 @@ impl<Runtime: pallet_evm::Config> SchnorrTaprootPrecompile<Runtime> {
 		let signature_bytes: Vec<u8> = signature_bytes.into();
 		let message: Vec<u8> = message.into();
 
-		verify_signature!(
-			Secp256K1Taproot,
+		verify_tg_frost_signature!(
+			Secp256K1Sha256TR,
 			public_bytes.as_slice(),
 			signature_bytes.as_slice(),
 			&message,
-			[0u8; 33],
-			[0u8; 65]
+			&[0u8; 33],
+			&[0u8; 65]
+		);
+
+		Ok(false)
+	}
+}
+
+/// A precompile to verify SchnorrP384 signature
+pub struct SchnorrP384Precompile<Runtime>(PhantomData<Runtime>);
+
+#[precompile_utils::precompile]
+impl<Runtime: pallet_evm::Config> SchnorrP384Precompile<Runtime> {
+	#[precompile::public("verify(bytes,bytes,bytes)")]
+	#[precompile::view]
+	fn verify(
+		_handle: &mut impl PrecompileHandle,
+		public_bytes: BoundedBytes<ConstU32<49>>,
+		signature_bytes: BoundedBytes<ConstU32<97>>,
+		message: UnboundedBytes,
+	) -> EvmResult<bool> {
+		// Parse arguments
+		let public_bytes: Vec<u8> = public_bytes.into();
+		let signature_bytes: Vec<u8> = signature_bytes.into();
+		let message: Vec<u8> = message.into();
+
+		verify_tg_frost_signature!(
+			P384Sha384,
+			public_bytes.as_slice(),
+			signature_bytes.as_slice(),
+			&message,
+			&[0u8; 49],
+			&[0u8; 97]
 		);
 
 		Ok(false)
