@@ -42,6 +42,8 @@ use sp_runtime::Saturating;
 use tangle_primitives::services::Asset;
 pub mod types;
 pub use types::*;
+pub mod functions;
+pub use functions::*;
 
 /// The pallet's account ID.
 #[frame_support::pallet]

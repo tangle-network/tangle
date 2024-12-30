@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate as pallet_multi_asset_delegation;
 use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
@@ -160,12 +159,6 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		who: &H160,
 		fee: U256,
 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
-		let pallet_multi_asset_delegation_address =
-			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
-		// Make pallet multi_asset_delegation account free to use
-		if who == &pallet_multi_asset_delegation_address {
-			return Ok(None);
-		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
 			Runtime,
@@ -178,12 +171,6 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		base_fee: U256,
 		already_withdrawn: Self::LiquidityInfo,
 	) -> Self::LiquidityInfo {
-		let pallet_multi_asset_delegation_address =
-			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
-		// Make pallet multi_asset_delegation account free to use
-		if who == &pallet_multi_asset_delegation_address {
-			return already_withdrawn;
-		}
 		// fallback to the default implementation
 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
 			Runtime,
