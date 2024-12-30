@@ -47,19 +47,18 @@
 
 pub use pallet::*;
 
-// #[cfg(test)]
-// mod mock;
+#[cfg(test)]
+mod mock;
 
-// #[cfg(test)]
-// mod mock_evm;
+#[cfg(test)]
+mod mock_evm;
 
-// #[cfg(test)]
-// mod tests;
+#[cfg(test)]
+mod tests;
 
 // pub mod weights;
 
 // #[cfg(feature = "runtime-benchmarks")]
-// TODO(@1xstj): Fix benchmarking and re-enable
 // mod benchmarking;
 
 use scale_info::TypeInfo;

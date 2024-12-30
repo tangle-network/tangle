@@ -305,34 +305,6 @@ parameter_types! {
 	pub const MaxDelegations: u32 = 50;
 }
 
-impl pallet_multi_asset_delegation::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
-	type ServiceManager = MockServiceManager;
-	type LeaveOperatorsDelay = ConstU32<10>;
-	type OperatorBondLessDelay = ConstU32<1>;
-	type LeaveDelegatorsDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<5>;
-	type MinDelegateAmount = ConstU128<100>;
-	type Fungibles = Assets;
-	type AssetId = AssetId;
-	type VaultId = AssetId;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type PalletId = PID;
-	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
-	type MaxOperatorBlueprints = MaxOperatorBlueprints;
-	type MaxWithdrawRequests = MaxWithdrawRequests;
-	type MaxUnstakeRequests = MaxUnstakeRequests;
-	type MaxDelegations = MaxDelegations;
-	type SlashedAmountRecipient = SlashedAmountRecipient;
-	type EvmRunner = MockedEvmRunner;
-	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
-	type EvmAddressMapping = PalletEVMAddressMapping;
-	type WeightInfo = ();
-}
-
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
 construct_runtime!(
@@ -342,7 +314,6 @@ construct_runtime!(
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
 		Assets: pallet_assets,
-		MultiAssetDelegation: pallet_multi_asset_delegation,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
 		Session: pallet_session,
@@ -402,8 +373,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let test_accounts = vec![
 		AccountKeyring::Dave.into(),
 		AccountKeyring::Eve.into(),
-		MultiAssetDelegation::pallet_account(),
 	];
+
 	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_u128)));
 
 	pallet_balances::GenesisConfig::<Runtime> { balances }
@@ -485,7 +456,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		<Staking as Hooks<u64>>::on_initialize(1);
 
 		let call = <Runtime as pallet_multi_asset_delegation::Config>::EvmRunner::call(
-			MultiAssetDelegation::pallet_evm_account(),
+			// MultiAssetDelegation::pallet_evm_account(),
+			H160::zero(),
 			USDC_ERC20,
 			serde_json::from_value::<ethabi::Function>(json!({
 				"name": "initialize",
@@ -526,7 +498,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		// Mint
 		for i in 1..=authorities.len() {
 			let call = <Runtime as pallet_multi_asset_delegation::Config>::EvmRunner::call(
-				MultiAssetDelegation::pallet_evm_account(),
+				// MultiAssetDelegation::pallet_evm_account(),
+				H160::zero(),
 				USDC_ERC20,
 				serde_json::from_value::<ethabi::Function>(json!({
 					"name": "mint",
