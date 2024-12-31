@@ -788,7 +788,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Event emitted when a blueprint is whitelisted for rewards
        **/
-      BlueprintWhitelisted: AugmentedEvent<ApiType, [blueprintId: u32], { blueprintId: u32 }>;
+      BlueprintWhitelisted: AugmentedEvent<ApiType, [blueprintId: u64], { blueprintId: u64 }>;
       /**
        * A delegator unstake request has been cancelled.
        **/
