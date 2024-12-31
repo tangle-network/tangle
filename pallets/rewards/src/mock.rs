@@ -263,6 +263,15 @@ impl pallet_assets::Config for Runtime {
 	type RemoveItemsLimit = ConstU32<5>;
 }
 
+impl pallet_rewards::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type AssetId = AssetId;
+    type Balance = Balance;
+    type Currency = Balances;
+    type Assets = Assets;
+    type ServiceManager = MockServiceManager;
+}
+
 pub struct MockServiceManager;
 
 impl tangle_primitives::ServiceManager<AccountId, Balance> for MockServiceManager {
@@ -319,6 +328,7 @@ construct_runtime!(
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Rewards: pallet_rewards,
 	}
 );
 
