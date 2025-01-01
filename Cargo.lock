@@ -14722,6 +14722,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-timestamp",
+ "sp-tracing",
  "sp-transaction-pool",
  "sp-transaction-storage-proof",
  "substrate-build-script-utils",
@@ -14730,6 +14731,7 @@ dependencies = [
  "tangle-crypto-primitives",
  "tangle-primitives",
  "tangle-runtime",
+ "tangle-subxt",
  "tangle-testnet-runtime",
  "tokio",
 ]
