@@ -8825,7 +8825,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards"
-version = "1.2.3"
+version = "1.2.4"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -14947,7 +14947,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
