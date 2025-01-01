@@ -649,12 +649,32 @@ pub mod module {
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
 		///
-		/// A Service Blueprint is a template for a service that can be instantiated later on by a
-		/// user.
+		/// A Service Blueprint is a template for a service that can be instantiated by users. The blueprint
+		/// defines the service's constraints, requirements and behavior, including the master blueprint service
+		/// manager revision to use.
 		///
-		/// # Parameters
-		/// - `origin`: The account that is creating the service blueprint.
-		/// - `blueprint`: The blueprint of the service.
+		/// # Permissions
+		///
+		/// * The origin must be signed by the account that will own the blueprint
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call, must be signed by the account creating the blueprint
+		/// * `blueprint` - The service blueprint containing:
+		///   - Service constraints and requirements
+		///   - Master blueprint service manager revision (Latest or Specific)
+		///   - Template configuration for service instantiation
+		///
+		/// # Errors
+		///
+		/// * [`Error::BadOrigin`] - Origin is not signed
+		/// * [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist
+		/// * [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks
+		///
+		/// # Returns
+		///
+		/// Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event
+		/// containing the owner and blueprint ID.
 		#[pallet::weight(T::WeightInfo::create_blueprint())]
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
@@ -694,13 +714,34 @@ pub mod module {
 
 		/// Pre-register the caller as an operator for a specific blueprint.
 		///
-		/// The caller can pre-register for a blueprint, which will emit a `PreRegistration` event.
-		/// This event can be listened to by the operator node to execute the custom blueprint's
-		/// registration function.
+		/// This function allows an account to signal intent to become an operator for a blueprint by emitting
+		/// a `PreRegistration` event. The operator node can listen for this event to execute any custom
+		/// registration logic defined in the blueprint.
 		///
-		/// # Parameters
-		/// - `origin`: The account that is pre-registering for the service blueprint.
-		/// - `blueprint_id`: The ID of the service blueprint.
+		/// Pre-registration is the first step in the operator registration flow. After pre-registering,
+		/// operators must complete the full registration process by calling `register()` with their preferences
+		/// and registration arguments.
+		///
+		/// # Arguments
+		///
+		/// * `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to
+		///   become an operator.
+		/// * `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer
+		///   to an existing blueprint.
+		///
+		/// # Permissions
+		///
+		/// * The caller must be a signed account.
+		///
+		/// # Events
+		///
+		/// * [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:
+		///   - `operator: T::AccountId` - The account ID of the pre-registering operator
+		///   - `blueprint_id: u64` - The ID of the blueprint being pre-registered for
+		///
+		/// # Errors
+		///
+		/// * [`Error::BadOrigin`] - The origin was not signed.
 		#[pallet::weight(T::WeightInfo::pre_register())]
 		pub fn pre_register(
 			origin: OriginFor<T>,
@@ -719,8 +760,31 @@ pub mod module {
 
 		/// Register the caller as an operator for a specific blueprint.
 		///
-		/// The caller may require an approval first before they can accept to provide the service
-		/// for the users.
+		/// This function allows an account to register as an operator for a blueprint by providing their
+		/// service preferences, registration arguments, and staking the required tokens. The operator must
+		/// be active in the delegation system and may require approval before accepting service requests.
+		///
+		/// # Permissions
+		///
+		/// * The caller must be a signed account
+		/// * The caller must be an active operator in the delegation system
+		/// * The caller must not already be registered for this blueprint
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed.
+		/// * `blueprint_id` - The identifier of the service blueprint to register for
+		/// * `preferences` - The operator's service preferences and configuration
+		/// * `registration_args` - Registration arguments required by the blueprint
+		/// * `value` - Amount of tokens to stake for registration
+		///
+		/// # Errors
+		///
+		/// * [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system
+		/// * [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint
+		/// * [`Error::TypeCheck`] - Registration arguments failed type checking
+		/// * [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration
+		/// * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit
 		#[pallet::weight(T::WeightInfo::register())]
 		pub fn register(
 			origin: OriginFor<T>,
@@ -792,11 +856,25 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Unregister the caller from being an operator for the service blueprint
-		/// so that, no more services will assigned to the caller for this specific blueprint.
-		/// Note that, the caller needs to keep providing service for other active service
-		/// that uses this blueprint, until the end of service time, otherwise they may get reported
-		/// and slashed.
+		/// Unregisters a service provider from a specific service blueprint.
+		///
+		/// After unregistering, the provider will no longer receive new service assignments for this blueprint.
+		/// However, they must continue servicing any active assignments until completion to avoid penalties.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed.
+		/// * `blueprint_id` - The identifier of the service blueprint to unregister from.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by a registered service provider
+		///
+		/// # Errors
+		///
+		/// * [`Error::NotRegistered`] - The caller is not registered for this blueprint
+		/// * [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted
+		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist
 		#[pallet::weight(T::WeightInfo::unregister())]
 		pub fn unregister(
 			origin: OriginFor<T>,
@@ -825,9 +903,26 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Update the price targets for the caller for a specific service blueprint.
+		/// Updates the price targets for a registered operator's service blueprint.
 		///
-		/// See [`Self::register`] for more information.
+		/// Allows an operator to modify their price targets for a specific blueprint they are registered for.
+		/// The operator must already be registered for the blueprint to update prices.
+		///
+		/// # Arguments
+		///
+		/// * `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator.
+		/// * `blueprint_id: u64` - The identifier of the blueprint to update price targets for.
+		/// * `price_targets: PriceTargets` - The new price targets to set for the blueprint.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by a registered operator for this blueprint.
+		///
+		/// # Errors
+		///
+		/// * [`Error::NotRegistered`] - The caller is not registered for this blueprint.
+		/// * [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted.
+		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		#[pallet::weight(T::WeightInfo::update_price_targets())]
 		pub fn update_price_targets(
 			origin: OriginFor<T>,
@@ -861,9 +956,34 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Request a new service to be initiated using the provided blueprint with a list of
-		/// operators that will run your service. Optionally, you can customize who is permitted
-		/// caller of this service, by default only the caller is allowed to call the service.
+		/// Request a new service using a blueprint and specified operators.
+		///
+		/// # Arguments
+		///
+		/// * `origin: OriginFor<T>` - The origin of the call. Must be signed.
+		/// * `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments.
+		/// * `blueprint_id: u64` - The identifier of the blueprint to use.
+		/// * `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call.
+		/// * `operators: Vec<T::AccountId>` - List of operators that will run the service.
+		/// * `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments.
+		/// * `assets: Vec<T::AssetId>` - Required assets for the service.
+		/// * `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request.
+		/// * `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20).
+		/// * `value: BalanceOf<T>` - Payment amount for the service.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by an account with sufficient balance to pay for the service.
+		/// * For ERC20 payments, the EVM origin must match the caller's mapped account.
+		///
+		/// # Errors
+		///
+		/// * [`Error::TypeCheck`] - Request arguments fail blueprint type checking.
+		/// * [`Error::NoAssetsProvided`] - No assets were specified.
+		/// * [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment.
+		/// * [`Error::ERC20TransferFailed`] - ERC20 token transfer failed.
+		/// * [`Error::NotRegistered`] - One or more operators not registered for blueprint.
+		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
@@ -1002,10 +1122,23 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Approve a service request, so that the service can be initiated.
+		/// Approve a service request, allowing it to be initiated once all required approvals are received.
 		///
-		/// The `restaking_percent` is the percentage of the restaked tokens that will be exposed to
-		/// the service.
+		/// # Permissions
+		///
+		/// * Caller must be a registered operator for the service blueprint
+		/// * Caller must be in the pending approvals list for this request
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call, must be a signed account
+		/// * `request_id` - The ID of the service request to approve
+		/// * `restaking_percent` - Percentage of staked tokens to expose to this service (0-100)
+		///
+		/// # Errors
+		///
+		/// * [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list
+		/// * [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook
 		#[pallet::weight(T::WeightInfo::approve())]
 		pub fn approve(
 			origin: OriginFor<T>,
@@ -1174,9 +1307,26 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Reject a service request.
-		/// The service will not be initiated, and the requester will need to update the service
-		/// request.
+		/// Reject a service request, preventing its initiation.
+		///
+		/// The service request will remain in the system but marked as rejected. The requester will
+		/// need to update the service request to proceed.
+		///
+		/// # Permissions
+		///
+		/// * Caller must be a registered operator for the blueprint associated with this request
+		/// * Caller must be one of the operators required to approve this request
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call, must be a signed account
+		/// * `request_id` - The ID of the service request to reject
+		///
+		/// # Errors
+		///
+		/// * [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request
+		/// * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment
+		/// * [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook
 		#[pallet::weight(T::WeightInfo::reject())]
 		pub fn reject(
 			origin: OriginFor<T>,
@@ -1258,7 +1408,23 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Terminates the service by the owner of the service.
+		/// Terminates a running service instance.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by the service owner
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call
+		/// * `service_id` - The identifier of the service to terminate
+		///
+		/// # Errors
+		///
+		/// * [`Error::ServiceNotFound`] - The service_id does not exist
+		/// * [`Error::NotRegistered`] - Service operator not registered
+		/// * [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks
+		/// * [`DispatchError::BadOrigin`] - Caller is not the service owner
 		#[pallet::weight(T::WeightInfo::terminate())]
 		pub fn terminate(
 			origin: OriginFor<T>,
@@ -1301,8 +1467,27 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Call a Job in the service.
-		/// The caller needs to be the owner of the service, or a permitted caller.
+		/// Call a job in the service with the provided arguments.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by the service owner or a permitted caller
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call
+		/// * `service_id` - The service identifier
+		/// * `job` - The job index to call
+		/// * `args` - The arguments to pass to the job
+		///
+		/// # Errors
+		///
+		/// * [`Error::ServiceNotFound`] - The service_id does not exist
+		/// * [`Error::JobDefinitionNotFound`] - The job index is invalid
+		/// * [`Error::MaxFieldsExceeded`] - Too many arguments provided
+		/// * [`Error::TypeCheck`] - Arguments fail type checking
+		/// * [`Error::InvalidJobCallInput`] - Job call was rejected by hooks
+		/// * [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller
 		#[pallet::weight(T::WeightInfo::call())]
 		pub fn call(
 			origin: OriginFor<T>,
@@ -1344,7 +1529,27 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Submit the job result by using the service ID and call ID.
+		/// Submit a result for a previously called job.
+		///
+		/// # Arguments
+		///
+		/// * `service_id` - ID of the service
+		/// * `call_id` - ID of the job call
+		/// * `result` - Vector of result fields
+		///
+		/// # Permissions
+		///
+		/// * Caller must be an operator of the service
+		///
+		/// # Errors
+		///
+		/// * [`Error::ServiceNotFound`] - The service_id does not exist
+		/// * [`Error::JobCallNotFound`] - The call_id does not exist
+		/// * [`Error::JobDefinitionNotFound`] - The job index is invalid
+		/// * [`Error::MaxFieldsExceeded`] - Too many result fields provided
+		/// * [`Error::TypeCheck`] - Result fields fail type checking
+		/// * [`Error::InvalidJobResult`] - Job result was rejected by hooks
+		/// * [`DispatchError::BadOrigin`] - Caller is not an operator
 		#[pallet::weight(T::WeightInfo::submit_result())]
 		pub fn submit_result(
 			origin: OriginFor<T>,
@@ -1398,12 +1603,30 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Slash an operator (offender) for a service id with a given percent of their exposed
-		/// stake for that service.
+		/// Slash an operator's stake for a service by scheduling a deferred slashing action.
 		///
-		/// The caller needs to be an authorized Slash Origin for this service.
-		/// Note that this does not apply the slash directly, but instead schedules a deferred call
-		/// to apply the slash by another entity.
+		/// This function schedules a deferred slashing action against an operator's stake for a specific service.
+		/// The slash is not applied immediately, but rather queued to be executed by another entity later.
+		///
+		/// # Permissions
+		///
+		/// * The caller must be an authorized Slash Origin for the target service, as determined by
+		///   `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call
+		///   will fail.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed by an authorized Slash Origin.
+		/// * `offender` - The account ID of the operator to be slashed.
+		/// * `service_id` - The ID of the service for which to slash the operator.
+		/// * `percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value.
+		///
+		/// # Errors
+		///
+		/// * `NoSlashingOrigin` - No slashing origin is set for the service
+		/// * `BadOrigin` - Caller is not the authorized slashing origin
+		/// * `OffenderNotOperator` - Target account is not an operator for this service
+		/// * `OffenderNotActiveOperator` - Target operator is not currently active
 		pub fn slash(
 			origin: OriginFor<T>,
 			offender: T::AccountId,
@@ -1463,10 +1686,26 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Dispute an [UnappliedSlash] for a given era and index.
+		/// Disputes and removes an [UnappliedSlash] from storage.
 		///
-		/// The caller needs to be an authorized Dispute Origin for the service in the
-		/// [UnappliedSlash].
+		/// The slash will not be applied once disputed and is permanently removed.
+		///
+		/// # Permissions
+		///
+		/// * Caller must be the authorized dispute origin for the service
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `era` - Era containing the slash to dispute  
+		/// * `index` - Index of the slash within the era
+		///
+		/// # Errors
+		///
+		/// * [Error::NoDisputeOrigin] - Service has no dispute origin configured
+		/// * [DispatchError::BadOrigin] - Caller is not the authorized dispute origin
+		///
+
 		pub fn dispute(
 			origin: OriginFor<T>,
 			#[pallet::compact] era: u32,
@@ -1493,9 +1732,20 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Adds a new Master Blueprint Service Manager to the list of revisions.
+		/// Updates the Master Blueprint Service Manager by adding a new revision.
 		///
-		/// The caller needs to be an authorized Master Blueprint Service Manager Update Origin.
+		/// # Permissions
+		///
+		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `address` - New manager address to add
+		///
+		/// # Errors
+		///
+		/// * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
 			address: H160,

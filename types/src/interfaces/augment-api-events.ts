@@ -686,7 +686,7 @@ declare module '@polkadot/api-base/types/events' {
     };
     lst: {
       /**
-       * A member has became bonded in a pool.
+       * A member has become bonded in a pool.
        **/
       Bonded: AugmentedEvent<ApiType, [member: AccountId32, poolId: u32, bonded: u128, joined: bool], { member: AccountId32, poolId: u32, bonded: u128, joined: bool }>;
       /**
@@ -708,7 +708,7 @@ declare module '@polkadot/api-base/types/events' {
        **/
       MinBalanceDeficitAdjusted: AugmentedEvent<ApiType, [poolId: u32, amount: u128], { poolId: u32, amount: u128 }>;
       /**
-       * Claimed excess frozen ED of af the reward pool.
+       * Claimed excess frozen ED of the reward pool.
        **/
       MinBalanceExcessAdjusted: AugmentedEvent<ApiType, [poolId: u32, amount: u128], { poolId: u32, amount: u128 }>;
       /**
@@ -769,7 +769,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A member has withdrawn from their pool.
        * 
-       * The given number of `points` have been dissolved in return of `balance`.
+       * The given number of `points` have been dissolved in return for `balance`.
        * 
        * Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance
        * will be 1.
