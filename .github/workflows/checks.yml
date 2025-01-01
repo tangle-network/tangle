@@ -67,7 +67,7 @@ jobs:
       CARGO_TERM_COLOR: always
 
     concurrency:
-      group: test-${{ github.ref }}
+      group: e2e-${{ github.ref }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
