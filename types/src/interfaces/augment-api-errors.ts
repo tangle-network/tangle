@@ -1422,6 +1422,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       RewardPoolNotFound: AugmentedError<ApiType>;
       /**
+       * The slash amount is too low to be applied.
+       **/
+      SlashTooLow: AugmentedError<ApiType>;
+      /**
        * A sub pool does not exist.
        **/
       SubPoolsNotFound: AugmentedError<ApiType>;

@@ -2408,7 +2408,7 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Whitelists a blueprint for rewards.
        **/
-      whitelistBlueprintForRewards: AugmentedSubmittable<(blueprintId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      whitelistBlueprintForRewards: AugmentedSubmittable<(blueprintId: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
       /**
        * Generic tx
        **/
@@ -2551,8 +2551,10 @@ declare module '@polkadot/api-base/types/submittable' {
        * Fails unless [`crate::pallet::Config::StakeAdapter`] is of strategy type:
        * [`adapter::StakeStrategyType::Delegate`].
        * 
-       * This call can be dispatched permissionlessly (i.e. by any account). If the member has
-       * slash to be applied, caller may be rewarded with the part of the slash.
+       * The pending slash amount of the member must be equal or more than `ExistentialDeposit`.
+       * This call can be dispatched permissionlessly (i.e. by any account). If the execution
+       * is successful, fee is refunded and caller may be rewarded with a part of the slash
+       * based on the [`crate::pallet::Config::StakeAdapter`] configuration.
        **/
       applySlash: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress]>;
       /**
