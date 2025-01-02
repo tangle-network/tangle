@@ -15662,6 +15662,7 @@ name = "tangle"
 version = "1.2.4"
 dependencies = [
  "alloy",
+ "anyhow",
  "async-trait",
  "clap",
  "fc-api",

@@ -150,7 +150,27 @@ pub async fn alloy_provider() -> impl alloy::providers::Provider + Clone {
 		.unwrap()
 }
 
+pub async fn subxt_client() -> subxt::OnlineClient<subxt::PolkadotConfig> {
+	subxt::OnlineClient::new().await.unwrap()
+}
+
+pub trait AddressConverter {
+	fn to_account_id(&self) -> subxt::utils::AccountId32;
+}
+
+impl AddressConverter for alloy::primitives::Address {
+	fn to_account_id(&self) -> subxt::utils::AccountId32 {
+		let mut data = [0u8; 24];
+		data[0..4].copy_from_slice(b"evm:");
+		data[4..24].copy_from_slice(&self[..]);
+		let hash = sp_core::blake2_256(&data);
+
+		subxt::utils::AccountId32(hash)
+	}
+}
+
 /// Run an end-to-end test with the given future.
+#[track_caller]
 pub fn run_e2e_test<F>(f: F)
 where
 	F: Future + Send + 'static,

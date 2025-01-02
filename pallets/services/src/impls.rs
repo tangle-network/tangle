@@ -63,7 +63,7 @@ impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pal
 	/// Operator can exit if no active services or blueprints
 	fn can_exit(operator: &T::AccountId) -> bool {
 		OperatorsProfile::<T>::get(operator)
-			.map_or(false, |profile| profile.services.is_empty() && profile.blueprints.is_empty())
+			.map_or(true, |profile| profile.services.is_empty() && profile.blueprints.is_empty())
 	}
 
 	fn get_blueprints_by_operator(operator: &T::AccountId) -> Vec<BlueprintId> {

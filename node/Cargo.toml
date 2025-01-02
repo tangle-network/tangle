@@ -121,6 +121,7 @@ futures-timer = { workspace = true }
 tangle-subxt = { workspace = true }
 sp-tracing = { workspace = true }
 alloy = { version = "0.9", features = ["full"] }
+anyhow = "1.0"
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
