@@ -264,12 +264,12 @@ impl pallet_assets::Config for Runtime {
 }
 
 impl pallet_rewards::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type AssetId = AssetId;
-    type Balance = Balance;
-    type Currency = Balances;
-    type Assets = Assets;
-    type ServiceManager = MockServiceManager;
+	type RuntimeEvent = RuntimeEvent;
+	type AssetId = AssetId;
+	type Balance = Balance;
+	type Currency = Balances;
+	type Assets = Assets;
+	type ServiceManager = MockServiceManager;
 }
 
 pub struct MockServiceManager;
