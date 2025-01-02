@@ -110,8 +110,23 @@ pub mod pallet {
 	pub type AllowedRewardAssets<T: Config> =
 		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, bool, ValueQuery>;
 
-	type BalanceOf<T> =
-		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+	/// Stores the APY percentage for each asset (in basis points, e.g. 100 = 1%)
+	#[pallet::storage]
+	#[pallet::getter(fn asset_apy)]
+	pub type AssetApy<T: Config> =
+		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, u32, ValueQuery>;
+
+	/// Stores the maximum capacity for each asset
+	#[pallet::storage]
+	#[pallet::getter(fn asset_capacity)]
+	pub type AssetCapacity<T: Config> =
+		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, BalanceOf<T>, ValueQuery>;
+
+	/// Stores the total score for each asset
+	#[pallet::storage]
+	#[pallet::getter(fn total_asset_score)]
+	pub type TotalAssetScore<T: Config> =
+		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, u128, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -134,6 +149,10 @@ pub mod pallet {
 		AssetWhitelisted { asset: Asset<T::AssetId> },
 		/// Asset has been removed from whitelist
 		AssetRemoved { asset: Asset<T::AssetId> },
+		/// Asset rewards have been updated
+		AssetRewardsUpdated { asset: Asset<T::AssetId>, total_score: u128, users_updated: u32 },
+		/// Asset APY has been updated
+		AssetApyUpdated { asset: Asset<T::AssetId>, apy_basis_points: u32 },
 	}
 
 	/// Type of reward being added or claimed
@@ -154,6 +173,8 @@ pub mod pallet {
 		AssetNotWhitelisted,
 		/// Asset is already whitelisted
 		AssetAlreadyWhitelisted,
+		/// Invalid APY value
+		InvalidAPY,
 	}
 
 	#[pallet::call]
@@ -166,6 +187,121 @@ pub mod pallet {
 			reward_type: RewardType,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+
+			// Ensure the asset is whitelisted
+			ensure!(Self::is_asset_whitelisted(asset), Error::<T>::AssetNotWhitelisted);
+
+			// Get user rewards snapshot
+			let rewards = Self::user_rewards(&who, asset);
+
+			// Calculate user's score based on their stake and lock period
+			let user_score = functions::calculate_user_score::<T>(asset, &rewards);
+
+			// Calculate APY distribution based on user's score
+			let apy = functions::calculate_apy_distribution::<T>(asset, user_score);
+
+			// Calculate reward amount based on APY and elapsed time
+			let reward_amount = match reward_type {
+				RewardType::Boost => {
+					// For boost rewards, calculate based on locked amount and APY
+					let locked_amount = rewards.boost_rewards.amount;
+					let elapsed_time = frame_system::Pallet::<T>::block_number()
+						.saturating_sub(rewards.boost_rewards.expiry);
+
+					// Convert APY to per-block rate (assuming 6 second blocks)
+					// APY / (blocks per year) = reward rate per block
+					// blocks per year = (365 * 24 * 60 * 60) / 6 = 5,256,000
+					let blocks_per_year = T::BlocksPerYear::get();
+					let reward_rate = apy.mul_floor(locked_amount) / blocks_per_year.into();
+
+					reward_rate.saturating_mul(elapsed_time.into())
+				},
+				RewardType::Service => {
+					// For service rewards, use the accumulated service rewards
+					rewards.service_rewards
+				},
+				RewardType::Restaking => {
+					// For restaking rewards, use the accumulated restaking rewards
+					rewards.restaking_rewards
+				},
+			};
+
+			// Ensure there are rewards to claim
+			ensure!(!reward_amount.is_zero(), Error::<T>::NoRewardsAvailable);
+
+			// Transfer rewards to user
+			// Note: This assumes the pallet account has sufficient balance
+			let pallet_account = Self::account_id();
+			T::Currency::transfer(
+				&pallet_account,
+				&who,
+				reward_amount,
+				frame_support::traits::ExistenceRequirement::KeepAlive,
+			)?;
+
+			// Reset the claimed reward type
+			match reward_type {
+				RewardType::Boost => {
+					// For boost rewards, update the expiry to current block
+					Self::update_user_rewards(
+						&who,
+						asset,
+						UserRewards {
+							boost_rewards: BoostInfo {
+								expiry: frame_system::Pallet::<T>::block_number(),
+								..rewards.boost_rewards
+							},
+							..rewards
+						},
+					);
+				},
+				RewardType::Service => {
+					// Reset service rewards to zero
+					Self::update_user_rewards(
+						&who,
+						asset,
+						UserRewards { service_rewards: Zero::zero(), ..rewards },
+					);
+				},
+				RewardType::Restaking => {
+					// Reset restaking rewards to zero
+					Self::update_user_rewards(
+						&who,
+						asset,
+						UserRewards { restaking_rewards: Zero::zero(), ..rewards },
+					);
+				},
+			}
+
+			// Emit event
+			Self::deposit_event(Event::RewardsClaimed {
+				account: who,
+				asset,
+				amount: reward_amount,
+				reward_type,
+			});
+
+			Ok(())
+		}
+
+		/// Update APY for an asset
+		#[pallet::call_index(6)]
+		#[pallet::weight(10_000)]
+		pub fn update_asset_apy(
+			origin: OriginFor<T>,
+			asset: Asset<T::AssetId>,
+			apy_basis_points: u32,
+		) -> DispatchResult {
+			ensure_root(origin)?;
+			ensure!(Self::is_asset_whitelisted(asset), Error::<T>::AssetNotWhitelisted);
+			ensure!(apy_basis_points <= 10000, Error::<T>::InvalidAPY); // Max 100%
+
+			// Update APY
+			AssetApy::<T>::insert(asset, apy_basis_points);
+
+			// Emit event
+			Self::deposit_event(Event::AssetApyUpdated { asset, apy_basis_points });
+
 			Ok(())
 		}
 	}

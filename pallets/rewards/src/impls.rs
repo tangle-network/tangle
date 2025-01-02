@@ -38,6 +38,7 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> Result<(), &'static str> {
+		// TODO : Handle service rewards later
 		Ok(())
 	}
 
