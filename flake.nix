@@ -64,6 +64,7 @@
             pkgs.taplo
             pkgs.harper
             pkgs.cargo-nextest
+            pkgs.cargo-expand
             pkgs.cargo-tarpaulin
             pkgs.lldb
           ];

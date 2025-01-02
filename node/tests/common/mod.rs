@@ -6,6 +6,7 @@ use core::future::Future;
 use sc_cli::{CliConfiguration, SubstrateCli};
 use tangle::{chainspec, cli, eth, service};
 use tangle_primitives::types::Block;
+use tangle_subxt::{subxt, subxt_signer};
 
 pub struct CliWrapper(pub cli::Cli);
 
@@ -90,6 +91,65 @@ impl SubstrateCli for CliWrapper {
 
 impl clap::Parser for CliWrapper {}
 
+#[derive(Debug, Clone, Copy)]
+pub enum TestAccount {
+	Alice,
+	Bob,
+	Charlie,
+	Dave,
+	Eve,
+	Ferdie,
+}
+
+impl TestAccount {
+	pub fn address(&self) -> alloy::primitives::Address {
+		self.evm_signer().address()
+	}
+
+	pub fn account_id(&self) -> subxt::utils::AccountId32 {
+		use subxt::tx::Signer;
+		use subxt::PolkadotConfig;
+
+		let signer = self.substrate_signer();
+		Signer::<PolkadotConfig>::account_id(&signer)
+	}
+
+	pub fn evm_signer(&self) -> alloy::signers::local::PrivateKeySigner {
+		let private_key = match self {
+			Self::Alice => subxt_signer::ecdsa::dev::alice().0.secret_bytes(),
+			Self::Bob => subxt_signer::ecdsa::dev::bob().0.secret_bytes(),
+			Self::Charlie => subxt_signer::ecdsa::dev::charlie().0.secret_bytes(),
+			Self::Dave => subxt_signer::ecdsa::dev::dave().0.secret_bytes(),
+			Self::Eve => subxt_signer::ecdsa::dev::eve().0.secret_bytes(),
+			Self::Ferdie => subxt_signer::ecdsa::dev::ferdie().0.secret_bytes(),
+		};
+		alloy::signers::local::PrivateKeySigner::from_bytes((&private_key).into()).unwrap()
+	}
+
+	pub fn evm_wallet(&self) -> alloy::network::EthereumWallet {
+		alloy::network::EthereumWallet::from(self.evm_signer())
+	}
+
+	pub fn substrate_signer(&self) -> subxt_signer::sr25519::Keypair {
+		match self {
+			Self::Alice => subxt_signer::sr25519::dev::alice(),
+			Self::Bob => subxt_signer::sr25519::dev::bob(),
+			Self::Charlie => subxt_signer::sr25519::dev::charlie(),
+			Self::Dave => subxt_signer::sr25519::dev::dave(),
+			Self::Eve => subxt_signer::sr25519::dev::eve(),
+			Self::Ferdie => subxt_signer::sr25519::dev::ferdie(),
+		}
+	}
+}
+
+pub async fn alloy_provider() -> impl alloy::providers::Provider + Clone {
+	alloy::providers::ProviderBuilder::new()
+		.with_recommended_fillers()
+		.on_builtin("http://127.0.0.1:9944")
+		.await
+		.unwrap()
+}
+
 /// Run an end-to-end test with the given future.
 pub fn run_e2e_test<F>(f: F)
 where
@@ -159,6 +219,8 @@ where
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
 					auto_insert_keys: cli.auto_insert_keys,
+					#[cfg(feature = "manual-seal")]
+					sealing: cli.sealing,
 				})
 				.await
 				.unwrap();
