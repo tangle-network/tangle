@@ -19,6 +19,7 @@ use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::{Alice, Bob};
 use tangle_primitives::services::Asset;
+use tangle_primitives::types::rewards::LockMultiplier;
 
 #[test]
 fn delegate_should_work() {
@@ -544,5 +545,120 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 		assert_eq!(updated_operator_delegation.delegator, who.clone());
 		assert_eq!(updated_operator_delegation.amount, amount + additional_amount);
 		assert_eq!(updated_operator_delegation.asset_id, asset_id);
+	});
+}
+
+#[test]
+fn delegate_should_work_with_lock_multiplier() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
+		let amount = 100;
+
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		create_and_mint_tokens(VDOT, who.clone(), amount);
+
+		// Deposit first
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			asset_id.clone(),
+			amount,
+			None
+		));
+
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			asset_id.clone(),
+			amount,
+			Default::default(),
+			Some(LockMultiplier::default())
+		));
+
+		// Assert
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert!(metadata.deposits.get(&asset_id).is_none());
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator.clone());
+		assert_eq!(delegation.amount, amount);
+		assert_eq!(delegation.asset_id, asset_id);
+
+		// check the lock info
+		assert_eq!(delegation.locks.clone().unwrap().first().unwrap().amount, amount);
+		assert_eq!(
+			delegation.locks.clone().unwrap().first().unwrap().lock_multiplier,
+			LockMultiplier::default()
+		);
+		assert_eq!(delegation.locks.clone().unwrap().first().unwrap().expiry_block, 432001);
+
+		// Check the operator metadata
+		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		assert_eq!(operator_metadata.delegations.len(), 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.delegator, who.clone());
+		assert_eq!(operator_delegation.amount, amount);
+		assert_eq!(operator_delegation.asset_id, asset_id);
+	});
+}
+
+#[test]
+fn schedule_delegator_unstake_should_work_with_lock_multiplier() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let asset_id = Asset::Custom(VDOT);
+		let amount = 100;
+
+		create_and_mint_tokens(VDOT, who.clone(), amount);
+
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Deposit and delegate first
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			asset_id.clone(),
+			amount,
+			None
+		));
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			asset_id.clone(),
+			amount,
+			Default::default(),
+			Some(LockMultiplier::default())
+		));
+
+		// Should not work with locks
+		assert_noop!(
+			MultiAssetDelegation::schedule_delegator_unstake(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				asset_id.clone(),
+				amount,
+			),
+			Error::<Runtime>::LockViolation
+		);
+
+		// time travel to after lock expiry
+		System::set_block_number(432002);
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			asset_id.clone(),
+			amount,
+		));
 	});
 }

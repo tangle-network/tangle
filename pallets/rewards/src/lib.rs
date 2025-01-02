@@ -101,13 +101,8 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn asset_rewards)]
-	pub type AssetRewards<T: Config> = StorageMap<
-		_,
-		Blake2_128Concat,
-		Asset<T::AssetId>,
-		u128,
-		ValueQuery,
-	>;
+	pub type AssetRewards<T: Config> =
+		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, u128, ValueQuery>;
 
 	/// Stores the whitelisted assets that can be used for rewards
 	#[pallet::storage]

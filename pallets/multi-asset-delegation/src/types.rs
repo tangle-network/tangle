@@ -16,12 +16,12 @@
 
 use crate::Config;
 use frame_support::traits::Currency;
+use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::types::RoundIndex;
-use frame_system::pallet_prelude::BlockNumberFor;
 
 pub mod delegator;
 pub mod operator;
@@ -40,12 +40,16 @@ pub type OperatorMetadataOf<T> = OperatorMetadata<
 	<T as Config>::AssetId,
 	<T as Config>::MaxDelegations,
 	<T as Config>::MaxOperatorBlueprints,
+	BlockNumberFor<T>,
+	<T as Config>::MaxDelegations,
 >;
 
 pub type OperatorSnapshotOf<T> = OperatorSnapshot<
 	<T as frame_system::Config>::AccountId,
 	BalanceOf<T>,
 	<T as Config>::AssetId,
+	<T as Config>::MaxDelegations,
+	BlockNumberFor<T>,
 	<T as Config>::MaxDelegations,
 >;
 

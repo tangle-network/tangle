@@ -16,8 +16,8 @@
 
 use super::*;
 use frame_support::{pallet_prelude::Get, BoundedVec};
-use tangle_primitives::{services::Asset, BlueprintId};
 use tangle_primitives::types::rewards::LockMultiplier;
+use tangle_primitives::{services::Asset, BlueprintId};
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
@@ -88,8 +88,10 @@ pub struct DelegatorMetadata<
 	/// A vector of withdraw requests.
 	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
-	pub delegations:
-		BoundedVec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>, MaxDelegations>,
+	pub delegations: BoundedVec<
+		BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>,
+		MaxDelegations,
+	>,
 	/// A vector of requests to reduce the bonded amount.
 	pub delegator_unstake_requests:
 		BoundedVec<BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints>, MaxUnstakeRequests>,
@@ -162,7 +164,8 @@ impl<
 	/// Returns a reference to the list of delegations.
 	pub fn get_delegations(
 		&self,
-	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>> {
+	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>>
+	{
 		&self.delegations
 	}
 
@@ -217,8 +220,14 @@ pub struct Deposit<AssetId: Encode + Decode, Balance> {
 
 /// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBlueprints: Get<u32>, BlockNumber, MaxLocks: Get<u32>>
-{
+pub struct BondInfoDelegator<
+	AccountId,
+	Balance,
+	AssetId: Encode + Decode,
+	MaxBlueprints: Get<u32>,
+	BlockNumber,
+	MaxLocks: Get<u32>,
+> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The amount bonded.
@@ -231,7 +240,7 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBl
 	pub locks: Option<BoundedVec<LockInfo<Balance, BlockNumber>, MaxLocks>>,
 }
 
-/// Struct to store the lock info 
+/// Struct to store the lock info
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct LockInfo<Balance, BlockNumber> {
 	pub amount: Balance,

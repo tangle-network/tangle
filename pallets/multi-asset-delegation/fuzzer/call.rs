@@ -247,7 +247,17 @@ fn random_calls<R: Rng>(
 			};
 			[
 				join_operators_call(&mut rng, operator_origin.clone(), &operator),
-				(mad::Call::delegate { operator, asset_id, amount, blueprint_selection }, origin),
+				(
+					mad::Call::delegate {
+						operator,
+						asset_id,
+						amount,
+						blueprint_selection,
+						lock_multiplier: None,
+					},
+					origin,
+				),
+				// TODO : Add fuzzing with lock_multiplier
 			]
 			.to_vec()
 		},

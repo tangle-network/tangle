@@ -19,7 +19,7 @@ pub struct UserRewards<Balance, BlockNumber, AssetId, MaxServiceRewards: Get<u32
 pub struct UserRestakeUpdate<Balance, AssetId> {
 	pub asset: Asset<AssetId>,
 	pub amount: Balance,
-    pub multiplier: LockMultiplier,
+	pub multiplier: LockMultiplier,
 }
 
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
@@ -86,19 +86,19 @@ impl LockMultiplier {
 		*self as u32
 	}
 
-    /// Get the block number for each multiplier
-    pub fn get_blocks(&self) -> u32 {
-        // assuming block time of 6 seconds
-        match self {
-            LockMultiplier::OneMonth => 432000,
-            LockMultiplier::TwoMonths => 864000,
-            LockMultiplier::ThreeMonths => 1296000,
-            LockMultiplier::SixMonths => 2592000
-        }
-    }
+	/// Get the block number for each multiplier
+	pub fn get_blocks(&self) -> u32 {
+		// assuming block time of 6 seconds
+		match self {
+			LockMultiplier::OneMonth => 432000,
+			LockMultiplier::TwoMonths => 864000,
+			LockMultiplier::ThreeMonths => 1296000,
+			LockMultiplier::SixMonths => 2592000,
+		}
+	}
 
-    /// Calculate the expiry block number based on the current block number and multiplier
-    pub fn expiry_block_number<T: Config>(&self, current_block: u32) -> u32 {
-        current_block.saturating_add(self.get_blocks())
-    }
+	/// Calculate the expiry block number based on the current block number and multiplier
+	pub fn expiry_block_number<T: Config>(&self, current_block: u32) -> u32 {
+		current_block.saturating_add(self.get_blocks())
+	}
 }

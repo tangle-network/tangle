@@ -39,6 +39,7 @@ pub mod mock;
 pub mod mock_evm;
 #[cfg(test)]
 mod tests;
+use tangle_primitives::types::rewards::LockMultiplier;
 
 use fp_evm::PrecompileHandle;
 use frame_support::{
@@ -308,7 +309,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("delegate(bytes32,uint256,address,uint256,uint64[])")]
+	#[precompile::public("delegate(bytes32,uint256,address,uint256,uint64[],uint8)")]
 	fn delegate(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
@@ -316,6 +317,7 @@ where
 		token_address: Address,
 		amount: U256,
 		blueprint_selection: Vec<u64>,
+		lock_multiplier: u8,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
@@ -329,6 +331,15 @@ where
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
+		};
+
+		let lock_multiplier = match lock_multiplier {
+			0 => None,
+			1 => Some(LockMultiplier::OneMonth),
+			2 => Some(LockMultiplier::TwoMonths),
+			3 => Some(LockMultiplier::ThreeMonths),
+			4 => Some(LockMultiplier::SixMonths),
+			_ => return Err(RevertReason::custom("Invalid lock multiplier").into()),
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(
@@ -345,6 +356,7 @@ where
 						RevertReason::custom("Too many blueprint ids for fixed selection")
 					})?,
 				),
+				lock_multiplier,
 			},
 		)?;
 
