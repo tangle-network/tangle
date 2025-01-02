@@ -49,7 +49,8 @@ fn delegate_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		// Assert
@@ -100,7 +101,8 @@ fn schedule_delegator_unstake_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -153,7 +155,8 @@ fn execute_delegator_unstake_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who.clone()),
@@ -205,7 +208,8 @@ fn cancel_delegator_unstake_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -279,7 +283,8 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -358,7 +363,8 @@ fn delegate_should_fail_if_not_enough_balance() {
 				operator.clone(),
 				asset_id.clone(),
 				amount,
-				Default::default()
+				Default::default(),
+				None
 			),
 			Error::<Runtime>::InsufficientBalance
 		);
@@ -429,7 +435,8 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		assert_noop!(
@@ -487,7 +494,8 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		// Assert first delegation
@@ -514,7 +522,8 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator.clone(),
 			asset_id.clone(),
 			additional_amount,
-			Default::default()
+			Default::default(),
+			None
 		));
 
 		// Assert updated delegation

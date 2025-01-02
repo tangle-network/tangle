@@ -44,6 +44,7 @@ pub mod types;
 pub use types::*;
 pub mod functions;
 pub use functions::*;
+pub mod impls;
 
 /// The pallet's account ID.
 #[frame_support::pallet]
@@ -74,6 +75,9 @@ pub mod pallet {
 		/// The pallet's account ID.
 		type PalletId: Get<PalletId>;
 
+		/// The maximum amount of rewards that can be claimed per asset per user.
+		type MaxUniqueServiceRewards: Get<u32> + MaxEncodedLen + TypeInfo;
+
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 	}
@@ -92,6 +96,16 @@ pub mod pallet {
 		Blake2_128Concat,
 		Asset<T::AssetId>,
 		UserRewardsOf<T>,
+		ValueQuery,
+	>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn asset_rewards)]
+	pub type AssetRewards<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		Asset<T::AssetId>,
+		u128,
 		ValueQuery,
 	>;
 
@@ -157,62 +171,6 @@ pub mod pallet {
 			reward_type: RewardType,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			ensure!(Self::is_asset_whitelisted(asset), Error::<T>::AssetNotWhitelisted);
-
-			let mut amount = BalanceOf::<T>::zero();
-
-			// TODO : Implement helper function to get this value out
-			// UserRewards::<T>::mutate(who.clone(), asset, |rewards| {
-			//     amount = match reward_type {
-			//         RewardType::Restaking => std::mem::take(&mut rewards.restaking_rewards),
-			//         RewardType::Boost => std::mem::take(&mut rewards.boost_rewards),
-			//         RewardType::Service => std::mem::take(&mut rewards.service_rewards),
-			//     };
-			// });
-
-			ensure!(!amount.is_zero(), Error::<T>::NoRewardsAvailable);
-
-			let pallet_account = Self::account_id();
-			ensure!(
-				T::Currency::free_balance(&pallet_account) >= amount,
-				Error::<T>::InsufficientRewardsBalance
-			);
-
-			T::Currency::transfer(
-				&pallet_account,
-				&who,
-				amount,
-				frame_support::traits::ExistenceRequirement::KeepAlive,
-			)?;
-
-			Self::deposit_event(Event::RewardsClaimed { account: who, asset, amount, reward_type });
-
-			Ok(())
-		}
-
-		/// Add an asset to the whitelist of allowed reward assets
-		#[pallet::weight(10_000)]
-		pub fn whitelist_asset(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			ensure!(!AllowedRewardAssets::<T>::get(&asset), Error::<T>::AssetAlreadyWhitelisted);
-
-			AllowedRewardAssets::<T>::insert(asset, true);
-
-			Self::deposit_event(Event::AssetWhitelisted { asset });
-			Ok(())
-		}
-
-		/// Remove an asset from the whitelist
-		#[pallet::weight(10_000)]
-		pub fn remove_asset(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			ensure!(AllowedRewardAssets::<T>::get(&asset), Error::<T>::AssetNotWhitelisted);
-
-			AllowedRewardAssets::<T>::remove(asset);
-
-			Self::deposit_event(Event::AssetRemoved { asset });
 			Ok(())
 		}
 	}

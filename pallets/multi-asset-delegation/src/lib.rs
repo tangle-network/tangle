@@ -80,6 +80,7 @@ pub use functions::*;
 #[frame_support::pallet]
 pub mod pallet {
 	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction, *};
+	use tangle_primitives::types::rewards::LockMultiplier;
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
@@ -430,6 +431,8 @@ pub mod pallet {
 		EVMAbiEncode,
 		/// EVM decode error
 		EVMAbiDecode,
+		/// Cannot unstake with locks
+		LockViolation
 	}
 
 	/// Hooks for the pallet.
@@ -607,6 +610,7 @@ pub mod pallet {
 			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+			lock_multiplier: Option<LockMultiplier>
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_delegate(
@@ -615,6 +619,7 @@ pub mod pallet {
 				asset_id,
 				amount,
 				blueprint_selection,
+				lock_multiplier
 			)?;
 			Self::deposit_event(Event::Delegated { who, operator, asset_id, amount });
 			Ok(())

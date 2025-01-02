@@ -21,6 +21,7 @@ use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::types::RoundIndex;
+use frame_system::pallet_prelude::BlockNumberFor;
 
 pub mod delegator;
 pub mod operator;
@@ -56,4 +57,6 @@ pub type DelegatorMetadataOf<T> = DelegatorMetadata<
 	<T as Config>::MaxDelegations,
 	<T as Config>::MaxUnstakeRequests,
 	<T as Config>::MaxDelegatorBlueprints,
+	BlockNumberFor<T>,
+	<T as Config>::MaxDelegations,
 >;
