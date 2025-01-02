@@ -15,16 +15,20 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{types::*, Pallet};
+use frame_support::BoundedVec;
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
 	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
+use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{
 	traits::{CheckedSub, Zero},
 	DispatchError, Percent,
 };
+use sp_std::vec;
 use sp_std::vec::Vec;
+use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping},
 	BlueprintId,
@@ -51,6 +55,7 @@ impl<T: Config> Pallet<T> {
 		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+		lock_multiplier: Option<LockMultiplier>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -74,12 +79,32 @@ impl<T: Config> Pallet<T> {
 			{
 				delegation.amount += amount;
 			} else {
+				let now = frame_system::Pallet::<T>::block_number();
+				let now_as_u32: u32 =
+					now.try_into().map_err(|_| Error::<T>::MaxDelegationsExceeded)?; // TODO : Can be improved
+				let locks = if let Some(lock_multiplier) = lock_multiplier {
+					let expiry_block: BlockNumberFor<T> = lock_multiplier
+						.expiry_block_number::<T>(now_as_u32)
+						.try_into()
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					let bounded_vec = BoundedVec::try_from(vec![LockInfo {
+						amount,
+						lock_multiplier,
+						expiry_block,
+					}])
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					Some(bounded_vec)
+				} else {
+					None
+				};
+
 				// Create the new delegation
 				let new_delegation = BondInfoDelegator {
 					operator: operator.clone(),
 					amount,
 					asset_id,
 					blueprint_selection,
+					locks,
 				};
 
 				// Create a mutable copy of delegations
@@ -102,7 +127,25 @@ impl<T: Config> Pallet<T> {
 				);
 
 				// Create and push the new delegation bond
-				let delegation = DelegatorBond { delegator: who.clone(), amount, asset_id };
+				let now = frame_system::Pallet::<T>::block_number();
+				let now_as_u32: u32 =
+					now.try_into().map_err(|_| Error::<T>::MaxDelegationsExceeded)?; // TODO : Can be improved
+				let locks = if let Some(lock_multiplier) = lock_multiplier {
+					let expiry_block: BlockNumberFor<T> = lock_multiplier
+						.expiry_block_number::<T>(now_as_u32)
+						.try_into()
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					let bounded_vec = BoundedVec::try_from(vec![LockInfo {
+						amount,
+						lock_multiplier,
+						expiry_block,
+					}])
+					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					Some(bounded_vec)
+				} else {
+					None
+				};
+				let delegation = DelegatorBond { delegator: who.clone(), amount, asset_id, locks };
 
 				let mut delegations = operator_metadata.delegations.clone();
 
@@ -165,6 +208,19 @@ impl<T: Config> Pallet<T> {
 				metadata.delegations[delegation_index].blueprint_selection.clone();
 			let delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
+
+			// ensure the locks are not violated
+			let now = frame_system::Pallet::<T>::block_number();
+			if let Some(locks) = &delegation.locks {
+				// lets filter only active locks
+				let active_locks =
+					locks.iter().filter(|lock| lock.expiry_block > now).collect::<Vec<_>>();
+				let total_locks =
+					active_locks.iter().fold(0_u32.into(), |acc, lock| acc + lock.amount);
+				if total_locks != Zero::zero() {
+					ensure!(amount < total_locks, Error::<T>::LockViolation);
+				}
+			}
 
 			delegation.amount -= amount;
 
@@ -312,7 +368,12 @@ impl<T: Config> Pallet<T> {
 						delegation.amount += amount;
 					} else {
 						delegations
-							.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
+							.try_push(DelegatorBond {
+								delegator: who.clone(),
+								amount,
+								asset_id,
+								locks: Default::default(),
+							})
 							.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 
 						// Increase the delegation count only when a new delegation is added
@@ -340,6 +401,7 @@ impl<T: Config> Pallet<T> {
 						amount: unstake_request.amount,
 						asset_id: unstake_request.asset_id,
 						blueprint_selection: unstake_request.blueprint_selection,
+						locks: Default::default(), // should be able to unstake only if locks didnt exist
 					})
 					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 			}

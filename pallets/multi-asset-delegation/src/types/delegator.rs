@@ -16,6 +16,7 @@
 
 use super::*;
 use frame_support::{pallet_prelude::Get, BoundedVec};
+use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, BlueprintId};
 
 /// Represents how a delegator selects which blueprints to work with.
@@ -79,14 +80,18 @@ pub struct DelegatorMetadata<
 	MaxDelegations: Get<u32>,
 	MaxUnstakeRequests: Get<u32>,
 	MaxBlueprints: Get<u32>,
+	BlockNumber,
+	MaxLocks: Get<u32>,
 > {
 	/// A map of deposited assets and their respective amounts.
 	pub deposits: BTreeMap<Asset<AssetId>, Balance>,
 	/// A vector of withdraw requests.
 	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
-	pub delegations:
-		BoundedVec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>, MaxDelegations>,
+	pub delegations: BoundedVec<
+		BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>,
+		MaxDelegations,
+	>,
 	/// A vector of requests to reduce the bonded amount.
 	pub delegator_unstake_requests:
 		BoundedVec<BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints>, MaxUnstakeRequests>,
@@ -102,6 +107,8 @@ impl<
 		MaxDelegations: Get<u32>,
 		MaxUnstakeRequests: Get<u32>,
 		MaxBlueprints: Get<u32>,
+		BlockNumber,
+		MaxLocks: Get<u32>,
 	> Default
 	for DelegatorMetadata<
 		AccountId,
@@ -111,6 +118,8 @@ impl<
 		MaxDelegations,
 		MaxUnstakeRequests,
 		MaxBlueprints,
+		BlockNumber,
+		MaxLocks,
 	>
 {
 	fn default() -> Self {
@@ -132,6 +141,8 @@ impl<
 		MaxDelegations: Get<u32>,
 		MaxUnstakeRequests: Get<u32>,
 		MaxBlueprints: Get<u32>,
+		BlockNumber,
+		MaxLocks: Get<u32>,
 	>
 	DelegatorMetadata<
 		AccountId,
@@ -141,6 +152,8 @@ impl<
 		MaxDelegations,
 		MaxUnstakeRequests,
 		MaxBlueprints,
+		BlockNumber,
+		MaxLocks,
 	>
 {
 	/// Returns a reference to the vector of withdraw requests.
@@ -151,7 +164,8 @@ impl<
 	/// Returns a reference to the list of delegations.
 	pub fn get_delegations(
 		&self,
-	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>> {
+	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>>
+	{
 		&self.delegations
 	}
 
@@ -187,7 +201,7 @@ impl<
 	pub fn calculate_delegation_by_operator(
 		&self,
 		operator: AccountId,
-	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>>
+	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>>
 	where
 		AccountId: Eq + PartialEq,
 	{
@@ -206,8 +220,14 @@ pub struct Deposit<AssetId: Encode + Decode, Balance> {
 
 /// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBlueprints: Get<u32>>
-{
+pub struct BondInfoDelegator<
+	AccountId,
+	Balance,
+	AssetId: Encode + Decode,
+	MaxBlueprints: Get<u32>,
+	BlockNumber,
+	MaxLocks: Get<u32>,
+> {
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The amount bonded.
@@ -216,4 +236,14 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBl
 	pub asset_id: Asset<AssetId>,
 	/// The blueprint selection mode for this delegator.
 	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
+	/// The locks associated with this delegation.
+	pub locks: Option<BoundedVec<LockInfo<Balance, BlockNumber>, MaxLocks>>,
+}
+
+/// Struct to store the lock info
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
+pub struct LockInfo<Balance, BlockNumber> {
+	pub amount: Balance,
+	pub lock_multiplier: LockMultiplier,
+	pub expiry_block: BlockNumber,
 }

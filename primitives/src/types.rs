@@ -15,6 +15,7 @@
 //
 use super::*;
 pub mod ordered_set;
+pub mod rewards;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};

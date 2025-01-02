@@ -21,46 +21,15 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-use tangle_primitives::types::RoundIndex;
+use tangle_primitives::types::rewards::UserRewards;
+use tangle_primitives::{services::Asset, types::RoundIndex};
 
-pub mod delegator;
-pub mod operator;
-pub mod rewards;
-
-pub use delegator::*;
-pub use operator::*;
-pub use rewards::*;
+pub type UserRewardsOf<T> = UserRewards<
+	BalanceOf<T>,
+	BlockNumberFor<T>,
+	<T as Config>::AssetId,
+	<T as Config>::MaxUniqueServiceRewards,
+>;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-pub type OperatorMetadataOf<T> = OperatorMetadata<
-	<T as frame_system::Config>::AccountId,
-	BalanceOf<T>,
-	<T as Config>::AssetId,
-	<T as Config>::MaxDelegations,
-	<T as Config>::MaxOperatorBlueprints,
-	BlockNumberFor<T>,
-	<T as Config>::MaxDelegations,
->;
-
-pub type OperatorSnapshotOf<T> = OperatorSnapshot<
-	<T as frame_system::Config>::AccountId,
-	BalanceOf<T>,
-	<T as Config>::AssetId,
-	<T as Config>::MaxDelegations,
-	BlockNumberFor<T>,
-	<T as Config>::MaxDelegations,
->;
-
-pub type DelegatorMetadataOf<T> = DelegatorMetadata<
-	<T as frame_system::Config>::AccountId,
-	BalanceOf<T>,
-	<T as Config>::AssetId,
-	<T as Config>::MaxWithdrawRequests,
-	<T as Config>::MaxDelegations,
-	<T as Config>::MaxUnstakeRequests,
-	<T as Config>::MaxDelegatorBlueprints,
-	BlockNumberFor<T>,
-	<T as Config>::MaxDelegations,
->;

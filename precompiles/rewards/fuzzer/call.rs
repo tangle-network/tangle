@@ -224,7 +224,6 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 						token_address,
 						amount,
 						blueprint_selection,
-						lock_multiplier: 0, // TODO : Add fuzzer with lock multiplier
 					},
 					who,
 				),
