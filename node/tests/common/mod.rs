@@ -185,6 +185,7 @@ where
 		"--rpc-methods=unsafe",
 		"--rpc-external",
 		"--rpc-port=9944",
+		#[cfg(feature = "manual-seal")]
 		"--sealing=manual",
 		"--auto-insert-keys",
 		"-linfo",

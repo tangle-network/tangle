@@ -40,8 +40,10 @@ pub mod mock_evm;
 #[cfg(test)]
 mod tests;
 
-use fp_evm::PrecompileHandle;
+use ethabi::Function;
+use fp_evm::{PrecompileFailure, PrecompileHandle};
 use frame_support::{
+	__private::log,
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::Currency,
 };
@@ -49,7 +51,9 @@ use pallet_evm::AddressMapping;
 use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
+use sp_runtime::format;
 use sp_runtime::traits::Dispatchable;
+use sp_std::prelude::*;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{services::Asset, types::WrappedAccountId32};
 
@@ -218,10 +222,12 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		let caller = handle.context().caller;
+		let pallet_address = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
 		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
+				erc20_transfer(handle, token_address, pallet_address.into(), amount)?;
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
@@ -434,5 +440,72 @@ where
 		)?;
 
 		Ok(())
+	}
+}
+
+fn erc20_transfer(
+	handle: &mut impl PrecompileHandle,
+	erc20: Address,
+	to: Address,
+	amount: U256,
+) -> EvmResult<bool> {
+	#[allow(deprecated)]
+	let transfer_fn = Function {
+		name: String::from("transfer"),
+		inputs: vec![
+			ethabi::Param {
+				name: String::from("to"),
+				kind: ethabi::ParamType::Address,
+				internal_type: None,
+			},
+			ethabi::Param {
+				name: String::from("value"),
+				kind: ethabi::ParamType::Uint(256),
+				internal_type: None,
+			},
+		],
+		outputs: vec![ethabi::Param {
+			name: String::from("success"),
+			kind: ethabi::ParamType::Bool,
+			internal_type: None,
+		}],
+		constant: None,
+		state_mutability: ethabi::StateMutability::NonPayable,
+	};
+
+	let args = [ethabi::Token::Address(to.0), ethabi::Token::Uint(ethabi::Uint::from(amount))];
+
+	let data = transfer_fn
+		.encode_input(&args)
+		.map_err(|e| revert(format!("failed to encode IERC20.transfer call: {e:?}")))?;
+	let gas_limit = Some(handle.remaining_gas());
+	let is_static = false;
+	let caller = handle.context().caller;
+	let context = fp_evm::Context { address: caller, caller, apparent_value: U256::zero() };
+	let (exit_reason, output) =
+		handle.call(erc20.0, None, data.clone(), gas_limit, is_static, &context);
+
+	log::debug!(
+		target: "evm",
+		"erc20_transfer: context: {:?}, exit_reason: {:?}, input: 0x{}, output: 0x{}",
+		context,
+		exit_reason,
+		hex::encode(&data),
+		hex::encode(&output),
+	);
+
+	match exit_reason {
+		fp_evm::ExitReason::Succeed(_) => {
+			// decode the result and return it
+			let result = transfer_fn
+				.decode_output(&output)
+				.map_err(|e| revert(format!("failed to decode IERC20.transfer result: {e:?}")))?;
+			let first_token = result.first().ok_or(RevertReason::custom("no return value"))?;
+			let s = if let ethabi::Token::Bool(val) = first_token { *val } else { false };
+			Ok(s)
+		},
+		fp_evm::ExitReason::Error(e) => Err(PrecompileFailure::Error { exit_status: e }),
+		fp_evm::ExitReason::Revert(e) => Err(PrecompileFailure::Revert { exit_status: e, output }),
+		fp_evm::ExitReason::Fatal(e) => Err(PrecompileFailure::Fatal { exit_status: e }),
 	}
 }

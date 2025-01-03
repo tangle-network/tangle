@@ -56,7 +56,7 @@ where
 			Ok(_) => info!("Test passed"),
 			Err(e) => {
 				// wait for 1 more block to ensure that the logs are printed
-				wait_for_more_blocks(&provider, 5).await;
+				wait_for_more_blocks(&provider, 1).await;
 				panic!("Test failed: {:?}", e);
 			},
 		}
@@ -110,19 +110,20 @@ fn operator_join_delegator_delegate() {
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_tnt_balance = bob_provider.get_balance(bob.address()).await?;
-		info!("Bob TNT balance: {:?}", bob_tnt_balance);
+		info!("Bob balance: {:?} TNT (in Uints)", bob_tnt_balance);
 		assert!(bob_tnt_balance > U256::ZERO);
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
-		info!("Bob balance: {:?}", bob_balance._0);
+		info!("Bob ({:?}) balance: {:?} USDC (in Uints)", bob.address(), bob_balance._0);
 		assert_eq!(bob_balance._0, mint_amount);
+		wait_for_more_blocks(&provider, 1).await;
 
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(U256::from(2));
 		assert!(delegate_amount < mint_amount);
 		// Deposit USDC to the MAD pallet.
 		let deposit_result = precompile
-			.deposit(U256::ZERO, *usdc.address(), delegate_amount)
+			.deposit(U256::ZERO, *usdc.address(), U256::from(1))
 			.send()
 			.await?
 			.with_timeout(Some(Duration::from_secs(5)))
