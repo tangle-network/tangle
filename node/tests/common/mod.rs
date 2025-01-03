@@ -4,6 +4,7 @@
 use core::future::Future;
 
 use sc_cli::{CliConfiguration, SubstrateCli};
+use sp_tracing::info;
 use tangle::{chainspec, cli, eth, service};
 use tangle_primitives::types::Block;
 use tangle_subxt::{subxt, subxt_signer};
@@ -123,6 +124,7 @@ impl TestAccount {
 			Self::Eve => subxt_signer::ecdsa::dev::eve().0.secret_bytes(),
 			Self::Ferdie => subxt_signer::ecdsa::dev::ferdie().0.secret_bytes(),
 		};
+		info!("Using {:?}'s private key: 0x{}", self, hex::encode(private_key));
 		alloy::signers::local::PrivateKeySigner::from_bytes((&private_key).into()).unwrap()
 	}
 

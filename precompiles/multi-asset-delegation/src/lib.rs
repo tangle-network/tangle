@@ -53,7 +53,6 @@ use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::format;
 use sp_runtime::traits::Dispatchable;
-use sp_std::prelude::*;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{services::Asset, types::WrappedAccountId32};
 
@@ -452,7 +451,7 @@ fn erc20_transfer(
 	#[allow(deprecated)]
 	let transfer_fn = Function {
 		name: String::from("transfer"),
-		inputs: vec![
+		inputs: Vec::from([
 			ethabi::Param {
 				name: String::from("to"),
 				kind: ethabi::ParamType::Address,
@@ -463,12 +462,12 @@ fn erc20_transfer(
 				kind: ethabi::ParamType::Uint(256),
 				internal_type: None,
 			},
-		],
-		outputs: vec![ethabi::Param {
+		]),
+		outputs: Vec::from([ethabi::Param {
 			name: String::from("success"),
 			kind: ethabi::ParamType::Bool,
 			internal_type: None,
-		}],
+		}]),
 		constant: None,
 		state_mutability: ethabi::StateMutability::NonPayable,
 	};
@@ -478,19 +477,20 @@ fn erc20_transfer(
 	let data = transfer_fn
 		.encode_input(&args)
 		.map_err(|e| revert(format!("failed to encode IERC20.transfer call: {e:?}")))?;
-	let gas_limit = Some(handle.remaining_gas());
+	// let gas_limit = Some(handle.remaining_gas());
+	let gas_limit = None;
 	let is_static = false;
 	let caller = handle.context().caller;
-	let context = fp_evm::Context { address: caller, caller, apparent_value: U256::zero() };
-	let (exit_reason, output) =
-		handle.call(erc20.0, None, data.clone(), gas_limit, is_static, &context);
+	let context = fp_evm::Context { address: erc20.0, caller, apparent_value: U256::zero() };
+	let (exit_reason, output) = handle.call(erc20.0, None, data, gas_limit, is_static, &context);
 
 	log::debug!(
 		target: "evm",
-		"erc20_transfer: context: {:?}, exit_reason: {:?}, input: 0x{}, output: 0x{}",
+		"erc20_transfer: context: {:?}, exit_reason: {:?}, input: ({:?}, {}), output: 0x{}",
 		context,
 		exit_reason,
-		hex::encode(&data),
+		to.0,
+		amount,
 		hex::encode(&output),
 	);
 

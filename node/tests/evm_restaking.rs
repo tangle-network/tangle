@@ -6,10 +6,11 @@ use core::ops::{Div, Mul};
 use core::time::Duration;
 
 use alloy::network::Ethereum;
-use alloy::primitives::*;
+use alloy::primitives::{FixedBytes, *};
 use alloy::providers::fillers::{FillProvider, RecommendedFillers, WalletFiller};
-use alloy::providers::Provider;
+use alloy::providers::{Provider, WalletProvider};
 use alloy::sol;
+use anyhow::bail;
 use sp_tracing::info;
 use tangle_subxt::tangle_testnet_runtime::api;
 
@@ -103,8 +104,14 @@ fn operator_join_delegator_delegate() {
 
 		// Delegate assets to the operator.
 		let bob = TestAccount::Bob;
-		let bob_provider = FillProvider::new(provider.clone(), Ethereum::recommended_fillers())
+		let provider = alloy_provider().await;
+		let bob_provider = FillProvider::new(provider, Ethereum::recommended_fillers())
 			.join_with(WalletFiller::new(bob.evm_wallet()));
+		if !bob_provider.has_signer_for(&bob.address()) {
+			bail!("Bob's provider does not have a signer for Bob's address");
+		}
+
+		let usdc = MockERC20::new(*usdc.address(), &bob_provider);
 		// Mint some USDC for Bob.
 		let mint_amount = U256::from(100u128).mul(U256::from(10).pow(U256::from(decimals)));
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
@@ -116,14 +123,15 @@ fn operator_join_delegator_delegate() {
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
 		info!("Bob ({:?}) balance: {:?} USDC (in Uints)", bob.address(), bob_balance._0);
 		assert_eq!(bob_balance._0, mint_amount);
-		wait_for_more_blocks(&provider, 1).await;
+		wait_for_more_blocks(&bob_provider, 1).await;
 
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(U256::from(2));
 		assert!(delegate_amount < mint_amount);
 		// Deposit USDC to the MAD pallet.
 		let deposit_result = precompile
-			.deposit(U256::ZERO, *usdc.address(), U256::from(1))
+			.deposit(U256::ZERO, *usdc.address(), delegate_amount)
+			.from(bob.address())
 			.send()
 			.await?
 			.with_timeout(Some(Duration::from_secs(5)))
@@ -135,7 +143,7 @@ fn operator_join_delegator_delegate() {
 		assert_eq!(bob_balance._0, mint_amount - delegate_amount);
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				FixedBytes::left_padding_from(alice.address().as_ref()),
 				U256::ZERO,
 				*usdc.address(),
 				delegate_amount,
