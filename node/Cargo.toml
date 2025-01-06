@@ -150,5 +150,3 @@ fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runt
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
 manual-seal = ["tangle-testnet-runtime/manual-seal"]
 try-runtime = []
-# This feature is used to enable E2E tests for the node
-e2e = []

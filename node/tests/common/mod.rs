@@ -1,10 +1,14 @@
-//! Common utilities for end-to-end tests.
-#![cfg(feature = "e2e")]
-
 use core::future::Future;
 
+use alloy::{
+	network::{Ethereum, EthereumWallet},
+	providers::{
+		fillers::{FillProvider, JoinFill, RecommendedFillers, WalletFiller},
+		Provider, RootProvider,
+	},
+	transports::BoxTransport,
+};
 use sc_cli::{CliConfiguration, SubstrateCli};
-use sp_tracing::info;
 use tangle::{chainspec, cli, eth, service};
 use tangle_primitives::types::Block;
 use tangle_subxt::{subxt, subxt_signer};
@@ -92,6 +96,23 @@ impl SubstrateCli for CliWrapper {
 
 impl clap::Parser for CliWrapper {}
 
+pub type RecommendedFillersOf<T> = <T as RecommendedFillers>::RecommendedFillers;
+
+/// A type alias for the Alloy provider with wallet.
+pub type AlloyProviderWithWallet = FillProvider<
+	JoinFill<RecommendedFillersOf<Ethereum>, WalletFiller<EthereumWallet>>,
+	RootProvider<BoxTransport>,
+	BoxTransport,
+	Ethereum,
+>;
+/// A type alias for the Alloy provider without wallet.
+pub type AlloyProvider = FillProvider<
+	RecommendedFillersOf<Ethereum>,
+	RootProvider<BoxTransport>,
+	BoxTransport,
+	Ethereum,
+>;
+
 #[derive(Debug, Clone, Copy)]
 pub enum TestAccount {
 	Alice,
@@ -124,7 +145,6 @@ impl TestAccount {
 			Self::Eve => subxt_signer::ecdsa::dev::eve().0.secret_bytes(),
 			Self::Ferdie => subxt_signer::ecdsa::dev::ferdie().0.secret_bytes(),
 		};
-		info!("Using {:?}'s private key: 0x{}", self, hex::encode(private_key));
 		alloy::signers::local::PrivateKeySigner::from_bytes((&private_key).into()).unwrap()
 	}
 
@@ -144,12 +164,20 @@ impl TestAccount {
 	}
 }
 
-pub async fn alloy_provider() -> impl alloy::providers::Provider + Clone {
-	alloy::providers::ProviderBuilder::new()
-		.with_recommended_fillers()
+pub async fn alloy_provider() -> AlloyProvider {
+	let provider = alloy::providers::ProviderBuilder::new()
 		.on_builtin("http://127.0.0.1:9944")
 		.await
-		.unwrap()
+		.unwrap();
+	FillProvider::new(provider.root().clone(), Ethereum::recommended_fillers())
+}
+
+pub fn alloy_provider_with_wallet(
+	provider: &AlloyProvider,
+	wallet: EthereumWallet,
+) -> AlloyProviderWithWallet {
+	FillProvider::new(provider.root().clone(), Ethereum::recommended_fillers())
+		.join_with(WalletFiller::new(wallet))
 }
 
 pub async fn subxt_client() -> subxt::OnlineClient<subxt::PolkadotConfig> {
