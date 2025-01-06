@@ -1,93 +1,72 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.3;
 
-/// @dev The MultiAssetDelegation contract's address.
-address constant MULTI_ASSET_DELEGATION = 0x0000000000000000000000000000000000000822;
+/// @dev The Rewards contract's address.
+address constant REWARDS = 0x0000000000000000000000000000000000000823;
 
-/// @dev The MultiAssetDelegation contract's instance.
-MultiAssetDelegation constant MULTI_ASSET_DELEGATION_CONTRACT = MultiAssetDelegation(MULTI_ASSET_DELEGATION);
+/// @dev The Rewards contract's instance.
+Rewards constant REWARDS_CONTRACT = Rewards(REWARDS);
 
 /// @author The Tangle Team
-/// @title Pallet MultiAssetDelegation Interface
-/// @title The interface through which solidity contracts will interact with the MultiAssetDelegation pallet
-/// @custom:address 0x0000000000000000000000000000000000000822
-interface MultiAssetDelegation {
-    /// @dev Join as an operator with a bond amount.
-    /// @param bondAmount The amount to bond as an operator.
-    function joinOperators(uint256 bondAmount) external returns (uint8);
+/// @title Pallet Rewards Interface
+/// @title The interface through which solidity contracts will interact with the Rewards pallet
+/// @custom:address 0x0000000000000000000000000000000000000823
+interface Rewards {
+    /// @notice Updates the rewards for a specific asset
+    /// @dev Only callable by root/admin
+    /// @param assetId The ID of the asset
+    /// @param rewards The new rewards amount
+    /// @return uint8 Returns 0 on success
+    function updateAssetRewards(uint256 assetId, uint256 rewards) external returns (uint8);
 
-    /// @dev Schedule to leave as an operator.
-    function scheduleLeaveOperators() external returns (uint8);
+    /// @notice Updates the APY for a specific asset
+    /// @dev Only callable by root/admin. APY is capped at 10%
+    /// @param assetId The ID of the asset
+    /// @param apy The new APY value (in basis points, e.g. 1000 = 10%)
+    /// @return uint8 Returns 0 on success
+    function updateAssetApy(uint256 assetId, uint32 apy) external returns (uint8);
 
-    /// @dev Cancel the scheduled leave as an operator.
-    function cancelLeaveOperators() external returns (uint8);
+    /// @notice Calculates the reward score for given parameters
+    /// @param stake The stake amount
+    /// @param rewards The rewards amount
+    /// @param apy The APY value
+    /// @return uint256 The calculated reward score
+    function calculateRewardScore(uint256 stake, uint256 rewards, uint32 apy) external view returns (uint256);
 
-    /// @dev Execute the leave as an operator.
-    function executeLeaveOperators() external returns (uint8);
+    /// @notice Calculates the total reward score for an asset
+    /// @param assetId The ID of the asset
+    /// @return uint256 The total reward score
+    function calculateTotalRewardScore(uint256 assetId) external view returns (uint256);
 
-    /// @dev Bond more as an operator.
-    /// @param additionalBond The additional amount to bond.
-    function operatorBondMore(uint256 additionalBond) external returns (uint8);
+    /// @notice Gets the current rewards for an asset
+    /// @param assetId The ID of the asset
+    /// @return uint256 The current rewards amount
+    function assetRewards(uint256 assetId) external view returns (uint256);
 
-    /// @dev Schedule to unstake as an operator.
-    /// @param unstakeAmount The amount to unstake.
-    function scheduleOperatorUnstake(uint256 unstakeAmount) external returns (uint8);
+    /// @notice Gets the current APY for an asset
+    /// @param assetId The ID of the asset
+    /// @return uint32 The current APY value
+    function assetApy(uint256 assetId) external view returns (uint32);
 
-    /// @dev Execute the unstake as an operator.
-    function executeOperatorUnstake() external returns (uint8);
+    /// @notice Sets incentive APY and cap for a vault
+    /// @dev Only callable by force origin. APY is capped at 10%
+    /// @param vaultId The ID of the vault
+    /// @param apy The APY value (in basis points, max 1000 = 10%)
+    /// @param cap The cap amount for full APY distribution
+    /// @return uint8 Returns 0 on success
+    function setIncentiveApyAndCap(uint256 vaultId, uint32 apy, uint256 cap) external returns (uint8);
 
-    /// @dev Cancel the scheduled unstake as an operator.
-    function cancelOperatorUnstake() external returns (uint8);
+    /// @notice Whitelists a blueprint for rewards
+    /// @dev Only callable by force origin
+    /// @param blueprintId The ID of the blueprint to whitelist
+    /// @return uint8 Returns 0 on success
+    function whitelistBlueprintForRewards(uint64 blueprintId) external returns (uint8);
 
-    /// @dev Go offline as an operator.
-    function goOffline() external returns (uint8);
-
-    /// @dev Go online as an operator.
-    function goOnline() external returns (uint8);
-
-    /// @dev Deposit an amount of an asset.
-    /// @param assetId The ID of the asset (0 for ERC20).
-    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
-    /// @param amount The amount to deposit.
-    function deposit(uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
-
-    /// @dev Schedule a withdrawal of an amount of an asset.
-    /// @param assetId The ID of the asset (0 for ERC20).
-    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
-    /// @param amount The amount to withdraw.
-    function scheduleWithdraw(uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
-
-    /// @dev Execute the scheduled withdrawal.
-    function executeWithdraw() external returns (uint8);
-
-    /// @dev Cancel the scheduled withdrawal.
-    /// @param assetId The ID of the asset (0 for ERC20).
-    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
-    /// @param amount The amount to cancel withdrawal.
-    function cancelWithdraw(uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
-
-    /// @dev Delegate an amount of an asset to an operator.
-    /// @param operator The address of the operator.
-    /// @param assetId The ID of the asset (0 for ERC20).
-    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
-    /// @param amount The amount to delegate.
-    /// @param blueprintSelection The blueprint selection.
-    function delegate(bytes32 operator, uint256 assetId, address tokenAddress, uint256 amount, uint64[] memory blueprintSelection) external returns (uint8);
-
-    /// @dev Schedule an unstake of an amount of an asset as a delegator.
-    /// @param operator The address of the operator.
-    /// @param assetId The ID of the asset (0 for ERC20).
-    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
-    /// @param amount The amount to unstake.
-    function scheduleDelegatorUnstake(bytes32 operator, uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
-
-    /// @dev Execute the scheduled unstake as a delegator.
-    function executeDelegatorUnstake() external returns (uint8);
-
-    /// @dev Cancel the scheduled unstake as a delegator.
-    /// @param operator The address of the operator.
-    /// @param assetId The ID of the asset (0 for ERC20).
-    /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
-    /// @param amount The amount to cancel unstake.
-    function cancelDelegatorUnstake(bytes32 operator, uint256 assetId, address tokenAddress, uint256 amount) external returns (uint8);
+    /// @notice Manages assets in a vault
+    /// @dev Only callable by authorized accounts
+    /// @param vaultId The ID of the vault
+    /// @param assetId The ID of the asset
+    /// @param action 0 for Add, 1 for Remove
+    /// @return uint8 Returns 0 on success
+    function manageAssetInVault(uint256 vaultId, uint256 assetId, uint8 action) external returns (uint8);
 }

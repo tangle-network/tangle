@@ -15,525 +15,219 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! # Running
-//! Running this fuzzer can be done with `cargo hfuzz run mad-fuzzer`. `honggfuzz` CLI
+//! Running this fuzzer can be done with `cargo hfuzz run rewards-fuzzer`. `honggfuzz` CLI
 //! options can be used by setting `HFUZZ_RUN_ARGS`, such as `-n 4` to use 4 threads.
 //!
 //! # Debugging a panic
 //! Once a panic is found, it can be debugged with
-//! `cargo hfuzz run-debug mad-fuzzer hfuzz_workspace/mad-fuzzer/*.fuzz`.
+//! `cargo hfuzz run-debug rewards-fuzzer hfuzz_workspace/rewards-fuzzer/*.fuzz`.
 
 use fp_evm::Context;
 use fp_evm::PrecompileSet;
 use frame_support::traits::{Currency, Get};
 use honggfuzz::fuzz;
 use pallet_evm::AddressMapping;
-use pallet_evm_precompile_multi_asset_delegation::{
-	mock::*, mock_evm::PrecompilesValue, MultiAssetDelegationPrecompileCall as MADPrecompileCall,
+use pallet_evm_precompile_rewards::{
+    mock::*, mock_evm::PrecompilesValue, RewardsPrecompileCall as RewardsCall,
 };
-use pallet_multi_asset_delegation::{
-	mock::{Asset, AssetId},
-	pallet as mad,
-	types::*,
-};
+use pallet_rewards::pallet as rewards;
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use rand::{seq::SliceRandom, Rng};
-use sp_runtime::traits::{Scale, Zero};
+use sp_runtime::traits::{Scale, Zero, One};
+use sp_runtime::Percent;
 
-const MAX_ED_MULTIPLE: Balance = 10_000;
-const MIN_ED_MULTIPLE: Balance = 10;
+const MAX_APY: u32 = 1000; // 10% in basis points
+const MAX_REWARDS: u128 = u128::MAX;
+const MAX_VAULT_ID: u128 = 1000;
+const MAX_BLUEPRINT_ID: u64 = 1000;
 
-type PCall = MADPrecompileCall<Runtime>;
+type PCall = RewardsCall<Runtime>;
 
 fn random_address<R: Rng>(rng: &mut R) -> Address {
-	Address(rng.gen::<[u8; 20]>().into())
+    Address(rng.gen::<[u8; 20]>().into())
 }
 
-/// Grab random accounts.
+/// Generate a random signed origin
 fn random_signed_origin<R: Rng>(rng: &mut R) -> (RuntimeOrigin, Address) {
-	let addr = random_address(rng);
-	let signer = <TestAccount as AddressMapping<AccountId>>::into_account_id(addr.0);
-	(RuntimeOrigin::signed(signer), addr)
+    let addr = random_address(rng);
+    let signer = <TestAccount as AddressMapping<AccountId>>::into_account_id(addr.0);
+    (RuntimeOrigin::signed(signer), addr)
 }
 
-fn random_ed_multiple<R: Rng>(rng: &mut R) -> Balance {
-	let multiple = rng.gen_range(MIN_ED_MULTIPLE..MAX_ED_MULTIPLE);
-	ExistentialDeposit::get() * multiple
+/// Generate a random asset ID
+fn random_asset<R: Rng>(rng: &mut R) -> u128 {
+    rng.gen_range(1..u128::MAX)
 }
 
-fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
-	let asset_id = rng.gen_range(1..u128::MAX);
-	let is_evm = rng.gen_bool(0.5);
-	if is_evm {
-		let evm_address = rng.gen::<[u8; 20]>().into();
-		Asset::Erc20(evm_address)
-	} else {
-		Asset::Custom(asset_id)
-	}
+/// Generate a random APY value (max 10%)
+fn random_apy<R: Rng>(rng: &mut R) -> u32 {
+    rng.gen_range(1..=MAX_APY)
 }
 
-fn fund_account<R: Rng>(rng: &mut R, address: &Address) {
-	let target_amount = random_ed_multiple(rng);
-	let signer = <TestAccount as AddressMapping<AccountId>>::into_account_id(address.0);
-	if let Some(top_up) = target_amount.checked_sub(Balances::free_balance(signer)) {
-		let _ = Balances::deposit_creating(&signer, top_up);
-	}
-	assert!(Balances::free_balance(signer) >= target_amount);
+/// Generate random rewards amount
+fn random_rewards<R: Rng>(rng: &mut R) -> u128 {
+    rng.gen_range(1..MAX_REWARDS)
 }
 
-/// Join operators call.
-fn join_operators_call<R: Rng>(rng: &mut R, who: &Address) -> (PCall, Address) {
-	let minimum_bond = <<Runtime as mad::Config>::MinOperatorBondAmount as Get<Balance>>::get();
-	let multiplier = rng.gen_range(1..50u64);
-	let who_account_id = <TestAccount as AddressMapping<AccountId>>::into_account_id(who.0);
-	let _ = Balances::deposit_creating(&who_account_id, minimum_bond.mul(multiplier));
-	let bond_amount = minimum_bond.mul(multiplier).into();
-	(PCall::join_operators { bond_amount }, *who)
+/// Generate a random vault ID
+fn random_vault_id<R: Rng>(rng: &mut R) -> u128 {
+    rng.gen_range(1..MAX_VAULT_ID)
 }
 
+/// Generate a random blueprint ID
+fn random_blueprint_id<R: Rng>(rng: &mut R) -> u64 {
+    rng.gen_range(1..MAX_BLUEPRINT_ID)
+}
+
+/// Update asset rewards call
+fn update_asset_rewards_call<R: Rng>(rng: &mut R) -> (PCall, Address) {
+    let (origin, who) = random_signed_origin(rng);
+    let asset_id = random_asset(rng).into();
+    let rewards = random_rewards(rng).into();
+    (PCall::update_asset_rewards { asset_id, rewards }, who)
+}
+
+/// Update asset APY call
+fn update_asset_apy_call<R: Rng>(rng: &mut R) -> (PCall, Address) {
+    let (origin, who) = random_signed_origin(rng);
+    let asset_id = random_asset(rng).into();
+    let apy = random_apy(rng);
+    (PCall::update_asset_apy { asset_id, apy }, who)
+}
+
+/// Set incentive APY and cap call
+fn set_incentive_apy_and_cap_call<R: Rng>(rng: &mut R) -> (PCall, Address) {
+    let (origin, who) = random_signed_origin(rng);
+    let vault_id = random_vault_id(rng).into();
+    let apy = random_apy(rng);
+    let cap = random_rewards(rng).into();
+    (PCall::set_incentive_apy_and_cap { vault_id, apy, cap }, who)
+}
+
+/// Whitelist blueprint call
+fn whitelist_blueprint_call<R: Rng>(rng: &mut R) -> (PCall, Address) {
+    let (origin, who) = random_signed_origin(rng);
+    let blueprint_id = random_blueprint_id(rng);
+    (PCall::whitelist_blueprint_for_rewards { blueprint_id }, who)
+}
+
+/// Manage asset in vault call
+fn manage_asset_in_vault_call<R: Rng>(rng: &mut R) -> (PCall, Address) {
+    let (origin, who) = random_signed_origin(rng);
+    let vault_id = random_vault_id(rng).into();
+    let asset_id = random_asset(rng).into();
+    let action = rng.gen_range(0..=1);
+    (PCall::manage_asset_in_vault { vault_id, asset_id, action }, who)
+}
+
+/// Generate random calls for fuzzing
 fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Address)> {
-	let op = PCall::selectors().choose(rng).cloned().unwrap();
-	match op {
-		_ if op == PCall::join_operators_selectors()[0] => {
-			// join_operators
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(&mut rng, &who)]
-		},
-		_ if op == PCall::schedule_leave_operators_selectors()[0] => {
-			// Schedule leave operators
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::schedule_leave_operators {}, who)]
-		},
-		_ if op == PCall::cancel_leave_operators_selectors()[0] => {
-			// Cancel leave operators
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::cancel_leave_operators {}, who)]
-		},
-		_ if op == PCall::execute_leave_operators_selectors()[0] => {
-			// Execute leave operators
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::execute_leave_operators {}, who)]
-		},
-		_ if op == PCall::operator_bond_more_selectors()[0] => {
-			// Operator bond more
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let additional_bond = random_ed_multiple(&mut rng).into();
-			vec![
-				join_operators_call(rng, &who),
-				(PCall::operator_bond_more { additional_bond }, who),
-			]
-		},
-		_ if op == PCall::schedule_operator_unstake_selectors()[0] => {
-			// Schedule operator unstake
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let unstake_amount = random_ed_multiple(&mut rng).into();
-			vec![
-				join_operators_call(rng, &who),
-				(PCall::schedule_operator_unstake { unstake_amount }, who),
-			]
-		},
-		_ if op == PCall::execute_operator_unstake_selectors()[0] => {
-			// Execute operator unstake
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::execute_operator_unstake {}, who)]
-		},
-		_ if op == PCall::cancel_operator_unstake_selectors()[0] => {
-			// Cancel operator unstake
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::cancel_operator_unstake {}, who)]
-		},
-		_ if op == PCall::go_offline_selectors()[0] => {
-			// Go offline
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::go_offline {}, who)]
-		},
-		_ if op == PCall::go_online_selectors()[0] => {
-			// Go online
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![join_operators_call(rng, &who), (PCall::go_online {}, who)]
-		},
-		_ if op == PCall::deposit_selectors()[0] => {
-			// Deposit
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
-				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
-			};
-			let amount = random_ed_multiple(&mut rng).into();
-			vec![(PCall::deposit { asset_id, amount, token_address }, who)]
-		},
-		_ if op == PCall::schedule_withdraw_selectors()[0] => {
-			// Schedule withdraw
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
-				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
-			};
-			let amount = random_ed_multiple(&mut rng).into();
-			vec![(PCall::schedule_withdraw { asset_id, token_address, amount }, who)]
-		},
-		_ if op == PCall::execute_withdraw_selectors()[0] => {
-			// Execute withdraw
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![(PCall::execute_withdraw {}, who)]
-		},
-		_ if op == PCall::cancel_withdraw_selectors()[0] => {
-			// Cancel withdraw
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
-				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
-			};
-			let amount = random_ed_multiple(&mut rng).into();
-			vec![(PCall::cancel_withdraw { asset_id, amount, token_address }, who)]
-		},
-		_ if op == PCall::delegate_selectors()[0] => {
-			// Delegate
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let (_, operator) = random_signed_origin(&mut rng);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
-				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
-			};
-			let amount = random_ed_multiple(&mut rng).into();
-			let blueprint_selection = {
-				let count = rng.gen_range(1..MaxDelegatorBlueprints::get());
-				(0..count).map(|_| rng.gen::<u64>()).collect::<Vec<_>>()
-			};
-			vec![
-				join_operators_call(&mut rng, &operator),
-				(
-					PCall::delegate {
-						operator: operator.0.into(),
-						asset_id,
-						token_address,
-						amount,
-						blueprint_selection,
-					},
-					who,
-				),
-			]
-		},
-		_ if op == PCall::schedule_delegator_unstake_selectors()[0] => {
-			// Schedule delegator unstakes
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let (_, operator) = random_signed_origin(&mut rng);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
-				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
-			};
-			let amount = random_ed_multiple(&mut rng).into();
-			vec![
-				join_operators_call(&mut rng, &operator),
-				(
-					PCall::schedule_delegator_unstake {
-						operator: operator.0.into(),
-						asset_id,
-						token_address,
-						amount,
-					},
-					who,
-				),
-			]
-		},
-		_ if op == PCall::execute_delegator_unstake_selectors()[0] => {
-			// Execute delegator unstake
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			vec![(PCall::execute_delegator_unstake {}, who)]
-		},
-		_ if op == PCall::cancel_delegator_unstake_selectors()[0] => {
-			// Cancel delegator unstake
-			let who = random_address(&mut rng);
-			fund_account(&mut rng, &who);
-			let (_, operator) = random_signed_origin(&mut rng);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
-				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
-			};
-			let amount = random_ed_multiple(&mut rng).into();
-			vec![
-				join_operators_call(&mut rng, &operator),
-				(
-					PCall::cancel_delegator_unstake {
-						operator: operator.0.into(),
-						asset_id,
-						token_address,
-						amount,
-					},
-					who,
-				),
-			]
-		},
-		_ => {
-			unimplemented!("unknown call name: {}", op)
-		},
-	}
+    let op = PCall::selectors().choose(rng).cloned().unwrap();
+    match op {
+        _ if op == PCall::update_asset_rewards_selectors()[0] => {
+            vec![update_asset_rewards_call(&mut rng)]
+        },
+        _ if op == PCall::update_asset_apy_selectors()[0] => {
+            vec![update_asset_apy_call(&mut rng)]
+        },
+        _ if op == PCall::set_incentive_apy_and_cap_selectors()[0] => {
+            vec![set_incentive_apy_and_cap_call(&mut rng)]
+        },
+        _ if op == PCall::whitelist_blueprint_for_rewards_selectors()[0] => {
+            vec![whitelist_blueprint_call(&mut rng)]
+        },
+        _ if op == PCall::manage_asset_in_vault_selectors()[0] => {
+            vec![manage_asset_in_vault_call(&mut rng)]
+        },
+        _ => vec![],
+    }
 }
 
 fn main() {
-	sp_tracing::try_init_simple();
-	let mut ext = ExtBuilder::default().build();
-	let mut block_number = 1;
-	let to = Precompile1.into();
-	loop {
-		fuzz!(|seed: [u8; 32]| {
-			use ::rand::{rngs::SmallRng, SeedableRng};
-			let mut rng = SmallRng::from_seed(seed);
+    loop {
+        fuzz!(|data: &[u8]| {
+            let mut rng = rand::thread_rng();
+            let calls = random_calls(&mut rng);
 
-			ext.execute_with(|| {
-				System::set_block_number(block_number);
-				for (call, who) in random_calls(&mut rng) {
-					let mut handle = MockHandle::new(
-						to,
-						Context {
-							address: to,
-							caller: who.into(),
-							apparent_value: Default::default(),
-						},
-					);
-					let mut handle_clone = MockHandle::new(
-						to,
-						Context {
-							address: to,
-							caller: who.into(),
-							apparent_value: Default::default(),
-						},
-					);
-					let encoded = call.encode();
-					handle.input = encoded.clone();
-					let call_clone = PCall::parse_call_data(&mut handle).unwrap();
-					handle_clone.input = encoded;
-					let outcome = PrecompilesValue::get().execute(&mut handle).unwrap();
-					sp_tracing::trace!(?who, ?outcome, "fuzzed call");
+            // Create test externalities
+            let mut ext = ExtBuilder::default().build();
+            ext.execute_with(|| {
+                let precompiles = PrecompilesValue::get();
 
-					// execute sanity checks at a fixed interval, possibly on every block.
-					if let Ok(out) = outcome {
-						sp_tracing::info!("running sanity checks..");
-						do_sanity_checks(call_clone, who, out);
-					}
-				}
+                // Execute each call
+                for (call, who) in calls {
+                    let input = call.encode();
+                    let context = Context {
+                        address: Default::default(),
+                        caller: who.0,
+                        apparent_value: Default::default(),
+                    };
 
-				System::reset_events();
-				block_number += 1;
-			});
-		})
-	}
+                    let info = call.estimate_gas(input.clone(), &mut EvmDataWriter::new(), context);
+                    match info {
+                        Ok((_, estimate)) => {
+                            let mut gasometer = Gasometer::new(estimate);
+                            let outcome = precompiles
+                                .execute(&context.address, &mut gasometer, &context, &input)
+                                .expect("Precompile failed");
+
+                            // Perform sanity checks
+                            do_sanity_checks(call, who, outcome);
+                        },
+                        Err(e) => {
+                            // Expected errors are ok
+                            println!("Expected error: {:?}", e);
+                        },
+                    }
+                }
+            });
+        });
+    }
 }
 
-/// Perform sanity checks on the state after a call is executed successfully.
-#[allow(unused)]
+/// Perform sanity checks on the state after a call is executed successfully
 fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
-	let caller = <TestAccount as AddressMapping<AccountId>>::into_account_id(origin.0);
-	match call {
-		PCall::join_operators { bond_amount } => {
-			assert!(mad::Operators::<Runtime>::contains_key(caller), "operator not found");
-			assert_eq!(
-				MultiAssetDelegation::operator_info(caller).unwrap_or_default().stake,
-				bond_amount.as_u64()
-			);
-			assert!(
-				Balances::reserved_balance(caller).ge(&bond_amount.as_u64()),
-				"bond amount not reserved"
-			);
-		},
-		PCall::schedule_leave_operators {} => {
-			assert!(mad::Operators::<Runtime>::contains_key(caller), "operator not found");
-			let current_round = mad::CurrentRound::<Runtime>::get();
-			let leaving_time =
-				<<Runtime as mad::Config>::LeaveOperatorsDelay as Get<u32>>::get() + current_round;
-			assert_eq!(
-				mad::Operators::<Runtime>::get(caller).unwrap_or_default().status,
-				OperatorStatus::Leaving(leaving_time)
-			);
-		},
-		PCall::cancel_leave_operators {} => {
-			assert_eq!(
-				mad::Operators::<Runtime>::get(caller).unwrap_or_default().status,
-				OperatorStatus::Active
-			);
-		},
-		PCall::execute_leave_operators {} => {
-			assert!(!mad::Operators::<Runtime>::contains_key(caller), "operator not removed");
-			assert!(Balances::reserved_balance(caller).is_zero(), "bond amount not unreserved");
-		},
-		PCall::operator_bond_more { additional_bond } => {
-			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
-			assert!(info.stake.ge(&additional_bond.as_u64()), "bond amount not increased");
-			assert!(
-				Balances::reserved_balance(caller).ge(&additional_bond.as_u64()),
-				"bond amount not reserved"
-			);
-		},
-		PCall::schedule_operator_unstake { unstake_amount } => {
-			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
-			let current_round = MultiAssetDelegation::current_round();
-			let unstake_request = OperatorBondLessRequest {
-				amount: unstake_amount.as_u64(),
-				request_time: current_round,
-			};
-			assert_eq!(info.request, Some(unstake_request), "unstake request not set");
-		},
-		PCall::execute_operator_unstake {} => {
-			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
-			assert!(info.request.is_none(), "unstake request not removed");
-			// reserved balance should be reduced and equal to the stake
-			assert!(
-				Balances::reserved_balance(caller).eq(&info.stake),
-				"reserved balance not equal to stake"
-			);
-		},
-		PCall::cancel_operator_unstake {} => {
-			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
-			assert!(info.request.is_none(), "unstake request not removed");
-		},
-		PCall::go_offline {} => {
-			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
-			assert_eq!(info.status, OperatorStatus::Inactive, "status not set to inactive");
-		},
-		PCall::go_online {} => {
-			let info = MultiAssetDelegation::operator_info(caller).unwrap_or_default();
-			assert_eq!(info.status, OperatorStatus::Active, "status not set to active");
-		},
-		PCall::deposit { asset_id, amount, token_address } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
-				(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
-			};
-			match deposit_asset {
-				Asset::Custom(id) => {
-					let pallet_balance =
-						Assets::balance(id, MultiAssetDelegation::pallet_account());
-					assert!(pallet_balance.ge(&amount.as_u64()), "pallet balance not enough");
-				},
-				Asset::Erc20(token) => {
-					let pallet_balance = MultiAssetDelegation::query_erc20_balance_of(
-						token,
-						MultiAssetDelegation::pallet_evm_account(),
-					)
-					.unwrap_or_default()
-					.0;
-					assert!(pallet_balance.ge(&amount), "pallet balance not enough");
-				},
-			};
-
-			assert_eq!(
-				MultiAssetDelegation::delegators(caller)
-					.unwrap_or_default()
-					.calculate_delegation_by_asset(deposit_asset),
-				amount.as_u64()
-			);
-		},
-		PCall::schedule_withdraw { asset_id, amount, token_address } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
-				(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
-			};
-			let round = MultiAssetDelegation::current_round();
-			assert!(
-				MultiAssetDelegation::delegators(caller)
-					.unwrap_or_default()
-					.get_withdraw_requests()
-					.contains(&WithdrawRequest {
-						asset_id: deposit_asset,
-						amount: amount.as_u64(),
-						requested_round: round
-					}),
-				"withdraw request not found"
-			);
-		},
-		PCall::execute_withdraw { .. } => {
-			assert!(
-				MultiAssetDelegation::delegators(caller)
-					.unwrap_or_default()
-					.get_withdraw_requests()
-					.is_empty(),
-				"withdraw requests not removed"
-			);
-		},
-		PCall::cancel_withdraw { asset_id, amount, token_address } => {
-			let round = MultiAssetDelegation::current_round();
-
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
-				(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
-			};
-			assert!(
-				!MultiAssetDelegation::delegators(caller)
-					.unwrap_or_default()
-					.get_withdraw_requests()
-					.contains(&WithdrawRequest {
-						asset_id: deposit_asset,
-						amount: amount.as_u64(),
-						requested_round: round
-					}),
-				"withdraw request not removed"
-			);
-		},
-		PCall::delegate { operator, asset_id, amount, token_address, .. } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
-				(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
-			};
-			let operator_account = AccountId::from(operator.0);
-			let delegator = MultiAssetDelegation::delegators(caller).unwrap_or_default();
-			let operator_info =
-				MultiAssetDelegation::operator_info(operator_account).unwrap_or_default();
-			assert!(
-				delegator
-					.calculate_delegation_by_operator(operator_account)
-					.iter()
-					.find_map(|x| {
-						if x.asset_id == deposit_asset {
-							Some(x.amount)
-						} else {
-							None
-						}
-					})
-					.ge(&Some(amount.as_u64())),
-				"delegation amount not set"
-			);
-			assert!(
-				operator_info
-					.delegations
-					.iter()
-					.find_map(|x| {
-						if x.delegator == caller && x.asset_id == deposit_asset {
-							Some(x.amount)
-						} else {
-							None
-						}
-					})
-					.ge(&Some(amount.as_u64())),
-				"delegator not added to operator"
-			);
-		},
-		_ => {
-			// ignore other calls
-		},
-	}
+    match call {
+        PCall::update_asset_rewards { asset_id, rewards } => {
+            // Check that rewards were updated
+            assert_eq!(Rewards::asset_rewards(asset_id), rewards);
+        },
+        PCall::update_asset_apy { asset_id, apy } => {
+            // Check that APY was updated and is within bounds
+            assert!(apy <= MAX_APY);
+            assert_eq!(Rewards::asset_apy(asset_id), apy);
+        },
+        PCall::set_incentive_apy_and_cap { vault_id, apy, cap } => {
+            // Check APY is within bounds
+            assert!(apy <= MAX_APY);
+            
+            // Check config was updated
+            if let Some(config) = Rewards::reward_config() {
+                if let Some(vault_config) = config.configs.get(&vault_id) {
+                    assert_eq!(vault_config.apy, Percent::from_parts(apy as u8));
+                    assert_eq!(vault_config.cap, cap);
+                }
+            }
+        },
+        PCall::whitelist_blueprint_for_rewards { blueprint_id } => {
+            // Check blueprint was whitelisted
+            if let Some(config) = Rewards::reward_config() {
+                assert!(config.whitelisted_blueprints.contains(&blueprint_id));
+            }
+        },
+        PCall::manage_asset_in_vault { vault_id, asset_id, action } => {
+            // Check asset was added/removed from vault
+            if let Some(config) = Rewards::reward_config() {
+                if let Some(vault_config) = config.configs.get(&vault_id) {
+                    match action {
+                        0 => assert!(vault_config.assets.contains(&asset_id)),
+                        1 => assert!(!vault_config.assets.contains(&asset_id)),
+                        _ => panic!("Invalid action"),
+                    }
+                }
+            }
+        },
+        _ => {},
+    }
 }
