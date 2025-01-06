@@ -638,6 +638,7 @@ fn slash_operator_success() {
 			RuntimeOrigin::signed(Bob.to_account_id()),
 			asset_id,
 			delegator_stake,
+			None,
 			None
 		));
 
@@ -735,6 +736,7 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 			RuntimeOrigin::signed(Bob.to_account_id()),
 			Asset::Custom(1),
 			5_000,
+			None,
 			None
 		));
 

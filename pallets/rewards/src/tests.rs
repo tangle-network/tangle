@@ -435,3 +435,380 @@ fn test_rewards_manager_implementation() {
 		assert_eq!(service, 75u128.into()); // 50 + 25
 	});
 }
+
+#[test]
+fn test_update_asset_rewards_should_fail_for_non_root() {
+    new_test_ext().execute_with(|| {
+        // Arrange
+        let who = AccountId::from(Bob);
+        let asset_id = Asset::Custom(1);
+        let rewards = 1_000;
+
+        // Act & Assert
+        assert_noop!(
+            Rewards::update_asset_rewards(RuntimeOrigin::signed(who), asset_id, rewards),
+            DispatchError::BadOrigin
+        );
+    });
+}
+
+#[test]
+fn test_update_asset_apy_should_fail_for_non_root() {
+    new_test_ext().execute_with(|| {
+        // Arrange
+        let who = AccountId::from(Bob);
+        let asset_id = Asset::Custom(1);
+        let apy = 500; // 5%
+
+        // Act & Assert
+        assert_noop!(
+            Rewards::update_asset_apy(RuntimeOrigin::signed(who), asset_id, apy),
+            DispatchError::BadOrigin
+        );
+    });
+}
+
+#[test]
+fn test_reward_score_calculation_with_zero_values() {
+    new_test_ext().execute_with(|| {
+        // Arrange
+        let who = AccountId::from(Bob);
+        let asset_id = Asset::Custom(1);
+
+        // Test with zero stake
+        assert_eq!(
+            Rewards::calculate_reward_score(0, 1000, 500),
+            0,
+            "Reward score should be 0 with zero stake"
+        );
+
+        // Test with zero rewards
+        assert_eq!(
+            Rewards::calculate_reward_score(1000, 0, 500),
+            0,
+            "Reward score should be 0 with zero rewards"
+        );
+
+        // Test with zero APY
+        assert_eq!(
+            Rewards::calculate_reward_score(1000, 1000, 0),
+            0,
+            "Reward score should be 0 with zero APY"
+        );
+    });
+}
+
+#[test]
+fn test_reward_score_calculation_with_large_values() {
+    new_test_ext().execute_with(|| {
+        // Test with maximum possible values
+        let max_balance = u128::MAX;
+        let large_apy = 10_000; // 100%
+
+        // Should not overflow
+        let score = Rewards::calculate_reward_score(max_balance, max_balance, large_apy);
+        assert!(
+            score > 0,
+            "Reward score should not overflow with large values"
+        );
+    });
+}
+
+#[test]
+fn test_rewards_should_fail_with_overflow() {
+    new_test_ext().execute_with(|| {
+        let asset_id = Asset::Custom(1);
+        
+        // Try to set rewards to maximum value
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            u128::MAX
+        ));
+
+        // Try to set APY to maximum value - this should cause overflow in calculations
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            u32::MAX
+        ));
+
+        // Attempting to calculate reward score with max values should return 0 to prevent overflow
+        let score = Rewards::calculate_reward_score(u128::MAX, u128::MAX, u32::MAX);
+        assert_eq!(score, 0, "Should handle potential overflow gracefully");
+    });
+}
+
+#[test]
+fn test_rewards_with_invalid_asset() {
+    new_test_ext().execute_with(|| {
+        let invalid_asset = Asset::Custom(u32::MAX);
+        let rewards = 1_000;
+        let apy = 500;
+
+        // Should succeed but have no effect since asset doesn't exist
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            invalid_asset.clone(),
+            rewards
+        ));
+
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            invalid_asset.clone(),
+            apy
+        ));
+
+        // Verify no rewards are available for invalid asset
+        assert_eq!(Rewards::asset_rewards(invalid_asset.clone()), 0);
+        assert_eq!(Rewards::asset_apy(invalid_asset.clone()), 0);
+    });
+}
+
+#[test]
+fn test_rewards_with_zero_stake() {
+    new_test_ext().execute_with(|| {
+        let asset_id = Asset::Custom(1);
+        let rewards = 1_000;
+        let apy = 500;
+
+        // Set up rewards and APY
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            rewards
+        ));
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            apy
+        ));
+
+        // Calculate rewards for zero stake
+        let reward_score = Rewards::calculate_reward_score(0, rewards, apy);
+        assert_eq!(reward_score, 0, "Zero stake should result in zero rewards");
+
+        // Verify total rewards score is zero when no stakes exist
+        let total_score = Rewards::calculate_total_reward_score(asset_id.clone());
+        assert_eq!(total_score, 0, "Total score should be zero when no stakes exist");
+    });
+}
+
+#[test]
+fn test_rewards_with_extreme_apy_values() {
+    new_test_ext().execute_with(|| {
+        let asset_id = Asset::Custom(1);
+        let stake = 1_000;
+        let rewards = 1_000;
+
+        // Test extremely high APY (10000% = 100x)
+        let extreme_apy = 1_000_000; // 10000%
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            extreme_apy
+        ));
+
+        let score = Rewards::calculate_reward_score(stake, rewards, extreme_apy);
+        assert!(score > 0, "Should handle extreme APY values");
+        assert!(score > rewards, "High APY should result in higher rewards");
+
+        // Test with minimum possible APY
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            1
+        ));
+
+        let min_score = Rewards::calculate_reward_score(stake, rewards, 1);
+        assert!(min_score < score, "Minimum APY should result in lower rewards");
+    });
+}
+
+#[test]
+fn test_rewards_accumulation() {
+    new_test_ext().execute_with(|| {
+        let asset_id = Asset::Custom(1);
+        let initial_rewards = 1_000;
+        let additional_rewards = 500;
+
+        // Set initial rewards
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            initial_rewards
+        ));
+
+        // Try to add more rewards - should replace, not accumulate
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            additional_rewards
+        ));
+
+        assert_eq!(
+            Rewards::asset_rewards(asset_id.clone()),
+            additional_rewards,
+            "Rewards should be replaced, not accumulated"
+        );
+    });
+}
+
+#[test]
+fn test_rewards_with_multiple_assets() {
+    new_test_ext().execute_with(|| {
+        let asset1 = Asset::Custom(1);
+        let asset2 = Asset::Custom(2);
+        let rewards1 = 1_000;
+        let rewards2 = 2_000;
+        let apy1 = 500;
+        let apy2 = 1_000;
+
+        // Set different rewards and APY for different assets
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset1.clone(),
+            rewards1
+        ));
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset2.clone(),
+            rewards2
+        ));
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset1.clone(),
+            apy1
+        ));
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset2.clone(),
+            apy2
+        ));
+
+        // Verify each asset maintains its own rewards and APY
+        assert_eq!(Rewards::asset_rewards(asset1.clone()), rewards1);
+        assert_eq!(Rewards::asset_rewards(asset2.clone()), rewards2);
+        assert_eq!(Rewards::asset_apy(asset1.clone()), apy1);
+        assert_eq!(Rewards::asset_apy(asset2.clone()), apy2);
+
+        // Verify reward scores are calculated independently
+        let stake = 1_000;
+        let score1 = Rewards::calculate_reward_score(stake, rewards1, apy1);
+        let score2 = Rewards::calculate_reward_score(stake, rewards2, apy2);
+        assert_ne!(score1, score2, "Different assets should have different reward scores");
+    });
+}
+
+#[test]
+fn test_update_asset_rewards_multiple_times() {
+    new_test_ext().execute_with(|| {
+        // Arrange
+        let asset_id = Asset::Custom(1);
+        let initial_rewards = 1_000;
+        let updated_rewards = 2_000;
+
+        // Act - Update rewards multiple times
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            initial_rewards
+        ));
+
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            updated_rewards
+        ));
+
+        // Assert
+        assert_eq!(
+            Rewards::asset_rewards(asset_id),
+            updated_rewards,
+            "Asset rewards should be updated to latest value"
+        );
+    });
+}
+
+#[test]
+fn test_update_asset_apy_multiple_times() {
+    new_test_ext().execute_with(|| {
+        // Arrange
+        let asset_id = Asset::Custom(1);
+        let initial_apy = 500; // 5%
+        let updated_apy = 1_000; // 10%
+
+        // Act - Update APY multiple times
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            initial_apy
+        ));
+
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            updated_apy
+        ));
+
+        // Assert
+        assert_eq!(
+            Rewards::asset_apy(asset_id),
+            updated_apy,
+            "Asset APY should be updated to latest value"
+        );
+    });
+}
+
+#[test]
+fn test_reward_distribution_with_zero_total_score() {
+    new_test_ext().execute_with(|| {
+        // Arrange
+        let asset_id = Asset::Custom(1);
+        let rewards = 1_000;
+        let apy = 500; // 5%
+
+        // Update rewards and APY
+        assert_ok!(Rewards::update_asset_rewards(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            rewards
+        ));
+        assert_ok!(Rewards::update_asset_apy(
+            RuntimeOrigin::root(),
+            asset_id.clone(),
+            apy
+        ));
+
+        // With no stakes, total score should be 0
+        let total_score = Rewards::calculate_total_reward_score(asset_id.clone());
+        assert_eq!(total_score, 0, "Total score should be 0 with no stakes");
+    });
+}
+
+#[test]
+fn test_reward_score_calculation_with_different_apy_ranges() {
+    new_test_ext().execute_with(|| {
+        let stake = 1_000;
+        let rewards = 1_000;
+
+        // Test with different APY ranges
+        let apys = vec![
+            0,      // 0%
+            100,    // 1%
+            500,    // 5%
+            1_000,  // 10%
+            5_000,  // 50%
+            10_000, // 100%
+        ];
+
+        for apy in apys {
+            let score = Rewards::calculate_reward_score(stake, rewards, apy);
+            assert!(
+                score >= 0,
+                "Reward score should be non-negative for APY {}",
+                apy
+            );
+        }
+    });
+}

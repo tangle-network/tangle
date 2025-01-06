@@ -51,7 +51,6 @@ fn handle_round_change_should_work() {
 			asset_id,
 			amount,
 			Default::default(),
-			None
 		));
 
 		assert_ok!(Pallet::<Runtime>::handle_round_change());
@@ -108,7 +107,6 @@ fn handle_round_change_with_unstake_should_work() {
 			asset_id,
 			amount1,
 			Default::default(),
-			None
 		));
 
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -123,7 +121,6 @@ fn handle_round_change_with_unstake_should_work() {
 			asset_id,
 			amount2,
 			Default::default(),
-			None
 		));
 
 		// Delegator1 schedules unstake
