@@ -210,7 +210,7 @@ impl<T: Config> UnbondPool<T> {
 #[scale_info(skip_type_params(T))]
 pub struct SubPools<T: Config> {
 	/// A general, era agnostic pool of funds that have fully unbonded. The pools
-	/// of `Self::with_era` will lazily be merged into into this pool if they are
+	/// of `Self::with_era` will lazily be merged into this pool if they are
 	/// older then `current_era - TotalUnbondingPools`.
 	pub no_era: UnbondPool<T>,
 	/// Map of era in which a pool becomes unbonded in => unbond pools.

@@ -104,7 +104,7 @@ pub trait Group: Copy + Clone + PartialEq {
 	/// Little-endian!
 	type Serialization: AsRef<[u8]> + Debug + TryFrom<Vec<u8>>;
 
-	/// The order of the the quotient group when the prime order subgroup divides the order of the
+	/// The order of the quotient group when the prime order subgroup divides the order of the
 	/// full curve group.
 	///
 	/// If using a prime order elliptic curve, the cofactor should be 1 in the scalar field.

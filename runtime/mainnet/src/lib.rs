@@ -628,7 +628,7 @@ parameter_types! {
 		.voters_count(10_000.into()).targets_count(1_500.into()).build();
 }
 
-/// The numbers configured here could always be more than the the maximum limits of staking pallet
+/// The numbers configured here could always be more than the maximum limits of staking pallet
 /// to ensure election snapshot will not run out of memory. For now, we set them to smaller values
 /// since the staking is bounded and the weight pipeline takes hours for this single pallet.
 pub struct ElectionProviderBenchmarkConfig;
