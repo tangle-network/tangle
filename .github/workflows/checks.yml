@@ -60,7 +60,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Run test suite
-        run: cargo nextest run --profile ci
+        run: cargo nextest run --workspace --exclude tangle --profile ci
 
   e2e:
     env:
@@ -94,7 +94,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Run End to End test suite
-        run: cargo nextest run -rp tangle -F e2e,manual-seal,testnet --profile ci --nocapture
+        run: cargo nextest run -rp tangle -F manual-seal,testnet,txpool --profile ci --nocapture
 
   clippy:
     concurrency:
