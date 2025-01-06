@@ -60,7 +60,9 @@ impl<T: Config> Pallet<T> {
 				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
 
 			// update the user deposit
-			user_deposit.increase_delegated_amount(amount).map_err(|_| Error::<T>::InsufficientBalance)?;
+			user_deposit
+				.increase_delegated_amount(amount)
+				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
 			// Check if the delegation exists and update it, otherwise create a new delegation
 			if let Some(delegation) = metadata
@@ -252,16 +254,16 @@ impl<T: Config> Pallet<T> {
 					.deposits
 					.get_mut(&request.asset_id)
 					.ok_or(Error::<T>::InsufficientBalance)?;
-				
+
 				deposit_record
 					.decrease_delegated_amount(request.amount)
 					.map_err(|_| Error::<T>::InsufficientBalance)?;
 			}
 
 			// Remove the processed requests
-			metadata.delegator_unstake_requests.retain(|request| {
-				current_round < delay + request.requested_round
-			});
+			metadata
+				.delegator_unstake_requests
+				.retain(|request| current_round < delay + request.requested_round);
 
 			Ok(())
 		})

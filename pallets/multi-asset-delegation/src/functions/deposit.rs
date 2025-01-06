@@ -21,9 +21,9 @@ use frame_support::{
 	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
 	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
-use tangle_primitives::types::rewards::LockMultiplier;
 use sp_core::H160;
 use tangle_primitives::services::{Asset, EvmAddressMapping};
+use tangle_primitives::types::rewards::LockMultiplier;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
@@ -102,10 +102,13 @@ impl<T: Config> Pallet<T> {
 		// Update storage
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
 			let metadata = maybe_metadata.get_or_insert_with(Default::default);
-			// Handle checked addition first to avoid ? operator in closure
-			if let Some(existing) = metadata.deposits.get(&asset_id) {
-				existing.increase_deposited_amount(amount, lock_multiplier, now);
+			// If there's an existing deposit, increase it
+			if let Some(existing) = metadata.deposits.get_mut(&asset_id) {
+				existing
+					.increase_deposited_amount(amount, lock_multiplier, now)
+					.map_err(|_| Error::<T>::InsufficientBalance)?;
 			} else {
+				// Create a new deposit if none exists
 				let new_deposit = Deposit::new(amount, lock_multiplier, now);
 				metadata.deposits.insert(asset_id, new_deposit);
 			}
@@ -140,7 +143,9 @@ impl<T: Config> Pallet<T> {
 			// Ensure there is enough deposited balance
 			let deposit =
 				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
-			deposit.decrease_deposited_amount(amount, now).map_err(|_| Error::<T>::InsufficientBalance)?;
+			deposit
+				.decrease_deposited_amount(amount, now)
+				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
 			// Create the unstake request
 			let current_round = Self::current_round();
@@ -256,7 +261,8 @@ impl<T: Config> Pallet<T> {
 
 			// Add the amount back to the delegator's deposits
 			if let Some(deposit) = metadata.deposits.get_mut(&withdraw_request.asset_id) {
-				deposit.increase_deposited_amount(withdraw_request.amount, None, now)
+				deposit
+					.increase_deposited_amount(withdraw_request.amount, None, now)
 					.map_err(|_| Error::<T>::InsufficientBalance)?;
 			} else {
 				// we are only able to withdraw from existing deposits without any locks

@@ -16,11 +16,11 @@
 
 use super::*;
 use frame_support::ensure;
-use sp_runtime::traits::Zero;
 use frame_support::{pallet_prelude::Get, BoundedVec};
+use sp_runtime::traits::Zero;
+use sp_std::fmt::Debug;
 use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, BlueprintId};
-use sp_std::fmt::Debug;
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
@@ -91,10 +91,8 @@ pub struct DelegatorMetadata<
 	/// A vector of withdraw requests.
 	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
-	pub delegations: BoundedVec<
-		BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>,
-		MaxDelegations,
-	>,
+	pub delegations:
+		BoundedVec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>, MaxDelegations>,
 	/// A vector of requests to reduce the bonded amount.
 	pub delegator_unstake_requests:
 		BoundedVec<BondLessRequest<AccountId, AssetId, Balance, MaxBlueprints>, MaxUnstakeRequests>,
@@ -167,8 +165,7 @@ impl<
 	/// Returns a reference to the list of delegations.
 	pub fn get_delegations(
 		&self,
-	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>>
-	{
+	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>> {
 		&self.delegations
 	}
 
@@ -223,73 +220,84 @@ pub struct Deposit<Balance, BlockNumber, MaxLocks: Get<u32>> {
 	pub locks: Option<BoundedVec<LockInfo<Balance, BlockNumber>, MaxLocks>>,
 }
 
-impl<Balance : Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::PartialOrd, BlockNumber : Debug + sp_runtime::Saturating + std::convert::From<u32> + sp_std::cmp::PartialOrd, MaxLocks: Get<u32>> Deposit<Balance, BlockNumber, MaxLocks> {
-	pub fn new(amount: Balance, lock_multiplier: Option<LockMultiplier>, current_block_number: BlockNumber) -> Self {
+impl<
+		Balance: Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::PartialOrd + From<u32>,
+		BlockNumber: Debug + sp_runtime::Saturating + std::convert::From<u32> + sp_std::cmp::PartialOrd,
+		MaxLocks: Get<u32>,
+	> Deposit<Balance, BlockNumber, MaxLocks>
+{
+	pub fn new(
+		amount: Balance,
+		lock_multiplier: Option<LockMultiplier>,
+		current_block_number: BlockNumber,
+	) -> Self {
 		let locks = lock_multiplier.map(|multiplier| {
 			let expiry_block = current_block_number.saturating_add(multiplier.get_blocks().into());
 			BoundedVec::try_from(vec![LockInfo {
-				amount,
+				amount: amount.clone(),
 				expiry_block,
 				lock_multiplier: multiplier,
-			}]).expect("This should not happen since only one lock exists!")
+			}])
+			.expect("This should not happen since only one lock exists!")
 		});
 
-		Deposit {
-			amount,
-			delegated_amount: Default::default(),
-			locks,
-		}
+		Deposit { amount, delegated_amount: Balance::default(), locks }
 	}
 
-	pub fn get_amount(&self) -> Balance {
+	pub fn get_total_amount(&self) -> Balance {
 		self.amount.clone()
 	}
 
-	pub fn increase_delegated_amount(&mut self, amount_to_increase: Balance) -> Result<(), &'static str> {
+	pub fn increase_delegated_amount(
+		&mut self,
+		amount_to_increase: Balance,
+	) -> Result<(), &'static str> {
 		// sanity check that the proposed amount when added to the current delegated amount is not greater than the total amount
-		let new_delegated_amount = self.delegated_amount.saturating_add(amount_to_increase);
-		if new_delegated_amount > self.amount {
-			return Err("delegated amount cannot be greater than total amount");
-		}
-
-		// increase the delegated amount
+		let new_delegated_amount =
+			self.delegated_amount.clone().saturating_add(amount_to_increase.clone());
+		ensure!(
+			new_delegated_amount <= self.amount,
+			"delegated amount cannot be greater than total amount"
+		);
 		self.delegated_amount = new_delegated_amount;
-
 		Ok(())
 	}
 
-	pub fn decrease_delegated_amount(&mut self, amount_to_decrease: Balance) -> Result<(), &'static str> {
-		// sanity check that the delegated amount is actually greater than the amount to decrease
-		if self.delegated_amount < amount_to_decrease {
-			return Err("delegated amount cannot be less than amount to decrease");
-		}
-
-		// decrease the delegated amount
-		self.delegated_amount = self.delegated_amount.saturating_sub(amount_to_decrease);
+	pub fn decrease_delegated_amount(
+		&mut self,
+		amount_to_decrease: Balance,
+	) -> Result<(), &'static str> {
+		self.delegated_amount = self.delegated_amount.clone().saturating_sub(amount_to_decrease);
 		Ok(())
 	}
 
-	pub fn increase_deposited_amount(&mut self, amount_to_increase: Balance, lock_multiplier: Option<LockMultiplier>, current_block_number: BlockNumber) -> Result<(), &'static str> {
+	pub fn increase_deposited_amount(
+		&mut self,
+		amount_to_increase: Balance,
+		lock_multiplier: Option<LockMultiplier>,
+		current_block_number: BlockNumber,
+	) -> Result<(), &'static str> {
 		// Update the total amount first
-		self.amount = self.amount.saturating_add(amount_to_increase);
+		self.amount = self.amount.clone().saturating_add(amount_to_increase.clone());
 
 		// If there's a lock multiplier, add a new lock
 		if let Some(multiplier) = lock_multiplier {
 			let lock_blocks = multiplier.get_blocks();
 			let expiry_block = current_block_number.saturating_add(lock_blocks.into());
-			
-			let new_lock = LockInfo {
-				amount: amount_to_increase,
-				expiry_block,
-				lock_multiplier: multiplier,
-			};
+
+			let new_lock =
+				LockInfo { amount: amount_to_increase, expiry_block, lock_multiplier: multiplier };
 
 			// Initialize locks if None or push to existing locks
 			if let Some(locks) = &mut self.locks {
-				locks.try_push(new_lock).map_err(|_| "Failed to push new lock - exceeded MaxLocks bound")?;
+				locks
+					.try_push(new_lock)
+					.map_err(|_| "Failed to push new lock - exceeded MaxLocks bound")?;
 			} else {
-				self.locks = Some(BoundedVec::try_from(vec![new_lock])
-					.expect("This should not happen since only one lock exists!"));
+				self.locks = Some(
+					BoundedVec::try_from(vec![new_lock])
+						.expect("This should not happen since only one lock exists!"),
+				);
 			}
 		}
 
@@ -301,27 +309,20 @@ impl<Balance : Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::P
 		amount_to_decrease: Balance,
 		current_block_number: BlockNumber,
 	) -> Result<(), &'static str> {
-		// Remove expired locks and get total locked amount
-		let total_locked = self
-			.locks
-			.as_mut()
-			.filter(|locks| {
-				locks.retain(|lock| lock.expiry_block > current_block_number);
-				true
-			})
-			.map_or(Zero::zero(), |locks| {
-				locks.iter().map(|lock| lock.amount.clone()).sum()
-			});
+		let total_locked = self.locks.as_ref().map_or(Balance::from(0_u32), |locks| {
+			locks
+				.iter()
+				.filter(|lock| lock.expiry_block > current_block_number)
+				.fold(Balance::from(0_u32), |acc, lock| acc.saturating_add(lock.amount.clone()))
+		});
 
-		// Calculate free amount and check if decrease is possible
-		let free_amount = self.amount.saturating_sub(total_locked);
+		let free_amount = self.amount.clone().saturating_sub(total_locked);
 		ensure!(
 			free_amount >= amount_to_decrease,
 			"total free amount cannot be lesser than amount to decrease"
 		);
 
-		// Update amount and ensure it covers delegations
-		self.amount = self.amount.saturating_sub(amount_to_decrease);
+		self.amount = self.amount.clone().saturating_sub(amount_to_decrease);
 		ensure!(
 			self.amount >= self.delegated_amount,
 			"delegated amount cannot be greater than total amount"
@@ -333,12 +334,8 @@ impl<Balance : Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::P
 
 /// Represents a stake between a delegator and an operator.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct BondInfoDelegator<
-	AccountId,
-	Balance,
-	AssetId: Encode + Decode,
-	MaxBlueprints: Get<u32>,
-> {
+pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBlueprints: Get<u32>>
+{
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The amount bonded.
