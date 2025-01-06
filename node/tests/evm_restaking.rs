@@ -25,6 +25,7 @@ use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives:
 use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_testnet_runtime::RuntimeCall;
 
 sol! {
+	#[allow(clippy::too_many_arguments)]
 	#[sol(rpc, all_derives)]
 	MockERC20,
 	"tests/fixtures/MockERC20.json",
@@ -157,6 +158,7 @@ where
 }
 
 /// Test inputs for the E2E test.
+#[allow(dead_code)]
 pub struct TestInputs {
 	/// The Alloy provider.
 	provider: AlloyProvider,

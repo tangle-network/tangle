@@ -114,6 +114,7 @@ pub type AlloyProvider = FillProvider<
 >;
 
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum TestAccount {
 	Alice,
 	Bob,
