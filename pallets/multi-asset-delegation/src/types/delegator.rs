@@ -15,9 +15,12 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use frame_support::ensure;
+use sp_runtime::traits::Zero;
 use frame_support::{pallet_prelude::Get, BoundedVec};
 use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, BlueprintId};
+use sp_std::fmt::Debug;
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
@@ -84,12 +87,12 @@ pub struct DelegatorMetadata<
 	MaxLocks: Get<u32>,
 > {
 	/// A map of deposited assets and their respective amounts.
-	pub deposits: BTreeMap<Asset<AssetId>, Balance>,
+	pub deposits: BTreeMap<Asset<AssetId>, Deposit<Balance, BlockNumber, MaxLocks>>,
 	/// A vector of withdraw requests.
 	pub withdraw_requests: BoundedVec<WithdrawRequest<AssetId, Balance>, MaxWithdrawRequests>,
 	/// A list of all current delegations.
 	pub delegations: BoundedVec<
-		BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>,
+		BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>,
 		MaxDelegations,
 	>,
 	/// A vector of requests to reduce the bonded amount.
@@ -164,7 +167,7 @@ impl<
 	/// Returns a reference to the list of delegations.
 	pub fn get_delegations(
 		&self,
-	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>>
+	) -> &Vec<BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>>
 	{
 		&self.delegations
 	}
@@ -201,7 +204,7 @@ impl<
 	pub fn calculate_delegation_by_operator(
 		&self,
 		operator: AccountId,
-	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints, BlockNumber, MaxLocks>>
+	) -> Vec<&BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>>
 	where
 		AccountId: Eq + PartialEq,
 	{
@@ -211,11 +214,121 @@ impl<
 
 /// Represents a deposit of a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct Deposit<AssetId: Encode + Decode, Balance> {
-	/// The amount of the asset deposited.
+pub struct Deposit<Balance, BlockNumber, MaxLocks: Get<u32>> {
+	/// The total amount deposited by the user (includes both delegated and non-delegated).
 	pub amount: Balance,
-	/// The ID of the deposited asset.
-	pub asset_id: Asset<AssetId>,
+	/// The total delegated amount by the user (this can never be greater than `amount`).
+	pub delegated_amount: Balance,
+	/// The locks associated with this deposit.
+	pub locks: Option<BoundedVec<LockInfo<Balance, BlockNumber>, MaxLocks>>,
+}
+
+impl<Balance : Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::PartialOrd, BlockNumber : Debug + sp_runtime::Saturating + std::convert::From<u32> + sp_std::cmp::PartialOrd, MaxLocks: Get<u32>> Deposit<Balance, BlockNumber, MaxLocks> {
+	pub fn new(amount: Balance, lock_multiplier: Option<LockMultiplier>, current_block_number: BlockNumber) -> Self {
+		let locks = lock_multiplier.map(|multiplier| {
+			let expiry_block = current_block_number.saturating_add(multiplier.get_blocks().into());
+			BoundedVec::try_from(vec![LockInfo {
+				amount,
+				expiry_block,
+				lock_multiplier: multiplier,
+			}]).expect("This should not happen since only one lock exists!")
+		});
+
+		Deposit {
+			amount,
+			delegated_amount: Default::default(),
+			locks,
+		}
+	}
+
+	pub fn get_amount(&self) -> Balance {
+		self.amount.clone()
+	}
+
+	pub fn increase_delegated_amount(&mut self, amount_to_increase: Balance) -> Result<(), &'static str> {
+		// sanity check that the proposed amount when added to the current delegated amount is not greater than the total amount
+		let new_delegated_amount = self.delegated_amount.saturating_add(amount_to_increase);
+		if new_delegated_amount > self.amount {
+			return Err("delegated amount cannot be greater than total amount");
+		}
+
+		// increase the delegated amount
+		self.delegated_amount = new_delegated_amount;
+
+		Ok(())
+	}
+
+	pub fn decrease_delegated_amount(&mut self, amount_to_decrease: Balance) -> Result<(), &'static str> {
+		// sanity check that the delegated amount is actually greater than the amount to decrease
+		if self.delegated_amount < amount_to_decrease {
+			return Err("delegated amount cannot be less than amount to decrease");
+		}
+
+		// decrease the delegated amount
+		self.delegated_amount = self.delegated_amount.saturating_sub(amount_to_decrease);
+		Ok(())
+	}
+
+	pub fn increase_deposited_amount(&mut self, amount_to_increase: Balance, lock_multiplier: Option<LockMultiplier>, current_block_number: BlockNumber) -> Result<(), &'static str> {
+		// Update the total amount first
+		self.amount = self.amount.saturating_add(amount_to_increase);
+
+		// If there's a lock multiplier, add a new lock
+		if let Some(multiplier) = lock_multiplier {
+			let lock_blocks = multiplier.get_blocks();
+			let expiry_block = current_block_number.saturating_add(lock_blocks.into());
+			
+			let new_lock = LockInfo {
+				amount: amount_to_increase,
+				expiry_block,
+				lock_multiplier: multiplier,
+			};
+
+			// Initialize locks if None or push to existing locks
+			if let Some(locks) = &mut self.locks {
+				locks.try_push(new_lock).map_err(|_| "Failed to push new lock - exceeded MaxLocks bound")?;
+			} else {
+				self.locks = Some(BoundedVec::try_from(vec![new_lock])
+					.expect("This should not happen since only one lock exists!"));
+			}
+		}
+
+		Ok(())
+	}
+
+	pub fn decrease_deposited_amount(
+		&mut self,
+		amount_to_decrease: Balance,
+		current_block_number: BlockNumber,
+	) -> Result<(), &'static str> {
+		// Remove expired locks and get total locked amount
+		let total_locked = self
+			.locks
+			.as_mut()
+			.filter(|locks| {
+				locks.retain(|lock| lock.expiry_block > current_block_number);
+				true
+			})
+			.map_or(Zero::zero(), |locks| {
+				locks.iter().map(|lock| lock.amount.clone()).sum()
+			});
+
+		// Calculate free amount and check if decrease is possible
+		let free_amount = self.amount.saturating_sub(total_locked);
+		ensure!(
+			free_amount >= amount_to_decrease,
+			"total free amount cannot be lesser than amount to decrease"
+		);
+
+		// Update amount and ensure it covers delegations
+		self.amount = self.amount.saturating_sub(amount_to_decrease);
+		ensure!(
+			self.amount >= self.delegated_amount,
+			"delegated amount cannot be greater than total amount"
+		);
+
+		Ok(())
+	}
 }
 
 /// Represents a stake between a delegator and an operator.
@@ -225,8 +338,6 @@ pub struct BondInfoDelegator<
 	Balance,
 	AssetId: Encode + Decode,
 	MaxBlueprints: Get<u32>,
-	BlockNumber,
-	MaxLocks: Get<u32>,
 > {
 	/// The account ID of the operator.
 	pub operator: AccountId,
@@ -236,8 +347,6 @@ pub struct BondInfoDelegator<
 	pub asset_id: Asset<AssetId>,
 	/// The blueprint selection mode for this delegator.
 	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
-	/// The locks associated with this delegation.
-	pub locks: Option<BoundedVec<LockInfo<Balance, BlockNumber>, MaxLocks>>,
 }
 
 /// Struct to store the lock info

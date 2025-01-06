@@ -20,33 +20,18 @@ use tangle_primitives::services::Asset;
 
 /// A snapshot of the operator state at the start of the round.
 #[derive(Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct OperatorSnapshot<
-	AccountId,
-	Balance,
-	AssetId: Encode + Decode,
-	MaxDelegations: Get<u32>,
-	BlockNumber,
-	MaxLocks: Get<u32>,
-> {
+pub struct OperatorSnapshot<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
+{
 	/// The total value locked by the operator.
 	pub stake: Balance,
 
 	/// The rewardable delegations. This list is a subset of total delegators, where certain
 	/// delegators are adjusted based on their scheduled status.
-	pub delegations: BoundedVec<
-		DelegatorBond<AccountId, Balance, AssetId, BlockNumber, MaxLocks>,
-		MaxDelegations,
-	>,
+	pub delegations: BoundedVec<DelegatorBond<AccountId, Balance, AssetId>, MaxDelegations>,
 }
 
-impl<
-		AccountId,
-		Balance,
-		AssetId: Encode + Decode,
-		MaxDelegations: Get<u32>,
-		BlockNumber,
-		MaxLocks: Get<u32>,
-	> OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations, BlockNumber, MaxLocks>
+impl<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
+	OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations>
 where
 	AssetId: PartialEq + Ord + Copy,
 	Balance: Default + core::ops::AddAssign + Copy,
@@ -104,8 +89,6 @@ pub struct OperatorMetadata<
 	AssetId: Encode + Decode,
 	MaxDelegations: Get<u32>,
 	MaxBlueprints: Get<u32>,
-	BlockNumber,
-	MaxLocks: Get<u32>,
 > {
 	/// The operator's self-stake amount.
 	pub stake: Balance,
@@ -115,10 +98,7 @@ pub struct OperatorMetadata<
 	/// any given time.
 	pub request: Option<OperatorBondLessRequest<Balance>>,
 	/// A list of all current delegations.
-	pub delegations: BoundedVec<
-		DelegatorBond<AccountId, Balance, AssetId, BlockNumber, MaxLocks>,
-		MaxDelegations,
-	>,
+	pub delegations: BoundedVec<DelegatorBond<AccountId, Balance, AssetId>, MaxDelegations>,
 	/// The current status of the operator.
 	pub status: OperatorStatus,
 	/// The set of blueprint IDs this operator works with.
@@ -131,18 +111,7 @@ impl<
 		AssetId: Encode + Decode,
 		MaxDelegations: Get<u32>,
 		MaxBlueprints: Get<u32>,
-		BlockNumber,
-		MaxLocks: Get<u32>,
-	> Default
-	for OperatorMetadata<
-		AccountId,
-		Balance,
-		AssetId,
-		MaxDelegations,
-		MaxBlueprints,
-		BlockNumber,
-		MaxLocks,
-	>
+	> Default for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
 where
 	Balance: Default,
 {
@@ -160,19 +129,11 @@ where
 
 /// Represents a stake for an operator
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct DelegatorBond<
-	AccountId,
-	Balance,
-	AssetId: Encode + Decode,
-	BlockNumber,
-	MaxLocks: Get<u32>,
-> {
+pub struct DelegatorBond<AccountId, Balance, AssetId: Encode + Decode> {
 	/// The account ID of the delegator.
 	pub delegator: AccountId,
 	/// The amount bonded.
 	pub amount: Balance,
 	/// The ID of the bonded asset.
 	pub asset_id: Asset<AssetId>,
-	/// The locks associated with this delegation.
-	pub locks: Option<BoundedVec<LockInfo<Balance, BlockNumber>, MaxLocks>>,
 }

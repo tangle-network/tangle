@@ -556,9 +556,10 @@ pub mod pallet {
 			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			evm_address: Option<H160>,
+			lock_multiplier: Option<LockMultiplier>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_deposit(who.clone(), asset_id, amount, evm_address)?;
+			Self::process_deposit(who.clone(), asset_id, amount, evm_address, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset_id });
 			Ok(())
 		}
@@ -610,7 +611,6 @@ pub mod pallet {
 			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
-			lock_multiplier: Option<LockMultiplier>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_delegate(
@@ -619,7 +619,6 @@ pub mod pallet {
 				asset_id,
 				amount,
 				blueprint_selection,
-				lock_multiplier,
 			)?;
 			Self::deposit_event(Event::Delegated { who, operator, asset_id, amount });
 			Ok(())

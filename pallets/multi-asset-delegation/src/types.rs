@@ -40,16 +40,12 @@ pub type OperatorMetadataOf<T> = OperatorMetadata<
 	<T as Config>::AssetId,
 	<T as Config>::MaxDelegations,
 	<T as Config>::MaxOperatorBlueprints,
-	BlockNumberFor<T>,
-	<T as Config>::MaxDelegations,
 >;
 
 pub type OperatorSnapshotOf<T> = OperatorSnapshot<
 	<T as frame_system::Config>::AccountId,
 	BalanceOf<T>,
 	<T as Config>::AssetId,
-	<T as Config>::MaxDelegations,
-	BlockNumberFor<T>,
 	<T as Config>::MaxDelegations,
 >;
 
