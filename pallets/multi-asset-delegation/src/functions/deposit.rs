@@ -45,7 +45,7 @@ impl<T: Config> Pallet<T> {
 		sender: &T::AccountId,
 		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
-		evm_sender: Option<H160>,
+		_evm_sender: Option<H160>,
 	) -> DispatchResult {
 		match asset_id {
 			Asset::Custom(asset_id) => {
@@ -57,16 +57,16 @@ impl<T: Config> Pallet<T> {
 					Preservation::Expendable,
 				)?;
 			},
-			Asset::Erc20(asset_address) => {
-				let sender = evm_sender.ok_or(Error::<T>::ERC20TransferFailed)?;
-				let (success, _weight) = Self::erc20_transfer(
-					asset_address,
-					&sender,
-					Self::pallet_evm_account(),
-					amount,
-				)
-				.map_err(|_| Error::<T>::ERC20TransferFailed)?;
-				ensure!(success, Error::<T>::ERC20TransferFailed);
+			Asset::Erc20(_asset_address) => {
+				// let sender = evm_sender.ok_or(Error::<T>::ERC20TransferFailed)?;
+				// let (success, _weight) = Self::erc20_transfer(
+				// 	asset_address,
+				// 	&sender,
+				// 	Self::pallet_evm_account(),
+				// 	amount,
+				// )
+				// .map_err(|_| Error::<T>::ERC20TransferFailed)?;
+				// ensure!(success, Error::<T>::ERC20TransferFailed);
 			},
 		}
 		Ok(())
