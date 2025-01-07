@@ -225,7 +225,7 @@ fn operator_join_delegator_delegate_erc20() {
 
 		// Deposit and delegate
 		let deposit_result = precompile
-			.deposit(U256::ZERO, *usdc.address(), delegate_amount)
+			.deposit(U256::ZERO, *usdc.address(), delegate_amount, 0)
 			.from(bob.address())
 			.send()
 			.await?
@@ -314,7 +314,7 @@ fn operator_join_delegator_delegate_asset_id() {
 
 		// Deposit and delegate using asset ID
 		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(delegate_amount))
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(delegate_amount), 0)
 			.from(bob.address())
 			.send()
 			.await?

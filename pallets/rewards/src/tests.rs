@@ -41,7 +41,7 @@ fn test_claim_rewards() {
 		let incentive_cap = 1000;
 
 		// Configure the reward vault
-		assert_ok!(RewardsPallet::<Runtime>::udpate_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
@@ -104,7 +104,7 @@ fn test_claim_rewards_with_invalid_asset() {
 		);
 
 		// Configure the reward vault
-		assert_ok!(RewardsPallet::<Runtime>::udpate_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault {
@@ -139,7 +139,7 @@ fn test_claim_rewards_with_no_deposit() {
 		let asset = Asset::Custom(vault_id as u128);
 
 		// Configure the reward vault
-		assert_ok!(RewardsPallet::<Runtime>::udpate_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault {
@@ -175,7 +175,7 @@ fn test_claim_rewards_multiple_times() {
 		let deposit = 100;
 
 		// Configure the reward vault
-		assert_ok!(RewardsPallet::<Runtime>::udpate_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault {
@@ -248,7 +248,7 @@ fn test_calculate_deposit_rewards_with_lock_multiplier() {
 		let incentive_cap = 1000;
 
 		// Configure the reward vault
-		assert_ok!(RewardsPallet::<Runtime>::udpate_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
@@ -334,7 +334,7 @@ fn test_calculate_deposit_rewards_with_expired_locks() {
 		let incentive_cap = 1000;
 
 		// Configure the reward vault
-		assert_ok!(RewardsPallet::<Runtime>::udpate_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }

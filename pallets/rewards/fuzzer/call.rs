@@ -131,7 +131,7 @@ impl RewardsCallGenerator {
             incentive_cap,
             boost_multiplier: boost_multiplier.map(|m| m.min(500)), // Cap at 5x
         };
-        RewardsCall::udpate_vault_reward_config { vault_id, new_config: config }
+        RewardsCall::update_vault_reward_config { vault_id, new_config: config }
     }
 }
 
@@ -160,7 +160,7 @@ impl RewardsCallExecutor {
             incentive_cap,
             boost_multiplier: boost_multiplier.map(|m| m.min(500)), // Cap at 5x
         };
-        Rewards::udpate_vault_reward_config(RuntimeOrigin::root(), vault_id, config)
+        Rewards::update_vault_reward_config(RuntimeOrigin::root(), vault_id, config)
     }
 }
 

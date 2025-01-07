@@ -45,7 +45,7 @@ fn test_claim_rewards() {
             incentive_cap: 100_000,
             boost_multiplier: Some(200),
         };
-        assert_ok!(Rewards::udpate_vault_reward_config(
+        assert_ok!(Rewards::update_vault_reward_config(
             RuntimeOrigin::root(),
             vault_id,
             config,

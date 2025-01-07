@@ -319,7 +319,7 @@ pub mod pallet {
 		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
 		#[pallet::call_index(3)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn udpate_vault_reward_config(
+		pub fn update_vault_reward_config(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
 			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
