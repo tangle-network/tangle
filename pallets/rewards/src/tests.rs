@@ -325,7 +325,6 @@ fn test_calculate_deposit_rewards_with_lock_multiplier() {
 #[test]
 fn test_calculate_deposit_rewards_with_expired_locks() {
 	new_test_ext().execute_with(|| {
-		let account: AccountId32 = AccountId32::new([1u8; 32]);
 		let vault_id = 1u32;
 		let asset = Asset::Custom(vault_id as u128);
 		let deposit = 100;

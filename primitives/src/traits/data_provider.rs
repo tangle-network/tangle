@@ -60,27 +60,27 @@ macro_rules! create_median_value_data_provider {
 			fn get(key: &$key) -> Option<$value> {
 				let mut values = vec![];
 				$(
-					if let Some(v) = <$provider as $crate::traits::DataProvide<$key, $value>>::get(&key) {
+					if let Some(v) = <$provider as $crate::traits::DataProvider<$key, $value>>::get(&key) {
 						values.push(v);
 					}
 				)*
-				$crate::data_provider::median(values)
+				$crate::traits::data_provider::median(values)
 			}
 		}
-		impl $crate::traits::DataProvideExtended<$key, $timestamped_value> for $name {
+		impl $crate::traits::DataProviderExtended<$key, $timestamped_value> for $name {
 			fn get_no_op(key: &$key) -> Option<$timestamped_value> {
 				let mut values = vec![];
 				$(
-					if let Some(v) = <$provider as $crate::traits::DataProvideExtended<$key, $timestamped_value>>::get_no_op(&key) {
+					if let Some(v) = <$provider as $crate::traits::DataProviderExtended<$key, $timestamped_value>>::get_no_op(&key) {
 						values.push(v);
 					}
 				)*
-				$crate::data_provider::median(values)
+				$crate::traits::data_provider::median(values)
 			}
 			fn get_all_values() -> Vec<($key, Option<$timestamped_value>)> {
 				let mut keys = sp_std::collections::btree_set::BTreeSet::new();
 				$(
-					<$provider as $crate::traits::DataProvideExtended<$key, $timestamped_value>>::get_all_values()
+					<$provider as $crate::traits::DataProviderExtended<$key, $timestamped_value>>::get_all_values()
 						.into_iter()
 						.for_each(|(k, _)| { keys.insert(k); });
 				)*

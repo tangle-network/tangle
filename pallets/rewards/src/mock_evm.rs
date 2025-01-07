@@ -18,12 +18,7 @@ use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use fp_evm::FeeCalculator;
-use frame_support::{
-	parameter_types,
-	traits::{Currency, FindAuthor},
-	weights::Weight,
-	PalletId,
-};
+use frame_support::{parameter_types, traits::FindAuthor, weights::Weight, PalletId};
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{
 	EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping, OnChargeEVMTransaction,
@@ -138,10 +133,6 @@ impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {
 
 	fn pay_priority_fee(_tip: Self::LiquidityInfo) {}
 }
-
-/// Type alias for negative imbalance during fees
-type RuntimeNegativeImbalance =
-	<Balances as Currency<<Runtime as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = FixedGasPrice;

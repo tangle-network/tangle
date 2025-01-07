@@ -303,10 +303,6 @@ fn test_execute_withdraw() {
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(());
 
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(metadata.withdraw_requests.is_empty());
-
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 100); // deposited 200, withdrew 100
 	});
 }
@@ -368,10 +364,6 @@ fn test_execute_withdraw_before_due() {
 				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})

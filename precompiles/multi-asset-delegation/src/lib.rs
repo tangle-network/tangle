@@ -212,7 +212,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("deposit(uint256,address,uint256)")]
+	#[precompile::public("deposit(uint256,address,uint256,uint8)")]
 	fn deposit(
 		handle: &mut impl PrecompileHandle,
 		asset_id: U256,
@@ -325,7 +325,7 @@ where
 		Ok(())
 	}
 
-	#[precompile::public("delegate(bytes32,uint256,address,uint256,uint64[],uint8)")]
+	#[precompile::public("delegate(bytes32,uint256,address,uint256,uint64[])")]
 	fn delegate(
 		handle: &mut impl PrecompileHandle,
 		operator: H256,
