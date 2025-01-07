@@ -86,47 +86,30 @@ pub mod pallet {
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
-	/// Stores the user rewards for each user and asset combination
-	#[pallet::storage]
-	#[pallet::getter(fn user_rewards)]
-	pub type UserRewards<T: Config> = StorageDoubleMap<
-		_,
-		Blake2_128Concat,
-		T::AccountId,
-		Blake2_128Concat,
-		Asset<T::AssetId>,
-		UserRewardsOf<T>,
-		ValueQuery,
-	>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn asset_rewards)]
-	pub type AssetRewards<T: Config> =
-		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, u128, ValueQuery>;
-
-	/// Stores the whitelisted assets that can be used for rewards
-	#[pallet::storage]
-	#[pallet::getter(fn allowed_reward_assets)]
-	pub type AllowedRewardAssets<T: Config> =
-		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, bool, ValueQuery>;
-
-	/// Stores the APY percentage for each asset (in basis points, e.g. 100 = 1%)
-	#[pallet::storage]
-	#[pallet::getter(fn asset_apy)]
-	pub type AssetApy<T: Config> =
-		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, u32, ValueQuery>;
-
-	/// Stores the maximum capacity for each asset
-	#[pallet::storage]
-	#[pallet::getter(fn asset_capacity)]
-	pub type AssetCapacity<T: Config> =
-		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, BalanceOf<T>, ValueQuery>;
-
 	/// Stores the total score for each asset
 	#[pallet::storage]
-	#[pallet::getter(fn total_asset_score)]
-	pub type TotalAssetScore<T: Config> =
-		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, u128, ValueQuery>;
+	#[pallet::getter(fn total_reward_vault_score)]
+	pub type TotalRewardVaultScore<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::VaultId, u128, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn reward_vaults)]
+	/// Storage for the reward vaults
+	pub type RewardVaults<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::VaultId, Vec<Asset<T::AssetId>>, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn asset_reward_vault_lookup)]
+	/// Storage for the reward vaults
+	pub type AssetLookupRewardVaults<T: Config> =
+		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, T::VaultId, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn reward_config)]
+	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted
+	/// blueprints.
+	pub type RewardConfigStorage<T: Config> =
+		StorageValue<_, RewardConfig<T::VaultId, BalanceOf<T>>, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -181,11 +164,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Claim rewards for a specific asset and reward type
 		#[pallet::weight(10_000)]
-		pub fn claim_rewards(
-			origin: OriginFor<T>,
-			asset: Asset<T::AssetId>,
-			reward_type: RewardType,
-		) -> DispatchResult {
+		pub fn claim_rewards(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
 			// Ensure the asset is whitelisted
@@ -227,7 +206,7 @@ pub mod pallet {
 			};
 
 			// Ensure there are rewards to claim
-			ensure!(!reward_amount.is_zero(), Error::<T>::NoRewardsAvailable);
+			ensure!(!.is_zero(), Error::<T>::NoRewardsAvailable);
 
 			// Transfer rewards to user
 			// Note: This assumes the pallet account has sufficient balance
@@ -301,6 +280,125 @@ pub mod pallet {
 
 			// Emit event
 			Self::deposit_event(Event::AssetApyUpdated { asset, apy_basis_points });
+
+			Ok(())
+		}
+
+		/// Sets the APY and cap for a specific asset.
+		///
+		/// # Permissions
+		///
+		/// * Must be called by the force origin
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `vault_id` - ID of the vault
+		/// * `apy` - Annual percentage yield (max 10%)
+		/// * `cap` - Required deposit amount for full APY
+		///
+		/// # Errors
+		///
+		/// * [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum
+		/// * [`Error::CapCannotBeZero`] - Cap amount cannot be zero
+		#[pallet::call_index(18)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn set_incentive_apy_and_cap(
+			origin: OriginFor<T>,
+			vault_id: T::VaultId,
+			apy: sp_runtime::Percent,
+			cap: BalanceOf<T>,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			ensure!(apy <= sp_runtime::Percent::from_percent(10), Error::<T>::APYExceedsMaximum);
+			ensure!(!cap.is_zero(), Error::<T>::CapCannotBeZero);
+
+			RewardConfigStorage::<T>::mutate(|maybe_config| {
+				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
+					configs: BTreeMap::new(),
+					whitelisted_blueprint_ids: Vec::new(),
+				});
+
+				config.configs.insert(vault_id, RewardConfigForAssetVault { apy, cap });
+
+				*maybe_config = Some(config);
+			});
+
+			Self::deposit_event(Event::IncentiveAPYAndCapSet { vault_id, apy, cap });
+
+			Ok(())
+		}
+
+		/// Whitelists a blueprint for rewards.
+		///
+		/// # Permissions
+		///
+		/// * Must be called by the force origin
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `blueprint_id` - ID of blueprint to whitelist
+		#[pallet::call_index(19)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn whitelist_blueprint_for_rewards(
+			origin: OriginFor<T>,
+			blueprint_id: BlueprintId,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			RewardConfigStorage::<T>::mutate(|maybe_config| {
+				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
+					configs: BTreeMap::new(),
+					whitelisted_blueprint_ids: Vec::new(),
+				});
+
+				if !config.whitelisted_blueprint_ids.contains(&blueprint_id) {
+					config.whitelisted_blueprint_ids.push(blueprint_id);
+				}
+
+				*maybe_config = Some(config);
+			});
+
+			Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
+
+			Ok(())
+		}
+
+		/// Manage asset id to vault rewards.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by an authorized account
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `vault_id` - ID of the vault
+		/// * `asset_id` - ID of the asset
+		/// * `action` - Action to perform (Add/Remove)
+		///
+		/// # Errors
+		///
+		/// * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
+		/// * [`Error::AssetNotInVault`] - Asset does not exist in vault
+		#[pallet::call_index(20)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn manage_asset_in_vault(
+			origin: OriginFor<T>,
+			vault_id: T::VaultId,
+			asset_id: Asset<T::AssetId>,
+			action: AssetAction,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			match action {
+				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
+				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
+			}
+
+			Self::deposit_event(Event::AssetUpdatedInVault { who, vault_id, asset_id, action });
 
 			Ok(())
 		}

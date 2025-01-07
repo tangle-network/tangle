@@ -24,11 +24,19 @@ use tangle_primitives::{services::Asset, traits::rewards::RewardsManager};
 impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumberFor<T>>
 	for Pallet<T>
 {
-	fn record_delegation_reward(
+	fn record_deposit(
 		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
-		lock_multiplier: u32,
+		lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), &'static str> {
+		Ok(())
+	}
+
+	fn record_withdrawal(
+		account_id: &T::AccountId,
+		asset: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
 	) -> Result<(), &'static str> {
 		Ok(())
 	}
@@ -42,24 +50,10 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		Ok(())
 	}
 
-	fn query_rewards(
+	fn query_total_deposit(
 		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 	) -> Result<(BalanceOf<T>, BalanceOf<T>), &'static str> {
-		todo!()
-	}
-
-	fn query_delegation_rewards(
-		account_id: &T::AccountId,
-		asset: Asset<T::AssetId>,
-	) -> Result<BalanceOf<T>, &'static str> {
-		todo!()
-	}
-
-	fn query_service_rewards(
-		account_id: &T::AccountId,
-		asset: Asset<T::AssetId>,
-	) -> Result<BalanceOf<T>, &'static str> {
 		todo!()
 	}
 }

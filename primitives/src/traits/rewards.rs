@@ -20,58 +20,58 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 
 /// Trait for managing rewards in the Tangle network.
-/// This trait allows other pallets to record and query rewards.
+/// This trait provides functionality to record deposits, withdrawals, and service rewards,
+/// as well as query total deposits for accounts.
 pub trait RewardsManager<AccountId, AssetId, Balance, BlockNumber> {
-	/// Record a delegation deposit reward.
-	/// This is used by the multi-asset-delegation pallet to record rewards from delegations.
+	type Error;
+
+	/// Records a deposit for an account with an optional lock multiplier.
 	///
-	/// Parameters:
-	/// - `account_id`: The account receiving the reward
-	/// - `asset`: The asset being delegated
-	/// - `amount`: The amount of the reward
-	/// - `lock_multiplier`: The multiplier for the lock period (e.g., 1 for 1 month, 3 for 3 months)
-	fn record_delegation_reward(
+	/// # Parameters
+	/// * `account_id` - The account making the deposit
+	/// * `asset` - The asset being deposited
+	/// * `amount` - The amount being deposited
+	/// * `lock_multiplier` - Optional multiplier for locked deposits
+	fn record_deposit(
 		account_id: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
-		lock_multiplier: u32,
-	) -> Result<(), &'static str>;
+		lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error>;
 
-	/// Record a service payment reward.
-	/// This is used by the services pallet to record rewards from service payments.
+	/// Records a withdrawal for an account.
 	///
-	/// Parameters:
-	/// - `account_id`: The account receiving the reward
-	/// - `asset`: The asset used for payment
-	/// - `amount`: The amount of the reward
+	/// # Parameters
+	/// * `account_id` - The account making the withdrawal
+	/// * `asset` - The asset being withdrawn
+	/// * `amount` - The amount being withdrawn
+	fn record_withdrawal(
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> Result<(), Self::Error>;
+
+	/// Records a service reward for an account.
+	///
+	/// # Parameters
+	/// * `account_id` - The account receiving the reward
+	/// * `asset` - The asset being rewarded
+	/// * `amount` - The reward amount
 	fn record_service_reward(
 		account_id: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
-	) -> Result<(), &'static str>;
+	) -> Result<(), Self::Error>;
 
-	/// Query the total rewards for an account and asset.
-	/// Returns a tuple of (delegation_rewards, service_rewards).
+	/// Queries the total deposit for an account and asset.
 	///
-	/// Parameters:
-	/// - `account_id`: The account to query
-	/// - `asset`: The asset to query
-	fn query_rewards(
+	/// # Parameters
+	/// * `account_id` - The account to query
+	/// * `asset` - The asset to query
+	fn query_total_deposit(
 		account_id: &AccountId,
 		asset: Asset<AssetId>,
-	) -> Result<(Balance, Balance), &'static str>;
-
-	/// Query only the delegation rewards for an account and asset.
-	fn query_delegation_rewards(
-		account_id: &AccountId,
-		asset: Asset<AssetId>,
-	) -> Result<Balance, &'static str>;
-
-	/// Query only the service rewards for an account and asset.
-	fn query_service_rewards(
-		account_id: &AccountId,
-		asset: Asset<AssetId>,
-	) -> Result<Balance, &'static str>;
+	) -> Result<Balance, Self::Error>;
 }
 
 impl<AccountId, AssetId, Balance, BlockNumber>
@@ -79,12 +79,22 @@ impl<AccountId, AssetId, Balance, BlockNumber>
 where
 	Balance: Zero,
 {
-	fn record_delegation_reward(
+	type Error = &'static str;
+
+	fn record_deposit(
 		_account_id: &AccountId,
 		_asset: Asset<AssetId>,
 		_amount: Balance,
-		_lock_multiplier: u32,
-	) -> Result<(), &'static str> {
+		_lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_withdrawal(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
 		Ok(())
 	}
 
@@ -92,28 +102,14 @@ where
 		_account_id: &AccountId,
 		_asset: Asset<AssetId>,
 		_amount: Balance,
-	) -> Result<(), &'static str> {
+	) -> Result<(), Self::Error> {
 		Ok(())
 	}
 
-	fn query_rewards(
+	fn query_total_deposit(
 		_account_id: &AccountId,
 		_asset: Asset<AssetId>,
-	) -> Result<(Balance, Balance), &'static str> {
-		Ok((Balance::zero(), Balance::zero()))
-	}
-
-	fn query_delegation_rewards(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-	) -> Result<Balance, &'static str> {
-		Ok(Balance::zero())
-	}
-
-	fn query_service_rewards(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-	) -> Result<Balance, &'static str> {
+	) -> Result<Balance, Self::Error> {
 		Ok(Balance::zero())
 	}
 }

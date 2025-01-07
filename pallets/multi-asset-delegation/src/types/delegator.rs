@@ -19,6 +19,7 @@ use frame_support::ensure;
 use frame_support::{pallet_prelude::Get, BoundedVec};
 use sp_runtime::traits::Zero;
 use sp_std::fmt::Debug;
+use sp_std::vec;
 use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, BlueprintId};
 
@@ -222,7 +223,7 @@ pub struct Deposit<Balance, BlockNumber, MaxLocks: Get<u32>> {
 
 impl<
 		Balance: Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::PartialOrd + From<u32>,
-		BlockNumber: Debug + sp_runtime::Saturating + std::convert::From<u32> + sp_std::cmp::PartialOrd,
+		BlockNumber: Debug + sp_runtime::Saturating + sp_std::convert::From<u32> + sp_std::cmp::PartialOrd,
 		MaxLocks: Get<u32>,
 	> Deposit<Balance, BlockNumber, MaxLocks>
 {
