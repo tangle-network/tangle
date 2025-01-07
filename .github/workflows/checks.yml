@@ -60,7 +60,41 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Run test suite
-        run: cargo nextest run --profile ci
+        run: cargo nextest run --workspace --exclude tangle --profile ci
+
+  e2e:
+    env:
+      CARGO_TERM_COLOR: always
+
+    concurrency:
+      group: e2e-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/free-disk-space
+      - name: Install toolchain
+        id: toolchain
+        uses: actions-rs/toolchain@master
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+
+      - name: Install Protobuf
+        run: sudo apt-get install protobuf-compiler
+
+      - name: Run End to End test suite
+        run: cargo nextest run -rp tangle -F manual-seal,testnet,txpool --profile ci --nocapture
 
   clippy:
     concurrency:
