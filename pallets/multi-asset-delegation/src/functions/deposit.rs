@@ -18,7 +18,7 @@ use crate::{types::*, Pallet};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
-	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
+	sp_runtime::traits::AccountIdConversion,
 	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
 use sp_core::H160;

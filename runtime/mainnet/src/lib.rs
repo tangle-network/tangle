@@ -1204,7 +1204,7 @@ pub type AssetId = u128;
 #[cfg(feature = "runtime-benchmarks")]
 pub type AssetId = u32;
 
-impl tangle_primitives::NextAssetId<AssetId> for Runtime {
+impl tangle_primitives::traits::NextAssetId<AssetId> for Runtime {
 	fn next_asset_id() -> Option<AssetId> {
 		pallet_assets::NextAssetId::<Runtime>::get()
 	}
@@ -1265,7 +1265,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
-	type VaultId = AssetId;
 	type SlashedAmountRecipient = TreasuryAccount;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
@@ -1273,6 +1272,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type MaxDelegations = MaxDelegations;
 	type EvmRunner = crate::tangle_services::PalletEvmRunner;
+	type RewardsManager = Rewards;
 	type EvmGasWeightMapping = crate::tangle_services::PalletEVMGasWeightMapping;
 	type EvmAddressMapping = crate::tangle_services::PalletEVMAddressMapping;
 	type WeightInfo = ();
@@ -1306,6 +1306,20 @@ impl pallet_tangle_lst::Config for Runtime {
 	type PoolId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
+}
+
+parameter_types! {
+	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
+}
+
+impl pallet_rewards::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type AssetId = AssetId;
+	type Currency = Balances;
+	type PalletId = RewardsPID;
+	type VaultId = u32;
+	type DelegationManager = MultiAssetDelegation;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1368,6 +1382,7 @@ construct_runtime!(
 		Assets: pallet_assets = 44,
 		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
 		Services: pallet_services = 46,
+		Rewards: pallet_rewards = 47,
 	}
 );
 

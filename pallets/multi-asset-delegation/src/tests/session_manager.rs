@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::CurrentRound;
+use frame_support::assert_noop;
 use frame_support::assert_ok;
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
 use tangle_primitives::services::Asset;
@@ -42,7 +43,8 @@ fn handle_round_change_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
-			None
+			None,
+			None,
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -76,8 +78,8 @@ fn handle_round_change_with_unstake_should_work() {
 		let operator1 = Charlie.to_account_id();
 		let operator2 = Dave.to_account_id();
 		let asset_id = Asset::Custom(VDOT);
-		let amount1 = 1_000_000_000_000;
-		let amount2 = 1_000_000_000_000;
+		let amount1 = 100_000;
+		let amount2 = 100_000;
 		let unstake_amount = 50;
 
 		CurrentRound::<Runtime>::put(1);
@@ -94,13 +96,27 @@ fn handle_round_change_with_unstake_should_work() {
 		create_and_mint_tokens(VDOT, delegator1.clone(), amount1);
 		mint_tokens(delegator1.clone(), VDOT, delegator2.clone(), amount2);
 
+		// Deposit with larger than cap should fail
+		assert_noop!(
+			MultiAssetDelegation::deposit(
+				RuntimeOrigin::signed(delegator1.clone()),
+				asset_id,
+				100_000_000_u32.into(),
+				None,
+				None,
+			),
+			Error::<Runtime>::DepositExceedsCapForAsset
+		);
+
 		// Deposit and delegate first
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator1.clone()),
 			asset_id,
 			amount1,
 			None,
+			None,
 		));
+
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(delegator1.clone()),
 			operator1.clone(),
@@ -113,8 +129,10 @@ fn handle_round_change_with_unstake_should_work() {
 			RuntimeOrigin::signed(delegator2.clone()),
 			asset_id,
 			amount2,
+			None,
 			None
 		));
+
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(delegator2.clone()),
 			operator2.clone(),

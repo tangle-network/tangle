@@ -17,7 +17,6 @@
 use super::*;
 use frame_support::ensure;
 use frame_support::{pallet_prelude::Get, BoundedVec};
-use sp_runtime::traits::Zero;
 use sp_std::fmt::Debug;
 use sp_std::vec;
 use tangle_primitives::types::rewards::LockInfo;
@@ -212,7 +211,7 @@ impl<
 }
 
 /// Represents a deposit of a specific asset.
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct Deposit<Balance, BlockNumber, MaxLocks: Get<u32>> {
 	/// The total amount deposited by the user (includes both delegated and non-delegated).
 	pub amount: Balance,

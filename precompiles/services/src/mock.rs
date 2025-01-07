@@ -41,6 +41,7 @@ use sp_runtime::{
 	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
+use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 pub type AccountId = AccountId32;
@@ -391,7 +392,7 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64>
 	for MockDelegationManager
 {
 	type AssetId = AssetId;
@@ -434,6 +435,13 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 		_blueprint_id: tangle_primitives::BlueprintId,
 		_percentage: sp_runtime::Percent,
 	) {
+	}
+
+	fn get_user_deposit_with_locks(
+		_who: &AccountId,
+		_asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, u64>> {
+		None
 	}
 }
 

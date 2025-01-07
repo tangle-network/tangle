@@ -79,7 +79,7 @@ pub use functions::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction, *};
+	use crate::types::{delegator::DelegatorBlueprintSelection, *};
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
@@ -88,8 +88,9 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
 	use sp_core::H160;
-	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*, vec::Vec};
+	use sp_runtime::traits::{MaybeSerializeDeserialize, Member};
+	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
+	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
 	use tangle_primitives::{services::Asset, traits::ServiceManager, BlueprintId, RoundIndex};
 
@@ -190,6 +191,14 @@ pub mod pallet {
 
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
 		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
+
+		/// Type that implements the reward manager trait
+		type RewardsManager: tangle_primitives::traits::RewardsManager<
+			Self::AccountId,
+			Self::AssetId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+		>;
 
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
@@ -393,6 +402,8 @@ pub mod pallet {
 		EVMAbiDecode,
 		/// Cannot unstake with locks
 		LockViolation,
+		/// Above deposit caps setup
+		DepositExceedsCapForAsset,
 	}
 
 	/// Hooks for the pallet.
@@ -671,6 +682,10 @@ pub mod pallet {
 			lock_multiplier: Option<LockMultiplier>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+			// ensure the caps have not been exceeded
+			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset_id)
+				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
+			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
 			Self::process_deposit(who.clone(), asset_id, amount, evm_address, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset_id });
 			Ok(())

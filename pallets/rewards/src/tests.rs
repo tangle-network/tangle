@@ -17,13 +17,10 @@ use crate::{
 	mock::*, types::*, AssetAction, Error, Event, Pallet as RewardsPallet, UserClaimedReward,
 };
 use frame_support::{assert_noop, assert_ok};
-use sp_runtime::{traits::Zero, AccountId32, Percent};
+use sp_runtime::{AccountId32, Percent};
 use tangle_primitives::types::rewards::LockInfo;
 use tangle_primitives::types::rewards::LockMultiplier;
-use tangle_primitives::{
-	services::Asset,
-	types::rewards::{UserDepositWithLocks, UserRewards},
-};
+use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
 
 fn run_to_block(n: u64) {
 	while System::block_number() < n {
@@ -54,14 +51,14 @@ fn test_claim_rewards() {
 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
-			asset.clone(),
+			asset,
 			AssetAction::Add,
 		));
 
 		// Mock deposit with UserDepositWithLocks
 		MOCK_DELEGATION_INFO.with(|m| {
 			m.borrow_mut().deposits.insert(
-				(account.clone(), asset.clone()),
+				(account.clone(), asset),
 				UserDepositWithLocks { unlocked_amount: deposit, amount_with_locks: None },
 			);
 		});
@@ -72,7 +69,7 @@ fn test_claim_rewards() {
 		// Claim rewards
 		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
 			RuntimeOrigin::signed(account.clone()),
-			asset.clone()
+			asset
 		));
 
 		// Balance should be greater than 0 after claiming rewards
@@ -82,7 +79,7 @@ fn test_claim_rewards() {
 		System::assert_has_event(
 			Event::RewardsClaimed {
 				account: account.clone(),
-				asset: asset.clone(),
+				asset,
 				amount: Balances::free_balance(&account),
 			}
 			.into(),
@@ -102,10 +99,7 @@ fn test_claim_rewards_with_invalid_asset() {
 
 		// Try to claim rewards for an asset that doesn't exist in the vault
 		assert_noop!(
-			RewardsPallet::<Runtime>::claim_rewards(
-				RuntimeOrigin::signed(account.clone()),
-				asset.clone()
-			),
+			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone()), asset),
 			Error::<Runtime>::AssetNotInVault
 		);
 
@@ -125,16 +119,13 @@ fn test_claim_rewards_with_invalid_asset() {
 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
-			asset.clone(),
+			asset,
 			AssetAction::Add,
 		));
 
 		// Try to claim rewards without any deposit
 		assert_noop!(
-			RewardsPallet::<Runtime>::claim_rewards(
-				RuntimeOrigin::signed(account.clone()),
-				asset.clone()
-			),
+			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone()), asset),
 			Error::<Runtime>::NoRewardsAvailable
 		);
 	});
@@ -163,16 +154,13 @@ fn test_claim_rewards_with_no_deposit() {
 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
-			asset.clone(),
+			asset,
 			AssetAction::Add,
 		));
 
 		// Try to claim rewards without any deposit
 		assert_noop!(
-			RewardsPallet::<Runtime>::claim_rewards(
-				RuntimeOrigin::signed(account.clone()),
-				asset.clone()
-			),
+			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone()), asset),
 			Error::<Runtime>::NoRewardsAvailable
 		);
 	});
@@ -202,14 +190,14 @@ fn test_claim_rewards_multiple_times() {
 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
-			asset.clone(),
+			asset,
 			AssetAction::Add,
 		));
 
 		// Mock deposit
 		MOCK_DELEGATION_INFO.with(|m| {
 			m.borrow_mut().deposits.insert(
-				(account.clone(), asset.clone()),
+				(account.clone(), asset),
 				UserDepositWithLocks {
 					unlocked_amount: deposit,
 					amount_with_locks: Some(vec![LockInfo {
@@ -230,7 +218,7 @@ fn test_claim_rewards_multiple_times() {
 		// Claim rewards first time
 		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
 			RuntimeOrigin::signed(account.clone()),
-			asset.clone()
+			asset
 		));
 
 		let first_claim_balance = Balances::free_balance(&account);
@@ -242,7 +230,7 @@ fn test_claim_rewards_multiple_times() {
 		// Claim rewards second time
 		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
 			RuntimeOrigin::signed(account.clone()),
-			asset.clone()
+			asset
 		));
 	});
 }
@@ -270,7 +258,7 @@ fn test_calculate_deposit_rewards_with_lock_multiplier() {
 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
-			asset.clone(),
+			asset,
 			AssetAction::Add,
 		));
 
@@ -284,7 +272,7 @@ fn test_calculate_deposit_rewards_with_lock_multiplier() {
 
 		MOCK_DELEGATION_INFO.with(|m| {
 			m.borrow_mut().deposits.insert(
-				(account.clone(), asset.clone()),
+				(account.clone(), asset),
 				UserDepositWithLocks {
 					unlocked_amount: deposit,
 					amount_with_locks: Some(vec![lock_info.clone()]),
@@ -357,7 +345,7 @@ fn test_calculate_deposit_rewards_with_expired_locks() {
 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
-			asset.clone(),
+			asset,
 			AssetAction::Add,
 		));
 

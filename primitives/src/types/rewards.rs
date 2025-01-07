@@ -1,8 +1,7 @@
 use super::*;
 use crate::services::Asset;
-use frame_system::pallet_prelude::BlockNumberFor;
 use frame_system::Config;
-use sp_runtime::Saturating;
+use sp_std::vec::Vec;
 
 /// Represents different types of rewards a user can earn
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]

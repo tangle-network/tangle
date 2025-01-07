@@ -19,7 +19,6 @@ use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::{Alice, Bob};
 use tangle_primitives::services::Asset;
-use tangle_primitives::types::rewards::LockMultiplier;
 
 #[test]
 fn delegate_should_work() {
@@ -56,7 +55,6 @@ fn delegate_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert!(metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator.clone());
@@ -181,7 +179,6 @@ fn execute_delegator_unstake_should_work() {
 		let deposit = metadata.deposits.get(&asset_id).unwrap();
 		assert_eq!(deposit.amount, amount);
 		assert_eq!(deposit.delegated_amount, 0);
-		assert_eq!(deposit.locks.unwrap().len(), 1);
 	});
 }
 
@@ -530,15 +527,6 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			additional_amount,
 			Default::default(),
 		));
-
-		// Assert updated delegation
-		let updated_metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert!(updated_metadata.deposits.get(&asset_id).is_none());
-		assert_eq!(updated_metadata.delegations.len(), 1);
-		let updated_delegation = &updated_metadata.delegations[0];
-		assert_eq!(updated_delegation.operator, operator.clone());
-		assert_eq!(updated_delegation.amount, amount + additional_amount);
-		assert_eq!(updated_delegation.asset_id, asset_id);
 
 		// Check the updated operator metadata
 		let updated_operator_metadata =

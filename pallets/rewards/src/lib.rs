@@ -71,22 +71,17 @@ mod mock_evm;
 #[cfg(test)]
 mod tests;
 
-// pub mod weights;
-
-// #[cfg(feature = "runtime-benchmarks")]
-// mod benchmarking;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 use scale_info::TypeInfo;
-use sp_runtime::Saturating;
-use sp_std::collections::btree_map::BTreeMap;
 use tangle_primitives::services::Asset;
 pub mod types;
 pub use types::*;
 pub mod functions;
-pub use functions::*;
 pub mod impls;
+use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
-use tangle_primitives::MultiAssetDelegationInfo;
 
 /// The pallet's account ID.
 #[frame_support::pallet]
@@ -99,7 +94,7 @@ pub mod pallet {
 	};
 
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::{AccountIdConversion, Zero};
+	use sp_runtime::traits::AccountIdConversion;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -294,7 +289,7 @@ pub mod pallet {
 			asset_id: Asset<T::AssetId>,
 			action: AssetAction,
 		) -> DispatchResult {
-			let who = T::ForceOrigin::ensure_origin(origin)?;
+			let _who = T::ForceOrigin::ensure_origin(origin)?;
 
 			match action {
 				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
@@ -329,7 +324,7 @@ pub mod pallet {
 			vault_id: T::VaultId,
 			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
 		) -> DispatchResult {
-			let who = T::ForceOrigin::ensure_origin(origin)?;
+			let _who = T::ForceOrigin::ensure_origin(origin)?;
 			RewardConfigStorage::<T>::insert(vault_id, new_config);
 			Self::deposit_event(Event::VaultRewardConfigUpdated { vault_id });
 			Ok(())

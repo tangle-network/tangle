@@ -14,14 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate as pallet_rewards;
 use crate::mock::{
 	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use fp_evm::FeeCalculator;
 use frame_support::{
 	parameter_types,
-	traits::{Currency, FindAuthor, OnUnbalanced},
+	traits::{Currency, FindAuthor},
 	weights::Weight,
 	PalletId,
 };
@@ -116,12 +115,6 @@ parameter_types! {
 	pub SuicideQuickClearLimit: u32 = 0;
 }
 
-pub struct DealWithFees;
-impl OnUnbalanced<RuntimeNegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
-		// whatever
-	}
-}
 pub struct FreeEVMExecution;
 
 impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {

@@ -30,10 +30,7 @@ use frame_system::ensure_signed_or_root;
 use honggfuzz::fuzz;
 use pallet_multi_asset_delegation::{mock::*, pallet as mad, types::*};
 use rand::{seq::SliceRandom, Rng};
-use sp_runtime::{
-	traits::{Scale, Zero},
-	Percent,
-};
+use sp_runtime::traits::{Scale, Zero};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
@@ -197,7 +194,8 @@ fn random_calls<R: Rng>(
 			let amount = random_ed_multiple(&mut rng);
 			let evm_address =
 				if rng.gen_bool(0.5) { Some(rng.gen::<[u8; 20]>().into()) } else { None };
-			[(mad::Call::deposit { asset_id, amount, evm_address }, origin)].to_vec()
+			[(mad::Call::deposit { asset_id, amount, evm_address, lock_multiplier: None }, origin)]
+				.to_vec()
 		},
 		"schedule_withdraw" => {
 			// Schedule withdraw
@@ -247,17 +245,7 @@ fn random_calls<R: Rng>(
 			};
 			[
 				join_operators_call(&mut rng, operator_origin.clone(), &operator),
-				(
-					mad::Call::delegate {
-						operator,
-						asset_id,
-						amount,
-						blueprint_selection,
-						lock_multiplier: None,
-					},
-					origin,
-				),
-				// TODO : Add fuzzing with lock_multiplier
+				(mad::Call::delegate { operator, asset_id, amount, blueprint_selection }, origin),
 			]
 			.to_vec()
 		},
@@ -292,70 +280,6 @@ fn random_calls<R: Rng>(
 				(mad::Call::cancel_delegator_unstake { operator, asset_id, amount }, origin),
 			]
 			.to_vec()
-		},
-		"set_incentive_apy_and_cap" => {
-			// Set incentive APY and cap
-			let is_root = rng.gen_bool(0.5);
-			let (origin, who) = if is_root {
-				(RuntimeOrigin::root(), [0u8; 32].into())
-			} else {
-				random_signed_origin(&mut rng)
-			};
-			fund_account(&mut rng, &who);
-			let vault_id = rng.gen();
-			let apy = Percent::from_percent(rng.gen_range(0..100));
-			let cap = rng.gen_range(0..Balance::MAX);
-			[(mad::Call::set_incentive_apy_and_cap { vault_id, apy, cap }, origin)].to_vec()
-		},
-		"whitelist_blueprint_for_rewards" => {
-			// Whitelist blueprint for rewards
-			let is_root = rng.gen_bool(0.5);
-			let (origin, who) = if is_root {
-				(RuntimeOrigin::root(), [0u8; 32].into())
-			} else {
-				random_signed_origin(&mut rng)
-			};
-			fund_account(&mut rng, &who);
-			let blueprint_id = rng.gen::<u64>();
-			[(mad::Call::whitelist_blueprint_for_rewards { blueprint_id }, origin)].to_vec()
-		},
-		"manage_asset_in_vault" => {
-			// Manage asset in vault
-			let is_root = rng.gen_bool(0.5);
-			let (origin, who) = if is_root {
-				(RuntimeOrigin::root(), [0u8; 32].into())
-			} else {
-				random_signed_origin(&mut rng)
-			};
-			fund_account(&mut rng, &who);
-			let asset_id = random_asset(&mut rng);
-			let vault_id = rng.gen();
-			let action = if rng.gen() { AssetAction::Add } else { AssetAction::Remove };
-			[(mad::Call::manage_asset_in_vault { asset_id, vault_id, action }, origin)].to_vec()
-		},
-		"add_blueprint_id" => {
-			// Add blueprint ID
-			let is_root = rng.gen_bool(0.5);
-			let (origin, who) = if is_root {
-				(RuntimeOrigin::root(), [0u8; 32].into())
-			} else {
-				random_signed_origin(&mut rng)
-			};
-			fund_account(&mut rng, &who);
-			let blueprint_id = rng.gen::<u64>();
-			[(mad::Call::add_blueprint_id { blueprint_id }, origin)].to_vec()
-		},
-		"remove_blueprint_id" => {
-			// Remove blueprint ID
-			let is_root = rng.gen_bool(0.5);
-			let (origin, who) = if is_root {
-				(RuntimeOrigin::root(), [0u8; 32].into())
-			} else {
-				random_signed_origin(&mut rng)
-			};
-			fund_account(&mut rng, &who);
-			let blueprint_id = rng.gen::<u64>();
-			[(mad::Call::remove_blueprint_id { blueprint_id }, origin)].to_vec()
 		},
 		_ => {
 			unimplemented!("unknown call name: {}", op)
@@ -563,11 +487,6 @@ fn do_sanity_checks(call: mad::Call<Runtime>, origin: RuntimeOrigin, outcome: Po
 		mad::Call::schedule_delegator_unstake { operator, asset_id, amount } => {},
 		mad::Call::execute_delegator_unstake {} => {},
 		mad::Call::cancel_delegator_unstake { operator, asset_id, amount } => {},
-		mad::Call::set_incentive_apy_and_cap { vault_id, apy, cap } => {},
-		mad::Call::whitelist_blueprint_for_rewards { blueprint_id } => {},
-		mad::Call::manage_asset_in_vault { vault_id, asset_id, action } => {},
-		mad::Call::add_blueprint_id { blueprint_id } => {},
-		mad::Call::remove_blueprint_id { blueprint_id } => {},
 		other => unimplemented!("sanity checks for call: {other:?} not implemented"),
 	}
 }

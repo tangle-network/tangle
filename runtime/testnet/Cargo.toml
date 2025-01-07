@@ -89,6 +89,7 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 pallet-tangle-lst = { workspace = true }
+pallet-rewards = { workspace = true }
 
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
@@ -256,6 +257,7 @@ std = [
     "pallet-multi-asset-delegation/std",
     "pallet-tangle-lst/std",
     "pallet-services-rpc-runtime-api/std",
+    "pallet-rewards/std",
 
     # Frontier
     "fp-evm/std",

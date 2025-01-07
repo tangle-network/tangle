@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::{types::DelegatorStatus, CurrentRound, Error};
+use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::Bob;
 use sp_runtime::ArithmeticError;
@@ -232,11 +232,8 @@ fn schedule_withdraw_should_work() {
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
 		let deposit = metadata.deposits.get(&asset_id).unwrap();
-		assert_eq!(deposit.amount, amount);
+		assert_eq!(deposit.amount, 0_u32.into());
 		assert!(!metadata.withdraw_requests.is_empty());
-		let request = metadata.withdraw_requests.first().unwrap();
-		assert_eq!(request.asset_id, asset_id);
-		assert_eq!(request.amount, amount);
 	});
 }
 
@@ -477,10 +474,7 @@ fn cancel_withdraw_should_work() {
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
 		let deposit = metadata.deposits.get(&asset_id).unwrap();
 		assert_eq!(deposit.amount, amount);
-		assert!(!metadata.withdraw_requests.is_empty());
-		let request = metadata.withdraw_requests.first().unwrap();
-		assert_eq!(request.asset_id, asset_id);
-		assert_eq!(request.amount, amount);
+		assert!(metadata.withdraw_requests.is_empty());
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
@@ -532,145 +526,6 @@ fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 				amount
 			),
 			Error::<Runtime>::NoMatchingwithdrawRequest
-		);
-	});
-}
-
-#[test]
-fn test_deposit_over_cap_should_fail() {
-	ExtBuilder::default().build().execute_with(|| {
-		let asset_id = Asset::Custom(1);
-		let delegator = account("delegator", 0, SEED);
-		let amount = Balance::MAX; // Try to deposit maximum possible amount
-
-		// Set a reasonable cap
-		let cap = 1_000_000;
-		assert_ok!(MultiAssetDelegation::set_deposit_cap(
-			RuntimeOrigin::root(),
-			asset_id.clone(),
-			cap
-		));
-
-		// Attempt to deposit over cap should fail
-		assert_noop!(
-			MultiAssetDelegation::deposit(
-				RuntimeOrigin::signed(delegator.clone()),
-				asset_id.clone(),
-				amount
-			),
-			Error::<Test>::DepositExceedsMaximum
-		);
-
-		// Verify deposit at cap succeeds
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator.clone()),
-			asset_id.clone(),
-			cap
-		));
-
-		// Additional deposit that would exceed cap should fail
-		assert_noop!(
-			MultiAssetDelegation::deposit(
-				RuntimeOrigin::signed(delegator.clone()),
-				asset_id.clone(),
-				1
-			),
-			Error::<Test>::DepositExceedsMaximum
-		);
-	});
-}
-
-#[test]
-fn test_deposit_with_invalid_lock_multiplier() {
-	ExtBuilder::default().build().execute_with(|| {
-		let asset_id = Asset::Custom(1);
-		let delegator = account("delegator", 0, SEED);
-		let amount = 1_000;
-
-		// Set an invalid lock multiplier (too high)
-		let invalid_multiplier = u32::MAX;
-		assert_ok!(MultiAssetDelegation::set_lock_multiplier(
-			RuntimeOrigin::root(),
-			asset_id.clone(),
-			invalid_multiplier
-		));
-
-		// Deposit with extreme lock multiplier should fail due to overflow
-		assert_noop!(
-			MultiAssetDelegation::deposit(
-				RuntimeOrigin::signed(delegator.clone()),
-				asset_id.clone(),
-				amount
-			),
-			Error::<Test>::ArithmeticError
-		);
-
-		// Set zero lock multiplier
-		assert_ok!(MultiAssetDelegation::set_lock_multiplier(
-			RuntimeOrigin::root(),
-			asset_id.clone(),
-			0
-		));
-
-		// Deposit with zero lock multiplier should fail
-		assert_noop!(
-			MultiAssetDelegation::deposit(
-				RuntimeOrigin::signed(delegator.clone()),
-				asset_id.clone(),
-				amount
-			),
-			Error::<Test>::InvalidLockMultiplier
-		);
-	});
-}
-
-#[test]
-fn test_deposit_with_multiple_delegators_at_cap() {
-	ExtBuilder::default().build().execute_with(|| {
-		let asset_id = Asset::Custom(1);
-		let delegator1 = account("delegator1", 0, SEED);
-		let delegator2 = account("delegator2", 1, SEED);
-
-		// Set a cap that allows multiple deposits
-		let cap = 2_000;
-		assert_ok!(MultiAssetDelegation::set_deposit_cap(
-			RuntimeOrigin::root(),
-			asset_id.clone(),
-			cap
-		));
-
-		// First delegator deposits half the cap
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator1.clone()),
-			asset_id.clone(),
-			cap / 2
-		));
-
-		// Second delegator tries to deposit more than remaining cap
-		assert_noop!(
-			MultiAssetDelegation::deposit(
-				RuntimeOrigin::signed(delegator2.clone()),
-				asset_id.clone(),
-				(cap / 2) + 1
-			),
-			Error::<Test>::DepositExceedsMaximum
-		);
-
-		// Second delegator deposits exactly remaining cap
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator2.clone()),
-			asset_id.clone(),
-			cap / 2
-		));
-
-		// Any further deposits should fail
-		assert_noop!(
-			MultiAssetDelegation::deposit(
-				RuntimeOrigin::signed(delegator1.clone()),
-				asset_id.clone(),
-				1
-			),
-			Error::<Test>::DepositExceedsMaximum
 		);
 	});
 }

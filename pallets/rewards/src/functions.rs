@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
 use crate::AssetLookupRewardVaults;
 use crate::Error;
 use crate::Event;
@@ -27,15 +26,13 @@ use frame_support::ensure;
 use frame_support::traits::Currency;
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::{CheckedDiv, CheckedMul};
+use sp_runtime::traits::{Saturating, Zero};
 use sp_runtime::DispatchError;
 use sp_runtime::DispatchResult;
-use sp_runtime::{
-	traits::{Saturating, Zero},
-	Percent,
-};
+use sp_std::vec::Vec;
+use tangle_primitives::services::Asset;
+use tangle_primitives::traits::MultiAssetDelegationInfo;
 use tangle_primitives::types::rewards::UserDepositWithLocks;
-use tangle_primitives::MultiAssetDelegationInfo;
-use tangle_primitives::{services::Asset, types::rewards::LockMultiplier};
 
 impl<T: Config> Pallet<T> {
 	pub fn remove_asset_from_vault(
@@ -117,21 +114,21 @@ impl<T: Config> Pallet<T> {
 		// find the vault for the asset id
 		// if the asset is not in a reward vault, do nothing
 		let vault_id =
-			AssetLookupRewardVaults::<T>::get(&asset).ok_or(Error::<T>::AssetNotInVault)?;
+			AssetLookupRewardVaults::<T>::get(asset).ok_or(Error::<T>::AssetNotInVault)?;
 
 		// lets read the user deposits from the delegation manager
 		let deposit_info =
-			T::DelegationManager::get_user_deposit_with_locks(&account_id.clone(), asset.clone())
+			T::DelegationManager::get_user_deposit_with_locks(&account_id.clone(), asset)
 				.ok_or(Error::<T>::NoRewardsAvailable)?;
 
 		// read the asset reward config
-		let reward_config = RewardConfigStorage::<T>::get(&vault_id);
+		let reward_config = RewardConfigStorage::<T>::get(vault_id);
 
 		// find the total vault score
-		let total_score = TotalRewardVaultScore::<T>::get(&vault_id);
+		let total_score = TotalRewardVaultScore::<T>::get(vault_id);
 
 		// get the users last claim
-		let last_claim = UserClaimedReward::<T>::get(&account_id, &vault_id);
+		let last_claim = UserClaimedReward::<T>::get(account_id, vault_id);
 
 		let (total_rewards, rewards_to_be_paid) =
 			Self::calculate_deposit_rewards_with_lock_multiplier(
@@ -142,12 +139,12 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 		// mint new TNT rewards and trasnfer to the user
-		T::Currency::deposit_creating(&account_id, rewards_to_be_paid);
+		let _ = T::Currency::deposit_creating(account_id, rewards_to_be_paid);
 
 		// update the last claim
 		UserClaimedReward::<T>::insert(
-			&account_id,
-			&vault_id,
+			account_id,
+			vault_id,
 			(frame_system::Pallet::<T>::block_number(), total_rewards),
 		);
 
@@ -228,6 +225,8 @@ impl<T: Config> Pallet<T> {
 		} else {
 			Zero::zero()
 		};
+
+		total_rewards = total_rewards.saturating_add(base_reward_rate);
 
 		// Add rewards for locked amounts if any exist
 		if let Some(locks) = deposit.amount_with_locks {

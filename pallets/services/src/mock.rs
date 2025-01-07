@@ -37,6 +37,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
+use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 use core::ops::Mul;
@@ -260,7 +261,7 @@ impl pallet_assets::Config for Runtime {
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64>
 	for MockDelegationManager
 {
 	type AssetId = AssetId;
@@ -307,6 +308,13 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 		_blueprint_id: tangle_primitives::BlueprintId,
 		_percentage: sp_runtime::Percent,
 	) {
+	}
+
+	fn get_user_deposit_with_locks(
+		_who: &AccountId,
+		_asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, u64>> {
+		None
 	}
 }
 

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate::mock_evm::MockedEvmRunner;
 use crate::{self as pallet_rewards};
 use ethabi::Uint;
 use frame_election_provider_support::{
@@ -22,17 +21,13 @@ use frame_election_provider_support::{
 	onchain, SequentialPhragmen,
 };
 use frame_support::{
-	construct_runtime, derive_impl,
-	pallet_prelude::{Hooks, Weight},
-	parameter_types,
+	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 	PalletId,
 };
-use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
@@ -42,7 +37,6 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 use tangle_primitives::services::Asset;
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 use tangle_primitives::types::rewards::UserDepositWithLocks;
 
 use core::ops::Mul;
@@ -219,31 +213,6 @@ parameter_types! {
 	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
 }
 
-pub struct PalletEVMGasWeightMapping;
-
-impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
-	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
-		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
-	}
-
-	fn weight_to_gas(weight: Weight) -> u64 {
-		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
-	}
-}
-
-pub struct PalletEVMAddressMapping;
-
-impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
-	fn into_account_id(address: H160) -> AccountId {
-		use pallet_evm::AddressMapping;
-		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
-	}
-
-	fn into_address(account_id: AccountId) -> H160 {
-		H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
-	}
-}
-
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
@@ -408,12 +377,6 @@ pub fn account_id_to_address(account_id: AccountId) -> H160 {
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities()
 }
-
-pub const USDC_ERC20: H160 = H160([0x23; 20]);
-// pub const USDC: AssetId = 1;
-// pub const WETH: AssetId = 2;
-// pub const WBTC: AssetId = 3;
-pub const VDOT: AssetId = 4;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.

@@ -16,8 +16,6 @@
 
 use crate::services::Asset;
 use crate::types::rewards::LockMultiplier;
-use frame_support::traits::Currency;
-use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 
 /// Trait for managing rewards in the Tangle network.
@@ -73,7 +71,7 @@ pub trait RewardsManager<AccountId, AssetId, Balance, BlockNumber> {
 	/// # Returns
 	/// * `Ok(Balance)` - The maximum deposit cap for the asset
 	/// * `Err(Self::Error)` - If there was an error retrieving the cap
-	fn get_asset_deposit_cap(asset: Asset<AssetId>) -> Result<Balance, Self::Error>;
+	fn get_asset_deposit_cap_remaining(asset: Asset<AssetId>) -> Result<Balance, Self::Error>;
 
 	/// Gets the incentive cap for an asset at a given block number.
 	/// This represents the minimum amount required to receive full incentives.
@@ -119,7 +117,7 @@ where
 		Ok(())
 	}
 
-	fn get_asset_deposit_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+	fn get_asset_deposit_cap_remaining(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(Balance::zero())
 	}
 

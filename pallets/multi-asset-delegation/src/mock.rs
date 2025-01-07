@@ -38,12 +38,15 @@ use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
+use sp_runtime::DispatchError;
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
+use tangle_primitives::traits::RewardsManager;
+use tangle_primitives::types::rewards::LockMultiplier;
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -273,7 +276,7 @@ impl pallet_assets::Config for Runtime {
 
 pub struct MockServiceManager;
 
-impl tangle_primitives::ServiceManager<AccountId, Balance> for MockServiceManager {
+impl tangle_primitives::traits::ServiceManager<AccountId, Balance> for MockServiceManager {
 	fn get_active_blueprints_count(_account: &AccountId) -> usize {
 		// we dont care
 		Default::default()
@@ -313,6 +316,45 @@ parameter_types! {
 	pub const MaxDelegations: u32 = 50;
 }
 
+pub struct MockRewardsManager;
+
+impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsManager {
+	type Error = DispatchError;
+
+	fn record_deposit(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+		_lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_withdrawal(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_service_reward(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn get_asset_deposit_cap_remaining(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(100_000_u32.into())
+	}
+
+	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(0_u32.into())
+	}
+}
+
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
@@ -326,7 +368,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = ConstU128<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type VaultId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type PalletId = PID;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
@@ -338,6 +379,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type EvmAddressMapping = PalletEVMAddressMapping;
+	type RewardsManager = MockRewardsManager;
 	type WeightInfo = ();
 }
 
@@ -448,40 +490,6 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
-
-	// let assets_config = pallet_assets::GenesisConfig::<Runtime> {
-	// 	assets: vec![
-	// 		(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
-	// 		(WETH, authorities[1].clone(), true, 100),     // 100 wei.
-	// 		(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
-	// 		(VDOT, authorities[0].clone(), true, 100),
-	// 	],
-	// 	metadata: vec![
-	// 		(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
-	// 		(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
-	// 		(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
-	// 		(VDOT, Vec::from(b"VeChain"), Vec::from(b"VDOT"), 18),
-	// 	],
-	// 	accounts: vec![
-	// 		(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
-	// 		(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
-	// 		//
-	// 		(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
-	// 		(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
-	// 		//
-	// 		(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
-	// 		(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
-
-	// 		//
-	// 		(VDOT, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(VDOT, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(VDOT, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
-	// 	],
-	// 	next_asset_id: Some(4),
-	// };
 
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);

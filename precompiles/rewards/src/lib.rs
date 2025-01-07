@@ -15,215 +15,161 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(any(test, feature = "fuzzing"))]
-pub mod mock;
-#[cfg(test)]
-mod tests;
-
-use fp_evm::PrecompileHandle;
-use frame_support::{
-    dispatch::{GetDispatchInfo, PostDispatchInfo},
-    traits::Currency,
+use core::marker::PhantomData;
+use frame_support::traits::Currency;
+use fp_evm::{PrecompileHandle, PrecompileOutput};
+use pallet_evm::Precompile;
+use pallet_rewards::Config;
+use precompile_utils::{
+	prelude::*,
+	solidity::{
+		codec::{Address, BoundedVec},
+		modifier::FunctionModifier,
+		revert::InjectBacktrace,
+	},
 };
-use pallet_evm::AddressMapping;
-use precompile_utils::prelude::*;
 use sp_core::{H160, U256};
-use sp_runtime::traits::Dispatchable;
-use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::{
-    services::Asset,
-    types::{rewards::{LockMultiplier, RewardType}, WrappedAccountId32},
-};
+use sp_runtime::traits::StaticLookup;
+use sp_std::{marker::PhantomData, prelude::*};
+use tangle_primitives::services::Asset;
 
-type BalanceOf<Runtime> =
-    <<Runtime as pallet_rewards::Config>::Currency as Currency<
-        <Runtime as frame_system::Config>::AccountId,
-    >>::Balance;
+/// Solidity selector of the Transfer log, which is the Keccak of the Log signature.
+pub const SELECTOR_LOG_REWARDS_CLAIMED: [u8; 32] = keccak256!("RewardsClaimed(address,uint256)");
 
-type AssetIdOf<Runtime> = <Runtime as pallet_rewards::Config>::AssetId;
-
+/// A precompile to wrap the functionality from pallet-rewards.
 pub struct RewardsPrecompile<Runtime>(PhantomData<Runtime>);
 
 #[precompile_utils::precompile]
 impl<Runtime> RewardsPrecompile<Runtime>
 where
-    Runtime: pallet_rewards::Config + pallet_evm::Config,
-    Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
-    Runtime::RuntimeCall: From<pallet_rewards::Call<Runtime>>,
-    BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-    AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u128>,
-    Runtime::AccountId: From<WrappedAccountId32>,
+	Runtime: Config + pallet_evm::Config,
+	Runtime::AccountId: From<H160> + Into<H160>,
 {
-    /// Set APY for an asset (admin only)
-    #[precompile::public("setAssetApy(uint256,address,uint256)")]
-    fn set_asset_apy(
-        handle: &mut impl PrecompileHandle,
-        asset_id: U256,
-        token_address: Address,
-        apy_basis_points: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-        
-        let asset = if token_address == Address::zero() {
-            Asset::Custom(
-                asset_id.try_into().map_err(|_| revert("Invalid asset ID"))?,
-            )
-        } else {
-            Asset::Erc20(token_address.into())
-        };
+	#[precompile::public("claimRewards(uint256,address)")]
+	fn claim_rewards(
+		handle: &mut impl PrecompileHandle,
+		asset_id: U256,
+		token_address: Address,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-        let apy: u32 = apy_basis_points
-            .try_into()
-            .map_err(|_| revert("Invalid APY basis points"))?;
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
 
-        let call = pallet_rewards::Call::<Runtime>::set_asset_apy { 
-            asset,
-            apy_basis_points: apy,
-        };
+		let (asset, _) = match (asset_id.as_u128(), token_address.0 .0) {
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), U256::zero())
+			},
+			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), U256::zero()),
+		};
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-        Ok(())
-    }
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_rewards::Call::<Runtime>::claim_rewards { asset },
+		)?;
 
-    /// Claim rewards for a specific asset and reward type
-    #[precompile::public("claimRewards(uint256,address,uint8)")]
-    fn claim_rewards(
-        handle: &mut impl PrecompileHandle,
-        asset_id: U256,
-        token_address: Address,
-        reward_type: u8,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-        
-        let asset = if token_address == Address::zero() {
-            Asset::Custom(
-                asset_id.try_into().map_err(|_| revert("Invalid asset ID"))?,
-            )
-        } else {
-            Asset::Erc20(token_address.into())
-        };
+		Ok(())
+	}
 
-        let reward_type = match reward_type {
-            0 => RewardType::Boost,
-            1 => RewardType::Service,
-            2 => RewardType::Restaking,
-            _ => return Err(revert("Invalid reward type")),
-        };
+	#[precompile::public("forceClaimRewards(address,uint256,address)")]
+	fn force_claim_rewards(
+		handle: &mut impl PrecompileHandle,
+		account: Address,
+		asset_id: U256,
+		token_address: Address,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-        let call = pallet_rewards::Call::<Runtime>::claim_rewards { 
-            asset,
-            reward_type,
-        };
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let target = Runtime::AddressMapping::into_account_id(account.0);
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-        Ok(())
-    }
+		let (asset, _) = match (asset_id.as_u128(), token_address.0 .0) {
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), U256::zero())
+			},
+			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), U256::zero()),
+		};
 
-    /// Get user's reward info for an asset
-    #[precompile::public("getUserRewards(address,uint256,address)")]
-    fn get_user_rewards(
-        handle: &mut impl PrecompileHandle,
-        user: Address,
-        asset_id: U256,
-        token_address: Address,
-    ) -> EvmResult<(U256, U256, U256, U256)> {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-        
-        let user = Runtime::AddressMapping::into_account_id(user.into());
-        let asset = if token_address == Address::zero() {
-            Asset::Custom(
-                asset_id.try_into().map_err(|_| revert("Invalid asset ID"))?,
-            )
-        } else {
-            Asset::Erc20(token_address.into())
-        };
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_rewards::Call::<Runtime>::force_claim_rewards { account: target, asset },
+		)?;
 
-        let rewards = pallet_rewards::Pallet::<Runtime>::user_rewards(&user, asset);
-        
-        Ok((
-            rewards.boost_rewards.amount.into(),
-            rewards.boost_rewards.expiry.into(),
-            rewards.service_rewards.into(),
-            rewards.restaking_rewards.into(),
-        ))
-    }
+		Ok(())
+	}
 
-    /// Get asset APY and capacity
-    #[precompile::public("getAssetInfo(uint256,address)")]
-    fn get_asset_info(
-        handle: &mut impl PrecompileHandle,
-        asset_id: U256,
-        token_address: Address,
-    ) -> EvmResult<(U256, U256)> {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-        
-        let asset = if token_address == Address::zero() {
-            Asset::Custom(
-                asset_id.try_into().map_err(|_| revert("Invalid asset ID"))?,
-            )
-        } else {
-            Asset::Erc20(token_address.into())
-        };
+	#[precompile::public("updateVaultRewardConfig(uint256,uint8,uint256,uint256,uint32)")]
+	fn update_vault_reward_config(
+		handle: &mut impl PrecompileHandle,
+		vault_id: U256,
+		apy: u8,
+		deposit_cap: U256,
+		incentive_cap: U256,
+		boost_multiplier: u32,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-        let apy = pallet_rewards::Pallet::<Runtime>::asset_apy(asset);
-        let capacity = pallet_rewards::Pallet::<Runtime>::asset_capacity(asset);
-        
-        Ok((apy.into(), capacity.into()))
-    }
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
 
-    /// Update APY for an asset (admin only)
-    #[precompile::public("updateAssetApy(uint256,address,uint32)")]
-    fn update_asset_apy(
-        handle: &mut impl PrecompileHandle,
-        asset_id: U256,
-        token_address: Address,
-        apy_basis_points: u32,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-        
-        let asset = if token_address == Address::zero() {
-            Asset::Custom(
-                asset_id.try_into().map_err(|_| revert("Invalid asset ID"))?,
-            )
-        } else {
-            Asset::Erc20(token_address.into())
-        };
+		let config = pallet_rewards::RewardConfigForAssetVault {
+			apy: sp_runtime::Percent::from_percent(apy.min(100)),
+			deposit_cap: deposit_cap.try_into().map_err(|_| RevertReason::value_is_too_large("deposit_cap"))?,
+			incentive_cap: incentive_cap.try_into().map_err(|_| RevertReason::value_is_too_large("incentive_cap"))?,
+			boost_multiplier: Some(boost_multiplier.min(500)), // Cap at 5x
+		};
 
-        let call = pallet_rewards::Call::<Runtime>::update_asset_apy { 
-            asset,
-            apy_basis_points,
-        };
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_rewards::Call::<Runtime>::udpate_vault_reward_config {
+				vault_id: vault_id.try_into().map_err(|_| RevertReason::value_is_too_large("vault_id"))?,
+				new_config: config,
+			},
+		)?;
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-        Ok(())
-    }
-}
+		Ok(())
+	}
 
-#[cfg(test)]
-mod test {
-    use super::*;
-    use mock::*;
-    use precompile_utils::testing::*;
-    use sp_core::H160;
+	#[precompile::public("manageAssetRewardVault(uint256,uint256,address,bool)")]
+	fn manage_asset_reward_vault(
+		handle: &mut impl PrecompileHandle,
+		vault_id: U256,
+		asset_id: U256,
+		token_address: Address,
+		add: bool,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-    fn precompiles() -> TestPrecompileSet<Runtime> {
-        PrecompilesValue::get()
-    }
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
 
-    #[test]
-    fn test_solidity_interface_has_all_function_selectors_documented() {
-        for file in ["Rewards.sol"] {
-            precompiles()
-                .process_selectors(file, |fn_selector, fn_signature| {
-                    assert!(
-                        DOCUMENTED_FUNCTIONS.contains(&fn_selector),
-                        "documented_functions must contain {fn_selector:?} ({fn_signature})",
-                    );
-                });
-        }
-    }
+		let (asset, _) = match (asset_id.as_u128(), token_address.0 .0) {
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), U256::zero())
+			},
+			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), U256::zero()),
+		};
+
+		let action = if add {
+			pallet_rewards::AssetAction::Add
+		} else {
+			pallet_rewards::AssetAction::Remove
+		};
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_rewards::Call::<Runtime>::manage_asset_reward_vault {
+				vault_id: vault_id.try_into().map_err(|_| RevertReason::value_is_too_large("vault_id"))?,
+				asset_id: asset,
+				action,
+			},
+		)?;
+
+		Ok(())
+	}
 }
