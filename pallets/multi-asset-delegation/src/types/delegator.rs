@@ -20,6 +20,7 @@ use frame_support::{pallet_prelude::Get, BoundedVec};
 use sp_runtime::traits::Zero;
 use sp_std::fmt::Debug;
 use sp_std::vec;
+use tangle_primitives::types::rewards::LockInfo;
 use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, BlueprintId};
 
@@ -345,12 +346,4 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBl
 	pub asset_id: Asset<AssetId>,
 	/// The blueprint selection mode for this delegator.
 	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
-}
-
-/// Struct to store the lock info
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct LockInfo<Balance, BlockNumber> {
-	pub amount: Balance,
-	pub lock_multiplier: LockMultiplier,
-	pub expiry_block: BlockNumber,
 }

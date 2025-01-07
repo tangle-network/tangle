@@ -36,15 +36,17 @@ mod tests;
 
 // #[cfg(feature = "runtime-benchmarks")]
 // mod benchmarking;
-
 use scale_info::TypeInfo;
 use sp_runtime::Saturating;
+use sp_std::collections::btree_map::BTreeMap;
 use tangle_primitives::services::Asset;
 pub mod types;
 pub use types::*;
 pub mod functions;
 pub use functions::*;
 pub mod impls;
+use tangle_primitives::BlueprintId;
+use tangle_primitives::MultiAssetDelegationInfo;
 
 /// The pallet's account ID.
 #[frame_support::pallet]
@@ -75,8 +77,23 @@ pub mod pallet {
 		/// The pallet's account ID.
 		type PalletId: Get<PalletId>;
 
-		/// The maximum amount of rewards that can be claimed per asset per user.
-		type MaxUniqueServiceRewards: Get<u32> + MaxEncodedLen + TypeInfo;
+		/// Type representing the unique ID of a vault.
+		type VaultId: Parameter
+			+ Member
+			+ Copy
+			+ MaybeSerializeDeserialize
+			+ Ord
+			+ Default
+			+ MaxEncodedLen
+			+ TypeInfo;
+
+		/// Manager for getting operator stake and delegation info
+		type DelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
+			Self::AccountId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+			AssetId = Self::AssetId,
+		>;
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
@@ -90,7 +107,32 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn total_reward_vault_score)]
 	pub type TotalRewardVaultScore<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::VaultId, u128, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, T::VaultId, BalanceOf<T>, ValueQuery>;
+
+	/// Stores the service reward for a given user
+	#[pallet::storage]
+	#[pallet::getter(fn user_reward_score)]
+	pub type UserServiceReward<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		Blake2_128Concat,
+		Asset<T::AssetId>,
+		BalanceOf<T>,
+		ValueQuery,
+	>;
+
+	/// Stores the service reward for a given user
+	#[pallet::storage]
+	#[pallet::getter(fn user_claimed_reward)]
+	pub type UserClaimedReward<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		Blake2_128Concat,
+		T::VaultId,
+		(BlockNumberFor<T>, BalanceOf<T>),
+	>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_vaults)]
@@ -106,44 +148,31 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn reward_config)]
-	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted
-	/// blueprints.
-	pub type RewardConfigStorage<T: Config> =
-		StorageValue<_, RewardConfig<T::VaultId, BalanceOf<T>>, OptionQuery>;
+	/// Storage for the reward configuration, which includes APY, cap for assets
+	pub type RewardConfigStorage<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::VaultId,
+		RewardConfigForAssetVault<BalanceOf<T>>,
+		OptionQuery,
+	>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Rewards have been added for an account
-		RewardsAdded {
-			account: T::AccountId,
-			asset: Asset<T::AssetId>,
-			amount: BalanceOf<T>,
-			reward_type: RewardType,
-		},
 		/// Rewards have been claimed by an account
-		RewardsClaimed {
-			account: T::AccountId,
-			asset: Asset<T::AssetId>,
-			amount: BalanceOf<T>,
-			reward_type: RewardType,
+		RewardsClaimed { account: T::AccountId, asset: Asset<T::AssetId>, amount: BalanceOf<T> },
+		/// Event emitted when an incentive APY and cap are set for a reward vault
+		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
+		/// Event emitted when a blueprint is whitelisted for rewards
+		BlueprintWhitelisted { blueprint_id: BlueprintId },
+		/// Asset has been updated to reward vault
+		AssetUpdatedInVault {
+			who: T::AccountId,
+			vault_id: T::VaultId,
+			asset_id: Asset<T::AssetId>,
+			action: AssetAction,
 		},
-		/// Asset has been whitelisted for rewards
-		AssetWhitelisted { asset: Asset<T::AssetId> },
-		/// Asset has been removed from whitelist
-		AssetRemoved { asset: Asset<T::AssetId> },
-		/// Asset rewards have been updated
-		AssetRewardsUpdated { asset: Asset<T::AssetId>, total_score: u128, users_updated: u32 },
-		/// Asset APY has been updated
-		AssetApyUpdated { asset: Asset<T::AssetId>, apy_basis_points: u32 },
-	}
-
-	/// Type of reward being added or claimed
-	#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-	pub enum RewardType {
-		Restaking,
-		Boost,
-		Service,
 	}
 
 	#[pallet::error]
@@ -158,6 +187,20 @@ pub mod pallet {
 		AssetAlreadyWhitelisted,
 		/// Invalid APY value
 		InvalidAPY,
+		/// Asset already exists in a reward vault
+		AssetAlreadyInVault,
+		/// Asset not found in reward vault
+		AssetNotInVault,
+		/// The reward vault does not exist
+		VaultNotFound,
+		/// Error returned when trying to add a blueprint ID that already exists.
+		DuplicateBlueprintId,
+		/// Error returned when trying to remove a blueprint ID that doesn't exist.
+		BlueprintIdNotFound,
+		/// Error returned when the reward configuration for the vault is not found.
+		RewardConfigNotFound,
+		/// Arithmetic operation caused an overflow
+		ArithmeticError,
 	}
 
 	#[pallet::call]
@@ -167,165 +210,10 @@ pub mod pallet {
 		pub fn claim_rewards(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			// Ensure the asset is whitelisted
-			ensure!(Self::is_asset_whitelisted(asset), Error::<T>::AssetNotWhitelisted);
-
-			// Get user rewards snapshot
-			let rewards = Self::user_rewards(&who, asset);
-
-			// Calculate user's score based on their stake and lock period
-			let user_score = functions::calculate_user_score::<T>(asset, &rewards);
-
-			// Calculate APY distribution based on user's score
-			let apy = functions::calculate_apy_distribution::<T>(asset, user_score);
-
-			// Calculate reward amount based on APY and elapsed time
-			let reward_amount = match reward_type {
-				RewardType::Boost => {
-					// For boost rewards, calculate based on locked amount and APY
-					let locked_amount = rewards.boost_rewards.amount;
-					let elapsed_time = frame_system::Pallet::<T>::block_number()
-						.saturating_sub(rewards.boost_rewards.expiry);
-
-					// Convert APY to per-block rate (assuming 6 second blocks)
-					// APY / (blocks per year) = reward rate per block
-					// blocks per year = (365 * 24 * 60 * 60) / 6 = 5,256,000
-					let blocks_per_year = T::BlocksPerYear::get();
-					let reward_rate = apy.mul_floor(locked_amount) / blocks_per_year.into();
-
-					reward_rate.saturating_mul(elapsed_time.into())
-				},
-				RewardType::Service => {
-					// For service rewards, use the accumulated service rewards
-					rewards.service_rewards
-				},
-				RewardType::Restaking => {
-					// For restaking rewards, use the accumulated restaking rewards
-					rewards.restaking_rewards
-				},
-			};
-
-			// Ensure there are rewards to claim
-			ensure!(!.is_zero(), Error::<T>::NoRewardsAvailable);
-
-			// Transfer rewards to user
-			// Note: This assumes the pallet account has sufficient balance
-			let pallet_account = Self::account_id();
-			T::Currency::transfer(
-				&pallet_account,
-				&who,
-				reward_amount,
-				frame_support::traits::ExistenceRequirement::KeepAlive,
-			)?;
-
-			// Reset the claimed reward type
-			match reward_type {
-				RewardType::Boost => {
-					// For boost rewards, update the expiry to current block
-					Self::update_user_rewards(
-						&who,
-						asset,
-						UserRewards {
-							boost_rewards: BoostInfo {
-								expiry: frame_system::Pallet::<T>::block_number(),
-								..rewards.boost_rewards
-							},
-							..rewards
-						},
-					);
-				},
-				RewardType::Service => {
-					// Reset service rewards to zero
-					Self::update_user_rewards(
-						&who,
-						asset,
-						UserRewards { service_rewards: Zero::zero(), ..rewards },
-					);
-				},
-				RewardType::Restaking => {
-					// Reset restaking rewards to zero
-					Self::update_user_rewards(
-						&who,
-						asset,
-						UserRewards { restaking_rewards: Zero::zero(), ..rewards },
-					);
-				},
-			}
+			// calculate and payout rewards
+			Self::calculate_and_payout_rewards(&who, asset)?;
 
 			// Emit event
-			Self::deposit_event(Event::RewardsClaimed {
-				account: who,
-				asset,
-				amount: reward_amount,
-				reward_type,
-			});
-
-			Ok(())
-		}
-
-		/// Update APY for an asset
-		#[pallet::call_index(6)]
-		#[pallet::weight(10_000)]
-		pub fn update_asset_apy(
-			origin: OriginFor<T>,
-			asset: Asset<T::AssetId>,
-			apy_basis_points: u32,
-		) -> DispatchResult {
-			ensure_root(origin)?;
-			ensure!(Self::is_asset_whitelisted(asset), Error::<T>::AssetNotWhitelisted);
-			ensure!(apy_basis_points <= 10000, Error::<T>::InvalidAPY); // Max 100%
-
-			// Update APY
-			AssetApy::<T>::insert(asset, apy_basis_points);
-
-			// Emit event
-			Self::deposit_event(Event::AssetApyUpdated { asset, apy_basis_points });
-
-			Ok(())
-		}
-
-		/// Sets the APY and cap for a specific asset.
-		///
-		/// # Permissions
-		///
-		/// * Must be called by the force origin
-		///
-		/// # Arguments
-		///
-		/// * `origin` - Origin of the call
-		/// * `vault_id` - ID of the vault
-		/// * `apy` - Annual percentage yield (max 10%)
-		/// * `cap` - Required deposit amount for full APY
-		///
-		/// # Errors
-		///
-		/// * [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum
-		/// * [`Error::CapCannotBeZero`] - Cap amount cannot be zero
-		#[pallet::call_index(18)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn set_incentive_apy_and_cap(
-			origin: OriginFor<T>,
-			vault_id: T::VaultId,
-			apy: sp_runtime::Percent,
-			cap: BalanceOf<T>,
-		) -> DispatchResult {
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			ensure!(apy <= sp_runtime::Percent::from_percent(10), Error::<T>::APYExceedsMaximum);
-			ensure!(!cap.is_zero(), Error::<T>::CapCannotBeZero);
-
-			RewardConfigStorage::<T>::mutate(|maybe_config| {
-				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
-					configs: BTreeMap::new(),
-					whitelisted_blueprint_ids: Vec::new(),
-				});
-
-				config.configs.insert(vault_id, RewardConfigForAssetVault { apy, cap });
-
-				*maybe_config = Some(config);
-			});
-
-			Self::deposit_event(Event::IncentiveAPYAndCapSet { vault_id, apy, cap });
 
 			Ok(())
 		}
@@ -340,31 +228,31 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `blueprint_id` - ID of blueprint to whitelist
-		#[pallet::call_index(19)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn whitelist_blueprint_for_rewards(
-			origin: OriginFor<T>,
-			blueprint_id: BlueprintId,
-		) -> DispatchResult {
-			T::ForceOrigin::ensure_origin(origin)?;
+		// #[pallet::call_index(19)]
+		// #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		// pub fn whitelist_blueprint_for_rewards(
+		// 	origin: OriginFor<T>,
+		// 	blueprint_id: BlueprintId,
+		// ) -> DispatchResult {
+		// 	T::ForceOrigin::ensure_origin(origin)?;
 
-			RewardConfigStorage::<T>::mutate(|maybe_config| {
-				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
-					configs: BTreeMap::new(),
-					whitelisted_blueprint_ids: Vec::new(),
-				});
+		// 	RewardConfigStorage::<T>::mutate(|maybe_config| {
+		// 		let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
+		// 			configs: BTreeMap::new(),
+		// 			whitelisted_blueprint_ids: Vec::new(),
+		// 		});
 
-				if !config.whitelisted_blueprint_ids.contains(&blueprint_id) {
-					config.whitelisted_blueprint_ids.push(blueprint_id);
-				}
+		// 		if !config.whitelisted_blueprint_ids.contains(&blueprint_id) {
+		// 			config.whitelisted_blueprint_ids.push(blueprint_id);
+		// 		}
 
-				*maybe_config = Some(config);
-			});
+		// 		*maybe_config = Some(config);
+		// 	});
 
-			Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
+		// 	Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
 
-			Ok(())
-		}
+		// 	Ok(())
+		// }
 
 		/// Manage asset id to vault rewards.
 		///
@@ -408,11 +296,6 @@ pub mod pallet {
 		/// The account ID of the rewards pot.
 		pub fn account_id() -> T::AccountId {
 			T::PalletId::get().into_account_truncating()
-		}
-
-		/// Check if an asset is whitelisted for rewards
-		pub fn is_asset_whitelisted(asset: Asset<T::AssetId>) -> bool {
-			AllowedRewardAssets::<T>::get(&asset)
 		}
 	}
 }

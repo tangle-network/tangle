@@ -26,13 +26,6 @@ use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::types::rewards::UserRewards;
 use tangle_primitives::{services::Asset, types::RoundIndex};
 
-pub type UserRewardsOf<T> = UserRewards<
-	BalanceOf<T>,
-	BlockNumberFor<T>,
-	<T as Config>::AssetId,
-	<T as Config>::MaxUniqueServiceRewards,
->;
-
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 

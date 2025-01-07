@@ -116,16 +116,6 @@ pub mod pallet {
 			+ Decode
 			+ TypeInfo;
 
-		/// Type representing the unique ID of a vault.
-		type VaultId: Parameter
-			+ Member
-			+ Copy
-			+ MaybeSerializeDeserialize
-			+ Ord
-			+ Default
-			+ MaxEncodedLen
-			+ TypeInfo;
-
 		/// The maximum number of blueprints a delegator can have in Fixed mode.
 		#[pallet::constant]
 		type MaxDelegatorBlueprints: Get<u32> + TypeInfo + MaxEncodedLen + Clone + Debug + PartialEq;
@@ -290,17 +280,6 @@ pub mod pallet {
 		ExecutedDelegatorBondLess { who: T::AccountId },
 		/// A delegator unstake request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
-		/// Event emitted when an incentive APY and cap are set for a reward vault
-		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
-		/// Event emitted when a blueprint is whitelisted for rewards
-		BlueprintWhitelisted { blueprint_id: BlueprintId },
-		/// Asset has been updated to reward vault
-		AssetUpdatedInVault {
-			who: T::AccountId,
-			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
-			action: AssetAction,
-		},
 		/// Operator has been slashed
 		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
 		/// Delegator has been slashed

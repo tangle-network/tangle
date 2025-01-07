@@ -14,22 +14,38 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::AssetLookupRewardVaults;
 use crate::BalanceOf;
-use crate::{Config, Pallet, UserRewards, UserRewardsOf};
+use crate::Error;
+use crate::RewardConfigStorage;
+use crate::TotalRewardVaultScore;
+use crate::UserServiceReward;
+use crate::{Config, Pallet};
 use frame_support::traits::Currency;
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::{Saturating, Zero};
+use sp_runtime::DispatchError;
+use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, traits::rewards::RewardsManager};
 
 impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumberFor<T>>
 	for Pallet<T>
 {
+	type Error = DispatchError;
+
 	fn record_deposit(
-		account_id: &T::AccountId,
+		_account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
-		lock_multiplier: Option<LockMultiplier>,
-	) -> Result<(), &'static str> {
+		_lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error> {
+		// find the vault for the asset id
+		// if the asset is not in a reward vault, do nothing
+		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(&asset) {
+			// Update the reward vault score
+			let score = TotalRewardVaultScore::<T>::get(vault_id).saturating_add(amount);
+			TotalRewardVaultScore::<T>::insert(vault_id, score);
+		}
 		Ok(())
 	}
 
@@ -37,7 +53,14 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
-	) -> Result<(), &'static str> {
+	) -> Result<(), Self::Error> {
+		// find the vault for the asset id
+		// if the asset is not in a reward vault, do nothing
+		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(&asset) {
+			// Update the reward vault score
+			let score = TotalRewardVaultScore::<T>::get(vault_id).saturating_sub(amount);
+			TotalRewardVaultScore::<T>::insert(vault_id, score);
+		}
 		Ok(())
 	}
 
@@ -45,15 +68,39 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
-	) -> Result<(), &'static str> {
-		// TODO : Handle service rewards later
-		Ok(())
+	) -> Result<(), Self::Error> {
+		// update the amount in the user service reward storage
+		UserServiceReward::<T>::try_mutate(account_id, asset, |reward| {
+			*reward = reward.saturating_add(amount);
+			Ok(())
+		})
 	}
 
-	fn query_total_deposit(
-		account_id: &T::AccountId,
-		asset: Asset<T::AssetId>,
-	) -> Result<(BalanceOf<T>, BalanceOf<T>), &'static str> {
-		todo!()
+	fn get_asset_deposit_cap(asset: Asset<T::AssetId>) -> Result<BalanceOf<T>, Self::Error> {
+		// find the vault for the asset id
+		// if the asset is not in a reward vault, do nothing
+		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(&asset) {
+			if let Some(config) = RewardConfigStorage::<T>::get(vault_id) {
+				Ok(config.deposit_cap)
+			} else {
+				Err(Error::<T>::RewardConfigNotFound.into())
+			}
+		} else {
+			Err(Error::<T>::AssetNotInVault.into())
+		}
+	}
+
+	fn get_asset_incentive_cap(asset: Asset<T::AssetId>) -> Result<BalanceOf<T>, Self::Error> {
+		// find the vault for the asset id
+		// if the asset is not in a reward vault, do nothing
+		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(&asset) {
+			if let Some(config) = RewardConfigStorage::<T>::get(vault_id) {
+				Ok(config.incentive_cap)
+			} else {
+				Err(Error::<T>::RewardConfigNotFound.into())
+			}
+		} else {
+			Err(Error::<T>::AssetNotInVault.into())
+		}
 	}
 }

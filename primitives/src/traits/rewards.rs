@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::services::Asset;
+use crate::types::rewards::LockMultiplier;
 use frame_support::traits::Currency;
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
@@ -63,15 +64,27 @@ pub trait RewardsManager<AccountId, AssetId, Balance, BlockNumber> {
 		amount: Balance,
 	) -> Result<(), Self::Error>;
 
-	/// Queries the total deposit for an account and asset.
+	/// Gets the maximum deposit cap for an asset at a given block number.
+	/// This represents the maximum amount that can be deposited for this asset.
 	///
 	/// # Parameters
-	/// * `account_id` - The account to query
-	/// * `asset` - The asset to query
-	fn query_total_deposit(
-		account_id: &AccountId,
-		asset: Asset<AssetId>,
-	) -> Result<Balance, Self::Error>;
+	/// * `asset` - The asset to query the deposit cap for
+	///
+	/// # Returns
+	/// * `Ok(Balance)` - The maximum deposit cap for the asset
+	/// * `Err(Self::Error)` - If there was an error retrieving the cap
+	fn get_asset_deposit_cap(asset: Asset<AssetId>) -> Result<Balance, Self::Error>;
+
+	/// Gets the incentive cap for an asset at a given block number.
+	/// This represents the minimum amount required to receive full incentives.
+	///
+	/// # Parameters
+	/// * `asset` - The asset to query the incentive cap for
+	///
+	/// # Returns
+	/// * `Ok(Balance)` - The incentive cap for the asset
+	/// * `Err(Self::Error)` - If there was an error retrieving the cap
+	fn get_asset_incentive_cap(asset: Asset<AssetId>) -> Result<Balance, Self::Error>;
 }
 
 impl<AccountId, AssetId, Balance, BlockNumber>
@@ -106,10 +119,11 @@ where
 		Ok(())
 	}
 
-	fn query_total_deposit(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-	) -> Result<Balance, Self::Error> {
+	fn get_asset_deposit_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(Balance::zero())
+	}
+
+	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(Balance::zero())
 	}
 }

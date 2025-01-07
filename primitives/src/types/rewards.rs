@@ -102,3 +102,17 @@ impl LockMultiplier {
 		current_block.saturating_add(self.get_blocks())
 	}
 }
+
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub struct UserDepositWithLocks<Balance, BlockNumber> {
+	pub unlocked_amount: Balance,
+	pub amount_with_locks: Option<Vec<LockInfo<Balance, BlockNumber>>>,
+}
+
+/// Struct to store the lock info
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
+pub struct LockInfo<Balance, BlockNumber> {
+	pub amount: Balance,
+	pub lock_multiplier: LockMultiplier,
+	pub expiry_block: BlockNumber,
+}
