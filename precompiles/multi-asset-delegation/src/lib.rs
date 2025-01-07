@@ -44,7 +44,6 @@ use tangle_primitives::types::rewards::LockMultiplier;
 use evm_erc20_utils::*;
 use fp_evm::PrecompileHandle;
 use frame_support::{
-	__private::log,
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::Currency,
 };
@@ -146,6 +145,8 @@ where
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
+		// TODO: Execute the ERC20 Transfers here.
+
 		Ok(())
 	}
 
@@ -222,15 +223,26 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		let caller = handle.context().caller;
-		let pallet_address = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
-		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (who, deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
-				erc20_transfer(handle, token_address, pallet_address.into(), amount)?;
-				(Asset::Erc20(erc20_token.into()), amount)
+				let who = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
+				let pallet_address =
+					pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
+				erc20_transfer(
+					handle,
+					token_address,
+					caller.into(),
+					pallet_address.into(),
+					amount,
+				)?;
+				(who, Asset::Erc20(erc20_token.into()), amount)
 			},
-			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, _) => (
+				Runtime::AddressMapping::into_account_id(caller),
+				Asset::Custom(other_asset_id.into()),
+				amount,
+			),
 		};
 
 		let lock_multiplier = match lock_multiplier {
@@ -268,13 +280,17 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (who, deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
-				(Asset::Erc20(erc20_token.into()), amount)
+				let who = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
+				(who, Asset::Erc20(erc20_token.into()), amount)
 			},
-			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
+			(other_asset_id, _) => (
+				Runtime::AddressMapping::into_account_id(caller),
+				Asset::Custom(other_asset_id.into()),
+				amount,
+			),
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(

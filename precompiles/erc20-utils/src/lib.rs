@@ -44,6 +44,7 @@ use alloc::format;
 pub fn erc20_transfer(
 	handle: &mut impl PrecompileHandle,
 	erc20: Address,
+	caller: Address,
 	to: Address,
 	amount: U256,
 ) -> EvmResult<bool> {
@@ -79,8 +80,8 @@ pub fn erc20_transfer(
 	// let gas_limit = Some(handle.remaining_gas());
 	let gas_limit = None;
 	let is_static = false;
-	let caller = handle.context().caller;
-	let context = fp_evm::Context { address: erc20.0, caller, apparent_value: U256::zero() };
+	let context =
+		fp_evm::Context { address: erc20.0, caller: caller.0, apparent_value: U256::zero() };
 	let (exit_reason, output) = handle.call(erc20.0, None, data, gas_limit, is_static, &context);
 
 	log::debug!(
