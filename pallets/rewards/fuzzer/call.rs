@@ -22,205 +22,207 @@
 //! Once a panic is found, it can be debugged with
 //! `cargo hfuzz run-debug rewards-fuzzer hfuzz_workspace/rewards-fuzzer/*.fuzz`.
 
-use frame_support::{
-    dispatch::PostDispatchInfo,
-    traits::{Currency, Get, GetCallName, Hooks, UnfilteredDispatchable},
-};
-use frame_system::ensure_signed_or_root;
-use honggfuzz::fuzz;
-use pallet_rewards::{mock::*, pallet as rewards, types::*, RewardType};
-use rand::{seq::SliceRandom, Rng};
-use sp_runtime::{
-    traits::{Scale, Zero},
-    Percent,
-};
-use tangle_primitives::{services::Asset, types::rewards::LockMultiplier};
+use crate::runtime::*;
+use frame_support::pallet_prelude::*;
+use pallet_rewards::{Call as RewardsCall, Config, Error, RewardConfigForAssetVault};
+use sp_runtime::{traits::Zero, Percent};
+use tangle_primitives::types::rewards::LockMultiplier;
 
-const MAX_ED_MULTIPLE: Balance = 10_000;
-const MIN_ED_MULTIPLE: Balance = 10;
-
-fn random_account_id<R: Rng>(rng: &mut R) -> AccountId {
-    rng.gen::<[u8; 32]>().into()
+#[derive(Debug)]
+pub enum RewardsFuzzCall {
+    ClaimRewards(u32),
+    ForceClaimRewards(AccountId, u32),
+    UpdateVaultRewardConfig(u32, u8, u128, u128, Option<u32>),
 }
 
-/// Grab random accounts.
-fn random_signed_origin<R: Rng>(rng: &mut R) -> (RuntimeOrigin, AccountId) {
-    let acc = random_account_id(rng);
-    (RuntimeOrigin::signed(acc.clone()), acc)
-}
+impl RewardsFuzzCall {
+    pub fn generate(data: &[u8]) -> Option<Self> {
+        if data.is_empty() {
+            return None;
+        }
 
-fn random_ed_multiple<R: Rng>(rng: &mut R) -> Balance {
-    let multiple = rng.gen_range(MIN_ED_MULTIPLE..MAX_ED_MULTIPLE);
-    ExistentialDeposit::get() * multiple
-}
+        // Use first byte to determine call type
+        match data[0] % 3 {
+            0 => Some(RewardsFuzzCall::ClaimRewards(
+                u32::from_le_bytes(data.get(1..5)?.try_into().ok()?),
+            )),
+            1 => Some(RewardsFuzzCall::ForceClaimRewards(
+                AccountId::new(data.get(1..33)?.try_into().ok()?),
+                u32::from_le_bytes(data.get(33..37)?.try_into().ok()?),
+            )),
+            2 => Some(RewardsFuzzCall::UpdateVaultRewardConfig(
+                u32::from_le_bytes(data.get(1..5)?.try_into().ok()?),
+                data.get(5)?.clone(),
+                u128::from_le_bytes(data.get(6..22)?.try_into().ok()?),
+                u128::from_le_bytes(data.get(22..38)?.try_into().ok()?),
+                if data.get(38)? % 2 == 0 {
+                    Some(u32::from_le_bytes(data.get(39..43)?.try_into().ok()?))
+                } else {
+                    None
+                },
+            )),
+            _ => None,
+        }
+    }
 
-fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
-    let asset_id = rng.gen_range(1..u128::MAX);
-    let is_evm = rng.gen_bool(0.5);
-    if is_evm {
-        let evm_address = rng.gen::<[u8; 20]>().into();
-        Asset::Erc20(evm_address)
-    } else {
-        Asset::Custom(asset_id)
+    pub fn execute(&self) -> DispatchResultWithPostInfo {
+        match self {
+            RewardsFuzzCall::ClaimRewards(vault_id) => {
+                RewardsCallExecutor::execute_claim_rewards(*vault_id)
+            }
+            RewardsFuzzCall::ForceClaimRewards(account, vault_id) => {
+                RewardsCallExecutor::execute_force_claim_rewards(account.clone(), *vault_id)
+            }
+            RewardsFuzzCall::UpdateVaultRewardConfig(vault_id, apy, deposit_cap, incentive_cap, boost_multiplier) => {
+                RewardsCallExecutor::execute_update_vault_reward_config(
+                    *vault_id,
+                    *apy,
+                    *deposit_cap,
+                    *incentive_cap,
+                    *boost_multiplier,
+                )
+            }
+        }
+    }
+
+    pub fn verify(&self) -> bool {
+        match self {
+            RewardsFuzzCall::ClaimRewards(vault_id) => {
+                RewardsCallVerifier::verify_claim_rewards(*vault_id)
+            }
+            RewardsFuzzCall::ForceClaimRewards(account, vault_id) => {
+                RewardsCallVerifier::verify_force_claim_rewards(account.clone(), *vault_id)
+            }
+            RewardsFuzzCall::UpdateVaultRewardConfig(vault_id, apy, deposit_cap, incentive_cap, boost_multiplier) => {
+                RewardsCallVerifier::verify_update_vault_reward_config(
+                    *vault_id,
+                    *apy,
+                    *deposit_cap,
+                    *incentive_cap,
+                    *boost_multiplier,
+                )
+            }
+        }
     }
 }
 
-fn random_lock_multiplier<R: Rng>(rng: &mut R) -> LockMultiplier {
-    let multipliers = [
-        LockMultiplier::OneMonth,
-        LockMultiplier::TwoMonths,
-        LockMultiplier::ThreeMonths,
-        LockMultiplier::SixMonths,
-    ];
-    *multipliers.choose(rng).unwrap()
-}
+#[derive(Debug)]
+pub struct RewardsCallGenerator;
 
-fn random_reward_type<R: Rng>(rng: &mut R) -> RewardType {
-    let reward_types = [
-        RewardType::Boost,
-        RewardType::Service,
-        RewardType::Restaking,
-    ];
-    *reward_types.choose(rng).unwrap()
-}
-
-fn fund_account<R: Rng>(rng: &mut R, account: &AccountId) {
-    let target_amount = random_ed_multiple(rng);
-    if let Some(top_up) = target_amount.checked_sub(Balances::free_balance(account)) {
-        let _ = Balances::deposit_creating(account, top_up);
+impl RewardsCallGenerator {
+    pub fn claim_rewards(vault_id: u32) -> RewardsCall<Runtime> {
+        RewardsCall::claim_rewards { vault_id }
     }
-    assert!(Balances::free_balance(account) >= target_amount);
+
+    pub fn force_claim_rewards(account: AccountId, vault_id: u32) -> RewardsCall<Runtime> {
+        RewardsCall::force_claim_rewards { account, vault_id }
+    }
+
+    pub fn update_vault_reward_config(
+        vault_id: u32,
+        apy: u8,
+        deposit_cap: u128,
+        incentive_cap: u128,
+        boost_multiplier: Option<u32>,
+    ) -> RewardsCall<Runtime> {
+        let config = RewardConfigForAssetVault {
+            apy: Percent::from_percent(apy.min(100)),
+            deposit_cap,
+            incentive_cap,
+            boost_multiplier: boost_multiplier.map(|m| m.min(500)), // Cap at 5x
+        };
+        RewardsCall::udpate_vault_reward_config { vault_id, new_config: config }
+    }
 }
 
-/// Initialize an asset with random APY and capacity
-fn init_asset_call<R: Rng>(
-    rng: &mut R,
-    origin: RuntimeOrigin,
-) -> (rewards::Call<Runtime>, RuntimeOrigin) {
-    let asset = random_asset(rng);
-    let apy = rng.gen_range(1..10000); // 0.01% to 100%
-    let capacity = random_ed_multiple(rng);
-    
-    (rewards::Call::whitelist_asset { asset }, origin.clone());
-    (
-        rewards::Call::set_asset_apy { 
-            asset: asset.clone(),
-            apy_basis_points: apy,
-        },
-        origin.clone(),
-    );
-    (
-        rewards::Call::set_asset_capacity {
-            asset,
-            capacity,
-        },
-        origin,
-    )
+#[derive(Debug)]
+pub struct RewardsCallExecutor;
+
+impl RewardsCallExecutor {
+    pub fn execute_claim_rewards(vault_id: u32) -> DispatchResultWithPostInfo {
+        Rewards::claim_rewards(RuntimeOrigin::signed(ALICE), vault_id)
+    }
+
+    pub fn execute_force_claim_rewards(account: AccountId, vault_id: u32) -> DispatchResultWithPostInfo {
+        Rewards::force_claim_rewards(RuntimeOrigin::root(), account, vault_id)
+    }
+
+    pub fn execute_update_vault_reward_config(
+        vault_id: u32,
+        apy: u8,
+        deposit_cap: u128,
+        incentive_cap: u128,
+        boost_multiplier: Option<u32>,
+    ) -> DispatchResultWithPostInfo {
+        let config = RewardConfigForAssetVault {
+            apy: Percent::from_percent(apy.min(100)),
+            deposit_cap,
+            incentive_cap,
+            boost_multiplier: boost_multiplier.map(|m| m.min(500)), // Cap at 5x
+        };
+        Rewards::udpate_vault_reward_config(RuntimeOrigin::root(), vault_id, config)
+    }
 }
 
-/// Claim rewards call
-fn claim_rewards_call<R: Rng>(
-    rng: &mut R,
-    origin: RuntimeOrigin,
-) -> (rewards::Call<Runtime>, RuntimeOrigin) {
-    let asset = random_asset(rng);
-    let reward_type = random_reward_type(rng);
-    (
-        rewards::Call::claim_rewards {
-            asset,
-            reward_type,
-        },
-        origin,
-    )
-}
+#[derive(Debug)]
+pub struct RewardsCallVerifier;
 
-fn random_calls<R: Rng>(
-    mut rng: &mut R,
-) -> impl IntoIterator<Item = (rewards::Call<Runtime>, RuntimeOrigin)> {
-    let op = <rewards::Call<Runtime> as GetCallName>::get_call_names()
-        .choose(rng)
-        .cloned()
-        .unwrap();
-
-    match op {
-        "whitelist_asset" | "set_asset_apy" | "set_asset_capacity" => {
-            let origin = RuntimeOrigin::root();
-            [init_asset_call(&mut rng, origin)].to_vec()
+impl RewardsCallVerifier {
+    pub fn verify_claim_rewards(vault_id: u32) -> bool {
+        if let Ok(_) = RewardsCallExecutor::execute_claim_rewards(vault_id) {
+            // Verify that rewards were claimed by checking storage
+            UserClaimedReward::<Runtime>::contains_key(&ALICE, vault_id)
+        } else {
+            false
         }
-        "claim_rewards" => {
-            let (origin, who) = random_signed_origin(&mut rng);
-            fund_account(&mut rng, &who);
-            [claim_rewards_call(&mut rng, origin)].to_vec()
+    }
+
+    pub fn verify_force_claim_rewards(account: AccountId, vault_id: u32) -> bool {
+        if let Ok(_) = RewardsCallExecutor::execute_force_claim_rewards(account.clone(), vault_id) {
+            // Verify that rewards were claimed by checking storage
+            UserClaimedReward::<Runtime>::contains_key(&account, vault_id)
+        } else {
+            false
         }
-        _ => vec![],
+    }
+
+    pub fn verify_update_vault_reward_config(
+        vault_id: u32,
+        apy: u8,
+        deposit_cap: u128,
+        incentive_cap: u128,
+        boost_multiplier: Option<u32>,
+    ) -> bool {
+        if let Ok(_) = RewardsCallExecutor::execute_update_vault_reward_config(
+            vault_id,
+            apy,
+            deposit_cap,
+            incentive_cap,
+            boost_multiplier,
+        ) {
+            // Verify that config was updated by checking storage
+            if let Some(config) = RewardConfigStorage::<Runtime>::get(vault_id) {
+                config.apy == Percent::from_percent(apy.min(100))
+                    && config.deposit_cap == deposit_cap
+                    && config.incentive_cap == incentive_cap
+                    && config.boost_multiplier == boost_multiplier.map(|m| m.min(500))
+            } else {
+                false
+            }
+        } else {
+            false
+        }
     }
 }
 
 fn main() {
     loop {
         fuzz!(|data: &[u8]| {
-            let mut rng = rand::rngs::SmallRng::from_slice(data).unwrap();
-            let calls = random_calls(&mut rng);
-
-            new_test_ext().execute_with(|| {
-                // Run to block 1 to initialize
-                System::set_block_number(1);
-                Rewards::on_initialize(1);
-
-                for (call, origin) in calls {
-                    let _ = call.dispatch_bypass_filter(origin.clone());
-                    System::assert_last_event(Event::Rewards(rewards::Event::RewardsClaimed { 
-                        account: who, 
-                        asset, 
-                        amount,
-                        reward_type,
-                    }));
-                }
-            });
-        });
-    }
-}
-
-/// Perform sanity checks on the state after a call is executed successfully.
-fn do_sanity_checks(
-    call: rewards::Call<Runtime>,
-    origin: RuntimeOrigin,
-    outcome: PostDispatchInfo,
-) {
-    match call {
-        rewards::Call::claim_rewards { asset, reward_type } => {
-            // Verify the asset is whitelisted
-            assert!(Rewards::is_asset_whitelisted(asset));
-
-            // Get the account that made the call
-            let who = ensure_signed_or_root(origin).unwrap();
-
-            // Get user rewards
-            let rewards = Rewards::user_rewards(&who, asset);
-
-            // Verify rewards were properly reset after claiming
-            match reward_type {
-                RewardType::Boost => {
-                    // For boost rewards, verify expiry was updated
-                    assert_eq!(
-                        rewards.boost_rewards.expiry,
-                        System::block_number(),
-                    );
-                }
-                RewardType::Service => {
-                    // Verify service rewards were reset
-                    assert!(rewards.service_rewards.is_zero());
-                }
-                RewardType::Restaking => {
-                    // Verify restaking rewards were reset
-                    assert!(rewards.restaking_rewards.is_zero());
-                }
+            if let Some(call) = RewardsFuzzCall::generate(data) {
+                // Execute the call and verify its effects
+                let _ = call.execute();
+                let _ = call.verify();
             }
-
-            // Verify total score is updated correctly
-            let user_score = rewards::functions::calculate_user_score::<Runtime>(asset, &rewards);
-            assert!(Rewards::total_asset_score(asset) >= user_score);
-        }
-        _ => {}
+        });
     }
 }

@@ -26,43 +26,63 @@ use sp_runtime::{traits::Zero, DispatchError};
 
 const SEED: u32 = 0;
 
+fn setup_vault<T: Config>() -> (T::VaultId, T::AccountId) {
+	let vault_id = T::VaultId::zero();
+	let caller: T::AccountId = account("caller", 0, SEED);
+	let balance = BalanceOf::<T>::from(1000u32);
+	T::Currency::make_free_balance_be(&caller, balance);
+
+	// Setup reward config
+	let reward_config = RewardConfigForAssetVault {
+		apy: Percent::from_percent(10),
+		deposit_cap: balance,
+		incentive_cap: balance,
+		boost_multiplier: Some(150),
+	};
+	RewardConfigStorage::<T>::insert(vault_id, reward_config);
+
+	(vault_id, caller)
+}
+
 benchmarks! {
-	whitelist_asset {
-		let asset: Asset<T::AssetId> = Asset::Custom(1u32.into());
-	}: _(RawOrigin::Root, asset)
-	verify {
-		assert!(AllowedRewardAssets::<T>::get(&asset));
-	}
-
-	remove_asset {
-		let asset: Asset<T::AssetId> = Asset::Custom(1u32.into());
-		Rewards::<T>::whitelist_asset(RawOrigin::Root.into(), asset)?;
-	}: _(RawOrigin::Root, asset)
-	verify {
-		assert!(!AllowedRewardAssets::<T>::get(&asset));
-	}
-
 	claim_rewards {
-		let caller: T::AccountId = whitelisted_caller();
-		let asset: Asset<T::AssetId> = Asset::Custom(1u32.into());
-		let reward_type = RewardType::Restaking;
-		let reward_amount: BalanceOf<T> = T::Currency::minimum_balance() * 100u32.into();
-
-		// Setup: Whitelist asset and add rewards
-		Rewards::<T>::whitelist_asset(RawOrigin::Root.into(), asset)?;
-		let pallet_account = Rewards::<T>::account_id();
-		T::Currency::make_free_balance_be(&pallet_account, reward_amount * 2u32.into());
-
-		// Add rewards for the user
-		UserRewards::<T>::insert(caller.clone(), asset, UserRewardInfo {
-			restaking_rewards: reward_amount,
-			boost_rewards: Zero::zero(),
-			service_rewards: Zero::zero(),
-		});
-
-	}: _(RawOrigin::Signed(caller.clone()), asset, reward_type)
+		let (vault_id, caller) = setup_vault::<T>();
+		let deposit = BalanceOf::<T>::from(100u32);
+		let deposit_info = UserDepositWithLocks {
+			unlocked_amount: deposit,
+			amount_with_locks: None,
+		};
+	}: _(RawOrigin::Signed(caller.clone()), vault_id)
 	verify {
-		let rewards = UserRewards::<T>::get(caller.clone(), asset).unwrap_or_default();
-		assert!(rewards.restaking_rewards.is_zero());
+		assert!(UserClaimedReward::<T>::contains_key(&caller, vault_id));
+	}
+
+	force_claim_rewards {
+		let (vault_id, caller) = setup_vault::<T>();
+		let deposit = BalanceOf::<T>::from(100u32);
+		let deposit_info = UserDepositWithLocks {
+			unlocked_amount: deposit,
+			amount_with_locks: None,
+		};
+		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+	}: _<T::RuntimeOrigin>(origin, caller.clone(), vault_id)
+	verify {
+		assert!(UserClaimedReward::<T>::contains_key(&caller, vault_id));
+	}
+
+	update_vault_reward_config {
+		let (vault_id, _) = setup_vault::<T>();
+		let new_config = RewardConfigForAssetVault {
+			apy: Percent::from_percent(20),
+			deposit_cap: BalanceOf::<T>::from(2000u32),
+			incentive_cap: BalanceOf::<T>::from(2000u32),
+			boost_multiplier: Some(200),
+		};
+		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+	}: _<T::RuntimeOrigin>(origin, vault_id, new_config.clone())
+	verify {
+		assert_eq!(RewardConfigStorage::<T>::get(vault_id), Some(new_config));
 	}
 }
+
+impl_benchmark_test_suite!(RewardsPallet, crate::mock::new_test_ext(), crate::mock::Runtime);

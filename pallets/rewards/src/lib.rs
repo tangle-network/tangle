@@ -14,10 +14,49 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-//! # Tangle Rewards Pallet
+//! # Rewards Pallet
 //!
-//! This pallet provides a reward management system for the Tangle network, enabling users to
-//! accumulate and claim rewards.
+//! A flexible reward distribution system that supports multiple vaults with configurable reward parameters.
+//!
+//! ## Overview
+//!
+//! The Rewards pallet provides a mechanism for distributing rewards to users who deposit assets into
+//! various vaults. Each vault can have its own reward configuration, including APY rates and deposit caps.
+//! The system supports both unlocked deposits and locked deposits with multipliers for longer lock periods.
+//!
+//! ## Reward Vaults
+//!
+//! Each vault is identified by a unique `VaultId` and has its own reward configuration:
+//! - `apy`: Annual Percentage Yield for the vault
+//! - `deposit_cap`: Maximum amount that can be deposited
+//! - `incentive_cap`: Maximum amount of incentives that can be distributed
+//! - `boost_multiplier`: Optional multiplier to boost rewards
+//!
+//! ## Reward Calculation
+//!
+//! Rewards are calculated based on several factors:
+//!
+//! 1. Base Rewards:
+//!    ```text
+//!    Base Reward = APY * (user_deposit / total_deposits) * (total_deposits / deposit_capacity)
+//!    ```
+//!
+//! 2. Locked Deposits:
+//!    For locked deposits, additional rewards are calculated using:
+//!    ```text
+//!    Lock Reward = Base Reward * lock_multiplier * (remaining_lock_time / total_lock_time)
+//!    ```
+//!
+//! Lock multipliers increase rewards based on lock duration:
+//! - One Month: 1.1x
+//! - Two Months: 1.2x
+//! - Three Months: 1.3x
+//! - Six Months: 1.6x
+//!
+//! ## Notes
+//!
+//! - The reward vaults will consider all assets in parity, so only add the same type of asset in the same vault.
+//!
 //!
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -267,6 +306,22 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Updates the reward configuration for a specific vault.
+		///
+		/// # Arguments
+		/// * `origin` - Origin of the call, must pass `ForceOrigin` check
+		/// * `vault_id` - The ID of the vault to update
+		/// * `new_config` - The new reward configuration containing:
+		///   * `apy` - Annual Percentage Yield for the vault
+		///   * `deposit_cap` - Maximum amount that can be deposited
+		///   * `incentive_cap` - Maximum amount of incentives that can be distributed
+		///   * `boost_multiplier` - Optional multiplier to boost rewards
+		///
+		/// # Events
+		/// * `VaultRewardConfigUpdated` - Emitted when vault reward config is updated
+		///
+		/// # Errors
+		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
 		#[pallet::call_index(3)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn udpate_vault_reward_config(
