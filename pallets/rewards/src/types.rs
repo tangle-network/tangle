@@ -30,7 +30,7 @@ pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 /// Configuration for rewards associated with a specific asset.
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct RewardConfigForAssetVault<Balance> {
 	// The annual percentage yield (APY) for the asset, represented as a Percent
 	pub apy: Percent,

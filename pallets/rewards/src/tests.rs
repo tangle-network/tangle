@@ -32,30 +32,13 @@ use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::types::rewards::UserDepositWithLocks;
 use tangle_primitives::types::rewards::UserRewards;
 
-// Helper function to set up user rewards
-fn setup_user_rewards<T: Config>(
-	account: T::AccountId,
-	asset: Asset<T::AssetId>,
-	restaking_rewards: BalanceOf<T>,
-	service_rewards: BalanceOf<T>,
-	boost_amount: BalanceOf<T>,
-	multiplier: LockMultiplier,
-	expiry: BlockNumberFor<T>,
-) {
-	let rewards = UserRewards {
-		restaking_rewards,
-		service_rewards,
-		boost_rewards: BoostInfo { amount: boost_amount, multiplier, expiry },
-	};
-	UserRewards::<T>::insert(account, asset, rewards);
-}
 
 #[test]
 fn test_reward_distribution_with_no_locks() {
 	new_test_ext().execute_with(|| {
 		// Setup test environment
 		let account = 1;
-		let asset = Asset::new(1, 1).unwrap();
+		let asset = Asset::Custom(1);
 		let vault_id = 1;
 		let apy = Percent::from_percent(10); // 10% APY
 		let deposit_cap = 1_000_000;

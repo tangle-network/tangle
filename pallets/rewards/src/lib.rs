@@ -27,6 +27,9 @@ pub use pallet::*;
 mod mock;
 
 #[cfg(test)]
+mod mock_evm;
+
+#[cfg(test)]
 mod tests;
 
 // pub mod weights;
@@ -166,11 +169,13 @@ pub mod pallet {
 		BlueprintWhitelisted { blueprint_id: BlueprintId },
 		/// Asset has been updated to reward vault
 		AssetUpdatedInVault {
-			who: T::AccountId,
 			vault_id: T::VaultId,
 			asset_id: Asset<T::AssetId>,
 			action: AssetAction,
 		},
+		VaultRewardConfigUpdated {
+			vault_id: T::VaultId,
+		}
 	}
 
 	#[pallet::error]
@@ -204,7 +209,8 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Claim rewards for a specific asset and reward type
-		#[pallet::weight(10_000)]
+		#[pallet::call_index(1)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn claim_rewards(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
@@ -231,23 +237,36 @@ pub mod pallet {
 		///
 		/// * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
 		/// * [`Error::AssetNotInVault`] - Asset does not exist in vault
-		#[pallet::call_index(20)]
+		#[pallet::call_index(2)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn manage_asset_in_vault(
+		pub fn manage_asset_reward_vault(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
 			asset_id: Asset<T::AssetId>,
 			action: AssetAction,
 		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
+			let who = T::ForceOrigin::ensure_origin(origin)?;
 
 			match action {
 				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
 				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
 			}
 
-			Self::deposit_event(Event::AssetUpdatedInVault { who, vault_id, asset_id, action });
+			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset_id, action });
 
+			Ok(())
+		}
+
+		#[pallet::call_index(3)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn udpate_vault_reward_config(
+			origin: OriginFor<T>,
+			vault_id: T::VaultId,
+			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
+		) -> DispatchResult {
+			let who = T::ForceOrigin::ensure_origin(origin)?;
+			RewardConfigStorage::<T>::insert(vault_id, new_config);
+			Self::deposit_event(Event::VaultRewardConfigUpdated { vault_id });
 			Ok(())
 		}
 	}

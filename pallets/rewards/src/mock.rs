@@ -27,6 +27,7 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 	PalletId,
 };
+use crate::mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -45,7 +46,7 @@ use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRun
 use tangle_primitives::types::rewards::UserDepositWithLocks;
 
 use core::ops::Mul;
-use std::{collections::BTreeMap, sync::Arc};
+use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -278,6 +279,15 @@ impl pallet_rewards::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 }
 
+thread_local! {
+    pub static MOCK_DELEGATION_INFO: RefCell<MockDelegationData> = RefCell::new(MockDelegationData::default());
+}
+
+#[derive(Default)]
+pub struct MockDelegationData {
+    pub deposits: BTreeMap<(AccountId, Asset<AssetId>), UserDepositWithLocks<Balance, BlockNumber>>,
+}
+
 pub struct MockDelegationManager;
 impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber>
 	for MockDelegationManager
@@ -332,7 +342,9 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		who: &AccountId,
 		asset_id: Asset<Self::AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
-		None
+		MOCK_DELEGATION_INFO.with(|delegation_info| {
+			delegation_info.borrow().deposits.get(&(who.clone(), asset_id)).cloned()
+		})
 	}
 }
 
@@ -364,6 +376,8 @@ construct_runtime!(
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
 		Assets: pallet_assets,
+		EVM: pallet_evm,
+		Ethereum: pallet_ethereum,
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
