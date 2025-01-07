@@ -162,11 +162,21 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Rewards have been claimed by an account
-		RewardsClaimed { account: T::AccountId, asset: Asset<T::AssetId>, amount: BalanceOf<T> },
+		RewardsClaimed {
+			account: T::AccountId,
+			asset: Asset<T::AssetId>,
+			amount: BalanceOf<T>,
+		},
 		/// Event emitted when an incentive APY and cap are set for a reward vault
-		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
+		IncentiveAPYAndCapSet {
+			vault_id: T::VaultId,
+			apy: sp_runtime::Percent,
+			cap: BalanceOf<T>,
+		},
 		/// Event emitted when a blueprint is whitelisted for rewards
-		BlueprintWhitelisted { blueprint_id: BlueprintId },
+		BlueprintWhitelisted {
+			blueprint_id: BlueprintId,
+		},
 		/// Asset has been updated to reward vault
 		AssetUpdatedInVault {
 			vault_id: T::VaultId,
@@ -175,7 +185,7 @@ pub mod pallet {
 		},
 		VaultRewardConfigUpdated {
 			vault_id: T::VaultId,
-		}
+		},
 	}
 
 	#[pallet::error]

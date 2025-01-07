@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
+use crate::mock_evm::MockedEvmRunner;
 use crate::{self as pallet_rewards};
 use ethabi::Uint;
 use frame_election_provider_support::{
@@ -27,7 +28,6 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 	PalletId,
 };
-use crate::mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -280,12 +280,12 @@ impl pallet_rewards::Config for Runtime {
 }
 
 thread_local! {
-    pub static MOCK_DELEGATION_INFO: RefCell<MockDelegationData> = RefCell::new(MockDelegationData::default());
+	pub static MOCK_DELEGATION_INFO: RefCell<MockDelegationData> = RefCell::new(MockDelegationData::default());
 }
 
 #[derive(Default)]
 pub struct MockDelegationData {
-    pub deposits: BTreeMap<(AccountId, Asset<AssetId>), UserDepositWithLocks<Balance, BlockNumber>>,
+	pub deposits: BTreeMap<(AccountId, Asset<AssetId>), UserDepositWithLocks<Balance, BlockNumber>>,
 }
 
 pub struct MockDelegationManager;
