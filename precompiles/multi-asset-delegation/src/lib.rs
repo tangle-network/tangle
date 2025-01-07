@@ -41,8 +41,8 @@ pub mod mock_evm;
 mod tests;
 use tangle_primitives::types::rewards::LockMultiplier;
 
-use ethabi::Function;
-use fp_evm::{PrecompileFailure, PrecompileHandle};
+use evm_erc20_utils::*;
+use fp_evm::PrecompileHandle;
 use frame_support::{
 	__private::log,
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
@@ -52,7 +52,6 @@ use pallet_evm::AddressMapping;
 use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
-use sp_runtime::format;
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{services::Asset, types::WrappedAccountId32};
@@ -451,73 +450,5 @@ where
 		)?;
 
 		Ok(())
-	}
-}
-
-fn erc20_transfer(
-	handle: &mut impl PrecompileHandle,
-	erc20: Address,
-	to: Address,
-	amount: U256,
-) -> EvmResult<bool> {
-	#[allow(deprecated)]
-	let transfer_fn = Function {
-		name: String::from("transfer"),
-		inputs: Vec::from([
-			ethabi::Param {
-				name: String::from("to"),
-				kind: ethabi::ParamType::Address,
-				internal_type: None,
-			},
-			ethabi::Param {
-				name: String::from("value"),
-				kind: ethabi::ParamType::Uint(256),
-				internal_type: None,
-			},
-		]),
-		outputs: Vec::from([ethabi::Param {
-			name: String::from("success"),
-			kind: ethabi::ParamType::Bool,
-			internal_type: None,
-		}]),
-		constant: None,
-		state_mutability: ethabi::StateMutability::NonPayable,
-	};
-
-	let args = [ethabi::Token::Address(to.0), ethabi::Token::Uint(ethabi::Uint::from(amount))];
-
-	let data = transfer_fn
-		.encode_input(&args)
-		.map_err(|e| revert(format!("failed to encode IERC20.transfer call: {e:?}")))?;
-	// let gas_limit = Some(handle.remaining_gas());
-	let gas_limit = None;
-	let is_static = false;
-	let caller = handle.context().caller;
-	let context = fp_evm::Context { address: erc20.0, caller, apparent_value: U256::zero() };
-	let (exit_reason, output) = handle.call(erc20.0, None, data, gas_limit, is_static, &context);
-
-	log::debug!(
-		target: "evm",
-		"erc20_transfer: context: {:?}, exit_reason: {:?}, input: ({:?}, {}), output: 0x{}",
-		context,
-		exit_reason,
-		to.0,
-		amount,
-		hex::encode(&output),
-	);
-
-	match exit_reason {
-		fp_evm::ExitReason::Succeed(_) => {
-			// decode the result and return it
-			let result = transfer_fn
-				.decode_output(&output)
-				.map_err(|e| revert(format!("failed to decode IERC20.transfer result: {e:?}")))?;
-			let first_token = result.first().ok_or(RevertReason::custom("no return value"))?;
-			let s = if let ethabi::Token::Bool(val) = first_token { *val } else { false };
-			Ok(s)
-		},
-		fp_evm::ExitReason::Error(e) => Err(PrecompileFailure::Error { exit_status: e }),
-		fp_evm::ExitReason::Revert(e) => Err(PrecompileFailure::Revert { exit_status: e, output }),
-		fp_evm::ExitReason::Fatal(e) => Err(PrecompileFailure::Fatal { exit_status: e }),
 	}
 }

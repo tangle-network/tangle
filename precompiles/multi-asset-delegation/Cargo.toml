@@ -7,8 +7,6 @@ description = "A Precompile to make pallet-multi-asset-delegation calls encoding
 
 [dependencies]
 precompile-utils = { workspace = true }
-ethabi = { workspace = true }
-hex = { workspace = true, default-features = false }
 
 # Substrate
 frame-support = { workspace = true }
@@ -23,6 +21,7 @@ sp-std = { workspace = true }
 # Frontier
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
+evm-erc20-utils = { workspace = true }
 
 tangle-primitives = { workspace = true }
 
@@ -174,7 +173,6 @@ std = [
     "sp-std/std",
     "tangle-primitives/std",
     "pallet-assets/std",
-    "hex/std",
     "scale-info/std",
     "sp-runtime/std",
     "frame-support/std",
@@ -207,9 +205,9 @@ std = [
     "pallet-evm-precompile-ed25519/std",
     "precompile-utils/std",
     "serde/std",
-    "hex/std",
     "pallet-session/std",
     "pallet-staking/std",
     "sp-staking/std",
     "frame-election-provider-support/std",
+    "evm-erc20-utils/std",
 ]
