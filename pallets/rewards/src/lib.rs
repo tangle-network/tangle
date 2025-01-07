@@ -27,15 +27,13 @@ pub use pallet::*;
 mod mock;
 
 #[cfg(test)]
-mod mock_evm;
-
-#[cfg(test)]
 mod tests;
 
 // pub mod weights;
 
 // #[cfg(feature = "runtime-benchmarks")]
 // mod benchmarking;
+
 use scale_info::TypeInfo;
 use sp_runtime::Saturating;
 use sp_std::collections::btree_map::BTreeMap;
@@ -213,46 +211,8 @@ pub mod pallet {
 			// calculate and payout rewards
 			Self::calculate_and_payout_rewards(&who, asset)?;
 
-			// Emit event
-
 			Ok(())
 		}
-
-		/// Whitelists a blueprint for rewards.
-		///
-		/// # Permissions
-		///
-		/// * Must be called by the force origin
-		///
-		/// # Arguments
-		///
-		/// * `origin` - Origin of the call
-		/// * `blueprint_id` - ID of blueprint to whitelist
-		// #[pallet::call_index(19)]
-		// #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		// pub fn whitelist_blueprint_for_rewards(
-		// 	origin: OriginFor<T>,
-		// 	blueprint_id: BlueprintId,
-		// ) -> DispatchResult {
-		// 	T::ForceOrigin::ensure_origin(origin)?;
-
-		// 	RewardConfigStorage::<T>::mutate(|maybe_config| {
-		// 		let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
-		// 			configs: BTreeMap::new(),
-		// 			whitelisted_blueprint_ids: Vec::new(),
-		// 		});
-
-		// 		if !config.whitelisted_blueprint_ids.contains(&blueprint_id) {
-		// 			config.whitelisted_blueprint_ids.push(blueprint_id);
-		// 		}
-
-		// 		*maybe_config = Some(config);
-		// 	});
-
-		// 	Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
-
-		// 	Ok(())
-		// }
 
 		/// Manage asset id to vault rewards.
 		///

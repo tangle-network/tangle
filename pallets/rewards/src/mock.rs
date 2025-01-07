@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use super::*;
-use crate::{self as pallet_multi_asset_delegation};
+use crate::{self as pallet_rewards};
 use ethabi::Uint;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -28,7 +27,6 @@ use frame_support::{
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 	PalletId,
 };
-use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -42,7 +40,9 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
+use tangle_primitives::services::Asset;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
+use tangle_primitives::types::rewards::UserDepositWithLocks;
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -51,6 +51,7 @@ pub type AccountId = AccountId32;
 pub type Balance = u128;
 type Nonce = u32;
 pub type AssetId = u128;
+pub type BlockNumber = u64;
 
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
@@ -263,35 +264,75 @@ impl pallet_assets::Config for Runtime {
 	type RemoveItemsLimit = ConstU32<5>;
 }
 
+parameter_types! {
+	pub RewardsPID: PalletId = PalletId(*b"PotStake");
+}
+
 impl pallet_rewards::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type AssetId = AssetId;
-	type Balance = Balance;
 	type Currency = Balances;
-	type Assets = Assets;
-	type ServiceManager = MockServiceManager;
+	type PalletId = RewardsPID;
+	type VaultId = u32;
+	type DelegationManager = MockDelegationManager;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 }
 
-pub struct MockServiceManager;
+pub struct MockDelegationManager;
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber>
+	for MockDelegationManager
+{
+	type AssetId = AssetId;
 
-impl tangle_primitives::ServiceManager<AccountId, Balance> for MockServiceManager {
-	fn get_active_blueprints_count(_account: &AccountId) -> usize {
-		// we dont care
+	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
 
-	fn get_active_services_count(_account: &AccountId) -> usize {
-		// we dont care
-		Default::default()
-	}
-
-	fn can_exit(_account: &AccountId) -> bool {
-		// Mock logic to determine if the given account can exit
+	fn is_operator(_operator: &AccountId) -> bool {
+		// dont care
 		true
 	}
 
-	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
-		todo!(); // we dont care
+	fn is_operator_active(operator: &AccountId) -> bool {
+		if operator == &mock_pub_key(10) {
+			return false;
+		}
+		true
+	}
+
+	fn get_operator_stake(operator: &AccountId) -> Balance {
+		if operator == &mock_pub_key(10) {
+			Default::default()
+		} else {
+			1000
+		}
+	}
+
+	fn get_total_delegation_by_asset_id(
+		_operator: &AccountId,
+		_asset_id: &Asset<Self::AssetId>,
+	) -> Balance {
+		Default::default()
+	}
+
+	fn get_delegators_for_operator(
+		_operator: &AccountId,
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
+		Default::default()
+	}
+
+	fn slash_operator(
+		_operator: &AccountId,
+		_blueprint_id: tangle_primitives::BlueprintId,
+		_percentage: sp_runtime::Percent,
+	) {
+	}
+
+	fn get_user_deposit_with_locks(
+		who: &AccountId,
+		asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
+		None
 	}
 }
 
@@ -323,12 +364,10 @@ construct_runtime!(
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
 		Assets: pallet_assets,
-		EVM: pallet_evm,
-		Ethereum: pallet_ethereum,
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
-		Rewards: pallet_rewards,
+		RewardsPallet: pallet_rewards,
 	}
 );
 
@@ -351,11 +390,6 @@ pub fn mock_address(id: u8) -> H160 {
 pub fn account_id_to_address(account_id: AccountId) -> H160 {
 	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 }
-
-// pub fn address_to_account_id(address: H160) -> AccountId {
-// 	use pallet_evm::AddressMapping;
-// 	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
-// }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities()
@@ -419,128 +453,10 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 
 	evm_config.assimilate_storage(&mut t).unwrap();
 
-	// let assets_config = pallet_assets::GenesisConfig::<Runtime> {
-	// 	assets: vec![
-	// 		(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
-	// 		(WETH, authorities[1].clone(), true, 100),     // 100 wei.
-	// 		(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
-	// 		(VDOT, authorities[0].clone(), true, 100),
-	// 	],
-	// 	metadata: vec![
-	// 		(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
-	// 		(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
-	// 		(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
-	// 		(VDOT, Vec::from(b"VeChain"), Vec::from(b"VDOT"), 18),
-	// 	],
-	// 	accounts: vec![
-	// 		(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
-	// 		(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
-	// 		//
-	// 		(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
-	// 		(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
-	// 		//
-	// 		(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
-	// 		(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
-
-	// 		//
-	// 		(VDOT, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(VDOT, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
-	// 		(VDOT, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
-	// 	],
-	// 	next_asset_id: Some(4),
-	// };
-
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
 	ext.execute_with(|| System::set_block_number(1));
-	ext.execute_with(|| {
-		System::set_block_number(1);
-		Session::on_initialize(1);
-		<Staking as Hooks<u64>>::on_initialize(1);
-
-		let call = <Runtime as pallet_multi_asset_delegation::Config>::EvmRunner::call(
-			// MultiAssetDelegation::pallet_evm_account(),
-			H160::zero(),
-			USDC_ERC20,
-			serde_json::from_value::<ethabi::Function>(json!({
-				"name": "initialize",
-				"inputs": [
-					{
-						"name": "name_",
-						"type": "string",
-						"internalType": "string"
-					},
-					{
-						"name": "symbol_",
-						"type": "string",
-						"internalType": "string"
-					},
-					{
-						"name": "decimals_",
-						"type": "uint8",
-						"internalType": "uint8"
-					}
-				],
-				"outputs": [],
-				"stateMutability": "nonpayable"
-			}))
-			.unwrap()
-			.encode_input(&[
-				ethabi::Token::String("USD Coin".to_string()),
-				ethabi::Token::String("USDC".to_string()),
-				ethabi::Token::Uint(6.into()),
-			])
-			.unwrap(),
-			Default::default(),
-			300_000,
-			true,
-			false,
-		);
-
-		assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
-		// Mint
-		for i in 1..=authorities.len() {
-			let call = <Runtime as pallet_multi_asset_delegation::Config>::EvmRunner::call(
-				// MultiAssetDelegation::pallet_evm_account(),
-				H160::zero(),
-				USDC_ERC20,
-				serde_json::from_value::<ethabi::Function>(json!({
-					"name": "mint",
-					"inputs": [
-						{
-							"internalType": "address",
-							"name": "account",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "amount",
-							"type": "uint256"
-						}
-					],
-					"outputs": [],
-					"stateMutability": "nonpayable"
-				}))
-				.unwrap()
-				.encode_input(&[
-					ethabi::Token::Address(mock_address(i as u8).into()),
-					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
-				])
-				.unwrap(),
-				Default::default(),
-				300_000,
-				true,
-				false,
-			);
-
-			assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
-		}
-	});
-
 	ext
 }
 
@@ -562,36 +478,3 @@ macro_rules! evm_log {
 		}
 	};
 }
-
-// /// Asserts that the EVM logs are as expected.
-// #[track_caller]
-// pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
-// 	assert_evm_events_contains(expected.iter().cloned().collect())
-// }
-
-// /// Asserts that the EVM events are as expected.
-// #[track_caller]
-// fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
-// 	let actual: Vec<fp_evm::Log> = System::events()
-// 		.iter()
-// 		.filter_map(|e| match e.event {
-// 			RuntimeEvent::EVM(pallet_evm::Event::Log { ref log }) => Some(log.clone()),
-// 			_ => None,
-// 		})
-// 		.collect();
-
-// 	// Check if `expected` is a subset of `actual`
-// 	let mut any_matcher = false;
-// 	for evt in expected {
-// 		if !actual.contains(&evt) {
-// 			panic!("Events don't match\nactual: {actual:?}\nexpected: {evt:?}");
-// 		} else {
-// 			any_matcher = true;
-// 		}
-// 	}
-
-// 	// At least one event should be present
-// 	if !any_matcher {
-// 		panic!("No events found");
-// 	}
-// }
