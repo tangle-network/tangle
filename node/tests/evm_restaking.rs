@@ -157,9 +157,45 @@ where
 		create_asset(&subxt, &alice, 1, "Wrapped Ether", "WETH", 18).await?;
 		create_asset(&subxt, &alice, 2, "Wrapped Bitcoin", "WBTC", 8).await?;
 
+		let pallet_account_addr = api::constants().multi_asset_delegation().pallet_id();
+		let pallet_account_id = subxt.constants().at(&pallet_account_addr).unwrap();
+		let pallet_account_id =
+			AccountIdConversion::<subxt::utils::AccountId32>::into_account_truncating(&PalletId(
+				pallet_account_id.0,
+			));
+
+		// Send some balance to the MAD pallet
+		let transfer_keep_alive_call = api::tx()
+			.balances()
+			.transfer_keep_alive(pallet_account_id.clone().into(), 100_000_000_000);
+
+		let mut result = subxt
+			.tx()
+			.sign_and_submit_then_watch_default(
+				&transfer_keep_alive_call,
+				&alice.substrate_signer(),
+			)
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::balances::events::Transfer>()?
+					.expect("Transfer event to be emitted");
+				break;
+			}
+		}
+
 		let test_inputs = TestInputs {
 			provider,
 			subxt,
+			pallet_account_id,
 			usdc: usdc_addr,
 			weth: weth_addr,
 			wbtc: wbtc_addr,
@@ -169,6 +205,11 @@ where
 		};
 		let result = f(test_inputs).await;
 		assert!(result.is_ok(), "Test failed: {result:?}");
+		if result.is_ok() {
+			info!("***************** Test passed **********");
+		} else {
+			error!("***************** Test failed **********");
+		}
 		result
 	});
 }
@@ -180,6 +221,8 @@ pub struct TestInputs {
 	provider: AlloyProvider,
 	/// The Subxt client.
 	subxt: subxt::OnlineClient<subxt::PolkadotConfig>,
+	/// The MAD pallet account ID.
+	pallet_account_id: subxt::utils::AccountId32,
 	/// The USDC ERC20 contract address.
 	usdc: Address,
 	/// The WETH ERC20 contract address.
@@ -333,72 +376,6 @@ fn operator_join_delegator_delegate_asset_id() {
 				break;
 			}
 		}
-
-		// Mint 1 USDC to the MAD pallet.
-		let pallet_account_addr = api::constants().multi_asset_delegation().pallet_id();
-		let pallet_account_id = t.subxt.constants().at(&pallet_account_addr).unwrap();
-		let pallet_account_id =
-			AccountIdConversion::<subxt::utils::AccountId32>::into_account_truncating(&PalletId(
-				pallet_account_id.0,
-			));
-
-		// Send some balance to the MAD pallet
-		let transfer_keep_alive_call = api::tx()
-			.balances()
-			.transfer_keep_alive(pallet_account_id.clone().into(), 100_000_000_000_000);
-
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(
-				&transfer_keep_alive_call,
-				&alice.substrate_signer(),
-			)
-			.await?;
-
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				evs.find_first::<api::balances::events::Transfer>()?
-					.expect("Transfer event to be emitted");
-				info!("Transferred 100_000_000_000_000 to the MAD pallet");
-				break;
-			}
-		}
-
-		info!("Minting {mint_amount} USDC to the MAD pallet");
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(
-				&mint_call(pallet_account_id.into()),
-				&alice.substrate_signer(),
-			)
-			.await?;
-
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				evs.find_first::<api::assets::events::Issued>()?
-					.expect("Issued event to be emitted");
-				info!("Minted {mint_amount} USDC to the MAD pallet");
-				break;
-			}
-		}
-
-		wait_for_more_blocks(&t.provider, 1).await;
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
