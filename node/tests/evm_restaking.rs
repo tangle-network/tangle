@@ -424,3 +424,67 @@ fn operator_join_delegator_delegate_asset_id() {
 		anyhow::Ok(())
 	});
 }
+
+#[test]
+fn deposits_withdraw() {
+	run_mad_test(|t| async move {
+		// Setup Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		let usdc = MockERC20::new(t.usdc, &bob_provider);
+
+		// Mint USDC for Bob
+		let mint_amount = U256::from(100_000_000u128);
+		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
+
+		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, mint_amount);
+
+		// Delegate assets
+		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let delegate_amount = mint_amount.div(U256::from(2));
+
+		// Deposit and delegate
+		let deposit_result = precompile
+			.deposit(U256::ZERO, *usdc.address(), delegate_amount)
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
+
+		let withdraw_amount = delegate_amount.div(U256::from(2));
+		// Schedule a withdrawal
+		let sch_withdraw_result = precompile
+			.scheduleWithdraw(U256::ZERO, *usdc.address(), withdraw_amount)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(sch_withdraw_result.status());
+
+		// Execute the withdrawal
+		let exec_withdraw_result = precompile
+			.executeWithdraw()
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(exec_withdraw_result.status());
+
+		// Bob deposited `delegate_amount` and withdrew `withdraw_amount`
+		// `delegate_amount` is 1/2 of the minted amount
+		// `withdraw_amount` is 1/2 of the deposited amount
+		// So, Bob should have `mint_amount - delegate_amount + withdraw_amount` USDC
+		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
+		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, expected_balance);
+
+		anyhow::Ok(())
+	})
+}

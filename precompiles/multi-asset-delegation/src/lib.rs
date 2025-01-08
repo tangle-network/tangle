@@ -147,6 +147,9 @@ where
 		let snapshot =
 			pallet_multi_asset_delegation::Pallet::<Runtime>::ready_withdraw_requests(&who)
 				.map_err(|_| revert("Failed to get ready withdraw requests"))?;
+		if snapshot.size_hint().0 == 0 {
+			return Err(revert("No ready withdraw requests"));
+		}
 
 		let erc20_transfers = snapshot.filter_map(|request| match request.asset_id {
 			Asset::Erc20(token) => Some((token, request.amount)),
@@ -165,8 +168,6 @@ where
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(pallet_account_id).into(), call)?;
-
-		// TODO: Execute the ERC20 Transfers here.
 
 		Ok(())
 	}
@@ -301,17 +302,13 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (who, deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
-				let who = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
-				(who, Asset::Erc20(erc20_token.into()), amount)
+				(Asset::Erc20(erc20_token.into()), amount)
 			},
-			(other_asset_id, _) => (
-				Runtime::AddressMapping::into_account_id(caller),
-				Asset::Custom(other_asset_id.into()),
-				amount,
-			),
+			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(
