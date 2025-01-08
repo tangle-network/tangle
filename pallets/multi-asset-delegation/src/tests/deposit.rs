@@ -341,7 +341,7 @@ fn execute_withdraw_should_work() {
 		));
 
 		// Simulate round passing
-		let current_round = 1;
+		let current_round = 2;
 		<CurrentRound<Runtime>>::put(current_round);
 
 		assert_ok!(MultiAssetDelegation::execute_withdraw(

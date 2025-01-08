@@ -147,9 +147,6 @@ where
 		let snapshot =
 			pallet_multi_asset_delegation::Pallet::<Runtime>::ready_withdraw_requests(&who)
 				.map_err(|_| revert("Failed to get ready withdraw requests"))?;
-		if snapshot.size_hint().0 == 0 {
-			return Err(revert("No ready withdraw requests"));
-		}
 
 		let erc20_transfers = snapshot.filter_map(|request| match request.asset_id {
 			Asset::Erc20(token) => Some((token, request.amount)),

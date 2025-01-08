@@ -297,7 +297,11 @@ fn test_execute_withdraw() {
 			)
 			.execute_returns(());
 
-		<CurrentRound<Runtime>>::put(3);
+		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
+		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
+		assert!(!metadata.withdraw_requests.is_empty());
+
+		<CurrentRound<Runtime>>::put(5);
 
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})

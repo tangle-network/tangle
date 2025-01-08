@@ -74,8 +74,8 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
-	SaturatedConversion,
+	ApplyExtrinsicResult, BoundToRuntimeAppPublic, FixedPointNumber, FixedU128, Perquintill,
+	RuntimeDebug, SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use tangle_primitives::services::RpcServicesWithBlueprint;
@@ -1263,6 +1263,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
+	type AuthorityId = <Babe as BoundToRuntimeAppPublic>::Public;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
 	type SlashedAmountRecipient = TreasuryAccount;

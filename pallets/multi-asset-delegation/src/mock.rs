@@ -42,7 +42,7 @@ use sp_runtime::DispatchError;
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
+	AccountId32, BoundToRuntimeAppPublic, BuildStorage, Perbill,
 };
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 use tangle_primitives::traits::RewardsManager;
@@ -145,7 +145,7 @@ impl OneSessionHandler<AccountId> for MockSessionHandler {
 	fn on_disabled(_validator_index: u32) {}
 }
 
-impl sp_runtime::BoundToRuntimeAppPublic for MockSessionHandler {
+impl BoundToRuntimeAppPublic for MockSessionHandler {
 	type Public = UintAuthorityId;
 }
 
@@ -173,7 +173,7 @@ impl pallet_session::Config for Runtime {
 	type Keys = MockSessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionHandler = (MockSessionHandler,);
+	type SessionHandler = (MultiAssetDelegation,);
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;

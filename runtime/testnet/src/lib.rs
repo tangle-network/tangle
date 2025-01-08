@@ -77,8 +77,8 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
-	SaturatedConversion,
+	ApplyExtrinsicResult, BoundToRuntimeAppPublic, FixedPointNumber, FixedU128, Perquintill,
+	RuntimeDebug, SaturatedConversion,
 };
 use sp_std::{prelude::*, vec::Vec};
 #[cfg(feature = "std")]
@@ -1489,6 +1489,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type DelegationBondLessDelay = ConstU32<5>;
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
+	type AuthorityId = <Babe as BoundToRuntimeAppPublic>::Public;
 	type AssetId = AssetId;
 	type SlashedAmountRecipient = TreasuryAccount;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
