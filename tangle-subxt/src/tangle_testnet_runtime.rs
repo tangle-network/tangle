@@ -1,4 +1,4 @@
-#[allow(dead_code, unused_imports, non_camel_case_types)]
+#[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
 #[allow(clippy::all)]
 #[allow(rustdoc::broken_intra_doc_links)]
 pub mod api {
@@ -69,13 +69,13 @@ pub mod api {
 		"TxPoolRuntimeApi",
 		"GenesisBuilder",
 	];
-	#[doc = r" The error type returned when there is a runtime issue."]
+	#[doc = r" The error type that is returned when there is a runtime issue."]
 	pub type DispatchError = runtime_types::sp_runtime::DispatchError;
 	#[doc = r" The outer event enum."]
 	pub type Event = runtime_types::tangle_testnet_runtime::RuntimeEvent;
 	#[doc = r" The outer extrinsic enum."]
 	pub type Call = runtime_types::tangle_testnet_runtime::RuntimeCall;
-	#[doc = r" The outer error enum representing the DispatchError's Module variant."]
+	#[doc = r" The outer error enum represents the DispatchError's Module variant."]
 	pub type Error = runtime_types::tangle_testnet_runtime::RuntimeError;
 	pub fn constants() -> ConstantsApi {
 		ConstantsApi
@@ -237,6 +237,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Version {}
@@ -259,6 +260,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ExecuteBlock {
@@ -284,6 +286,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct InitializeBlock {
@@ -380,6 +383,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Metadata {}
@@ -403,6 +407,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct MetadataAtVersion {
@@ -426,6 +431,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct MetadataVersions {}
@@ -539,6 +545,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ApplyExtrinsic {
@@ -564,6 +571,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct FinalizeBlock {}
@@ -586,6 +594,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct InherentExtrinsics {
@@ -611,6 +620,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CheckInherents {
@@ -671,6 +681,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct QueryServicesWithBlueprintsByOperator {
@@ -1072,6 +1083,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ChainId {}
@@ -1094,6 +1106,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AccountBasic {
@@ -1117,6 +1130,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GasPrice {}
@@ -1139,6 +1153,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AccountCodeAt {
@@ -1162,6 +1177,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Author {}
@@ -1185,6 +1201,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct StorageAt {
@@ -1231,6 +1248,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Call {
@@ -1282,6 +1300,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Create {
@@ -1317,6 +1336,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentBlock {}
@@ -1342,6 +1362,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentReceipts {}
@@ -1365,6 +1386,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentTransactionStatuses {}
@@ -1402,6 +1424,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentAll {}
@@ -1426,6 +1449,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ExtrinsicFilter {
@@ -1451,6 +1475,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Elasticity {}
@@ -1472,6 +1497,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GasLimitMultiplierSupport {}
@@ -1505,6 +1531,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PendingBlock {
@@ -1530,6 +1557,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct InitializePendingBlock {
@@ -1582,6 +1610,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ConvertTransaction {
@@ -1649,6 +1678,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ValidateTransaction {
@@ -1706,6 +1736,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct OffchainWorker {
@@ -1790,6 +1821,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GenerateSessionKeys {
@@ -1819,6 +1851,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct DecodeSessionKeys {
@@ -1990,6 +2023,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Configuration {}
@@ -2011,6 +2045,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentEpochStart {}
@@ -2032,6 +2067,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentEpoch {}
@@ -2053,6 +2089,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct NextEpoch {}
@@ -2078,6 +2115,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GenerateKeyOwnershipProof {
@@ -2111,6 +2149,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SubmitReportEquivocationUnsignedExtrinsic {
@@ -2169,6 +2208,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AccountNonce {
@@ -2283,6 +2323,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct QueryInfo {
@@ -2312,6 +2353,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct QueryFeeDetails {
@@ -2337,6 +2379,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct QueryWeightToFee {
@@ -2361,6 +2404,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct QueryLengthToFee {
@@ -2509,6 +2553,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GrandpaAuthorities {}
@@ -2536,6 +2581,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SubmitReportEquivocationUnsignedExtrinsic {
@@ -2565,6 +2611,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GenerateKeyOwnershipProof {
@@ -2589,6 +2636,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct CurrentSetId {}
@@ -2705,6 +2753,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct TraceTransaction {
@@ -2736,6 +2785,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct TraceBlock {
@@ -2780,6 +2830,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct TraceCall {
@@ -2843,6 +2894,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ExtrinsicFilter {
@@ -2962,6 +3014,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BuildState {
@@ -2988,6 +3041,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GetPreset {
@@ -3012,6 +3066,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PresetNames {}
@@ -3402,6 +3457,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Make some on-chain remark."]
@@ -3429,6 +3485,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the number of pages in the WebAssembly environment's heap."]
@@ -3454,6 +3511,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the new runtime code."]
@@ -3479,6 +3537,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the new runtime code without doing any checks of the given `code`."]
@@ -3507,6 +3566,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set some items of storage."]
@@ -3535,6 +3595,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Kill some items from storage."]
@@ -3562,6 +3623,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Kill all storage items with a key that starts with the given prefix."]
@@ -3592,6 +3654,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Make some on-chain remark and emit event."]
@@ -3617,6 +3680,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Authorize an upgrade to a given `code_hash` for the runtime. The runtime can be supplied"]
@@ -3645,6 +3709,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Authorize an upgrade to a given `code_hash` for the runtime. The runtime can be supplied"]
@@ -3677,6 +3742,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Provide the preimage (runtime binary) `code` for an upgrade that has been authorized."]
@@ -3931,6 +3997,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An extrinsic completed successfully."]
@@ -3956,6 +4023,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An extrinsic failed."]
@@ -3983,6 +4051,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "`:code` was updated."]
@@ -4002,6 +4071,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new account was created."]
@@ -4027,6 +4097,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account was reaped."]
@@ -4052,6 +4123,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "On on-chain remark happened."]
@@ -4079,6 +4151,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An upgrade was authorized."]
@@ -4819,6 +4892,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the current time."]
@@ -5005,6 +5079,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Authenticates the sudo key and dispatches a function call with `Root` origin."]
@@ -5030,6 +5105,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Authenticates the sudo key and dispatches a function call with `Root` origin."]
@@ -5061,6 +5137,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Authenticates the current sudo key and sets the given AccountId (`new`) as the new sudo"]
@@ -5090,6 +5167,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Authenticates the sudo key and dispatches a function call with `Signed` origin from"]
@@ -5123,6 +5201,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Permanently removes the sudo key."]
@@ -5251,6 +5330,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A sudo call just took place."]
@@ -5277,6 +5357,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The sudo key has been updated."]
@@ -5304,6 +5385,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The key was permanently removed."]
@@ -5323,6 +5405,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A [sudo_as](Pallet::sudo_as) call just took place."]
@@ -5442,6 +5525,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Issue a new class of fungible assets from a public origin."]
@@ -5493,6 +5577,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Issue a new class of fungible assets from a privileged origin."]
@@ -5547,6 +5632,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Start the process of destroying a fungible asset class."]
@@ -5583,6 +5669,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Destroy all accounts associated with a given asset."]
@@ -5620,6 +5707,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Destroy all approvals associated with a given asset up to the max (T::RemoveItemsLimit)."]
@@ -5657,6 +5745,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Complete destroying asset and unreserve currency."]
@@ -5692,6 +5781,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Mint assets of a particular class."]
@@ -5737,6 +5827,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Reduce the balance of `who` by as much as possible up to `amount` assets of `id`."]
@@ -5785,6 +5876,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Move some assets from the sender account to another."]
@@ -5836,6 +5928,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Move some assets from the sender account to another, keeping the sender account alive."]
@@ -5887,6 +5980,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Move some assets from one account to another."]
@@ -5944,6 +6038,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Disallow further unprivileged transfers of an asset `id` from an account `who`. `who`"]
@@ -5986,6 +6081,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allow unprivileged transfers to and from an account again."]
@@ -6026,6 +6122,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Disallow further unprivileged transfers for the asset class."]
@@ -6060,6 +6157,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allow unprivileged transfers for the asset again."]
@@ -6094,6 +6192,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Change the Owner of an asset."]
@@ -6134,6 +6233,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Change the Issuer, Admin and Freezer of an asset."]
@@ -6186,6 +6286,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the metadata for an asset."]
@@ -6233,6 +6334,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clear the metadata for an asset."]
@@ -6269,6 +6371,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force the metadata for an asset to some value."]
@@ -6316,6 +6419,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clear the metadata for an asset."]
@@ -6352,6 +6456,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Alter the attributes of a given asset."]
@@ -6426,6 +6531,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Approve an amount of asset for transfer by a delegated third-party account."]
@@ -6479,6 +6585,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel all of some asset approved for delegated transfer by a third-party account."]
@@ -6522,6 +6629,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel all of some asset approved for delegated transfer by a third-party account."]
@@ -6570,6 +6678,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Transfer some asset balance from a previously delegated account to some third-party"]
@@ -6626,6 +6735,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create an asset account for non-provider assets."]
@@ -6660,6 +6770,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Return the deposit (if any) of an asset account or a consumer reference (if any) of an"]
@@ -6697,6 +6808,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Sets the minimum balance of an asset."]
@@ -6736,6 +6848,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create an asset account for `who`."]
@@ -6776,6 +6889,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Return the deposit (if any) of a target asset account. Useful if you are the depositor."]
@@ -6816,6 +6930,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Disallow further unprivileged transfers of an asset `id` to and from an account `who`."]
@@ -7841,6 +7956,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some asset class was created."]
@@ -7870,6 +7986,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some assets were issued."]
@@ -7899,6 +8016,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some assets were transferred."]
@@ -7930,6 +8048,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some assets were destroyed."]
@@ -7959,6 +8078,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The management team changed."]
@@ -7990,6 +8110,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The owner changed."]
@@ -8017,6 +8138,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some account `who` was frozen."]
@@ -8044,6 +8166,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some account `who` was thawed."]
@@ -8071,6 +8194,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some asset `asset_id` was frozen."]
@@ -8096,6 +8220,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some asset `asset_id` was thawed."]
@@ -8121,6 +8246,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Accounts were destroyed for given asset."]
@@ -8150,6 +8276,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Approvals were destroyed for given asset."]
@@ -8179,6 +8306,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An asset class is in the process of being destroyed."]
@@ -8204,6 +8332,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An asset class was destroyed."]
@@ -8229,6 +8358,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some asset class was force-created."]
@@ -8256,6 +8386,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "New metadata has been set for an asset."]
@@ -8289,6 +8420,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Metadata has been cleared for an asset."]
@@ -8314,6 +8446,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "(Additional) funds have been approved for transfer to a destination account."]
@@ -8345,6 +8478,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An approval for account `delegate` was cancelled by `owner`."]
@@ -8374,6 +8508,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An `amount` was transferred in its entirety from `owner` to `destination` by"]
@@ -8408,6 +8543,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An asset has had its attributes changed by the `Force` origin."]
@@ -8433,6 +8569,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The min_balance of an asset has been updated by the asset owner."]
@@ -8460,6 +8597,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some account `who` was created with a deposit from `depositor`."]
@@ -8489,6 +8627,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some account `who` was blocked."]
@@ -8516,6 +8655,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some assets were deposited (e.g. for transaction fees)."]
@@ -8545,6 +8685,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some assets were withdrawn from the account (e.g. for transaction fees)."]
@@ -9057,6 +9198,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Transfer some liquid free balance to another account."]
@@ -9094,6 +9236,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Exactly as `transfer_allow_death`, except the origin must be root and the source account"]
@@ -9131,6 +9274,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Same as the [`transfer_allow_death`] call, but with a check that the transfer will not"]
@@ -9167,6 +9311,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Transfer the entire transferable balance from the caller account."]
@@ -9211,6 +9356,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unreserve some balance from a user by force."]
@@ -9243,6 +9389,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Upgrade a specified account."]
@@ -9275,6 +9422,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the regular balance of a given account."]
@@ -9308,6 +9456,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Adjust the total issuance in a saturating way."]
@@ -9340,6 +9489,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Burn the specified liquid free balance from the origin account."]
@@ -9588,6 +9738,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account was created with some free balance."]
@@ -9615,6 +9766,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account was removed whose balance was non-zero but below ExistentialDeposit,"]
@@ -9643,6 +9795,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Transfer succeeded."]
@@ -9672,6 +9825,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A balance was set by root."]
@@ -9699,6 +9853,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was reserved (moved from free to reserved)."]
@@ -9726,6 +9881,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was unreserved (moved from reserved to free)."]
@@ -9753,6 +9909,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was moved from the reserve of the first account to the second account."]
@@ -9786,6 +9943,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was deposited (e.g. for transaction fees)."]
@@ -9813,6 +9971,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was withdrawn from the account (e.g. for transaction fees)."]
@@ -9840,6 +9999,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was removed from the account (e.g. for misbehavior)."]
@@ -9867,6 +10027,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was minted into an account."]
@@ -9894,6 +10055,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was burned from an account."]
@@ -9921,6 +10083,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was suspended from an account (it can be restored later)."]
@@ -9948,6 +10111,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some amount was restored into an account."]
@@ -9975,6 +10139,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account was upgraded."]
@@ -10000,6 +10165,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Total issuance was increased by `amount`, creating a credit to be balanced."]
@@ -10025,6 +10191,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Total issuance was decreased by `amount`, creating a debt to be balanced."]
@@ -10050,6 +10217,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was locked."]
@@ -10077,6 +10245,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was unlocked."]
@@ -10104,6 +10273,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was frozen."]
@@ -10131,6 +10301,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some balance was thawed."]
@@ -10158,6 +10329,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The `TotalIssuance` was forcefully changed."]
@@ -10650,6 +10822,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,"]
@@ -10835,6 +11008,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Report authority equivocation/misbehavior. This method will verify"]
@@ -10872,6 +11046,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Report authority equivocation/misbehavior. This method will verify"]
@@ -10914,6 +11089,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Plan an epoch config change. The epoch config change is recorded and will be enacted on"]
@@ -11637,6 +11813,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Report voter equivocation/misbehavior. This method will verify the"]
@@ -11672,6 +11849,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Report voter equivocation/misbehavior. This method will verify the"]
@@ -11713,6 +11891,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Note that the current authority set of the GRANDPA finality gadget has stalled."]
@@ -11845,6 +12024,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "New authority set has been applied."]
@@ -11873,6 +12053,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Current authority set has been paused."]
@@ -11892,6 +12073,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Current authority set has been resumed."]
@@ -12217,6 +12399,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Assign an previously unassigned index."]
@@ -12253,6 +12436,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Assign an index already owned by the sender to another account. The balance reservation"]
@@ -12294,6 +12478,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Free up an index owned by the sender."]
@@ -12330,6 +12515,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force an index to an account. This doesn't require a deposit. If the index is already"]
@@ -12374,6 +12560,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Freeze an index so it will always point to the sender account. This consumes the"]
@@ -12562,6 +12749,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A account index was assigned."]
@@ -12589,6 +12777,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A account index has been freed up (unassigned)."]
@@ -12614,6 +12803,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A account index has been frozen to its current account ID."]
@@ -12739,6 +12929,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Propose a sensitive action to be taken."]
@@ -12778,6 +12969,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Signals agreement with a particular proposal."]
@@ -12809,6 +13001,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Vote in a referendum. If `vote.is_aye()`, the vote is to enact the proposal;"]
@@ -12844,6 +13037,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule an emergency cancellation of a referendum. Cannot happen twice to the same"]
@@ -12876,6 +13070,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule a referendum to be tabled once it is legal to schedule an external"]
@@ -12909,6 +13104,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule a majority-carries referendum to be tabled next once it is legal to schedule"]
@@ -12947,6 +13143,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule a negative-turnout-bias referendum to be tabled next once it is legal to"]
@@ -12985,6 +13182,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule the currently externally-proposed majority-carries referendum to be tabled"]
@@ -13029,6 +13227,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Veto and blacklist the external proposal hash."]
@@ -13062,6 +13261,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a referendum."]
@@ -13094,6 +13294,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Delegate the voting power (with some given conviction) of the sending account."]
@@ -13145,6 +13346,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Undelegate the voting power of the sending account."]
@@ -13175,6 +13377,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clears all public proposals."]
@@ -13198,6 +13401,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unlock tokens that have an expired lock."]
@@ -13232,6 +13436,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a vote for a referendum."]
@@ -13283,6 +13488,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a vote for a referendum."]
@@ -13327,6 +13533,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Permanently place a proposal into the blacklist. This prevents it from ever being"]
@@ -13368,6 +13575,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a proposal."]
@@ -13400,6 +13608,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set or clear a metadata of a proposal or a referendum."]
@@ -13964,6 +14173,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A motion has been proposed by a public account."]
@@ -13991,6 +14201,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A public proposal has been tabled for referendum vote."]
@@ -14018,6 +14229,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An external proposal has been tabled."]
@@ -14037,6 +14249,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A referendum has begun."]
@@ -14064,6 +14277,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proposal has been approved by referendum."]
@@ -14089,6 +14303,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proposal has been rejected by referendum."]
@@ -14114,6 +14329,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A referendum has been cancelled."]
@@ -14139,6 +14355,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has delegated their vote to another account."]
@@ -14166,6 +14383,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has cancelled a previous delegation operation."]
@@ -14191,6 +14409,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An external proposal has been vetoed."]
@@ -14220,6 +14439,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proposal_hash has been blacklisted permanently."]
@@ -14245,6 +14465,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has voted in a referendum"]
@@ -14275,6 +14496,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has seconded a proposal"]
@@ -14302,6 +14524,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proposal got canceled."]
@@ -14327,6 +14550,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Metadata for a proposal or a referendum has been set."]
@@ -14354,6 +14578,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Metadata for a proposal or a referendum has been cleared."]
@@ -14381,6 +14606,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Metadata has been transferred to new owner."]
@@ -15148,6 +15374,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the collective's membership."]
@@ -15201,6 +15428,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Dispatch a proposal from a member using the `Member` origin."]
@@ -15237,6 +15465,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add a new proposal to either be voted on or executed directly."]
@@ -15281,6 +15510,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add an aye or nay vote for the sender to the given proposal."]
@@ -15319,6 +15549,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Disapprove a proposal, close, and remove it from the system, regardless of its current"]
@@ -15353,6 +15584,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Close a vote that is either approved, disapproved or whose voting period has ended."]
@@ -15618,6 +15850,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A motion (given hash) has been proposed (by given account) with a threshold (given"]
@@ -15650,6 +15883,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A motion (given hash) has been voted on by given account, leaving"]
@@ -15684,6 +15918,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A motion was approved by the required threshold."]
@@ -15709,6 +15944,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A motion was not approved by the required threshold."]
@@ -15734,6 +15970,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A motion was executed; result will be `Ok` if it returned without error."]
@@ -15762,6 +15999,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A single member did some action; result will be `Ok` if it returned without error."]
@@ -15790,6 +16028,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proposal was closed because its threshold was reached or after its duration was up."]
@@ -16071,6 +16310,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unlock any vested funds of the sender account."]
@@ -16098,6 +16338,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unlock any vested funds of a `target` account."]
@@ -16136,6 +16377,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create a vested transfer."]
@@ -16181,6 +16423,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force a vested transfer."]
@@ -16232,6 +16475,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Merge two vesting schedules together, creating a new vesting schedule that unlocks over"]
@@ -16279,6 +16523,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force remove a vesting schedule"]
@@ -16493,6 +16738,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The amount vested has been updated. This could indicate a change in funds available."]
@@ -16521,6 +16767,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An \\[account\\] has become fully vested."]
@@ -16684,6 +16931,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Vote for a set of candidates for the upcoming round of election. This can be called to"]
@@ -16731,6 +16979,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove `origin` as a voter."]
@@ -16754,6 +17003,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Submit oneself for candidacy. A fixed amount of deposit is recorded."]
@@ -16794,6 +17044,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Renounce one's intention to be a candidate for the next election round. 3 potential"]
@@ -16838,6 +17089,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a particular member from the set. This is effective immediately and the bond of"]
@@ -16885,6 +17137,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clean all voters who are defunct (i.e. they do not serve any purpose at all). The"]
@@ -17110,6 +17363,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new term with new_members. This indicates that enough candidates existed to run"]
@@ -17142,6 +17396,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "No (or not enough) candidates existed for this round. This is different from"]
@@ -17162,6 +17417,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Internal error happened while trying to perform election."]
@@ -17181,6 +17437,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has been removed. This should always be followed by either `NewTerm` or"]
@@ -17207,6 +17464,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Someone has renounced their candidacy."]
@@ -17232,6 +17490,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A candidate was slashed by amount due to failing to obtain a seat as member or"]
@@ -17262,6 +17521,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A seat holder was slashed by amount by being forcefully removed from the set."]
@@ -17663,6 +17923,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Submit a solution for the unsigned phase."]
@@ -17707,6 +17968,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a new value for `MinimumUntrustedScore`."]
@@ -17737,6 +17999,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a solution in the queue, to be handed out to the client of this pallet in the next"]
@@ -17772,6 +18035,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Submit a solution for the signed phase."]
@@ -17808,6 +18072,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Trigger the governance fallback."]
@@ -17972,6 +18237,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A solution was stored with the given compute."]
@@ -18008,6 +18274,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The election has been finalized, with the given computation and score."]
@@ -18036,6 +18303,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An election failed."]
@@ -18057,6 +18325,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has been rewarded for their signed submission being finalized."]
@@ -18084,6 +18353,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has been slashed for submitting an invalid signed submission."]
@@ -18111,6 +18381,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "There was a phase transition in a given round."]
@@ -18741,6 +19012,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Take the origin account as a stash and lock up `value` of its balance. `controller` will"]
@@ -18786,6 +19058,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add some extra amount that have appeared in the stash `free_balance` into the balance up"]
@@ -18825,6 +19098,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule a portion of the stash to be unlocked ready for transfer out after the bond"]
@@ -18869,6 +19143,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove any unlocked chunks from the `unlocking` queue from our management."]
@@ -18916,6 +19191,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Declare the desire to validate for the origin controller."]
@@ -18945,6 +19221,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Declare the desire to nominate `targets` for the origin controller."]
@@ -18984,6 +19261,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Declare no desire to either validate or nominate."]
@@ -19012,6 +19290,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "(Re-)set the payment target for a controller."]
@@ -19050,6 +19329,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "(Re-)sets the controller of a stash to the stash itself. This function previously"]
@@ -19082,6 +19362,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Sets the ideal number of validators."]
@@ -19113,6 +19394,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Increments the ideal number of validators up to maximum of"]
@@ -19145,6 +19427,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Scale up the ideal number of validators by a factor up to maximum of"]
@@ -19176,6 +19459,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force there to be no new eras indefinitely."]
@@ -19207,6 +19491,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force there to be a new era at the end of the next session. After this, it will be"]
@@ -19239,6 +19524,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the validators who cannot be slashed (if any)."]
@@ -19267,6 +19553,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force a current staker to become completely unstaked, immediately."]
@@ -19301,6 +19588,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force there to be a new era at the end of sessions indefinitely."]
@@ -19328,6 +19616,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel enactment of a deferred slash."]
@@ -19359,6 +19648,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Pay out next page of the stakers behind a validator for the given era."]
@@ -19398,6 +19688,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Rebond a portion of the stash scheduled to be unlocked."]
@@ -19430,6 +19721,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove all data structures concerning a staker/stash once it is at a state where it can"]
@@ -19474,6 +19766,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove the given nominations from the calling validator."]
@@ -19514,6 +19807,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Update the various staking configurations ."]
@@ -19588,6 +19882,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Declare a `controller` to stop participating as either a validator or nominator."]
@@ -19638,6 +19933,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force a validator to have at least the minimum commission. This will not affect a"]
@@ -19665,6 +19961,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Sets the minimum amount of commission that each validators must maintain."]
@@ -19693,6 +19990,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Pay out a page of the stakers behind a validator for the given era and page."]
@@ -19738,6 +20036,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Migrates an account's `RewardDestination::Controller` to"]
@@ -19768,6 +20067,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Updates a batch of controller accounts to their corresponding stash account if they are"]
@@ -19802,6 +20102,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Restores the state of a ledger which is in an inconsistent state."]
@@ -20678,6 +20979,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The era payout has been set; the first balance is the validator-payout; the second is"]
@@ -20708,6 +21010,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The nominator has been rewarded by this amount to this destination."]
@@ -20739,6 +21042,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A staker (validator or nominator) has been slashed by the given amount."]
@@ -20766,6 +21070,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A slash for the given validator, for the given percentage of their stake, at the given"]
@@ -20796,6 +21101,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An old slashing report from a prior era was discarded because it could"]
@@ -20822,6 +21128,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new set of stakers was elected."]
@@ -20841,6 +21148,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has bonded this amount. \\[stash, amount\\]"]
@@ -20871,6 +21179,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has unbonded this amount."]
@@ -20898,6 +21207,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has called `withdraw_unbonded` and removed unbonding chunks worth `Balance`"]
@@ -20926,6 +21236,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A nominator has been kicked from a validator."]
@@ -20953,6 +21264,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The election failed. No new era is planned."]
@@ -20972,6 +21284,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An account has stopped participating as either a validator or nominator."]
@@ -20997,6 +21310,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The stakers' rewards are getting paid."]
@@ -21024,6 +21338,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A validator has set their preferences."]
@@ -21051,6 +21366,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Voters size limit reached."]
@@ -21076,6 +21392,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Targets size limit reached."]
@@ -21101,6 +21418,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new force era mode was set."]
@@ -21126,6 +21444,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Report of a controller batch deprecation."]
@@ -23565,6 +23884,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Sets the session key(s) of the function caller to `keys`."]
@@ -23600,6 +23920,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Removes any session key(s) of the function caller."]
@@ -23691,6 +24012,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "New session has happened. Note that the argument is the session index, not the"]
@@ -24100,6 +24422,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Propose and approve a spend of treasury funds."]
@@ -24147,6 +24470,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Force a previously approved proposal to be removed from the approval queue."]
@@ -24193,6 +24517,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Propose and approve a spend of treasury funds."]
@@ -24250,6 +24575,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim a spend."]
@@ -24293,6 +24619,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Check the status of the spend and remove it from the storage if processed."]
@@ -24336,6 +24663,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Void previously approved spend."]
@@ -24604,6 +24932,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "We have ended a spend period and will now allocate funds."]
@@ -24629,6 +24958,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some funds have been allocated."]
@@ -24658,6 +24988,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some of our funds have been burnt."]
@@ -24683,6 +25014,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Spending has finished; this is the amount that rolls over until next spend."]
@@ -24708,6 +25040,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Some funds have been deposited."]
@@ -24733,6 +25066,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new spend proposal has been approved."]
@@ -24762,6 +25096,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The inactive funds of the pallet have been updated."]
@@ -24789,6 +25124,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new asset spend proposal has been approved."]
@@ -24824,6 +25160,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An approved spend was voided."]
@@ -24849,6 +25186,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A payment happened."]
@@ -24876,6 +25214,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A payment failed and can be retried."]
@@ -24903,6 +25242,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A spend was processed and removed from the storage. It might have been successfully"]
@@ -25250,6 +25590,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Propose a new bounty."]
@@ -25289,6 +25630,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Approve a bounty proposal. At a later time, the bounty will be funded and become active"]
@@ -25321,6 +25663,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Propose a curator to a funded bounty."]
@@ -25360,6 +25703,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unassign curator from a bounty."]
@@ -25402,6 +25746,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Accept the curator role for a bounty."]
@@ -25434,6 +25779,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Award bounty to a beneficiary account. The beneficiary will be able to claim the funds"]
@@ -25474,6 +25820,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim the payout from an awarded bounty after payout delay."]
@@ -25507,6 +25854,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel a proposed or active bounty. All the funds will be sent to treasury and"]
@@ -25541,6 +25889,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Extend the expiry time of an active bounty."]
@@ -25817,6 +26166,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "New bounty proposal."]
@@ -25842,6 +26192,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty proposal was rejected; funds were slashed."]
@@ -25869,6 +26220,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty proposal is funded and became active."]
@@ -25894,6 +26246,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty is awarded to a beneficiary."]
@@ -25921,6 +26274,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty is claimed by beneficiary."]
@@ -25950,6 +26304,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty is cancelled."]
@@ -25975,6 +26330,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty expiry is extended."]
@@ -26000,6 +26356,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty is approved."]
@@ -26025,6 +26382,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty curator is proposed."]
@@ -26052,6 +26410,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty curator is unassigned."]
@@ -26077,6 +26436,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A bounty curator is accepted."]
@@ -26435,6 +26795,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add a new child-bounty."]
@@ -26484,6 +26845,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Propose curator for funded child-bounty."]
@@ -26535,6 +26897,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Accept the curator role for the child-bounty."]
@@ -26582,6 +26945,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unassign curator from a child-bounty."]
@@ -26644,6 +27008,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Award child-bounty to a beneficiary."]
@@ -26694,6 +27059,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim the payout from an awarded child-bounty after payout delay."]
@@ -26738,6 +27104,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel a proposed or active child-bounty. Child-bounty account funds"]
@@ -27059,6 +27426,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A child-bounty is added."]
@@ -27086,6 +27454,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A child-bounty is awarded to a beneficiary."]
@@ -27115,6 +27484,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A child-bounty is claimed by beneficiary."]
@@ -27146,6 +27516,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A child-bounty is cancelled."]
@@ -27501,6 +27872,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Declare that some `dislocated` account has, through rewards or penalties, sufficiently"]
@@ -27538,6 +27910,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Move the caller's Id directly in front of `lighter`."]
@@ -27575,6 +27948,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Same as [`Pallet::put_in_front_of`], but it can be called by anyone."]
@@ -27689,6 +28063,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Moved an account from one bag to another."]
@@ -27718,6 +28093,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Updated the score of some account to the given amount."]
@@ -27963,6 +28339,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Stake funds with a pool. The amount to bond is transferred from the member to the"]
@@ -28000,6 +28377,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Bond `extra` more funds from `origin` into the pool to which they already belong."]
@@ -28032,6 +28410,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "A bonded member can use this to claim their payout based on the rewards that the pool"]
@@ -28058,6 +28437,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unbond up to `unbonding_points` of the `member_account`'s funds from the pool. It"]
@@ -28119,6 +28499,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Call `withdraw_unbonded` for the pools account. This call can be made by any account."]
@@ -28151,6 +28532,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Withdraw unbonded funds from `member_account`. If no bonded funds can be unbonded, an"]
@@ -28202,6 +28584,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create a new delegation pool."]
@@ -28259,6 +28642,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create a new delegation pool with a previously used pool id"]
@@ -28307,6 +28691,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Nominate on behalf of the pool."]
@@ -28346,6 +28731,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a new state for the pool."]
@@ -28382,6 +28768,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a new metadata for the pool."]
@@ -28412,6 +28799,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Update configurations for the nomination pools. The origin for this call must be"]
@@ -28464,6 +28852,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Update the roles of the pool."]
@@ -28507,6 +28896,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Chill on behalf of the pool."]
@@ -28547,6 +28937,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "`origin` bonds funds from `extra` for some pool member `member` into their respective"]
@@ -28586,6 +28977,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allows a pool member to set a claim permission to allow or disallow permissionless"]
@@ -28617,6 +29009,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "`origin` can claim payouts on some pool member `other`'s behalf."]
@@ -28645,6 +29038,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the commission of a pool."]
@@ -28679,6 +29073,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the maximum commission of a pool."]
@@ -28710,6 +29105,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the commission change rate for a pool."]
@@ -28743,6 +29139,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim pending commission."]
@@ -28772,6 +29169,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Top up the deficit or withdraw the excess ED from the pool."]
@@ -28803,6 +29201,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set or remove a pool's commission claim permission."]
@@ -28837,6 +29236,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Apply a pending slash on a member."]
@@ -28873,6 +29273,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Migrates delegated funds from the pool account to the `member_account`."]
@@ -28909,6 +29310,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Migrate pool from [`adapter::StakeStrategyType::Transfer`] to"]
@@ -29630,6 +30032,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool has been created."]
@@ -29657,6 +30060,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has became bonded in a pool."]
@@ -29688,6 +30092,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A payout has been made to a member."]
@@ -29717,6 +30122,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has unbonded from their pool."]
@@ -29760,6 +30166,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has withdrawn from their pool."]
@@ -29796,6 +30203,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool has been destroyed."]
@@ -29821,6 +30229,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The state of a pool has changed"]
@@ -29848,6 +30257,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has been removed from a pool."]
@@ -29877,6 +30287,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"]
@@ -29907,6 +30318,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The active balance of pool `pool_id` has been slashed to `balance`."]
@@ -29934,6 +30346,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."]
@@ -29963,6 +30376,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool's commission setting has been changed."]
@@ -29993,6 +30407,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool's maximum commission setting has been changed."]
@@ -30020,6 +30435,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool's commission `change_rate` has been changed."]
@@ -30049,6 +30465,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Pool commission claim permission has been updated."]
@@ -30080,6 +30497,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Pool commission has been claimed."]
@@ -30107,6 +30525,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Topped up deficit in frozen ED of the reward pool."]
@@ -30134,6 +30553,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Claimed excess frozen ED of af the reward pool."]
@@ -30989,6 +31409,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Anonymously schedule a task."]
@@ -31021,6 +31442,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel an anonymously scheduled task."]
@@ -31048,6 +31470,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule a named task."]
@@ -31082,6 +31505,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel a named scheduled task."]
@@ -31107,6 +31531,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Anonymously schedule a task after a delay."]
@@ -31139,6 +31564,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedule a named task after a delay."]
@@ -31173,6 +31599,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a retry configuration for a task so that, in case its scheduled run fails, it will"]
@@ -31213,6 +31640,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a retry configuration for a named task so that, in case its scheduled run fails, it"]
@@ -31253,6 +31681,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Removes the retry configuration of a task."]
@@ -31278,6 +31707,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel the retry configuration of a named task."]
@@ -31539,6 +31969,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Scheduled some task."]
@@ -31566,6 +31997,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Canceled some task."]
@@ -31593,6 +32025,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Dispatched some task."]
@@ -31623,6 +32056,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Set a retry configuration for some task."]
@@ -31654,6 +32088,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Cancel a retry configuration for some task."]
@@ -31681,6 +32116,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The call for the provided hash was not found so the task has been aborted."]
@@ -31708,6 +32144,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The given task was unable to be renewed since the agenda is full at that block."]
@@ -31735,6 +32172,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The given task was unable to be retried since the agenda is full at that block or there"]
@@ -31763,6 +32201,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The given task can never be executed since it is overweight."]
@@ -32079,6 +32518,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Register a preimage on-chain."]
@@ -32107,6 +32547,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clear an unrequested preimage from the runtime storage."]
@@ -32137,6 +32578,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Request a preimage be uploaded to the chain without paying any fees or deposits."]
@@ -32165,6 +32607,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clear a previously made request for a preimage."]
@@ -32192,6 +32635,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Ensure that the a bulk of pre-images is upgraded."]
@@ -32326,6 +32770,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A preimage has been noted."]
@@ -32351,6 +32796,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A preimage has been requested."]
@@ -32376,6 +32822,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A preimage has ben cleared."]
@@ -32610,6 +33057,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
@@ -32808,6 +33256,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Pause a call."]
@@ -32843,6 +33292,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Un-pause a call."]
@@ -32926,6 +33376,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "This pallet, or a specific call is now paused."]
@@ -32958,6 +33409,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "This pallet, or a specific call is now unpaused."]
@@ -33123,6 +33575,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "## Complexity:"]
@@ -33182,6 +33635,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new heartbeat was received from `AuthorityId`."]
@@ -33208,6 +33662,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "At the end of the session, no offence was committed."]
@@ -33227,6 +33682,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "At the end of the session, at least one validator was found to be offline."]
@@ -33544,6 +34000,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add a registrar to the system."]
@@ -33578,6 +34035,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set an account's identity information and reserve the appropriate deposit."]
@@ -33612,6 +34070,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the sub-accounts of the sender."]
@@ -33648,6 +34107,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Clear an account's identity info and all sub-accounts and return all deposits."]
@@ -33674,6 +34134,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Request a judgement from a registrar."]
@@ -33718,6 +34179,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel a previous request."]
@@ -33752,6 +34214,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the fee required for a judgement to be requested from a registrar."]
@@ -33787,6 +34250,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Change the account associated with a registrar."]
@@ -33824,6 +34288,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the field information for a registrar."]
@@ -33858,6 +34323,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Provide a judgement for an account's identity."]
@@ -33908,6 +34374,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove an account's identity and sub-account information and slash the deposits."]
@@ -33947,6 +34414,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add the given account to the sender's subs."]
@@ -33983,6 +34451,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Alter the associated name of the given sub-account."]
@@ -34016,6 +34485,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove the given account from the sender's subs."]
@@ -34050,6 +34520,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove the sender as a sub-account."]
@@ -34078,6 +34549,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Add an `AccountId` with permission to grant usernames with a given `suffix` appended."]
@@ -34113,6 +34585,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove `authority` from the username authorities."]
@@ -34141,6 +34614,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the username for `who`. Must be called by a username authority."]
@@ -34182,6 +34656,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Accept a given username that an `authority` granted. The call must include the full"]
@@ -34210,6 +34685,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove an expired username approval. The username was approved by an authority but never"]
@@ -34239,6 +34715,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set a given username as the primary. The username should include the suffix."]
@@ -34266,6 +34743,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a username that corresponds to an account with no identity. Exists when a user"]
@@ -34811,6 +35289,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A name was set or reset (which will remove all judgements)."]
@@ -34836,6 +35315,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A name was cleared, and the given balance returned."]
@@ -34863,6 +35343,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A name was removed and the given balance slashed."]
@@ -34890,6 +35371,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A judgement was asked from a registrar."]
@@ -34917,6 +35399,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A judgement request was retracted."]
@@ -34944,6 +35427,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A judgement was given by a registrar."]
@@ -34971,6 +35455,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A registrar was added."]
@@ -34996,6 +35481,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A sub-identity was added to an identity and the deposit paid."]
@@ -35025,6 +35511,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A sub-identity was removed from an identity and the deposit freed."]
@@ -35054,6 +35541,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A sub-identity was cleared, and the given deposit repatriated from the"]
@@ -35084,6 +35572,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A username authority was added."]
@@ -35109,6 +35598,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A username authority was removed."]
@@ -35134,6 +35624,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A username was set for `who`."]
@@ -35163,6 +35654,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A username was queued, but `who` must accept it prior to `expiration`."]
@@ -35194,6 +35686,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A queued username passed its expiration without being claimed and was removed."]
@@ -35219,6 +35712,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A username was set as a primary and can be looked up from `who`."]
@@ -35248,6 +35742,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A dangling username (as in, a username corresponding to an account that has removed its"]
@@ -35828,6 +36323,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Send a batch of dispatch calls."]
@@ -35872,6 +36368,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Send a call through an indexed pseudonym of the sender."]
@@ -35911,6 +36408,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Send a batch of dispatch calls and atomically execute them."]
@@ -35950,6 +36448,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Dispatches a function call with a provided origin."]
@@ -35982,6 +36481,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Send a batch of dispatch calls."]
@@ -36021,6 +36521,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Dispatch a function call with a specified weight."]
@@ -36237,6 +36738,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Batch of dispatches did not complete fully. Index of first failing dispatch given, as"]
@@ -36265,6 +36767,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Batch of dispatches completed fully with no error."]
@@ -36284,6 +36787,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Batch of dispatches completed but has errors."]
@@ -36303,6 +36807,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A single item within a Batch of dispatches has completed with no error."]
@@ -36322,6 +36827,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A single item within a Batch of dispatches has completed with error."]
@@ -36347,6 +36853,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A call was dispatched."]
@@ -36409,6 +36916,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Immediately dispatch a multi-signature call using a single approval from the caller."]
@@ -36448,6 +36956,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
@@ -36522,6 +37031,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
@@ -36587,6 +37097,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancel a pre-existing, on-going multisig transaction. Any deposit reserved previously"]
@@ -36841,6 +37352,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new multisig operation has begun."]
@@ -36870,6 +37382,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A multisig operation has been approved by someone."]
@@ -36902,6 +37415,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A multisig operation has been executed."]
@@ -36937,6 +37451,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A multisig operation has been cancelled."]
@@ -37134,6 +37649,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Transact an Ethereum transaction."]
@@ -37184,6 +37700,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An ethereum transaction was successfully executed."]
@@ -37397,6 +37914,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Withdraw balance from EVM into currency/balances pallet."]
@@ -37424,6 +37942,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Issue an EVM call operation. This is similar to a message call transaction in Ethereum."]
@@ -37469,6 +37988,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Issue an EVM create operation. This is similar to a contract creation transaction in"]
@@ -37513,6 +38033,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Issue an EVM create2 operation."]
@@ -37687,6 +38208,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Ethereum events from contracts."]
@@ -37712,6 +38234,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A contract has been created at given address."]
@@ -37737,6 +38260,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A contract was attempted to be created, but the execution failed."]
@@ -37762,6 +38286,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A contract has been executed successfully with states applied."]
@@ -37787,6 +38312,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A contract has been executed with errors. States are reverted with only gas fees applied."]
@@ -38096,6 +38622,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct NoteMinGasPriceTarget {
@@ -38209,6 +38736,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SetBaseFeePerGas {
@@ -38233,6 +38761,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SetElasticity {
@@ -38297,6 +38826,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct NewBaseFeePerGas {
@@ -38321,6 +38851,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct BaseFeeOverflow;
@@ -38339,6 +38870,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct NewElasticity {
@@ -38435,6 +38967,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Increment `sufficients` for existing accounts having a nonzero `nonce` but zero `sufficients`, `consumers` and `providers` value."]
@@ -38503,6 +39036,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Make a claim to collect your tokens."]
@@ -38560,6 +39094,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Mint a new claim to collect native tokens."]
@@ -38612,6 +39147,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Make a claim to collect your native tokens by signing a statement."]
@@ -38674,6 +39210,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct MoveClaim {
@@ -38700,6 +39237,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the value for expiryconfig"]
@@ -38728,6 +39266,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim from signed origin"]
@@ -38937,6 +39476,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Someone claimed some native tokens."]
@@ -39217,6 +39757,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Dispatch the given `call` from an account that the sender is authorised for through"]
@@ -39258,6 +39799,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Register a proxy account for the sender that is able to make calls on its behalf."]
@@ -39298,6 +39840,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unregister a proxy account for the sender."]
@@ -39336,6 +39879,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Unregister all proxy accounts for the sender."]
@@ -39360,6 +39904,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Spawn a fresh new account that is guaranteed to be otherwise inaccessible, and"]
@@ -39406,6 +39951,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Removes a previously spawned pure proxy."]
@@ -39459,6 +40005,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Publish the hash of a proxy-call that will be made in the future."]
@@ -39503,6 +40050,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove a given announcement."]
@@ -39542,6 +40090,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Remove the given announcement of a delegate."]
@@ -39581,6 +40130,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Dispatch the given `call` from an account that the sender is authorized for through"]
@@ -39927,6 +40477,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proxy was executed correctly, with the given."]
@@ -39953,6 +40504,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pure account has been created by new proxy with given"]
@@ -39985,6 +40537,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An announcement was placed to make a call in the future."]
@@ -40014,6 +40567,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proxy was added."]
@@ -40045,6 +40599,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A proxy was removed."]
@@ -40323,9 +40878,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Allows an account to join as an operator by providing a stake."]
+				#[doc = "Allows an account to join as an operator by staking the required bond amount."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the account joining as operator"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `bond_amount` - Amount to stake as operator bond"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking"]
+				#[doc = "* [`Error::StakeOverflow`] - Bond amount would overflow stake tracking"]
 				pub struct JoinOperators {
 					pub bond_amount: join_operators::BondAmount,
 				}
@@ -40348,9 +40918,23 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Schedules an operator to leave."]
+				#[doc = "Schedules an operator to leave the system."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
 				pub struct ScheduleLeaveOperators;
 				impl ::subxt_core::blocks::StaticExtrinsic for ScheduleLeaveOperators {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40367,9 +40951,23 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancels a scheduled leave for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
 				pub struct CancelLeaveOperators;
 				impl ::subxt_core::blocks::StaticExtrinsic for CancelLeaveOperators {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40386,9 +40984,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Executes a scheduled leave for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
+				#[doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"]
 				pub struct ExecuteLeaveOperators;
 				impl ::subxt_core::blocks::StaticExtrinsic for ExecuteLeaveOperators {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40405,9 +41018,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allows an operator to increase their stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `additional_bond` - Additional amount to stake"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::StakeOverflow`] - Additional bond would overflow stake tracking"]
 				pub struct OperatorBondMore {
 					pub additional_bond: operator_bond_more::AdditionalBond,
 				}
@@ -40430,9 +41058,25 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedules an operator to decrease their stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `unstake_amount` - Amount to unstake"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
+				#[doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"]
 				pub struct ScheduleOperatorUnstake {
 					pub unstake_amount: schedule_operator_unstake::UnstakeAmount,
 				}
@@ -40455,9 +41099,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Executes a scheduled stake decrease for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
+				#[doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"]
 				pub struct ExecuteOperatorUnstake;
 				impl ::subxt_core::blocks::StaticExtrinsic for ExecuteOperatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40474,9 +41133,23 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancels a scheduled stake decrease for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
 				pub struct CancelOperatorUnstake;
 				impl ::subxt_core::blocks::StaticExtrinsic for CancelOperatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40493,9 +41166,23 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allows an operator to go offline."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::AlreadyOffline`] - Operator is already offline"]
 				pub struct GoOffline;
 				impl ::subxt_core::blocks::StaticExtrinsic for GoOffline {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40512,9 +41199,23 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allows an operator to go online."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::AlreadyOnline`] - Operator is already online"]
 				pub struct GoOnline;
 				impl ::subxt_core::blocks::StaticExtrinsic for GoOnline {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40531,9 +41232,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allows a user to deposit an asset."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the depositor account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `asset_id` - ID of the asset to deposit"]
+				#[doc = "* `amount` - Amount to deposit"]
+				#[doc = "* `evm_address` - Optional EVM address"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::DepositOverflow`] - Deposit would overflow tracking"]
+				#[doc = "* [`Error::InvalidAsset`] - Asset is not supported"]
 				pub struct Deposit {
 					pub asset_id: deposit::AssetId,
 					pub amount: deposit::Amount,
@@ -40561,9 +41279,25 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Schedules an withdraw request."]
+				#[doc = "Schedules a withdraw request."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the withdrawer account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `asset_id` - ID of the asset to withdraw"]
+				#[doc = "* `amount` - Amount to withdraw"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::InsufficientBalance`] - Insufficient balance to withdraw"]
+				#[doc = "* [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists"]
 				pub struct ScheduleWithdraw {
 					pub asset_id: schedule_withdraw::AssetId,
 					pub amount: schedule_withdraw::Amount,
@@ -40589,9 +41323,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Executes a scheduled withdraw request."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the withdrawer account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `evm_address` - Optional EVM address"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"]
+				#[doc = "* [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed"]
 				pub struct ExecuteWithdraw {
 					pub evm_address: execute_withdraw::EvmAddress,
 				}
@@ -40614,9 +41363,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancels a scheduled withdraw request."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the withdrawer account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `asset_id` - ID of the asset withdrawal to cancel"]
+				#[doc = "* `amount` - Amount of the withdrawal to cancel"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"]
 				pub struct CancelWithdraw {
 					pub asset_id: cancel_withdraw::AssetId,
 					pub amount: cancel_withdraw::Amount,
@@ -40642,9 +41406,28 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Allows a user to delegate an amount of an asset to an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `operator` - Operator to delegate to"]
+				#[doc = "* `asset_id` - ID of asset to delegate"]
+				#[doc = "* `amount` - Amount to delegate"]
+				#[doc = "* `blueprint_selection` - Blueprint selection strategy"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Target account is not an operator"]
+				#[doc = "* [`Error::InsufficientBalance`] - Insufficient balance to delegate"]
+				#[doc = "* [`Error::MaxDelegationsExceeded`] - Would exceed max delegations"]
 				pub struct Delegate {
 					pub operator: delegate::Operator,
 					pub asset_id: delegate::AssetId,
@@ -40674,9 +41457,27 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Schedules a request to reduce a delegator's stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `operator` - Operator to unstake from"]
+				#[doc = "* `asset_id` - ID of asset to unstake"]
+				#[doc = "* `amount` - Amount to unstake"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::InsufficientDelegation`] - Insufficient delegation to unstake"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists"]
 				pub struct ScheduleDelegatorUnstake {
 					pub operator: schedule_delegator_unstake::Operator,
 					pub asset_id: schedule_delegator_unstake::AssetId,
@@ -40704,9 +41505,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Executes a scheduled request to reduce a delegator's stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
+				#[doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed"]
 				pub struct ExecuteDelegatorUnstake;
 				impl ::subxt_core::blocks::StaticExtrinsic for ExecuteDelegatorUnstake {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -40723,9 +41539,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Cancels a scheduled request to reduce a delegator's stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `operator` - Operator to cancel unstake from"]
+				#[doc = "* `asset_id` - ID of asset unstake to cancel"]
+				#[doc = "* `amount` - Amount of unstake to cancel"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
 				pub struct CancelDelegatorUnstake {
 					pub operator: cancel_delegator_unstake::Operator,
 					pub asset_id: cancel_delegator_unstake::AssetId,
@@ -40753,14 +41586,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Sets the APY and cap for a specific asset."]
-				#[doc = "The APY is the annual percentage yield that the asset will earn."]
-				#[doc = "The cap is the amount of assets required to be deposited to distribute the entire APY."]
-				#[doc = "The APY is capped at 10% and will require runtime upgrade to change."]
 				#[doc = ""]
-				#[doc = "While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by the force origin"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `vault_id` - ID of the vault"]
+				#[doc = "* `apy` - Annual percentage yield (max 10%)"]
+				#[doc = "* `cap` - Required deposit amount for full APY"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum"]
+				#[doc = "* [`Error::CapCannotBeZero`] - Cap amount cannot be zero"]
 				pub struct SetIncentiveApyAndCap {
 					pub vault_id: set_incentive_apy_and_cap::VaultId,
 					pub apy: set_incentive_apy_and_cap::Apy,
@@ -40787,9 +41632,19 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Whitelists a blueprint for rewards."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by the force origin"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `blueprint_id` - ID of blueprint to whitelist"]
 				pub struct WhitelistBlueprintForRewards {
 					pub blueprint_id: whitelist_blueprint_for_rewards::BlueprintId,
 				}
@@ -40812,9 +41667,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Manage asset id to vault rewards"]
+				#[doc = "Manage asset id to vault rewards."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by an authorized account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `vault_id` - ID of the vault"]
+				#[doc = "* `asset_id` - ID of the asset"]
+				#[doc = "* `action` - Action to perform (Add/Remove)"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::AssetAlreadyInVault`] - Asset already exists in vault"]
+				#[doc = "* [`Error::AssetNotInVault`] - Asset does not exist in vault"]
 				pub struct ManageAssetInVault {
 					pub vault_id: manage_asset_in_vault::VaultId,
 					pub asset_id: manage_asset_in_vault::AssetId,
@@ -40843,9 +41715,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Adds a blueprint ID to a delegator's selection."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `blueprint_id` - ID of blueprint to add"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::DuplicateBlueprintId`] - Blueprint ID already exists"]
+				#[doc = "* [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints"]
+				#[doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"]
 				pub struct AddBlueprintId {
 					pub blueprint_id: add_blueprint_id::BlueprintId,
 				}
@@ -40868,9 +41757,25 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Removes a blueprint ID from a delegator's selection."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `blueprint_id` - ID of blueprint to remove"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::BlueprintIdNotFound`] - Blueprint ID not found"]
+				#[doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"]
 				pub struct RemoveBlueprintId {
 					pub blueprint_id: remove_blueprint_id::BlueprintId,
 				}
@@ -40885,7 +41790,21 @@ pub mod api {
 			}
 			pub struct TransactionApi;
 			impl TransactionApi {
-				#[doc = "Allows an account to join as an operator by providing a stake."]
+				#[doc = "Allows an account to join as an operator by staking the required bond amount."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the account joining as operator"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `bond_amount` - Amount to stake as operator bond"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking"]
+				#[doc = "* [`Error::StakeOverflow`] - Bond amount would overflow stake tracking"]
 				pub fn join_operators(
 					&self,
 					bond_amount: types::join_operators::BondAmount,
@@ -40902,7 +41821,20 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Schedules an operator to leave."]
+				#[doc = "Schedules an operator to leave the system."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
 				pub fn schedule_leave_operators(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::ScheduleLeaveOperators> {
@@ -40918,6 +41850,19 @@ pub mod api {
 					)
 				}
 				#[doc = "Cancels a scheduled leave for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
 				pub fn cancel_leave_operators(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::CancelLeaveOperators> {
@@ -40933,6 +41878,20 @@ pub mod api {
 					)
 				}
 				#[doc = "Executes a scheduled leave for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
+				#[doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"]
 				pub fn execute_leave_operators(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::ExecuteLeaveOperators> {
@@ -40949,6 +41908,20 @@ pub mod api {
 					)
 				}
 				#[doc = "Allows an operator to increase their stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `additional_bond` - Additional amount to stake"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::StakeOverflow`] - Additional bond would overflow stake tracking"]
 				pub fn operator_bond_more(
 					&self,
 					additional_bond: types::operator_bond_more::AdditionalBond,
@@ -40966,6 +41939,21 @@ pub mod api {
 					)
 				}
 				#[doc = "Schedules an operator to decrease their stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `unstake_amount` - Amount to unstake"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
+				#[doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"]
 				pub fn schedule_operator_unstake(
 					&self,
 					unstake_amount: types::schedule_operator_unstake::UnstakeAmount,
@@ -40982,6 +41970,20 @@ pub mod api {
 					)
 				}
 				#[doc = "Executes a scheduled stake decrease for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
+				#[doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"]
 				pub fn execute_operator_unstake(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::ExecuteOperatorUnstake> {
@@ -40997,6 +41999,19 @@ pub mod api {
 					)
 				}
 				#[doc = "Cancels a scheduled stake decrease for an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
 				pub fn cancel_operator_unstake(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::CancelOperatorUnstake> {
@@ -41012,6 +42027,19 @@ pub mod api {
 					)
 				}
 				#[doc = "Allows an operator to go offline."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::AlreadyOffline`] - Operator is already offline"]
 				pub fn go_offline(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::GoOffline> {
@@ -41028,6 +42056,19 @@ pub mod api {
 					)
 				}
 				#[doc = "Allows an operator to go online."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the operator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
+				#[doc = "* [`Error::AlreadyOnline`] - Operator is already online"]
 				pub fn go_online(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::GoOnline> {
@@ -41044,6 +42085,22 @@ pub mod api {
 					)
 				}
 				#[doc = "Allows a user to deposit an asset."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the depositor account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `asset_id` - ID of the asset to deposit"]
+				#[doc = "* `amount` - Amount to deposit"]
+				#[doc = "* `evm_address` - Optional EVM address"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::DepositOverflow`] - Deposit would overflow tracking"]
+				#[doc = "* [`Error::InvalidAsset`] - Asset is not supported"]
 				pub fn deposit(
 					&self,
 					asset_id: types::deposit::AssetId,
@@ -41062,7 +42119,22 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Schedules an withdraw request."]
+				#[doc = "Schedules a withdraw request."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the withdrawer account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `asset_id` - ID of the asset to withdraw"]
+				#[doc = "* `amount` - Amount to withdraw"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::InsufficientBalance`] - Insufficient balance to withdraw"]
+				#[doc = "* [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists"]
 				pub fn schedule_withdraw(
 					&self,
 					asset_id: types::schedule_withdraw::AssetId,
@@ -41080,6 +42152,20 @@ pub mod api {
 					)
 				}
 				#[doc = "Executes a scheduled withdraw request."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the withdrawer account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `evm_address` - Optional EVM address"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"]
+				#[doc = "* [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed"]
 				pub fn execute_withdraw(
 					&self,
 					evm_address: types::execute_withdraw::EvmAddress,
@@ -41096,6 +42182,20 @@ pub mod api {
 					)
 				}
 				#[doc = "Cancels a scheduled withdraw request."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the withdrawer account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `asset_id` - ID of the asset withdrawal to cancel"]
+				#[doc = "* `amount` - Amount of the withdrawal to cancel"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"]
 				pub fn cancel_withdraw(
 					&self,
 					asset_id: types::cancel_withdraw::AssetId,
@@ -41113,6 +42213,24 @@ pub mod api {
 					)
 				}
 				#[doc = "Allows a user to delegate an amount of an asset to an operator."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `operator` - Operator to delegate to"]
+				#[doc = "* `asset_id` - ID of asset to delegate"]
+				#[doc = "* `amount` - Amount to delegate"]
+				#[doc = "* `blueprint_selection` - Blueprint selection strategy"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotOperator`] - Target account is not an operator"]
+				#[doc = "* [`Error::InsufficientBalance`] - Insufficient balance to delegate"]
+				#[doc = "* [`Error::MaxDelegationsExceeded`] - Would exceed max delegations"]
 				pub fn delegate(
 					&self,
 					operator: types::delegate::Operator,
@@ -41133,6 +42251,23 @@ pub mod api {
 					)
 				}
 				#[doc = "Schedules a request to reduce a delegator's stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `operator` - Operator to unstake from"]
+				#[doc = "* `asset_id` - ID of asset to unstake"]
+				#[doc = "* `amount` - Amount to unstake"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::InsufficientDelegation`] - Insufficient delegation to unstake"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists"]
 				pub fn schedule_delegator_unstake(
 					&self,
 					operator: types::schedule_delegator_unstake::Operator,
@@ -41151,6 +42286,20 @@ pub mod api {
 					)
 				}
 				#[doc = "Executes a scheduled request to reduce a delegator's stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
+				#[doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed"]
 				pub fn execute_delegator_unstake(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::ExecuteDelegatorUnstake> {
@@ -41166,6 +42315,22 @@ pub mod api {
 					)
 				}
 				#[doc = "Cancels a scheduled request to reduce a delegator's stake."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `operator` - Operator to cancel unstake from"]
+				#[doc = "* `asset_id` - ID of asset unstake to cancel"]
+				#[doc = "* `amount` - Amount of unstake to cancel"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"]
 				pub fn cancel_delegator_unstake(
 					&self,
 					operator: types::cancel_delegator_unstake::Operator,
@@ -41185,11 +42350,22 @@ pub mod api {
 					)
 				}
 				#[doc = "Sets the APY and cap for a specific asset."]
-				#[doc = "The APY is the annual percentage yield that the asset will earn."]
-				#[doc = "The cap is the amount of assets required to be deposited to distribute the entire APY."]
-				#[doc = "The APY is capped at 10% and will require runtime upgrade to change."]
 				#[doc = ""]
-				#[doc = "While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by the force origin"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `vault_id` - ID of the vault"]
+				#[doc = "* `apy` - Annual percentage yield (max 10%)"]
+				#[doc = "* `cap` - Required deposit amount for full APY"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum"]
+				#[doc = "* [`Error::CapCannotBeZero`] - Cap amount cannot be zero"]
 				pub fn set_incentive_apy_and_cap(
 					&self,
 					vault_id: types::set_incentive_apy_and_cap::VaultId,
@@ -41209,6 +42385,15 @@ pub mod api {
 					)
 				}
 				#[doc = "Whitelists a blueprint for rewards."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by the force origin"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `blueprint_id` - ID of blueprint to whitelist"]
 				pub fn whitelist_blueprint_for_rewards(
 					&self,
 					blueprint_id: types::whitelist_blueprint_for_rewards::BlueprintId,
@@ -41226,7 +42411,23 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Manage asset id to vault rewards"]
+				#[doc = "Manage asset id to vault rewards."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by an authorized account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `vault_id` - ID of the vault"]
+				#[doc = "* `asset_id` - ID of the asset"]
+				#[doc = "* `action` - Action to perform (Add/Remove)"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::AssetAlreadyInVault`] - Asset already exists in vault"]
+				#[doc = "* [`Error::AssetNotInVault`] - Asset does not exist in vault"]
 				pub fn manage_asset_in_vault(
 					&self,
 					vault_id: types::manage_asset_in_vault::VaultId,
@@ -41245,6 +42446,22 @@ pub mod api {
 					)
 				}
 				#[doc = "Adds a blueprint ID to a delegator's selection."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `blueprint_id` - ID of blueprint to add"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::DuplicateBlueprintId`] - Blueprint ID already exists"]
+				#[doc = "* [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints"]
+				#[doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"]
 				pub fn add_blueprint_id(
 					&self,
 					blueprint_id: types::add_blueprint_id::BlueprintId,
@@ -41261,6 +42478,21 @@ pub mod api {
 					)
 				}
 				#[doc = "Removes a blueprint ID from a delegator's selection."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the delegator account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `blueprint_id` - ID of blueprint to remove"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotDelegator`] - Account is not a delegator"]
+				#[doc = "* [`Error::BlueprintIdNotFound`] - Blueprint ID not found"]
+				#[doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"]
 				pub fn remove_blueprint_id(
 					&self,
 					blueprint_id: types::remove_blueprint_id::BlueprintId,
@@ -41294,6 +42526,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has joined."]
@@ -41319,6 +42552,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has scheduled to leave."]
@@ -41344,6 +42578,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has cancelled their leave request."]
@@ -41369,6 +42604,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has executed their leave request."]
@@ -41394,6 +42630,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has increased their stake."]
@@ -41421,6 +42658,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has scheduled to decrease their stake."]
@@ -41448,6 +42686,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has executed their stake decrease."]
@@ -41473,6 +42712,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has cancelled their stake decrease request."]
@@ -41498,6 +42738,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has gone offline."]
@@ -41523,6 +42764,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has gone online."]
@@ -41548,6 +42790,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A deposit has been made."]
@@ -41578,6 +42821,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An withdraw has been scheduled."]
@@ -41608,6 +42852,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An withdraw has been executed."]
@@ -41633,6 +42878,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An withdraw has been cancelled."]
@@ -41658,6 +42904,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A delegation has been made."]
@@ -41690,6 +42937,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A delegator unstake request has been scheduled."]
@@ -41722,6 +42970,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A delegator unstake request has been executed."]
@@ -41747,6 +42996,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A delegator unstake request has been cancelled."]
@@ -41772,6 +43022,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Event emitted when an incentive APY and cap are set for a reward vault"]
@@ -41801,6 +43052,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Event emitted when a blueprint is whitelisted for rewards"]
@@ -41826,6 +43078,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Asset has been updated to reward vault"]
@@ -41859,6 +43112,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Operator has been slashed"]
@@ -41886,6 +43140,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Delegator has been slashed"]
@@ -41913,6 +43168,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "EVM execution reverted with a reason."]
@@ -42493,16 +43749,37 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create a new service blueprint."]
 				#[doc = ""]
-				#[doc = "A Service Blueprint is a template for a service that can be instantiated later on by a"]
-				#[doc = "user."]
+				#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The blueprint"]
+				#[doc = "defines the service's constraints, requirements and behavior, including the master blueprint service"]
+				#[doc = "manager revision to use."]
 				#[doc = ""]
-				#[doc = "# Parameters"]
-				#[doc = "- `origin`: The account that is creating the service blueprint."]
-				#[doc = "- `blueprint`: The blueprint of the service."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The origin must be signed by the account that will own the blueprint"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be signed by the account creating the blueprint"]
+				#[doc = "* `blueprint` - The service blueprint containing:"]
+				#[doc = "  - Service constraints and requirements"]
+				#[doc = "  - Master blueprint service manager revision (Latest or Specific)"]
+				#[doc = "  - Template configuration for service instantiation"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::BadOrigin`] - Origin is not signed"]
+				#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist"]
+				#[doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"]
+				#[doc = ""]
+				#[doc = "# Returns"]
+				#[doc = ""]
+				#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event"]
+				#[doc = "containing the owner and blueprint ID."]
 				pub struct CreateBlueprint {
 					pub blueprint: create_blueprint::Blueprint,
 				}
@@ -42526,17 +43803,39 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Pre-register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "The caller can pre-register for a blueprint, which will emit a `PreRegistration` event."]
-				#[doc = "This event can be listened to by the operator node to execute the custom blueprint's"]
-				#[doc = "registration function."]
+				#[doc = "This function allows an account to signal intent to become an operator for a blueprint by emitting"]
+				#[doc = "a `PreRegistration` event. The operator node can listen for this event to execute any custom"]
+				#[doc = "registration logic defined in the blueprint."]
 				#[doc = ""]
-				#[doc = "# Parameters"]
-				#[doc = "- `origin`: The account that is pre-registering for the service blueprint."]
-				#[doc = "- `blueprint_id`: The ID of the service blueprint."]
+				#[doc = "Pre-registration is the first step in the operator registration flow. After pre-registering,"]
+				#[doc = "operators must complete the full registration process by calling `register()` with their preferences"]
+				#[doc = "and registration arguments."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to"]
+				#[doc = "  become an operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer"]
+				#[doc = "  to an existing blueprint."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The caller must be a signed account."]
+				#[doc = ""]
+				#[doc = "# Events"]
+				#[doc = ""]
+				#[doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"]
+				#[doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"]
+				#[doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::BadOrigin`] - The origin was not signed."]
 				pub struct PreRegister {
 					#[codec(compact)]
 					pub blueprint_id: pre_register::BlueprintId,
@@ -42560,12 +43859,36 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "The caller may require an approval first before they can accept to provide the service"]
-				#[doc = "for the users."]
+				#[doc = "This function allows an account to register as an operator for a blueprint by providing their"]
+				#[doc = "service preferences, registration arguments, and staking the required tokens. The operator must"]
+				#[doc = "be active in the delegation system and may require approval before accepting service requests."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The caller must be a signed account"]
+				#[doc = "* The caller must be an active operator in the delegation system"]
+				#[doc = "* The caller must not already be registered for this blueprint"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed."]
+				#[doc = "* `blueprint_id` - The identifier of the service blueprint to register for"]
+				#[doc = "* `preferences` - The operator's service preferences and configuration"]
+				#[doc = "* `registration_args` - Registration arguments required by the blueprint"]
+				#[doc = "* `value` - Amount of tokens to stake for registration"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system"]
+				#[doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"]
+				#[doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"]
+				#[doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"]
+				#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit"]
 				pub struct Register {
 					#[codec(compact)]
 					pub blueprint_id: register::BlueprintId,
@@ -42601,13 +43924,28 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Unregister the caller from being an operator for the service blueprint"]
-				#[doc = "so that, no more services will assigned to the caller for this specific blueprint."]
-				#[doc = "Note that, the caller needs to keep providing service for other active service"]
-				#[doc = "that uses this blueprint, until the end of service time, otherwise they may get reported"]
-				#[doc = "and slashed."]
+				#[doc = "Unregisters a service provider from a specific service blueprint."]
+				#[doc = ""]
+				#[doc = "After unregistering, the provider will no longer receive new service assignments for this blueprint."]
+				#[doc = "However, they must continue servicing any active assignments until completion to avoid penalties."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed."]
+				#[doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by a registered service provider"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"]
+				#[doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"]
 				pub struct Unregister {
 					#[codec(compact)]
 					pub blueprint_id: unregister::BlueprintId,
@@ -42631,11 +43969,29 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Update the price targets for the caller for a specific service blueprint."]
+				#[doc = "Updates the price targets for a registered operator's service blueprint."]
 				#[doc = ""]
-				#[doc = "See [`Self::register`] for more information."]
+				#[doc = "Allows an operator to modify their price targets for a specific blueprint they are registered for."]
+				#[doc = "The operator must already be registered for the blueprint to update prices."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update price targets for."]
+				#[doc = "* `price_targets: PriceTargets` - The new price targets to set for the blueprint."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by a registered operator for this blueprint."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
+				#[doc = "* [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
 				pub struct UpdatePriceTargets {
 					#[codec(compact)]
 					pub blueprint_id: update_price_targets::BlueprintId,
@@ -42662,11 +44018,37 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Request a new service to be initiated using the provided blueprint with a list of"]
-				#[doc = "operators that will run your service. Optionally, you can customize who is permitted"]
-				#[doc = "caller of this service, by default only the caller is allowed to call the service."]
+				#[doc = "Request a new service using a blueprint and specified operators."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."]
+				#[doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."]
+				#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call."]
+				#[doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."]
+				#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments."]
+				#[doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."]
+				#[doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."]
+				#[doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."]
+				#[doc = "* `value: BalanceOf<T>` - Payment amount for the service."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by an account with sufficient balance to pay for the service."]
+				#[doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."]
+				#[doc = "* [`Error::NoAssetsProvided`] - No assets were specified."]
+				#[doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."]
+				#[doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."]
+				#[doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
 				pub struct Request {
 					pub evm_origin: request::EvmOrigin,
 					#[codec(compact)]
@@ -42715,12 +44097,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Approve a service request, so that the service can be initiated."]
+				#[doc = "Approve a service request, allowing it to be initiated once all required approvals are received."]
 				#[doc = ""]
-				#[doc = "The `restaking_percent` is the percentage of the restaked tokens that will be exposed to"]
-				#[doc = "the service."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be a registered operator for the service blueprint"]
+				#[doc = "* Caller must be in the pending approvals list for this request"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be a signed account"]
+				#[doc = "* `request_id` - The ID of the service request to approve"]
+				#[doc = "* `restaking_percent` - Percentage of staked tokens to expose to this service (0-100)"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"]
+				#[doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"]
 				pub struct Approve {
 					#[codec(compact)]
 					pub request_id: approve::RequestId,
@@ -42747,11 +44143,29 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Reject a service request."]
-				#[doc = "The service will not be initiated, and the requester will need to update the service"]
-				#[doc = "request."]
+				#[doc = "Reject a service request, preventing its initiation."]
+				#[doc = ""]
+				#[doc = "The service request will remain in the system but marked as rejected. The requester will"]
+				#[doc = "need to update the service request to proceed."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be a registered operator for the blueprint associated with this request"]
+				#[doc = "* Caller must be one of the operators required to approve this request"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be a signed account"]
+				#[doc = "* `request_id` - The ID of the service request to reject"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request"]
+				#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment"]
+				#[doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"]
 				pub struct Reject {
 					#[codec(compact)]
 					pub request_id: reject::RequestId,
@@ -42775,9 +44189,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Terminates the service by the owner of the service."]
+				#[doc = "Terminates a running service instance."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the service owner"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `service_id` - The identifier of the service to terminate"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+				#[doc = "* [`Error::NotRegistered`] - Service operator not registered"]
+				#[doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"]
 				pub struct Terminate {
 					#[codec(compact)]
 					pub service_id: terminate::ServiceId,
@@ -42801,10 +44232,30 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Call a Job in the service."]
-				#[doc = "The caller needs to be the owner of the service, or a permitted caller."]
+				#[doc = "Call a job in the service with the provided arguments."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the service owner or a permitted caller"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `service_id` - The service identifier"]
+				#[doc = "* `job` - The job index to call"]
+				#[doc = "* `args` - The arguments to pass to the job"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+				#[doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"]
+				#[doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"]
+				#[doc = "* [`Error::TypeCheck`] - Arguments fail type checking"]
+				#[doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"]
 				pub struct Call {
 					#[codec(compact)]
 					pub service_id: call::ServiceId,
@@ -42837,9 +44288,30 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Submit the job result by using the service ID and call ID."]
+				#[doc = "Submit a result for a previously called job."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `service_id` - ID of the service"]
+				#[doc = "* `call_id` - ID of the job call"]
+				#[doc = "* `result` - Vector of result fields"]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be an operator of the service"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+				#[doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"]
+				#[doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"]
+				#[doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"]
+				#[doc = "* [`Error::TypeCheck`] - Result fields fail type checking"]
+				#[doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"]
 				pub struct SubmitResult {
 					#[codec(compact)]
 					pub service_id: submit_result::ServiceId,
@@ -42872,14 +44344,33 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed"]
-				#[doc = "stake for that service."]
+				#[doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Slash Origin for this service."]
-				#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call"]
-				#[doc = "to apply the slash by another entity."]
+				#[doc = "This function schedules a deferred slashing action against an operator's stake for a specific service."]
+				#[doc = "The slash is not applied immediately, but rather queued to be executed by another entity later."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"]
+				#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call"]
+				#[doc = "  will fail."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."]
+				#[doc = "* `offender` - The account ID of the operator to be slashed."]
+				#[doc = "* `service_id` - The ID of the service for which to slash the operator."]
+				#[doc = "* `percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"]
+				#[doc = "* `BadOrigin` - Caller is not the authorized slashing origin"]
+				#[doc = "* `OffenderNotOperator` - Target account is not an operator for this service"]
+				#[doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"]
 				pub struct Slash {
 					pub offender: slash::Offender,
 					#[codec(compact)]
@@ -42908,12 +44399,28 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Dispute an [UnappliedSlash] for a given era and index."]
+				#[doc = "Disputes and removes an [UnappliedSlash] from storage."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Dispute Origin for the service in the"]
-				#[doc = "[UnappliedSlash]."]
+				#[doc = "The slash will not be applied once disputed and is permanently removed."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be the authorized dispute origin for the service"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `era` - Era containing the slash to dispute  "]
+				#[doc = "* `index` - Index of the slash within the era"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"]
+				#[doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"]
+				#[doc = ""]
 				pub struct Dispute {
 					#[codec(compact)]
 					pub era: dispute::Era,
@@ -42940,11 +44447,23 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Adds a new Master Blueprint Service Manager to the list of revisions."]
+				#[doc = "Updates the Master Blueprint Service Manager by adding a new revision."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Master Blueprint Service Manager Update Origin."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `address` - New manager address to add"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached"]
 				pub struct UpdateMasterBlueprintServiceManager {
 					pub address: update_master_blueprint_service_manager::Address,
 				}
@@ -42961,12 +44480,32 @@ pub mod api {
 			impl TransactionApi {
 				#[doc = "Create a new service blueprint."]
 				#[doc = ""]
-				#[doc = "A Service Blueprint is a template for a service that can be instantiated later on by a"]
-				#[doc = "user."]
+				#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The blueprint"]
+				#[doc = "defines the service's constraints, requirements and behavior, including the master blueprint service"]
+				#[doc = "manager revision to use."]
 				#[doc = ""]
-				#[doc = "# Parameters"]
-				#[doc = "- `origin`: The account that is creating the service blueprint."]
-				#[doc = "- `blueprint`: The blueprint of the service."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The origin must be signed by the account that will own the blueprint"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be signed by the account creating the blueprint"]
+				#[doc = "* `blueprint` - The service blueprint containing:"]
+				#[doc = "  - Service constraints and requirements"]
+				#[doc = "  - Master blueprint service manager revision (Latest or Specific)"]
+				#[doc = "  - Template configuration for service instantiation"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::BadOrigin`] - Origin is not signed"]
+				#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist"]
+				#[doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"]
+				#[doc = ""]
+				#[doc = "# Returns"]
+				#[doc = ""]
+				#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event"]
+				#[doc = "containing the owner and blueprint ID."]
 				pub fn create_blueprint(
 					&self,
 					blueprint: types::create_blueprint::Blueprint,
@@ -42985,13 +44524,34 @@ pub mod api {
 				}
 				#[doc = "Pre-register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "The caller can pre-register for a blueprint, which will emit a `PreRegistration` event."]
-				#[doc = "This event can be listened to by the operator node to execute the custom blueprint's"]
-				#[doc = "registration function."]
+				#[doc = "This function allows an account to signal intent to become an operator for a blueprint by emitting"]
+				#[doc = "a `PreRegistration` event. The operator node can listen for this event to execute any custom"]
+				#[doc = "registration logic defined in the blueprint."]
 				#[doc = ""]
-				#[doc = "# Parameters"]
-				#[doc = "- `origin`: The account that is pre-registering for the service blueprint."]
-				#[doc = "- `blueprint_id`: The ID of the service blueprint."]
+				#[doc = "Pre-registration is the first step in the operator registration flow. After pre-registering,"]
+				#[doc = "operators must complete the full registration process by calling `register()` with their preferences"]
+				#[doc = "and registration arguments."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to"]
+				#[doc = "  become an operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer"]
+				#[doc = "  to an existing blueprint."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The caller must be a signed account."]
+				#[doc = ""]
+				#[doc = "# Events"]
+				#[doc = ""]
+				#[doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"]
+				#[doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"]
+				#[doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::BadOrigin`] - The origin was not signed."]
 				pub fn pre_register(
 					&self,
 					blueprint_id: types::pre_register::BlueprintId,
@@ -43009,8 +44569,31 @@ pub mod api {
 				}
 				#[doc = "Register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "The caller may require an approval first before they can accept to provide the service"]
-				#[doc = "for the users."]
+				#[doc = "This function allows an account to register as an operator for a blueprint by providing their"]
+				#[doc = "service preferences, registration arguments, and staking the required tokens. The operator must"]
+				#[doc = "be active in the delegation system and may require approval before accepting service requests."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The caller must be a signed account"]
+				#[doc = "* The caller must be an active operator in the delegation system"]
+				#[doc = "* The caller must not already be registered for this blueprint"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed."]
+				#[doc = "* `blueprint_id` - The identifier of the service blueprint to register for"]
+				#[doc = "* `preferences` - The operator's service preferences and configuration"]
+				#[doc = "* `registration_args` - Registration arguments required by the blueprint"]
+				#[doc = "* `value` - Amount of tokens to stake for registration"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system"]
+				#[doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"]
+				#[doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"]
+				#[doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"]
+				#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit"]
 				pub fn register(
 					&self,
 					blueprint_id: types::register::BlueprintId,
@@ -43029,11 +44612,25 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Unregister the caller from being an operator for the service blueprint"]
-				#[doc = "so that, no more services will assigned to the caller for this specific blueprint."]
-				#[doc = "Note that, the caller needs to keep providing service for other active service"]
-				#[doc = "that uses this blueprint, until the end of service time, otherwise they may get reported"]
-				#[doc = "and slashed."]
+				#[doc = "Unregisters a service provider from a specific service blueprint."]
+				#[doc = ""]
+				#[doc = "After unregistering, the provider will no longer receive new service assignments for this blueprint."]
+				#[doc = "However, they must continue servicing any active assignments until completion to avoid penalties."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed."]
+				#[doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by a registered service provider"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"]
+				#[doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"]
 				pub fn unregister(
 					&self,
 					blueprint_id: types::unregister::BlueprintId,
@@ -43049,9 +44646,26 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Update the price targets for the caller for a specific service blueprint."]
+				#[doc = "Updates the price targets for a registered operator's service blueprint."]
 				#[doc = ""]
-				#[doc = "See [`Self::register`] for more information."]
+				#[doc = "Allows an operator to modify their price targets for a specific blueprint they are registered for."]
+				#[doc = "The operator must already be registered for the blueprint to update prices."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update price targets for."]
+				#[doc = "* `price_targets: PriceTargets` - The new price targets to set for the blueprint."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by a registered operator for this blueprint."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
+				#[doc = "* [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
 				pub fn update_price_targets(
 					&self,
 					blueprint_id: types::update_price_targets::BlueprintId,
@@ -43069,9 +44683,34 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Request a new service to be initiated using the provided blueprint with a list of"]
-				#[doc = "operators that will run your service. Optionally, you can customize who is permitted"]
-				#[doc = "caller of this service, by default only the caller is allowed to call the service."]
+				#[doc = "Request a new service using a blueprint and specified operators."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."]
+				#[doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."]
+				#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call."]
+				#[doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."]
+				#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments."]
+				#[doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."]
+				#[doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."]
+				#[doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."]
+				#[doc = "* `value: BalanceOf<T>` - Payment amount for the service."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by an account with sufficient balance to pay for the service."]
+				#[doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."]
+				#[doc = "* [`Error::NoAssetsProvided`] - No assets were specified."]
+				#[doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."]
+				#[doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."]
+				#[doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
 				pub fn request(
 					&self,
 					evm_origin: types::request::EvmOrigin,
@@ -43106,10 +44745,23 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Approve a service request, so that the service can be initiated."]
+				#[doc = "Approve a service request, allowing it to be initiated once all required approvals are received."]
 				#[doc = ""]
-				#[doc = "The `restaking_percent` is the percentage of the restaked tokens that will be exposed to"]
-				#[doc = "the service."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be a registered operator for the service blueprint"]
+				#[doc = "* Caller must be in the pending approvals list for this request"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be a signed account"]
+				#[doc = "* `request_id` - The ID of the service request to approve"]
+				#[doc = "* `restaking_percent` - Percentage of staked tokens to expose to this service (0-100)"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"]
+				#[doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"]
 				pub fn approve(
 					&self,
 					request_id: types::approve::RequestId,
@@ -43126,9 +44778,26 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Reject a service request."]
-				#[doc = "The service will not be initiated, and the requester will need to update the service"]
-				#[doc = "request."]
+				#[doc = "Reject a service request, preventing its initiation."]
+				#[doc = ""]
+				#[doc = "The service request will remain in the system but marked as rejected. The requester will"]
+				#[doc = "need to update the service request to proceed."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be a registered operator for the blueprint associated with this request"]
+				#[doc = "* Caller must be one of the operators required to approve this request"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be a signed account"]
+				#[doc = "* `request_id` - The ID of the service request to reject"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request"]
+				#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment"]
+				#[doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"]
 				pub fn reject(
 					&self,
 					request_id: types::reject::RequestId,
@@ -43145,7 +44814,23 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Terminates the service by the owner of the service."]
+				#[doc = "Terminates a running service instance."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the service owner"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `service_id` - The identifier of the service to terminate"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+				#[doc = "* [`Error::NotRegistered`] - Service operator not registered"]
+				#[doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"]
 				pub fn terminate(
 					&self,
 					service_id: types::terminate::ServiceId,
@@ -43161,8 +44846,27 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Call a Job in the service."]
-				#[doc = "The caller needs to be the owner of the service, or a permitted caller."]
+				#[doc = "Call a job in the service with the provided arguments."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the service owner or a permitted caller"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `service_id` - The service identifier"]
+				#[doc = "* `job` - The job index to call"]
+				#[doc = "* `args` - The arguments to pass to the job"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+				#[doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"]
+				#[doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"]
+				#[doc = "* [`Error::TypeCheck`] - Arguments fail type checking"]
+				#[doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"]
 				pub fn call(
 					&self,
 					service_id: types::call::ServiceId,
@@ -43181,7 +44885,27 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Submit the job result by using the service ID and call ID."]
+				#[doc = "Submit a result for a previously called job."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `service_id` - ID of the service"]
+				#[doc = "* `call_id` - ID of the job call"]
+				#[doc = "* `result` - Vector of result fields"]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be an operator of the service"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+				#[doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"]
+				#[doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"]
+				#[doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"]
+				#[doc = "* [`Error::TypeCheck`] - Result fields fail type checking"]
+				#[doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"]
 				pub fn submit_result(
 					&self,
 					service_id: types::submit_result::ServiceId,
@@ -43200,12 +44924,30 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed"]
-				#[doc = "stake for that service."]
+				#[doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Slash Origin for this service."]
-				#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call"]
-				#[doc = "to apply the slash by another entity."]
+				#[doc = "This function schedules a deferred slashing action against an operator's stake for a specific service."]
+				#[doc = "The slash is not applied immediately, but rather queued to be executed by another entity later."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"]
+				#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call"]
+				#[doc = "  will fail."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."]
+				#[doc = "* `offender` - The account ID of the operator to be slashed."]
+				#[doc = "* `service_id` - The ID of the service for which to slash the operator."]
+				#[doc = "* `percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"]
+				#[doc = "* `BadOrigin` - Caller is not the authorized slashing origin"]
+				#[doc = "* `OffenderNotOperator` - Target account is not an operator for this service"]
+				#[doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"]
 				pub fn slash(
 					&self,
 					offender: types::slash::Offender,
@@ -43223,10 +44965,25 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Dispute an [UnappliedSlash] for a given era and index."]
+				#[doc = "Disputes and removes an [UnappliedSlash] from storage."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Dispute Origin for the service in the"]
-				#[doc = "[UnappliedSlash]."]
+				#[doc = "The slash will not be applied once disputed and is permanently removed."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be the authorized dispute origin for the service"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `era` - Era containing the slash to dispute  "]
+				#[doc = "* `index` - Index of the slash within the era"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"]
+				#[doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"]
+				#[doc = ""]
 				pub fn dispute(
 					&self,
 					era: types::dispute::Era,
@@ -43243,9 +45000,20 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Adds a new Master Blueprint Service Manager to the list of revisions."]
+				#[doc = "Updates the Master Blueprint Service Manager by adding a new revision."]
 				#[doc = ""]
-				#[doc = "The caller needs to be an authorized Master Blueprint Service Manager Update Origin."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `address` - New manager address to add"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached"]
 				pub fn update_master_blueprint_service_manager(
 					&self,
 					address: types::update_master_blueprint_service_manager::Address,
@@ -43281,6 +45049,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new service blueprint has been created."]
@@ -43308,6 +45077,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has pre-registered for a service blueprint."]
@@ -43335,6 +45105,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An new operator has been registered."]
@@ -43371,6 +45142,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An operator has been unregistered."]
@@ -43398,6 +45170,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The price targets for an operator has been updated."]
@@ -43427,6 +45200,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A new service has been requested."]
@@ -43463,6 +45237,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A service request has been approved."]
@@ -43497,6 +45272,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A service request has been rejected."]
@@ -43526,6 +45302,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A service has been initiated."]
@@ -43559,6 +45336,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A service has been terminated."]
@@ -43588,6 +45366,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A job has been called."]
@@ -43625,6 +45404,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A job result has been submitted."]
@@ -43662,6 +45442,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "EVM execution reverted with a reason."]
@@ -43693,6 +45474,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An Operator has an unapplied slash."]
@@ -43728,6 +45510,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "An Unapplied Slash got discarded."]
@@ -43763,6 +45546,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The Master Blueprint Service Manager has been revised."]
@@ -45003,16 +46787,31 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Stake funds with a pool. The amount to bond is transferred from the member to the"]
-				#[doc = "pools account and immediately increases the pools bond."]
+				#[doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `amount` - Amount to stake"]
+				#[doc = "* `pool_id` - Target pool ID"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::DefensiveError`] - Reward pool not found"]
 				#[doc = ""]
 				#[doc = "# Note"]
 				#[doc = ""]
-				#[doc = "* This call will *not* dust the member account, so the member must have at least"]
-				#[doc = "  `existential deposit + amount` in their account."]
-				#[doc = "* Only a pool with [`PoolState::Open`] can be joined"]
+				#[doc = "* Member must have `existential deposit + amount` in account"]
+				#[doc = "* Pool must be in [`PoolState::Open`] state"]
 				pub struct Join {
 					#[codec(compact)]
 					pub amount: join::Amount,
@@ -45038,15 +46837,36 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Bond `extra` more funds from `origin` into the pool to which they already belong."]
+				#[doc = "Bond additional funds into an existing pool position."]
 				#[doc = ""]
-				#[doc = "Additional funds can come from either the free balance of the account, of from the"]
-				#[doc = "accumulated rewards, see [`BondExtra`]."]
+				#[doc = "Additional funds can come from either free balance or accumulated rewards."]
+				#[doc = "Automatically pays out all pending rewards."]
 				#[doc = ""]
-				#[doc = "Bonding extra funds implies an automatic payout of all pending rewards as well."]
-				#[doc = "See `bond_extra_other` to bond pending rewards of `other` members."]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Target pool ID"]
+				#[doc = "* `extra` - Source and amount of additional funds"]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed"]
+				#[doc = "* Must have permission to bond extra if not self"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"]
+				#[doc = "* [`Error::DefensiveError`] - Reward pool not found"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "* This transaction prioritizes readability and correctness over optimization"]
+				#[doc = "* Multiple storage reads/writes are performed to reuse code"]
+				#[doc = "* See `bond_extra_other` to bond pending rewards of other members"]
 				pub struct BondExtra {
 					pub pool_id: bond_extra::PoolId,
 					pub extra: bond_extra::Extra,
@@ -45072,39 +46892,38 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Unbond up to `unbonding_points` of the `member_account`'s funds from the pool. It"]
-				#[doc = "implicitly collects the rewards one last time, since not doing so would mean some"]
-				#[doc = "rewards would be forfeited."]
+				#[doc = "Unbond points from a member's pool position, collecting any pending rewards."]
 				#[doc = ""]
-				#[doc = "Under certain conditions, this call can be dispatched permissionlessly (i.e. by any"]
-				#[doc = "account)."]
+				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "# Conditions for a permissionless dispatch."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `member_account` - Account to unbond from"]
+				#[doc = "* `pool_id` - Target pool ID"]
+				#[doc = "* `unbonding_points` - Amount of points to unbond"]
 				#[doc = ""]
-				#[doc = "* The pool is blocked and the caller is either the root or bouncer. This is refereed to"]
-				#[doc = "  as a kick."]
-				#[doc = "* The pool is destroying and the member is not the depositor."]
-				#[doc = "* The pool is destroying, the member is the depositor and no other members are in the"]
-				#[doc = "  pool."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "## Conditions for permissioned dispatch (i.e. the caller is also the"]
-				#[doc = "`member_account`):"]
+				#[doc = "* Permissionless if:"]
+				#[doc = "  - Pool is blocked and caller is root/bouncer (kick)"]
+				#[doc = "  - Pool is destroying and member is not depositor"]
+				#[doc = "  - Pool is destroying, member is depositor, and pool is empty"]
+				#[doc = "* Permissioned (caller must be member) if:"]
+				#[doc = "  - Caller is not depositor"]
+				#[doc = "  - Caller is depositor, pool is destroying, and pool is empty"]
 				#[doc = ""]
-				#[doc = "* The caller is not the depositor."]
-				#[doc = "* The caller is the depositor, the pool is destroying and no other members are in the"]
-				#[doc = "  pool."]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"]
+				#[doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"]
 				#[doc = ""]
 				#[doc = "# Note"]
-				#[doc = ""]
-				#[doc = "If there are too many unlocking chunks to unbond with the pool account,"]
-				#[doc = "[`Call::pool_withdraw_unbonded`] can be called to try and minimize unlocking chunks."]
-				#[doc = "The [`StakingInterface::unbond`] will implicitly call [`Call::pool_withdraw_unbonded`]"]
-				#[doc = "to try to free chunks if necessary (ie. if unbound was called and no unlocking chunks"]
-				#[doc = "are available). However, it may not be possible to release the current unlocking chunks,"]
-				#[doc = "in which case, the result of this call will likely be the `NoMoreChunks` error from the"]
-				#[doc = "staking system."]
+				#[doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."]
+				#[doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"]
+				#[doc = "if chunks cannot be released."]
 				pub struct Unbond {
 					pub member_account: unbond::MemberAccount,
 					pub pool_id: unbond::PoolId,
@@ -45135,14 +46954,28 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Call `withdraw_unbonded` for the pools account. This call can be made by any account."]
+				#[doc = "Withdraws unbonded funds from the pool's staking account."]
 				#[doc = ""]
-				#[doc = "This is useful if there are too many unlocking chunks to call `unbond`, and some"]
-				#[doc = "can be cleared by withdrawing. In the case there are too many unlocking chunks, the user"]
-				#[doc = "would probably see an error like `NoMoreChunks` emitted from the staking system when"]
-				#[doc = "they attempt to unbond."]
+				#[doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."]
+				#[doc = "Prevents `NoMoreChunks` errors from the staking system."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Can be signed by any account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `num_slashing_spans` - Number of slashing spans to check"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NotDestroying`] - Pool is in destroying state"]
 				pub struct PoolWithdrawUnbonded {
 					pub pool_id: pool_withdraw_unbonded::PoolId,
 					pub num_slashing_spans: pool_withdraw_unbonded::NumSlashingSpans,
@@ -45167,27 +47000,34 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Withdraw unbonded funds from `member_account`. If no bonded funds can be unbonded, an"]
-				#[doc = "error is returned."]
+				#[doc = "Withdraw unbonded funds from a member account."]
 				#[doc = ""]
-				#[doc = "Under certain conditions, this call can be dispatched permissionlessly (i.e. by any"]
-				#[doc = "account)."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "# Conditions for a permissionless dispatch"]
+				#[doc = "* Permissionless if:"]
+				#[doc = "  - Pool is in destroy mode and target is not depositor"]
+				#[doc = "  - Target is depositor and only member in sub pools"]
+				#[doc = "  - Pool is blocked and caller is root/bouncer"]
+				#[doc = "* Permissioned if caller is target and not depositor"]
 				#[doc = ""]
-				#[doc = "* The pool is in destroy mode and the target is not the depositor."]
-				#[doc = "* The target is the depositor and they are the only member in the sub pools."]
-				#[doc = "* The pool is blocked and the caller is either the root or bouncer."]
+				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "# Conditions for permissioned dispatch"]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `member_account` - Account to withdraw from"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `num_slashing_spans` - Number of slashing spans"]
 				#[doc = ""]
-				#[doc = "* The caller is the target and they are not the depositor."]
+				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "# Note"]
+				#[doc = "* [`Error::PoolMemberNotFound`] - Member account not found"]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"]
+				#[doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"]
 				#[doc = ""]
-				#[doc = "If the target is the depositor, the pool will be destroyed."]
+				#[doc = "If target is depositor, pool will be destroyed."]
 				pub struct WithdrawUnbonded {
 					pub member_account: withdraw_unbonded::MemberAccount,
 					pub pool_id: withdraw_unbonded::PoolId,
@@ -45217,25 +47057,32 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create a new delegation pool."]
 				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the account that will become the initial depositor"]
+				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `amount` - The amount of funds to delegate to the pool. This also acts of a sort of"]
-				#[doc = "  deposit since the pools creator cannot fully unbond funds until the pool is being"]
-				#[doc = "  destroyed."]
-				#[doc = "* `index` - A disambiguation index for creating the account. Likely only useful when"]
-				#[doc = "  creating multiple pools in the same extrinsic."]
-				#[doc = "* `root` - The account to set as [`PoolRoles::root`]."]
-				#[doc = "* `nominator` - The account to set as the [`PoolRoles::nominator`]."]
-				#[doc = "* `bouncer` - The account to set as the [`PoolRoles::bouncer`]."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `amount` - Amount to delegate to the pool"]
+				#[doc = "* `root` - Account to set as pool root"]
+				#[doc = "* `nominator` - Account to set as pool nominator"]
+				#[doc = "* `bouncer` - Account to set as pool bouncer"]
+				#[doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"]
+				#[doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"]
 				#[doc = ""]
 				#[doc = "# Note"]
 				#[doc = ""]
-				#[doc = "In addition to `amount`, the caller will transfer the existential deposit; so the caller"]
-				#[doc = "needs at have at least `amount + existential_deposit` transferable."]
+				#[doc = "Caller must have `amount + existential_deposit` transferable funds."]
 				pub struct Create {
 					#[codec(compact)]
 					pub amount: create::Amount,
@@ -45286,14 +47133,34 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Create a new delegation pool with a previously used pool id"]
+				#[doc = "Create a new delegation pool with a previously used pool ID."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the account that will become the depositor"]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "same as `create` with the inclusion of"]
-				#[doc = "* `pool_id` - `A valid PoolId."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `amount` - Amount to delegate to the pool"]
+				#[doc = "* `root` - Account to set as pool root"]
+				#[doc = "* `nominator` - Account to set as pool nominator"]
+				#[doc = "* `bouncer` - Account to set as pool bouncer"]
+				#[doc = "* `pool_id` - Pool ID to reuse"]
+				#[doc = "* `name` - Optional pool name"]
+				#[doc = "* `icon` - Optional pool icon"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"]
+				#[doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "Caller must have `amount + existential_deposit` transferable funds."]
 				pub struct CreateWithPoolId {
 					#[codec(compact)]
 					pub amount: create_with_pool_id::Amount,
@@ -45346,15 +47213,29 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Nominate on behalf of the pool."]
+				#[doc = "Nominate validators on behalf of the pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the pool nominator or the pool"]
-				#[doc = "root role."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "This directly forward the call to the staking pallet, on behalf of the pool bonded"]
-				#[doc = "account."]
+				#[doc = "* Pool nominator or root role can nominate validators"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `validators` - List of validator accounts to nominate"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "Forwards nomination call to staking pallet using pool's bonded account."]
 				pub struct Nominate {
 					pub pool_id: nominate::PoolId,
 					pub validators: nominate::Validators,
@@ -45380,18 +47261,32 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Set a new state for the pool."]
+				#[doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"]
+				#[doc = "changed again under any circumstances."]
 				#[doc = ""]
-				#[doc = "If a pool is already in the `Destroying` state, then under no condition can its state"]
-				#[doc = "change again."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be either:"]
+				#[doc = "* Pool bouncer or root role can set any state"]
+				#[doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"]
 				#[doc = ""]
-				#[doc = "1. signed by the bouncer, or the root role of the pool,"]
-				#[doc = "2. if the pool conditions to be open are NOT met (as described by `ok_to_be_open`), and"]
-				#[doc = "   then the state of the pool can be permissionlessly changed to `Destroying`."]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `state` - New state to set"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"]
+				#[doc = "commission, member count and roles."]
 				pub struct SetState {
 					pub pool_id: set_state::PoolId,
 					pub state: set_state::State,
@@ -45416,12 +47311,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Set a new metadata for the pool."]
+				#[doc = "Updates the metadata for a given pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the bouncer, or the root role of the"]
-				#[doc = "pool."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by the pool bouncer or root role"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `metadata` - New metadata to set"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"]
 				pub struct SetMetadata {
 					pub pool_id: set_metadata::PoolId,
 					pub metadata: set_metadata::Metadata,
@@ -45446,19 +47355,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Update configurations for the nomination pools. The origin for this call must be"]
-				#[doc = "Root."]
+				#[doc = "Updates the global configuration parameters for nomination pools."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by Root"]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `min_join_bond` - Set [`MinJoinBond`]."]
-				#[doc = "* `min_create_bond` - Set [`MinCreateBond`]."]
-				#[doc = "* `max_pools` - Set [`MaxPools`]."]
-				#[doc = "* `max_members` - Set [`MaxPoolMembers`]."]
-				#[doc = "* `max_members_per_pool` - Set [`MaxPoolMembersPerPool`]."]
-				#[doc = "* `global_max_commission` - Set [`GlobalMaxCommission`]."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"]
+				#[doc = "* `min_create_bond` - Config operation for minimum bond to create a pool  "]
+				#[doc = "* `max_pools` - Config operation for maximum number of pools"]
+				#[doc = "* `global_max_commission` - Config operation for maximum global commission"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"]
 				pub struct SetConfigs {
 					pub min_join_bond: set_configs::MinJoinBond,
 					pub min_create_bond: set_configs::MinCreateBond,
@@ -45493,15 +47409,30 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Update the roles of the pool."]
+				#[doc = "Update the roles of a pool."]
 				#[doc = ""]
-				#[doc = "The root is the only entity that can change any of the roles, including itself,"]
-				#[doc = "excluding the depositor, who can never change."]
+				#[doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."]
+				#[doc = "Emits a `RolesUpdated` event on successful update."]
 				#[doc = ""]
-				#[doc = "It emits an event, notifying UIs of the role change. This event is quite relevant to"]
-				#[doc = "most pool members and they should be informed of changes to pool roles."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Origin must be Root or pool root"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `new_root` - New root role configuration"]
+				#[doc = "* `new_nominator` - New nominator role configuration  "]
+				#[doc = "* `new_bouncer` - New bouncer role configuration"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"]
 				pub struct UpdateRoles {
 					pub pool_id: update_roles::PoolId,
 					pub new_root: update_roles::NewRoot,
@@ -45536,15 +47467,24 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Chill on behalf of the pool."]
+				#[doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the pool nominator or the pool"]
-				#[doc = "root role, same as [`Pallet::nominate`]."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "This directly forward the call to the staking pallet, on behalf of the pool bonded"]
-				#[doc = "account."]
+				#[doc = "* Origin must be signed by pool nominator or root role"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"]
 				pub struct Chill {
 					pub pool_id: chill::PoolId,
 				}
@@ -45567,17 +47507,29 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "`origin` bonds funds from `extra` for some pool member `member` into their respective"]
-				#[doc = "pools."]
+				#[doc = "Bond additional funds for a pool member into their respective pool."]
 				#[doc = ""]
-				#[doc = "`origin` can bond extra funds from free balance or pending rewards when `origin =="]
-				#[doc = "other`."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "In the case of `origin != other`, `origin` can only bond extra pending rewards of"]
-				#[doc = "`other` members assuming set_claim_permission for the given member is"]
-				#[doc = "`PermissionlessAll` or `PermissionlessCompound`."]
+				#[doc = "* Origin must match member account for bonding from free balance/pending rewards"]
+				#[doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"]
+				#[doc = "  `PermissionlessCompound` claim permissions"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `member` - Pool member account to bond for"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `extra` - Amount to bond from free balance or pending rewards"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"]
+				#[doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"]
 				pub struct BondExtraOther {
 					pub member: bond_extra_other::Member,
 					pub pool_id: bond_extra_other::PoolId,
@@ -45608,13 +47560,25 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Set the commission of a pool."]
-				#[doc = "Both a commission percentage and a commission payee must be provided in the `current`"]
-				#[doc = "tuple. Where a `current` of `None` is provided, any current commission will be removed."]
+				#[doc = "Set or remove the commission rate and payee for a pool."]
 				#[doc = ""]
-				#[doc = "- If a `None` is supplied to `new_commission`, existing commission will be removed."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must have commission management permission for the pool"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `pool_id` - The pool identifier"]
+				#[doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"]
 				pub struct SetCommission {
 					pub pool_id: set_commission::PoolId,
 					pub new_commission: set_commission::NewCommission,
@@ -45642,13 +47606,26 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Set the maximum commission of a pool."]
+				#[doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"]
+				#[doc = "lower values allowed thereafter. Current commission will be reduced if above new max."]
 				#[doc = ""]
-				#[doc = "- Initial max can be set to any `Perbill`, and only smaller values thereafter."]
-				#[doc = "- Current commission will be lowered in the event it is higher than a new max"]
-				#[doc = "  commission."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must have commission management permission for the pool"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `pool_id` - The pool identifier"]
+				#[doc = "* `max_commission` - The new maximum commission rate"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"]
 				pub struct SetCommissionMax {
 					pub pool_id: set_commission_max::PoolId,
 					pub max_commission: set_commission_max::MaxCommission,
@@ -45673,12 +47650,19 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set the commission change rate for a pool."]
 				#[doc = ""]
 				#[doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"]
 				#[doc = "restrictive than the current."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."]
+				#[doc = "* `pool_id` - The identifier of the pool to set commission change rate for."]
+				#[doc = "* `change_rate` - The new commission change rate configuration."]
 				pub struct SetCommissionChangeRate {
 					pub pool_id: set_commission_change_rate::PoolId,
 					pub change_rate: set_commission_change_rate::ChangeRate,
@@ -45706,13 +47690,19 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Claim pending commission."]
+				#[doc = "Claim pending commission for a pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the `root` role of the pool. Pending"]
-				#[doc = "commission is paid out and added to total claimed commission`. Total pending commission"]
-				#[doc = "is reset to zero. the current."]
+				#[doc = "The dispatch origin of this call must be signed by an account with commission claim permission."]
+				#[doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"]
+				#[doc = "is reset to zero."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."]
+				#[doc = "* `pool_id` - The identifier of the pool to claim commission from."]
 				pub struct ClaimCommission {
 					pub pool_id: claim_commission::PoolId,
 				}
@@ -45735,6 +47725,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Top up the deficit or withdraw the excess ED from the pool."]
@@ -45744,6 +47735,11 @@ pub mod api {
 				#[doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"]
 				#[doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"]
 				#[doc = "pool by either topping up the deficit or claiming the excess."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed."]
+				#[doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."]
 				pub struct AdjustPoolDeposit {
 					pub pool_id: adjust_pool_deposit::PoolId,
 				}
@@ -45766,12 +47762,19 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Set or remove a pool's commission claim permission."]
 				#[doc = ""]
-				#[doc = "Determines who can claim the pool's pending commission. Only the `Root` role of the pool"]
-				#[doc = "is able to conifigure commission claim permissions."]
+				#[doc = "Only the `Root` role of the pool is able to configure commission claim permissions."]
+				#[doc = "This determines which accounts are allowed to claim the pool's pending commission."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."]
+				#[doc = "* `pool_id` - The identifier of the pool to set permissions for."]
+				#[doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."]
 				pub struct SetCommissionClaimPermission {
 					pub pool_id: set_commission_claim_permission::PoolId,
 					pub permission: set_commission_claim_permission::Permission,
@@ -45788,14 +47791,28 @@ pub mod api {
 			}
 			pub struct TransactionApi;
 			impl TransactionApi {
-				#[doc = "Stake funds with a pool. The amount to bond is transferred from the member to the"]
-				#[doc = "pools account and immediately increases the pools bond."]
+				#[doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `amount` - Amount to stake"]
+				#[doc = "* `pool_id` - Target pool ID"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::DefensiveError`] - Reward pool not found"]
 				#[doc = ""]
 				#[doc = "# Note"]
 				#[doc = ""]
-				#[doc = "* This call will *not* dust the member account, so the member must have at least"]
-				#[doc = "  `existential deposit + amount` in their account."]
-				#[doc = "* Only a pool with [`PoolState::Open`] can be joined"]
+				#[doc = "* Member must have `existential deposit + amount` in account"]
+				#[doc = "* Pool must be in [`PoolState::Open`] state"]
 				pub fn join(
 					&self,
 					amount: types::join::Amount,
@@ -45812,13 +47829,33 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Bond `extra` more funds from `origin` into the pool to which they already belong."]
+				#[doc = "Bond additional funds into an existing pool position."]
 				#[doc = ""]
-				#[doc = "Additional funds can come from either the free balance of the account, of from the"]
-				#[doc = "accumulated rewards, see [`BondExtra`]."]
+				#[doc = "Additional funds can come from either free balance or accumulated rewards."]
+				#[doc = "Automatically pays out all pending rewards."]
 				#[doc = ""]
-				#[doc = "Bonding extra funds implies an automatic payout of all pending rewards as well."]
-				#[doc = "See `bond_extra_other` to bond pending rewards of `other` members."]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Target pool ID"]
+				#[doc = "* `extra` - Source and amount of additional funds"]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed"]
+				#[doc = "* Must have permission to bond extra if not self"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"]
+				#[doc = "* [`Error::DefensiveError`] - Reward pool not found"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "* This transaction prioritizes readability and correctness over optimization"]
+				#[doc = "* Multiple storage reads/writes are performed to reuse code"]
+				#[doc = "* See `bond_extra_other` to bond pending rewards of other members"]
 				pub fn bond_extra(
 					&self,
 					pool_id: types::bond_extra::PoolId,
@@ -45835,37 +47872,35 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Unbond up to `unbonding_points` of the `member_account`'s funds from the pool. It"]
-				#[doc = "implicitly collects the rewards one last time, since not doing so would mean some"]
-				#[doc = "rewards would be forfeited."]
+				#[doc = "Unbond points from a member's pool position, collecting any pending rewards."]
 				#[doc = ""]
-				#[doc = "Under certain conditions, this call can be dispatched permissionlessly (i.e. by any"]
-				#[doc = "account)."]
+				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "# Conditions for a permissionless dispatch."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `member_account` - Account to unbond from"]
+				#[doc = "* `pool_id` - Target pool ID"]
+				#[doc = "* `unbonding_points` - Amount of points to unbond"]
 				#[doc = ""]
-				#[doc = "* The pool is blocked and the caller is either the root or bouncer. This is refereed to"]
-				#[doc = "  as a kick."]
-				#[doc = "* The pool is destroying and the member is not the depositor."]
-				#[doc = "* The pool is destroying, the member is the depositor and no other members are in the"]
-				#[doc = "  pool."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "## Conditions for permissioned dispatch (i.e. the caller is also the"]
-				#[doc = "`member_account`):"]
+				#[doc = "* Permissionless if:"]
+				#[doc = "  - Pool is blocked and caller is root/bouncer (kick)"]
+				#[doc = "  - Pool is destroying and member is not depositor"]
+				#[doc = "  - Pool is destroying, member is depositor, and pool is empty"]
+				#[doc = "* Permissioned (caller must be member) if:"]
+				#[doc = "  - Caller is not depositor"]
+				#[doc = "  - Caller is depositor, pool is destroying, and pool is empty"]
 				#[doc = ""]
-				#[doc = "* The caller is not the depositor."]
-				#[doc = "* The caller is the depositor, the pool is destroying and no other members are in the"]
-				#[doc = "  pool."]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"]
+				#[doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"]
 				#[doc = ""]
 				#[doc = "# Note"]
-				#[doc = ""]
-				#[doc = "If there are too many unlocking chunks to unbond with the pool account,"]
-				#[doc = "[`Call::pool_withdraw_unbonded`] can be called to try and minimize unlocking chunks."]
-				#[doc = "The [`StakingInterface::unbond`] will implicitly call [`Call::pool_withdraw_unbonded`]"]
-				#[doc = "to try to free chunks if necessary (ie. if unbound was called and no unlocking chunks"]
-				#[doc = "are available). However, it may not be possible to release the current unlocking chunks,"]
-				#[doc = "in which case, the result of this call will likely be the `NoMoreChunks` error from the"]
-				#[doc = "staking system."]
+				#[doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."]
+				#[doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"]
+				#[doc = "if chunks cannot be released."]
 				pub fn unbond(
 					&self,
 					member_account: types::unbond::MemberAccount,
@@ -45884,12 +47919,25 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Call `withdraw_unbonded` for the pools account. This call can be made by any account."]
+				#[doc = "Withdraws unbonded funds from the pool's staking account."]
 				#[doc = ""]
-				#[doc = "This is useful if there are too many unlocking chunks to call `unbond`, and some"]
-				#[doc = "can be cleared by withdrawing. In the case there are too many unlocking chunks, the user"]
-				#[doc = "would probably see an error like `NoMoreChunks` emitted from the staking system when"]
-				#[doc = "they attempt to unbond."]
+				#[doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."]
+				#[doc = "Prevents `NoMoreChunks` errors from the staking system."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Can be signed by any account"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `num_slashing_spans` - Number of slashing spans to check"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NotDestroying`] - Pool is in destroying state"]
 				pub fn pool_withdraw_unbonded(
 					&self,
 					pool_id: types::pool_withdraw_unbonded::PoolId,
@@ -45907,25 +47955,31 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Withdraw unbonded funds from `member_account`. If no bonded funds can be unbonded, an"]
-				#[doc = "error is returned."]
+				#[doc = "Withdraw unbonded funds from a member account."]
 				#[doc = ""]
-				#[doc = "Under certain conditions, this call can be dispatched permissionlessly (i.e. by any"]
-				#[doc = "account)."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "# Conditions for a permissionless dispatch"]
+				#[doc = "* Permissionless if:"]
+				#[doc = "  - Pool is in destroy mode and target is not depositor"]
+				#[doc = "  - Target is depositor and only member in sub pools"]
+				#[doc = "  - Pool is blocked and caller is root/bouncer"]
+				#[doc = "* Permissioned if caller is target and not depositor"]
 				#[doc = ""]
-				#[doc = "* The pool is in destroy mode and the target is not the depositor."]
-				#[doc = "* The target is the depositor and they are the only member in the sub pools."]
-				#[doc = "* The pool is blocked and the caller is either the root or bouncer."]
+				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "# Conditions for permissioned dispatch"]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `member_account` - Account to withdraw from"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `num_slashing_spans` - Number of slashing spans"]
 				#[doc = ""]
-				#[doc = "* The caller is the target and they are not the depositor."]
+				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "# Note"]
+				#[doc = "* [`Error::PoolMemberNotFound`] - Member account not found"]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"]
+				#[doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"]
 				#[doc = ""]
-				#[doc = "If the target is the depositor, the pool will be destroyed."]
+				#[doc = "If target is depositor, pool will be destroyed."]
 				pub fn withdraw_unbonded(
 					&self,
 					member_account: types::withdraw_unbonded::MemberAccount,
@@ -45946,21 +48000,27 @@ pub mod api {
 				}
 				#[doc = "Create a new delegation pool."]
 				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the account that will become the initial depositor"]
+				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `amount` - The amount of funds to delegate to the pool. This also acts of a sort of"]
-				#[doc = "  deposit since the pools creator cannot fully unbond funds until the pool is being"]
-				#[doc = "  destroyed."]
-				#[doc = "* `index` - A disambiguation index for creating the account. Likely only useful when"]
-				#[doc = "  creating multiple pools in the same extrinsic."]
-				#[doc = "* `root` - The account to set as [`PoolRoles::root`]."]
-				#[doc = "* `nominator` - The account to set as the [`PoolRoles::nominator`]."]
-				#[doc = "* `bouncer` - The account to set as the [`PoolRoles::bouncer`]."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `amount` - Amount to delegate to the pool"]
+				#[doc = "* `root` - Account to set as pool root"]
+				#[doc = "* `nominator` - Account to set as pool nominator"]
+				#[doc = "* `bouncer` - Account to set as pool bouncer"]
+				#[doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"]
+				#[doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"]
 				#[doc = ""]
 				#[doc = "# Note"]
 				#[doc = ""]
-				#[doc = "In addition to `amount`, the caller will transfer the existential deposit; so the caller"]
-				#[doc = "needs at have at least `amount + existential_deposit` transferable."]
+				#[doc = "Caller must have `amount + existential_deposit` transferable funds."]
 				pub fn create(
 					&self,
 					amount: types::create::Amount,
@@ -45981,12 +48041,31 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Create a new delegation pool with a previously used pool id"]
+				#[doc = "Create a new delegation pool with a previously used pool ID."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by the account that will become the depositor"]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "same as `create` with the inclusion of"]
-				#[doc = "* `pool_id` - `A valid PoolId."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `amount` - Amount to delegate to the pool"]
+				#[doc = "* `root` - Account to set as pool root"]
+				#[doc = "* `nominator` - Account to set as pool nominator"]
+				#[doc = "* `bouncer` - Account to set as pool bouncer"]
+				#[doc = "* `pool_id` - Pool ID to reuse"]
+				#[doc = "* `name` - Optional pool name"]
+				#[doc = "* `icon` - Optional pool icon"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"]
+				#[doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "Caller must have `amount + existential_deposit` transferable funds."]
 				pub fn create_with_pool_id(
 					&self,
 					amount: types::create_with_pool_id::Amount,
@@ -46017,13 +48096,26 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Nominate on behalf of the pool."]
+				#[doc = "Nominate validators on behalf of the pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the pool nominator or the pool"]
-				#[doc = "root role."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "This directly forward the call to the staking pallet, on behalf of the pool bonded"]
-				#[doc = "account."]
+				#[doc = "* Pool nominator or root role can nominate validators"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `validators` - List of validator accounts to nominate"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "Forwards nomination call to staking pallet using pool's bonded account."]
 				pub fn nominate(
 					&self,
 					pool_id: types::nominate::PoolId,
@@ -46040,16 +48132,29 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Set a new state for the pool."]
+				#[doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"]
+				#[doc = "changed again under any circumstances."]
 				#[doc = ""]
-				#[doc = "If a pool is already in the `Destroying` state, then under no condition can its state"]
-				#[doc = "change again."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be either:"]
+				#[doc = "* Pool bouncer or root role can set any state"]
+				#[doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"]
 				#[doc = ""]
-				#[doc = "1. signed by the bouncer, or the root role of the pool,"]
-				#[doc = "2. if the pool conditions to be open are NOT met (as described by `ok_to_be_open`), and"]
-				#[doc = "   then the state of the pool can be permissionlessly changed to `Destroying`."]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `state` - New state to set"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"]
+				#[doc = ""]
+				#[doc = "# Note"]
+				#[doc = ""]
+				#[doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"]
+				#[doc = "commission, member count and roles."]
 				pub fn set_state(
 					&self,
 					pool_id: types::set_state::PoolId,
@@ -46066,10 +48171,23 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Set a new metadata for the pool."]
+				#[doc = "Updates the metadata for a given pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the bouncer, or the root role of the"]
-				#[doc = "pool."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by the pool bouncer or root role"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `metadata` - New metadata to set"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"]
 				pub fn set_metadata(
 					&self,
 					pool_id: types::set_metadata::PoolId,
@@ -46086,17 +48204,23 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Update configurations for the nomination pools. The origin for this call must be"]
-				#[doc = "Root."]
+				#[doc = "Updates the global configuration parameters for nomination pools."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be called by Root"]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `min_join_bond` - Set [`MinJoinBond`]."]
-				#[doc = "* `min_create_bond` - Set [`MinCreateBond`]."]
-				#[doc = "* `max_pools` - Set [`MaxPools`]."]
-				#[doc = "* `max_members` - Set [`MaxPoolMembers`]."]
-				#[doc = "* `max_members_per_pool` - Set [`MaxPoolMembersPerPool`]."]
-				#[doc = "* `global_max_commission` - Set [`GlobalMaxCommission`]."]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"]
+				#[doc = "* `min_create_bond` - Config operation for minimum bond to create a pool  "]
+				#[doc = "* `max_pools` - Config operation for maximum number of pools"]
+				#[doc = "* `global_max_commission` - Config operation for maximum global commission"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"]
 				pub fn set_configs(
 					&self,
 					min_join_bond: types::set_configs::MinJoinBond,
@@ -46121,13 +48245,27 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Update the roles of the pool."]
+				#[doc = "Update the roles of a pool."]
 				#[doc = ""]
-				#[doc = "The root is the only entity that can change any of the roles, including itself,"]
-				#[doc = "excluding the depositor, who can never change."]
+				#[doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."]
+				#[doc = "Emits a `RolesUpdated` event on successful update."]
 				#[doc = ""]
-				#[doc = "It emits an event, notifying UIs of the role change. This event is quite relevant to"]
-				#[doc = "most pool members and they should be informed of changes to pool roles."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Origin must be Root or pool root"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - Origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `new_root` - New root role configuration"]
+				#[doc = "* `new_nominator` - New nominator role configuration  "]
+				#[doc = "* `new_bouncer` - New bouncer role configuration"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"]
 				pub fn update_roles(
 					&self,
 					pool_id: types::update_roles::PoolId,
@@ -46147,13 +48285,21 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Chill on behalf of the pool."]
+				#[doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the pool nominator or the pool"]
-				#[doc = "root role, same as [`Pallet::nominate`]."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "This directly forward the call to the staking pallet, on behalf of the pool bonded"]
-				#[doc = "account."]
+				#[doc = "* Origin must be signed by pool nominator or root role"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"]
 				pub fn chill(
 					&self,
 					pool_id: types::chill::PoolId,
@@ -46169,15 +48315,26 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "`origin` bonds funds from `extra` for some pool member `member` into their respective"]
-				#[doc = "pools."]
+				#[doc = "Bond additional funds for a pool member into their respective pool."]
 				#[doc = ""]
-				#[doc = "`origin` can bond extra funds from free balance or pending rewards when `origin =="]
-				#[doc = "other`."]
+				#[doc = "# Permissions"]
 				#[doc = ""]
-				#[doc = "In the case of `origin != other`, `origin` can only bond extra pending rewards of"]
-				#[doc = "`other` members assuming set_claim_permission for the given member is"]
-				#[doc = "`PermissionlessAll` or `PermissionlessCompound`."]
+				#[doc = "* Origin must match member account for bonding from free balance/pending rewards"]
+				#[doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"]
+				#[doc = "  `PermissionlessCompound` claim permissions"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `member` - Pool member account to bond for"]
+				#[doc = "* `pool_id` - Pool identifier"]
+				#[doc = "* `extra` - Amount to bond from free balance or pending rewards"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - Pool does not exist"]
+				#[doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"]
+				#[doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"]
 				pub fn bond_extra_other(
 					&self,
 					member: types::bond_extra_other::Member,
@@ -46195,11 +48352,22 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Set the commission of a pool."]
-				#[doc = "Both a commission percentage and a commission payee must be provided in the `current`"]
-				#[doc = "tuple. Where a `current` of `None` is provided, any current commission will be removed."]
+				#[doc = "Set or remove the commission rate and payee for a pool."]
 				#[doc = ""]
-				#[doc = "- If a `None` is supplied to `new_commission`, existing commission will be removed."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must have commission management permission for the pool"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `pool_id` - The pool identifier"]
+				#[doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"]
 				pub fn set_commission(
 					&self,
 					pool_id: types::set_commission::PoolId,
@@ -46216,11 +48384,23 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Set the maximum commission of a pool."]
+				#[doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"]
+				#[doc = "lower values allowed thereafter. Current commission will be reduced if above new max."]
 				#[doc = ""]
-				#[doc = "- Initial max can be set to any `Perbill`, and only smaller values thereafter."]
-				#[doc = "- Current commission will be lowered in the event it is higher than a new max"]
-				#[doc = "  commission."]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Caller must have commission management permission for the pool"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call"]
+				#[doc = "* `pool_id` - The pool identifier"]
+				#[doc = "* `max_commission` - The new maximum commission rate"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"]
+				#[doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"]
 				pub fn set_commission_max(
 					&self,
 					pool_id: types::set_commission_max::PoolId,
@@ -46242,6 +48422,12 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"]
 				#[doc = "restrictive than the current."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."]
+				#[doc = "* `pool_id` - The identifier of the pool to set commission change rate for."]
+				#[doc = "* `change_rate` - The new commission change rate configuration."]
 				pub fn set_commission_change_rate(
 					&self,
 					pool_id: types::set_commission_change_rate::PoolId,
@@ -46259,11 +48445,16 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Claim pending commission."]
+				#[doc = "Claim pending commission for a pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by the `root` role of the pool. Pending"]
-				#[doc = "commission is paid out and added to total claimed commission`. Total pending commission"]
-				#[doc = "is reset to zero. the current."]
+				#[doc = "The dispatch origin of this call must be signed by an account with commission claim permission."]
+				#[doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"]
+				#[doc = "is reset to zero."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."]
+				#[doc = "* `pool_id` - The identifier of the pool to claim commission from."]
 				pub fn claim_commission(
 					&self,
 					pool_id: types::claim_commission::PoolId,
@@ -46286,6 +48477,11 @@ pub mod api {
 				#[doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"]
 				#[doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"]
 				#[doc = "pool by either topping up the deficit or claiming the excess."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed."]
+				#[doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."]
 				pub fn adjust_pool_deposit(
 					&self,
 					pool_id: types::adjust_pool_deposit::PoolId,
@@ -46303,8 +48499,14 @@ pub mod api {
 				}
 				#[doc = "Set or remove a pool's commission claim permission."]
 				#[doc = ""]
-				#[doc = "Determines who can claim the pool's pending commission. Only the `Root` role of the pool"]
-				#[doc = "is able to conifigure commission claim permissions."]
+				#[doc = "Only the `Root` role of the pool is able to configure commission claim permissions."]
+				#[doc = "This determines which accounts are allowed to claim the pool's pending commission."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."]
+				#[doc = "* `pool_id` - The identifier of the pool to set permissions for."]
+				#[doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."]
 				pub fn set_commission_claim_permission(
 					&self,
 					pool_id: types::set_commission_claim_permission::PoolId,
@@ -46339,6 +48541,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool has been created."]
@@ -46366,9 +48569,10 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-			#[doc = "A member has became bonded in a pool."]
+			#[doc = "A member has become bonded in a pool."]
 			pub struct Bonded {
 				pub member: bonded::Member,
 				pub pool_id: bonded::PoolId,
@@ -46397,6 +48601,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A payout has been made to a member."]
@@ -46426,6 +48631,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has unbonded from their pool."]
@@ -46434,7 +48640,7 @@ pub mod api {
 			#[doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"]
 			#[doc = "  pool."]
 			#[doc = "- `points` is the number of points that are issued as a result of `balance` being"]
-			#[doc = "dissolved into the corresponding unbonding pool."]
+			#[doc = "  dissolved into the corresponding unbonding pool."]
 			#[doc = "- `era` is the era in which the balance will be unbonded."]
 			#[doc = "In the absence of slashing, these values will match. In the presence of slashing, the"]
 			#[doc = "number of points that are issued in the unbonding pool will be less than the amount"]
@@ -46469,11 +48675,12 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has withdrawn from their pool."]
 			#[doc = ""]
-			#[doc = "The given number of `points` have been dissolved in return of `balance`."]
+			#[doc = "The given number of `points` have been dissolved in return for `balance`."]
 			#[doc = ""]
 			#[doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"]
 			#[doc = "will be 1."]
@@ -46505,6 +48712,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool has been destroyed."]
@@ -46530,6 +48738,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The state of a pool has changed"]
@@ -46557,6 +48766,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has been removed from a pool."]
@@ -46586,6 +48796,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"]
@@ -46616,6 +48827,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The active balance of pool `pool_id` has been slashed to `balance`."]
@@ -46643,6 +48855,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."]
@@ -46672,6 +48885,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool's commission setting has been changed."]
@@ -46702,6 +48916,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool's maximum commission setting has been changed."]
@@ -46729,6 +48944,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A pool's commission `change_rate` has been changed."]
@@ -46759,6 +48975,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Pool commission claim permission has been updated."]
@@ -46790,6 +49007,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Pool commission has been claimed."]
@@ -46817,6 +49035,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "Topped up deficit in frozen ED of the reward pool."]
@@ -46844,9 +49063,10 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-			#[doc = "Claimed excess frozen ED of af the reward pool."]
+			#[doc = "Claimed excess frozen ED of the reward pool."]
 			pub struct MinBalanceExcessAdjusted {
 				pub pool_id: min_balance_excess_adjusted::PoolId,
 				pub amount: min_balance_excess_adjusted::Amount,
@@ -47671,6 +49891,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BoundedBTreeMap<_0, _1>(pub ::subxt_core::utils::KeyedVec<_0, _1>);
@@ -47688,6 +49909,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BoundedBTreeSet<_0>(pub ::subxt_core::alloc::vec::Vec<_0>);
@@ -47707,6 +49929,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BoundedVec<_0>(pub ::subxt_core::alloc::vec::Vec<_0>);
@@ -47724,6 +49947,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct WeakBoundedVec<_0>(pub ::subxt_core::alloc::vec::Vec<_0>);
@@ -47742,6 +49966,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Bloom(pub [::core::primitive::u8; 256usize]);
@@ -47761,6 +49986,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Block<_0> {
@@ -47783,6 +50009,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Header {
@@ -47816,6 +50043,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Log {
@@ -47837,6 +50065,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct EIP658ReceiptData {
@@ -47856,6 +50085,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ReceiptV3 {
@@ -47880,6 +50110,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AccessListItem {
@@ -47897,6 +50128,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct EIP1559Transaction {
@@ -47926,6 +50158,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct EIP2930Transaction {
@@ -47954,6 +50187,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct LegacyTransaction {
@@ -47976,6 +50210,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum TransactionAction {
@@ -47996,6 +50231,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct TransactionRecoveryId(pub ::core::primitive::u64);
@@ -48010,6 +50246,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct TransactionSignature {
@@ -48028,6 +50265,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum TransactionV2 {
@@ -48055,6 +50293,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct H64(pub [::core::primitive::u8; 8usize]);
@@ -48075,6 +50314,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Basic {
@@ -48098,6 +50338,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ExitError {
@@ -48145,6 +50386,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ExitFatal {
@@ -48168,6 +50410,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ExitReason {
@@ -48191,6 +50434,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ExitRevert {
@@ -48208,6 +50452,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ExitSucceed {
@@ -48233,6 +50478,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Opcode(pub ::core::primitive::u8);
@@ -48251,6 +50497,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Equivocation<_0, _1, _2> {
@@ -48270,6 +50517,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Precommit<_0, _1> {
@@ -48287,6 +50535,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Prevote<_0, _1> {
@@ -48307,6 +50556,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ExecutionInfoV2<_0> {
@@ -48327,6 +50577,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct UsedGas {
@@ -48344,6 +50595,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct WeightInfo {
@@ -48366,6 +50618,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct TransactionStatus {
@@ -48393,6 +50646,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct UncheckedExtrinsic<_0, _1, _2, _3>(
@@ -48413,6 +50667,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct CheckMetadataHash {
@@ -48429,6 +50684,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Mode {
@@ -48453,6 +50709,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum DispatchClass {
@@ -48474,6 +50731,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct DispatchInfo {
@@ -48492,6 +50750,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Pays {
@@ -48511,6 +50770,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PerDispatchClass<_0> {
@@ -48529,6 +50789,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum RawOrigin<_0> {
@@ -48555,6 +50816,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum Bounded<_0, _1> {
@@ -48591,6 +50853,7 @@ pub mod api {
 							PartialEq,
 						)]
 						# [codec (crate = :: subxt_core :: ext :: codec)]
+						#[codec(dumb_trait_bound)]
 						#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 						#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 						pub enum BalanceStatus {
@@ -48610,6 +50873,7 @@ pub mod api {
 							PartialEq,
 						)]
 						# [codec (crate = :: subxt_core :: ext :: codec)]
+						#[codec(dumb_trait_bound)]
 						#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 						#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 						pub struct IdAmount<_0, _1> {
@@ -48630,6 +50894,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct PalletId(pub [::core::primitive::u8; 8usize]);
@@ -48651,6 +50916,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckGenesis;
@@ -48668,6 +50934,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckMortality(pub runtime_types::sp_runtime::generic::era::Era);
@@ -48685,6 +50952,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckNonZeroSender;
@@ -48702,6 +50970,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckNonce(#[codec(compact)] pub ::core::primitive::u32);
@@ -48719,6 +50988,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckSpecVersion;
@@ -48736,6 +51006,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckTxVersion;
@@ -48753,6 +51024,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CheckWeight;
@@ -48771,6 +51043,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BlockLength {
@@ -48789,6 +51062,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BlockWeights {
@@ -48809,6 +51083,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct WeightsPerClass {
@@ -48834,6 +51109,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -48927,6 +51203,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Error for the System pallet"]
@@ -48974,6 +51251,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Event for the System pallet."]
@@ -49023,6 +51301,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct AccountInfo<_0, _1> {
@@ -49043,6 +51322,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct CodeUpgradeAuthorization {
@@ -49060,6 +51340,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct EventRecord<_0, _1> {
@@ -49078,6 +51359,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct LastRuntimeUpgradeInfo {
@@ -49096,6 +51378,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Phase {
@@ -49122,6 +51405,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -49261,6 +51545,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -49302,6 +51587,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -49330,6 +51616,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct EcdsaSignature(pub [::core::primitive::u8; 65usize]);
@@ -49344,6 +51631,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct EthereumAddress(pub [::core::primitive::u8; 20usize]);
@@ -49359,6 +51647,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum MultiAddress {
@@ -49374,6 +51663,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum MultiAddressSignature {
@@ -49389,6 +51679,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Sr25519Signature(pub [::core::primitive::u8; 64usize]);
@@ -49404,6 +51695,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum StatementKind {
@@ -49428,6 +51720,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -50169,6 +52462,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -50251,6 +52545,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -50430,6 +52725,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum AccountStatus {
@@ -50451,6 +52747,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Approval<_0, _1> {
@@ -50468,6 +52765,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AssetAccount<_0, _1, _2, _3> {
@@ -50489,6 +52787,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AssetDetails<_0, _1, _2> {
@@ -50516,6 +52815,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AssetMetadata<_0, _1> {
@@ -50536,6 +52836,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum AssetStatus {
@@ -50557,6 +52858,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ExistenceReason<_0, _1> {
@@ -50588,6 +52890,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -50648,6 +52951,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -50682,6 +52986,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Bag {
@@ -50699,6 +53004,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ListError {
@@ -50722,6 +53028,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Node {
@@ -50745,6 +53052,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -50809,6 +53117,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -50828,6 +53137,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -50863,6 +53173,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -51007,6 +53318,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -51059,6 +53371,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -51207,6 +53520,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AccountData<_0> {
@@ -51226,6 +53540,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum AdjustmentDirection {
@@ -51245,6 +53560,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BalanceLock<_0> {
@@ -51264,6 +53580,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ExtraFlags(pub ::core::primitive::u128);
@@ -51278,6 +53595,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Reasons {
@@ -51299,6 +53617,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ReserveData<_0, _1> {
@@ -51322,6 +53641,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -51342,6 +53662,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -51370,6 +53691,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -51528,6 +53850,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -51578,6 +53901,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -51641,6 +53965,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Bounty<_0, _1, _2> {
@@ -51662,6 +53987,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum BountyStatus<_0, _1> {
@@ -51694,6 +54020,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -51912,6 +54239,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -51937,6 +54265,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -51975,6 +54304,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ChildBounty<_0, _1, _2> {
@@ -51995,6 +54325,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ChildBountyStatus<_0, _1> {
@@ -52023,6 +54354,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -52172,6 +54504,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -52221,6 +54554,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -52284,6 +54618,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RawOrigin<_0> {
@@ -52305,6 +54640,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Votes<_0, _1> {
@@ -52330,6 +54666,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Conviction {
@@ -52362,6 +54699,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -52694,6 +55032,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -52783,6 +55122,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -52888,6 +55228,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Delegations<_0> {
@@ -52905,6 +55246,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum MetadataOwner {
@@ -52926,6 +55268,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ReferendumInfo<_0, _1, _2> {
@@ -52945,6 +55288,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ReferendumStatus<_0, _1, _2> {
@@ -52965,6 +55309,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Tally<_0> {
@@ -52986,6 +55331,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum AccountVote<_0> {
@@ -53005,6 +55351,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PriorLock<_0, _1>(pub _0, pub _1);
@@ -53020,6 +55367,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Vote(pub ::core::primitive::u8);
@@ -53034,6 +55382,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Voting<_0, _1, _2> {
@@ -53069,6 +55418,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum VoteThreshold {
@@ -53096,6 +55446,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -53120,6 +55471,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -53136,6 +55488,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Error of the pallet that can be returned in response to dispatches."]
@@ -53197,6 +55550,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -53265,6 +55619,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SignedSubmission<_0, _1, _2> {
@@ -53286,6 +55641,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ElectionCompute {
@@ -53311,6 +55667,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Phase<_0> {
@@ -53334,6 +55691,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct RawSolution<_0> {
@@ -53352,6 +55710,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ReadySolution {
@@ -53373,6 +55732,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct RoundSnapshot<_0, _1> {
@@ -53390,6 +55750,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct SolutionOrSnapshotSize {
@@ -53414,6 +55775,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -53545,6 +55907,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -53612,6 +55975,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -53670,6 +56034,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Renouncing {
@@ -53691,6 +56056,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct SeatHolder<_0, _1> {
@@ -53709,6 +56075,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Voter<_0, _1> {
@@ -53732,6 +56099,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -53751,6 +56119,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -53773,6 +56142,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -53799,6 +56169,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RawOrigin {
@@ -53821,6 +56192,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -53891,6 +56263,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -53946,6 +56319,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -53978,6 +56352,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct CodeMetadata {
@@ -54000,6 +56375,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -54066,6 +56442,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -54105,6 +56482,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -54136,6 +56514,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct StoredPendingChange<_0> {
@@ -54159,6 +56538,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum StoredState<_0> {
@@ -54187,6 +56567,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -54211,6 +56592,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -54236,6 +56618,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct IdentityInfo {
@@ -54266,6 +56649,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Identity pallet declaration."]
@@ -54588,6 +56972,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -54682,6 +57067,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -54802,6 +57188,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct AuthorityProperties<_0> {
@@ -54819,6 +57206,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Data {
@@ -54910,6 +57298,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Judgement<_0> {
@@ -54939,6 +57328,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct RegistrarInfo<_0, _1, _2> {
@@ -54957,6 +57347,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Registration<_0, _2> {
@@ -54984,6 +57375,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -55009,6 +57401,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -55031,6 +57424,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -55071,6 +57465,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct Public(pub [::core::primitive::u8; 32usize]);
@@ -55085,6 +57480,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct Signature(pub [::core::primitive::u8; 64usize]);
@@ -55101,6 +57497,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Heartbeat<_0> {
@@ -55125,6 +57522,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -55225,6 +57623,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -55256,6 +57655,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -55293,11 +57693,12 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The callable functions (extrinsics) of the pallet."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Allows an account to join as an operator by providing a stake."] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "Schedules an operator to leave."] schedule_leave_operators , # [codec (index = 2)] # [doc = "Cancels a scheduled leave for an operator."] cancel_leave_operators , # [codec (index = 3)] # [doc = "Executes a scheduled leave for an operator."] execute_leave_operators , # [codec (index = 4)] # [doc = "Allows an operator to increase their stake."] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Schedules an operator to decrease their stake."] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Executes a scheduled stake decrease for an operator."] execute_operator_unstake , # [codec (index = 7)] # [doc = "Cancels a scheduled stake decrease for an operator."] cancel_operator_unstake , # [codec (index = 8)] # [doc = "Allows an operator to go offline."] go_offline , # [codec (index = 9)] # [doc = "Allows an operator to go online."] go_online , # [codec (index = 10)] # [doc = "Allows a user to deposit an asset."] deposit { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 11)] # [doc = "Schedules an withdraw request."] schedule_withdraw { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "Executes a scheduled withdraw request."] execute_withdraw { evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 13)] # [doc = "Cancels a scheduled withdraw request."] cancel_withdraw { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "Allows a user to delegate an amount of an asset to an operator."] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 15)] # [doc = "Schedules a request to reduce a delegator's stake."] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Executes a scheduled request to reduce a delegator's stake."] execute_delegator_unstake , # [codec (index = 17)] # [doc = "Cancels a scheduled request to reduce a delegator's stake."] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "Sets the APY and cap for a specific asset."] # [doc = "The APY is the annual percentage yield that the asset will earn."] # [doc = "The cap is the amount of assets required to be deposited to distribute the entire APY."] # [doc = "The APY is capped at 10% and will require runtime upgrade to change."] # [doc = ""] # [doc = "While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`."] set_incentive_apy_and_cap { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Whitelists a blueprint for rewards."] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 20)] # [doc = "Manage asset id to vault rewards"] manage_asset_in_vault { vault_id : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , # [codec (index = 22)] # [doc = "Adds a blueprint ID to a delegator's selection."] add_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 23)] # [doc = "Removes a blueprint ID from a delegator's selection."] remove_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , }
+					# [codec (index = 0)] # [doc = "Allows an account to join as an operator by staking the required bond amount."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account joining as operator"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `bond_amount` - Amount to stake as operator bond"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking"] # [doc = "* [`Error::StakeOverflow`] - Bond amount would overflow stake tracking"] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "Schedules an operator to leave the system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"] schedule_leave_operators , # [codec (index = 2)] # [doc = "Cancels a scheduled leave for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_leave_operators , # [codec (index = 3)] # [doc = "Executes a scheduled leave for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"] execute_leave_operators , # [codec (index = 4)] # [doc = "Allows an operator to increase their stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `additional_bond` - Additional amount to stake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::StakeOverflow`] - Additional bond would overflow stake tracking"] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Schedules an operator to decrease their stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `unstake_amount` - Amount to unstake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"] # [doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Executes a scheduled stake decrease for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"] execute_operator_unstake , # [codec (index = 7)] # [doc = "Cancels a scheduled stake decrease for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_operator_unstake , # [codec (index = 8)] # [doc = "Allows an operator to go offline."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::AlreadyOffline`] - Operator is already offline"] go_offline , # [codec (index = 9)] # [doc = "Allows an operator to go online."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::AlreadyOnline`] - Operator is already online"] go_online , # [codec (index = 10)] # [doc = "Allows a user to deposit an asset."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the depositor account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset_id` - ID of the asset to deposit"] # [doc = "* `amount` - Amount to deposit"] # [doc = "* `evm_address` - Optional EVM address"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::DepositOverflow`] - Deposit would overflow tracking"] # [doc = "* [`Error::InvalidAsset`] - Asset is not supported"] deposit { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 11)] # [doc = "Schedules a withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset_id` - ID of the asset to withdraw"] # [doc = "* `amount` - Amount to withdraw"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::InsufficientBalance`] - Insufficient balance to withdraw"] # [doc = "* [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists"] schedule_withdraw { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "Executes a scheduled withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `evm_address` - Optional EVM address"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"] # [doc = "* [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed"] execute_withdraw { evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 13)] # [doc = "Cancels a scheduled withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset_id` - ID of the asset withdrawal to cancel"] # [doc = "* `amount` - Amount of the withdrawal to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"] cancel_withdraw { asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "Allows a user to delegate an amount of an asset to an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to delegate to"] # [doc = "* `asset_id` - ID of asset to delegate"] # [doc = "* `amount` - Amount to delegate"] # [doc = "* `blueprint_selection` - Blueprint selection strategy"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Target account is not an operator"] # [doc = "* [`Error::InsufficientBalance`] - Insufficient balance to delegate"] # [doc = "* [`Error::MaxDelegationsExceeded`] - Would exceed max delegations"] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 15)] # [doc = "Schedules a request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to unstake from"] # [doc = "* `asset_id` - ID of asset to unstake"] # [doc = "* `amount` - Amount to unstake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::InsufficientDelegation`] - Insufficient delegation to unstake"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists"] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Executes a scheduled request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed"] execute_delegator_unstake , # [codec (index = 17)] # [doc = "Cancels a scheduled request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to cancel unstake from"] # [doc = "* `asset_id` - ID of asset unstake to cancel"] # [doc = "* `amount` - Amount of unstake to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "Sets the APY and cap for a specific asset."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the force origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `vault_id` - ID of the vault"] # [doc = "* `apy` - Annual percentage yield (max 10%)"] # [doc = "* `cap` - Required deposit amount for full APY"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum"] # [doc = "* [`Error::CapCannotBeZero`] - Cap amount cannot be zero"] set_incentive_apy_and_cap { vault_id : :: core :: primitive :: u128 , apy : runtime_types :: sp_arithmetic :: per_things :: Percent , cap : :: core :: primitive :: u128 , } , # [codec (index = 19)] # [doc = "Whitelists a blueprint for rewards."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the force origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to whitelist"] whitelist_blueprint_for_rewards { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 20)] # [doc = "Manage asset id to vault rewards."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by an authorized account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `vault_id` - ID of the vault"] # [doc = "* `asset_id` - ID of the asset"] # [doc = "* `action` - Action to perform (Add/Remove)"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::AssetAlreadyInVault`] - Asset already exists in vault"] # [doc = "* [`Error::AssetNotInVault`] - Asset does not exist in vault"] manage_asset_in_vault { vault_id : :: core :: primitive :: u128 , asset_id : runtime_types :: tangle_primitives :: services :: Asset < :: core :: primitive :: u128 > , action : runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: AssetAction , } , # [codec (index = 22)] # [doc = "Adds a blueprint ID to a delegator's selection."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::DuplicateBlueprintId`] - Blueprint ID already exists"] # [doc = "* [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints"] # [doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"] add_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 23)] # [doc = "Removes a blueprint ID from a delegator's selection."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to remove"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::BlueprintIdNotFound`] - Blueprint ID not found"] # [doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"] remove_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -55309,6 +57710,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Errors emitted by the pallet."]
@@ -55475,6 +57877,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events emitted by the pallet."]
@@ -55496,6 +57899,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct BondInfoDelegator < _0 , _1 , _2 , _3 > { pub operator : _0 , pub amount : _1 , pub asset_id : runtime_types :: tangle_primitives :: services :: Asset < _1 > , pub blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < _3 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _2 > }
@@ -55510,6 +57914,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct BondLessRequest < _0 , _1 , _2 , _3 > { pub operator : _0 , pub asset_id : runtime_types :: tangle_primitives :: services :: Asset < _1 > , pub amount : _2 , pub requested_round : :: core :: primitive :: u32 , pub blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < _3 > , }
@@ -55524,6 +57929,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum DelegatorBlueprintSelection<_0> {
@@ -55548,6 +57954,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct DelegatorMetadata < _0 , _1 , _2 , _3 , _4 , _5 , _6 > { pub deposits : :: subxt_core :: utils :: KeyedVec < runtime_types :: tangle_primitives :: services :: Asset < _1 > , _1 > , pub withdraw_requests : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: WithdrawRequest < _1 , _1 > > , pub delegations : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondInfoDelegator < _0 , _1 , _1 , _6 > > , pub delegator_unstake_requests : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: BondLessRequest < _0 , _1 , _1 , _6 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorStatus , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < (_2 , _4 , _3 , _5) > }
@@ -55562,6 +57969,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum DelegatorStatus {
@@ -55581,6 +57989,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct WithdrawRequest<_0, _1> {
@@ -55602,6 +58011,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct DelegatorBond<_0, _1, _2> {
@@ -55622,6 +58032,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct OperatorBondLessRequest<_0> {
@@ -55639,6 +58050,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct OperatorMetadata < _0 , _1 , _2 , _3 , _4 > { pub stake : _1 , pub delegation_count : :: core :: primitive :: u32 , pub request : :: core :: option :: Option < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorBondLessRequest < _1 > > , pub delegations : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: DelegatorBond < _0 , _1 , _1 > > , pub status : runtime_types :: pallet_multi_asset_delegation :: types :: operator :: OperatorStatus , pub blueprint_ids : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u32 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < (_2 , _3 , _4) > }
@@ -55653,6 +58065,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct OperatorSnapshot < _0 , _1 , _2 , _3 > { pub stake : _1 , pub delegations : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: pallet_multi_asset_delegation :: types :: operator :: DelegatorBond < _0 , _1 , _1 > > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < (_2 , _3) > }
@@ -55667,6 +58080,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum OperatorStatus {
@@ -55691,6 +58105,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum AssetAction {
@@ -55710,6 +58125,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct RewardConfig < _0 , _1 > { pub configs : :: subxt_core :: utils :: KeyedVec < _0 , runtime_types :: pallet_multi_asset_delegation :: types :: rewards :: RewardConfigForAssetVault < _0 > > , pub whitelisted_blueprint_ids : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u64 > , # [codec (skip)] pub __ignore : :: core :: marker :: PhantomData < _1 > }
@@ -55724,6 +58140,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct RewardConfigForAssetVault<_0> {
@@ -55748,6 +58165,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -55907,6 +58325,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -55965,6 +58384,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -56018,6 +58438,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Multisig<_0, _1, _2> {
@@ -56037,6 +58458,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Timepoint<_0> {
@@ -56059,6 +58481,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -56506,6 +58929,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum DefensiveError {
@@ -56535,6 +58959,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -56670,6 +59095,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events of this pallet."]
@@ -56828,6 +59254,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum FreezeReason {
@@ -56846,6 +59273,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum BondExtra<_0> {
@@ -56865,6 +59293,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct BondedPoolInner {
@@ -56887,6 +59316,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ClaimPermission {
@@ -56910,6 +59340,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Commission {
@@ -56941,6 +59372,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct CommissionChangeRate<_0> {
@@ -56958,6 +59390,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum CommissionClaimPermission<_0> {
@@ -56977,6 +59410,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ConfigOp<_0> {
@@ -56998,6 +59432,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct PoolMember {
@@ -57022,6 +59457,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct PoolRoles<_0> {
@@ -57041,6 +59477,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum PoolState {
@@ -57062,6 +59499,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct RewardPool {
@@ -57083,6 +59521,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct SubPools {
@@ -57104,6 +59543,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct UnbondPool {
@@ -57126,6 +59566,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events type."]
@@ -57156,6 +59597,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -57204,6 +59646,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -57247,6 +59690,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -57272,6 +59716,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum HoldReason {
@@ -57290,6 +59735,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum OldRequestStatus<_0, _1> {
@@ -57313,6 +59759,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RequestStatus<_0, _1> {
@@ -57341,6 +59788,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -57561,6 +60009,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -57601,6 +60050,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -57656,6 +60106,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Announcement<_0, _1, _2> {
@@ -57674,6 +60125,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ProxyDefinition<_0, _1, _2> {
@@ -57697,6 +60149,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -57815,6 +60268,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -57846,6 +60300,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events type."]
@@ -57916,6 +60371,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct RetryConfig<_0> {
@@ -57934,6 +60390,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Scheduled<_0, _1, _2, _3, _4> {
@@ -57961,6 +60418,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -57968,25 +60426,66 @@ pub mod api {
 					#[codec(index = 0)]
 					#[doc = "Create a new service blueprint."]
 					#[doc = ""]
-					#[doc = "A Service Blueprint is a template for a service that can be instantiated later on by a"]
-					#[doc = "user."]
+					#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The blueprint"]
+					#[doc = "defines the service's constraints, requirements and behavior, including the master blueprint service"]
+					#[doc = "manager revision to use."]
 					#[doc = ""]
-					#[doc = "# Parameters"]
-					#[doc = "- `origin`: The account that is creating the service blueprint."]
-					#[doc = "- `blueprint`: The blueprint of the service."]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* The origin must be signed by the account that will own the blueprint"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call, must be signed by the account creating the blueprint"]
+					#[doc = "* `blueprint` - The service blueprint containing:"]
+					#[doc = "  - Service constraints and requirements"]
+					#[doc = "  - Master blueprint service manager revision (Latest or Specific)"]
+					#[doc = "  - Template configuration for service instantiation"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::BadOrigin`] - Origin is not signed"]
+					#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist"]
+					#[doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"]
+					#[doc = ""]
+					#[doc = "# Returns"]
+					#[doc = ""]
+					#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event"]
+					#[doc = "containing the owner and blueprint ID."]
 					create_blueprint {
 						blueprint: runtime_types::tangle_primitives::services::ServiceBlueprint,
 					},
 					#[codec(index = 1)]
 					#[doc = "Pre-register the caller as an operator for a specific blueprint."]
 					#[doc = ""]
-					#[doc = "The caller can pre-register for a blueprint, which will emit a `PreRegistration` event."]
-					#[doc = "This event can be listened to by the operator node to execute the custom blueprint's"]
-					#[doc = "registration function."]
+					#[doc = "This function allows an account to signal intent to become an operator for a blueprint by emitting"]
+					#[doc = "a `PreRegistration` event. The operator node can listen for this event to execute any custom"]
+					#[doc = "registration logic defined in the blueprint."]
 					#[doc = ""]
-					#[doc = "# Parameters"]
-					#[doc = "- `origin`: The account that is pre-registering for the service blueprint."]
-					#[doc = "- `blueprint_id`: The ID of the service blueprint."]
+					#[doc = "Pre-registration is the first step in the operator registration flow. After pre-registering,"]
+					#[doc = "operators must complete the full registration process by calling `register()` with their preferences"]
+					#[doc = "and registration arguments."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to"]
+					#[doc = "  become an operator."]
+					#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer"]
+					#[doc = "  to an existing blueprint."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* The caller must be a signed account."]
+					#[doc = ""]
+					#[doc = "# Events"]
+					#[doc = ""]
+					#[doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"]
+					#[doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"]
+					#[doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::BadOrigin`] - The origin was not signed."]
 					pre_register {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
@@ -57994,8 +60493,31 @@ pub mod api {
 					#[codec(index = 2)]
 					#[doc = "Register the caller as an operator for a specific blueprint."]
 					#[doc = ""]
-					#[doc = "The caller may require an approval first before they can accept to provide the service"]
-					#[doc = "for the users."]
+					#[doc = "This function allows an account to register as an operator for a blueprint by providing their"]
+					#[doc = "service preferences, registration arguments, and staking the required tokens. The operator must"]
+					#[doc = "be active in the delegation system and may require approval before accepting service requests."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* The caller must be a signed account"]
+					#[doc = "* The caller must be an active operator in the delegation system"]
+					#[doc = "* The caller must not already be registered for this blueprint"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call. Must be signed."]
+					#[doc = "* `blueprint_id` - The identifier of the service blueprint to register for"]
+					#[doc = "* `preferences` - The operator's service preferences and configuration"]
+					#[doc = "* `registration_args` - Registration arguments required by the blueprint"]
+					#[doc = "* `value` - Amount of tokens to stake for registration"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system"]
+					#[doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"]
+					#[doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"]
+					#[doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"]
+					#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit"]
 					register {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
@@ -58010,28 +60532,84 @@ pub mod api {
 						value: ::core::primitive::u128,
 					},
 					#[codec(index = 3)]
-					#[doc = "Unregister the caller from being an operator for the service blueprint"]
-					#[doc = "so that, no more services will assigned to the caller for this specific blueprint."]
-					#[doc = "Note that, the caller needs to keep providing service for other active service"]
-					#[doc = "that uses this blueprint, until the end of service time, otherwise they may get reported"]
-					#[doc = "and slashed."]
+					#[doc = "Unregisters a service provider from a specific service blueprint."]
+					#[doc = ""]
+					#[doc = "After unregistering, the provider will no longer receive new service assignments for this blueprint."]
+					#[doc = "However, they must continue servicing any active assignments until completion to avoid penalties."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call. Must be signed."]
+					#[doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Must be signed by a registered service provider"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"]
+					#[doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"]
+					#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"]
 					unregister {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
 					},
 					#[codec(index = 4)]
-					#[doc = "Update the price targets for the caller for a specific service blueprint."]
+					#[doc = "Updates the price targets for a registered operator's service blueprint."]
 					#[doc = ""]
-					#[doc = "See [`Self::register`] for more information."]
+					#[doc = "Allows an operator to modify their price targets for a specific blueprint they are registered for."]
+					#[doc = "The operator must already be registered for the blueprint to update prices."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
+					#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update price targets for."]
+					#[doc = "* `price_targets: PriceTargets` - The new price targets to set for the blueprint."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Must be signed by a registered operator for this blueprint."]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
+					#[doc = "* [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted."]
+					#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
 					update_price_targets {
 						#[codec(compact)]
 						blueprint_id: ::core::primitive::u64,
 						price_targets: runtime_types::tangle_primitives::services::PriceTargets,
 					},
 					#[codec(index = 5)]
-					#[doc = "Request a new service to be initiated using the provided blueprint with a list of"]
-					#[doc = "operators that will run your service. Optionally, you can customize who is permitted"]
-					#[doc = "caller of this service, by default only the caller is allowed to call the service."]
+					#[doc = "Request a new service using a blueprint and specified operators."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."]
+					#[doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."]
+					#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."]
+					#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call."]
+					#[doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."]
+					#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments."]
+					#[doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."]
+					#[doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."]
+					#[doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."]
+					#[doc = "* `value: BalanceOf<T>` - Payment amount for the service."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Must be signed by an account with sufficient balance to pay for the service."]
+					#[doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."]
+					#[doc = "* [`Error::NoAssetsProvided`] - No assets were specified."]
+					#[doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."]
+					#[doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."]
+					#[doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."]
+					#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
 					request {
 						evm_origin: ::core::option::Option<::subxt_core::utils::H160>,
 						#[codec(compact)]
@@ -58054,10 +60632,23 @@ pub mod api {
 						value: ::core::primitive::u128,
 					},
 					#[codec(index = 6)]
-					#[doc = "Approve a service request, so that the service can be initiated."]
+					#[doc = "Approve a service request, allowing it to be initiated once all required approvals are received."]
 					#[doc = ""]
-					#[doc = "The `restaking_percent` is the percentage of the restaked tokens that will be exposed to"]
-					#[doc = "the service."]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Caller must be a registered operator for the service blueprint"]
+					#[doc = "* Caller must be in the pending approvals list for this request"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call, must be a signed account"]
+					#[doc = "* `request_id` - The ID of the service request to approve"]
+					#[doc = "* `restaking_percent` - Percentage of staked tokens to expose to this service (0-100)"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"]
+					#[doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"]
 					approve {
 						#[codec(compact)]
 						request_id: ::core::primitive::u64,
@@ -58065,22 +60656,74 @@ pub mod api {
 						restaking_percent: runtime_types::sp_arithmetic::per_things::Percent,
 					},
 					#[codec(index = 7)]
-					#[doc = "Reject a service request."]
-					#[doc = "The service will not be initiated, and the requester will need to update the service"]
-					#[doc = "request."]
+					#[doc = "Reject a service request, preventing its initiation."]
+					#[doc = ""]
+					#[doc = "The service request will remain in the system but marked as rejected. The requester will"]
+					#[doc = "need to update the service request to proceed."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Caller must be a registered operator for the blueprint associated with this request"]
+					#[doc = "* Caller must be one of the operators required to approve this request"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call, must be a signed account"]
+					#[doc = "* `request_id` - The ID of the service request to reject"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request"]
+					#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment"]
+					#[doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"]
 					reject {
 						#[codec(compact)]
 						request_id: ::core::primitive::u64,
 					},
 					#[codec(index = 8)]
-					#[doc = "Terminates the service by the owner of the service."]
+					#[doc = "Terminates a running service instance."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Must be signed by the service owner"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call"]
+					#[doc = "* `service_id` - The identifier of the service to terminate"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+					#[doc = "* [`Error::NotRegistered`] - Service operator not registered"]
+					#[doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"]
+					#[doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"]
 					terminate {
 						#[codec(compact)]
 						service_id: ::core::primitive::u64,
 					},
 					#[codec(index = 9)]
-					#[doc = "Call a Job in the service."]
-					#[doc = "The caller needs to be the owner of the service, or a permitted caller."]
+					#[doc = "Call a job in the service with the provided arguments."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Must be signed by the service owner or a permitted caller"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call"]
+					#[doc = "* `service_id` - The service identifier"]
+					#[doc = "* `job` - The job index to call"]
+					#[doc = "* `args` - The arguments to pass to the job"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+					#[doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"]
+					#[doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"]
+					#[doc = "* [`Error::TypeCheck`] - Arguments fail type checking"]
+					#[doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"]
+					#[doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"]
 					call {
 						#[codec(compact)]
 						service_id: ::core::primitive::u64,
@@ -58093,7 +60736,27 @@ pub mod api {
 						>,
 					},
 					#[codec(index = 10)]
-					#[doc = "Submit the job result by using the service ID and call ID."]
+					#[doc = "Submit a result for a previously called job."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `service_id` - ID of the service"]
+					#[doc = "* `call_id` - ID of the job call"]
+					#[doc = "* `result` - Vector of result fields"]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Caller must be an operator of the service"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"]
+					#[doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"]
+					#[doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"]
+					#[doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"]
+					#[doc = "* [`Error::TypeCheck`] - Result fields fail type checking"]
+					#[doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"]
+					#[doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"]
 					submit_result {
 						#[codec(compact)]
 						service_id: ::core::primitive::u64,
@@ -58106,12 +60769,30 @@ pub mod api {
 						>,
 					},
 					#[codec(index = 11)]
-					#[doc = "Slash an operator (offender) for a service id with a given percent of their exposed"]
-					#[doc = "stake for that service."]
+					#[doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."]
 					#[doc = ""]
-					#[doc = "The caller needs to be an authorized Slash Origin for this service."]
-					#[doc = "Note that this does not apply the slash directly, but instead schedules a deferred call"]
-					#[doc = "to apply the slash by another entity."]
+					#[doc = "This function schedules a deferred slashing action against an operator's stake for a specific service."]
+					#[doc = "The slash is not applied immediately, but rather queued to be executed by another entity later."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"]
+					#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call"]
+					#[doc = "  will fail."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."]
+					#[doc = "* `offender` - The account ID of the operator to be slashed."]
+					#[doc = "* `service_id` - The ID of the service for which to slash the operator."]
+					#[doc = "* `percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value."]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"]
+					#[doc = "* `BadOrigin` - Caller is not the authorized slashing origin"]
+					#[doc = "* `OffenderNotOperator` - Target account is not an operator for this service"]
+					#[doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"]
 					slash {
 						offender: ::subxt_core::utils::AccountId32,
 						#[codec(compact)]
@@ -58120,10 +60801,25 @@ pub mod api {
 						percent: runtime_types::sp_arithmetic::per_things::Percent,
 					},
 					#[codec(index = 12)]
-					#[doc = "Dispute an [UnappliedSlash] for a given era and index."]
+					#[doc = "Disputes and removes an [UnappliedSlash] from storage."]
 					#[doc = ""]
-					#[doc = "The caller needs to be an authorized Dispute Origin for the service in the"]
-					#[doc = "[UnappliedSlash]."]
+					#[doc = "The slash will not be applied once disputed and is permanently removed."]
+					#[doc = ""]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Caller must be the authorized dispute origin for the service"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - Origin of the call"]
+					#[doc = "* `era` - Era containing the slash to dispute  "]
+					#[doc = "* `index` - Index of the slash within the era"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"]
+					#[doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"]
+					#[doc = ""]
 					dispute {
 						#[codec(compact)]
 						era: ::core::primitive::u32,
@@ -58131,9 +60827,20 @@ pub mod api {
 						index: ::core::primitive::u32,
 					},
 					#[codec(index = 13)]
-					#[doc = "Adds a new Master Blueprint Service Manager to the list of revisions."]
+					#[doc = "Updates the Master Blueprint Service Manager by adding a new revision."]
 					#[doc = ""]
-					#[doc = "The caller needs to be an authorized Master Blueprint Service Manager Update Origin."]
+					#[doc = "# Permissions"]
+					#[doc = ""]
+					#[doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = ""]
+					#[doc = "* `origin` - Origin of the call"]
+					#[doc = "* `address` - New manager address to add"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = ""]
+					#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached"]
 					update_master_blueprint_service_manager { address: ::subxt_core::utils::H160 },
 				}
 				#[derive(
@@ -58147,6 +60854,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -58294,6 +61002,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -58455,6 +61164,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct UnappliedSlash<_0, _1> {
@@ -58482,6 +61192,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -58526,6 +61237,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Error for the session pallet."]
@@ -58557,6 +61269,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -58585,6 +61298,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -59105,6 +61819,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum ConfigOp<_0> {
@@ -59126,6 +61841,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					#[doc = "The `Error` enum of this pallet."]
@@ -59239,6 +61955,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					#[doc = "The `Event` enum of this pallet"]
@@ -59355,6 +62072,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SlashingSpans {
@@ -59374,6 +62092,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SpanRecord<_0> {
@@ -59392,6 +62111,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ActiveEraInfo {
@@ -59409,6 +62129,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct EraRewardPoints<_0> {
@@ -59426,6 +62147,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Forcing {
@@ -59449,6 +62171,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Nominations {
@@ -59469,6 +62192,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RewardDestination<_0> {
@@ -59494,6 +62218,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct StakingLedger {
@@ -59521,6 +62246,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct UnappliedSlash<_0, _1> {
@@ -59541,6 +62267,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct UnlockChunk<_0> {
@@ -59560,6 +62287,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ValidatorPrefs {
@@ -59583,6 +62311,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -59646,6 +62375,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Error for the Sudo pallet."]
@@ -59665,6 +62395,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -59708,11 +62439,12 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Stake funds with a pool. The amount to bond is transferred from the member to the"] # [doc = "pools account and immediately increases the pools bond."] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* This call will *not* dust the member account, so the member must have at least"] # [doc = "  `existential deposit + amount` in their account."] # [doc = "* Only a pool with [`PoolState::Open`] can be joined"] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Bond `extra` more funds from `origin` into the pool to which they already belong."] # [doc = ""] # [doc = "Additional funds can come from either the free balance of the account, of from the"] # [doc = "accumulated rewards, see [`BondExtra`]."] # [doc = ""] # [doc = "Bonding extra funds implies an automatic payout of all pending rewards as well."] # [doc = "See `bond_extra_other` to bond pending rewards of `other` members."] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "Unbond up to `unbonding_points` of the `member_account`'s funds from the pool. It"] # [doc = "implicitly collects the rewards one last time, since not doing so would mean some"] # [doc = "rewards would be forfeited."] # [doc = ""] # [doc = "Under certain conditions, this call can be dispatched permissionlessly (i.e. by any"] # [doc = "account)."] # [doc = ""] # [doc = "# Conditions for a permissionless dispatch."] # [doc = ""] # [doc = "* The pool is blocked and the caller is either the root or bouncer. This is refereed to"] # [doc = "  as a kick."] # [doc = "* The pool is destroying and the member is not the depositor."] # [doc = "* The pool is destroying, the member is the depositor and no other members are in the"] # [doc = "  pool."] # [doc = ""] # [doc = "## Conditions for permissioned dispatch (i.e. the caller is also the"] # [doc = "`member_account`):"] # [doc = ""] # [doc = "* The caller is not the depositor."] # [doc = "* The caller is the depositor, the pool is destroying and no other members are in the"] # [doc = "  pool."] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "If there are too many unlocking chunks to unbond with the pool account,"] # [doc = "[`Call::pool_withdraw_unbonded`] can be called to try and minimize unlocking chunks."] # [doc = "The [`StakingInterface::unbond`] will implicitly call [`Call::pool_withdraw_unbonded`]"] # [doc = "to try to free chunks if necessary (ie. if unbound was called and no unlocking chunks"] # [doc = "are available). However, it may not be possible to release the current unlocking chunks,"] # [doc = "in which case, the result of this call will likely be the `NoMoreChunks` error from the"] # [doc = "staking system."] unbond { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Call `withdraw_unbonded` for the pools account. This call can be made by any account."] # [doc = ""] # [doc = "This is useful if there are too many unlocking chunks to call `unbond`, and some"] # [doc = "can be cleared by withdrawing. In the case there are too many unlocking chunks, the user"] # [doc = "would probably see an error like `NoMoreChunks` emitted from the staking system when"] # [doc = "they attempt to unbond."] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Withdraw unbonded funds from `member_account`. If no bonded funds can be unbonded, an"] # [doc = "error is returned."] # [doc = ""] # [doc = "Under certain conditions, this call can be dispatched permissionlessly (i.e. by any"] # [doc = "account)."] # [doc = ""] # [doc = "# Conditions for a permissionless dispatch"] # [doc = ""] # [doc = "* The pool is in destroy mode and the target is not the depositor."] # [doc = "* The target is the depositor and they are the only member in the sub pools."] # [doc = "* The pool is blocked and the caller is either the root or bouncer."] # [doc = ""] # [doc = "# Conditions for permissioned dispatch"] # [doc = ""] # [doc = "* The caller is the target and they are not the depositor."] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "If the target is the depositor, the pool will be destroyed."] withdraw_unbonded { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Create a new delegation pool."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `amount` - The amount of funds to delegate to the pool. This also acts of a sort of"] # [doc = "  deposit since the pools creator cannot fully unbond funds until the pool is being"] # [doc = "  destroyed."] # [doc = "* `index` - A disambiguation index for creating the account. Likely only useful when"] # [doc = "  creating multiple pools in the same extrinsic."] # [doc = "* `root` - The account to set as [`PoolRoles::root`]."] # [doc = "* `nominator` - The account to set as the [`PoolRoles::nominator`]."] # [doc = "* `bouncer` - The account to set as the [`PoolRoles::bouncer`]."] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "In addition to `amount`, the caller will transfer the existential deposit; so the caller"] # [doc = "needs at have at least `amount + existential_deposit` transferable."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 7)] # [doc = "Create a new delegation pool with a previously used pool id"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "same as `create` with the inclusion of"] # [doc = "* `pool_id` - `A valid PoolId."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 8)] # [doc = "Nominate on behalf of the pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by the pool nominator or the pool"] # [doc = "root role."] # [doc = ""] # [doc = "This directly forward the call to the staking pallet, on behalf of the pool bonded"] # [doc = "account."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "Set a new state for the pool."] # [doc = ""] # [doc = "If a pool is already in the `Destroying` state, then under no condition can its state"] # [doc = "change again."] # [doc = ""] # [doc = "The dispatch origin of this call must be either:"] # [doc = ""] # [doc = "1. signed by the bouncer, or the root role of the pool,"] # [doc = "2. if the pool conditions to be open are NOT met (as described by `ok_to_be_open`), and"] # [doc = "   then the state of the pool can be permissionlessly changed to `Destroying`."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "Set a new metadata for the pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by the bouncer, or the root role of the"] # [doc = "pool."] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "Update configurations for the nomination pools. The origin for this call must be"] # [doc = "Root."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `min_join_bond` - Set [`MinJoinBond`]."] # [doc = "* `min_create_bond` - Set [`MinCreateBond`]."] # [doc = "* `max_pools` - Set [`MaxPools`]."] # [doc = "* `max_members` - Set [`MaxPoolMembers`]."] # [doc = "* `max_members_per_pool` - Set [`MaxPoolMembersPerPool`]."] # [doc = "* `global_max_commission` - Set [`GlobalMaxCommission`]."] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "Update the roles of the pool."] # [doc = ""] # [doc = "The root is the only entity that can change any of the roles, including itself,"] # [doc = "excluding the depositor, who can never change."] # [doc = ""] # [doc = "It emits an event, notifying UIs of the role change. This event is quite relevant to"] # [doc = "most pool members and they should be informed of changes to pool roles."] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "Chill on behalf of the pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by the pool nominator or the pool"] # [doc = "root role, same as [`Pallet::nominate`]."] # [doc = ""] # [doc = "This directly forward the call to the staking pallet, on behalf of the pool bonded"] # [doc = "account."] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "`origin` bonds funds from `extra` for some pool member `member` into their respective"] # [doc = "pools."] # [doc = ""] # [doc = "`origin` can bond extra funds from free balance or pending rewards when `origin =="] # [doc = "other`."] # [doc = ""] # [doc = "In the case of `origin != other`, `origin` can only bond extra pending rewards of"] # [doc = "`other` members assuming set_claim_permission for the given member is"] # [doc = "`PermissionlessAll` or `PermissionlessCompound`."] bond_extra_other { member : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "Set the commission of a pool."] # [doc = "Both a commission percentage and a commission payee must be provided in the `current`"] # [doc = "tuple. Where a `current` of `None` is provided, any current commission will be removed."] # [doc = ""] # [doc = "- If a `None` is supplied to `new_commission`, existing commission will be removed."] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "Set the maximum commission of a pool."] # [doc = ""] # [doc = "- Initial max can be set to any `Perbill`, and only smaller values thereafter."] # [doc = "- Current commission will be lowered in the event it is higher than a new max"] # [doc = "  commission."] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "Set the commission change rate for a pool."] # [doc = ""] # [doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"] # [doc = "restrictive than the current."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "Claim pending commission."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by the `root` role of the pool. Pending"] # [doc = "commission is paid out and added to total claimed commission`. Total pending commission"] # [doc = "is reset to zero. the current."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Top up the deficit or withdraw the excess ED from the pool."] # [doc = ""] # [doc = "When a pool is created, the pool depositor transfers ED to the reward account of the"] # [doc = "pool. ED is subject to change and over time, the deposit in the reward account may be"] # [doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"] # [doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"] # [doc = "pool by either topping up the deficit or claiming the excess."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set or remove a pool's commission claim permission."] # [doc = ""] # [doc = "Determines who can claim the pool's pending commission. Only the `Root` role of the pool"] # [doc = "is able to conifigure commission claim permissions."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , }
+					# [codec (index = 0)] # [doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to stake"] # [doc = "* `pool_id` - Target pool ID"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* Member must have `existential deposit + amount` in account"] # [doc = "* Pool must be in [`PoolState::Open`] state"] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Bond additional funds into an existing pool position."] # [doc = ""] # [doc = "Additional funds can come from either free balance or accumulated rewards."] # [doc = "Automatically pays out all pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `extra` - Source and amount of additional funds"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = "* Must have permission to bond extra if not self"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* This transaction prioritizes readability and correctness over optimization"] # [doc = "* Multiple storage reads/writes are performed to reuse code"] # [doc = "* See `bond_extra_other` to bond pending rewards of other members"] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "Unbond points from a member's pool position, collecting any pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to unbond from"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `unbonding_points` - Amount of points to unbond"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is blocked and caller is root/bouncer (kick)"] # [doc = "  - Pool is destroying and member is not depositor"] # [doc = "  - Pool is destroying, member is depositor, and pool is empty"] # [doc = "* Permissioned (caller must be member) if:"] # [doc = "  - Caller is not depositor"] # [doc = "  - Caller is depositor, pool is destroying, and pool is empty"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"] # [doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"] # [doc = ""] # [doc = "# Note"] # [doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."] # [doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"] # [doc = "if chunks cannot be released."] unbond { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Withdraws unbonded funds from the pool's staking account."] # [doc = ""] # [doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."] # [doc = "Prevents `NoMoreChunks` errors from the staking system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Can be signed by any account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans to check"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotDestroying`] - Pool is in destroying state"] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Withdraw unbonded funds from a member account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is in destroy mode and target is not depositor"] # [doc = "  - Target is depositor and only member in sub pools"] # [doc = "  - Pool is blocked and caller is root/bouncer"] # [doc = "* Permissioned if caller is target and not depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to withdraw from"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolMemberNotFound`] - Member account not found"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"] # [doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"] # [doc = ""] # [doc = "If target is depositor, pool will be destroyed."] withdraw_unbonded { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Create a new delegation pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the initial depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"] # [doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 7)] # [doc = "Create a new delegation pool with a previously used pool ID."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `pool_id` - Pool ID to reuse"] # [doc = "* `name` - Optional pool name"] # [doc = "* `icon` - Optional pool icon"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"] # [doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 8)] # [doc = "Nominate validators on behalf of the pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool nominator or root role can nominate validators"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `validators` - List of validator accounts to nominate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Forwards nomination call to staking pallet using pool's bonded account."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"] # [doc = "changed again under any circumstances."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool bouncer or root role can set any state"] # [doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `state` - New state to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"] # [doc = "commission, member count and roles."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "Updates the metadata for a given pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the pool bouncer or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `metadata` - New metadata to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "Updates the global configuration parameters for nomination pools."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by Root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"] # [doc = "* `min_create_bond` - Config operation for minimum bond to create a pool  "] # [doc = "* `max_pools` - Config operation for maximum number of pools"] # [doc = "* `global_max_commission` - Config operation for maximum global commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "Update the roles of a pool."] # [doc = ""] # [doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."] # [doc = "Emits a `RolesUpdated` event on successful update."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be Root or pool root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `new_root` - New root role configuration"] # [doc = "* `new_nominator` - New nominator role configuration  "] # [doc = "* `new_bouncer` - New bouncer role configuration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be signed by pool nominator or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "Bond additional funds for a pool member into their respective pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must match member account for bonding from free balance/pending rewards"] # [doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"] # [doc = "  `PermissionlessCompound` claim permissions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `member` - Pool member account to bond for"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `extra` - Amount to bond from free balance or pending rewards"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"] # [doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"] bond_extra_other { member : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "Set or remove the commission rate and payee for a pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"] # [doc = "lower values allowed thereafter. Current commission will be reduced if above new max."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `max_commission` - The new maximum commission rate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "Set the commission change rate for a pool."] # [doc = ""] # [doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"] # [doc = "restrictive than the current."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."] # [doc = "* `pool_id` - The identifier of the pool to set commission change rate for."] # [doc = "* `change_rate` - The new commission change rate configuration."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "Claim pending commission for a pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by an account with commission claim permission."] # [doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"] # [doc = "is reset to zero."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."] # [doc = "* `pool_id` - The identifier of the pool to claim commission from."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Top up the deficit or withdraw the excess ED from the pool."] # [doc = ""] # [doc = "When a pool is created, the pool depositor transfers ED to the reward account of the"] # [doc = "pool. ED is subject to change and over time, the deposit in the reward account may be"] # [doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"] # [doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"] # [doc = "pool by either topping up the deficit or claiming the excess."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set or remove a pool's commission claim permission."] # [doc = ""] # [doc = "Only the `Root` role of the pool is able to configure commission claim permissions."] # [doc = "This determines which accounts are allowed to claim the pool's pending commission."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."] # [doc = "* `pool_id` - The identifier of the pool to set permissions for."] # [doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -59724,6 +62456,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum DefensiveError {
@@ -59749,6 +62482,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -59871,11 +62605,12 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events of this pallet."]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has became bonded in a pool."] Bonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been"] # [doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"] # [doc = "  pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return of `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of af the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , }
+					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has become bonded in a pool."] Bonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been"] # [doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"] # [doc = "  pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "  dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return for `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -59887,6 +62622,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum FreezeReason {
@@ -59909,6 +62645,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct BondedPoolInner {
@@ -59932,6 +62669,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct PoolMetadata {
@@ -59960,6 +62698,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct Commission { pub current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , pub max : :: core :: option :: Option < runtime_types :: sp_arithmetic :: per_things :: Perbill > , pub change_rate : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > > , pub throttle_from : :: core :: option :: Option < :: core :: primitive :: u64 > , pub claim_permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , }
@@ -59974,6 +62713,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct CommissionChangeRate<_0> {
@@ -59991,6 +62731,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum CommissionClaimPermission<_0> {
@@ -60013,6 +62754,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct PoolMember {
@@ -60033,6 +62775,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct PoolRoles<_0> {
@@ -60052,6 +62795,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum PoolState {
@@ -60076,6 +62820,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct RewardPool {
@@ -60097,6 +62842,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct SubPools {
@@ -60118,6 +62864,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct UnbondPool {
@@ -60136,6 +62883,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum BondExtra<_0> {
@@ -60153,6 +62901,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ClaimPermission {
@@ -60176,6 +62925,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ConfigOp<_0> {
@@ -60203,6 +62953,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -60249,6 +63000,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -60276,6 +63028,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct FeeDetails<_0> {
@@ -60295,6 +63048,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct InclusionFee<_0> {
@@ -60313,6 +63067,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct RuntimeDispatchInfo<_0, _1> {
@@ -60332,6 +63087,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ChargeTransactionPayment(#[codec(compact)] pub ::core::primitive::u128);
@@ -60346,6 +63102,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Releases {
@@ -60370,6 +63127,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -60533,6 +63291,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Error for the treasury pallet."]
@@ -60583,6 +63342,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -60655,6 +63415,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum PaymentState<_0> {
@@ -60676,6 +63437,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Proposal<_0, _1> {
@@ -60695,6 +63457,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct SpendStatus<_0, _1, _2, _3, _4> {
@@ -60723,6 +63486,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -60769,6 +63533,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -60796,6 +63561,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -60842,6 +63608,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -60968,6 +63735,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Error` enum of this pallet."]
@@ -60987,6 +63755,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -61034,6 +63803,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
@@ -61172,6 +63942,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Error for the vesting pallet."]
@@ -61204,6 +63975,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
@@ -61233,6 +64005,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct VestingInfo<_0, _1> {
@@ -61252,6 +64025,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Releases {
@@ -61274,6 +64048,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct U256(pub [::core::primitive::u64; 4usize]);
@@ -61291,6 +64066,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct TxPoolResponse {
@@ -61318,6 +64094,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct FixedU128(pub ::core::primitive::u128);
@@ -61336,6 +64113,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PerU16(pub ::core::primitive::u16);
@@ -61351,6 +64129,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Perbill(pub ::core::primitive::u32);
@@ -61366,6 +64145,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Percent(pub ::core::primitive::u8);
@@ -61381,6 +64161,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Permill(pub ::core::primitive::u32);
@@ -61396,6 +64177,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ArithmeticError {
@@ -61422,6 +64204,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Public(pub [::core::primitive::u8; 32usize]);
@@ -61439,6 +64222,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum NextConfigDescriptor {
@@ -61459,6 +64243,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum PreDigest {
@@ -61482,6 +64267,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PrimaryPreDigest {
@@ -61500,6 +64286,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SecondaryPlainPreDigest {
@@ -61517,6 +64304,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SecondaryVRFPreDigest {
@@ -61536,6 +64324,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum AllowedSlots {
@@ -61557,6 +64346,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct BabeConfiguration {
@@ -61581,6 +64371,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct BabeEpochConfiguration {
@@ -61598,6 +64389,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Epoch {
@@ -61622,6 +64414,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct OpaqueKeyOwnershipProof(
@@ -61643,6 +64436,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Public(pub [::core::primitive::u8; 32usize]);
@@ -61657,6 +64451,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Signature(pub [::core::primitive::u8; 64usize]);
@@ -61672,6 +64467,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Equivocation<_0, _1> {
@@ -61703,6 +64499,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct EquivocationProof<_0, _1> {
@@ -61723,6 +64520,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct EquivocationProof<_0, _1> {
@@ -61743,6 +64541,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Slot(pub ::core::primitive::u64);
@@ -61762,6 +64561,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct KeyTypeId(pub [::core::primitive::u8; 4usize]);
@@ -61781,6 +64581,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct VrfSignature {
@@ -61800,6 +64601,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct OpaqueMetadata(pub ::subxt_core::alloc::vec::Vec<::core::primitive::u8>);
@@ -61814,6 +64616,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum Void {}
@@ -61831,6 +64634,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct CheckInherentsResult {
@@ -61849,6 +64653,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct InherentData {
@@ -61871,6 +64676,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ElectionScore {
@@ -61889,6 +64695,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Support<_0> {
@@ -61913,6 +64720,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct Block<_0, _1> {
@@ -61933,6 +64741,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct Digest {
@@ -61951,6 +64760,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum DigestItem {
@@ -61988,6 +64798,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum Era {
@@ -62518,6 +65329,7 @@ pub mod api {
 						PartialEq,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct Header<_0> {
@@ -62543,6 +65355,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct BlakeTwo256;
@@ -62560,6 +65373,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum InvalidTransaction {
@@ -62597,6 +65411,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum TransactionSource {
@@ -62618,6 +65433,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum TransactionValidityError {
@@ -62637,6 +65453,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum UnknownTransaction {
@@ -62658,6 +65475,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ValidTransaction {
@@ -62683,6 +65501,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum DispatchError {
@@ -62726,6 +65545,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ExtrinsicInclusionMode {
@@ -62745,6 +65565,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ModuleError {
@@ -62762,6 +65583,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum MultiSignature {
@@ -62783,6 +65605,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct OpaqueValue(pub ::subxt_core::alloc::vec::Vec<::core::primitive::u8>);
@@ -62797,6 +65620,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum TokenError {
@@ -62832,6 +65656,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum TransactionalError {
@@ -62854,6 +65679,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct MembershipProof {
@@ -62879,6 +65705,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct OffenceDetails<_0, _1> {
@@ -62897,6 +65724,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Exposure<_0, _1> {
@@ -62919,6 +65747,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct ExposurePage<_0, _1> {
@@ -62939,6 +65768,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct IndividualExposure<_0, _1> {
@@ -62957,6 +65787,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct PagedExposureMetadata<_0> {
@@ -62981,6 +65812,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct RuntimeVersion {
@@ -63012,6 +65844,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Weight {
@@ -63032,6 +65865,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct RuntimeDbWeight {
@@ -63058,6 +65892,7 @@ pub mod api {
 						serde :: Serialize,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct BoundedString(
@@ -63094,6 +65929,7 @@ pub mod api {
 						serde :: Serialize,
 					)]
 					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub enum FieldType {
@@ -63167,6 +66003,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum ApprovalState {
@@ -63192,6 +66029,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Architecture {
@@ -63227,6 +66065,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Asset<_0> {
@@ -63248,6 +66087,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum BlueprintServiceManager {
@@ -63267,6 +66107,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ContainerGadget {
@@ -63287,6 +66128,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Gadget {
@@ -63310,6 +66152,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GadgetBinary {
@@ -63331,6 +66174,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GadgetSource {
@@ -63349,6 +66193,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum GadgetSourceFetcher {
@@ -63380,6 +66225,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct GithubFetcher {
@@ -63403,6 +66249,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ImageRegistryFetcher {
@@ -63421,6 +66268,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct JobCall<_1> {
@@ -63441,6 +66289,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct JobCallResult<_1> {
@@ -63463,6 +66312,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct JobDefinition {
@@ -63487,6 +66337,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct JobMetadata {
@@ -63508,6 +66359,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum MasterBlueprintServiceManagerRevision {
@@ -63529,6 +66381,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct NativeGadget {
@@ -63549,6 +66402,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum OperatingSystem {
@@ -63574,6 +66428,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct OperatorPreferences {
@@ -63591,6 +66446,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct OperatorProfile {
@@ -63614,6 +66470,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct PriceTargets {
@@ -63634,6 +66491,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct RpcServicesWithBlueprint<_1, _2, _3> {
@@ -63654,6 +66512,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct Service<_1, _2, _3> {
@@ -63682,6 +66541,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ServiceBlueprint { pub metadata : runtime_types :: tangle_primitives :: services :: ServiceMetadata , pub jobs : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: JobDefinition > , pub registration_params : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: field :: FieldType > , pub request_params : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: field :: FieldType > , pub manager : runtime_types :: tangle_primitives :: services :: BlueprintServiceManager , pub master_manager_revision : runtime_types :: tangle_primitives :: services :: MasterBlueprintServiceManagerRevision , pub gadget : runtime_types :: tangle_primitives :: services :: Gadget , }
@@ -63698,6 +66558,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ServiceMetadata {
@@ -63735,6 +66596,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct ServiceRequest<_1, _2, _3> {
@@ -63764,6 +66626,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct StagingServicePayment<_0, _1, _2> {
@@ -63785,6 +66648,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct TestFetcher {
@@ -63804,6 +66668,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum TypeCheckError {
@@ -63838,6 +66703,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct WasmGadget {
@@ -63859,6 +66725,7 @@ pub mod api {
 					serde :: Serialize,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum WasmRuntime {
@@ -63881,6 +66748,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub enum Account<_0> {
@@ -63906,6 +66774,7 @@ pub mod api {
 					PartialEq,
 				)]
 				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct SessionKeys {
@@ -63925,6 +66794,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct MaxDelegations;
@@ -63939,6 +66809,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct MaxDelegatorBlueprints;
@@ -63953,6 +66824,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct MaxOperatorBlueprints;
@@ -63967,6 +66839,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct MaxUnstakeRequests;
@@ -63981,6 +66854,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct MaxWithdrawRequests;
@@ -63995,6 +66869,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct NposSolution16 {
@@ -64164,6 +67039,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum OriginCaller {
@@ -64193,6 +67069,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum ProxyType {
@@ -64216,6 +67093,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub struct Runtime;
@@ -64230,6 +67108,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RuntimeCall {
@@ -64321,6 +67200,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RuntimeError {
@@ -64406,6 +67286,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RuntimeEvent {
@@ -64493,6 +67374,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RuntimeFreezeReason {
@@ -64512,6 +67394,7 @@ pub mod api {
 				PartialEq,
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			pub enum RuntimeHoldReason {
