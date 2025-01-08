@@ -138,12 +138,33 @@ where
 	#[precompile::public("executeWithdraw()")]
 	fn execute_withdraw(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+
+		let pallet_account_id = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
+		let pallet_address = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
+
+		let snapshot =
+			pallet_multi_asset_delegation::Pallet::<Runtime>::ready_withdraw_requests(&who)
+				.map_err(|_| revert("Failed to get ready withdraw requests"))?;
+
+		let erc20_transfers = snapshot.filter_map(|request| match request.asset_id {
+			Asset::Erc20(token) => Some((token, request.amount)),
+			_ => None,
+		});
+
+		for (token, amount) in erc20_transfers {
+			let v: U256 = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+			if !erc20_transfer(handle, token.into(), pallet_address.into(), caller.into(), v)? {
+				return Err(revert("Failed to transfer ERC20 tokens"));
+			}
+		}
+
 		let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_withdraw {
-			evm_address: Some(handle.context().caller),
+			evm_address: Some(caller),
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(pallet_account_id).into(), call)?;
 
 		// TODO: Execute the ERC20 Transfers here.
 

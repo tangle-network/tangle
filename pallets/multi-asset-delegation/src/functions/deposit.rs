@@ -149,6 +149,40 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
+	/// Returns an iterator over all withdraw requests that are ready to be executed.
+	///
+	/// A withdraw request is considered ready when the current round number is greater than or equal to
+	/// the requested round plus the configured delay period.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator to check withdraw requests for.
+	///
+	/// # Returns
+	///
+	/// An iterator yielding `WithdrawRequest` entries that are ready to be executed, or an error if
+	/// the account is not a delegator.
+	///
+	/// # Errors
+	///
+	/// Returns `Error::NotDelegator` if the provided account is not registered as a delegator.
+	pub fn ready_withdraw_requests(
+		who: &T::AccountId,
+	) -> Result<impl Iterator<Item = WithdrawRequest<T::AssetId, BalanceOf<T>>>, Error<T>> {
+		let metadata = Delegators::<T>::get(who).ok_or(Error::<T>::NotDelegator)?;
+		let iter = metadata.withdraw_requests.into_iter().filter_map(|request| {
+			let current_round = Self::current_round();
+			let delay = T::LeaveDelegatorsDelay::get();
+			if current_round >= delay + request.requested_round {
+				Some(request)
+			} else {
+				None
+			}
+		});
+
+		Ok(iter)
+	}
+
 	/// Executes a withdraw request for a delegator.
 	///
 	/// # Arguments
@@ -159,10 +193,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the user is not a delegator, if there are no withdraw requests, or if
 	/// the withdraw request is not ready.
-	pub fn process_execute_withdraw(
-		who: T::AccountId,
-		evm_address: Option<H160>,
-	) -> DispatchResult {
+	pub fn process_execute_withdraw(who: T::AccountId) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
@@ -172,10 +203,8 @@ impl<T: Config> Pallet<T> {
 			let current_round = Self::current_round();
 			let delay = T::LeaveDelegatorsDelay::get();
 
-			// Process all ready withdraw requests
-			let mut i = 0;
-			while i < metadata.withdraw_requests.len() {
-				let request = &metadata.withdraw_requests[i];
+			// Process all ready withdraw requests using retain
+			metadata.withdraw_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
 					let transfer_success = match request.asset_id {
 						Asset::Custom(asset_id) => T::Fungibles::transfer(
@@ -186,35 +215,21 @@ impl<T: Config> Pallet<T> {
 							Preservation::Expendable,
 						)
 						.is_ok(),
-						Asset::Erc20(asset_address) => {
-							if let Some(evm_addr) = evm_address {
-								if let Ok((success, _weight)) = Self::erc20_transfer(
-									asset_address,
-									&Self::pallet_evm_account(),
-									evm_addr,
-									request.amount,
-								) {
-									success
-								} else {
-									false
-								}
-							} else {
-								false
-							}
+						Asset::Erc20(_) => {
+							// Handled by the Precompile, always return true
+							//
+							// Note to the reader: This is set to true with the assumption that the
+							// if the precompiled failed to transfer the funds, after this call, the whole
+							// transaction will be reverted. This is a safe assumption because the precompile
+							// will revert the transaction if the transfer fails.
+							true
 						},
 					};
-
-					if transfer_success {
-						// Remove the completed request
-						metadata.withdraw_requests.remove(i);
-					} else {
-						// Only increment if we didn't remove the request
-						i += 1;
-					}
+					!transfer_success
 				} else {
-					i += 1;
+					true
 				}
-			}
+			});
 
 			Ok(())
 		})

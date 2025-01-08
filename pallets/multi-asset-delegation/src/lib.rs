@@ -756,8 +756,14 @@ pub mod pallet {
 		#[pallet::call_index(12)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			Self::process_execute_withdraw(who.clone(), evm_address)?;
+			let who = match evm_address {
+				Some(addr) => {
+					ensure_pallet::<T, _>(origin)?;
+					T::EvmAddressMapping::into_account_id(addr)
+				},
+				None => ensure_signed(origin)?,
+			};
+			Self::process_execute_withdraw(who.clone())?;
 			Self::deposit_event(Event::Executedwithdraw { who });
 			Ok(())
 		}
