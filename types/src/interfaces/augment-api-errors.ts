@@ -1082,6 +1082,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CapExceedsTotalSupply: AugmentedError<ApiType>;
       /**
+       * Above deposit caps setup
+       **/
+      DepositExceedsCapForAsset: AugmentedError<ApiType>;
+      /**
        * Deposit amount overflow
        **/
       DepositOverflow: AugmentedError<ApiType>;
@@ -1113,6 +1117,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Leaving round not reached
        **/
       LeavingRoundNotReached: AugmentedError<ApiType>;
+      /**
+       * Cannot unstake with locks
+       **/
+      LockViolation: AugmentedError<ApiType>;
       /**
        * Maximum number of blueprints exceeded
        **/
@@ -1509,6 +1517,60 @@ declare module '@polkadot/api-base/types/errors' {
        * A call which is incompatible with the proxy type's filter was attempted.
        **/
       Unproxyable: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    rewards: {
+      /**
+       * Arithmetic operation caused an overflow
+       **/
+      ArithmeticError: AugmentedError<ApiType>;
+      /**
+       * Asset already exists in a reward vault
+       **/
+      AssetAlreadyInVault: AugmentedError<ApiType>;
+      /**
+       * Asset is already whitelisted
+       **/
+      AssetAlreadyWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Asset not found in reward vault
+       **/
+      AssetNotInVault: AugmentedError<ApiType>;
+      /**
+       * Asset is not whitelisted for rewards
+       **/
+      AssetNotWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to remove a blueprint ID that doesn't exist.
+       **/
+      BlueprintIdNotFound: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to add a blueprint ID that already exists.
+       **/
+      DuplicateBlueprintId: AugmentedError<ApiType>;
+      /**
+       * Insufficient rewards balance in pallet account
+       **/
+      InsufficientRewardsBalance: AugmentedError<ApiType>;
+      /**
+       * Invalid APY value
+       **/
+      InvalidAPY: AugmentedError<ApiType>;
+      /**
+       * No rewards available to claim
+       **/
+      NoRewardsAvailable: AugmentedError<ApiType>;
+      /**
+       * Error returned when the reward configuration for the vault is not found.
+       **/
+      RewardConfigNotFound: AugmentedError<ApiType>;
+      /**
+       * The reward vault does not exist
+       **/
+      VaultNotFound: AugmentedError<ApiType>;
       /**
        * Generic error
        **/

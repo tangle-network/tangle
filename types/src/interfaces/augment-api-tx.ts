@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesServicesAsset, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesAsset, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -2644,7 +2644,7 @@ declare module '@polkadot/api-base/types/submittable' {
        * * [`Error::DepositOverflow`] - Deposit would overflow tracking
        * * [`Error::InvalidAsset`] - Asset is not supported
        **/
-      deposit: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array, evmAddress: Option<H160> | null | Uint8Array | H160 | string) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128, Option<H160>]>;
+      deposit: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array, evmAddress: Option<H160> | null | Uint8Array | H160 | string, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier> | null | Uint8Array | TanglePrimitivesRewardsLockMultiplier | 'OneMonth' | 'TwoMonths' | 'ThreeMonths' | 'SixMonths' | number) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128, Option<H160>, Option<TanglePrimitivesRewardsLockMultiplier>]>;
       /**
        * Executes a scheduled request to reduce a delegator's stake.
        * 
@@ -2770,26 +2770,6 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       joinOperators: AugmentedSubmittable<(bondAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
-       * Manage asset id to vault rewards.
-       * 
-       * # Permissions
-       * 
-       * * Must be signed by an authorized account
-       * 
-       * # Arguments
-       * 
-       * * `origin` - Origin of the call
-       * * `vault_id` - ID of the vault
-       * * `asset_id` - ID of the asset
-       * * `action` - Action to perform (Add/Remove)
-       * 
-       * # Errors
-       * 
-       * * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
-       * * [`Error::AssetNotInVault`] - Asset does not exist in vault
-       **/
-      manageAssetInVault: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, TanglePrimitivesServicesAsset, PalletMultiAssetDelegationRewardsAssetAction]>;
-      /**
        * Allows an operator to increase their stake.
        * 
        * # Permissions
@@ -2902,39 +2882,6 @@ declare module '@polkadot/api-base/types/submittable' {
        * * [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists
        **/
       scheduleWithdraw: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128]>;
-      /**
-       * Sets the APY and cap for a specific asset.
-       * 
-       * # Permissions
-       * 
-       * * Must be called by the force origin
-       * 
-       * # Arguments
-       * 
-       * * `origin` - Origin of the call
-       * * `vault_id` - ID of the vault
-       * * `apy` - Annual percentage yield (max 10%)
-       * * `cap` - Required deposit amount for full APY
-       * 
-       * # Errors
-       * 
-       * * [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum
-       * * [`Error::CapCannotBeZero`] - Cap amount cannot be zero
-       **/
-      setIncentiveApyAndCap: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, apy: Percent | AnyNumber | Uint8Array, cap: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, Percent, u128]>;
-      /**
-       * Whitelists a blueprint for rewards.
-       * 
-       * # Permissions
-       * 
-       * * Must be called by the force origin
-       * 
-       * # Arguments
-       * 
-       * * `origin` - Origin of the call
-       * * `blueprint_id` - ID of blueprint to whitelist
-       **/
-      whitelistBlueprintForRewards: AugmentedSubmittable<(blueprintId: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
       /**
        * Generic tx
        **/
@@ -3571,6 +3518,55 @@ declare module '@polkadot/api-base/types/submittable' {
        * - `proxy_type`: The permissions currently enabled for the removed proxy account.
        **/
       removeProxy: AugmentedSubmittable<(delegate: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, proxyType: TangleTestnetRuntimeProxyType | 'Any' | 'NonTransfer' | 'Governance' | 'Staking' | number | Uint8Array, delay: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, TangleTestnetRuntimeProxyType, u64]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
+    rewards: {
+      /**
+       * Claim rewards for a specific asset and reward type
+       **/
+      claimRewards: AugmentedSubmittable<(asset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset]>;
+      /**
+       * Manage asset id to vault rewards.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by an authorized account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `vault_id` - ID of the vault
+       * * `asset_id` - ID of the asset
+       * * `action` - Action to perform (Add/Remove)
+       * 
+       * # Errors
+       * 
+       * * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
+       * * [`Error::AssetNotInVault`] - Asset does not exist in vault
+       **/
+      manageAssetRewardVault: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, TanglePrimitivesServicesAsset, PalletRewardsAssetAction]>;
+      /**
+       * Updates the reward configuration for a specific vault.
+       * 
+       * # Arguments
+       * * `origin` - Origin of the call, must pass `ForceOrigin` check
+       * * `vault_id` - The ID of the vault to update
+       * * `new_config` - The new reward configuration containing:
+       * * `apy` - Annual Percentage Yield for the vault
+       * * `deposit_cap` - Maximum amount that can be deposited
+       * * `incentive_cap` - Maximum amount of incentives that can be distributed
+       * * `boost_multiplier` - Optional multiplier to boost rewards
+       * 
+       * # Events
+       * * `VaultRewardConfigUpdated` - Emitted when vault reward config is updated
+       * 
+       * # Errors
+       * * `BadOrigin` - If caller is not authorized through `ForceOrigin`
+       **/
+      updateVaultRewardConfig: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, newConfig: PalletRewardsRewardConfigForAssetVault | { apy?: any; incentiveCap?: any; depositCap?: any; boostMultiplier?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletRewardsRewardConfigForAssetVault]>;
       /**
        * Generic tx
        **/
