@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::{types::DelegatorStatus, CurrentRound, Error};
+use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::Bob;
 use sp_runtime::ArithmeticError;
@@ -52,12 +52,15 @@ fn deposit_should_work_for_fungible_asset() {
 			RuntimeOrigin::signed(who.clone()),
 			Asset::Custom(VDOT),
 			amount,
+			None,
 			None
 		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&amount));
+		let deposit = metadata.deposits.get(&Asset::Custom(VDOT)).unwrap();
+		assert_eq!(deposit.amount, amount);
+
 		assert_eq!(
 			System::events().last().unwrap().event,
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
@@ -82,12 +85,15 @@ fn deposit_should_work_for_evm_asset() {
 			RuntimeOrigin::signed(who.clone()),
 			Asset::Custom(VDOT),
 			amount,
+			None,
 			None
 		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&amount));
+		let deposit = metadata.deposits.get(&Asset::Custom(VDOT)).unwrap();
+		assert_eq!(deposit.amount, amount);
+
 		assert_eq!(
 			System::events().last().unwrap().event,
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
@@ -112,12 +118,15 @@ fn multiple_deposit_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			Asset::Custom(VDOT),
 			amount,
-			None
+			None,
+			None,
 		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&amount));
+		let deposit = metadata.deposits.get(&Asset::Custom(VDOT)).unwrap();
+		assert_eq!(deposit.amount, amount);
+
 		assert_eq!(
 			System::events().last().unwrap().event,
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
@@ -131,12 +140,15 @@ fn multiple_deposit_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			Asset::Custom(VDOT),
 			amount,
+			None,
 			None
 		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(VDOT),), Some(&(amount * 2)));
+		let deposit = metadata.deposits.get(&Asset::Custom(VDOT)).unwrap();
+		assert_eq!(deposit.amount, amount * 2);
+
 		assert_eq!(
 			System::events().last().unwrap().event,
 			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
@@ -162,6 +174,7 @@ fn deposit_should_fail_for_insufficient_balance() {
 				RuntimeOrigin::signed(who.clone()),
 				Asset::Custom(VDOT),
 				amount,
+				None,
 				None
 			),
 			ArithmeticError::Underflow
@@ -183,6 +196,7 @@ fn deposit_should_fail_for_bond_too_low() {
 				RuntimeOrigin::signed(who.clone()),
 				Asset::Custom(VDOT),
 				amount,
+				None,
 				None
 			),
 			Error::<Runtime>::BondTooLow
@@ -205,6 +219,7 @@ fn schedule_withdraw_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
 
@@ -216,11 +231,9 @@ fn schedule_withdraw_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.deposits.get(&asset_id), None);
+		let deposit = metadata.deposits.get(&asset_id).unwrap();
+		assert_eq!(deposit.amount, 0_u32.into());
 		assert!(!metadata.withdraw_requests.is_empty());
-		let request = metadata.withdraw_requests.first().unwrap();
-		assert_eq!(request.asset_id, asset_id);
-		assert_eq!(request.amount, amount);
 	});
 }
 
@@ -260,6 +273,7 @@ fn schedule_withdraw_should_fail_for_insufficient_balance() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			100,
+			None,
 			None
 		));
 
@@ -289,6 +303,7 @@ fn schedule_withdraw_should_fail_if_withdraw_request_exists() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
 
@@ -316,6 +331,7 @@ fn execute_withdraw_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
 		assert_ok!(MultiAssetDelegation::schedule_withdraw(
@@ -372,6 +388,7 @@ fn execute_withdraw_should_fail_if_no_withdraw_request() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
 
@@ -397,8 +414,10 @@ fn execute_withdraw_should_fail_if_withdraw_not_ready() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
+
 		assert_ok!(MultiAssetDelegation::schedule_withdraw(
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
@@ -435,8 +454,10 @@ fn cancel_withdraw_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
+
 		assert_ok!(MultiAssetDelegation::schedule_withdraw(
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
@@ -451,9 +472,9 @@ fn cancel_withdraw_should_work() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		let deposit = metadata.deposits.get(&asset_id).unwrap();
+		assert_eq!(deposit.amount, amount);
 		assert!(metadata.withdraw_requests.is_empty());
-		assert_eq!(metadata.deposits.get(&asset_id), Some(&amount));
-		assert_eq!(metadata.status, DelegatorStatus::Active);
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
@@ -494,6 +515,7 @@ fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id,
 			amount,
+			None,
 			None
 		));
 

@@ -32,17 +32,17 @@ use sp_core::{
 	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160,
 };
+use sp_runtime::DispatchError;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
-use tangle_primitives::{
-	services::{EvmAddressMapping, EvmGasWeightMapping},
-	ServiceManager,
-};
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
+use tangle_primitives::traits::{RewardsManager, ServiceManager};
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
+pub type BlockNumber = u64;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
 type AssetId = u128;
@@ -307,6 +307,45 @@ parameter_types! {
 	pub const MaxDelegations: u32 = 50;
 }
 
+pub struct MockRewardsManager;
+
+impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsManager {
+	type Error = DispatchError;
+
+	fn record_deposit(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+		_lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_withdrawal(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_service_reward(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn get_asset_deposit_cap_remaining(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(100_000_u32.into())
+	}
+
+	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(0_u32.into())
+	}
+}
+
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
@@ -323,7 +362,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = ConstU64<100>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type VaultId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
@@ -332,6 +370,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxDelegations = MaxDelegations;
 	type SlashedAmountRecipient = SlashedAmountRecipient;
 	type PalletId = PID;
+	type RewardsManager = MockRewardsManager;
 	type WeightInfo = ();
 }
 

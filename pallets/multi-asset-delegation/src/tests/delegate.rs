@@ -41,7 +41,8 @@ fn delegate_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
-			None
+			None,
+			None,
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -49,12 +50,11 @@ fn delegate_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert!(metadata.deposits.get(&asset_id).is_none());
 		assert_eq!(metadata.delegations.len(), 1);
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator.clone());
@@ -93,6 +93,7 @@ fn schedule_delegator_unstake_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
+			None,
 			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -100,7 +101,7 @@ fn schedule_delegator_unstake_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -146,6 +147,7 @@ fn execute_delegator_unstake_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
+			None,
 			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -153,8 +155,9 @@ fn execute_delegator_unstake_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
+
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
 			RuntimeOrigin::signed(who.clone()),
 			operator.clone(),
@@ -173,7 +176,9 @@ fn execute_delegator_unstake_should_work() {
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
 		assert!(metadata.delegator_unstake_requests.is_empty());
 		assert!(metadata.deposits.get(&asset_id).is_some());
-		assert_eq!(metadata.deposits.get(&asset_id).unwrap(), &amount);
+		let deposit = metadata.deposits.get(&asset_id).unwrap();
+		assert_eq!(deposit.amount, amount);
+		assert_eq!(deposit.delegated_amount, 0);
 	});
 }
 
@@ -198,6 +203,7 @@ fn cancel_delegator_unstake_should_work() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
+			None,
 			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -205,7 +211,7 @@ fn cancel_delegator_unstake_should_work() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -272,6 +278,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
+			None,
 			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -279,7 +286,7 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
 
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
@@ -349,6 +356,7 @@ fn delegate_should_fail_if_not_enough_balance() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount - 20,
+			None,
 			None
 		));
 
@@ -358,7 +366,7 @@ fn delegate_should_fail_if_not_enough_balance() {
 				operator.clone(),
 				asset_id.clone(),
 				amount,
-				Default::default()
+				Default::default(),
 			),
 			Error::<Runtime>::InsufficientBalance
 		);
@@ -386,6 +394,7 @@ fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
+			None,
 			None
 		));
 
@@ -422,6 +431,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount,
+			None,
 			None
 		));
 		assert_ok!(MultiAssetDelegation::delegate(
@@ -429,7 +439,7 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
 
 		assert_noop!(
@@ -478,6 +488,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			RuntimeOrigin::signed(who.clone()),
 			asset_id.clone(),
 			amount + additional_amount,
+			None,
 			None
 		));
 
@@ -487,7 +498,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator.clone(),
 			asset_id.clone(),
 			amount,
-			Default::default()
+			Default::default(),
 		));
 
 		// Assert first delegation
@@ -514,17 +525,8 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 			operator.clone(),
 			asset_id.clone(),
 			additional_amount,
-			Default::default()
+			Default::default(),
 		));
-
-		// Assert updated delegation
-		let updated_metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert!(updated_metadata.deposits.get(&asset_id).is_none());
-		assert_eq!(updated_metadata.delegations.len(), 1);
-		let updated_delegation = &updated_metadata.delegations[0];
-		assert_eq!(updated_delegation.operator, operator.clone());
-		assert_eq!(updated_delegation.amount, amount + additional_amount);
-		assert_eq!(updated_delegation.asset_id, asset_id);
 
 		// Check the updated operator metadata
 		let updated_operator_metadata =

@@ -20,13 +20,13 @@
 
 #[cfg(not(feature = "std"))]
 extern crate alloc;
-
 use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
 use sp_runtime::{traits::Get, DispatchResult};
+use tangle_primitives::traits::MultiAssetDelegationInfo;
 
 mod functions;
 mod impls;
@@ -71,7 +71,7 @@ pub mod module {
 	use sp_std::vec::Vec;
 	use tangle_primitives::{
 		services::{MasterBlueprintServiceManagerRevision, *},
-		Account, MultiAssetDelegationInfo,
+		Account,
 	};
 	use types::*;
 
@@ -187,6 +187,7 @@ pub mod module {
 		type OperatorDelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
 			Self::AccountId,
 			BalanceOf<Self>,
+			BlockNumberFor<Self>,
 		>;
 
 		/// Number of eras that slashes are deferred by, after computation.

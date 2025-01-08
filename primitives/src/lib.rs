@@ -30,13 +30,12 @@ use sp_runtime::{
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+pub mod chain_identifier;
+pub mod impls;
 pub mod services;
 pub mod types;
 pub use types::*;
-pub mod chain_identifier;
-pub mod impls;
 pub mod traits;
-pub use traits::*;
 
 #[cfg(feature = "verifying")]
 pub mod verifier;

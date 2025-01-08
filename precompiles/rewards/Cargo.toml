@@ -1,0 +1,216 @@
+[package]
+name = "pallet-evm-precompile-rewards"
+version = "0.1.0"
+authors = { workspace = true }
+edition = "2021"
+description = "A Precompile to make pallet-rewards calls encoding accessible to pallet-evm"
+
+[dependencies]
+precompile-utils = { workspace = true }
+
+# Substrate
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-multi-asset-delegation = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+
+# Frontier
+fp-evm = { workspace = true }
+pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
+
+tangle-primitives = { workspace = true }
+
+derive_more = { workspace = true, features = ["full"], optional = true }
+hex-literal = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+sha3 = { workspace = true, optional = true }
+ethereum = { workspace = true, features = ["with-codec"], optional = true }
+ethers = { version = "2.0", optional = true }
+hex = { workspace = true, optional = true }
+num_enum = { workspace = true, optional = true }
+libsecp256k1 = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+smallvec = { workspace = true, optional = true }
+sp-keystore = { workspace = true, optional = true }
+pallet-assets = { workspace = true, features = ["std"], optional = true }
+pallet-timestamp = { workspace = true, features = ["std"], optional = true }
+scale-info = { workspace = true, features = ["derive", "std"], optional = true }
+sp-io = { workspace = true, features = ["std"], optional = true }
+fp-account = { workspace = true, optional = true }
+fp-consensus = { workspace = true, optional = true }
+fp-dynamic-fee = { workspace = true, optional = true }
+fp-ethereum = { workspace = true, optional = true }
+fp-rpc = { workspace = true, optional = true }
+fp-self-contained = { workspace = true, optional = true }
+fp-storage = { workspace = true, optional = true }
+pallet-base-fee = { workspace = true, optional = true }
+pallet-dynamic-fee = { workspace = true, optional = true }
+pallet-ethereum = { workspace = true, optional = true }
+pallet-evm-chain-id = { workspace = true, optional = true }
+pallet-evm-precompile-blake2 = { workspace = true, optional = true }
+pallet-evm-precompile-bn128 = { workspace = true, optional = true }
+pallet-evm-precompile-curve25519 = { workspace = true, optional = true }
+pallet-evm-precompile-ed25519 = { workspace = true, optional = true }
+pallet-evm-precompile-modexp = { workspace = true, optional = true }
+pallet-evm-precompile-sha3fips = { workspace = true, optional = true }
+pallet-evm-precompile-simple = { workspace = true, optional = true }
+pallet-session = { workspace = true, optional = true }
+pallet-staking = { workspace = true, optional = true }
+sp-staking = { workspace = true, optional = true }
+frame-election-provider-support = { workspace = true, optional = true }
+ethabi = { workspace = true, optional = true }
+
+[dev-dependencies]
+derive_more = { workspace = true, features = ["full"] }
+hex-literal = { workspace = true }
+serde = { workspace = true }
+sha3 = { workspace = true }
+ethereum = { workspace = true, features = ["with-codec"] }
+ethers = "2.0"
+hex = { workspace = true }
+num_enum = { workspace = true }
+libsecp256k1 = { workspace = true }
+serde_json = { workspace = true }
+smallvec = { workspace = true }
+sp-keystore = { workspace = true }
+
+
+precompile-utils = { workspace = true, features = ["std", "testing"] }
+
+# Substrate
+pallet-balances = { workspace = true, features = ["std"] }
+pallet-assets = { workspace = true, features = ["std"] }
+pallet-timestamp = { workspace = true, features = ["std"] }
+scale-info = { workspace = true, features = ["derive", "std"] }
+sp-io = { workspace = true, features = ["std"] }
+
+# Frontier Primitive
+fp-account = { workspace = true }
+fp-consensus = { workspace = true }
+fp-dynamic-fee = { workspace = true }
+fp-ethereum = { workspace = true }
+fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
+fp-storage = { workspace = true }
+
+# Frontier FRAME
+pallet-base-fee = { workspace = true }
+pallet-dynamic-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
+
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-ed25519 = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+sp-staking = { workspace = true }
+frame-election-provider-support = { workspace = true }
+
+ethabi = { workspace = true }
+
+[features]
+default = ["std"]
+fuzzing = [
+    "derive_more",
+    "hex-literal",
+    "serde",
+    "sha3",
+    "ethereum",
+    "ethers",
+    "hex",
+    "num_enum",
+    "libsecp256k1",
+    "serde_json",
+    "smallvec",
+    "sp-keystore",
+    "pallet-assets",
+    "pallet-timestamp",
+    "scale-info",
+    "sp-io",
+    "fp-account",
+    "fp-consensus",
+    "fp-dynamic-fee",
+    "fp-ethereum",
+    "fp-rpc",
+    "fp-self-contained",
+    "fp-storage",
+    "pallet-base-fee",
+    "pallet-dynamic-fee",
+    "pallet-ethereum",
+    "pallet-evm-chain-id",
+    "pallet-evm-precompile-blake2",
+    "pallet-evm-precompile-bn128",
+    "pallet-evm-precompile-curve25519",
+    "pallet-evm-precompile-ed25519",
+    "pallet-evm-precompile-modexp",
+    "pallet-evm-precompile-sha3fips",
+    "pallet-evm-precompile-simple",
+    "pallet-session",
+    "pallet-staking",
+    "sp-staking",
+    "frame-election-provider-support",
+    "ethabi",
+]
+std = [
+    "fp-evm/std",
+    "frame-support/std",
+    "frame-system/std",
+    "pallet-balances/std",
+    "pallet-evm/std",
+    "pallet-multi-asset-delegation/std",
+    "parity-scale-codec/std",
+    "precompile-utils/std",
+    "sp-core/std",
+    "sp-runtime/std",
+    "sp-std/std",
+    "tangle-primitives/std",
+    "pallet-assets/std",
+    "hex/std",
+    "scale-info/std",
+    "sp-runtime/std",
+    "frame-support/std",
+    "frame-system/std",
+    "sp-core/std",
+    "sp-std/std",
+    "sp-io/std",
+    "tangle-primitives/std",
+    "pallet-balances/std",
+    "pallet-timestamp/std",
+    "fp-account/std",
+    "fp-consensus/std",
+    "fp-dynamic-fee/std",
+    "fp-ethereum/std",
+    "fp-evm/std",
+    "fp-rpc/std",
+    "fp-self-contained/std",
+    "fp-storage/std",
+    "pallet-base-fee/std",
+    "pallet-dynamic-fee/std",
+    "pallet-ethereum/std",
+    "pallet-evm/std",
+    "pallet-evm-chain-id/std",
+    "pallet-evm-precompile-modexp/std",
+    "pallet-evm-precompile-sha3fips/std",
+    "pallet-evm-precompile-simple/std",
+    "pallet-evm-precompile-blake2/std",
+    "pallet-evm-precompile-bn128/std",
+    "pallet-evm-precompile-curve25519/std",
+    "pallet-evm-precompile-ed25519/std",
+    "precompile-utils/std",
+    "serde/std",
+    "pallet-session/std",
+    "pallet-staking/std",
+    "sp-staking/std",
+    "frame-election-provider-support/std",
+]

@@ -2,7 +2,7 @@ use crate::{Config, MomentOf, TimestampedValueOf};
 use frame_support::traits::{Get, Time};
 use sp_runtime::traits::Saturating;
 use sp_std::{marker, prelude::*};
-use tangle_primitives::CombineData;
+use tangle_primitives::traits::CombineData;
 
 /// Sort by value and returns median timestamped value.
 /// Returns prev_value if not enough valid values.

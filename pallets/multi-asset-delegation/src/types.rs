@@ -16,6 +16,7 @@
 
 use crate::Config;
 use frame_support::traits::Currency;
+use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
@@ -56,4 +57,6 @@ pub type DelegatorMetadataOf<T> = DelegatorMetadata<
 	<T as Config>::MaxDelegations,
 	<T as Config>::MaxUnstakeRequests,
 	<T as Config>::MaxDelegatorBlueprints,
+	BlockNumberFor<T>,
+	<T as Config>::MaxDelegations,
 >;

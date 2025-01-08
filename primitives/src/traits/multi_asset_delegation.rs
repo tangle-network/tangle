@@ -1,3 +1,4 @@
+use crate::types::rewards::UserDepositWithLocks;
 use crate::{services::Asset, types::RoundIndex};
 use sp_std::prelude::*;
 
@@ -12,7 +13,8 @@ use sp_std::prelude::*;
 /// * `AccountId`: The type representing an account identifier.
 /// * `AssetId`: The type representing an asset identifier.
 /// * `Balance`: The type representing a balance or amount.
-pub trait MultiAssetDelegationInfo<AccountId, Balance> {
+/// * `BlockNumber`: The type representing a block number.
+pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 	type AssetId;
 
 	/// Get the current round index.
@@ -106,4 +108,9 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 		blueprint_id: crate::BlueprintId,
 		percentage: sp_runtime::Percent,
 	);
+
+	fn get_user_deposit_with_locks(
+		who: &AccountId,
+		asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, BlockNumber>>;
 }

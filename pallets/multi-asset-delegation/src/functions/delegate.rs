@@ -56,15 +56,13 @@ impl<T: Config> Pallet<T> {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure enough deposited balance
-			let balance =
+			let user_deposit =
 				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
-			ensure!(*balance >= amount, Error::<T>::InsufficientBalance);
 
-			// Reduce the balance in deposits
-			*balance = balance.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
-			if *balance == Zero::zero() {
-				metadata.deposits.remove(&asset_id);
-			}
+			// update the user deposit
+			user_deposit
+				.increase_delegated_amount(amount)
+				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
 			// Check if the delegation exists and update it, otherwise create a new delegation
 			if let Some(delegation) = metadata
@@ -237,27 +235,35 @@ impl<T: Config> Pallet<T> {
 			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
 
 			let current_round = Self::current_round();
+			let delay = T::DelegationBondLessDelay::get();
 
-			// Process all ready unstake requests
-			let mut executed_requests = Vec::new();
-			metadata.delegator_unstake_requests.retain(|request| {
-				let delay = T::DelegationBondLessDelay::get();
-				if current_round >= delay + request.requested_round {
-					// Add the amount back to the delegator's deposits
-					metadata
-						.deposits
-						.entry(request.asset_id)
-						.and_modify(|e| *e += request.amount)
-						.or_insert(request.amount);
-					executed_requests.push(request.clone());
-					false // Remove this request
-				} else {
-					true // Keep this request
-				}
-			});
+			// First, collect all ready requests and process them
+			let ready_requests: Vec<_> = metadata
+				.delegator_unstake_requests
+				.iter()
+				.filter(|request| current_round >= delay + request.requested_round)
+				.cloned()
+				.collect();
 
-			// If no requests were executed, return an error
-			ensure!(!executed_requests.is_empty(), Error::<T>::BondLessNotReady);
+			// If no requests are ready, return an error
+			ensure!(!ready_requests.is_empty(), Error::<T>::BondLessNotReady);
+
+			// Process each ready request
+			for request in ready_requests.iter() {
+				let deposit_record = metadata
+					.deposits
+					.get_mut(&request.asset_id)
+					.ok_or(Error::<T>::InsufficientBalance)?;
+
+				deposit_record
+					.decrease_delegated_amount(request.amount)
+					.map_err(|_| Error::<T>::InsufficientBalance)?;
+			}
+
+			// Remove the processed requests
+			metadata
+				.delegator_unstake_requests
+				.retain(|request| current_round < delay + request.requested_round);
 
 			Ok(())
 		})

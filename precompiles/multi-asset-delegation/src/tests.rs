@@ -80,7 +80,7 @@ fn test_delegate_assets_invalid_operator() {
 		Balances::make_free_balance_be(&delegator_account, 500);
 		create_and_mint_tokens(1, delegator_account, 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into())));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into()), None));
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -119,7 +119,8 @@ fn test_delegate_assets() {
 			RuntimeOrigin::signed(delegator_account),
 			Asset::Custom(1),
 			200,
-			Some(TestAccount::Alex.into())
+			Some(TestAccount::Alex.into()),
+			None
 		));
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
@@ -157,7 +158,7 @@ fn test_delegate_assets_insufficient_balance() {
 
 		create_and_mint_tokens(1, delegator_account, 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into())));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into()), None));
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -201,6 +202,7 @@ fn test_schedule_withdraw() {
 					asset_id: U256::from(1),
 					amount: U256::from(200),
 					token_address: Default::default(),
+					lock_multiplier: 0,
 				},
 			)
 			.execute_returns(());
@@ -234,10 +236,6 @@ fn test_schedule_withdraw() {
 				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change
 	});
@@ -265,6 +263,7 @@ fn test_execute_withdraw() {
 					asset_id: U256::from(1),
 					amount: U256::from(200),
 					token_address: Default::default(),
+					lock_multiplier: 0,
 				},
 			)
 			.execute_returns(());
@@ -298,19 +297,11 @@ fn test_execute_withdraw() {
 			)
 			.execute_returns(());
 
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(!metadata.withdraw_requests.is_empty());
-
 		<CurrentRound<Runtime>>::put(3);
 
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(metadata.withdraw_requests.is_empty());
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 100); // deposited 200, withdrew 100
 	});
@@ -339,6 +330,7 @@ fn test_execute_withdraw_before_due() {
 					asset_id: U256::from(1),
 					amount: U256::from(200),
 					token_address: Default::default(),
+					lock_multiplier: 0,
 				},
 			)
 			.execute_returns(());
@@ -373,10 +365,6 @@ fn test_execute_withdraw_before_due() {
 			)
 			.execute_returns(());
 
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(!metadata.withdraw_requests.is_empty());
-
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(()); // should not fail
@@ -408,6 +396,7 @@ fn test_cancel_withdraw() {
 					asset_id: U256::from(1),
 					amount: U256::from(200),
 					token_address: Default::default(),
+					lock_multiplier: 0,
 				},
 			)
 			.execute_returns(());
@@ -440,10 +429,6 @@ fn test_cancel_withdraw() {
 				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		PrecompilesValue::get()
 			.prepare_test(

@@ -79,7 +79,7 @@ pub use functions::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use crate::types::{delegator::DelegatorBlueprintSelection, AssetAction, *};
+	use crate::types::{delegator::DelegatorBlueprintSelection, *};
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
@@ -88,8 +88,10 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use scale_info::TypeInfo;
 	use sp_core::H160;
-	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, prelude::*, vec::Vec};
+	use sp_runtime::traits::{MaybeSerializeDeserialize, Member};
+	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
+	use tangle_primitives::traits::RewardsManager;
+	use tangle_primitives::types::rewards::LockMultiplier;
 	use tangle_primitives::{services::Asset, traits::ServiceManager, BlueprintId, RoundIndex};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -113,16 +115,6 @@ pub mod pallet {
 			+ MaxEncodedLen
 			+ Encode
 			+ Decode
-			+ TypeInfo;
-
-		/// Type representing the unique ID of a vault.
-		type VaultId: Parameter
-			+ Member
-			+ Copy
-			+ MaybeSerializeDeserialize
-			+ Ord
-			+ Default
-			+ MaxEncodedLen
 			+ TypeInfo;
 
 		/// The maximum number of blueprints a delegator can have in Fixed mode.
@@ -200,6 +192,14 @@ pub mod pallet {
 		/// A type that implements the `EvmAddressMapping` trait for the conversion of EVM address
 		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
 
+		/// Type that implements the reward manager trait
+		type RewardsManager: tangle_primitives::traits::RewardsManager<
+			Self::AccountId,
+			Self::AssetId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+		>;
+
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
 	}
@@ -238,25 +238,6 @@ pub mod pallet {
 	#[pallet::getter(fn delegators)]
 	pub type Delegators<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::AccountId, DelegatorMetadataOf<T>>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn reward_vaults)]
-	/// Storage for the reward vaults
-	pub type RewardVaults<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::VaultId, Vec<Asset<T::AssetId>>, OptionQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn asset_reward_vault_lookup)]
-	/// Storage for the reward vaults
-	pub type AssetLookupRewardVaults<T: Config> =
-		StorageMap<_, Blake2_128Concat, Asset<T::AssetId>, T::VaultId, OptionQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn reward_config)]
-	/// Storage for the reward configuration, which includes APY, cap for assets, and whitelisted
-	/// blueprints.
-	pub type RewardConfigStorage<T: Config> =
-		StorageValue<_, RewardConfig<T::VaultId, BalanceOf<T>>, OptionQuery>;
 
 	/// Events emitted by the pallet.
 	#[pallet::event]
@@ -308,17 +289,6 @@ pub mod pallet {
 		ExecutedDelegatorBondLess { who: T::AccountId },
 		/// A delegator unstake request has been cancelled.
 		CancelledDelegatorBondLess { who: T::AccountId },
-		/// Event emitted when an incentive APY and cap are set for a reward vault
-		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
-		/// Event emitted when a blueprint is whitelisted for rewards
-		BlueprintWhitelisted { blueprint_id: BlueprintId },
-		/// Asset has been updated to reward vault
-		AssetUpdatedInVault {
-			who: T::AccountId,
-			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
-			action: AssetAction,
-		},
 		/// Operator has been slashed
 		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
 		/// Delegator has been slashed
@@ -430,6 +400,10 @@ pub mod pallet {
 		EVMAbiEncode,
 		/// EVM decode error
 		EVMAbiDecode,
+		/// Cannot unstake with locks
+		LockViolation,
+		/// Above deposit caps setup
+		DepositExceedsCapForAsset,
 	}
 
 	/// Hooks for the pallet.
@@ -705,9 +679,14 @@ pub mod pallet {
 			asset_id: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			evm_address: Option<H160>,
+			lock_multiplier: Option<LockMultiplier>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_deposit(who.clone(), asset_id, amount, evm_address)?;
+			// ensure the caps have not been exceeded
+			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset_id)
+				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
+			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
+			Self::process_deposit(who.clone(), asset_id, amount, evm_address, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset_id });
 			Ok(())
 		}
@@ -927,125 +906,6 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_delegator_unstake(who.clone(), operator, asset_id, amount)?;
 			Self::deposit_event(Event::CancelledDelegatorBondLess { who });
-			Ok(())
-		}
-
-		/// Sets the APY and cap for a specific asset.
-		///
-		/// # Permissions
-		///
-		/// * Must be called by the force origin
-		///
-		/// # Arguments
-		///
-		/// * `origin` - Origin of the call
-		/// * `vault_id` - ID of the vault
-		/// * `apy` - Annual percentage yield (max 10%)
-		/// * `cap` - Required deposit amount for full APY
-		///
-		/// # Errors
-		///
-		/// * [`Error::APYExceedsMaximum`] - APY exceeds 10% maximum
-		/// * [`Error::CapCannotBeZero`] - Cap amount cannot be zero
-		#[pallet::call_index(18)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn set_incentive_apy_and_cap(
-			origin: OriginFor<T>,
-			vault_id: T::VaultId,
-			apy: sp_runtime::Percent,
-			cap: BalanceOf<T>,
-		) -> DispatchResult {
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			ensure!(apy <= sp_runtime::Percent::from_percent(10), Error::<T>::APYExceedsMaximum);
-			ensure!(!cap.is_zero(), Error::<T>::CapCannotBeZero);
-
-			RewardConfigStorage::<T>::mutate(|maybe_config| {
-				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
-					configs: BTreeMap::new(),
-					whitelisted_blueprint_ids: Vec::new(),
-				});
-
-				config.configs.insert(vault_id, RewardConfigForAssetVault { apy, cap });
-
-				*maybe_config = Some(config);
-			});
-
-			Self::deposit_event(Event::IncentiveAPYAndCapSet { vault_id, apy, cap });
-
-			Ok(())
-		}
-
-		/// Whitelists a blueprint for rewards.
-		///
-		/// # Permissions
-		///
-		/// * Must be called by the force origin
-		///
-		/// # Arguments
-		///
-		/// * `origin` - Origin of the call
-		/// * `blueprint_id` - ID of blueprint to whitelist
-		#[pallet::call_index(19)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn whitelist_blueprint_for_rewards(
-			origin: OriginFor<T>,
-			blueprint_id: BlueprintId,
-		) -> DispatchResult {
-			T::ForceOrigin::ensure_origin(origin)?;
-
-			RewardConfigStorage::<T>::mutate(|maybe_config| {
-				let mut config = maybe_config.take().unwrap_or_else(|| RewardConfig {
-					configs: BTreeMap::new(),
-					whitelisted_blueprint_ids: Vec::new(),
-				});
-
-				if !config.whitelisted_blueprint_ids.contains(&blueprint_id) {
-					config.whitelisted_blueprint_ids.push(blueprint_id);
-				}
-
-				*maybe_config = Some(config);
-			});
-
-			Self::deposit_event(Event::BlueprintWhitelisted { blueprint_id });
-
-			Ok(())
-		}
-
-		/// Manage asset id to vault rewards.
-		///
-		/// # Permissions
-		///
-		/// * Must be signed by an authorized account
-		///
-		/// # Arguments
-		///
-		/// * `origin` - Origin of the call
-		/// * `vault_id` - ID of the vault
-		/// * `asset_id` - ID of the asset
-		/// * `action` - Action to perform (Add/Remove)
-		///
-		/// # Errors
-		///
-		/// * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
-		/// * [`Error::AssetNotInVault`] - Asset does not exist in vault
-		#[pallet::call_index(20)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn manage_asset_in_vault(
-			origin: OriginFor<T>,
-			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
-			action: AssetAction,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-
-			match action {
-				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
-				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
-			}
-
-			Self::deposit_event(Event::AssetUpdatedInVault { who, vault_id, asset_id, action });
-
 			Ok(())
 		}
 

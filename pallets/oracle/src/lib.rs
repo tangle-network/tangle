@@ -37,7 +37,7 @@ use scale_info::TypeInfo;
 use sp_runtime::{traits::Member, DispatchResult, RuntimeDebug};
 use sp_std::{prelude::*, vec};
 use tangle_primitives::ordered_set::OrderedSet;
-pub use tangle_primitives::{
+pub use tangle_primitives::traits::{
 	CombineData, DataFeeder, DataProvider, DataProviderExtended, OnNewData,
 };
 

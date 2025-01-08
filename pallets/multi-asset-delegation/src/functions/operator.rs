@@ -27,7 +27,8 @@ use sp_runtime::{
 	traits::{CheckedAdd, CheckedSub},
 	DispatchError, Percent,
 };
-use tangle_primitives::{BlueprintId, ServiceManager};
+use tangle_primitives::traits::ServiceManager;
+use tangle_primitives::BlueprintId;
 
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.

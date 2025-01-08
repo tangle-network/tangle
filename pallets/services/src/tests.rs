@@ -21,7 +21,7 @@ use k256::ecdsa::{SigningKey, VerifyingKey};
 use mock::*;
 use sp_core::{bounded_vec, ecdsa, ByteArray, Pair, U256};
 use sp_runtime::{KeyTypeId, Percent};
-use tangle_primitives::{services::*, MultiAssetDelegationInfo};
+use tangle_primitives::{services::*, traits::MultiAssetDelegationInfo};
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;

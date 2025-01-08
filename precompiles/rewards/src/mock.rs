@@ -16,31 +16,36 @@
 
 //! Test utilities
 use super::*;
-use crate::{AssetsPrecompile, AssetsPrecompileCall};
+use crate::mock_evm::*;
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU64},
 	weights::Weight,
+	PalletId,
 };
-use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, SubstrateBlockHashMapping};
+use pallet_evm::GasWeightMapping;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
+use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_core::{
 	self,
 	sr25519::{Public as sr25519Public, Signature},
-	ConstU32, H160, U256,
+	ConstU32, H160,
 };
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
+};
+use tangle_primitives::{
+	services::{EvmAddressMapping, EvmGasWeightMapping},
+	ServiceManager,
 };
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 pub type Balance = u64;
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
-type AssetId = u32;
+type AssetId = u128;
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -64,7 +69,7 @@ const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 pub enum TestAccount {
 	Empty,
 	Alex,
-	Bob,
+	Bobo,
 	Dave,
 	Charlie,
 	Eve,
@@ -82,7 +87,7 @@ impl AddressMapping<AccountId32> for TestAccount {
 	fn into_account_id(h160_account: H160) -> AccountId32 {
 		match h160_account {
 			a if a == H160::repeat_byte(0x01) => TestAccount::Alex.into(),
-			a if a == H160::repeat_byte(0x02) => TestAccount::Bob.into(),
+			a if a == H160::repeat_byte(0x02) => TestAccount::Bobo.into(),
 			a if a == H160::repeat_byte(0x03) => TestAccount::Charlie.into(),
 			a if a == H160::repeat_byte(0x04) => TestAccount::Dave.into(),
 			a if a == H160::repeat_byte(0x05) => TestAccount::Eve.into(),
@@ -110,7 +115,7 @@ impl From<TestAccount> for H160 {
 	fn from(x: TestAccount) -> H160 {
 		match x {
 			TestAccount::Alex => H160::repeat_byte(0x01),
-			TestAccount::Bob => H160::repeat_byte(0x02),
+			TestAccount::Bobo => H160::repeat_byte(0x02),
 			TestAccount::Charlie => H160::repeat_byte(0x03),
 			TestAccount::Dave => H160::repeat_byte(0x04),
 			TestAccount::Eve => H160::repeat_byte(0x05),
@@ -124,7 +129,7 @@ impl From<TestAccount> for AccountId32 {
 	fn from(x: TestAccount) -> Self {
 		match x {
 			TestAccount::Alex => AccountId32::from([1u8; 32]),
-			TestAccount::Bob => AccountId32::from([2u8; 32]),
+			TestAccount::Bobo => AccountId32::from([2u8; 32]),
 			TestAccount::Charlie => AccountId32::from([3u8; 32]),
 			TestAccount::Dave => AccountId32::from([4u8; 32]),
 			TestAccount::Eve => AccountId32::from([5u8; 32]),
@@ -138,7 +143,7 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 	fn from(x: TestAccount) -> Self {
 		match x {
 			TestAccount::Alex => sr25519Public::from_raw([1u8; 32]),
-			TestAccount::Bob => sr25519Public::from_raw([2u8; 32]),
+			TestAccount::Bobo => sr25519Public::from_raw([2u8; 32]),
 			TestAccount::Charlie => sr25519Public::from_raw([3u8; 32]),
 			TestAccount::Dave => sr25519Public::from_raw([4u8; 32]),
 			TestAccount::Eve => sr25519Public::from_raw([5u8; 32]),
@@ -154,8 +159,10 @@ construct_runtime!(
 		System: frame_system,
 		Balances: pallet_balances,
 		Evm: pallet_evm,
+		Ethereum: pallet_ethereum,
 		Timestamp: pallet_timestamp,
 		Assets: pallet_assets,
+		MultiAssetDelegation: pallet_multi_asset_delegation,
 	}
 );
 
@@ -207,88 +214,11 @@ impl pallet_balances::Config for Runtime {
 	type MaxFreezes = ();
 }
 
-pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, AssetsPrecompile<R>>,)>;
-
-pub type PCall = AssetsPrecompileCall<Runtime>;
-
-pub struct EnsureAddressAlways;
-impl<OuterOrigin> EnsureAddressOrigin<OuterOrigin> for EnsureAddressAlways {
-	type Success = ();
-
-	fn try_address_origin(
-		_address: &H160,
-		_origin: OuterOrigin,
-	) -> Result<Self::Success, OuterOrigin> {
-		Ok(())
-	}
-
-	fn ensure_address_origin(
-		_address: &H160,
-		_origin: OuterOrigin,
-	) -> Result<Self::Success, sp_runtime::traits::BadOrigin> {
-		Ok(())
-	}
-}
-
-const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
-
-parameter_types! {
-	pub BlockGasLimit: U256 = U256::from(u64::MAX);
-	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
-	pub const WeightPerGas: Weight = Weight::from_parts(1, 0);
-	pub GasLimitPovSizeRatio: u64 = {
-		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
-		block_gas_limit.saturating_div(MAX_POV_SIZE)
-	};
-	pub SuicideQuickClearLimit: u32 = 0;
-
-}
-impl pallet_evm::Config for Runtime {
-	type FeeCalculator = ();
-	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
-	type WeightPerGas = WeightPerGas;
-	type CallOrigin = EnsureAddressAlways;
-	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = TestAccount;
-	type Currency = Balances;
-	type RuntimeEvent = RuntimeEvent;
-	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type PrecompilesType = Precompiles<Self>;
-	type PrecompilesValue = PrecompilesValue;
-	type ChainId = ();
-	type OnChargeTransaction = ();
-	type BlockGasLimit = BlockGasLimit;
-	type BlockHashMapping = SubstrateBlockHashMapping<Self>;
-	type FindAuthor = ();
-	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
-	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
-	type Timestamp = Timestamp;
-	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const MinimumPeriod: u64 = 5;
-}
-impl pallet_timestamp::Config for Runtime {
-	type Moment = u64;
-	type OnTimestampSet = ();
-	type MinimumPeriod = MinimumPeriod;
-	type WeightInfo = ();
-}
-
-impl tangle_primitives::traits::NextAssetId<u32> for Runtime {
-	fn next_asset_id() -> Option<u32> {
-		None
-	}
-}
-
 impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
 	type AssetId = AssetId;
-	type AssetIdParameter = u32;
+	type AssetIdParameter = u128;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -305,16 +235,116 @@ impl pallet_assets::Config for Runtime {
 	type RemoveItemsLimit = ConstU32<5>;
 }
 
+pub struct MockServiceManager;
+
+impl ServiceManager<AccountId, Balance> for MockServiceManager {
+	fn get_active_blueprints_count(_account: &AccountId) -> usize {
+		// we dont care
+		Default::default()
+	}
+
+	fn get_active_services_count(_account: &AccountId) -> usize {
+		// we dont care
+		Default::default()
+	}
+
+	fn can_exit(_account: &AccountId) -> bool {
+		// Mock logic to determine if the given account can exit
+		true
+	}
+
+	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
+		// we dont care
+		Default::default()
+	}
+}
+
+pub struct PalletEVMGasWeightMapping;
+
+impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
+	}
+
+	fn weight_to_gas(weight: Weight) -> u64 {
+		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
+	}
+}
+
+pub struct PalletEVMAddressMapping;
+
+impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		use pallet_evm::AddressMapping;
+		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+	}
+
+	fn into_address(account_id: AccountId) -> H160 {
+		account_id.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			H160(addr)
+		})
+	}
+}
+
+parameter_types! {
+	pub const BlockHashCount: u64 = 250;
+	pub const MaxLocks: u32 = 50;
+	pub const MinOperatorBondAmount: u64 = 10_000;
+	pub const BondDuration: u32 = 10;
+	pub PID: PalletId = PalletId(*b"PotStake");
+	pub SlashedAmountRecipient : AccountId = TestAccount::Alex.into();
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxOperatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxWithdrawRequests: u32 = 5;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxUnstakeRequests: u32 = 5;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = 50;
+}
+
+impl pallet_multi_asset_delegation::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type BondDuration = BondDuration;
+	type ServiceManager = MockServiceManager;
+	type LeaveOperatorsDelay = ConstU32<10>;
+	type EvmRunner = MockedEvmRunner;
+	type EvmAddressMapping = PalletEVMAddressMapping;
+	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type OperatorBondLessDelay = ConstU32<1>;
+	type LeaveDelegatorsDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<5>;
+	type MinDelegateAmount = ConstU64<100>;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type VaultId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
+	type MaxOperatorBlueprints = MaxOperatorBlueprints;
+	type MaxWithdrawRequests = MaxWithdrawRequests;
+	type MaxUnstakeRequests = MaxUnstakeRequests;
+	type MaxDelegations = MaxDelegations;
+	type SlashedAmountRecipient = SlashedAmountRecipient;
+	type PalletId = PID;
+	type WeightInfo = ();
+}
+
 /// Build test externalities, prepopulated with data for testing democracy precompiles
 #[derive(Default)]
-pub(crate) struct ExtBuilder {
+pub struct ExtBuilder {
 	/// Endowed accounts with balances
 	balances: Vec<(AccountId, Balance)>,
 }
 
 impl ExtBuilder {
 	/// Build the test externalities for use in tests
-	pub(crate) fn build(self) -> sp_io::TestExternalities {
+	pub fn build(self) -> sp_io::TestExternalities {
 		let mut t = frame_system::GenesisConfig::<Runtime>::default()
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
@@ -326,8 +356,10 @@ impl ExtBuilder {
 				.chain(
 					[
 						(TestAccount::Alex.into(), 1_000_000),
-						(TestAccount::Bob.into(), 1_000_000),
+						(TestAccount::Bobo.into(), 1_000_000),
 						(TestAccount::Charlie.into(), 1_000_000),
+						(MultiAssetDelegation::pallet_account(), 100), /* give pallet some ED so
+						                                                * it can receive tokens */
 					]
 					.iter(),
 				)
