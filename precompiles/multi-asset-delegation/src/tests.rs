@@ -1,6 +1,7 @@
 use crate::{mock::*, mock_evm::*, U256};
 use frame_support::{assert_ok, traits::Currency};
 use pallet_multi_asset_delegation::{types::OperatorStatus, CurrentRound, Delegators, Operators};
+use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use sp_core::H160;
 use tangle_primitives::services::Asset;
@@ -97,6 +98,126 @@ fn test_delegate_assets_invalid_operator() {
 			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [2, 0, 0, 0], message: Some(\"NotAnOperator\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
+	});
+}
+
+#[test]
+fn test_deposit_assets() {
+	ExtBuilder::default().build().execute_with(|| {
+		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		Balances::make_free_balance_be(&delegator_account, 500);
+
+		create_and_mint_tokens(1, delegator_account, 500);
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::deposit {
+					asset_id: U256::from(1),
+					amount: U256::from(200),
+					token_address: Default::default(),
+					lock_multiplier: 0,
+				},
+			)
+			.execute_returns(());
+
+		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+
+		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+	});
+}
+
+#[test]
+fn test_deposit_assets_insufficient_balance() {
+	ExtBuilder::default().build().execute_with(|| {
+		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		Balances::make_free_balance_be(&delegator_account, 500);
+
+		create_and_mint_tokens(1, delegator_account, 200);
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::deposit {
+					asset_id: U256::from(1),
+					amount: U256::from(500),
+					token_address: Default::default(),
+					lock_multiplier: 0,
+				},
+			)
+			.execute_reverts(|output| {
+				output == b"Dispatched call failed with error: Arithmetic(Underflow)"
+			});
+
+		assert_eq!(Assets::balance(1, delegator_account), 200); // should not lose deposit
+
+		assert!(Delegators::<Runtime>::get(delegator_account).is_none());
+	});
+}
+
+#[test]
+fn test_deposit_assets_erc20() {
+	ExtBuilder::default().build().execute_with(|| {
+		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		Balances::make_free_balance_be(&delegator_account, 500);
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::deposit {
+					asset_id: U256::zero(),
+					amount: U256::from(200),
+					token_address: USDC_ERC20.into(),
+					lock_multiplier: 0,
+				},
+			)
+			.with_subcall_handle(|subcall| {
+				// Intercept the call
+				assert!(!subcall.is_static);
+				assert_eq!(subcall.address, USDC_ERC20.into());
+				assert_eq!(subcall.context.caller, TestAccount::Alex.into());
+				assert_eq!(subcall.context.apparent_value, U256::zero());
+				assert_eq!(subcall.context.address, USDC_ERC20.into());
+				assert_eq!(subcall.input[0..4], keccak256!("transfer(address,uint256)")[0..4]);
+				// if all of the above passed, then it is okay.
+
+				let mut out = SubcallOutput::succeed();
+				out.output = ethabi::encode(&[ethabi::Token::Bool(true)]).to_vec();
+				out
+			})
+			.execute_returns(());
+
+		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+	});
+}
+
+#[test]
+fn test_deposit_assets_insufficient_balance_erc20() {
+	ExtBuilder::default().build().execute_with(|| {
+		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		Balances::make_free_balance_be(&delegator_account, 500);
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::deposit {
+					asset_id: U256::zero(),
+					amount: U256::from(200),
+					token_address: USDC_ERC20.into(),
+					lock_multiplier: 0,
+				},
+			)
+			.with_subcall_handle(|_subcall| {
+				// Simulate a faild ERC20 transfer
+				let mut out = SubcallOutput::succeed();
+				out.output = ethabi::encode(&[ethabi::Token::Bool(false)]).to_vec();
+				out
+			})
+			.execute_reverts(|output| output == b"Failed to transfer ERC20 tokens: false");
+
+		assert!(Delegators::<Runtime>::get(delegator_account).is_none());
 	});
 }
 

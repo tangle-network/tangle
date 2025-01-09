@@ -248,13 +248,17 @@ where
 				let who = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
 				let pallet_address =
 					pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
-				erc20_transfer(
+				let r = erc20_transfer(
 					handle,
 					token_address,
 					caller.into(),
 					pallet_address.into(),
 					amount,
 				)?;
+
+				if !r {
+					return Err(revert("Failed to transfer ERC20 tokens: false"));
+				}
 				(who, Asset::Erc20(erc20_token.into()), amount)
 			},
 			(other_asset_id, _) => (
