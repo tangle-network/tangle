@@ -15,10 +15,10 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{CurrentRound, Error};
-use frame_support::{assert_noop, assert_ok};
+use frame_support::{assert_err, assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::Bob;
-use sp_runtime::ArithmeticError;
-use tangle_primitives::services::Asset;
+use sp_runtime::{ArithmeticError, DispatchError};
+use tangle_primitives::services::{Asset, EvmAddressMapping};
 
 // helper function
 pub fn create_and_mint_tokens(
@@ -436,6 +436,64 @@ fn execute_withdraw_should_fail_if_withdraw_not_ready() {
 
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
 		assert!(!metadata.withdraw_requests.is_empty());
+	});
+}
+
+#[test]
+fn execute_withdraw_should_fail_if_caller_not_pallet_from_evm() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let evm_address = mock_address(1);
+		let pallet_account_id = MultiAssetDelegation::pallet_account();
+		let who = PalletEVMAddressMapping::into_account_id(evm_address);
+		let asset_id = Asset::Erc20(USDC_ERC20);
+		let amount = 100;
+
+		// Deposit would fail because the origin is not from the pallet
+		assert_err!(
+			MultiAssetDelegation::deposit(
+				RuntimeOrigin::signed(who.clone()),
+				asset_id,
+				amount,
+				Some(evm_address),
+				None
+			),
+			DispatchError::BadOrigin
+		);
+
+		// Try with the pallet account should work
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(pallet_account_id.clone()),
+			asset_id,
+			amount,
+			Some(evm_address),
+			None
+		));
+
+		assert_ok!(MultiAssetDelegation::schedule_withdraw(
+			RuntimeOrigin::signed(who.clone()),
+			asset_id,
+			amount,
+		));
+
+		// Simulate round passing
+		let current_round = 2;
+		<CurrentRound<Runtime>>::put(current_round);
+
+		// Try to execute withdraw with the EVM address should fail
+		assert_err!(
+			MultiAssetDelegation::execute_withdraw(
+				RuntimeOrigin::signed(who.clone()),
+				Some(evm_address)
+			),
+			DispatchError::BadOrigin
+		);
+
+		// Try to execute withdraw with the pallet account should work
+		assert_ok!(MultiAssetDelegation::execute_withdraw(
+			RuntimeOrigin::signed(pallet_account_id.clone()),
+			Some(evm_address)
+		));
 	});
 }
 
