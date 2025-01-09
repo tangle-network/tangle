@@ -154,7 +154,7 @@ where
 		});
 
 		for (token, amount) in erc20_transfers {
-			let v: U256 = amount.try_into().map_err(|_| revert("Invalid amount"))?;
+			let v: U256 = amount.into();
 			if !erc20_transfer(handle, token.into(), pallet_address.into(), caller.into(), v)? {
 				return Err(revert("Failed to transfer ERC20 tokens"));
 			}
