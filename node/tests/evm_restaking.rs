@@ -212,6 +212,90 @@ where
 			}
 		}
 
+		// Create a new vault and these assets to it.
+		let vault_id = 0;
+		let update_vault_reward_config = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
+				api::runtime_types::pallet_rewards::pallet::Call::update_vault_reward_config {
+					vault_id,
+					new_config:
+						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
+							apy: api::runtime_types::sp_arithmetic::per_things::Percent(1),
+							incentive_cap: 100_000_000_000_000,
+							deposit_cap: 100_000_000_000_000,
+							boost_multiplier: None,
+						},
+				},
+			),
+		);
+
+		let mut result = subxt
+			.tx()
+			.sign_and_submit_then_watch_default(
+				&update_vault_reward_config,
+				&alice.substrate_signer(),
+			)
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::rewards::events::VaultRewardConfigUpdated>()?
+					.expect("VaultRewardConfigUpdated event to be emitted");
+				break;
+			}
+		}
+
+		let add_asset_to_vault = |x| {
+			api::tx()
+				.sudo()
+				.sudo(api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
+					api::runtime_types::pallet_rewards::pallet::Call::manage_asset_reward_vault {
+						vault_id,
+						asset_id: x,
+						action: api::runtime_types::pallet_rewards::types::AssetAction::Add,
+					},
+				))
+		};
+		let assets = [
+			Asset::Erc20((<[u8; 20]>::from(usdc_addr)).into()),
+			Asset::Erc20((<[u8; 20]>::from(weth_addr)).into()),
+			Asset::Erc20((<[u8; 20]>::from(wbtc_addr)).into()),
+			Asset::Custom(0),
+			Asset::Custom(1),
+			Asset::Custom(2),
+		];
+		for asset_id in assets {
+			let mut result = subxt
+				.tx()
+				.sign_and_submit_then_watch_default(
+					&add_asset_to_vault(asset_id),
+					&alice.substrate_signer(),
+				)
+				.await?;
+
+			while let Some(Ok(s)) = result.next().await {
+				if let TxStatus::InBestBlock(b) = s {
+					let evs = match b.wait_for_success().await {
+						Ok(evs) => evs,
+						Err(e) => {
+							error!("Error: {:?}", e);
+							break;
+						},
+					};
+					evs.find_first::<api::rewards::events::AssetUpdatedInVault>()?
+						.expect("AssetRewardVault event to be emitted");
+					break;
+				}
+			}
+		}
+
 		let test_inputs = TestInputs {
 			provider,
 			subxt,
@@ -464,9 +548,10 @@ fn deposits_withdraw_erc20() {
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(U256::from(2));
 
+		let multiplier = 0;
 		// Deposit and delegate
 		let deposit_result = precompile
-			.deposit(U256::ZERO, *usdc.address(), delegate_amount)
+			.deposit(U256::ZERO, *usdc.address(), delegate_amount, multiplier)
 			.from(bob.address())
 			.send()
 			.await?
@@ -554,9 +639,10 @@ fn deposits_withdraw_asset_id() {
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(U256::from(2));
 
+		let multiplier = 0;
 		// Deposit and delegate
 		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, delegate_amount)
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, delegate_amount, multiplier)
 			.from(bob.address())
 			.send()
 			.await?

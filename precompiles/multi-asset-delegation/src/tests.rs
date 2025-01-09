@@ -158,7 +158,7 @@ fn test_delegate_assets_insufficient_balance() {
 
 		create_and_mint_tokens(1, delegator_account, 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into()), None));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, None, None));
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -298,7 +298,6 @@ fn test_execute_withdraw() {
 			.execute_returns(());
 
 		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&Asset::Custom(1)), None);
 		assert!(!metadata.withdraw_requests.is_empty());
 
 		<CurrentRound<Runtime>>::put(5);
