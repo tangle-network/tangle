@@ -446,7 +446,7 @@ fn operator_join_delegator_delegate_asset_id() {
 }
 
 #[test]
-fn deposits_withdraw() {
+fn deposits_withdraw_erc20() {
 	run_mad_test(|t| async move {
 		// Setup Bob as delegator
 		let bob = TestAccount::Bob;
@@ -508,6 +508,98 @@ fn deposits_withdraw() {
 		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
 		assert_eq!(bob_balance._0, expected_balance);
+
+		anyhow::Ok(())
+	})
+}
+
+#[test]
+fn deposits_withdraw_asset_id() {
+	run_mad_test(|t| async move {
+		let alice = TestAccount::Alice;
+		// Setup Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+
+		// Mint USDC for Bob
+		let mint_amount = U256::from(100_000_000u128);
+		let mint_call = api::tx().assets().mint(
+			t.usdc_asset_id,
+			bob.address().to_account_id().into(),
+			mint_amount.to::<u128>(),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::assets::events::Issued>()?
+					.expect("Issued event to be emitted");
+				break;
+			}
+		}
+
+		// Delegate assets
+		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let delegate_amount = mint_amount.div(U256::from(2));
+
+		// Deposit and delegate
+		let deposit_result = precompile
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, delegate_amount)
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
+
+		let withdraw_amount = delegate_amount.div(U256::from(2));
+		// Schedule a withdrawal
+		let sch_withdraw_result = precompile
+			.scheduleWithdraw(U256::from(t.usdc_asset_id), Address::ZERO, withdraw_amount)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(sch_withdraw_result.status());
+
+		// Wait for two new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
+		// Execute the withdrawal
+		let exec_withdraw_result = precompile
+			.executeWithdraw()
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(exec_withdraw_result.status());
+
+		// Bob deposited `delegate_amount` and withdrew `withdraw_amount`
+		// `delegate_amount` is 1/2 of the minted amount
+		// `withdraw_amount` is 1/2 of the deposited amount
+		// So, Bob should have `mint_amount - delegate_amount + withdraw_amount` USDC
+		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
+		let balance_call =
+			api::storage().assets().account(t.usdc_asset_id, bob.address().to_account_id());
+		let bob_balance = t.subxt.storage().at_latest().await?.fetch(&balance_call).await?;
+		assert_eq!(bob_balance.map(|b| b.balance), Some(expected_balance.to::<u128>()));
 
 		anyhow::Ok(())
 	})
