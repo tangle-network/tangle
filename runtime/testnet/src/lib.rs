@@ -50,8 +50,9 @@ use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_multi_asset_delegation::RoundChangeSessionManager;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
-use pallet_session::historical as pallet_session_historical;
+use pallet_session::historical::{self as pallet_session_historical, NoteHistoricalRoot};
 pub use pallet_staking::StakerStatus;
 #[allow(deprecated)]
 use pallet_transaction_payment::{
@@ -77,8 +78,8 @@ use sp_runtime::{
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
-	ApplyExtrinsicResult, BoundToRuntimeAppPublic, FixedPointNumber, FixedU128, Perquintill,
-	RuntimeDebug, SaturatedConversion,
+	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
+	SaturatedConversion,
 };
 use sp_std::{prelude::*, vec::Vec};
 #[cfg(feature = "std")]
@@ -414,7 +415,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = pallet_staking::StashOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	type SessionManager = RoundChangeSessionManager<Self, NoteHistoricalRoot<Self, Staking>>;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = ();
@@ -1475,6 +1476,37 @@ parameter_types! {
 	pub const MaxUnstakeRequests: u32 = 5;
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+
+}
+
+#[cfg(feature = "fast-runtime")]
+parameter_types! {
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveOperatorsDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveDelegatorsDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const DelegationBondLessDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const OperatorBondLessDelay: u32 = 1;
+}
+
+#[cfg(not(feature = "fast-runtime"))]
+parameter_types! {
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveOperatorsDelay: u32 = 10;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveDelegatorsDelay: u32 = 10;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const DelegationBondLessDelay: u32 = 5;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const OperatorBondLessDelay: u32 = 5;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -1483,13 +1515,12 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
 	type ServiceManager = Services;
-	type LeaveOperatorsDelay = ConstU32<10>;
-	type OperatorBondLessDelay = ConstU32<1>;
-	type LeaveDelegatorsDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<5>;
+	type LeaveOperatorsDelay = LeaveOperatorsDelay;
+	type OperatorBondLessDelay = OperatorBondLessDelay;
+	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
+	type DelegationBondLessDelay = DelegationBondLessDelay;
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
-	type AuthorityId = <Babe as BoundToRuntimeAppPublic>::Public;
 	type AssetId = AssetId;
 	type SlashedAmountRecipient = TreasuryAccount;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;

@@ -11,6 +11,7 @@ use core::time::Duration;
 use alloy::primitives::*;
 use alloy::providers::Provider;
 use alloy::sol;
+use anyhow::bail;
 use sp_runtime::traits::AccountIdConversion;
 use sp_tracing::{error, info};
 use tangle_runtime::PalletId;
@@ -52,6 +53,25 @@ pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
 pub async fn wait_for_more_blocks(provider: &impl Provider, blocks: u64) {
 	let current_block = provider.get_block_number().await.unwrap();
 	wait_for_block(provider, current_block + blocks).await;
+}
+
+/// Waits for the next session to start and returns the session index
+pub async fn wait_for_next_session(
+	client: &subxt::OnlineClient<subxt::PolkadotConfig>,
+) -> anyhow::Result<u32> {
+	let mut new_blocks = client.blocks().subscribe_best().await?;
+	loop {
+		if let Some(Ok(block)) = new_blocks.next().await {
+			let evs = block.events().await?;
+			if let Some(new_session) = evs.find_first::<api::session::events::NewSession>()? {
+				return Ok(new_session.session_index);
+			} else {
+				info!("No new session event found in block #{}", block.number());
+			}
+		} else {
+			bail!("Error while waiting for new blocks");
+		}
+	}
 }
 
 /// Deploys and initializes an ERC20 token contract
@@ -465,6 +485,10 @@ fn deposits_withdraw() {
 			.get_receipt()
 			.await?;
 		assert!(sch_withdraw_result.status());
+
+		// Wait for two new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
 
 		// Execute the withdrawal
 		let exec_withdraw_result = precompile

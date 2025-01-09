@@ -41,7 +41,7 @@ use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::DispatchError;
 use sp_runtime::{
 	testing::UintAuthorityId,
-	traits::{ConvertInto, IdentityLookup},
+	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
 	AccountId32, BoundToRuntimeAppPublic, BuildStorage, Perbill,
 };
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
@@ -169,11 +169,11 @@ parameter_types! {
 }
 
 impl pallet_session::Config for Runtime {
-	type SessionManager = MockSessionManager;
+	type SessionManager = pallet::RoundChangeSessionManager<Self, MockSessionManager>;
 	type Keys = MockSessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionHandler = (MultiAssetDelegation,);
+	type SessionHandler = <MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;

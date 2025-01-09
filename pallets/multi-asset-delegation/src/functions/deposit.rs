@@ -170,7 +170,7 @@ impl<T: Config> Pallet<T> {
 		who: &T::AccountId,
 	) -> Result<impl Iterator<Item = WithdrawRequest<T::AssetId, BalanceOf<T>>>, Error<T>> {
 		let metadata = Delegators::<T>::get(who).ok_or(Error::<T>::NotDelegator)?;
-		let delay = T::LeaveOperatorsDelay::get();
+		let delay = T::LeaveDelegatorsDelay::get();
 		let current_round = Self::current_round();
 		let iter = metadata.withdraw_requests.into_iter().filter_map(move |request| {
 			if current_round >= delay + request.requested_round {

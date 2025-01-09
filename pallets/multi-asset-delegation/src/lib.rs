@@ -83,16 +83,15 @@ pub mod pallet {
 	use crate::types::{delegator::DelegatorBlueprintSelection, *};
 	use frame_support::{
 		pallet_prelude::*,
-		traits::{
-			tokens::fungibles, Currency, Get, LockableCurrency, OneSessionHandler,
-			ReservableCurrency,
-		},
+		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
+	use pallet_session::SessionManager;
 	use scale_info::TypeInfo;
 	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member};
+	use sp_staking::SessionIndex;
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
 	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
@@ -1017,32 +1016,26 @@ pub mod pallet {
 		}
 	}
 
-	impl<T: Config> BoundToRuntimeAppPublic for Pallet<T> {
-		type Public = T::AuthorityId;
-	}
+	/// A Session Manager that wraps another session manager and handles round changes.
+	pub struct RoundChangeSessionManager<T, I>(core::marker::PhantomData<(T, I)>);
 
-	impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
-		type Key = T::AuthorityId;
-		fn on_genesis_session<'a, I: 'a>(_validators: I)
-		where
-			I: Iterator<Item = (&'a T::AccountId, T::AuthorityId)>,
-		{
-			CurrentRound::<T>::put(0);
+	impl<T, I, A> SessionManager<A> for RoundChangeSessionManager<T, I>
+	where
+		T: Config,
+		I: SessionManager<A>,
+	{
+		fn new_session_genesis(i: SessionIndex) -> Option<Vec<A>> {
+			I::new_session_genesis(i)
 		}
-		fn on_new_session<'a, I: 'a>(_changed: bool, _validators: I, _queued_validators: I)
-		where
-			I: Iterator<Item = (&'a T::AccountId, T::AuthorityId)>,
-		{
-			// Increment the current round.
-			CurrentRound::<T>::mutate(|r| *r += 1);
+		fn new_session(i: SessionIndex) -> Option<Vec<A>> {
+			I::new_session(i)
 		}
-
-		fn on_before_session_ending() {
-			// Ignore
+		fn start_session(i: SessionIndex) {
+			Pallet::<T>::handle_round_change(i);
+			I::start_session(i)
 		}
-
-		fn on_disabled(_i: u32) {
-			// ignore
+		fn end_session(i: SessionIndex) {
+			I::end_session(i)
 		}
 	}
 }

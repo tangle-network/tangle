@@ -55,7 +55,7 @@ fn handle_round_change_should_work() {
 			Default::default(),
 		));
 
-		assert_ok!(Pallet::<Runtime>::handle_round_change());
+		Pallet::<Runtime>::handle_round_change(2);
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
@@ -149,7 +149,7 @@ fn handle_round_change_with_unstake_should_work() {
 			unstake_amount,
 		));
 
-		assert_ok!(Pallet::<Runtime>::handle_round_change());
+		Pallet::<Runtime>::handle_round_change(2);
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
