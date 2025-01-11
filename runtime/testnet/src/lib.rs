@@ -1461,9 +1461,9 @@ impl pallet_assets::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 10_000;
+	pub const MinOperatorBondAmount: Balance = 100;
 	pub const BondDuration: u32 = 10;
-	pub const MinDelegateAmount : Balance = 1000;
+	pub const MinDelegateAmount : Balance = 1;
 	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;

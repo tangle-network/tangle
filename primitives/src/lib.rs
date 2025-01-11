@@ -109,7 +109,7 @@ pub mod currency {
 	pub const WEIGHT_FEE: Balance = 100 * MEGAWEI;
 	/// Return the cost to add an item to storage based on size
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		items as Balance * 10 * DOLLAR + (bytes as Balance) * 100 * MILLICENT
+		items as Balance * 1 * DOLLAR + (bytes as Balance) * 10 * MILLICENT
 	}
 }
 
