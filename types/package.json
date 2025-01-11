@@ -1,6 +1,6 @@
 {
   "name": "@webb-tools/tangle-substrate-types",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "description": "Polkadot.js type definitions required for interacting with Webb's tangle network",
   "author": "Webb Developers <drew@webb.tools>",
   "license": "Apache-2.0",
