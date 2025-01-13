@@ -168,17 +168,17 @@ fn test_deposit_assets_erc20() {
 				PCall::deposit {
 					asset_id: U256::zero(),
 					amount: U256::from(200),
-					token_address: USDC_ERC20.into(),
+					token_address: USDC_ERC20,
 					lock_multiplier: 0,
 				},
 			)
 			.with_subcall_handle(|subcall| {
 				// Intercept the call
 				assert!(!subcall.is_static);
-				assert_eq!(subcall.address, USDC_ERC20.into());
+				assert_eq!(subcall.address, USDC_ERC20);
 				assert_eq!(subcall.context.caller, TestAccount::Alex.into());
 				assert_eq!(subcall.context.apparent_value, U256::zero());
-				assert_eq!(subcall.context.address, USDC_ERC20.into());
+				assert_eq!(subcall.context.address, USDC_ERC20);
 				assert_eq!(subcall.input[0..4], keccak256!("transfer(address,uint256)")[0..4]);
 				// if all of the above passed, then it is okay.
 
@@ -205,7 +205,7 @@ fn test_deposit_assets_insufficient_balance_erc20() {
 				PCall::deposit {
 					asset_id: U256::zero(),
 					amount: U256::from(200),
-					token_address: USDC_ERC20.into(),
+					token_address: USDC_ERC20,
 					lock_multiplier: 0,
 				},
 			)

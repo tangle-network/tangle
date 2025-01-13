@@ -277,7 +277,7 @@ fn test_request_service_with_erc20() {
 					assets: [TNT, WETH].into_iter().map(Into::into).collect(),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
-					payment_token_address: USDC_ERC20.into(),
+					payment_token_address: USDC_ERC20,
 					amount: payment_amount,
 				},
 			)
