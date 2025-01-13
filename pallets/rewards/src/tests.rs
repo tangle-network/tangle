@@ -16,8 +16,9 @@
 use crate::{
 	mock::*, types::*, AssetAction, Error, Event, Pallet as RewardsPallet, UserClaimedReward,
 };
+use frame_support::assert_err;
 use frame_support::{assert_noop, assert_ok};
-use sp_runtime::{AccountId32, Percent};
+use sp_runtime::{AccountId32, DispatchError, Percent};
 use tangle_primitives::types::rewards::LockInfo;
 use tangle_primitives::types::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
@@ -379,5 +380,57 @@ fn test_calculate_deposit_rewards_with_expired_locks() {
 		// Verify only base rewards are calculated (no lock multiplier)
 		assert_eq!(total_rewards, rewards_to_be_paid);
 		assert!(total_rewards > 0);
+	});
+}
+
+// Access control.
+#[test]
+fn update_vault_config_non_force_origin() {
+	new_test_ext().execute_with(|| {
+		let vault_id = 1u32;
+		let apy = Percent::from_percent(10);
+		let deposit_cap = 1000;
+		let boost_multiplier = Some(150);
+		let incentive_cap = 1000;
+
+		// Configure the reward vault
+		assert_err!(
+			RewardsPallet::<Runtime>::update_vault_reward_config(
+				RuntimeOrigin::signed(mock_pub_key(1)),
+				vault_id,
+				RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
+			),
+			DispatchError::BadOrigin
+		);
+	});
+}
+
+#[test]
+fn add_or_remove_asset_non_force_origin() {
+	new_test_ext().execute_with(|| {
+		let vault_id = 1u32;
+		let asset = Asset::Custom(vault_id as u128);
+
+		// Add asset to vault
+		assert_err!(
+			RewardsPallet::<Runtime>::manage_asset_reward_vault(
+				RuntimeOrigin::signed(mock_pub_key(1)),
+				vault_id,
+				asset,
+				AssetAction::Add,
+			),
+			DispatchError::BadOrigin
+		);
+
+		// Remove asset from vault
+		assert_err!(
+			RewardsPallet::<Runtime>::manage_asset_reward_vault(
+				RuntimeOrigin::signed(mock_pub_key(1)),
+				vault_id,
+				asset,
+				AssetAction::Remove,
+			),
+			DispatchError::BadOrigin
+		);
 	});
 }

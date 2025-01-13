@@ -48,8 +48,9 @@ use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_multi_asset_delegation::RoundChangeSessionManager;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
-use pallet_session::historical as pallet_session_historical;
+use pallet_session::historical::{self as pallet_session_historical, NoteHistoricalRoot};
 pub use pallet_staking::StakerStatus;
 #[allow(deprecated)]
 use pallet_transaction_payment::{
@@ -407,7 +408,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = pallet_staking::StashOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	type SessionManager = RoundChangeSessionManager<Self, NoteHistoricalRoot<Self, Staking>>;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;

@@ -94,7 +94,7 @@ jobs:
         run: sudo apt-get install protobuf-compiler
 
       - name: Run End to End test suite
-        run: cargo nextest run -rp tangle -F manual-seal,testnet,txpool --profile ci --nocapture
+        run: cargo nextest run -rp tangle -F manual-seal,testnet,txpool,fast-runtime --profile ci --nocapture
 
   clippy:
     concurrency:

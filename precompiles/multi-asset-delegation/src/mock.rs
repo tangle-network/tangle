@@ -15,8 +15,12 @@
 // limitations under the License.
 
 //! Test utilities
+use std::{collections::BTreeMap, sync::Arc};
+
 use super::*;
 use crate::mock_evm::*;
+use core::ops::Mul;
+use ethabi::Uint;
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU64},
@@ -27,16 +31,19 @@ use pallet_evm::GasWeightMapping;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sp_core::{
 	self,
 	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160,
 };
+use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::DispatchError;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
+use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 use tangle_primitives::traits::{RewardsManager, ServiceManager};
 
@@ -381,6 +388,16 @@ pub struct ExtBuilder {
 	balances: Vec<(AccountId, Balance)>,
 }
 
+pub fn mock_address(id: u8) -> H160 {
+	H160::from_slice(&[id; 20])
+}
+
+pub fn account_id_to_address(account_id: AccountId) -> H160 {
+	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
+}
+
+pub const USDC_ERC20: H160 = H160([0x23; 20]);
+
 impl ExtBuilder {
 	/// Build the test externalities for use in tests
 	pub fn build(self) -> sp_io::TestExternalities {
@@ -408,7 +425,131 @@ impl ExtBuilder {
 		.assimilate_storage(&mut t)
 		.expect("Pallet balances storage can be assimilated");
 
+		let mut evm_accounts = BTreeMap::new();
+
+		let accounts = [
+			TestAccount::Alex,
+			TestAccount::Bobo,
+			TestAccount::Charlie,
+			TestAccount::Dave,
+			TestAccount::Eve,
+		];
+
+		for i in 1..=accounts.len() {
+			evm_accounts.insert(
+				mock_address(i as u8),
+				fp_evm::GenesisAccount {
+					code: vec![],
+					storage: Default::default(),
+					nonce: Default::default(),
+					balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+				},
+			);
+		}
+
+		for a in &accounts {
+			evm_accounts.insert(
+				a.clone().into(),
+				fp_evm::GenesisAccount {
+					code: vec![],
+					storage: Default::default(),
+					nonce: Default::default(),
+					balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+				},
+			);
+		}
+
+		let evm_config =
+			pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
+
+		evm_config.assimilate_storage(&mut t).unwrap();
+
+		// assets_config.assimilate_storage(&mut t).unwrap();
 		let mut ext = sp_io::TestExternalities::new(t);
+		ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
+		ext.execute_with(|| System::set_block_number(1));
+		ext.execute_with(|| {
+			System::set_block_number(1);
+
+			let call = <Runtime as pallet_multi_asset_delegation::Config>::EvmRunner::call(
+				MultiAssetDelegation::pallet_evm_account(),
+				USDC_ERC20,
+				serde_json::from_value::<ethabi::Function>(json!({
+					"name": "initialize",
+					"inputs": [
+						{
+							"name": "name_",
+							"type": "string",
+							"internalType": "string"
+						},
+						{
+							"name": "symbol_",
+							"type": "string",
+							"internalType": "string"
+						},
+						{
+							"name": "decimals_",
+							"type": "uint8",
+							"internalType": "uint8"
+						}
+					],
+					"outputs": [],
+					"stateMutability": "nonpayable"
+				}))
+				.unwrap()
+				.encode_input(&[
+					ethabi::Token::String("USD Coin".to_string()),
+					ethabi::Token::String("USDC".to_string()),
+					ethabi::Token::Uint(6.into()),
+				])
+				.unwrap(),
+				Default::default(),
+				300_000,
+				true,
+				false,
+			);
+
+			assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
+			// Mint
+			for i in 1..=accounts.len() {
+				let call = <Runtime as pallet_multi_asset_delegation::Config>::EvmRunner::call(
+					MultiAssetDelegation::pallet_evm_account(),
+					USDC_ERC20,
+					serde_json::from_value::<ethabi::Function>(json!({
+						"name": "mint",
+						"inputs": [
+							{
+								"internalType": "address",
+								"name": "account",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "amount",
+								"type": "uint256"
+							}
+						],
+						"outputs": [],
+						"stateMutability": "nonpayable"
+					}))
+					.unwrap()
+					.encode_input(&[
+						ethabi::Token::Address(mock_address(i as u8)),
+						ethabi::Token::Uint(
+							Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6))),
+						),
+					])
+					.unwrap(),
+					Default::default(),
+					300_000,
+					true,
+					false,
+				);
+
+				assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
+			}
+		});
+
 		ext.execute_with(|| {
 			System::set_block_number(1);
 		});
