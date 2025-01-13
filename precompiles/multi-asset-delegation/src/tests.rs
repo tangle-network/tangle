@@ -168,7 +168,7 @@ fn test_deposit_assets_erc20() {
 				PCall::deposit {
 					asset_id: U256::zero(),
 					amount: U256::from(200),
-					token_address: USDC_ERC20,
+					token_address: Address(USDC_ERC20),
 					lock_multiplier: 0,
 				},
 			)
@@ -205,7 +205,7 @@ fn test_deposit_assets_insufficient_balance_erc20() {
 				PCall::deposit {
 					asset_id: U256::zero(),
 					amount: U256::from(200),
-					token_address: USDC_ERC20,
+					token_address: Address(USDC_ERC20),
 					lock_multiplier: 0,
 				},
 			)
