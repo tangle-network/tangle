@@ -336,7 +336,8 @@ pub mod pallet {
 
 	/// Ever increasing number of all pools created so far.
 	#[pallet::storage]
-	pub type LastPoolId<T: Config> = StorageValue<_, u32, ValueQuery>;
+	#[pallet::getter(fn last_pool_id)]
+	pub type LastPoolId<T: Config> = StorageValue<_, PoolId, ValueQuery>;
 
 	/// Unbonding members.
 	///
@@ -475,6 +476,8 @@ pub mod pallet {
 		MinBalanceDeficitAdjusted { pool_id: PoolId, amount: BalanceOf<T> },
 		/// Claimed excess frozen ED of the reward pool.
 		MinBalanceExcessAdjusted { pool_id: PoolId, amount: BalanceOf<T> },
+		/// The last PoolId is updated
+		LastPoolIdUpdated { pool_id: PoolId },
 	}
 
 	#[pallet::error]
@@ -1545,6 +1548,15 @@ pub mod pallet {
 				permission,
 			});
 
+			Ok(())
+		}
+
+		#[pallet::call_index(23)]
+		#[pallet::weight(T::WeightInfo::set_last_pool_id())]
+		pub fn set_last_pool_id(origin: OriginFor<T>, pool_id: PoolId) -> DispatchResult {
+			let _who = T::ForceOrigin::ensure_origin(origin)?;
+			LastPoolId::<T>::put(pool_id);
+			Self::deposit_event(Event::<T>::LastPoolIdUpdated { pool_id });
 			Ok(())
 		}
 	}

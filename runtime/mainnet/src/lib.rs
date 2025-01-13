@@ -1444,7 +1444,19 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	migrations::MigrateSessionKeys<Runtime>,
+	(
+		migrations::MigrateSessionKeys<Runtime>,
+		// AssetId limits
+		// 0 - 1000 (reserved for future use)
+		// 1000 - 50000 (reserved for LST pools)
+		// 50000 - 1000000 (reserved for native assets)
+		// set user start at 50_000, everything below is reserved for system use
+		pallet_assets::migration::next_asset_id::SetNextAssetId<
+			ConstU32<50_000>,
+			Runtime,
+			TrustBackedAssetsInstance,
+		>,
+	),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {

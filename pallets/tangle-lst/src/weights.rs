@@ -58,6 +58,7 @@ pub trait WeightInfo {
 	fn set_claim_permission() -> Weight;
 	fn claim_commission() -> Weight;
 	fn adjust_pool_deposit() -> Weight;
+	fn set_last_pool_id() -> Weight;
 }
 
 /// Weights for `pallet_nomination_pools` using the Substrate node and recommended hardware.
@@ -633,6 +634,17 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
 	}
+	/// Storage: `NominationPools::LastPoolId` (r:1 w:1)
+	/// Proof: `NominationPools::LastPoolId` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
+	fn set_last_pool_id() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `901`
+		//  Estimated: `4764`
+		// Minimum execution time: 65_462_000 picoseconds.
+		Weight::from_parts(67_250_000, 4764)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
 }
 
 // For backwards compatibility and tests.
@@ -1206,5 +1218,17 @@ impl WeightInfo for () {
 		Weight::from_parts(67_250_000, 4764)
 			.saturating_add(RocksDbWeight::get().reads(4_u64))
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+
+	/// Storage: `NominationPools::LastPoolId` (r:1 w:1)
+	/// Proof: `NominationPools::LastPoolId` (`max_values`: Some(1), `max_size`: Some(4), added: 499, mode: `MaxEncodedLen`)
+	fn set_last_pool_id() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `901`
+		//  Estimated: `4764`
+		// Minimum execution time: 65_462_000 picoseconds.
+		Weight::from_parts(67_250_000, 4764)
+			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 }
