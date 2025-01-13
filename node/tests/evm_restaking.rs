@@ -8,13 +8,16 @@ use core::future::Future;
 use core::ops::Div;
 use core::time::Duration;
 
+use alloy::network::TransactionBuilder;
+use alloy::primitives::utils::*;
 use alloy::primitives::*;
+use alloy::providers::ext::DebugApi;
 use alloy::providers::Provider;
 use alloy::sol;
 use anyhow::bail;
 use sp_runtime::traits::AccountIdConversion;
-use sp_tracing::{error, info};
-use tangle_runtime::PalletId;
+use sp_tracing::{error, info, warn};
+use tangle_runtime::{deposit, PalletId};
 use tangle_subxt::subxt;
 use tangle_subxt::subxt::tx::TxStatus;
 use tangle_subxt::tangle_testnet_runtime::api;
@@ -35,6 +38,13 @@ sol! {
 sol! {
 	#[sol(rpc, all_derives)]
 	"../precompiles/multi-asset-delegation/MultiAssetDelegation.sol",
+}
+
+sol! {
+	#[allow(clippy::too_many_arguments)]
+	#[sol(rpc, all_derives)]
+	TangleLiquidRestakingVault,
+	"tests/fixtures/TangleLiquidRestakingVault.json",
 }
 
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
@@ -149,6 +159,33 @@ async fn create_asset(
 	}
 
 	Ok(())
+}
+
+/// Deploys and initializes an Tangle Liquid Restaking Vault contract
+async fn deploy_tangle_lrt(
+	provider: AlloyProviderWithWallet,
+	base_token: Address,
+	operator: [u8; 32],
+	name: &str,
+	symbol: &str,
+) -> anyhow::Result<Address> {
+	info!(
+		%base_token,
+		%name,
+		%symbol,
+		"Deploying Tangle LRT contract...");
+	let token = TangleLiquidRestakingVault::deploy(
+		provider.clone(),
+		base_token,
+		operator.into(),
+		vec![],
+		MULTI_ASSET_DELEGATION,
+		name.into(),
+		symbol.into(),
+	)
+	.await?;
+	info!("Deployed {} Tangle LRT contract at address: {}", symbol, token.address());
+	Ok(*token.address())
 }
 
 /// Setup the E2E test environment.
@@ -308,12 +345,13 @@ where
 			wbtc_asset_id: 2,
 		};
 		let result = f(test_inputs).await;
-		assert!(result.is_ok(), "Test failed: {result:?}");
 		if result.is_ok() {
 			info!("***************** Test passed **********");
 		} else {
 			error!("***************** Test failed **********");
+			error!("{:?}", result);
 		}
+		assert!(result.is_ok(), "Test failed: {result:?}");
 		result
 	});
 }
@@ -689,4 +727,103 @@ fn deposits_withdraw_asset_id() {
 
 		anyhow::Ok(())
 	})
+}
+
+#[test]
+fn lrt_deposit_withdraw_erc20() {
+	run_mad_test(|t| async move {
+		let alice = TestAccount::Alice;
+		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
+		// Join operators
+		let tnt = U256::from(100_000u128);
+		assert!(join_as_operator(&alice_provider, tnt).await?);
+		// Setup a LRT Vault for Alice.
+		let lrt_address = deploy_tangle_lrt(
+			alice_provider.clone(),
+			t.weth,
+			alice.address().to_account_id().0,
+			"Liquid Restaked Ether",
+			"lrtETH",
+		)
+		.await?;
+
+		// Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		// Mint WETH for Bob
+		let weth_amount = parse_ether("10").unwrap();
+		let weth = MockERC20::new(t.weth, &bob_provider);
+		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
+		info!("Minted {} WETH for Bob", format_ether(weth_amount));
+
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, weth_amount);
+
+		// Approve LRT contract to spend WETH
+		let deposit_amount = weth_amount.div(U256::from(2));
+		let approve_result =
+			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
+		assert!(approve_result.status());
+		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+
+		// Deposit WETH to LRT
+		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		let deposit_tx = lrt.deposit(deposit_amount, bob.address());
+		let deposit_result = deposit_tx.send().await;
+		let deposit_result = match deposit_result {
+			Err(e) => {
+				error!("Error: {:?}", e);
+				// Trace the transaction
+				let res = bob_provider
+					.debug_trace_transaction_call(
+						*deposit_tx_envelope.tx_hash(),
+						Default::default(),
+					)
+					.await?;
+				warn!("Trace: {:?}", res);
+				panic!("Deposit into LRT failed");
+			},
+			Ok(r) => {
+				let txhash = r.tx_hash();
+				info!("Deposit into LRT tx hash: {}", txhash);
+				r.get_receipt().await
+			},
+		};
+		match deposit_result {
+			Err(e) => {
+				error!("Error: {:?}", e);
+				panic!("Deposit into LRT failed");
+			},
+			Ok(r) => {
+				assert!(r.status(), "Deposit into LRT failed");
+			},
+		}
+		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Bob deposited `deposit_amount` WETH, should receive `deposit_amount` lrtETH in return
+		let lrt_balance = lrt.balanceOf(bob.address()).call().await?;
+		assert_eq!(lrt_balance._0, deposit_amount);
+		// Bob should have `weth_amount - deposit_amount` WETH
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, weth_amount - deposit_amount);
+
+		// LRT should be a delegator to the operator in the MAD pallet.
+		let operator_key = api::storage()
+			.multi_asset_delegation()
+			.operators(alice.address().to_account_id());
+		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+		assert!(maybe_operator.is_some());
+		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
+		assert_eq!(
+			maybe_operator.map(|p| p.delegations.0[0].clone()),
+			Some(DelegatorBond {
+				delegator: lrt_address.to_account_id(),
+				amount: deposit_amount.to::<u128>(),
+				asset_id: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+				__ignore: std::marker::PhantomData
+			})
+		);
+
+		anyhow::Ok(())
+	});
 }

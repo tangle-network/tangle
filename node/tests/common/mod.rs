@@ -9,6 +9,7 @@ use alloy::{
 	transports::BoxTransport,
 };
 use sc_cli::{CliConfiguration, SubstrateCli};
+use sp_tracing::warn;
 use tangle::{chainspec, cli, eth, service};
 use tangle_primitives::types::Block;
 use tangle_subxt::{subxt, subxt_signer};
@@ -216,6 +217,7 @@ where
 		"--rpc-methods=unsafe",
 		"--rpc-external",
 		"--rpc-port=9944",
+		"--ethapi=trace,debug,txpool",
 		#[cfg(feature = "manual-seal")]
 		"--sealing=manual",
 		"--auto-insert-keys",
@@ -258,6 +260,7 @@ where
 		max_past_logs: cli.eth.max_past_logs,
 		tracing_raw_max_memory_usage: cli.eth.tracing_raw_max_memory_usage,
 	};
+	warn!("Starting the node with the following RPC config: {:?}", rpc_config);
 
 	runner
 		.async_run(|config| {
