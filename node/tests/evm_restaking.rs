@@ -399,7 +399,7 @@ fn operator_join_delegator_delegate_erc20() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().into_word(),
+				alice.address().to_account_id().0.into(),
 				U256::ZERO,
 				*usdc.address(),
 				delegate_amount,
@@ -498,7 +498,7 @@ fn operator_join_delegator_delegate_asset_id() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().into_word(),
+				alice.address().to_account_id().0.into(),
 				U256::from(t.usdc_asset_id),
 				Address::ZERO,
 				U256::from(delegate_amount),

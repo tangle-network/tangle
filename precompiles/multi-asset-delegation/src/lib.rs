@@ -372,8 +372,7 @@ where
 
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
-		let operator =
-			Runtime::AddressMapping::into_account_id(H160::from_slice(&operator.0[12..]));
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
