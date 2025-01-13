@@ -534,7 +534,7 @@ impl ExtBuilder {
 					}))
 					.unwrap()
 					.encode_input(&[
-						ethabi::Token::Address(mock_address(i as u8).into()),
+						ethabi::Token::Address(mock_address(i as u8)),
 						ethabi::Token::Uint(
 							Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6))),
 						),
