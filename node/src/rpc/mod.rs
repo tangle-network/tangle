@@ -123,7 +123,7 @@ where
 		AccountId,
 		AssetId,
 	>,
-	C::Api: pallet_rewards_rpc::RewardsRuntimeApi<Block, AccountId, AssetId>,
+	C::Api: pallet_rewards_rpc::RewardsRuntimeApi<Block, AccountId, AssetId, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,

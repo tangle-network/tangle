@@ -15794,6 +15794,7 @@ dependencies = [
  "log",
  "pallet-airdrop-claims",
  "pallet-im-online",
+ "pallet-rewards-rpc",
  "pallet-services-rpc",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
