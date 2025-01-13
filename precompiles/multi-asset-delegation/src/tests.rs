@@ -260,6 +260,14 @@ fn test_delegate_assets() {
 			.execute_returns(());
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change when delegating
+		assert!(Operators::<Runtime>::get(operator_account)
+			.unwrap()
+			.delegations
+			.iter()
+			.find(|x| x.delegator == delegator_account
+				&& x.asset_id == Asset::Custom(1)
+				&& x.amount == 100)
+			.is_some());
 	});
 }
 
