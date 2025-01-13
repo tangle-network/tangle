@@ -79,6 +79,7 @@ pub use functions::*;
 
 #[frame_support::pallet]
 pub mod pallet {
+	use super::functions::*;
 	use crate::types::{delegator::DelegatorBlueprintSelection, *};
 	use frame_support::{
 		pallet_prelude::*,
@@ -86,13 +87,18 @@ pub mod pallet {
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
+	use pallet_session::SessionManager;
 	use scale_info::TypeInfo;
 	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member};
+	use sp_staking::SessionIndex;
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
 	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
-	use tangle_primitives::{services::Asset, traits::ServiceManager, BlueprintId, RoundIndex};
+	use tangle_primitives::{
+		services::Asset, services::EvmAddressMapping, traits::ServiceManager, BlueprintId,
+		RoundIndex,
+	};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
@@ -173,6 +179,7 @@ pub mod pallet {
 			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
 		/// The pallet's account ID.
+		#[pallet::constant]
 		type PalletId: Get<PalletId>;
 
 		/// The origin with privileged access
@@ -681,12 +688,25 @@ pub mod pallet {
 			evm_address: Option<H160>,
 			lock_multiplier: Option<LockMultiplier>,
 		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
+			let who = match (asset_id, evm_address) {
+				(Asset::Custom(_), None) => ensure_signed(origin)?,
+				(Asset::Erc20(_), Some(addr)) => {
+					ensure_pallet::<T, _>(origin)?;
+					T::EvmAddressMapping::into_account_id(addr)
+				},
+				(Asset::Erc20(_), None) => return Err(Error::<T>::NotAuthorized.into()),
+				(Asset::Custom(_), Some(adress)) => {
+					let evm_account_id = T::EvmAddressMapping::into_account_id(adress);
+					let caller = ensure_signed(origin)?;
+					ensure!(evm_account_id == caller, DispatchError::BadOrigin);
+					evm_account_id
+				},
+			};
 			// ensure the caps have not been exceeded
 			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset_id)
 				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
 			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
-			Self::process_deposit(who.clone(), asset_id, amount, evm_address, lock_multiplier)?;
+			Self::process_deposit(who.clone(), asset_id, amount, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset_id });
 			Ok(())
 		}
@@ -738,8 +758,14 @@ pub mod pallet {
 		#[pallet::call_index(12)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			Self::process_execute_withdraw(who.clone(), evm_address)?;
+			let who = match evm_address {
+				Some(addr) => {
+					ensure_pallet::<T, _>(origin)?;
+					T::EvmAddressMapping::into_account_id(addr)
+				},
+				None => ensure_signed(origin)?,
+			};
+			Self::process_execute_withdraw(who.clone())?;
 			Self::deposit_event(Event::Executedwithdraw { who });
 			Ok(())
 		}
@@ -987,6 +1013,29 @@ pub mod pallet {
 
 			Delegators::<T>::insert(&who, metadata);
 			Ok(())
+		}
+	}
+
+	/// A Session Manager that wraps another session manager and handles round changes.
+	pub struct RoundChangeSessionManager<T, I>(core::marker::PhantomData<(T, I)>);
+
+	impl<T, I, A> SessionManager<A> for RoundChangeSessionManager<T, I>
+	where
+		T: Config,
+		I: SessionManager<A>,
+	{
+		fn new_session_genesis(i: SessionIndex) -> Option<Vec<A>> {
+			I::new_session_genesis(i)
+		}
+		fn new_session(i: SessionIndex) -> Option<Vec<A>> {
+			I::new_session(i)
+		}
+		fn start_session(i: SessionIndex) {
+			Pallet::<T>::handle_round_change(i);
+			I::start_session(i)
+		}
+		fn end_session(i: SessionIndex) {
+			I::end_session(i)
 		}
 	}
 }

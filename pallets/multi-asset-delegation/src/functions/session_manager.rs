@@ -16,12 +16,10 @@
 use super::*;
 use crate::{types::*, Pallet};
 
-use frame_support::pallet_prelude::DispatchResult;
-
 impl<T: Config> Pallet<T> {
-	pub fn handle_round_change() -> DispatchResult {
-		// Increment the current round
-		CurrentRound::<T>::mutate(|round| *round += 1);
+	pub fn handle_round_change(i: u32) {
+		// Set the current round
+		CurrentRound::<T>::put(i);
 		let current_round = Self::current_round();
 
 		// Iterate through all operators and build their snapshots
@@ -35,7 +33,5 @@ impl<T: Config> Pallet<T> {
 			// Store the snapshot in AtStake storage
 			AtStake::<T>::insert(current_round, operator.clone(), snapshot);
 		}
-
-		Ok(())
 	}
 }

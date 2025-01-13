@@ -23,6 +23,8 @@ members = [
     "pallets/*",
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
+    "pallets/rewards/rpc",
+    "pallets/rewards/rpc/runtime-api",
     "pallets/tangle-lst/benchmarking",
     "pallets/multi-asset-delegation/fuzzer",
     "precompiles/pallet-democracy",
@@ -32,6 +34,7 @@ members = [
     "precompiles/preimage",
     "precompiles/balances-erc20",
     "precompiles/assets-erc20",
+    "precompiles/erc20-utils",
     "precompiles/verify-ecdsa-secp256k1-signature",
     "precompiles/verify-ecdsa-secp256r1-signature",
     "precompiles/verify-ecdsa-stark-signature",
@@ -127,6 +130,8 @@ pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", defau
 pallet-tangle-lst-benchmarking = { path = "pallets/tangle-lst/benchmarking", default-features = false }
 pallet-oracle = { path = "pallets/oracle", default-features = false }
 pallet-rewards = { path = "pallets/rewards", default-features = false }
+pallet-rewards-rpc-runtime-api = { path = "pallets/rewards/rpc/runtime-api", default-features = false }
+pallet-rewards-rpc = { path = "pallets/rewards/rpc" }
 
 k256 = { version = "0.13.3", default-features = false }
 p256 = { version = "0.13.2", default-features = false }
@@ -307,6 +312,7 @@ pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git"
 precompile-utils = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
 
 # Local precompiles
+evm-erc20-utils = { path = "precompiles/erc20-utils", default-features = false }
 pallet-evm-precompile-democracy = { path = "precompiles/pallet-democracy", default-features = false }
 pallet-evm-precompile-batch = { path = "precompiles/batch", default-features = false }
 pallet-evm-precompile-balances-erc20 = { path = "precompiles/balances-erc20", default-features = false }

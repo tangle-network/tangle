@@ -16,7 +16,7 @@
 use super::*;
 use crate::CurrentRound;
 use frame_support::assert_noop;
-use frame_support::assert_ok;
+use frame_support::{assert_ok, traits::OnInitialize};
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
 use tangle_primitives::services::Asset;
 
@@ -55,7 +55,7 @@ fn handle_round_change_should_work() {
 			Default::default(),
 		));
 
-		assert_ok!(Pallet::<Runtime>::handle_round_change());
+		Pallet::<Runtime>::handle_round_change(2);
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
@@ -149,7 +149,7 @@ fn handle_round_change_with_unstake_should_work() {
 			unstake_amount,
 		));
 
-		assert_ok!(Pallet::<Runtime>::handle_round_change());
+		Pallet::<Runtime>::handle_round_change(2);
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
@@ -170,5 +170,25 @@ fn handle_round_change_with_unstake_should_work() {
 		assert_eq!(snapshot2.delegations[0].delegator, delegator2.clone());
 		assert_eq!(snapshot2.delegations[0].amount, amount2);
 		assert_eq!(snapshot2.delegations[0].asset_id, asset_id);
+	});
+}
+
+#[test]
+fn round_should_change_on_new_sessions() {
+	new_test_ext().execute_with(|| {
+		let current_round = MultiAssetDelegation::current_round();
+		assert_eq!(current_round, 1);
+
+		// Create a new session
+		System::set_block_number(2);
+		Session::on_initialize(2);
+		let current_round = MultiAssetDelegation::current_round();
+		assert_eq!(current_round, 2);
+
+		// Create a new session
+		System::set_block_number(3);
+		Session::on_initialize(3);
+		let current_round = MultiAssetDelegation::current_round();
+		assert_eq!(current_round, 3);
 	});
 }

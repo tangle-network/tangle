@@ -41,8 +41,8 @@ use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::DispatchError;
 use sp_runtime::{
 	testing::UintAuthorityId,
-	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
+	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
+	AccountId32, BoundToRuntimeAppPublic, BuildStorage, Perbill,
 };
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 use tangle_primitives::traits::RewardsManager;
@@ -145,7 +145,7 @@ impl OneSessionHandler<AccountId> for MockSessionHandler {
 	fn on_disabled(_validator_index: u32) {}
 }
 
-impl sp_runtime::BoundToRuntimeAppPublic for MockSessionHandler {
+impl BoundToRuntimeAppPublic for MockSessionHandler {
 	type Public = UintAuthorityId;
 }
 
@@ -169,11 +169,11 @@ parameter_types! {
 }
 
 impl pallet_session::Config for Runtime {
-	type SessionManager = MockSessionManager;
+	type SessionManager = pallet::RoundChangeSessionManager<Self, MockSessionManager>;
 	type Keys = MockSessionKeys;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
-	type SessionHandler = (MockSessionHandler,);
+	type SessionHandler = <MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
@@ -563,7 +563,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				}))
 				.unwrap()
 				.encode_input(&[
-					ethabi::Token::Address(mock_address(i as u8).into()),
+					ethabi::Token::Address(mock_address(i as u8)),
 					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
 				])
 				.unwrap(),

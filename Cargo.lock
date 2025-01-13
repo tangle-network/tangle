@@ -3918,6 +3918,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "evm-erc20-utils"
+version = "0.1.0"
+dependencies = [
+ "ethabi",
+ "fp-evm",
+ "hex",
+ "log",
+ "precompile-utils",
+ "sp-core",
+ "sp-std",
+]
+
+[[package]]
 name = "evm-gasometer"
 version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8898,7 +8911,7 @@ dependencies = [
  "derive_more 1.0.0",
  "ethabi",
  "ethereum",
- "ethers",
+ "evm-erc20-utils",
  "fp-account",
  "fp-consensus",
  "fp-dynamic-fee",
@@ -9710,6 +9723,30 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "sp-staking",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-rewards-rpc"
+version = "1.2.5"
+dependencies = [
+ "jsonrpsee 0.23.2",
+ "pallet-rewards-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-blockchain",
+ "sp-runtime",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-rewards-rpc-runtime-api"
+version = "1.2.5"
+dependencies = [
+ "parity-scale-codec",
+ "sp-api",
+ "sp-runtime",
  "sp-std",
  "tangle-primitives",
 ]
@@ -15770,6 +15807,7 @@ dependencies = [
  "log",
  "pallet-airdrop-claims",
  "pallet-im-online",
+ "pallet-rewards-rpc",
  "pallet-services-rpc",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
@@ -15945,6 +15983,7 @@ dependencies = [
  "pallet-preimage",
  "pallet-proxy",
  "pallet-rewards",
+ "pallet-rewards-rpc-runtime-api",
  "pallet-scheduler",
  "pallet-services",
  "pallet-services-rpc-runtime-api",
@@ -16076,6 +16115,7 @@ dependencies = [
  "pallet-preimage",
  "pallet-proxy",
  "pallet-rewards",
+ "pallet-rewards-rpc-runtime-api",
  "pallet-scheduler",
  "pallet-services",
  "pallet-services-rpc-runtime-api",
