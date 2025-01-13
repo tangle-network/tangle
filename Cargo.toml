@@ -23,6 +23,8 @@ members = [
     "pallets/*",
     "pallets/services/rpc",
     "pallets/services/rpc/runtime-api",
+    "pallets/rewards/rpc",
+    "pallets/rewards/rpc/runtime-api",
     "pallets/tangle-lst/benchmarking",
     "pallets/multi-asset-delegation/fuzzer",
     "precompiles/pallet-democracy",
@@ -128,6 +130,8 @@ pallet-multi-asset-delegation = { path = "pallets/multi-asset-delegation", defau
 pallet-tangle-lst-benchmarking = { path = "pallets/tangle-lst/benchmarking", default-features = false }
 pallet-oracle = { path = "pallets/oracle", default-features = false }
 pallet-rewards = { path = "pallets/rewards", default-features = false }
+pallet-rewards-rpc-runtime-api = { path = "pallets/rewards/rpc/runtime-api", default-features = false }
+pallet-rewards-rpc = { path = "pallets/rewards/rpc" }
 
 k256 = { version = "0.13.3", default-features = false }
 p256 = { version = "0.13.2", default-features = false }

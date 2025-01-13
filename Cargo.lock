@@ -9728,6 +9728,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-rewards-rpc"
+version = "1.2.5"
+dependencies = [
+ "jsonrpsee 0.23.2",
+ "pallet-rewards-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api",
+ "sp-blockchain",
+ "sp-runtime",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-rewards-rpc-runtime-api"
+version = "1.2.5"
+dependencies = [
+ "parity-scale-codec",
+ "sp-api",
+ "sp-runtime",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-scheduler"
 version = "38.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#f2081f6657f011634a483e3a4c91e54150c974c7"
@@ -15783,6 +15807,7 @@ dependencies = [
  "log",
  "pallet-airdrop-claims",
  "pallet-im-online",
+ "pallet-rewards-rpc",
  "pallet-services-rpc",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
@@ -15958,6 +15983,7 @@ dependencies = [
  "pallet-preimage",
  "pallet-proxy",
  "pallet-rewards",
+ "pallet-rewards-rpc-runtime-api",
  "pallet-scheduler",
  "pallet-services",
  "pallet-services-rpc-runtime-api",
@@ -16089,6 +16115,7 @@ dependencies = [
  "pallet-preimage",
  "pallet-proxy",
  "pallet-rewards",
+ "pallet-rewards-rpc-runtime-api",
  "pallet-scheduler",
  "pallet-services",
  "pallet-services-rpc-runtime-api",

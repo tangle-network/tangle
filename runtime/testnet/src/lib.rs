@@ -1462,9 +1462,9 @@ impl pallet_assets::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 10_000;
+	pub const MinOperatorBondAmount: Balance = 100;
 	pub const BondDuration: u32 = 10;
-	pub const MinDelegateAmount : Balance = 1000;
+	pub const MinDelegateAmount : Balance = 1;
 	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
@@ -1611,6 +1611,16 @@ impl_runtime_apis! {
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
+	}
+
+	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
+		fn query_user_rewards(
+			account_id: AccountId,
+			asset_id: tangle_primitives::services::Asset<AssetId>,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
+			Ok(rewards)
 		}
 	}
 
