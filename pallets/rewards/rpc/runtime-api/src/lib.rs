@@ -20,7 +20,6 @@
 #![allow(clippy::type_complexity)]
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
-use sp_std::vec::Vec;
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
@@ -40,9 +39,9 @@ sp_api::decl_runtime_apis! {
 		/// - [`RpcRewardsWithBlueprint`]: A list of rewards with their blueprints.
 		fn query_user_rewards(
 			account_id: AccountId,
-			asset_id: AssetId
+			asset_id: tangle_primitives::services::Asset<AssetId>
 		) -> Result<
-			Vec<Balance>,
+			Balance,
 			sp_runtime::DispatchError,
 		>;
 	}

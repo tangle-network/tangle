@@ -27,7 +27,7 @@ use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
 	traits::{Block as BlockT, MaybeDisplay},
-	DispatchError, Serialize,
+	Serialize,
 };
 use std::sync::Arc;
 use tangle_primitives::Balance;
@@ -45,26 +45,27 @@ where
 	fn query_user_rewards(
 		&self,
 		account_id: AccountId,
-		asset_id: AssetId,
+		asset_id: tangle_primitives::services::Asset<AssetId>,
 		at: Option<BlockHash>,
-	) -> RpcResult<Vec<Balance>>;
+	) -> RpcResult<Balance>;
 }
 
-/// A struct that implements the `RewardsApi`.
-pub struct RewardsClient<C, M, P> {
+/// Provides RPC methods to query a dispatchable's class, weight and fee.
+pub struct RewardsClient<C, P> {
+	/// Shared reference to the client.
 	client: Arc<C>,
-	_marker: std::marker::PhantomData<(M, P)>,
+	_marker: std::marker::PhantomData<P>,
 }
 
-impl<C, M, P> RewardsClient<C, M, P> {
-	/// Create new `RewardsClient` instance with the given reference to the client.
+impl<C, P> RewardsClient<C, P> {
+	/// Creates a new instance of the RewardsClient Rpc helper.
 	pub fn new(client: Arc<C>) -> Self {
 		Self { client, _marker: Default::default() }
 	}
 }
 
 impl<C, Block, AccountId, AssetId> RewardsApiServer<<Block as BlockT>::Hash, AccountId, AssetId>
-	for RewardsClient<C, AccountId, AssetId>
+	for RewardsClient<C, Block>
 where
 	Block: BlockT,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
@@ -75,20 +76,22 @@ where
 	fn query_user_rewards(
 		&self,
 		account_id: AccountId,
-		asset_id: AssetId,
+		asset_id: tangle_primitives::services::Asset<AssetId>,
 		at: Option<<Block as BlockT>::Hash>,
-	) -> RpcResult<Vec<Balance>> {
+	) -> RpcResult<Balance> {
 		let api = self.client.runtime_api();
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
-		api.query_user_rewards(at, account_id, asset_id).map_err(|e| {
-			ErrorObject::owned(
-				Error::RuntimeError.into(),
-				"Error querying user rewards",
-				Some(format!("{:?}", e)),
-			)
-		})
+		match api.query_user_rewards(at, account_id, asset_id) {
+			Ok(Ok(res)) => Ok(res),
+			Ok(Err(e)) => Err(map_err(format!("{:?}", e), "Unable to query user rewards")),
+			Err(e) => Err(map_err(format!("{:?}", e), "Unable to query user rewards")),
+		}
 	}
+}
+
+fn map_err(error: impl ToString, desc: &'static str) -> ErrorObjectOwned {
+	ErrorObject::owned(Error::RuntimeError.into(), desc, Some(error.to_string()))
 }
 
 /// Error type of this RPC api.

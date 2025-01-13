@@ -1582,6 +1582,16 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
+		fn query_user_rewards(
+			account_id: AccountId,
+			asset_id: tangle_primitives::services::Asset<AssetId>,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
+			Ok(rewards)
+		}
+	}
+
 	impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
 		fn chain_id() -> u64 {
 			<Runtime as pallet_evm::Config>::ChainId::get()
