@@ -7,7 +7,7 @@ description = "A Precompile to make pallet-services calls encoding accessible to
 
 [dependencies]
 
-# Moonbeam
+
 precompile-utils = { workspace = true }
 
 # Substrate
@@ -36,11 +36,12 @@ ethers = "2.0"
 hex = { workspace = true }
 num_enum = { workspace = true }
 libsecp256k1 = { workspace = true }
+k256 = { workspace = true }
 serde_json = { workspace = true }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
 
-# Moonbeam
+
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate

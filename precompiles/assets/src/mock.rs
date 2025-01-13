@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-multi-asset-delegation package.
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -278,7 +278,7 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = ();
 }
 
-impl tangle_primitives::NextAssetId<u32> for Runtime {
+impl tangle_primitives::traits::NextAssetId<u32> for Runtime {
 	fn next_asset_id() -> Option<u32> {
 		None
 	}

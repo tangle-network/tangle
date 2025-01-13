@@ -1,6 +1,6 @@
+use crate::types::rewards::UserDepositWithLocks;
+use crate::{services::Asset, types::RoundIndex};
 use sp_std::prelude::*;
-
-use crate::types::RoundIndex;
 
 /// A trait to provide information about multi-asset delegation.
 ///
@@ -13,7 +13,8 @@ use crate::types::RoundIndex;
 /// * `AccountId`: The type representing an account identifier.
 /// * `AssetId`: The type representing an asset identifier.
 /// * `Balance`: The type representing a balance or amount.
-pub trait MultiAssetDelegationInfo<AccountId, Balance> {
+/// * `BlockNumber`: The type representing a block number.
+pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 	type AssetId;
 
 	/// Get the current round index.
@@ -75,13 +76,15 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 	/// # Parameters
 	///
 	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `asset_id`: A reference to the asset identifier for which the total
-	/// delegation amount is requested.
+	/// * `asset_id`: A reference to the asset identifier for which the total delegation amount is requested.
 	///
 	/// # Returns
 	///
 	/// The total delegation amount as a `Balance`.
-	fn get_total_delegation_by_asset_id(operator: &AccountId, asset_id: &Self::AssetId) -> Balance;
+	fn get_total_delegation_by_asset_id(
+		operator: &AccountId,
+		asset_id: &Asset<Self::AssetId>,
+	) -> Balance;
 
 	/// Get all delegators for a specific operator.
 	///
@@ -98,11 +101,16 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance> {
 	/// delegator account identifier, delegation amount, and asset identifier.
 	fn get_delegators_for_operator(
 		operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)>;
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)>;
 
 	fn slash_operator(
 		operator: &AccountId,
 		blueprint_id: crate::BlueprintId,
 		percentage: sp_runtime::Percent,
 	);
+
+	fn get_user_deposit_with_locks(
+		who: &AccountId,
+		asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, BlockNumber>>;
 }

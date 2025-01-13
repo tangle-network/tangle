@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,18 +16,20 @@
 #![allow(clippy::all)]
 use super::*;
 use crate::{self as pallet_services};
+use ethabi::Uint;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
-	traits::{ConstU128, ConstU32, OneSessionHandler},
+	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
 };
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
+use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
@@ -35,7 +37,10 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
+use tangle_primitives::rewards::UserDepositWithLocks;
+use tangle_primitives::services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
+use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
@@ -228,18 +233,35 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	}
 
 	fn into_address(account_id: AccountId) -> H160 {
-		account_id.using_encoded(|b| {
-			let mut addr = [0u8; 20];
-			addr.copy_from_slice(&b[0..20]);
-			H160(addr)
-		})
+		H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 	}
+}
+
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = AssetId;
+	type AssetIdParameter = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type AssetDeposit = ConstU128<1>;
+	type AssetAccountDeposit = ConstU128<10>;
+	type MetadataDepositBase = ConstU128<1>;
+	type MetadataDepositPerByte = ConstU128<1>;
+	type ApprovalDeposit = ConstU128<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
 }
 
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64>
 	for MockDelegationManager
 {
 	type AssetId = AssetId;
@@ -270,14 +292,14 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Self::AssetId,
+		_asset_id: &Asset<Self::AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
 		Default::default()
 	}
 
@@ -286,6 +308,13 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 		_blueprint_id: tangle_primitives::BlueprintId,
 		_percentage: sp_runtime::Percent,
 	) {
+	}
+
+	fn get_user_deposit_with_locks(
+		_who: &AccountId,
+		_asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, u64>> {
+		None
 	}
 }
 
@@ -383,6 +412,7 @@ impl Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
+	type Fungibles = Assets;
 	type PalletEVMAddress = ServicesEVMAddress;
 	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
@@ -424,6 +454,7 @@ construct_runtime!(
 		System: frame_system,
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
+		Assets: pallet_assets,
 		Services: pallet_services,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
@@ -445,6 +476,19 @@ pub fn mock_pub_key(id: u8) -> AccountId {
 	sr25519::Public::from_raw([id; 32]).into()
 }
 
+pub fn mock_address(id: u8) -> H160 {
+	H160::from_slice(&[id; 20])
+}
+
+pub fn account_id_to_address(account_id: AccountId) -> H160 {
+	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
+}
+
+pub fn address_to_account_id(address: H160) -> AccountId {
+	use pallet_evm::AddressMapping;
+	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
+}
+
 pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
 	vec.into_iter().map(|id| mock_pub_key(id)).collect()
 }
@@ -456,6 +500,12 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const HOOKS_TEST: H160 = H160([0x22; 20]);
+pub const USDC_ERC20: H160 = H160([0x23; 20]);
+
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
+pub const WBTC: AssetId = 3;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -518,12 +568,65 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		include_str!("./test-artifacts/HookTestBlueprintServiceManager.hex"),
 		HOOKS_TEST,
 	);
+	create_contract(include_str!("./test-artifacts/MockERC20.hex"), USDC_ERC20);
+
+	for i in 1..=authorities.len() {
+		evm_accounts.insert(
+			mock_address(i as u8),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
+	}
+
+	for a in &authorities {
+		evm_accounts.insert(
+			account_id_to_address(a.clone()),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
+	}
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
 
+	let assets_config = pallet_assets::GenesisConfig::<Runtime> {
+		assets: vec![
+			(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
+			(WETH, authorities[1].clone(), true, 100),     // 100 wei.
+			(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
+		],
+		metadata: vec![
+			(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
+			(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
+			(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
+		],
+		accounts: vec![
+			(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
+			//
+			(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
+			//
+			(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
+		],
+		next_asset_id: Some(4),
+	};
+
+	assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
 	ext.execute_with(|| System::set_block_number(1));
@@ -531,6 +634,82 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		System::set_block_number(1);
 		Session::on_initialize(1);
 		<Staking as Hooks<u64>>::on_initialize(1);
+
+		let call = <Runtime as pallet_services::Config>::EvmRunner::call(
+			Services::address(),
+			USDC_ERC20,
+			serde_json::from_value::<ethabi::Function>(json!({
+				"name": "initialize",
+				"inputs": [
+					{
+						"name": "name_",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "symbol_",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "decimals_",
+						"type": "uint8",
+						"internalType": "uint8"
+					}
+				],
+				"outputs": [],
+				"stateMutability": "nonpayable"
+			}))
+			.unwrap()
+			.encode_input(&[
+				ethabi::Token::String("USD Coin".to_string()),
+				ethabi::Token::String("USDC".to_string()),
+				ethabi::Token::Uint(6.into()),
+			])
+			.unwrap(),
+			Default::default(),
+			300_000,
+			true,
+			false,
+		);
+
+		assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
+		// Mint
+		for i in 1..=authorities.len() {
+			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
+				Services::address(),
+				USDC_ERC20,
+				serde_json::from_value::<ethabi::Function>(json!({
+					"name": "mint",
+					"inputs": [
+						{
+							"internalType": "address",
+							"name": "account",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						}
+					],
+					"outputs": [],
+					"stateMutability": "nonpayable"
+				}))
+				.unwrap()
+				.encode_input(&[
+					ethabi::Token::Address(mock_address(i as u8).into()),
+					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
+				])
+				.unwrap(),
+				Default::default(),
+				300_000,
+				true,
+				false,
+			);
+
+			assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
+		}
 	});
 
 	ext

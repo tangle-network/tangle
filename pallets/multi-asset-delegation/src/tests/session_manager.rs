@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,41 +15,53 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::CurrentRound;
+use frame_support::assert_noop;
 use frame_support::assert_ok;
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
+use tangle_primitives::services::Asset;
 
 #[test]
 fn handle_round_change_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = 1;
-		let operator = 2;
-		let asset_id = VDOT;
+		let who = Bob.to_account_id();
+		let operator = Alice.to_account_id();
+		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
-		CurrentRound::<Test>::put(1);
+		CurrentRound::<Runtime>::put(1);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
-
-		create_and_mint_tokens(VDOT, who, amount);
-
-		// Deposit first
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(who), asset_id, amount,));
-
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who),
-			operator,
-			asset_id,
-			amount,
-			Default::default()
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
 		));
 
-		assert_ok!(Pallet::<Test>::handle_round_change());
+		create_and_mint_tokens(VDOT, who.clone(), amount);
+
+		// Deposit first
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			asset_id,
+			amount,
+			None,
+			None,
+		));
+
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			asset_id,
+			amount,
+			Default::default(),
+		));
+
+		assert_ok!(Pallet::<Runtime>::handle_round_change());
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
 		assert_eq!(current_round, 2);
 
-		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator).unwrap();
+		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator.clone()).unwrap();
 		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
 		assert_eq!(snapshot1.delegations[0].amount, amount);
@@ -61,77 +73,101 @@ fn handle_round_change_should_work() {
 fn handle_round_change_with_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let delegator1 = 1;
-		let delegator2 = 2;
-		let operator1 = 3;
-		let operator2 = EVE;
-		let asset_id = VDOT;
-		let amount1 = 100;
-		let amount2 = 200;
+		let delegator1 = Alice.to_account_id();
+		let delegator2 = Bob.to_account_id();
+		let operator1 = Charlie.to_account_id();
+		let operator2 = Dave.to_account_id();
+		let asset_id = Asset::Custom(VDOT);
+		let amount1 = 100_000;
+		let amount2 = 100_000;
 		let unstake_amount = 50;
 
-		CurrentRound::<Test>::put(1);
+		CurrentRound::<Runtime>::put(1);
 
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator1), 10_000));
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator2), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator1.clone()),
+			10_000
+		));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator2.clone()),
+			10_000
+		));
 
-		create_and_mint_tokens(VDOT, delegator1, amount1);
-		mint_tokens(delegator1, VDOT, delegator2, amount2);
+		create_and_mint_tokens(VDOT, delegator1.clone(), amount1);
+		mint_tokens(delegator1.clone(), VDOT, delegator2.clone(), amount2);
+
+		// Deposit with larger than cap should fail
+		assert_noop!(
+			MultiAssetDelegation::deposit(
+				RuntimeOrigin::signed(delegator1.clone()),
+				asset_id,
+				100_000_000_u32.into(),
+				None,
+				None,
+			),
+			Error::<Runtime>::DepositExceedsCapForAsset
+		);
 
 		// Deposit and delegate first
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator1),
+			RuntimeOrigin::signed(delegator1.clone()),
 			asset_id,
 			amount1,
+			None,
+			None,
 		));
+
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(delegator1),
-			operator1,
+			RuntimeOrigin::signed(delegator1.clone()),
+			operator1.clone(),
 			asset_id,
 			amount1,
-			Default::default()
+			Default::default(),
 		));
 
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator2),
+			RuntimeOrigin::signed(delegator2.clone()),
 			asset_id,
 			amount2,
+			None,
+			None
 		));
+
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(delegator2),
-			operator2,
+			RuntimeOrigin::signed(delegator2.clone()),
+			operator2.clone(),
 			asset_id,
 			amount2,
-			Default::default()
+			Default::default(),
 		));
 
 		// Delegator1 schedules unstake
 		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
-			RuntimeOrigin::signed(delegator1),
-			operator1,
+			RuntimeOrigin::signed(delegator1.clone()),
+			operator1.clone(),
 			asset_id,
 			unstake_amount,
 		));
 
-		assert_ok!(Pallet::<Test>::handle_round_change());
+		assert_ok!(Pallet::<Runtime>::handle_round_change());
 
 		// Assert
 		let current_round = MultiAssetDelegation::current_round();
 		assert_eq!(current_round, 2);
 
 		// Check the snapshot for operator1
-		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator1).unwrap();
+		let snapshot1 = MultiAssetDelegation::at_stake(current_round, operator1.clone()).unwrap();
 		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
-		assert_eq!(snapshot1.delegations[0].delegator, delegator1);
+		assert_eq!(snapshot1.delegations[0].delegator, delegator1.clone());
 		assert_eq!(snapshot1.delegations[0].amount, amount1 - unstake_amount); // Amount reduced by unstake_amount
 		assert_eq!(snapshot1.delegations[0].asset_id, asset_id);
 
 		// Check the snapshot for operator2
-		let snapshot2 = MultiAssetDelegation::at_stake(current_round, operator2).unwrap();
+		let snapshot2 = MultiAssetDelegation::at_stake(current_round, operator2.clone()).unwrap();
 		assert_eq!(snapshot2.stake, 10000);
 		assert_eq!(snapshot2.delegations.len(), 1);
-		assert_eq!(snapshot2.delegations[0].delegator, delegator2);
+		assert_eq!(snapshot2.delegations[0].delegator, delegator2.clone());
 		assert_eq!(snapshot2.delegations[0].amount, amount2);
 		assert_eq!(snapshot2.delegations[0].asset_id, asset_id);
 	});

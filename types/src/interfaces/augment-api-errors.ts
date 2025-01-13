@@ -1082,6 +1082,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CapExceedsTotalSupply: AugmentedError<ApiType>;
       /**
+       * Above deposit caps setup
+       **/
+      DepositExceedsCapForAsset: AugmentedError<ApiType>;
+      /**
        * Deposit amount overflow
        **/
       DepositOverflow: AugmentedError<ApiType>;
@@ -1089,6 +1093,18 @@ declare module '@polkadot/api-base/types/errors' {
        * Error returned when trying to add a blueprint ID that already exists.
        **/
       DuplicateBlueprintId: AugmentedError<ApiType>;
+      /**
+       * Erc20 transfer failed
+       **/
+      ERC20TransferFailed: AugmentedError<ApiType>;
+      /**
+       * EVM decode error
+       **/
+      EVMAbiDecode: AugmentedError<ApiType>;
+      /**
+       * EVM encode error
+       **/
+      EVMAbiEncode: AugmentedError<ApiType>;
       /**
        * The account has insufficient balance.
        **/
@@ -1101,6 +1117,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Leaving round not reached
        **/
       LeavingRoundNotReached: AugmentedError<ApiType>;
+      /**
+       * Cannot unstake with locks
+       **/
+      LockViolation: AugmentedError<ApiType>;
       /**
        * Maximum number of blueprints exceeded
        **/
@@ -1410,6 +1430,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       RewardPoolNotFound: AugmentedError<ApiType>;
       /**
+       * The slash amount is too low to be applied.
+       **/
+      SlashTooLow: AugmentedError<ApiType>;
+      /**
        * A sub pool does not exist.
        **/
       SubPoolsNotFound: AugmentedError<ApiType>;
@@ -1498,6 +1522,60 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    rewards: {
+      /**
+       * Arithmetic operation caused an overflow
+       **/
+      ArithmeticError: AugmentedError<ApiType>;
+      /**
+       * Asset already exists in a reward vault
+       **/
+      AssetAlreadyInVault: AugmentedError<ApiType>;
+      /**
+       * Asset is already whitelisted
+       **/
+      AssetAlreadyWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Asset not found in reward vault
+       **/
+      AssetNotInVault: AugmentedError<ApiType>;
+      /**
+       * Asset is not whitelisted for rewards
+       **/
+      AssetNotWhitelisted: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to remove a blueprint ID that doesn't exist.
+       **/
+      BlueprintIdNotFound: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to add a blueprint ID that already exists.
+       **/
+      DuplicateBlueprintId: AugmentedError<ApiType>;
+      /**
+       * Insufficient rewards balance in pallet account
+       **/
+      InsufficientRewardsBalance: AugmentedError<ApiType>;
+      /**
+       * Invalid APY value
+       **/
+      InvalidAPY: AugmentedError<ApiType>;
+      /**
+       * No rewards available to claim
+       **/
+      NoRewardsAvailable: AugmentedError<ApiType>;
+      /**
+       * Error returned when the reward configuration for the vault is not found.
+       **/
+      RewardConfigNotFound: AugmentedError<ApiType>;
+      /**
+       * The reward vault does not exist
+       **/
+      VaultNotFound: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     scheduler: {
       /**
        * Failed to schedule a call
@@ -1546,6 +1624,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
       /**
+       * The ERC20 transfer failed.
+       **/
+      ERC20TransferFailed: AugmentedError<ApiType>;
+      /**
        * An error occurred while decoding the EVM ABI.
        **/
       EVMAbiDecode: AugmentedError<ApiType>;
@@ -1553,6 +1635,14 @@ declare module '@polkadot/api-base/types/errors' {
        * An error occurred while encoding the EVM ABI.
        **/
       EVMAbiEncode: AugmentedError<ApiType>;
+      /**
+       * Expected the account to be an account ID.
+       **/
+      ExpectedAccountId: AugmentedError<ApiType>;
+      /**
+       * Expected the account to be an EVM address.
+       **/
+      ExpectedEVMAddress: AugmentedError<ApiType>;
       /**
        * The caller does not have the requirements to call a job.
        **/
@@ -1611,6 +1701,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The maximum number of services per user has been exceeded.
        **/
       MaxServicesPerUserExceeded: AugmentedError<ApiType>;
+      /**
+       * Missing EVM Origin for the EVM execution.
+       **/
+      MissingEVMOrigin: AugmentedError<ApiType>;
       /**
        * No assets provided for the service, at least one asset is required.
        **/

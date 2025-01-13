@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -211,12 +211,12 @@ pub type TanglePrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2082>,
 		MultiAssetDelegationPrecompile<R>,
-		(CallableByContract, CallableByPrecompile),
+		(CallableByContract, CallableByPrecompile, SubcallWithMaxNesting<1>),
 	>,
 	PrecompileAt<
 		AddressU64<2083>,
 		ServicesPrecompile<R>,
-		(CallableByContract, CallableByPrecompile),
+		(CallableByContract, CallableByPrecompile, SubcallWithMaxNesting<1>),
 	>,
 	PrecompileAt<
 		AddressU64<2084>,

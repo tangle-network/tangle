@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ pub struct RewardConfig<VaultId, Balance> {
 	// A map of asset IDs to their respective reward configurations.
 	pub configs: BTreeMap<VaultId, RewardConfigForAssetVault<Balance>>,
 	// A list of blueprint IDs that are whitelisted for rewards.
-	pub whitelisted_blueprint_ids: Vec<u32>,
+	pub whitelisted_blueprint_ids: Vec<u64>,
 }
 
 /// Asset action for vaults

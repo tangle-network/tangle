@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,13 +30,12 @@ use sp_runtime::{
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+pub mod chain_identifier;
+pub mod impls;
 pub mod services;
 pub mod types;
 pub use types::*;
-pub mod chain_identifier;
-pub mod impls;
 pub mod traits;
-pub use traits::*;
 
 #[cfg(feature = "verifying")]
 pub mod verifier;

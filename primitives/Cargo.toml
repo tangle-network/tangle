@@ -21,6 +21,9 @@ sp-runtime = { workspace = true }
 sp-std = { workspace = true }
 sp-staking = { workspace = true }
 ethabi = { workspace = true }
+fp-evm = { workspace = true }
+frame-system = { workspace = true }
+impl-trait-for-tuples = "0.2.2"
 
 # Arkworks
 ark-bn254 = { workspace = true, optional = true }
@@ -69,7 +72,9 @@ std = [
   "ark-groth16?/std",
   "ark-serialize?/std",
   "ethabi/std",
-  "sp-staking/std"
+  "sp-staking/std",
+  "fp-evm/std",
+  "frame-system/std",
 ]
 verifying = [
   "ark-crypto-primitives",

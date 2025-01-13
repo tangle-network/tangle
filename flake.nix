@@ -6,9 +6,7 @@
     # Rust
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs = { nixpkgs.follows = "nixpkgs"; };
     };
     # EVM dev tools
     foundry = {
@@ -24,13 +22,10 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) foundry.overlay ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
+        pkgs = import nixpkgs { inherit system overlays; };
         lib = pkgs.lib;
         toolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-      in
-      {
+      in {
         devShells.default = pkgs.mkShell {
           name = "tangle";
           nativeBuildInputs = [
@@ -40,13 +35,22 @@
             pkgs.openssl
             # Needed for rocksdb-sys
             pkgs.clang
+            pkgs.gcc
+            pkgs.libbfd
+            pkgs.libunwind
+            pkgs.libblocksruntime
             pkgs.libclang.lib
+            pkgs.libgcc
             pkgs.rustPlatform.bindgenHook
             # Mold Linker for faster builds (only on Linux)
             (lib.optionals pkgs.stdenv.isLinux pkgs.mold)
-            (lib.optionals pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.Security)
-            (lib.optionals pkgs.stdenv.isDarwin pkgs.darwin.apple_sdk.frameworks.SystemConfiguration)
+            (lib.optionals pkgs.stdenv.isDarwin
+              pkgs.darwin.apple_sdk.frameworks.Security)
+            (lib.optionals pkgs.stdenv.isDarwin
+              pkgs.darwin.apple_sdk.frameworks.SystemConfiguration)
           ];
+          # Fortify causes build failures: 'str*' defined both normally and as 'alias' attribute
+          hardeningDisable = [ "fortify" ];
           buildInputs = [
             # Nodejs for test suite
             pkgs.nodePackages.typescript-language-server
@@ -58,13 +62,26 @@
           ];
           packages = [
             pkgs.taplo
+            pkgs.harper
             pkgs.cargo-nextest
+            pkgs.cargo-expand
             pkgs.cargo-tarpaulin
+            pkgs.lldb
           ];
           # Environment variables
           RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
           # Needed for running DKG Node.
-          LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.gmp pkgs.openssl pkgs.libclang pkgs.stdenv.cc.cc ];
+          LD_LIBRARY_PATH = lib.makeLibraryPath [
+            pkgs.gmp
+            pkgs.openssl
+            pkgs.libclang
+            pkgs.libgcc
+            pkgs.stdenv.cc.cc
+            pkgs.libbfd
+            pkgs.libunwind
+            pkgs.libblocksruntime
+            pkgs.libopcodes
+          ];
         };
       });
 }

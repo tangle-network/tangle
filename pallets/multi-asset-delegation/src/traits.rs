@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,11 +15,17 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::types::{BalanceOf, OperatorStatus};
+use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{traits::Zero, Percent};
 use sp_std::prelude::*;
-use tangle_primitives::{traits::MultiAssetDelegationInfo, BlueprintId, RoundIndex};
+use tangle_primitives::types::rewards::UserDepositWithLocks;
+use tangle_primitives::{
+	services::Asset, traits::MultiAssetDelegationInfo, BlueprintId, RoundIndex,
+};
 
-impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {
+impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>>
+	for crate::Pallet<T>
+{
 	type AssetId = T::AssetId;
 
 	fn get_current_round() -> RoundIndex {
@@ -41,7 +47,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 
 	fn get_total_delegation_by_asset_id(
 		operator: &T::AccountId,
-		asset_id: &T::AssetId,
+		asset_id: &Asset<T::AssetId>,
 	) -> BalanceOf<T> {
 		Operators::<T>::get(operator).map_or(Zero::zero(), |metadata| {
 			metadata
@@ -54,7 +60,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 
 	fn get_delegators_for_operator(
 		operator: &T::AccountId,
-	) -> Vec<(T::AccountId, BalanceOf<T>, Self::AssetId)> {
+	) -> Vec<(T::AccountId, BalanceOf<T>, Asset<Self::AssetId>)> {
 		Operators::<T>::get(operator).map_or(Vec::new(), |metadata| {
 			metadata
 				.delegations
@@ -66,5 +72,17 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>> for 
 
 	fn slash_operator(operator: &T::AccountId, blueprint_id: BlueprintId, percentage: Percent) {
 		let _ = Pallet::<T>::slash_operator(operator, blueprint_id, percentage);
+	}
+
+	fn get_user_deposit_with_locks(
+		who: &T::AccountId,
+		asset_id: Asset<T::AssetId>,
+	) -> Option<UserDepositWithLocks<BalanceOf<T>, BlockNumberFor<T>>> {
+		Delegators::<T>::get(who).and_then(|metadata| {
+			metadata.deposits.get(&asset_id).map(|deposit| UserDepositWithLocks {
+				unlocked_amount: deposit.amount,
+				amount_with_locks: deposit.locks.as_ref().map(|locks| locks.to_vec()),
+			})
+		})
 	}
 }

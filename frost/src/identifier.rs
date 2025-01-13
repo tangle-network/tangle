@@ -1,32 +1,50 @@
+//! FROST participant identifiers
+
 use core::{
-	fmt::Debug,
+	fmt::{self, Debug},
 	hash::{Hash, Hasher},
 };
 
+use alloc::vec::Vec;
+
 use crate::{
-	error::{Error, FieldError},
-	serialization::ScalarSerialization,
-	traits::{Ciphersuite, Field, Group, Scalar},
-	util::scalar_is_valid,
+	serialization::SerializableScalar, Ciphersuite, Error, Field, FieldError, Group, Scalar,
 };
 
-#[derive(Copy, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-#[serde(bound = "C: Ciphersuite")]
-#[serde(try_from = "ScalarSerialization<C>")]
-#[serde(into = "ScalarSerialization<C>")]
-pub struct Identifier<C: Ciphersuite>(Scalar<C>);
+/// A FROST participant identifier.
+///
+/// The identifier is a field element in the scalar field that the secret polynomial is defined
+/// over, corresponding to some x-coordinate for a polynomial f(x) = y.  MUST NOT be zero in the
+/// field, as f(0) = the shared secret.
+#[derive(Copy, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(bound = "C: Ciphersuite"))]
+// We use these to add a validation step since zero scalars should cause an
+// error when deserializing.
+#[cfg_attr(feature = "serde", serde(try_from = "SerializableScalar<C>"))]
+#[cfg_attr(feature = "serde", serde(into = "SerializableScalar<C>"))]
+pub struct Identifier<C: Ciphersuite>(SerializableScalar<C>);
 
 impl<C> Identifier<C>
 where
 	C: Ciphersuite,
 {
 	/// Create a new Identifier from a scalar. For internal use only.
-	fn new(scalar: Scalar<C>) -> Result<Self, Error> {
+	#[cfg_attr(feature = "internals", visibility::make(pub))]
+	#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
+	pub(crate) fn new(scalar: Scalar<C>) -> Result<Self, Error<C>> {
 		if scalar == <<C::Group as Group>::Field>::zero() {
 			Err(FieldError::InvalidZeroScalar.into())
 		} else {
-			Ok(Self(scalar))
+			Ok(Self(SerializableScalar(scalar)))
 		}
+	}
+
+	/// Get the inner scalar.
+	#[cfg_attr(feature = "internals", visibility::make(pub))]
+	#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
+	pub(crate) fn to_scalar(&self) -> Scalar<C> {
+		self.0 .0
 	}
 
 	/// Derive an Identifier from an arbitrary byte string.
@@ -38,48 +56,42 @@ where
 	/// Returns an error if the ciphersuite does not support identifier derivation,
 	/// or if the mapped identifier is zero (which is unpredictable, but should happen
 	/// with negligible probability).
-	pub fn derive(s: &[u8]) -> Result<Self, Error> {
+	pub fn derive(s: &[u8]) -> Result<Self, Error<C>> {
 		let scalar = C::HID(s).ok_or(Error::IdentifierDerivationNotSupported)?;
 		Self::new(scalar)
 	}
 
 	/// Serialize the identifier using the ciphersuite encoding.
-	pub fn serialize(&self) -> <<C::Group as Group>::Field as Field>::Serialization {
-		<<C::Group as Group>::Field>::serialize(&self.0)
+	pub fn serialize(&self) -> Vec<u8> {
+		self.0.serialize()
 	}
 
 	/// Deserialize an Identifier from a serialized buffer.
 	/// Returns an error if it attempts to deserialize zero.
-	pub fn deserialize(
-		buf: &<<C::Group as Group>::Field as Field>::Serialization,
-	) -> Result<Self, Error> {
-		let scalar = <<C::Group as Group>::Field>::deserialize(buf)?;
-		Self::new(scalar)
-	}
-
-	/// Check if the identifier is valid aka not zero
-	pub fn is_valid(&self) -> bool {
-		scalar_is_valid::<C>(&self.0)
+	pub fn deserialize(bytes: &[u8]) -> Result<Self, Error<C>> {
+		Self::new(SerializableScalar::deserialize(bytes)?.0)
 	}
 }
 
-impl<C> TryFrom<ScalarSerialization<C>> for Identifier<C>
+#[cfg(feature = "serde")]
+impl<C> TryFrom<SerializableScalar<C>> for Identifier<C>
 where
 	C: Ciphersuite,
 {
-	type Error = Error;
+	type Error = Error<C>;
 
-	fn try_from(value: ScalarSerialization<C>) -> Result<Self, Self::Error> {
-		Self::deserialize(&value.0)
+	fn try_from(s: SerializableScalar<C>) -> Result<Self, Self::Error> {
+		Self::new(s.0)
 	}
 }
 
-impl<C> From<Identifier<C>> for ScalarSerialization<C>
+#[cfg(feature = "serde")]
+impl<C> From<Identifier<C>> for SerializableScalar<C>
 where
 	C: Ciphersuite,
 {
-	fn from(value: Identifier<C>) -> Self {
-		Self(value.serialize())
+	fn from(i: Identifier<C>) -> Self {
+		i.0
 	}
 }
 
@@ -89,10 +101,8 @@ impl<C> Debug for Identifier<C>
 where
 	C: Ciphersuite,
 {
-	fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-		f.debug_tuple("Identifier")
-			.field(&hex::encode(<<C::Group as Group>::Field>::serialize(&self.0).as_ref()))
-			.finish()
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		f.debug_tuple("Identifier").field(&hex::encode(self.serialize())).finish()
 	}
 }
 
@@ -102,7 +112,7 @@ where
 	C: Ciphersuite,
 {
 	fn hash<H: Hasher>(&self, state: &mut H) {
-		<<C::Group as Group>::Field>::serialize(&self.0).as_ref().hash(state)
+		self.serialize().hash(state)
 	}
 }
 
@@ -111,8 +121,10 @@ where
 	C: Ciphersuite,
 {
 	fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-		let serialized_self = <<C::Group as Group>::Field>::little_endian_serialize(&self.0);
-		let serialized_other = <<C::Group as Group>::Field>::little_endian_serialize(&other.0);
+		let serialized_self =
+			<<C::Group as Group>::Field>::little_endian_serialize(&self.to_scalar());
+		let serialized_other =
+			<<C::Group as Group>::Field>::little_endian_serialize(&other.to_scalar());
 		// The default cmp uses lexicographic order; so we need the elements in big endian
 		serialized_self
 			.as_ref()
@@ -131,42 +143,11 @@ where
 	}
 }
 
-impl<C> core::ops::Mul<Scalar<C>> for Identifier<C>
-where
-	C: Ciphersuite,
-{
-	type Output = Scalar<C>;
-
-	fn mul(self, scalar: Scalar<C>) -> Scalar<C> {
-		self.0 * scalar
-	}
-}
-
-impl<C> core::ops::MulAssign<Identifier<C>> for Scalar<C>
-where
-	C: Ciphersuite,
-{
-	fn mul_assign(&mut self, identifier: Identifier<C>) {
-		*self = *self * identifier.0
-	}
-}
-
-impl<C> core::ops::Sub for Identifier<C>
-where
-	C: Ciphersuite,
-{
-	type Output = Self;
-
-	fn sub(self, rhs: Identifier<C>) -> Self::Output {
-		Self(self.0 - rhs.0)
-	}
-}
-
 impl<C> TryFrom<u16> for Identifier<C>
 where
 	C: Ciphersuite,
 {
-	type Error = Error;
+	type Error = Error<C>;
 
 	fn try_from(n: u16) -> Result<Identifier<C>, Self::Error> {
 		if n == 0 {
@@ -184,7 +165,7 @@ where
 					sum = sum + one;
 				}
 			}
-			Ok(Self(sum))
+			Self::new(sum)
 		}
 	}
 }

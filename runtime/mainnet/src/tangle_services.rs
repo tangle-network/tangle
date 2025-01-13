@@ -9,7 +9,7 @@ parameter_types! {
 
 pub struct PalletEvmRunner;
 
-impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
+impl tangle_primitives::services::EvmRunner<Runtime> for PalletEvmRunner {
 	type Error = pallet_evm::Error<Runtime>;
 
 	fn call(
@@ -20,7 +20,7 @@ impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
 		gas_limit: u64,
 		is_transactional: bool,
 		validate: bool,
-	) -> Result<fp_evm::CallInfo, pallet_services::RunnerError<Self::Error>> {
+	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
 		let max_fee_per_gas = DefaultBaseFeePerGas::get();
 		let max_priority_fee_per_gas =
 			max_fee_per_gas.saturating_mul(U256::from(3) / U256::from(2));
@@ -44,13 +44,13 @@ impl pallet_services::EvmRunner<Runtime> for PalletEvmRunner {
 			proof_size_base_cost,
 			<Runtime as pallet_evm::Config>::config(),
 		)
-		.map_err(|o| pallet_services::RunnerError { error: o.error, weight: o.weight })
+		.map_err(|o| tangle_primitives::services::RunnerError { error: o.error, weight: o.weight })
 	}
 }
 
 pub struct PalletEVMGasWeightMapping;
 
-impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
+impl tangle_primitives::services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
 	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
 		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
 	}
@@ -62,7 +62,7 @@ impl pallet_services::EvmGasWeightMapping for PalletEVMGasWeightMapping {
 
 pub struct PalletEVMAddressMapping;
 
-impl pallet_services::EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
+impl tangle_primitives::services::EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	fn into_account_id(address: H160) -> AccountId {
 		use pallet_evm::AddressMapping;
 		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
@@ -151,6 +151,7 @@ impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
+	type Fungibles = Assets;
 	type PalletEVMAddress = ServicesEVMAddress;
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;

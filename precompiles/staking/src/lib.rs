@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-staking package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-staking package used in Tangle Network in terms of GPLv3.
@@ -218,7 +218,6 @@ where
 		Ok(total_stake)
 	}
 
-	#[precompile::public("erasTotalRewardPoints(uint32)")]
 	#[precompile::public("eras_total_reward_points(uint32)")]
 	#[precompile::view]
 	fn eras_total_reward_points(

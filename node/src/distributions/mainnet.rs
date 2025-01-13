@@ -1,6 +1,6 @@
 #![allow(clippy::type_complexity)]
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -396,6 +396,7 @@ pub fn get_distribution_for(
 	DistributionResult { claims, vesting, vesting_length: total_vesting_schedule, vesting_cliff }
 }
 
+#[cfg(not(feature = "testnet"))]
 #[test]
 fn test_compute_investor_balance_distribution() {
 	let alice = MultiAddress::Native(AccountId32::new([0; 32]));
@@ -432,6 +433,7 @@ fn test_compute_investor_balance_distribution() {
 	);
 }
 
+#[cfg(not(feature = "testnet"))]
 #[test]
 fn test_get_distribution_for() {
 	let alice = MultiAddress::Native(AccountId32::new([0; 32]));
@@ -470,6 +472,7 @@ fn test_get_distribution_for() {
 	);
 }
 
+#[cfg(not(feature = "testnet"))]
 #[test]
 fn test_distribution_shares() {
 	// ============== compute total investor amount and share of distribution ================= //

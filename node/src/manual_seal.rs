@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,22 +23,19 @@ use crate::{
 		StorageOverrideHandler,
 	},
 };
-use futures::{channel::mpsc, future, prelude::*, FutureExt};
-use futures_timer::Delay;
+use futures::{future, prelude::*, FutureExt};
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
-use sc_consensus_babe::{BabeLink, BabeWorkerHandle, SlotProportion};
+use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
 pub use sc_executor::NativeElseWasmExecutor;
-use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker};
-use sc_transaction_pool::FullPool;
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
 use sp_runtime::traits::Block as BlockT;
-use std::{cell::RefCell, path::Path, sync::Arc, time::Duration};
-use substrate_prometheus_endpoint::Registry;
+use std::{path::Path, sync::Arc, time::Duration};
 use tangle_primitives::Block;
 
 #[cfg(not(feature = "testnet"))]

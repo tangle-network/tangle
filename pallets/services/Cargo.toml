@@ -27,11 +27,12 @@ hex = { workspace = true, features = ["alloc"] }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
-ethers = "2.0"
 hex = { workspace = true }
+k256 = { workspace = true }
 num_enum = { workspace = true }
 hex-literal = { workspace = true }
 libsecp256k1 = { workspace = true }
+pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-timestamp = { workspace = true }
 serde = { workspace = true }
@@ -98,11 +99,13 @@ std = [
  "fp-self-contained/std",
  "fp-storage/std",
  "ethabi/std",
+ "ethabi/serde",
  "pallet-base-fee/std",
  "pallet-dynamic-fee/std",
  "pallet-ethereum/std",
  "pallet-evm/std",
  "pallet-evm-chain-id/std",
+ "pallet-assets/std",
 
  "pallet-evm-precompile-modexp/std",
  "pallet-evm-precompile-sha3fips/std",

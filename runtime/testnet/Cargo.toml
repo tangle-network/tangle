@@ -89,6 +89,7 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 pallet-tangle-lst = { workspace = true }
+pallet-rewards = { workspace = true }
 
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
@@ -144,15 +145,6 @@ precompile-utils = { workspace = true }
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
-
-# Sygma
-# sygma-access-segregator = { workspace = true }
-# sygma-basic-feehandler = { workspace = true }
-# sygma-traits = { workspace = true }
-# sygma-fee-handler-router = { workspace = true }
-# sygma-percentage-feehandler = { workspace = true }
-# sygma-bridge = { workspace = true }
-# sygma-runtime-api = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
@@ -265,6 +257,7 @@ std = [
     "pallet-multi-asset-delegation/std",
     "pallet-tangle-lst/std",
     "pallet-services-rpc-runtime-api/std",
+    "pallet-rewards/std",
 
     # Frontier
     "fp-evm/std",
@@ -311,14 +304,6 @@ std = [
     "precompile-utils/std",
     "pallet-evm-precompile-services/std",
     "pallet-evm-precompile-tangle-lst/std",
-    # Sygma
-    # "sygma-basic-feehandler/std",
-    # "sygma-traits/std",
-    # "sygma-bridge/std",
-    # "sygma-access-segregator/std",
-    # "sygma-fee-handler-router/std",
-    # "sygma-percentage-feehandler/std",
-    # "sygma-runtime-api/std",
 
     # XCM
     "xcm/std",

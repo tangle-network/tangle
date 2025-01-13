@@ -13,33 +13,176 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
+log = { workspace = true }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+ethabi = { workspace = true }
 pallet-balances = { workspace = true }
 tangle-primitives = { workspace = true }
 pallet-assets = { workspace = true, default-features = false }
+fp-evm = { workspace = true }
+itertools = { workspace = true, features = ["use_alloc"] }
+serde = { workspace = true, features = ["derive"], optional = true }
+hex = { workspace = true, features = ["alloc"] }
+
+# Optional dependencies for fuzzing
+ethereum = { workspace = true, features = ["with-codec"], optional = true }
+ethers = { version = "2.0", optional = true }
+num_enum = { workspace = true, optional = true }
+hex-literal = { workspace = true, optional = true }
+libsecp256k1 = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+smallvec = { workspace = true, optional = true }
+sp-keystore = { workspace = true, optional = true }
+fp-account = { workspace = true, optional = true }
+fp-consensus = { workspace = true, optional = true }
+fp-dynamic-fee = { workspace = true, optional = true }
+fp-ethereum = { workspace = true, optional = true }
+fp-rpc = { workspace = true, optional = true }
+fp-self-contained = { workspace = true, optional = true }
+fp-storage = { workspace = true, optional = true }
+pallet-base-fee = { workspace = true, optional = true }
+pallet-dynamic-fee = { workspace = true, optional = true }
+pallet-ethereum = { workspace = true, optional = true }
+pallet-evm = { workspace = true, optional = true }
+pallet-evm-chain-id = { workspace = true, optional = true }
+pallet-evm-precompile-blake2 = { workspace = true, optional = true }
+pallet-evm-precompile-bn128 = { workspace = true, optional = true }
+pallet-evm-precompile-curve25519 = { workspace = true, optional = true }
+pallet-evm-precompile-ed25519 = { workspace = true, optional = true }
+pallet-evm-precompile-modexp = { workspace = true, optional = true }
+pallet-evm-precompile-sha3fips = { workspace = true, optional = true }
+pallet-evm-precompile-simple = { workspace = true, optional = true }
+precompile-utils = { workspace = true, optional = true }
+sp-keyring = { workspace = true, optional = true }
+pallet-timestamp = { workspace = true, optional = true }
+pallet-session = { workspace = true, optional = true }
+pallet-staking = { workspace = true, optional = true }
+sp-staking = { workspace = true, optional = true }
+frame-election-provider-support = { workspace = true, optional = true }
+
+[dev-dependencies]
+ethereum = { workspace = true, features = ["with-codec"] }
+ethers = "2.0"
+num_enum = { workspace = true }
+hex-literal = { workspace = true }
+libsecp256k1 = { workspace = true }
+pallet-assets = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+smallvec = { workspace = true }
+sp-io = { workspace = true }
+sp-keystore = { workspace = true }
+fp-account = { workspace = true }
+fp-consensus = { workspace = true }
+fp-dynamic-fee = { workspace = true }
+fp-ethereum = { workspace = true }
+fp-rpc = { workspace = true }
+fp-self-contained = { workspace = true }
+fp-storage = { workspace = true }
+pallet-base-fee = { workspace = true }
+pallet-dynamic-fee = { workspace = true }
+pallet-ethereum = { workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-chain-id = { workspace = true }
+pallet-evm-precompile-blake2 = { workspace = true }
+pallet-evm-precompile-bn128 = { workspace = true }
+pallet-evm-precompile-curve25519 = { workspace = true }
+pallet-evm-precompile-ed25519 = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+precompile-utils = { workspace = true }
+sp-keyring = { workspace = true }
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+sp-staking = { workspace = true }
+frame-election-provider-support = { workspace = true }
 
 [features]
 default = ["std"]
 std = [
-  "scale-info/std",
-  "sp-runtime/std",
-  "frame-benchmarking?/std",
-  "frame-support/std",
-  "frame-system/std",
-  "sp-core/std",
-  "sp-std/std",
-  "pallet-balances/std",
-  "pallet-assets/std",
-  "tangle-primitives/std"
+ "scale-info/std",
+ "sp-runtime/std",
+ "frame-benchmarking?/std",
+ "frame-support/std",
+ "frame-system/std",
+ "sp-core/std",
+ "sp-std/std",
+ "pallet-balances/std",
+ "pallet-assets/std",
+ "tangle-primitives/std",
+ "ethabi/std",
+ "log/std",
+ "fp-evm/std",
+ "serde/std",
+ "hex/std",
+ "pallet-evm-precompile-modexp/std",
+ "pallet-evm-precompile-sha3fips/std",
+ "pallet-evm-precompile-simple/std",
+ "pallet-evm-precompile-blake2/std",
+ "pallet-evm-precompile-bn128/std",
+ "pallet-evm-precompile-curve25519/std",
+ "pallet-evm-precompile-ed25519/std",
+ "precompile-utils/std",
+ "pallet-staking/std",
+ "fp-account/std",
+ "fp-consensus/std",
+ "fp-dynamic-fee/std",
+ "fp-ethereum/std",
+ "fp-evm/std",
+ "fp-rpc/std",
+ "fp-self-contained/std",
+ "fp-storage/std",
+ "ethabi/std",
+ "sp-keyring/std",
+ "pallet-ethereum/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
-  "frame-benchmarking/runtime-benchmarks",
-  "frame-support/runtime-benchmarks",
-  "frame-system/runtime-benchmarks",
-  "sp-runtime/runtime-benchmarks",
-  "pallet-balances/runtime-benchmarks",
+ "frame-benchmarking/runtime-benchmarks",
+ "frame-support/runtime-benchmarks",
+ "frame-system/runtime-benchmarks",
+ "sp-runtime/runtime-benchmarks",
+ "pallet-balances/runtime-benchmarks",
+]
+fuzzing = [
+ "ethereum",
+ "ethers",
+ "num_enum",
+ "hex-literal",
+ "libsecp256k1",
+ "serde_json",
+ "smallvec",
+ "sp-keystore",
+ "fp-account",
+ "fp-consensus",
+ "fp-dynamic-fee",
+ "fp-ethereum",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
+ "pallet-base-fee",
+ "pallet-dynamic-fee",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-chain-id",
+ "pallet-evm-precompile-blake2",
+ "pallet-evm-precompile-bn128",
+ "pallet-evm-precompile-curve25519",
+ "pallet-evm-precompile-ed25519",
+ "pallet-evm-precompile-modexp",
+ "pallet-evm-precompile-sha3fips",
+ "pallet-evm-precompile-simple",
+ "precompile-utils",
+ "sp-keyring",
+ "pallet-timestamp",
+ "pallet-session",
+ "pallet-staking",
+ "sp-staking",
+ "frame-election-provider-support",
 ]

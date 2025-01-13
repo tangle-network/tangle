@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultiAssetDelegationRewardsAssetAction, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesAsset, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TanglePrimitivesServicesServiceBlueprint, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -2075,113 +2075,238 @@ declare module '@polkadot/api-base/types/submittable' {
        * insufficient to cover the ED deficit of the pool or vice-versa where there is excess
        * deposit to the pool. This call allows anyone to adjust the ED deposit of the
        * pool by either topping up the deficit or claiming the excess.
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call. Must be signed.
+       * * `pool_id` - The identifier of the pool to adjust the deposit for.
        **/
       adjustPoolDeposit: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
       /**
-       * Bond `extra` more funds from `origin` into the pool to which they already belong.
+       * Bond additional funds into an existing pool position.
        * 
-       * Additional funds can come from either the free balance of the account, of from the
-       * accumulated rewards, see [`BondExtra`].
+       * Additional funds can come from either free balance or accumulated rewards.
+       * Automatically pays out all pending rewards.
        * 
-       * Bonding extra funds implies an automatic payout of all pending rewards as well.
-       * See `bond_extra_other` to bond pending rewards of `other` members.
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `pool_id` - Target pool ID
+       * * `extra` - Source and amount of additional funds
+       * 
+       * # Permissions
+       * 
+       * * Must be signed
+       * * Must have permission to bond extra if not self
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::DoesNotHavePermission`] - Caller lacks permission
+       * * [`Error::DefensiveError`] - Reward pool not found
+       * 
+       * # Note
+       * 
+       * * This transaction prioritizes readability and correctness over optimization
+       * * Multiple storage reads/writes are performed to reuse code
+       * * See `bond_extra_other` to bond pending rewards of other members
        **/
       bondExtra: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, extra: PalletTangleLstBondExtra | { FreeBalance: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstBondExtra]>;
       /**
-       * `origin` bonds funds from `extra` for some pool member `member` into their respective
-       * pools.
+       * Bond additional funds for a pool member into their respective pool.
        * 
-       * `origin` can bond extra funds from free balance or pending rewards when `origin ==
-       * other`.
+       * # Permissions
        * 
-       * In the case of `origin != other`, `origin` can only bond extra pending rewards of
-       * `other` members assuming set_claim_permission for the given member is
-       * `PermissionlessAll` or `PermissionlessCompound`.
+       * * Origin must match member account for bonding from free balance/pending rewards
+       * * Any origin can bond from pending rewards if member has `PermissionlessAll` or
+       * `PermissionlessCompound` claim permissions
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call
+       * * `member` - Pool member account to bond for
+       * * `pool_id` - Pool identifier
+       * * `extra` - Amount to bond from free balance or pending rewards
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::PoolMemberNotFound`] - Account is not a member of pool
+       * * [`Error::NoPermission`] - Origin lacks permission to bond for member
        **/
       bondExtraOther: AugmentedSubmittable<(member: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, extra: PalletTangleLstBondExtra | { FreeBalance: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, PalletTangleLstBondExtra]>;
       /**
-       * Chill on behalf of the pool.
+       * Chill on behalf of the pool by forwarding the call to the staking pallet.
        * 
-       * The dispatch origin of this call must be signed by the pool nominator or the pool
-       * root role, same as [`Pallet::nominate`].
+       * # Permissions
        * 
-       * This directly forward the call to the staking pallet, on behalf of the pool bonded
-       * account.
+       * * Origin must be signed by pool nominator or root role
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call
+       * * `pool_id` - Pool identifier
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::NotNominator`] - Origin lacks nomination permission
        **/
       chill: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
       /**
-       * Claim pending commission.
+       * Claim pending commission for a pool.
        * 
-       * The dispatch origin of this call must be signed by the `root` role of the pool. Pending
-       * commission is paid out and added to total claimed commission`. Total pending commission
-       * is reset to zero. the current.
+       * The dispatch origin of this call must be signed by an account with commission claim permission.
+       * Pending commission is paid out and added to total claimed commission. Total pending commission
+       * is reset to zero.
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call. Must be signed by an account with commission claim permission.
+       * * `pool_id` - The identifier of the pool to claim commission from.
        **/
       claimCommission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
       /**
        * Create a new delegation pool.
        * 
+       * # Permissions
+       * 
+       * * Must be signed by the account that will become the initial depositor
+       * 
        * # Arguments
        * 
-       * * `amount` - The amount of funds to delegate to the pool. This also acts of a sort of
-       * deposit since the pools creator cannot fully unbond funds until the pool is being
-       * destroyed.
-       * * `index` - A disambiguation index for creating the account. Likely only useful when
-       * creating multiple pools in the same extrinsic.
-       * * `root` - The account to set as [`PoolRoles::root`].
-       * * `nominator` - The account to set as the [`PoolRoles::nominator`].
-       * * `bouncer` - The account to set as the [`PoolRoles::bouncer`].
+       * * `origin` - Origin of the call
+       * * `amount` - Amount to delegate to the pool
+       * * `root` - Account to set as pool root
+       * * `nominator` - Account to set as pool nominator
+       * * `bouncer` - Account to set as pool bouncer
+       * * `name` - Optional pool name bounded by `T::MaxNameLength`
+       * * `icon` - Optional pool icon bounded by `T::MaxIconLength`
+       * 
+       * # Errors
+       * 
+       * * [`Error::OverflowRisk`] - Pool ID increment would overflow
        * 
        * # Note
        * 
-       * In addition to `amount`, the caller will transfer the existential deposit; so the caller
-       * needs at have at least `amount + existential_deposit` transferable.
+       * Caller must have `amount + existential_deposit` transferable funds.
        **/
       create: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, root: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, nominator: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, bouncer: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, name: Option<Bytes> | null | Uint8Array | Bytes | string, icon: Option<Bytes> | null | Uint8Array | Bytes | string) => SubmittableExtrinsic<ApiType>, [Compact<u128>, MultiAddress, MultiAddress, MultiAddress, Option<Bytes>, Option<Bytes>]>;
       /**
-       * Create a new delegation pool with a previously used pool id
+       * Create a new delegation pool with a previously used pool ID.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the account that will become the depositor
        * 
        * # Arguments
        * 
-       * same as `create` with the inclusion of
-       * * `pool_id` - `A valid PoolId.
-       **/
-      createWithPoolId: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, root: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, nominator: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, bouncer: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, name: Option<Bytes> | null | Uint8Array | Bytes | string, icon: Option<Bytes> | null | Uint8Array | Bytes | string) => SubmittableExtrinsic<ApiType>, [Compact<u128>, MultiAddress, MultiAddress, MultiAddress, u32, Option<Bytes>, Option<Bytes>]>;
-      /**
-       * Stake funds with a pool. The amount to bond is transferred from the member to the
-       * pools account and immediately increases the pools bond.
+       * * `origin` - Origin of the call
+       * * `amount` - Amount to delegate to the pool
+       * * `root` - Account to set as pool root
+       * * `nominator` - Account to set as pool nominator
+       * * `bouncer` - Account to set as pool bouncer
+       * * `pool_id` - Pool ID to reuse
+       * * `name` - Optional pool name
+       * * `icon` - Optional pool icon
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolIdInUse`] - Pool ID is already in use
+       * * [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID
        * 
        * # Note
        * 
-       * * This call will *not* dust the member account, so the member must have at least
-       * `existential deposit + amount` in their account.
-       * * Only a pool with [`PoolState::Open`] can be joined
+       * Caller must have `amount + existential_deposit` transferable funds.
+       **/
+      createWithPoolId: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, root: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, nominator: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, bouncer: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, name: Option<Bytes> | null | Uint8Array | Bytes | string, icon: Option<Bytes> | null | Uint8Array | Bytes | string) => SubmittableExtrinsic<ApiType>, [Compact<u128>, MultiAddress, MultiAddress, MultiAddress, u32, Option<Bytes>, Option<Bytes>]>;
+      /**
+       * Stakes funds with a pool by transferring the bonded amount from member to pool account.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `amount` - Amount to stake
+       * * `pool_id` - Target pool ID
+       * 
+       * # Errors
+       * 
+       * * [`Error::MinimumBondNotMet`] - Amount below minimum bond
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::DefensiveError`] - Reward pool not found
+       * 
+       * # Note
+       * 
+       * * Member must have `existential deposit + amount` in account
+       * * Pool must be in [`PoolState::Open`] state
        **/
       join: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array, poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, u32]>;
       /**
-       * Nominate on behalf of the pool.
+       * Nominate validators on behalf of the pool.
        * 
-       * The dispatch origin of this call must be signed by the pool nominator or the pool
-       * root role.
+       * # Permissions
        * 
-       * This directly forward the call to the staking pallet, on behalf of the pool bonded
-       * account.
+       * * Pool nominator or root role can nominate validators
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `pool_id` - Pool identifier
+       * * `validators` - List of validator accounts to nominate
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::NotNominator`] - Caller lacks nominator permissions
+       * 
+       * # Note
+       * 
+       * Forwards nomination call to staking pallet using pool's bonded account.
        **/
       nominate: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, validators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [u32, Vec<AccountId32>]>;
       /**
-       * Call `withdraw_unbonded` for the pools account. This call can be made by any account.
+       * Withdraws unbonded funds from the pool's staking account.
        * 
-       * This is useful if there are too many unlocking chunks to call `unbond`, and some
-       * can be cleared by withdrawing. In the case there are too many unlocking chunks, the user
-       * would probably see an error like `NoMoreChunks` emitted from the staking system when
-       * they attempt to unbond.
+       * Useful for clearing unlocking chunks when there are too many to call `unbond`.
+       * Prevents `NoMoreChunks` errors from the staking system.
+       * 
+       * # Permissions
+       * 
+       * * Can be signed by any account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `pool_id` - Pool identifier
+       * * `num_slashing_spans` - Number of slashing spans to check
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::NotDestroying`] - Pool is in destroying state
        **/
       poolWithdrawUnbonded: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, numSlashingSpans: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, u32]>;
       /**
-       * Set the commission of a pool.
-       * Both a commission percentage and a commission payee must be provided in the `current`
-       * tuple. Where a `current` of `None` is provided, any current commission will be removed.
+       * Set or remove the commission rate and payee for a pool.
        * 
-       * - If a `None` is supplied to `new_commission`, existing commission will be removed.
+       * # Permissions
+       * 
+       * * Caller must have commission management permission for the pool
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call
+       * * `pool_id` - The pool identifier
+       * * `new_commission` - Optional commission rate and payee. None removes existing commission
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - The pool_id does not exist
+       * * [`Error::DoesNotHavePermission`] - Caller lacks commission management permission
        **/
       setCommission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, newCommission: Option<ITuple<[Perbill, AccountId32]>> | null | Uint8Array | ITuple<[Perbill, AccountId32]> | [Perbill | AnyNumber | Uint8Array, AccountId32 | string | Uint8Array]) => SubmittableExtrinsic<ApiType>, [u32, Option<ITuple<[Perbill, AccountId32]>>]>;
       /**
@@ -2189,121 +2314,195 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * Initial change rate is not bounded, whereas subsequent updates can only be more
        * restrictive than the current.
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call. Must be signed by an account with commission management permission.
+       * * `pool_id` - The identifier of the pool to set commission change rate for.
+       * * `change_rate` - The new commission change rate configuration.
        **/
       setCommissionChangeRate: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, changeRate: PalletTangleLstCommissionCommissionChangeRate | { maxIncrease?: any; minDelay?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstCommissionCommissionChangeRate]>;
       /**
        * Set or remove a pool's commission claim permission.
        * 
-       * Determines who can claim the pool's pending commission. Only the `Root` role of the pool
-       * is able to conifigure commission claim permissions.
-       **/
-      setCommissionClaimPermission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, permission: Option<PalletTangleLstCommissionCommissionClaimPermission> | null | Uint8Array | PalletTangleLstCommissionCommissionClaimPermission | { Permissionless: any } | { Account: any } | string) => SubmittableExtrinsic<ApiType>, [u32, Option<PalletTangleLstCommissionCommissionClaimPermission>]>;
-      /**
-       * Set the maximum commission of a pool.
-       * 
-       * - Initial max can be set to any `Perbill`, and only smaller values thereafter.
-       * - Current commission will be lowered in the event it is higher than a new max
-       * commission.
-       **/
-      setCommissionMax: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, maxCommission: Perbill | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Perbill]>;
-      /**
-       * Update configurations for the nomination pools. The origin for this call must be
-       * Root.
+       * Only the `Root` role of the pool is able to configure commission claim permissions.
+       * This determines which accounts are allowed to claim the pool's pending commission.
        * 
        * # Arguments
        * 
-       * * `min_join_bond` - Set [`MinJoinBond`].
-       * * `min_create_bond` - Set [`MinCreateBond`].
-       * * `max_pools` - Set [`MaxPools`].
-       * * `max_members` - Set [`MaxPoolMembers`].
-       * * `max_members_per_pool` - Set [`MaxPoolMembersPerPool`].
-       * * `global_max_commission` - Set [`GlobalMaxCommission`].
+       * * `origin` - The origin of the call. Must be signed by the pool's root account.
+       * * `pool_id` - The identifier of the pool to set permissions for.
+       * * `permission` - Optional commission claim permission configuration. If None, removes any existing permission.
+       **/
+      setCommissionClaimPermission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, permission: Option<PalletTangleLstCommissionCommissionClaimPermission> | null | Uint8Array | PalletTangleLstCommissionCommissionClaimPermission | { Permissionless: any } | { Account: any } | string) => SubmittableExtrinsic<ApiType>, [u32, Option<PalletTangleLstCommissionCommissionClaimPermission>]>;
+      /**
+       * Set the maximum commission rate for a pool. Initial max can be set to any value, with only
+       * lower values allowed thereafter. Current commission will be reduced if above new max.
+       * 
+       * # Permissions
+       * 
+       * * Caller must have commission management permission for the pool
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call
+       * * `pool_id` - The pool identifier
+       * * `max_commission` - The new maximum commission rate
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - The pool_id does not exist
+       * * [`Error::DoesNotHavePermission`] - Caller lacks commission management permission
+       **/
+      setCommissionMax: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, maxCommission: Perbill | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Perbill]>;
+      /**
+       * Updates the global configuration parameters for nomination pools.
+       * 
+       * # Permissions
+       * 
+       * * Must be called by Root
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `min_join_bond` - Config operation for minimum bond to join a pool
+       * * `min_create_bond` - Config operation for minimum bond to create a pool
+       * * `max_pools` - Config operation for maximum number of pools
+       * * `global_max_commission` - Config operation for maximum global commission
+       * 
+       * # Errors
+       * 
+       * * [`DispatchError::BadOrigin`] - Caller is not Root
        **/
       setConfigs: AugmentedSubmittable<(minJoinBond: PalletTangleLstConfigOpU128 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, minCreateBond: PalletTangleLstConfigOpU128 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, maxPools: PalletTangleLstConfigOpU32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, globalMaxCommission: PalletTangleLstConfigOpPerbill | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstConfigOpPerbill]>;
       /**
-       * Set a new metadata for the pool.
+       * Updates the metadata for a given pool.
        * 
-       * The dispatch origin of this call must be signed by the bouncer, or the root role of the
-       * pool.
+       * # Permissions
+       * 
+       * * Must be called by the pool bouncer or root role
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `pool_id` - Pool identifier
+       * * `metadata` - New metadata to set
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed
+       * * [`Error::DoesNotHavePermission`] - Caller lacks required permissions
        **/
       setMetadata: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, metadata: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes]>;
       /**
-       * Set a new state for the pool.
+       * Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be
+       * changed again under any circumstances.
        * 
-       * If a pool is already in the `Destroying` state, then under no condition can its state
-       * change again.
+       * # Permissions
        * 
-       * The dispatch origin of this call must be either:
+       * * Pool bouncer or root role can set any state
+       * * Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions
        * 
-       * 1. signed by the bouncer, or the root role of the pool,
-       * 2. if the pool conditions to be open are NOT met (as described by `ok_to_be_open`), and
-       * then the state of the pool can be permissionlessly changed to `Destroying`.
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `pool_id` - Pool identifier
+       * * `state` - New state to set
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions
+       * 
+       * # Note
+       * 
+       * State changes are validated through `ok_to_be_open` which checks pool properties like
+       * commission, member count and roles.
        **/
       setState: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, state: PalletTangleLstPoolsPoolState | 'Open' | 'Blocked' | 'Destroying' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstPoolsPoolState]>;
       /**
-       * Unbond up to `unbonding_points` of the `member_account`'s funds from the pool. It
-       * implicitly collects the rewards one last time, since not doing so would mean some
-       * rewards would be forfeited.
+       * Unbond points from a member's pool position, collecting any pending rewards.
        * 
-       * Under certain conditions, this call can be dispatched permissionlessly (i.e. by any
-       * account).
+       * # Arguments
        * 
-       * # Conditions for a permissionless dispatch.
+       * * `origin` - Origin of the call
+       * * `member_account` - Account to unbond from
+       * * `pool_id` - Target pool ID
+       * * `unbonding_points` - Amount of points to unbond
        * 
-       * * The pool is blocked and the caller is either the root or bouncer. This is refereed to
-       * as a kick.
-       * * The pool is destroying and the member is not the depositor.
-       * * The pool is destroying, the member is the depositor and no other members are in the
-       * pool.
+       * # Permissions
        * 
-       * ## Conditions for permissioned dispatch (i.e. the caller is also the
-       * `member_account`):
+       * * Permissionless if:
+       * - Pool is blocked and caller is root/bouncer (kick)
+       * - Pool is destroying and member is not depositor
+       * - Pool is destroying, member is depositor, and pool is empty
+       * * Permissioned (caller must be member) if:
+       * - Caller is not depositor
+       * - Caller is depositor, pool is destroying, and pool is empty
        * 
-       * * The caller is not the depositor.
-       * * The caller is the depositor, the pool is destroying and no other members are in the
-       * pool.
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::NoBalanceToUnbond`] - Member has insufficient points
+       * * [`Error::DefensiveError`] - Not enough space in unbond pool
        * 
        * # Note
-       * 
-       * If there are too many unlocking chunks to unbond with the pool account,
-       * [`Call::pool_withdraw_unbonded`] can be called to try and minimize unlocking chunks.
-       * The [`StakingInterface::unbond`] will implicitly call [`Call::pool_withdraw_unbonded`]
-       * to try to free chunks if necessary (ie. if unbound was called and no unlocking chunks
-       * are available). However, it may not be possible to release the current unlocking chunks,
-       * in which case, the result of this call will likely be the `NoMoreChunks` error from the
-       * staking system.
+       * If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first.
+       * The staking interface will attempt this automatically but may still return `NoMoreChunks`
+       * if chunks cannot be released.
        **/
       unbond: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, unbondingPoints: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, Compact<u128>]>;
       /**
-       * Update the roles of the pool.
+       * Update the roles of a pool.
        * 
-       * The root is the only entity that can change any of the roles, including itself,
-       * excluding the depositor, who can never change.
+       * Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed.
+       * Emits a `RolesUpdated` event on successful update.
        * 
-       * It emits an event, notifying UIs of the role change. This event is quite relevant to
-       * most pool members and they should be informed of changes to pool roles.
+       * # Permissions
+       * 
+       * * Origin must be Root or pool root
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `pool_id` - Pool identifier
+       * * `new_root` - New root role configuration
+       * * `new_nominator` - New nominator role configuration
+       * * `new_bouncer` - New bouncer role configuration
+       * 
+       * # Errors
+       * 
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::DoesNotHavePermission`] - Origin does not have permission
        **/
       updateRoles: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, newRoot: PalletTangleLstConfigOpAccountId32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, newNominator: PalletTangleLstConfigOpAccountId32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, newBouncer: PalletTangleLstConfigOpAccountId32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpAccountId32]>;
       /**
-       * Withdraw unbonded funds from `member_account`. If no bonded funds can be unbonded, an
-       * error is returned.
+       * Withdraw unbonded funds from a member account.
        * 
-       * Under certain conditions, this call can be dispatched permissionlessly (i.e. by any
-       * account).
+       * # Permissions
        * 
-       * # Conditions for a permissionless dispatch
+       * * Permissionless if:
+       * - Pool is in destroy mode and target is not depositor
+       * - Target is depositor and only member in sub pools
+       * - Pool is blocked and caller is root/bouncer
+       * * Permissioned if caller is target and not depositor
        * 
-       * * The pool is in destroy mode and the target is not the depositor.
-       * * The target is the depositor and they are the only member in the sub pools.
-       * * The pool is blocked and the caller is either the root or bouncer.
+       * # Arguments
        * 
-       * # Conditions for permissioned dispatch
+       * * `origin` - Origin of the call
+       * * `member_account` - Account to withdraw from
+       * * `pool_id` - Pool identifier
+       * * `num_slashing_spans` - Number of slashing spans
        * 
-       * * The caller is the target and they are not the depositor.
+       * # Errors
        * 
-       * # Note
+       * * [`Error::PoolMemberNotFound`] - Member account not found
+       * * [`Error::PoolNotFound`] - Pool does not exist
+       * * [`Error::SubPoolsNotFound`] - Sub pools not found
+       * * [`Error::CannotWithdrawAny`] - No unbonded funds available
        * 
-       * If the target is the depositor, the pool will be destroyed.
+       * If target is depositor, pool will be destroyed.
        **/
       withdrawUnbonded: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, numSlashingSpans: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, u32]>;
       /**
@@ -2314,101 +2513,375 @@ declare module '@polkadot/api-base/types/submittable' {
     multiAssetDelegation: {
       /**
        * Adds a blueprint ID to a delegator's selection.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the delegator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `blueprint_id` - ID of blueprint to add
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotDelegator`] - Account is not a delegator
+       * * [`Error::DuplicateBlueprintId`] - Blueprint ID already exists
+       * * [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints
+       * * [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode
        **/
       addBlueprintId: AugmentedSubmittable<(blueprintId: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
       /**
        * Cancels a scheduled request to reduce a delegator's stake.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the delegator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `operator` - Operator to cancel unstake from
+       * * `asset_id` - ID of asset unstake to cancel
+       * * `amount` - Amount of unstake to cancel
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotDelegator`] - Account is not a delegator
+       * * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
        **/
-      cancelDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
+      cancelDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset, u128]>;
       /**
        * Cancels a scheduled leave for an operator.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
        **/
       cancelLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Cancels a scheduled stake decrease for an operator.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
        **/
       cancelOperatorUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Cancels a scheduled withdraw request.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the withdrawer account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `asset_id` - ID of the asset withdrawal to cancel
+       * * `amount` - Amount of the withdrawal to cancel
+       * 
+       * # Errors
+       * 
+       * * [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists
        **/
-      cancelWithdraw: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
+      cancelWithdraw: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128]>;
       /**
        * Allows a user to delegate an amount of an asset to an operator.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the delegator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `operator` - Operator to delegate to
+       * * `asset_id` - ID of asset to delegate
+       * * `amount` - Amount to delegate
+       * * `blueprint_selection` - Blueprint selection strategy
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Target account is not an operator
+       * * [`Error::InsufficientBalance`] - Insufficient balance to delegate
+       * * [`Error::MaxDelegationsExceeded`] - Would exceed max delegations
        **/
-      delegate: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array, blueprintSelection: PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection | { Fixed: any } | { All: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection]>;
+      delegate: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array, blueprintSelection: PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection | { Fixed: any } | { All: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset, u128, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection]>;
       /**
        * Allows a user to deposit an asset.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the depositor account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `asset_id` - ID of the asset to deposit
+       * * `amount` - Amount to deposit
+       * * `evm_address` - Optional EVM address
+       * 
+       * # Errors
+       * 
+       * * [`Error::DepositOverflow`] - Deposit would overflow tracking
+       * * [`Error::InvalidAsset`] - Asset is not supported
        **/
-      deposit: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
+      deposit: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array, evmAddress: Option<H160> | null | Uint8Array | H160 | string, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier> | null | Uint8Array | TanglePrimitivesRewardsLockMultiplier | 'OneMonth' | 'TwoMonths' | 'ThreeMonths' | 'SixMonths' | number) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128, Option<H160>, Option<TanglePrimitivesRewardsLockMultiplier>]>;
       /**
        * Executes a scheduled request to reduce a delegator's stake.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the delegator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotDelegator`] - Account is not a delegator
+       * * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
+       * * [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed
        **/
       executeDelegatorUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Executes a scheduled leave for an operator.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
+       * * [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet
        **/
       executeLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Executes a scheduled stake decrease for an operator.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
+       * * [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet
        **/
       executeOperatorUnstake: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Executes a scheduled withdraw request.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the withdrawer account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `evm_address` - Optional EVM address
+       * 
+       * # Errors
+       * 
+       * * [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists
+       * * [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed
        **/
-      executeWithdraw: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
+      executeWithdraw: AugmentedSubmittable<(evmAddress: Option<H160> | null | Uint8Array | H160 | string) => SubmittableExtrinsic<ApiType>, [Option<H160>]>;
       /**
        * Allows an operator to go offline.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::AlreadyOffline`] - Operator is already offline
        **/
       goOffline: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Allows an operator to go online.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::AlreadyOnline`] - Operator is already online
        **/
       goOnline: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
-       * Allows an account to join as an operator by providing a stake.
+       * Allows an account to join as an operator by staking the required bond amount.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the account joining as operator
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `bond_amount` - Amount to stake as operator bond
+       * 
+       * # Errors
+       * 
+       * * [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking
+       * * [`Error::StakeOverflow`] - Bond amount would overflow stake tracking
        **/
       joinOperators: AugmentedSubmittable<(bondAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
-       * Manage asset id to vault rewards
-       **/
-      manageAssetInVault: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, action: PalletMultiAssetDelegationRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128, PalletMultiAssetDelegationRewardsAssetAction]>;
-      /**
        * Allows an operator to increase their stake.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `additional_bond` - Additional amount to stake
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::StakeOverflow`] - Additional bond would overflow stake tracking
        **/
       operatorBondMore: AugmentedSubmittable<(additionalBond: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
        * Removes a blueprint ID from a delegator's selection.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the delegator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `blueprint_id` - ID of blueprint to remove
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotDelegator`] - Account is not a delegator
+       * * [`Error::BlueprintIdNotFound`] - Blueprint ID not found
+       * * [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode
        **/
       removeBlueprintId: AugmentedSubmittable<(blueprintId: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
       /**
        * Schedules a request to reduce a delegator's stake.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the delegator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `operator` - Operator to unstake from
+       * * `asset_id` - ID of asset to unstake
+       * * `amount` - Amount to unstake
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotDelegator`] - Account is not a delegator
+       * * [`Error::InsufficientDelegation`] - Insufficient delegation to unstake
+       * * [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists
        **/
-      scheduleDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, u128, u128]>;
+      scheduleDelegatorUnstake: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset, u128]>;
       /**
-       * Schedules an operator to leave.
+       * Schedules an operator to leave the system.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
        **/
       scheduleLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
        * Schedules an operator to decrease their stake.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the operator account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `unstake_amount` - Amount to unstake
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotOperator`] - Account is not registered as an operator
+       * * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
+       * * [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake
        **/
       scheduleOperatorUnstake: AugmentedSubmittable<(unstakeAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
       /**
-       * Schedules an withdraw request.
-       **/
-      scheduleWithdraw: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, u128]>;
-      /**
-       * Sets the APY and cap for a specific asset.
-       * The APY is the annual percentage yield that the asset will earn.
-       * The cap is the amount of assets required to be deposited to distribute the entire APY.
-       * The APY is capped at 10% and will require runtime upgrade to change.
+       * Schedules a withdraw request.
        * 
-       * While the cap is not met, the APY distributed will be `amount_deposited / cap * APY`.
+       * # Permissions
+       * 
+       * * Must be signed by the withdrawer account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `asset_id` - ID of the asset to withdraw
+       * * `amount` - Amount to withdraw
+       * 
+       * # Errors
+       * 
+       * * [`Error::InsufficientBalance`] - Insufficient balance to withdraw
+       * * [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists
        **/
-      setIncentiveApyAndCap: AugmentedSubmittable<(vaultId: u128 | AnyNumber | Uint8Array, apy: Percent | AnyNumber | Uint8Array, cap: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128, Percent, u128]>;
-      /**
-       * Whitelists a blueprint for rewards.
-       **/
-      whitelistBlueprintForRewards: AugmentedSubmittable<(blueprintId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      scheduleWithdraw: AugmentedSubmittable<(assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset, u128]>;
       /**
        * Generic tx
        **/
@@ -2551,8 +3024,10 @@ declare module '@polkadot/api-base/types/submittable' {
        * Fails unless [`crate::pallet::Config::StakeAdapter`] is of strategy type:
        * [`adapter::StakeStrategyType::Delegate`].
        * 
-       * This call can be dispatched permissionlessly (i.e. by any account). If the member has
-       * slash to be applied, caller may be rewarded with the part of the slash.
+       * The pending slash amount of the member must be equal or more than `ExistentialDeposit`.
+       * This call can be dispatched permissionlessly (i.e. by any account). If the execution
+       * is successful, fee is refunded and caller may be rewarded with a part of the slash
+       * based on the [`crate::pallet::Config::StakeAdapter`] configuration.
        **/
       applySlash: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress]>;
       /**
@@ -3048,6 +3523,55 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
+    rewards: {
+      /**
+       * Claim rewards for a specific asset and reward type
+       **/
+      claimRewards: AugmentedSubmittable<(asset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset]>;
+      /**
+       * Manage asset id to vault rewards.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by an authorized account
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `vault_id` - ID of the vault
+       * * `asset_id` - ID of the asset
+       * * `action` - Action to perform (Add/Remove)
+       * 
+       * # Errors
+       * 
+       * * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
+       * * [`Error::AssetNotInVault`] - Asset does not exist in vault
+       **/
+      manageAssetRewardVault: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, TanglePrimitivesServicesAsset, PalletRewardsAssetAction]>;
+      /**
+       * Updates the reward configuration for a specific vault.
+       * 
+       * # Arguments
+       * * `origin` - Origin of the call, must pass `ForceOrigin` check
+       * * `vault_id` - The ID of the vault to update
+       * * `new_config` - The new reward configuration containing:
+       * * `apy` - Annual Percentage Yield for the vault
+       * * `deposit_cap` - Maximum amount that can be deposited
+       * * `incentive_cap` - Maximum amount of incentives that can be distributed
+       * * `boost_multiplier` - Optional multiplier to boost rewards
+       * 
+       * # Events
+       * * `VaultRewardConfigUpdated` - Emitted when vault reward config is updated
+       * 
+       * # Errors
+       * * `BadOrigin` - If caller is not authorized through `ForceOrigin`
+       **/
+      updateVaultRewardConfig: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, newConfig: PalletRewardsRewardConfigForAssetVault | { apy?: any; incentiveCap?: any; depositCap?: any; boostMultiplier?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletRewardsRewardConfigForAssetVault]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
     scheduler: {
       /**
        * Cancel an anonymously scheduled task.
@@ -3118,94 +3642,350 @@ declare module '@polkadot/api-base/types/submittable' {
     };
     services: {
       /**
-       * Approve a service request, so that the service can be initiated.
+       * Approve a service request, allowing it to be initiated once all required approvals are received.
        * 
-       * The `restaking_percent` is the percentage of the restaked tokens that will be exposed to
-       * the service.
+       * # Permissions
+       * 
+       * * Caller must be a registered operator for the service blueprint
+       * * Caller must be in the pending approvals list for this request
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call, must be a signed account
+       * * `request_id` - The ID of the service request to approve
+       * * `restaking_percent` - Percentage of staked tokens to expose to this service (0-100)
+       * 
+       * # Errors
+       * 
+       * * [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list
+       * * [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook
        **/
       approve: AugmentedSubmittable<(requestId: Compact<u64> | AnyNumber | Uint8Array, restakingPercent: Compact<Percent> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<Percent>]>;
       /**
-       * Call a Job in the service.
-       * The caller needs to be the owner of the service, or a permitted caller.
+       * Call a job in the service with the provided arguments.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the service owner or a permitted caller
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call
+       * * `service_id` - The service identifier
+       * * `job` - The job index to call
+       * * `args` - The arguments to pass to the job
+       * 
+       * # Errors
+       * 
+       * * [`Error::ServiceNotFound`] - The service_id does not exist
+       * * [`Error::JobDefinitionNotFound`] - The job index is invalid
+       * * [`Error::MaxFieldsExceeded`] - Too many arguments provided
+       * * [`Error::TypeCheck`] - Arguments fail type checking
+       * * [`Error::InvalidJobCallInput`] - Job call was rejected by hooks
+       * * [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller
        **/
       call: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, job: Compact<u8> | AnyNumber | Uint8Array, args: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<u8>, Vec<TanglePrimitivesServicesField>]>;
       /**
        * Create a new service blueprint.
        * 
-       * A Service Blueprint is a template for a service that can be instantiated later on by a
-       * user.
+       * A Service Blueprint is a template for a service that can be instantiated by users. The blueprint
+       * defines the service's constraints, requirements and behavior, including the master blueprint service
+       * manager revision to use.
        * 
-       * # Parameters
-       * - `origin`: The account that is creating the service blueprint.
-       * - `blueprint`: The blueprint of the service.
+       * # Permissions
+       * 
+       * * The origin must be signed by the account that will own the blueprint
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call, must be signed by the account creating the blueprint
+       * * `blueprint` - The service blueprint containing:
+       * - Service constraints and requirements
+       * - Master blueprint service manager revision (Latest or Specific)
+       * - Template configuration for service instantiation
+       * 
+       * # Errors
+       * 
+       * * [`Error::BadOrigin`] - Origin is not signed
+       * * [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist
+       * * [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks
+       * 
+       * # Returns
+       * 
+       * Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event
+       * containing the owner and blueprint ID.
        **/
       createBlueprint: AugmentedSubmittable<(blueprint: TanglePrimitivesServicesServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; gadget?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesServiceBlueprint]>;
       /**
-       * Dispute an [UnappliedSlash] for a given era and index.
+       * Disputes and removes an [UnappliedSlash] from storage.
        * 
-       * The caller needs to be an authorized Dispute Origin for the service in the [UnappliedSlash].
+       * The slash will not be applied once disputed and is permanently removed.
+       * 
+       * # Permissions
+       * 
+       * * Caller must be the authorized dispute origin for the service
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `era` - Era containing the slash to dispute
+       * * `index` - Index of the slash within the era
+       * 
+       * # Errors
+       * 
+       * * [Error::NoDisputeOrigin] - Service has no dispute origin configured
+       * * [DispatchError::BadOrigin] - Caller is not the authorized dispute origin
+       * 
        **/
       dispute: AugmentedSubmittable<(era: Compact<u32> | AnyNumber | Uint8Array, index: Compact<u32> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u32>, Compact<u32>]>;
       /**
        * Pre-register the caller as an operator for a specific blueprint.
        * 
-       * The caller can pre-register for a blueprint, which will emit a `PreRegistration` event.
-       * This event can be listened to by the operator node to execute the custom blueprint's
-       * registration function.
+       * This function allows an account to signal intent to become an operator for a blueprint by emitting
+       * a `PreRegistration` event. The operator node can listen for this event to execute any custom
+       * registration logic defined in the blueprint.
        * 
-       * # Parameters
-       * - `origin`: The account that is pre-registering for the service blueprint.
-       * - `blueprint_id`: The ID of the service blueprint.
+       * Pre-registration is the first step in the operator registration flow. After pre-registering,
+       * operators must complete the full registration process by calling `register()` with their preferences
+       * and registration arguments.
+       * 
+       * # Arguments
+       * 
+       * * `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to
+       * become an operator.
+       * * `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer
+       * to an existing blueprint.
+       * 
+       * # Permissions
+       * 
+       * * The caller must be a signed account.
+       * 
+       * # Events
+       * 
+       * * [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:
+       * - `operator: T::AccountId` - The account ID of the pre-registering operator
+       * - `blueprint_id: u64` - The ID of the blueprint being pre-registered for
+       * 
+       * # Errors
+       * 
+       * * [`Error::BadOrigin`] - The origin was not signed.
        **/
       preRegister: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
       /**
        * Register the caller as an operator for a specific blueprint.
        * 
-       * The caller may require an approval first before they can accept to provide the service
-       * for the users.
+       * This function allows an account to register as an operator for a blueprint by providing their
+       * service preferences, registration arguments, and staking the required tokens. The operator must
+       * be active in the delegation system and may require approval before accepting service requests.
+       * 
+       * # Permissions
+       * 
+       * * The caller must be a signed account
+       * * The caller must be an active operator in the delegation system
+       * * The caller must not already be registered for this blueprint
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call. Must be signed.
+       * * `blueprint_id` - The identifier of the service blueprint to register for
+       * * `preferences` - The operator's service preferences and configuration
+       * * `registration_args` - Registration arguments required by the blueprint
+       * * `value` - Amount of tokens to stake for registration
+       * 
+       * # Errors
+       * 
+       * * [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system
+       * * [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint
+       * * [`Error::TypeCheck`] - Registration arguments failed type checking
+       * * [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration
+       * * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit
        **/
       register: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, preferences: TanglePrimitivesServicesOperatorPreferences | { key?: any; priceTargets?: any } | string | Uint8Array, registrationArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesOperatorPreferences, Vec<TanglePrimitivesServicesField>, Compact<u128>]>;
       /**
-       * Reject a service request.
-       * The service will not be initiated, and the requester will need to update the service
-       * request.
+       * Reject a service request, preventing its initiation.
+       * 
+       * The service request will remain in the system but marked as rejected. The requester will
+       * need to update the service request to proceed.
+       * 
+       * # Permissions
+       * 
+       * * Caller must be a registered operator for the blueprint associated with this request
+       * * Caller must be one of the operators required to approve this request
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call, must be a signed account
+       * * `request_id` - The ID of the service request to reject
+       * 
+       * # Errors
+       * 
+       * * [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request
+       * * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment
+       * * [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook
        **/
       reject: AugmentedSubmittable<(requestId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
       /**
-       * Request a new service to be initiated using the provided blueprint with a list of
-       * operators that will run your service. Optionally, you can specifiy who is permitted
-       * caller of this service, by default only the caller is allowed to call the service.
-       **/
-      request: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], operators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], assets: Vec<u128> | (u128 | AnyNumber | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Vec<TanglePrimitivesServicesField>, Vec<u128>, Compact<u64>, Compact<u128>]>;
-      /**
-       * Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
+       * Request a new service using a blueprint and specified operators.
        * 
-       * The caller needs to be an authorized Slash Origin for this service.
-       * Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-       * by another entity.
+       * # Arguments
+       * 
+       * * `origin: OriginFor<T>` - The origin of the call. Must be signed.
+       * * `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments.
+       * * `blueprint_id: u64` - The identifier of the blueprint to use.
+       * * `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call.
+       * * `operators: Vec<T::AccountId>` - List of operators that will run the service.
+       * * `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments.
+       * * `assets: Vec<T::AssetId>` - Required assets for the service.
+       * * `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request.
+       * * `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20).
+       * * `value: BalanceOf<T>` - Payment amount for the service.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by an account with sufficient balance to pay for the service.
+       * * For ERC20 payments, the EVM origin must match the caller's mapped account.
+       * 
+       * # Errors
+       * 
+       * * [`Error::TypeCheck`] - Request arguments fail blueprint type checking.
+       * * [`Error::NoAssetsProvided`] - No assets were specified.
+       * * [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment.
+       * * [`Error::ERC20TransferFailed`] - ERC20 token transfer failed.
+       * * [`Error::NotRegistered`] - One or more operators not registered for blueprint.
+       * * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
+       **/
+      request: AugmentedSubmittable<(evmOrigin: Option<H160> | null | Uint8Array | H160 | string, blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], operators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], assets: Vec<u128> | (u128 | AnyNumber | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, paymentAsset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Option<H160>, Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Vec<TanglePrimitivesServicesField>, Vec<u128>, Compact<u64>, TanglePrimitivesServicesAsset, Compact<u128>]>;
+      /**
+       * Slash an operator's stake for a service by scheduling a deferred slashing action.
+       * 
+       * This function schedules a deferred slashing action against an operator's stake for a specific service.
+       * The slash is not applied immediately, but rather queued to be executed by another entity later.
+       * 
+       * # Permissions
+       * 
+       * * The caller must be an authorized Slash Origin for the target service, as determined by
+       * `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call
+       * will fail.
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call. Must be signed by an authorized Slash Origin.
+       * * `offender` - The account ID of the operator to be slashed.
+       * * `service_id` - The ID of the service for which to slash the operator.
+       * * `percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value.
+       * 
+       * # Errors
+       * 
+       * * `NoSlashingOrigin` - No slashing origin is set for the service
+       * * `BadOrigin` - Caller is not the authorized slashing origin
+       * * `OffenderNotOperator` - Target account is not an operator for this service
+       * * `OffenderNotActiveOperator` - Target operator is not currently active
        **/
       slash: AugmentedSubmittable<(offender: AccountId32 | string | Uint8Array, serviceId: Compact<u64> | AnyNumber | Uint8Array, percent: Compact<Percent> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, Compact<u64>, Compact<Percent>]>;
       /**
-       * Submit the job result by using the service ID and call ID.
+       * Submit a result for a previously called job.
+       * 
+       * # Arguments
+       * 
+       * * `service_id` - ID of the service
+       * * `call_id` - ID of the job call
+       * * `result` - Vector of result fields
+       * 
+       * # Permissions
+       * 
+       * * Caller must be an operator of the service
+       * 
+       * # Errors
+       * 
+       * * [`Error::ServiceNotFound`] - The service_id does not exist
+       * * [`Error::JobCallNotFound`] - The call_id does not exist
+       * * [`Error::JobDefinitionNotFound`] - The job index is invalid
+       * * [`Error::MaxFieldsExceeded`] - Too many result fields provided
+       * * [`Error::TypeCheck`] - Result fields fail type checking
+       * * [`Error::InvalidJobResult`] - Job result was rejected by hooks
+       * * [`DispatchError::BadOrigin`] - Caller is not an operator
        **/
       submitResult: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, callId: Compact<u64> | AnyNumber | Uint8Array, result: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { None: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Bytes: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Compact<u64>, Vec<TanglePrimitivesServicesField>]>;
       /**
-       * Terminates the service by the owner of the service.
+       * Terminates a running service instance.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by the service owner
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call
+       * * `service_id` - The identifier of the service to terminate
+       * 
+       * # Errors
+       * 
+       * * [`Error::ServiceNotFound`] - The service_id does not exist
+       * * [`Error::NotRegistered`] - Service operator not registered
+       * * [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks
+       * * [`DispatchError::BadOrigin`] - Caller is not the service owner
        **/
       terminate: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
       /**
-       * Unregister the caller from being an operator for the service blueprint
-       * so that, no more services will assigned to the caller for this specific blueprint.
-       * Note that, the caller needs to keep providing service for other active service
-       * that uses this blueprint, until the end of service time, otherwise they may get reported
-       * and slashed.
+       * Unregisters a service provider from a specific service blueprint.
+       * 
+       * After unregistering, the provider will no longer receive new service assignments for this blueprint.
+       * However, they must continue servicing any active assignments until completion to avoid penalties.
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call. Must be signed.
+       * * `blueprint_id` - The identifier of the service blueprint to unregister from.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by a registered service provider
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotRegistered`] - The caller is not registered for this blueprint
+       * * [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted
+       * * [`Error::BlueprintNotFound`] - The blueprint_id does not exist
        **/
       unregister: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
+      /**
+       * Updates the Master Blueprint Service Manager by adding a new revision.
+       * 
+       * # Permissions
+       * 
+       * * Caller must be an authorized Master Blueprint Service Manager Update Origin
+       * 
+       * # Arguments
+       * 
+       * * `origin` - Origin of the call
+       * * `address` - New manager address to add
+       * 
+       * # Errors
+       * 
+       * * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached
+       **/
       updateMasterBlueprintServiceManager: AugmentedSubmittable<(address: H160 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [H160]>;
       /**
-       * Update the price targets for the caller for a specific service blueprint.
+       * Updates the price targets for a registered operator's service blueprint.
        * 
-       * See [`Self::register`] for more information.
+       * Allows an operator to modify their price targets for a specific blueprint they are registered for.
+       * The operator must already be registered for the blueprint to update prices.
+       * 
+       * # Arguments
+       * 
+       * * `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator.
+       * * `blueprint_id: u64` - The identifier of the blueprint to update price targets for.
+       * * `price_targets: PriceTargets` - The new price targets to set for the blueprint.
+       * 
+       * # Permissions
+       * 
+       * * Must be signed by a registered operator for this blueprint.
+       * 
+       * # Errors
+       * 
+       * * [`Error::NotRegistered`] - The caller is not registered for this blueprint.
+       * * [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted.
+       * * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
        **/
       updatePriceTargets: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, priceTargets: TanglePrimitivesServicesPriceTargets | { cpu?: any; mem?: any; storageHdd?: any; storageSsd?: any; storageNvme?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesPriceTargets]>;
       /**

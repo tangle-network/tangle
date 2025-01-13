@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-staking package, originally developed by Purestake
 // Inc. Pallet-evm-precompile-staking package used in Tangle Network in terms of GPLv3.
@@ -86,7 +86,7 @@ where
 		Ok(addr)
 	}
 
-	/// Helper for converting from u8 to RewardDestination
+	/// Helper for converting from H256 to AccountId
 	fn convert_to_account_id(payee: H256) -> EvmResult<Runtime::AccountId> {
 		let payee = match payee {
 			H256(

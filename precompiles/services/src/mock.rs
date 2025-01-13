@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use super::*;
+use core::ops::Mul;
+use ethabi::Uint;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
@@ -23,22 +25,24 @@ use frame_support::{
 	construct_runtime, derive_impl,
 	pallet_prelude::{Hooks, Weight},
 	parameter_types,
-	traits::{ConstU128, OneSessionHandler},
+	traits::{AsEnsureOriginWithArg, ConstU128, OneSessionHandler},
 };
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
-use pallet_services::{EvmAddressMapping, EvmGasWeightMapping};
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
+use tangle_primitives::rewards::UserDepositWithLocks;
+use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -243,6 +247,27 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	}
 }
 
+impl pallet_assets::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = u128;
+	type AssetId = AssetId;
+	type AssetIdParameter = u32;
+	type Currency = Balances;
+	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type AssetDeposit = ConstU128<1>;
+	type AssetAccountDeposit = ConstU128<10>;
+	type MetadataDepositBase = ConstU128<1>;
+	type MetadataDepositPerByte = ConstU128<1>;
+	type ApprovalDeposit = ConstU128<1>;
+	type StringLimit = ConstU32<50>;
+	type Freezer = ();
+	type WeightInfo = ();
+	type CallbackHandle = ();
+	type Extra = ();
+	type RemoveItemsLimit = ConstU32<5>;
+}
+
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 ];
@@ -335,6 +360,21 @@ impl From<TestAccount> for AccountId32 {
 	}
 }
 
+impl From<AccountId32> for TestAccount {
+	fn from(x: AccountId32) -> Self {
+		let bytes: [u8; 32] = x.into();
+		match bytes {
+			a if a == [1u8; 32] => TestAccount::Alex,
+			a if a == [2u8; 32] => TestAccount::Bob,
+			a if a == [3u8; 32] => TestAccount::Charlie,
+			a if a == [4u8; 32] => TestAccount::Dave,
+			a if a == [5u8; 32] => TestAccount::Eve,
+			a if a == PRECOMPILE_ADDRESS_BYTES => TestAccount::PrecompileAddress,
+			_ => TestAccount::Empty,
+		}
+	}
+}
+
 impl From<TestAccount> for sp_core::sr25519::Public {
 	fn from(x: TestAccount) -> Self {
 		match x {
@@ -352,7 +392,7 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64>
 	for MockDelegationManager
 {
 	type AssetId = AssetId;
@@ -379,14 +419,14 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Self::AssetId,
+		_asset_id: &Asset<Self::AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Self::AssetId)> {
+	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
 		Default::default()
 	}
 
@@ -395,6 +435,13 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance>
 		_blueprint_id: tangle_primitives::BlueprintId,
 		_percentage: sp_runtime::Percent,
 	) {
+	}
+
+	fn get_user_deposit_with_locks(
+		_who: &AccountId,
+		_asset_id: Asset<Self::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, u64>> {
+		None
 	}
 }
 
@@ -492,6 +539,7 @@ impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
+	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PalletEVMAddress = ServicesEVMAddress;
 	type EvmRunner = MockedEvmRunner;
@@ -533,6 +581,7 @@ construct_runtime!(
 		System: frame_system,
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
+		Assets: pallet_assets,
 		Services: pallet_services,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
@@ -552,6 +601,12 @@ pub fn mock_authorities(vec: Vec<u8>) -> Vec<AccountId> {
 
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
+pub const USDC_ERC20: H160 = H160([0x23; 20]);
+
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
+pub const WBTC: AssetId = 3;
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
 #[derive(Default)]
@@ -570,7 +625,7 @@ impl ExtBuilder {
 pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
+	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_000_u128)).collect();
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
@@ -631,10 +686,57 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		MBSM,
 	);
 
+	create_contract(
+		include_str!("../../../pallets/services/src/test-artifacts/MockERC20.hex"),
+		USDC_ERC20,
+	);
+
+	// Add some initial balance to the authorities in the EVM pallet
+	for a in authorities.iter().cloned() {
+		evm_accounts.insert(
+			TestAccount::from(a).into(),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
+	}
+
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
+
+	let assets_config = pallet_assets::GenesisConfig::<Runtime> {
+		assets: vec![
+			(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
+			(WETH, authorities[1].clone(), true, 100),     // 100 wei.
+			(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
+		],
+		metadata: vec![
+			(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),
+			(WETH, Vec::from(b"Wrapped Ether"), Vec::from(b"WETH"), 18),
+			(WBTC, Vec::from(b"Wrapped Bitcoin"), Vec::from(b"WBTC"), 18),
+		],
+		accounts: vec![
+			(USDC, authorities[0].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[0].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[0].clone(), 50 * 10u128.pow(18)),
+			//
+			(USDC, authorities[1].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[1].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[1].clone(), 50 * 10u128.pow(18)),
+			//
+			(USDC, authorities[2].clone(), 1_000_000 * 10u128.pow(6)),
+			(WETH, authorities[2].clone(), 100 * 10u128.pow(18)),
+			(WBTC, authorities[2].clone(), 50 * 10u128.pow(18)),
+		],
+		next_asset_id: Some(4),
+	};
+
+	assets_config.assimilate_storage(&mut t).unwrap();
 
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
@@ -643,6 +745,82 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		System::set_block_number(1);
 		Session::on_initialize(1);
 		<Staking as Hooks<u64>>::on_initialize(1);
+
+		let call = <Runtime as pallet_services::Config>::EvmRunner::call(
+			Services::address(),
+			USDC_ERC20,
+			serde_json::from_value::<ethabi::Function>(json!({
+				"name": "initialize",
+				"inputs": [
+					{
+						"name": "name_",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "symbol_",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "decimals_",
+						"type": "uint8",
+						"internalType": "uint8"
+					}
+				],
+				"outputs": [],
+				"stateMutability": "nonpayable"
+			}))
+			.unwrap()
+			.encode_input(&[
+				ethabi::Token::String("USD Coin".to_string()),
+				ethabi::Token::String("USDC".to_string()),
+				ethabi::Token::Uint(6.into()),
+			])
+			.unwrap(),
+			Default::default(),
+			300_000,
+			true,
+			false,
+		);
+
+		assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
+		// Mint
+		for a in authorities {
+			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
+				Services::address(),
+				USDC_ERC20,
+				serde_json::from_value::<ethabi::Function>(json!({
+					"name": "mint",
+					"inputs": [
+						{
+							"internalType": "address",
+							"name": "account",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "amount",
+							"type": "uint256"
+						}
+					],
+					"outputs": [],
+					"stateMutability": "nonpayable"
+				}))
+				.unwrap()
+				.encode_input(&[
+					ethabi::Token::Address(TestAccount::from(a).into()),
+					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
+				])
+				.unwrap(),
+				Default::default(),
+				300_000,
+				true,
+				false,
+			);
+
+			assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
+		}
 	});
 
 	ext

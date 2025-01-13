@@ -42,3 +42,5 @@ scripts/edg-balances-new.json
 *.venv
 
 ._*
+hfuzz_*/
+

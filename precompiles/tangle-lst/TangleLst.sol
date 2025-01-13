@@ -7,30 +7,45 @@ interface TangleLst {
     /// @dev Join a pool with a specified amount.
     /// @param amount The amount to join with.
     /// @param poolId The ID of the pool to join.
-    function join(uint256 amount, uint256 poolId) external returns (uint8);
+    function join(uint256 amount, uint256 poolId) external;
 
     /// @dev Bond extra to a pool.
     /// @param poolId The ID of the pool.
     /// @param extraType The type of extra bond (0 for FreeBalance, 1 for Rewards).
     /// @param extra The amount of extra bond.
-    function bondExtra(uint256 poolId, uint8 extraType, uint256 extra) external returns (uint8);
+    function bondExtra(
+        uint256 poolId,
+        uint8 extraType,
+        uint256 extra
+    ) external returns (uint8);
 
     /// @dev Unbond from a pool.
     /// @param memberAccount The account of the member.
     /// @param poolId The ID of the pool.
     /// @param unbondingPoints The amount of unbonding points.
-    function unbond(bytes32 memberAccount, uint256 poolId, uint256 unbondingPoints) external returns (uint8);
+    function unbond(
+        bytes32 memberAccount,
+        uint256 poolId,
+        uint256 unbondingPoints
+    ) external returns (uint8);
 
     /// @dev Withdraw unbonded funds from a pool.
     /// @param poolId The ID of the pool.
     /// @param numSlashingSpans The number of slashing spans.
-    function poolWithdrawUnbonded(uint256 poolId, uint32 numSlashingSpans) external returns (uint8);
+    function poolWithdrawUnbonded(
+        uint256 poolId,
+        uint32 numSlashingSpans
+    ) external returns (uint8);
 
     /// @dev Withdraw unbonded funds for a member.
     /// @param memberAccount The account of the member.
     /// @param poolId The ID of the pool.
     /// @param numSlashingSpans The number of slashing spans.
-    function withdrawUnbonded(bytes32 memberAccount, uint256 poolId, uint32 numSlashingSpans) external returns (uint8);
+    function withdrawUnbonded(
+        bytes32 memberAccount,
+        uint256 poolId,
+        uint32 numSlashingSpans
+    ) external returns (uint8);
 
     /// @dev Create a new pool.
     /// @param amount The initial amount to create the pool with.
@@ -40,9 +55,9 @@ interface TangleLst {
     /// @param name The name of the pool.
     /// @param icon The icon of the pool.
     function create(
-        uint256 amount, 
-        bytes32 root, 
-        bytes32 nominator, 
+        uint256 amount,
+        bytes32 root,
+        bytes32 nominator,
         bytes32 bouncer,
         bytes calldata name,
         bytes calldata icon
@@ -51,7 +66,10 @@ interface TangleLst {
     /// @dev Nominate validators for a pool.
     /// @param poolId The ID of the pool.
     /// @param validators An array of validator accounts to nominate.
-    function nominate(uint256 poolId, bytes32[] calldata validators) external returns (uint8);
+    function nominate(
+        uint256 poolId,
+        bytes32[] calldata validators
+    ) external returns (uint8);
 
     /// @dev Set the state of a pool.
     /// @param poolId The ID of the pool.
@@ -61,12 +79,32 @@ interface TangleLst {
     /// @dev Set metadata for a pool.
     /// @param poolId The ID of the pool.
     /// @param metadata The metadata to set.
-    function setMetadata(uint256 poolId, bytes calldata metadata) external returns (uint8);
+    function setMetadata(
+        uint256 poolId,
+        bytes calldata metadata
+    ) external returns (uint8);
 
     /// @dev Set global configurations (only callable by root).
     /// @param minJoinBond The minimum bond required to join a pool (0 for no change).
     /// @param minCreateBond The minimum bond required to create a pool (0 for no change).
     /// @param maxPools The maximum number of pools (0 for no change).
     /// @param globalMaxCommission The global maximum commission percentage (0 for no change).
-    function setConfigs(uint256 minJoinBond, uint256 minCreateBond, uint32 maxPools, uint32 globalMaxCommission) external returns (uint8);
+    function setConfigs(
+        uint256 minJoinBond,
+        uint256 minCreateBond,
+        uint32 maxPools,
+        uint32 globalMaxCommission
+    ) external returns (uint8);
+
+    /// @dev Update roles for a pool.
+    /// @param poolId The ID of the pool.
+    /// @param root The new root account.
+    /// @param nominator The new nominator account.
+    /// @param bouncer The new bouncer account.
+    function updateRoles(
+        uint256 poolId,
+        bytes32 root,
+        bytes32 nominator,
+        bytes32 bouncer
+    ) external returns (uint8);
 }

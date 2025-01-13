@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-multi-asset-delegation package.
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ use frame_support::{
 	traits::Currency,
 };
 use pallet_evm::AddressMapping;
-use pallet_tangle_lst::{BondExtra, PoolId, PoolState};
+use pallet_tangle_lst::{BondExtra, ConfigOp, PoolId, PoolState};
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
 use sp_runtime::traits::{Dispatchable, StaticLookup};
@@ -280,6 +280,47 @@ where
 
 		Ok(())
 	}
+
+	#[precompile::public("updateRoles(uint256,bytes32,bytes32,bytes32)")]
+	fn update_roles(
+		handle: &mut impl PrecompileHandle,
+		pool_id: U256,
+		new_root: H256,
+		new_nominator: H256,
+		new_bouncer: H256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
+
+		let new_root = if new_root == H256::zero() {
+			ConfigOp::Noop
+		} else {
+			ConfigOp::Set(Self::convert_to_account_id(new_root)?)
+		};
+
+		let new_nominator = if new_nominator == H256::zero() {
+			ConfigOp::Noop
+		} else {
+			ConfigOp::Set(Self::convert_to_account_id(new_nominator)?)
+		};
+
+		let new_bouncer = if new_bouncer == H256::zero() {
+			ConfigOp::Noop
+		} else {
+			ConfigOp::Set(Self::convert_to_account_id(new_bouncer)?)
+		};
+
+		let call = pallet_tangle_lst::Call::<Runtime>::update_roles {
+			pool_id,
+			new_root,
+			new_nominator,
+			new_bouncer,
+		};
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		Ok(())
+	}
 }
 
 impl<Runtime> TangleLstPrecompile<Runtime>
@@ -310,7 +351,7 @@ where
 		Ok(addr)
 	}
 
-	/// Helper for converting from u8 to RewardDestination
+	/// Helper for converting from H256 to AccountId
 	fn convert_to_account_id(payee: H256) -> EvmResult<Runtime::AccountId> {
 		let payee = match payee {
 			H256(

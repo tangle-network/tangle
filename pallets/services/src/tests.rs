@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,10 +17,11 @@ use crate::types::ConstraintsOf;
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
+use k256::ecdsa::{SigningKey, VerifyingKey};
 use mock::*;
-use sp_core::{bounded_vec, ecdsa, ByteArray};
+use sp_core::{bounded_vec, ecdsa, ByteArray, Pair, U256};
 use sp_runtime::{KeyTypeId, Percent};
-use tangle_primitives::{services::*, MultiAssetDelegationInfo};
+use tangle_primitives::{services::*, traits::MultiAssetDelegationInfo};
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;
@@ -28,14 +29,16 @@ const CHARLIE: u8 = 3;
 const DAVE: u8 = 4;
 const EVE: u8 = 5;
 
-const USDC: AssetId = 1;
-const WETH: AssetId = 2;
-
 const KEYGEN_JOB_ID: u8 = 0;
 const SIGN_JOB_ID: u8 = 1;
 
-fn zero_key() -> ecdsa::Public {
-	ecdsa::Public::try_from([0; 33].as_slice()).unwrap()
+fn test_ecdsa_key() -> [u8; 65] {
+	let (ecdsa_key, _) = ecdsa::Pair::generate();
+	let secret = SigningKey::from_slice(&ecdsa_key.seed())
+		.expect("Should be able to create a secret key from a seed");
+	let verifying_key = VerifyingKey::from(secret);
+	let public_key = verifying_key.to_encoded_point(false);
+	public_key.to_bytes().to_vec().try_into().unwrap()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -178,12 +181,13 @@ fn register_on_blueprint() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
 
 		let registration_call = Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			OperatorPreferences {
-				key: zero_key(),
+				key: bob_ecdsa_key,
 				price_targets: price_targets(MachineKind::Large),
 			},
 			Default::default(),
@@ -195,7 +199,7 @@ fn register_on_blueprint() {
 			provider: bob.clone(),
 			blueprint_id: 0,
 			preferences: OperatorPreferences {
-				key: zero_key(),
+				key: bob_ecdsa_key,
 				price_targets: price_targets(MachineKind::Large),
 			},
 			registration_args: Default::default(),
@@ -210,7 +214,7 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(bob),
 				0,
-				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+				OperatorPreferences { key: bob_ecdsa_key, price_targets: Default::default() },
 				Default::default(),
 				0,
 			),
@@ -222,7 +226,7 @@ fn register_on_blueprint() {
 			Services::register(
 				RuntimeOrigin::signed(mock_pub_key(10)),
 				0,
-				OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 				Default::default(),
 				0,
 			),
@@ -266,12 +270,12 @@ fn update_price_targets() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
-
+		let bob_operator_ecdsa_key = test_ecdsa_key();
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			OperatorPreferences {
-				key: zero_key(),
+				key: bob_operator_ecdsa_key,
 				price_targets: price_targets(MachineKind::Small)
 			},
 			Default::default(),
@@ -281,7 +285,7 @@ fn update_price_targets() {
 		assert_eq!(
 			Operators::<Runtime>::get(0, &bob).unwrap(),
 			OperatorPreferences {
-				key: zero_key(),
+				key: bob_operator_ecdsa_key,
 				price_targets: price_targets(MachineKind::Small)
 			}
 		);
@@ -290,7 +294,7 @@ fn update_price_targets() {
 			provider: bob.clone(),
 			blueprint_id: 0,
 			preferences: OperatorPreferences {
-				key: zero_key(),
+				key: bob_operator_ecdsa_key,
 				price_targets: price_targets(MachineKind::Small),
 			},
 			registration_args: Default::default(),
@@ -340,7 +344,7 @@ fn unregister_from_blueprint() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -377,7 +381,7 @@ fn request_service() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -385,7 +389,7 @@ fn request_service() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -393,7 +397,7 @@ fn request_service() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -401,12 +405,14 @@ fn request_service() {
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![USDC, WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 
@@ -493,7 +499,7 @@ fn request_service_with_no_assets() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -501,16 +507,277 @@ fn request_service_with_no_assets() {
 		assert_err!(
 			Services::request(
 				RuntimeOrigin::signed(eve.clone()),
+				None,
 				0,
 				vec![alice.clone()],
 				vec![bob.clone()],
 				Default::default(),
 				vec![], // no assets
 				100,
+				Asset::Custom(USDC),
 				0,
 			),
 			Error::<Runtime>::NoAssetsProvided
 		);
+	});
+}
+
+#[test]
+fn request_service_with_payment_asset() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint.clone()
+		));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		let payment = 5 * 10u128.pow(6); // 5 USDC
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			None,
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![TNT, USDC, WETH],
+			100,
+			Asset::Custom(USDC),
+			payment,
+		));
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		// The Pallet account now has 5 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), payment);
+
+		// Bob approves the request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		// The request is now fully approved
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		// The Payment should be now transferred to the MBSM.
+		let mbsm_address = Pallet::<Runtime>::mbsm_address_of(&blueprint).unwrap();
+		let mbsm_account_id = address_to_account_id(mbsm_address);
+		assert_eq!(Assets::balance(USDC, mbsm_account_id), payment);
+		// Pallet account should have 0 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
+
+		// Now the service should be initiated
+		assert!(Instances::<Runtime>::contains_key(0));
+	});
+}
+
+#[test]
+fn request_service_with_payment_token() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint.clone()
+		));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		let payment = 5 * 10u128.pow(6); // 5 USDC
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(address_to_account_id(mock_address(CHARLIE))),
+			Some(account_id_to_address(charlie.clone())),
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![TNT, USDC, WETH],
+			100,
+			Asset::Erc20(USDC_ERC20),
+			payment,
+		));
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		// The Pallet address now has 5 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address()).map(|(b, _)| b),
+			U256::from(payment)
+		);
+
+		// Bob approves the request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10)
+		));
+
+		// The request is now fully approved
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
+
+		// The Payment should be now transferred to the MBSM.
+		let mbsm_address = Pallet::<Runtime>::mbsm_address_of(&blueprint).unwrap();
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, mbsm_address).map(|(b, _)| b),
+			U256::from(payment)
+		);
+		// Pallet account should have 0 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address()).map(|(b, _)| b),
+			U256::from(0)
+		);
+
+		// Now the service should be initiated
+		assert!(Instances::<Runtime>::contains_key(0));
+	});
+}
+
+#[test]
+fn reject_service_with_payment_token() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint.clone()
+		));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		let payment = 5 * 10u128.pow(6); // 5 USDC
+		let charlie_address = mock_address(CHARLIE);
+		let charlie_evm_account_id = address_to_account_id(charlie_address);
+		let before_balance = Services::query_erc20_balance_of(USDC_ERC20, charlie_address)
+			.map(|(b, _)| b)
+			.unwrap_or_default();
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie_evm_account_id),
+			Some(charlie_address),
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![TNT, USDC, WETH],
+			100,
+			Asset::Erc20(USDC_ERC20),
+			payment,
+		));
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		// The Pallet address now has 5 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address()).map(|(b, _)| b),
+			U256::from(payment)
+		);
+		// Charlie Balance should be decreased by 5 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, charlie_address).map(|(b, _)| b),
+			before_balance - U256::from(payment)
+		);
+
+		// Bob rejects the request
+		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+
+		// The Payment should be now refunded to the requester.
+		// Pallet account should have 0 USDC
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, Services::address()).map(|(b, _)| b),
+			U256::from(0)
+		);
+		// Charlie Balance should be back to the original
+		assert_ok!(
+			Services::query_erc20_balance_of(USDC_ERC20, charlie_address).map(|(b, _)| b),
+			before_balance
+		);
+	});
+}
+
+#[test]
+fn reject_service_with_payment_asset() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+
+		assert_ok!(Services::create_blueprint(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint.clone()
+		));
+		let bob = mock_pub_key(BOB);
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		let payment = 5 * 10u128.pow(6); // 5 USDC
+		let charlie = mock_pub_key(CHARLIE);
+		let before_balance = Assets::balance(USDC, charlie.clone());
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			None,
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![TNT, USDC, WETH],
+			100,
+			Asset::Custom(USDC),
+			payment,
+		));
+
+		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
+
+		// The Pallet account now has 5 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), payment);
+		// Charlie Balance should be decreased by 5 USDC
+		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
+
+		// Bob rejects the request
+		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+
+		// The Payment should be now refunded to the requester.
+		// Pallet account should have 0 USDC
+		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
+		// Charlie Balance should be back to the original
+		assert_eq!(Assets::balance(USDC, charlie), before_balance);
 	});
 }
 
@@ -526,7 +793,7 @@ fn job_calls() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -534,7 +801,7 @@ fn job_calls() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -542,7 +809,7 @@ fn job_calls() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -550,12 +817,14 @@ fn job_calls() {
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 
@@ -618,7 +887,7 @@ fn job_result() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -626,7 +895,7 @@ fn job_result() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -634,7 +903,7 @@ fn job_result() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -642,12 +911,14 @@ fn job_result() {
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 
@@ -750,7 +1021,7 @@ fn deploy() -> Deployment {
 	assert_ok!(Services::register(
 		RuntimeOrigin::signed(bob.clone()),
 		blueprint_id,
-		OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+		OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 		Default::default(),
 		0,
 	));
@@ -759,12 +1030,14 @@ fn deploy() -> Deployment {
 	let service_id = Services::next_instance_id();
 	assert_ok!(Services::request(
 		RuntimeOrigin::signed(eve.clone()),
+		None,
 		blueprint_id,
 		vec![alice.clone()],
 		vec![bob.clone()],
 		Default::default(),
 		vec![WETH],
 		100,
+		Asset::Custom(USDC),
 		0,
 	));
 
@@ -1034,7 +1307,7 @@ fn hooks() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -1048,7 +1321,7 @@ fn hooks() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			OperatorPreferences { key: zero_key(), price_targets: Default::default() },
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 			Default::default(),
 			0,
 		));
@@ -1064,12 +1337,14 @@ fn hooks() {
 		// OnRequest hook should be called
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone()],
 			Default::default(),
 			vec![USDC, WETH],
 			100,
+			Asset::Custom(USDC),
 			0,
 		));
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRequest()")]);

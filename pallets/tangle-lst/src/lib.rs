@@ -107,34 +107,29 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::Codec;
-use frame_support::traits::fungibles;
-use frame_support::traits::fungibles::Create;
-use frame_support::traits::fungibles::Inspect as FungiblesInspect;
-use frame_support::traits::fungibles::Mutate as FungiblesMutate;
-use frame_support::traits::tokens::Precision;
-use frame_support::traits::tokens::Preservation;
-use frame_support::traits::Currency;
-use frame_support::traits::ExistenceRequirement;
-use frame_support::traits::LockableCurrency;
-use frame_support::traits::ReservableCurrency;
 use frame_support::{
 	defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		tokens::Fortitude, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating, Get,
+		fungibles,
+		fungibles::{Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate},
+		tokens::{Fortitude, Precision, Preservation},
+		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
+		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency,
 	},
 	DefaultNoBound, PalletError,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_core::U256;
-use sp_runtime::traits::AccountIdConversion;
-use sp_runtime::traits::{
-	AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating, StaticLookup, Zero,
+use sp_runtime::{
+	traits::{
+		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating,
+		StaticLookup, Zero,
+	},
+	FixedPointNumber, Perbill,
 };
-use sp_runtime::FixedPointNumber;
-use sp_runtime::Perbill;
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
 
@@ -407,7 +402,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// A pool has been created.
 		Created { depositor: T::AccountId, pool_id: PoolId },
-		/// A member has became bonded in a pool.
+		/// A member has become bonded in a pool.
 		Bonded { member: T::AccountId, pool_id: PoolId, bonded: BalanceOf<T>, joined: bool },
 		/// A payout has been made to a member.
 		PaidOut { member: T::AccountId, pool_id: PoolId, payout: BalanceOf<T> },
@@ -417,7 +412,7 @@ pub mod pallet {
 		///   requested to be unbonded (the argument of the `unbond` transaction) from the bonded
 		///   pool.
 		/// - `points` is the number of points that are issued as a result of `balance` being
-		/// dissolved into the corresponding unbonding pool.
+		///   dissolved into the corresponding unbonding pool.
 		/// - `era` is the era in which the balance will be unbonded.
 		/// In the absence of slashing, these values will match. In the presence of slashing, the
 		/// number of points that are issued in the unbonding pool will be less than the amount
@@ -431,7 +426,7 @@ pub mod pallet {
 		},
 		/// A member has withdrawn from their pool.
 		///
-		/// The given number of `points` have been dissolved in return of `balance`.
+		/// The given number of `points` have been dissolved in return for `balance`.
 		///
 		/// Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance
 		/// will be 1.
@@ -478,7 +473,7 @@ pub mod pallet {
 		PoolCommissionClaimed { pool_id: PoolId, commission: BalanceOf<T> },
 		/// Topped up deficit in frozen ED of the reward pool.
 		MinBalanceDeficitAdjusted { pool_id: PoolId, amount: BalanceOf<T> },
-		/// Claimed excess frozen ED of af the reward pool.
+		/// Claimed excess frozen ED of the reward pool.
 		MinBalanceExcessAdjusted { pool_id: PoolId, amount: BalanceOf<T> },
 	}
 
@@ -591,14 +586,28 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Stake funds with a pool. The amount to bond is transferred from the member to the
-		/// pools account and immediately increases the pools bond.
+		/// Stakes funds with a pool by transferring the bonded amount from member to pool account.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `amount` - Amount to stake
+		/// * `pool_id` - Target pool ID
+		///
+		/// # Errors
+		///
+		/// * [`Error::MinimumBondNotMet`] - Amount below minimum bond
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::DefensiveError`] - Reward pool not found
 		///
 		/// # Note
 		///
-		/// * This call will *not* dust the member account, so the member must have at least
-		///   `existential deposit + amount` in their account.
-		/// * Only a pool with [`PoolState::Open`] can be joined
+		/// * Member must have `existential deposit + amount` in account
+		/// * Pool must be in [`PoolState::Open`] state
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::join())]
 		pub fn join(
@@ -638,16 +647,33 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Bond `extra` more funds from `origin` into the pool to which they already belong.
+		/// Bond additional funds into an existing pool position.
 		///
-		/// Additional funds can come from either the free balance of the account, of from the
-		/// accumulated rewards, see [`BondExtra`].
+		/// Additional funds can come from either free balance or accumulated rewards.
+		/// Automatically pays out all pending rewards.
 		///
-		/// Bonding extra funds implies an automatic payout of all pending rewards as well.
-		/// See `bond_extra_other` to bond pending rewards of `other` members.
-		// NOTE: this transaction is implemented with the sole purpose of readability and
-		// correctness, not optimization. We read/write several storage items multiple times instead
-		// of just once, in the spirit reusing code.
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `pool_id` - Target pool ID
+		/// * `extra` - Source and amount of additional funds
+		///
+		/// # Permissions
+		///
+		/// * Must be signed
+		/// * Must have permission to bond extra if not self
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::DoesNotHavePermission`] - Caller lacks permission
+		/// * [`Error::DefensiveError`] - Reward pool not found
+		///
+		/// # Note
+		///
+		/// * This transaction prioritizes readability and correctness over optimization
+		/// * Multiple storage reads/writes are performed to reuse code
+		/// * See `bond_extra_other` to bond pending rewards of other members
 		#[pallet::call_index(1)]
 		#[pallet::weight(
 			T::WeightInfo::bond_extra_transfer()
@@ -662,37 +688,35 @@ pub mod pallet {
 			Self::do_bond_extra(who.clone(), who, pool_id, extra)
 		}
 
-		/// Unbond up to `unbonding_points` of the `member_account`'s funds from the pool. It
-		/// implicitly collects the rewards one last time, since not doing so would mean some
-		/// rewards would be forfeited.
+		/// Unbond points from a member's pool position, collecting any pending rewards.
 		///
-		/// Under certain conditions, this call can be dispatched permissionlessly (i.e. by any
-		/// account).
+		/// # Arguments
 		///
-		/// # Conditions for a permissionless dispatch.
+		/// * `origin` - Origin of the call
+		/// * `member_account` - Account to unbond from
+		/// * `pool_id` - Target pool ID
+		/// * `unbonding_points` - Amount of points to unbond
 		///
-		/// * The pool is blocked and the caller is either the root or bouncer. This is refereed to
-		///   as a kick.
-		/// * The pool is destroying and the member is not the depositor.
-		/// * The pool is destroying, the member is the depositor and no other members are in the
-		///   pool.
+		/// # Permissions
 		///
-		/// ## Conditions for permissioned dispatch (i.e. the caller is also the
-		/// `member_account`):
+		/// * Permissionless if:
+		///   - Pool is blocked and caller is root/bouncer (kick)
+		///   - Pool is destroying and member is not depositor
+		///   - Pool is destroying, member is depositor, and pool is empty
+		/// * Permissioned (caller must be member) if:
+		///   - Caller is not depositor
+		///   - Caller is depositor, pool is destroying, and pool is empty
 		///
-		/// * The caller is not the depositor.
-		/// * The caller is the depositor, the pool is destroying and no other members are in the
-		///   pool.
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::NoBalanceToUnbond`] - Member has insufficient points
+		/// * [`Error::DefensiveError`] - Not enough space in unbond pool
 		///
 		/// # Note
-		///
-		/// If there are too many unlocking chunks to unbond with the pool account,
-		/// [`Call::pool_withdraw_unbonded`] can be called to try and minimize unlocking chunks.
-		/// The [`StakingInterface::unbond`] will implicitly call [`Call::pool_withdraw_unbonded`]
-		/// to try to free chunks if necessary (ie. if unbound was called and no unlocking chunks
-		/// are available). However, it may not be possible to release the current unlocking chunks,
-		/// in which case, the result of this call will likely be the `NoMoreChunks` error from the
-		/// staking system.
+		/// If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first.
+		/// The staking interface will attempt this automatically but may still return `NoMoreChunks`
+		/// if chunks cannot be released.
 		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::unbond())]
 		pub fn unbond(
@@ -786,12 +810,25 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Call `withdraw_unbonded` for the pools account. This call can be made by any account.
+		/// Withdraws unbonded funds from the pool's staking account.
 		///
-		/// This is useful if there are too many unlocking chunks to call `unbond`, and some
-		/// can be cleared by withdrawing. In the case there are too many unlocking chunks, the user
-		/// would probably see an error like `NoMoreChunks` emitted from the staking system when
-		/// they attempt to unbond.
+		/// Useful for clearing unlocking chunks when there are too many to call `unbond`.
+		/// Prevents `NoMoreChunks` errors from the staking system.
+		///
+		/// # Permissions
+		///
+		/// * Can be signed by any account
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `pool_id` - Pool identifier
+		/// * `num_slashing_spans` - Number of slashing spans to check
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::NotDestroying`] - Pool is in destroying state
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::pool_withdraw_unbonded(*num_slashing_spans))]
 		pub fn pool_withdraw_unbonded(
@@ -810,25 +847,31 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Withdraw unbonded funds from `member_account`. If no bonded funds can be unbonded, an
-		/// error is returned.
+		/// Withdraw unbonded funds from a member account.
 		///
-		/// Under certain conditions, this call can be dispatched permissionlessly (i.e. by any
-		/// account).
+		/// # Permissions
 		///
-		/// # Conditions for a permissionless dispatch
+		/// * Permissionless if:
+		///   - Pool is in destroy mode and target is not depositor
+		///   - Target is depositor and only member in sub pools
+		///   - Pool is blocked and caller is root/bouncer
+		/// * Permissioned if caller is target and not depositor
 		///
-		/// * The pool is in destroy mode and the target is not the depositor.
-		/// * The target is the depositor and they are the only member in the sub pools.
-		/// * The pool is blocked and the caller is either the root or bouncer.
+		/// # Arguments
 		///
-		/// # Conditions for permissioned dispatch
+		/// * `origin` - Origin of the call
+		/// * `member_account` - Account to withdraw from
+		/// * `pool_id` - Pool identifier
+		/// * `num_slashing_spans` - Number of slashing spans
 		///
-		/// * The caller is the target and they are not the depositor.
+		/// # Errors
 		///
-		/// # Note
+		/// * [`Error::PoolMemberNotFound`] - Member account not found
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::SubPoolsNotFound`] - Sub pools not found
+		/// * [`Error::CannotWithdrawAny`] - No unbonded funds available
 		///
-		/// If the target is the depositor, the pool will be destroyed.
+		/// If target is depositor, pool will be destroyed.
 		#[pallet::call_index(5)]
 		#[pallet::weight(
 			T::WeightInfo::withdraw_unbonded_kill(*num_slashing_spans)
@@ -945,21 +988,27 @@ pub mod pallet {
 
 		/// Create a new delegation pool.
 		///
+		/// # Permissions
+		///
+		/// * Must be signed by the account that will become the initial depositor
+		///
 		/// # Arguments
 		///
-		/// * `amount` - The amount of funds to delegate to the pool. This also acts of a sort of
-		///   deposit since the pools creator cannot fully unbond funds until the pool is being
-		///   destroyed.
-		/// * `index` - A disambiguation index for creating the account. Likely only useful when
-		///   creating multiple pools in the same extrinsic.
-		/// * `root` - The account to set as [`PoolRoles::root`].
-		/// * `nominator` - The account to set as the [`PoolRoles::nominator`].
-		/// * `bouncer` - The account to set as the [`PoolRoles::bouncer`].
+		/// * `origin` - Origin of the call
+		/// * `amount` - Amount to delegate to the pool
+		/// * `root` - Account to set as pool root
+		/// * `nominator` - Account to set as pool nominator
+		/// * `bouncer` - Account to set as pool bouncer
+		/// * `name` - Optional pool name bounded by `T::MaxNameLength`
+		/// * `icon` - Optional pool icon bounded by `T::MaxIconLength`
+		///
+		/// # Errors
+		///
+		/// * [`Error::OverflowRisk`] - Pool ID increment would overflow
 		///
 		/// # Note
 		///
-		/// In addition to `amount`, the caller will transfer the existential deposit; so the caller
-		/// needs at have at least `amount + existential_deposit` transferable.
+		/// Caller must have `amount + existential_deposit` transferable funds.
 		#[pallet::call_index(6)]
 		#[pallet::weight(T::WeightInfo::create())]
 		pub fn create(
@@ -981,12 +1030,31 @@ pub mod pallet {
 			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id, name, icon)
 		}
 
-		/// Create a new delegation pool with a previously used pool id
+		/// Create a new delegation pool with a previously used pool ID.
+		///
+		/// # Permissions
+		///
+		/// * Must be signed by the account that will become the depositor
 		///
 		/// # Arguments
 		///
-		/// same as `create` with the inclusion of
-		/// * `pool_id` - `A valid PoolId.
+		/// * `origin` - Origin of the call
+		/// * `amount` - Amount to delegate to the pool
+		/// * `root` - Account to set as pool root
+		/// * `nominator` - Account to set as pool nominator
+		/// * `bouncer` - Account to set as pool bouncer
+		/// * `pool_id` - Pool ID to reuse
+		/// * `name` - Optional pool name
+		/// * `icon` - Optional pool icon
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolIdInUse`] - Pool ID is already in use
+		/// * [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID
+		///
+		/// # Note
+		///
+		/// Caller must have `amount + existential_deposit` transferable funds.
 		#[pallet::call_index(7)]
 		#[pallet::weight(T::WeightInfo::create())]
 		#[allow(clippy::too_many_arguments)]
@@ -1008,13 +1076,26 @@ pub mod pallet {
 			Self::do_create(depositor, amount, root, nominator, bouncer, pool_id, name, icon)
 		}
 
-		/// Nominate on behalf of the pool.
+		/// Nominate validators on behalf of the pool.
 		///
-		/// The dispatch origin of this call must be signed by the pool nominator or the pool
-		/// root role.
+		/// # Permissions
 		///
-		/// This directly forward the call to the staking pallet, on behalf of the pool bonded
-		/// account.
+		/// * Pool nominator or root role can nominate validators
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `pool_id` - Pool identifier
+		/// * `validators` - List of validator accounts to nominate
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::NotNominator`] - Caller lacks nominator permissions
+		///
+		/// # Note
+		///
+		/// Forwards nomination call to staking pallet using pool's bonded account.
 		#[pallet::call_index(8)]
 		#[pallet::weight(T::WeightInfo::nominate(validators.len() as u32))]
 		pub fn nominate(
@@ -1028,16 +1109,29 @@ pub mod pallet {
 			T::Staking::nominate(&bonded_pool.bonded_account(), validators)
 		}
 
-		/// Set a new state for the pool.
+		/// Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be
+		/// changed again under any circumstances.
 		///
-		/// If a pool is already in the `Destroying` state, then under no condition can its state
-		/// change again.
+		/// # Permissions
 		///
-		/// The dispatch origin of this call must be either:
+		/// * Pool bouncer or root role can set any state
+		/// * Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions
 		///
-		/// 1. signed by the bouncer, or the root role of the pool,
-		/// 2. if the pool conditions to be open are NOT met (as described by `ok_to_be_open`), and
-		///    then the state of the pool can be permissionlessly changed to `Destroying`.
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `pool_id` - Pool identifier
+		/// * `state` - New state to set
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions
+		///
+		/// # Note
+		///
+		/// State changes are validated through `ok_to_be_open` which checks pool properties like
+		/// commission, member count and roles.
 		#[pallet::call_index(9)]
 		#[pallet::weight(T::WeightInfo::set_state())]
 		pub fn set_state(
@@ -1063,10 +1157,23 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Set a new metadata for the pool.
+		/// Updates the metadata for a given pool.
 		///
-		/// The dispatch origin of this call must be signed by the bouncer, or the root role of the
-		/// pool.
+		/// # Permissions
+		///
+		/// * Must be called by the pool bouncer or root role
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `pool_id` - Pool identifier
+		/// * `metadata` - New metadata to set
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed
+		/// * [`Error::DoesNotHavePermission`] - Caller lacks required permissions
 		#[pallet::call_index(10)]
 		#[pallet::weight(T::WeightInfo::set_metadata(metadata.len() as u32))]
 		pub fn set_metadata(
@@ -1089,17 +1196,23 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Update configurations for the nomination pools. The origin for this call must be
-		/// Root.
+		/// Updates the global configuration parameters for nomination pools.
+		///
+		/// # Permissions
+		///
+		/// * Must be called by Root
 		///
 		/// # Arguments
 		///
-		/// * `min_join_bond` - Set [`MinJoinBond`].
-		/// * `min_create_bond` - Set [`MinCreateBond`].
-		/// * `max_pools` - Set [`MaxPools`].
-		/// * `max_members` - Set [`MaxPoolMembers`].
-		/// * `max_members_per_pool` - Set [`MaxPoolMembersPerPool`].
-		/// * `global_max_commission` - Set [`GlobalMaxCommission`].
+		/// * `origin` - Origin of the call
+		/// * `min_join_bond` - Config operation for minimum bond to join a pool
+		/// * `min_create_bond` - Config operation for minimum bond to create a pool  
+		/// * `max_pools` - Config operation for maximum number of pools
+		/// * `global_max_commission` - Config operation for maximum global commission
+		///
+		/// # Errors
+		///
+		/// * [`DispatchError::BadOrigin`] - Caller is not Root
 		#[pallet::call_index(11)]
 		#[pallet::weight(T::WeightInfo::set_configs())]
 		pub fn set_configs(
@@ -1128,13 +1241,27 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Update the roles of the pool.
+		/// Update the roles of a pool.
 		///
-		/// The root is the only entity that can change any of the roles, including itself,
-		/// excluding the depositor, who can never change.
+		/// Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed.
+		/// Emits a `RolesUpdated` event on successful update.
 		///
-		/// It emits an event, notifying UIs of the role change. This event is quite relevant to
-		/// most pool members and they should be informed of changes to pool roles.
+		/// # Permissions
+		///
+		/// * Origin must be Root or pool root
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `pool_id` - Pool identifier
+		/// * `new_root` - New root role configuration
+		/// * `new_nominator` - New nominator role configuration  
+		/// * `new_bouncer` - New bouncer role configuration
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::DoesNotHavePermission`] - Origin does not have permission
 		#[pallet::call_index(12)]
 		#[pallet::weight(T::WeightInfo::update_roles())]
 		pub fn update_roles(
@@ -1181,13 +1308,21 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Chill on behalf of the pool.
+		/// Chill on behalf of the pool by forwarding the call to the staking pallet.
 		///
-		/// The dispatch origin of this call must be signed by the pool nominator or the pool
-		/// root role, same as [`Pallet::nominate`].
+		/// # Permissions
 		///
-		/// This directly forward the call to the staking pallet, on behalf of the pool bonded
-		/// account.
+		/// * Origin must be signed by pool nominator or root role
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call
+		/// * `pool_id` - Pool identifier
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::NotNominator`] - Origin lacks nomination permission
 		#[pallet::call_index(13)]
 		#[pallet::weight(T::WeightInfo::chill())]
 		pub fn chill(origin: OriginFor<T>, pool_id: PoolId) -> DispatchResult {
@@ -1197,15 +1332,26 @@ pub mod pallet {
 			T::Staking::chill(&bonded_pool.bonded_account())
 		}
 
-		/// `origin` bonds funds from `extra` for some pool member `member` into their respective
-		/// pools.
+		/// Bond additional funds for a pool member into their respective pool.
 		///
-		/// `origin` can bond extra funds from free balance or pending rewards when `origin ==
-		/// other`.
+		/// # Permissions
 		///
-		/// In the case of `origin != other`, `origin` can only bond extra pending rewards of
-		/// `other` members assuming set_claim_permission for the given member is
-		/// `PermissionlessAll` or `PermissionlessCompound`.
+		/// * Origin must match member account for bonding from free balance/pending rewards
+		/// * Any origin can bond from pending rewards if member has `PermissionlessAll` or
+		///   `PermissionlessCompound` claim permissions
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call
+		/// * `member` - Pool member account to bond for
+		/// * `pool_id` - Pool identifier
+		/// * `extra` - Amount to bond from free balance or pending rewards
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - Pool does not exist
+		/// * [`Error::PoolMemberNotFound`] - Account is not a member of pool
+		/// * [`Error::NoPermission`] - Origin lacks permission to bond for member
 		#[pallet::call_index(14)]
 		#[pallet::weight(
 			T::WeightInfo::bond_extra_transfer()
@@ -1221,12 +1367,22 @@ pub mod pallet {
 			Self::do_bond_extra(who, T::Lookup::lookup(member)?, pool_id, extra)
 		}
 
-		/// Set the commission of a pool.
-		//
-		/// Both a commission percentage and a commission payee must be provided in the `current`
-		/// tuple. Where a `current` of `None` is provided, any current commission will be removed.
+		/// Set or remove the commission rate and payee for a pool.
 		///
-		/// - If a `None` is supplied to `new_commission`, existing commission will be removed.
+		/// # Permissions
+		///
+		/// * Caller must have commission management permission for the pool
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call
+		/// * `pool_id` - The pool identifier
+		/// * `new_commission` - Optional commission rate and payee. None removes existing commission
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - The pool_id does not exist
+		/// * [`Error::DoesNotHavePermission`] - Caller lacks commission management permission
 		#[pallet::call_index(17)]
 		#[pallet::weight(T::WeightInfo::set_commission())]
 		pub fn set_commission(
@@ -1258,11 +1414,23 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Set the maximum commission of a pool.
+		/// Set the maximum commission rate for a pool. Initial max can be set to any value, with only
+		/// lower values allowed thereafter. Current commission will be reduced if above new max.
 		///
-		/// - Initial max can be set to any `Perbill`, and only smaller values thereafter.
-		/// - Current commission will be lowered in the event it is higher than a new max
-		///   commission.
+		/// # Permissions
+		///
+		/// * Caller must have commission management permission for the pool
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call
+		/// * `pool_id` - The pool identifier
+		/// * `max_commission` - The new maximum commission rate
+		///
+		/// # Errors
+		///
+		/// * [`Error::PoolNotFound`] - The pool_id does not exist
+		/// * [`Error::DoesNotHavePermission`] - Caller lacks commission management permission
 		#[pallet::call_index(18)]
 		#[pallet::weight(T::WeightInfo::set_commission_max())]
 		pub fn set_commission_max(
@@ -1285,6 +1453,12 @@ pub mod pallet {
 		///
 		/// Initial change rate is not bounded, whereas subsequent updates can only be more
 		/// restrictive than the current.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed by an account with commission management permission.
+		/// * `pool_id` - The identifier of the pool to set commission change rate for.
+		/// * `change_rate` - The new commission change rate configuration.
 		#[pallet::call_index(19)]
 		#[pallet::weight(T::WeightInfo::set_commission_change_rate())]
 		pub fn set_commission_change_rate(
@@ -1306,11 +1480,16 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Claim pending commission.
+		/// Claim pending commission for a pool.
 		///
-		/// The dispatch origin of this call must be signed by the `root` role of the pool. Pending
-		/// commission is paid out and added to total claimed commission`. Total pending commission
-		/// is reset to zero. the current.
+		/// The dispatch origin of this call must be signed by an account with commission claim permission.
+		/// Pending commission is paid out and added to total claimed commission. Total pending commission
+		/// is reset to zero.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed by an account with commission claim permission.
+		/// * `pool_id` - The identifier of the pool to claim commission from.
 		#[pallet::call_index(20)]
 		#[pallet::weight(T::WeightInfo::claim_commission())]
 		pub fn claim_commission(origin: OriginFor<T>, pool_id: PoolId) -> DispatchResult {
@@ -1325,6 +1504,11 @@ pub mod pallet {
 		/// insufficient to cover the ED deficit of the pool or vice-versa where there is excess
 		/// deposit to the pool. This call allows anyone to adjust the ED deposit of the
 		/// pool by either topping up the deficit or claiming the excess.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed.
+		/// * `pool_id` - The identifier of the pool to adjust the deposit for.
 		#[pallet::call_index(21)]
 		#[pallet::weight(T::WeightInfo::adjust_pool_deposit())]
 		pub fn adjust_pool_deposit(origin: OriginFor<T>, pool_id: PoolId) -> DispatchResult {
@@ -1334,8 +1518,14 @@ pub mod pallet {
 
 		/// Set or remove a pool's commission claim permission.
 		///
-		/// Determines who can claim the pool's pending commission. Only the `Root` role of the pool
-		/// is able to conifigure commission claim permissions.
+		/// Only the `Root` role of the pool is able to configure commission claim permissions.
+		/// This determines which accounts are allowed to claim the pool's pending commission.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call. Must be signed by the pool's root account.
+		/// * `pool_id` - The identifier of the pool to set permissions for.
+		/// * `permission` - Optional commission claim permission configuration. If None, removes any existing permission.
 		#[pallet::call_index(22)]
 		#[pallet::weight(T::WeightInfo::set_commission_claim_permission())]
 		pub fn set_commission_claim_permission(
@@ -1539,7 +1729,8 @@ impl<T: Config> Pallet<T> {
 		let bouncer = T::Lookup::lookup(bouncer)?;
 
 		// ensure that pool token can be created
-		// if this fails, it means that the pool token already exists or the token counter needs to be incremented correctly
+		// if this fails, it means that the pool token already exists or the token counter needs to
+		// be incremented correctly
 		ensure!(
 			T::Fungibles::total_issuance(pool_id.into()) == 0_u32.into(),
 			Error::<T>::PoolTokenCreationFailed

@@ -1,21 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
-//
-// Tangle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Tangle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
-// This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,12 +15,14 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Services primitives.
-
+use crate::Weight;
 use educe::Educe;
+use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
+use serde::Deserializer;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ecdsa, RuntimeDebug};
+use sp_core::{ByteArray, RuntimeDebug, H160, U256};
 use sp_runtime::Percent;
 
 #[cfg(not(feature = "std"))]
@@ -44,6 +30,8 @@ use alloc::{string::String, vec, vec::Vec};
 
 pub mod field;
 pub use field::*;
+
+use super::Account;
 
 /// A Higher level abstraction of all the constraints.
 pub trait Constraints {
@@ -562,6 +550,37 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId>
 	}
 }
 
+/// A staging service payment is a payment that is made for a service request
+/// but will be paid when the service is created or refunded if the service is rejected.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub struct StagingServicePayment<AccountId, AssetId, Balance> {
+	/// The service request ID.
+	pub request_id: u64,
+	/// Where the refund should go.
+	pub refund_to: Account<AccountId>,
+	/// The Asset used in the payment.
+	pub asset: Asset<AssetId>,
+	/// The amount of the asset that is paid.
+	pub amount: Balance,
+}
+
+impl<AccountId, AssetId, Balance> Default for StagingServicePayment<AccountId, AssetId, Balance>
+where
+	AccountId: ByteArray,
+	AssetId: sp_runtime::traits::Zero,
+	Balance: Default,
+{
+	fn default() -> Self {
+		Self {
+			request_id: Default::default(),
+			refund_to: Account::default(),
+			asset: Asset::default(),
+			amount: Default::default(),
+		}
+	}
+}
+
 /// A Service is an instance of a service blueprint.
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(
@@ -604,6 +623,7 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	pub ttl: BlockNumber,
 }
 
+/// Operator's Approval State.
 #[derive(
 	Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
 )]
@@ -622,6 +642,74 @@ pub enum ApprovalState {
 	/// The operator is rejected to provide the service.
 	#[codec(index = 2)]
 	Rejected,
+}
+
+/// Different types of assets that can be used.
+#[derive(
+	PartialEq,
+	Eq,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	Copy,
+	Clone,
+	MaxEncodedLen,
+	Ord,
+	PartialOrd,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum Asset<AssetId> {
+	/// Use the specified AssetId.
+	#[codec(index = 0)]
+	Custom(AssetId),
+
+	/// Use an ERC20-like token with the specified contract address.
+	#[codec(index = 1)]
+	Erc20(sp_core::H160),
+}
+
+impl<AssetId: sp_runtime::traits::Zero> Default for Asset<AssetId> {
+	fn default() -> Self {
+		Asset::Custom(sp_runtime::traits::Zero::zero())
+	}
+}
+
+impl<AssetId: Encode + Decode> Asset<AssetId> {
+	pub fn to_ethabi_param_type() -> ethabi::ParamType {
+		ethabi::ParamType::Tuple(vec![
+			// Kind of the Asset
+			ethabi::ParamType::Uint(8),
+			// Data of the Asset (Contract Address or AssetId)
+			ethabi::ParamType::FixedBytes(32),
+		])
+	}
+
+	pub fn to_ethabi_param() -> ethabi::Param {
+		ethabi::Param {
+			name: String::from("asset"),
+			kind: Self::to_ethabi_param_type(),
+			internal_type: Some(String::from("struct ServiceOperators.Asset")),
+		}
+	}
+
+	pub fn to_ethabi(&self) -> ethabi::Token {
+		match self {
+			Asset::Custom(asset_id) => {
+				let asset_id = asset_id.using_encoded(ethabi::Uint::from_little_endian);
+				let mut asset_id_bytes = [0u8; core::mem::size_of::<ethabi::Uint>()];
+				asset_id.to_big_endian(&mut asset_id_bytes);
+				ethabi::Token::Tuple(vec![
+					ethabi::Token::Uint(0.into()),
+					ethabi::Token::FixedBytes(asset_id_bytes.into()),
+				])
+			},
+			Asset::Erc20(addr) => ethabi::Token::Tuple(vec![
+				ethabi::Token::Uint(1.into()),
+				ethabi::Token::FixedBytes(addr.to_fixed_bytes().into()),
+			]),
+		}
+	}
 }
 
 /// Represents the pricing structure for various hardware resources.
@@ -665,7 +753,7 @@ impl PriceTargets {
 		ethabi::Param {
 			name: String::from("priceTargets"),
 			kind: Self::to_ethabi_param_type(),
-			internal_type: Some(String::from("struct IBlueprintServiceManager.PriceTargets")),
+			internal_type: Some(String::from("struct ServiceOperators.PriceTargets")),
 		}
 	}
 
@@ -682,12 +770,65 @@ impl PriceTargets {
 }
 
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct OperatorPreferences {
 	/// The operator ECDSA public key.
-	pub key: ecdsa::Public,
+	pub key: [u8; 65],
 	/// The pricing targets for the operator's resources.
 	pub price_targets: PriceTargets,
+}
+
+#[cfg(feature = "std")]
+impl Serialize for OperatorPreferences {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer,
+	{
+		use serde::ser::SerializeTuple;
+		let mut tup = serializer.serialize_tuple(2)?;
+		tup.serialize_element(&self.key[..])?;
+		tup.serialize_element(&self.price_targets)?;
+		tup.end()
+	}
+}
+
+#[cfg(feature = "std")]
+struct OperatorPreferencesVisitor;
+
+#[cfg(feature = "std")]
+impl<'de> serde::de::Visitor<'de> for OperatorPreferencesVisitor {
+	type Value = OperatorPreferences;
+
+	fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+		formatter.write_str("a tuple of 2 elements")
+	}
+
+	fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+	where
+		A: serde::de::SeqAccess<'de>,
+	{
+		let key = seq
+			.next_element::<Vec<u8>>()?
+			.ok_or_else(|| serde::de::Error::custom("key is missing"))?;
+		let price_targets = seq
+			.next_element::<PriceTargets>()?
+			.ok_or_else(|| serde::de::Error::custom("price_targets is missing"))?;
+		let key_arr: [u8; 65] = key.try_into().map_err(|_| {
+			serde::de::Error::custom(
+				"key must be in the uncompressed format with length of 65 bytes",
+			)
+		})?;
+		Ok(OperatorPreferences { key: key_arr, price_targets })
+	}
+}
+
+#[cfg(feature = "std")]
+impl<'de> Deserialize<'de> for OperatorPreferences {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		deserializer.deserialize_tuple(2, OperatorPreferencesVisitor)
+	}
 }
 
 impl OperatorPreferences {
@@ -715,7 +856,7 @@ impl OperatorPreferences {
 	pub fn to_ethabi(&self) -> ethabi::Token {
 		ethabi::Token::Tuple(vec![
 			// operator public key
-			ethabi::Token::Bytes(self.key.0.to_vec()),
+			ethabi::Token::Bytes(self.key.to_vec()),
 			// price targets
 			self.price_targets.to_ethabi(),
 		])
@@ -1046,4 +1187,51 @@ pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, Asse
 	pub blueprint: ServiceBlueprint<C>,
 	/// The services instances of that blueprint.
 	pub services: Vec<Service<C, AccountId, BlockNumber, AssetId>>,
+}
+
+#[derive(Debug)]
+pub struct RunnerError<E: Into<sp_runtime::DispatchError>> {
+	pub error: E,
+	pub weight: Weight,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub trait EvmRunner<T: frame_system::Config> {
+	type Error: Into<sp_runtime::DispatchError>;
+
+	fn call(
+		source: H160,
+		target: H160,
+		input: Vec<u8>,
+		value: U256,
+		gas_limit: u64,
+		is_transactional: bool,
+		validate: bool,
+	) -> Result<CallInfo, RunnerError<Self::Error>>;
+}
+
+/// A mapping function that converts EVM gas to Substrate weight and vice versa
+pub trait EvmGasWeightMapping {
+	/// Convert EVM gas to Substrate weight
+	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight;
+	/// Convert Substrate weight to EVM gas
+	fn weight_to_gas(weight: Weight) -> u64;
+}
+
+impl EvmGasWeightMapping for () {
+	fn gas_to_weight(_gas: u64, _without_base_weight: bool) -> Weight {
+		Default::default()
+	}
+	fn weight_to_gas(_weight: Weight) -> u64 {
+		Default::default()
+	}
+}
+
+/// Trait to be implemented for evm address mapping.
+pub trait EvmAddressMapping<A> {
+	/// Convert an address to an account id.
+	fn into_account_id(address: H160) -> A;
+
+	/// Convert an account id to an address.
+	fn into_address(account_id: A) -> H160;
 }

@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionValidity, TransactionValidityError},
 	ConsensusEngineId,
 };
+use tangle_primitives::services::EvmRunner;
 
 pub type Precompiles<R> =
 	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, ServicesPrecompile<R>>,)>;
@@ -276,7 +277,7 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 
 pub struct MockedEvmRunner;
 
-impl pallet_services::EvmRunner<Runtime> for MockedEvmRunner {
+impl EvmRunner<Runtime> for MockedEvmRunner {
 	type Error = pallet_evm::Error<Runtime>;
 
 	fn call(
@@ -287,7 +288,7 @@ impl pallet_services::EvmRunner<Runtime> for MockedEvmRunner {
 		gas_limit: u64,
 		is_transactional: bool,
 		validate: bool,
-	) -> Result<fp_evm::CallInfo, pallet_services::traits::RunnerError<Self::Error>> {
+	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
 		let max_fee_per_gas = FixedGasPrice::min_gas_price().0;
 		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
 		let nonce = None;
@@ -310,7 +311,7 @@ impl pallet_services::EvmRunner<Runtime> for MockedEvmRunner {
 			proof_size_base_cost,
 			<Runtime as pallet_evm::Config>::config(),
 		)
-		.map_err(|o| pallet_services::traits::RunnerError { error: o.error, weight: o.weight })
+		.map_err(|o| tangle_primitives::services::RunnerError { error: o.error, weight: o.weight })
 	}
 }
 

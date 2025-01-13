@@ -1,19 +1,13 @@
 //! Schnorr signature signing keys
 
-use crate::{
-	error::Error,
-	traits::{Ciphersuite, Field, Group, Scalar},
-	util::scalar_is_valid,
-	verifying_key::VerifyingKey,
-};
+use alloc::vec::Vec;
 
-#[cfg(feature = "std")]
-use crate::{challenge, signature::Signature};
-
-#[cfg(feature = "std")]
-use crate::random_nonzero;
-#[cfg(feature = "std")]
 use rand_core::{CryptoRng, RngCore};
+
+use crate::{
+	random_nonzero, serialization::SerializableScalar, Challenge, Ciphersuite, Error, Field, Group,
+	Scalar, Signature, VerifyingKey,
+};
 
 /// A signing key for a Schnorr signature on a FROST [`Ciphersuite::Group`].
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -29,7 +23,6 @@ where
 	C: Ciphersuite,
 {
 	/// Generate a new signing key.
-	#[cfg(feature = "std")]
 	pub fn new<R: RngCore + CryptoRng>(rng: &mut R) -> SigningKey<C> {
 		let scalar = random_nonzero::<C, R>(rng);
 
@@ -37,54 +30,49 @@ where
 	}
 
 	/// Deserialize from bytes
-	pub fn deserialize(
-		bytes: <<C::Group as Group>::Field as Field>::Serialization,
-	) -> Result<SigningKey<C>, Error> {
-		let scalar =
-			<<C::Group as Group>::Field as Field>::deserialize(&bytes).map_err(Error::from)?;
-
-		if scalar == <<C::Group as Group>::Field as Field>::zero() {
-			return Err(Error::MalformedSigningKey);
-		}
-
-		Ok(Self { scalar })
+	pub fn deserialize(bytes: &[u8]) -> Result<SigningKey<C>, Error<C>> {
+		Self::from_scalar(SerializableScalar::deserialize(bytes)?.0)
 	}
 
 	/// Serialize `SigningKey` to bytes
-	pub fn serialize(&self) -> <<C::Group as Group>::Field as Field>::Serialization {
-		<<C::Group as Group>::Field as Field>::serialize(&self.scalar)
+	pub fn serialize(&self) -> Vec<u8> {
+		SerializableScalar::<C>(self.scalar).serialize()
 	}
 
 	/// Create a signature `msg` using this `SigningKey`.
-	#[cfg(feature = "std")]
-	pub fn sign<R: RngCore + CryptoRng>(&self, mut rng: R, msg: &[u8]) -> Signature<C> {
-		let k = random_nonzero::<C, R>(&mut rng);
+	pub fn sign<R: RngCore + CryptoRng>(&self, rng: R, message: &[u8]) -> Signature<C> {
+		<C>::single_sign(self, rng, message)
+	}
 
-		let R = <C::Group>::generator() * k;
+	/// Create a signature `msg` using this `SigningKey` using the default
+	/// signing.
+	#[cfg(feature = "internals")]
+	pub fn default_sign<R: RngCore + CryptoRng>(&self, mut rng: R, message: &[u8]) -> Signature<C> {
+		let public = VerifyingKey::<C>::from(*self);
+
+		let (k, R) = <C>::generate_nonce(&mut rng);
 
 		// Generate Schnorr challenge
-		let c = challenge::<C>(&R, &VerifyingKey::<C>::from(*self), msg);
+		let c: Challenge<C> = <C>::challenge(&R, &public, message).expect("should not return error since that happens only if one of the inputs is the identity. R is not since k is nonzero. The verifying_key is not because signing keys are not allowed to be zero.");
 
 		let z = k + (c.0 * self.scalar);
 
 		Signature { R, z }
 	}
 
-	/// Creates a SigningKey from a scalar.
+	/// Creates a SigningKey from a scalar. Returns an error if the scalar is zero.
 	pub fn from_scalar(
 		scalar: <<<C as Ciphersuite>::Group as Group>::Field as Field>::Scalar,
-	) -> Self {
-		Self { scalar }
+	) -> Result<Self, Error<C>> {
+		if scalar == <<C::Group as Group>::Field as Field>::zero() {
+			return Err(Error::MalformedSigningKey);
+		}
+		Ok(Self { scalar })
 	}
 
 	/// Return the underlying scalar.
 	pub fn to_scalar(self) -> <<<C as Ciphersuite>::Group as Group>::Field as Field>::Scalar {
 		self.scalar
-	}
-
-	/// Check if the signing key is valid.
-	pub fn is_valid(&self) -> bool {
-		scalar_is_valid::<C>(&self.scalar)
 	}
 }
 
@@ -102,7 +90,7 @@ where
 	C: Ciphersuite,
 {
 	fn from(signing_key: &SigningKey<C>) -> Self {
-		VerifyingKey { element: C::Group::generator() * signing_key.scalar }
+		VerifyingKey::new(C::Group::generator() * signing_key.scalar)
 	}
 }
 

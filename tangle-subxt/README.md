@@ -12,12 +12,13 @@
 Use the [`subxt-cli`](https://lib.rs/crates/subxt-cli) tool to download the metadata for your target runtime from a node.
 
 1. Install:
+
 ```bash
-cargo install subxt-cli@0.37.0 --force
+cargo install subxt-cli@0.38.0 --force
 ```
 
 2. To Save the metadata of `tangle`:
-Run the release build of the `tangle` node, then on another terminal run:
+   Run the release build of the `tangle` node, then on another terminal run:
 
 ```bash
 subxt metadata -f bytes > ./metadata/tangle-testnet-runtime.scale
@@ -40,12 +41,14 @@ subxt codegen --file metadata/tangle-testnet-runtime.scale \
 
 You can run following tests to trigger Job pallet events for local development.
 
-1. Run Local Tangle network 
+1. Run Local Tangle network
+
 ```bash
 ./scripts/run-standalone-local.sh --clean
 ```
+
 2. Run Test
+
 ```bash
 cargo test test_job_submission_event
 ```
-

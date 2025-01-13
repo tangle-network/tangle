@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ use sp_runtime::{
 	traits::{CheckedAdd, CheckedSub},
 	DispatchError, Percent,
 };
-use tangle_primitives::{BlueprintId, ServiceManager};
+use tangle_primitives::traits::ServiceManager;
+use tangle_primitives::BlueprintId;
 
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.
@@ -237,6 +238,9 @@ impl<T: Config> Pallet<T> {
 			.stake
 			.checked_sub(&request.amount)
 			.ok_or(Error::<T>::UnstakeAmountTooLarge)?;
+
+		// Unreserve the unstaked amount and clear the request
+		T::Currency::unreserve(who, request.amount);
 
 		operator.request = None;
 		Operators::<T>::insert(who, operator);

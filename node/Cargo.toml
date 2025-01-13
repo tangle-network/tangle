@@ -116,28 +116,32 @@ tangle-primitives = { workspace = true, features = ["std"] }
 tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
 futures-timer = { workspace = true }
-# sygma-rpc = { workspace = true }
-# sygma-runtime-api = { workspace = true }
+
+[dev-dependencies]
+tangle-subxt = { workspace = true }
+sp-tracing = { workspace = true }
+alloy = { version = "0.9", features = ["full"] }
+anyhow = "1.0"
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]
 runtime-benchmarks = [
- "frame-benchmarking-cli/runtime-benchmarks",
- "frame-benchmarking/runtime-benchmarks",
- "frame-system/runtime-benchmarks",
- "tangle-runtime/runtime-benchmarks",
- "tangle-testnet-runtime?/runtime-benchmarks",
- "sc-service/runtime-benchmarks",
+    "frame-benchmarking-cli/runtime-benchmarks",
+    "frame-benchmarking/runtime-benchmarks",
+    "frame-system/runtime-benchmarks",
+    "tangle-runtime/runtime-benchmarks",
+    "tangle-testnet-runtime?/runtime-benchmarks",
+    "sc-service/runtime-benchmarks",
 ]
 with-rocksdb-weights = ["tangle-testnet-runtime/with-rocksdb-weights"]
 with-paritydb-weights = ["tangle-testnet-runtime/with-paritydb-weights"]
 rocksdb = [
- "sc-cli/rocksdb",
- "sc-service/rocksdb",
- "fc-cli/rocksdb",
- "fc-db/rocksdb",
- "fc-mapping-sync/rocksdb",
- "fc-rpc/rocksdb",
+    "sc-cli/rocksdb",
+    "sc-service/rocksdb",
+    "fc-cli/rocksdb",
+    "fc-db/rocksdb",
+    "fc-mapping-sync/rocksdb",
+    "fc-rpc/rocksdb",
 ]
 sql = ["fc-db/sql", "fc-mapping-sync/sql"]
 testnet = ["tangle-testnet-runtime"]
@@ -146,4 +150,3 @@ fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runt
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
 manual-seal = ["tangle-testnet-runtime/manual-seal"]
 try-runtime = []
-

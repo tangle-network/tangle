@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,14 +18,59 @@ use crate::{types::*, Pallet};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
-	sp_runtime::traits::{AccountIdConversion, CheckedAdd, Zero},
+	sp_runtime::traits::AccountIdConversion,
 	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
+use sp_core::H160;
+use tangle_primitives::services::{Asset, EvmAddressMapping};
+use tangle_primitives::types::rewards::LockMultiplier;
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
 	pub fn pallet_account() -> T::AccountId {
 		T::PalletId::get().into_account_truncating()
+	}
+
+	/// Returns the EVM account id of the pallet.
+	///
+	/// This function retrieves the account id associated with the pallet by converting
+	/// the pallet evm address to an account id.
+	///
+	/// # Returns
+	/// * `T::AccountId` - The account id of the pallet.
+	pub fn pallet_evm_account() -> H160 {
+		T::EvmAddressMapping::into_address(Self::pallet_account())
+	}
+
+	pub fn handle_transfer_to_pallet(
+		sender: &T::AccountId,
+		asset_id: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
+		_evm_sender: Option<H160>,
+	) -> DispatchResult {
+		match asset_id {
+			Asset::Custom(asset_id) => {
+				T::Fungibles::transfer(
+					asset_id,
+					sender,
+					&Self::pallet_account(),
+					amount,
+					Preservation::Expendable,
+				)?;
+			},
+			Asset::Erc20(_asset_address) => {
+				// let sender = evm_sender.ok_or(Error::<T>::ERC20TransferFailed)?;
+				// let (success, _weight) = Self::erc20_transfer(
+				// 	asset_address,
+				// 	&sender,
+				// 	Self::pallet_evm_account(),
+				// 	amount,
+				// )
+				// .map_err(|_| Error::<T>::ERC20TransferFailed)?;
+				// ensure!(success, Error::<T>::ERC20TransferFailed);
+			},
+		}
+		Ok(())
 	}
 
 	/// Processes the deposit of assets into the pallet.
@@ -42,30 +87,30 @@ impl<T: Config> Pallet<T> {
 	/// the transfer fails.
 	pub fn process_deposit(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
+		evm_address: Option<H160>,
+		lock_multiplier: Option<LockMultiplier>,
 	) -> DispatchResult {
 		ensure!(amount >= T::MinDelegateAmount::get(), Error::<T>::BondTooLow);
 
 		// Transfer the amount to the pallet account
-		T::Fungibles::transfer(
-			asset_id,
-			&who,
-			&Self::pallet_account(),
-			amount,
-			Preservation::Expendable,
-		)?;
+		Self::handle_transfer_to_pallet(&who, asset_id, amount, evm_address)?;
+
+		let now = <frame_system::Pallet<T>>::block_number();
 
 		// Update storage
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
 			let metadata = maybe_metadata.get_or_insert_with(Default::default);
-			// Handle checked addition first to avoid ? operator in closure
-			if let Some(existing) = metadata.deposits.get(&asset_id) {
-				let new_amount =
-					existing.checked_add(&amount).ok_or(Error::<T>::DepositOverflow)?;
-				metadata.deposits.insert(asset_id, new_amount);
+			// If there's an existing deposit, increase it
+			if let Some(existing) = metadata.deposits.get_mut(&asset_id) {
+				existing
+					.increase_deposited_amount(amount, lock_multiplier, now)
+					.map_err(|_| Error::<T>::InsufficientBalance)?;
 			} else {
-				metadata.deposits.insert(asset_id, amount);
+				// Create a new deposit if none exists
+				let new_deposit = Deposit::new(amount, lock_multiplier, now);
+				metadata.deposits.insert(asset_id, new_deposit);
 			}
 			Ok(())
 		})?;
@@ -73,7 +118,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Schedules an withdraw request for a delegator.
+	/// Schedules a withdraw request for a delegator.
 	///
 	/// # Arguments
 	///
@@ -87,22 +132,20 @@ impl<T: Config> Pallet<T> {
 	/// asset is not supported.
 	pub fn process_schedule_withdraw(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure there is enough deposited balance
-			let balance =
-				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
-			ensure!(*balance >= amount, Error::<T>::InsufficientBalance);
+			let now = <frame_system::Pallet<T>>::block_number();
 
-			// Reduce the balance in deposits
-			*balance -= amount;
-			if *balance == Zero::zero() {
-				metadata.deposits.remove(&asset_id);
-			}
+			// Ensure there is enough deposited balance
+			let deposit =
+				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
+			deposit
+				.decrease_deposited_amount(amount, now)
+				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
 			// Create the unstake request
 			let current_round = Self::current_round();
@@ -116,7 +159,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	/// Executes an withdraw request for a delegator.
+	/// Executes a withdraw request for a delegator.
 	///
 	/// # Arguments
 	///
@@ -126,7 +169,10 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns an error if the user is not a delegator, if there are no withdraw requests, or if
 	/// the withdraw request is not ready.
-	pub fn process_execute_withdraw(who: T::AccountId) -> DispatchResult {
+	pub fn process_execute_withdraw(
+		who: T::AccountId,
+		evm_address: Option<H160>,
+	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
@@ -137,29 +183,54 @@ impl<T: Config> Pallet<T> {
 			let delay = T::LeaveDelegatorsDelay::get();
 
 			// Process all ready withdraw requests
-			metadata.withdraw_requests.retain(|request| {
+			let mut i = 0;
+			while i < metadata.withdraw_requests.len() {
+				let request = &metadata.withdraw_requests[i];
 				if current_round >= delay + request.requested_round {
-					// Transfer the amount back to the delegator
-					T::Fungibles::transfer(
-						request.asset_id,
-						&Self::pallet_account(),
-						&who,
-						request.amount,
-						Preservation::Expendable,
-					)
-					.expect("Transfer should not fail");
+					let transfer_success = match request.asset_id {
+						Asset::Custom(asset_id) => T::Fungibles::transfer(
+							asset_id,
+							&Self::pallet_account(),
+							&who,
+							request.amount,
+							Preservation::Expendable,
+						)
+						.is_ok(),
+						Asset::Erc20(asset_address) => {
+							if let Some(evm_addr) = evm_address {
+								if let Ok((success, _weight)) = Self::erc20_transfer(
+									asset_address,
+									&Self::pallet_evm_account(),
+									evm_addr,
+									request.amount,
+								) {
+									success
+								} else {
+									false
+								}
+							} else {
+								false
+							}
+						},
+					};
 
-					false // Remove this request
+					if transfer_success {
+						// Remove the completed request
+						metadata.withdraw_requests.remove(i);
+					} else {
+						// Only increment if we didn't remove the request
+						i += 1;
+					}
 				} else {
-					true // Keep this request
+					i += 1;
 				}
-			});
+			}
 
 			Ok(())
 		})
 	}
 
-	/// Cancels an withdraw request for a delegator.
+	/// Cancels a withdraw request for a delegator.
 	///
 	/// # Arguments
 	///
@@ -172,11 +243,12 @@ impl<T: Config> Pallet<T> {
 	/// Returns an error if the user is not a delegator or if there is no matching withdraw request.
 	pub fn process_cancel_withdraw(
 		who: T::AccountId,
-		asset_id: T::AssetId,
+		asset_id: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+			let now = <frame_system::Pallet<T>>::block_number();
 
 			// Find and remove the matching withdraw request
 			let request_index = metadata
@@ -188,11 +260,16 @@ impl<T: Config> Pallet<T> {
 			let withdraw_request = metadata.withdraw_requests.remove(request_index);
 
 			// Add the amount back to the delegator's deposits
-			metadata
-				.deposits
-				.entry(asset_id)
-				.and_modify(|e| *e += withdraw_request.amount)
-				.or_insert(withdraw_request.amount);
+			if let Some(deposit) = metadata.deposits.get_mut(&withdraw_request.asset_id) {
+				deposit
+					.increase_deposited_amount(withdraw_request.amount, None, now)
+					.map_err(|_| Error::<T>::InsufficientBalance)?;
+			} else {
+				// we are only able to withdraw from existing deposits without any locks
+				// so when we add back, add it without any locks
+				let new_deposit = Deposit::new(withdraw_request.amount, None, now);
+				metadata.deposits.insert(withdraw_request.asset_id, new_deposit);
+			}
 
 			// Update the status if no more delegations exist
 			if metadata.delegations.is_empty() {

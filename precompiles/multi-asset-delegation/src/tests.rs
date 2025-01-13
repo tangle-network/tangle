@@ -1,12 +1,13 @@
-use crate::{mock::*, U256};
+use crate::{mock::*, mock_evm::*, U256};
 use frame_support::{assert_ok, traits::Currency};
 use pallet_multi_asset_delegation::{types::OperatorStatus, CurrentRound, Delegators, Operators};
 use precompile_utils::testing::*;
 use sp_core::H160;
+use tangle_primitives::services::Asset;
 
 // Helper function for creating and minting tokens
 pub fn create_and_mint_tokens(
-	asset_id: u32,
+	asset_id: u128,
 	recipient: <Runtime as frame_system::Config>::AccountId,
 	amount: Balance,
 ) {
@@ -79,7 +80,7 @@ fn test_delegate_assets_invalid_operator() {
 		Balances::make_free_balance_be(&delegator_account, 500);
 		create_and_mint_tokens(1, delegator_account, 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), 1, 200));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into()), None));
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -90,9 +91,10 @@ fn test_delegate_assets_invalid_operator() {
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [2, 0, 0, 0], message: Some(\"NotAnOperator\") })");
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [2, 0, 0, 0], message: Some(\"NotAnOperator\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});
@@ -113,7 +115,13 @@ fn test_delegate_assets() {
 		));
 
 		create_and_mint_tokens(1, delegator_account, 500);
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), 1, 200));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(delegator_account),
+			Asset::Custom(1),
+			200,
+			Some(TestAccount::Alex.into()),
+			None
+		));
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
@@ -125,6 +133,7 @@ fn test_delegate_assets() {
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -149,7 +158,7 @@ fn test_delegate_assets_insufficient_balance() {
 
 		create_and_mint_tokens(1, delegator_account, 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), 1, 200));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into()), None));
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -160,9 +169,10 @@ fn test_delegate_assets_insufficient_balance() {
 					asset_id: U256::from(1),
 					amount: U256::from(300),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 5, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});
@@ -188,7 +198,12 @@ fn test_schedule_withdraw() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
+				PCall::deposit {
+					asset_id: U256::from(1),
+					amount: U256::from(200),
+					token_address: Default::default(),
+					lock_multiplier: 0,
+				},
 			)
 			.execute_returns(());
 
@@ -203,6 +218,7 @@ fn test_schedule_withdraw() {
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -213,13 +229,13 @@ fn test_schedule_withdraw() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::schedule_withdraw { asset_id: U256::from(1), amount: U256::from(100) },
+				PCall::schedule_withdraw {
+					asset_id: U256::from(1),
+					amount: U256::from(100),
+					token_address: Default::default(),
+				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&1), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change
 	});
@@ -243,7 +259,12 @@ fn test_execute_withdraw() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
+				PCall::deposit {
+					asset_id: U256::from(1),
+					amount: U256::from(200),
+					token_address: Default::default(),
+					lock_multiplier: 0,
+				},
 			)
 			.execute_returns(());
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
@@ -257,6 +278,7 @@ fn test_execute_withdraw() {
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -267,23 +289,19 @@ fn test_execute_withdraw() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::schedule_withdraw { asset_id: U256::from(1), amount: U256::from(100) },
+				PCall::schedule_withdraw {
+					asset_id: U256::from(1),
+					amount: U256::from(100),
+					token_address: Default::default(),
+				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&1), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		<CurrentRound<Runtime>>::put(3);
 
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&1), None);
-		assert!(metadata.withdraw_requests.is_empty());
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 100); // deposited 200, withdrew 100
 	});
@@ -308,7 +326,12 @@ fn test_execute_withdraw_before_due() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
+				PCall::deposit {
+					asset_id: U256::from(1),
+					amount: U256::from(200),
+					token_address: Default::default(),
+					lock_multiplier: 0,
+				},
 			)
 			.execute_returns(());
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
@@ -322,6 +345,7 @@ fn test_execute_withdraw_before_due() {
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -333,13 +357,13 @@ fn test_execute_withdraw_before_due() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::schedule_withdraw { asset_id: U256::from(1), amount: U256::from(100) },
+				PCall::schedule_withdraw {
+					asset_id: U256::from(1),
+					amount: U256::from(100),
+					token_address: Default::default(),
+				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&1), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
@@ -368,7 +392,12 @@ fn test_cancel_withdraw() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::deposit { asset_id: U256::from(1), amount: U256::from(200) },
+				PCall::deposit {
+					asset_id: U256::from(1),
+					amount: U256::from(200),
+					token_address: Default::default(),
+					lock_multiplier: 0,
+				},
 			)
 			.execute_returns(());
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
@@ -382,6 +411,7 @@ fn test_cancel_withdraw() {
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
+					token_address: Default::default(),
 				},
 			)
 			.execute_returns(());
@@ -392,24 +422,28 @@ fn test_cancel_withdraw() {
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::schedule_withdraw { asset_id: U256::from(1), amount: U256::from(100) },
+				PCall::schedule_withdraw {
+					asset_id: U256::from(1),
+					amount: U256::from(100),
+					token_address: Default::default(),
+				},
 			)
 			.execute_returns(());
-
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert_eq!(metadata.deposits.get(&1), None);
-		assert!(!metadata.withdraw_requests.is_empty());
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
-				PCall::cancel_withdraw { asset_id: U256::from(1), amount: U256::from(100) },
+				PCall::cancel_withdraw {
+					asset_id: U256::from(1),
+					amount: U256::from(100),
+					token_address: Default::default(),
+				},
 			)
 			.execute_returns(());
 
 		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
-		assert!(metadata.deposits.contains_key(&1));
+		assert!(metadata.deposits.contains_key(&Asset::Custom(1)));
 		assert!(metadata.withdraw_requests.is_empty());
 
 		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change

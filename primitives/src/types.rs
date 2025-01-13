@@ -1,5 +1,5 @@
 // This file is part of Tangle.
-// Copyright (C) 2022-2024 Webb Technologies Inc.
+// Copyright (C) 2022-2024 Tangle Foundation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,12 @@
 // limitations under the License.
 //
 use super::*;
+pub mod ordered_set;
+pub mod rewards;
+use frame_support::pallet_prelude::*;
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
+use sp_core::{ByteArray, RuntimeDebug};
 use sp_runtime::{generic, AccountId32, OpaqueExtrinsic};
 
 /// Block header type as expected by this runtime.
@@ -68,5 +74,95 @@ impl From<WrappedAccountId32> for AccountId32 {
 impl From<WrappedAccountId32> for sp_core::sr25519::Public {
 	fn from(x: WrappedAccountId32) -> Self {
 		sp_core::sr25519::Public::from_raw(x.0)
+	}
+}
+
+/// Different Account kinds
+#[derive(
+	PartialEq,
+	Eq,
+	PartialOrd,
+	Ord,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	Copy,
+	Clone,
+	MaxEncodedLen,
+)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum Account<AccountId> {
+	#[codec(index = 0)]
+	Id(AccountId),
+	#[codec(index = 1)]
+	Address(sp_core::H160),
+}
+
+impl<AccountId> Default for Account<AccountId>
+where
+	AccountId: ByteArray,
+{
+	fn default() -> Self {
+		// This should be good enough to make the account for any account id type.
+		let empty = [0u8; 64];
+		let account_id =
+			AccountId::from_slice(&empty[0..AccountId::LEN]).expect("never fails; qed");
+		Account::Id(account_id)
+	}
+}
+
+impl<AccountId> Account<AccountId> {
+	/// Create a new account from an AccountId.
+	pub fn id(account_id: AccountId) -> Self {
+		Self::Id(account_id)
+	}
+
+	/// Create a new account from an EVM address.
+	pub fn address(address: sp_core::H160) -> Self {
+		Self::Address(address)
+	}
+	/// Returns `true` if the account is native (a la [`Id`]).
+	///
+	/// [`Id`]: Account::Id
+	#[must_use]
+	#[doc(alias = "is_id", alias = "is_account_id")]
+	pub fn is_native(&self) -> bool {
+		matches!(self, Self::Id(..))
+	}
+
+	/// Returns `true` if the account is [`Address`].
+	///
+	/// [`Address`]: Account::Address
+	#[must_use]
+	#[doc(alias = "is_evm")]
+	pub fn is_address(&self) -> bool {
+		matches!(self, Self::Address(..))
+	}
+
+	/// Try to convert into an EVM address.
+	#[doc(alias = "try_into_evm")]
+	pub fn try_into_address(self) -> Result<sp_core::H160, Self> {
+		if let Self::Address(v) = self {
+			Ok(v)
+		} else {
+			Err(self)
+		}
+	}
+
+	/// Try to convert into an AccountId.
+	#[doc(alias = "try_into_native")]
+	pub fn try_into_account_id(self) -> Result<AccountId, Self> {
+		if let Self::Id(v) = self {
+			Ok(v)
+		} else {
+			Err(self)
+		}
+	}
+}
+
+impl<AccountId> From<sp_core::H160> for Account<AccountId> {
+	fn from(v: sp_core::H160) -> Self {
+		Self::Address(v)
 	}
 }
