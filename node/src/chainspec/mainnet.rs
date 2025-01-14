@@ -36,8 +36,8 @@ use sp_runtime::{
 };
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
-	AccountId, Balance, MaxVestingSchedules, Perbill, StakerStatus, TreasuryPalletId, UNIT,
-	WASM_BINARY,
+	AccountId, Balance, MaxVestingSchedules, Perbill, Precompiles, StakerStatus, TreasuryPalletId,
+	UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -200,12 +200,30 @@ fn mainnet_genesis(
 		})
 		.collect();
 
+	// As precompiles are implemented inside the Runtime, they don't have a bytecode, and
+	// their account code is empty by default. However in Solidity calling a function of a
+	// contract often automatically adds a check that the contract bytecode is non-empty.
+	// For that reason a dummy code (0x60006000fd) can be inserted at the precompile address
+	// to pass that check.
+	let revert_bytecode = [0x60, 0x00, 0x60, 0x00, 0xFD];
 	let evm_accounts = {
 		let mut map = BTreeMap::new();
 
 		for (address, account) in genesis_evm_distribution {
 			map.insert(address, account);
 		}
+
+		Precompiles::used_addresses_h160().for_each(|address| {
+			map.insert(
+				address.into(),
+				fp_evm::GenesisAccount {
+					nonce: Default::default(),
+					balance: Default::default(),
+					storage: Default::default(),
+					code: revert_bytecode.to_vec(),
+				},
+			);
+		});
 		map
 	};
 
