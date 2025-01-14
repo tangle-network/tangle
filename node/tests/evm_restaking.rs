@@ -8,16 +8,14 @@ use core::future::Future;
 use core::ops::Div;
 use core::time::Duration;
 
-use alloy::network::TransactionBuilder;
 use alloy::primitives::utils::*;
 use alloy::primitives::*;
-use alloy::providers::ext::DebugApi;
 use alloy::providers::Provider;
 use alloy::sol;
 use anyhow::bail;
 use sp_runtime::traits::AccountIdConversion;
-use sp_tracing::{error, info, warn};
-use tangle_runtime::{deposit, PalletId};
+use sp_tracing::{error, info};
+use tangle_runtime::PalletId;
 use tangle_subxt::subxt;
 use tangle_subxt::subxt::tx::TxStatus;
 use tangle_subxt::tangle_testnet_runtime::api;
@@ -251,6 +249,8 @@ where
 
 		// Create a new vault and these assets to it.
 		let vault_id = 0;
+		let deposit_cap = parse_ether("100").unwrap();
+		let incentive_cap = parse_ether("100").unwrap();
 		let update_vault_reward_config = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
 				api::runtime_types::pallet_rewards::pallet::Call::update_vault_reward_config {
@@ -258,8 +258,8 @@ where
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
 							apy: api::runtime_types::sp_arithmetic::per_things::Percent(1),
-							incentive_cap: 100_000_000_000_000,
-							deposit_cap: 100_000_000_000_000,
+							incentive_cap: incentive_cap.to::<u128>(),
+							deposit_cap: deposit_cap.to::<u128>(),
 							boost_multiplier: None,
 						},
 				},
@@ -768,36 +768,14 @@ fn lrt_deposit_withdraw_erc20() {
 
 		// Deposit WETH to LRT
 		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
-		let deposit_tx = lrt.deposit(deposit_amount, bob.address());
-		let deposit_result = deposit_tx.send().await;
-		let deposit_result = match deposit_result {
-			Err(e) => {
-				error!("Error: {:?}", e);
-				// Trace the transaction
-				let res = bob_provider
-					.debug_trace_transaction_call(
-						*deposit_tx_envelope.tx_hash(),
-						Default::default(),
-					)
-					.await?;
-				warn!("Trace: {:?}", res);
-				panic!("Deposit into LRT failed");
-			},
-			Ok(r) => {
-				let txhash = r.tx_hash();
-				info!("Deposit into LRT tx hash: {}", txhash);
-				r.get_receipt().await
-			},
-		};
-		match deposit_result {
-			Err(e) => {
-				error!("Error: {:?}", e);
-				panic!("Deposit into LRT failed");
-			},
-			Ok(r) => {
-				assert!(r.status(), "Deposit into LRT failed");
-			},
-		}
+		let deposit_result = lrt
+			.deposit(deposit_amount, bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
 		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
 
 		// Bob deposited `deposit_amount` WETH, should receive `deposit_amount` lrtETH in return
