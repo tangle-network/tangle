@@ -177,6 +177,9 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
+// Precompiles
+pub type Precompiles = precompiles::TanglePrecompiles<Runtime>;
+
 pub const MAXIMUM_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
 parameter_types! {
