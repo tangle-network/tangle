@@ -279,6 +279,28 @@ std = [
     "pallet-evm-precompile-multi-asset-delegation/std",
 ]
 
+try-runtime = [
+    "frame-support/try-runtime",
+    "frame-executive/try-runtime",
+    "frame-system/try-runtime",
+    "pallet-balances/try-runtime",
+    "pallet-grandpa/try-runtime",
+    "pallet-timestamp/try-runtime",
+    "pallet-vesting/try-runtime",
+    "pallet-assets/try-runtime",
+    "pallet-collective/try-runtime",
+    "pallet-tx-pause/try-runtime",
+    "pallet-staking/try-runtime",
+    "sp-runtime/try-runtime",
+
+    # Frontier
+    "pallet-ethereum/try-runtime",
+    "pallet-evm/try-runtime",
+    "pallet-hotfix-sufficients/try-runtime",
+    # Tangle
+    "pallet-services/try-runtime",
+]
+
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
 with-paritydb-weights = []

@@ -1,6 +1,4 @@
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
-#[cfg(feature = "try-runtime")]
-use pallet_airdrop_claims::MultiAddress;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::{
 	traits::{Convert, EnsureDiv, Header, Zero},
@@ -130,9 +128,51 @@ pub const INVESTOR_ACCOUNTS: [[u8; 32]; 29] = [
 	],
 ];
 
-pub const TEAM_ACCOUNT_TO_UPDATE: [u8; 32] = [
-	142, 28, 43, 221, 218, 185, 87, 61, 140, 176, 148, 219, 255, 186, 36, 162, 178, 194, 27, 126,
-	113, 227, 245, 182, 4, 232, 96, 116, 131, 135, 36, 67,
+pub const TEAM_ACCOUNTS: [[u8; 32]; 11] = [
+	[
+		220, 217, 183, 10, 4, 9, 183, 98, 108, 186, 26, 64, 22, 216, 218, 25, 244, 223, 92, 233,
+		252, 94, 141, 22, 183, 137, 231, 27, 177, 22, 29, 115,
+	],
+	[
+		76, 227, 164, 218, 58, 124, 28, 230, 95, 126, 222, 255, 134, 77, 195, 221, 66, 232, 244,
+		126, 236, 194, 114, 109, 153, 160, 168, 1, 36, 105, 130, 23,
+	],
+	[
+		226, 96, 78, 172, 142, 71, 162, 218, 115, 191, 193, 196, 247, 215, 108, 71, 131, 198, 47,
+		143, 92, 45, 64, 78, 106, 176, 223, 167, 103, 39, 29, 33,
+	],
+	[
+		162, 133, 55, 193, 209, 134, 98, 231, 154, 181, 108, 72, 150, 15, 166, 174, 160, 28, 203,
+		238, 113, 51, 80, 242, 197, 70, 70, 237, 33, 244, 251, 67,
+	],
+	[
+		112, 37, 90, 147, 193, 18, 157, 49, 188, 57, 43, 67, 30, 93, 62, 212, 223, 135, 97, 116,
+		54, 19, 11, 84, 98, 79, 154, 98, 77, 97, 206, 66,
+	],
+	[
+		242, 66, 123, 184, 39, 134, 15, 110, 181, 6, 187, 139, 110, 58, 126, 105, 95, 171, 231,
+		171, 87, 30, 111, 88, 107, 141, 246, 112, 113, 230, 9, 127,
+	],
+	[
+		72, 59, 70, 104, 50, 224, 148, 240, 27, 23, 121, 167, 237, 7, 2, 93, 243, 25, 196, 146,
+		218, 197, 22, 10, 202, 137, 163, 190, 17, 122, 123, 109,
+	],
+	[
+		140, 62, 57, 135, 164, 41, 178, 70, 246, 25, 233, 31, 140, 164, 85, 53, 161, 191, 95, 135,
+		14, 199, 197, 207, 246, 169, 16, 169, 148, 151, 139, 65,
+	],
+	[
+		134, 208, 142, 123, 190, 119, 188, 116, 227, 216, 142, 226, 46, 220, 83, 54, 139, 193, 61,
+		97, 158, 5, 182, 111, 230, 196, 184, 226, 213, 199, 1, 90,
+	],
+	[
+		220, 247, 191, 133, 183, 80, 119, 15, 91, 184, 117, 45, 0, 7, 150, 96, 236, 168, 190, 205,
+		63, 90, 138, 73, 172, 186, 174, 240, 173, 126, 237, 8,
+	],
+	[
+		142, 28, 43, 221, 218, 185, 87, 61, 140, 176, 148, 219, 255, 186, 36, 162, 178, 194, 27,
+		126, 113, 227, 245, 182, 4, 232, 96, 116, 131, 135, 36, 67,
+	],
 ];
 
 /// Migration to update team and investor vesting schedules to 4 years with 1 year cliff
@@ -161,9 +201,11 @@ impl<T: pallet_vesting::Config + pallet_balances::Config> OnRuntimeUpgrade
 		}
 
 		// Update team vesting schedule
-		let account_id: T::AccountId =
-			T::AccountId::decode(&mut TEAM_ACCOUNT_TO_UPDATE.as_ref()).expect("Invalid account ID");
-		update_account_vesting::<T>(&account_id, &mut reads, &mut writes);
+		for account in TEAM_ACCOUNTS.iter() {
+			let account_id: T::AccountId =
+				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
+			update_account_vesting::<T>(&account_id, &mut reads, &mut writes);
+		}
 
 		T::DbWeight::get().reads_writes(reads, writes)
 	}
@@ -255,14 +297,22 @@ fn update_vesting_schedule<T: pallet_vesting::Config>(
 fn verify_updated_schedule<T: pallet_vesting::Config>(
 	account_id: &T::AccountId,
 ) -> Result<(), &'static str> {
+	use sp_runtime::traits::Block;
+
 	if let Some(schedules) = Vesting::<T>::get(account_id) {
 		ensure!(schedules.len() >= 2, "Schedule should have at least 2 entries");
 		ensure!(
-			schedules[0].starting_block() == T::BlockNumber::from(ONE_YEAR_BLOCKS as u32),
+			schedules[0].starting_block()
+				== <<<T as frame_system::Config>::Block as Block>::Header as Header>::Number::from(
+					ONE_YEAR_BLOCKS as u32
+				),
 			"First schedule should start at 1 year"
 		);
 		ensure!(
-			schedules[1].starting_block() == T::BlockNumber::from(ONE_YEAR_BLOCKS as u32),
+			schedules[1].starting_block()
+				== <<<T as frame_system::Config>::Block as Block>::Header as Header>::Number::from(
+					ONE_YEAR_BLOCKS as u32
+				),
 			"Second schedule should start at 1 year"
 		);
 		ensure!(schedules[0].per_block().is_zero(), "First schedule should have zero per_block");
