@@ -802,6 +802,39 @@ fn lrt_deposit_withdraw_erc20() {
 			})
 		);
 
+		// Schedule a withdrawal
+		let withdraw_amount = deposit_amount.div(U256::from(2));
+		let sch_withdraw_result = lrt
+			.scheduleWithdraw(withdraw_amount)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(sch_withdraw_result.status());
+		info!("Scheduled withdrawal of {} lrtETH", format_ether(withdraw_amount));
+
+		// Wait for two new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+		// Execute the withdrawal
+		let exec_withdraw_result = lrt
+			.withdraw(withdraw_amount, bob.address(), bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(exec_withdraw_result.status());
+
+		// Bob deposited `deposit_amount` and withdrew `withdraw_amount`
+		// `deposit_amount` is 1/2 of the minted amount
+		// `withdraw_amount` is 1/2 of the deposited amount
+		// So, Bob should have `weth_amount - deposit_amount + withdraw_amount` WETH
+		let expected_balance = weth_amount - deposit_amount + withdraw_amount;
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, expected_balance);
+
 		anyhow::Ok(())
 	});
 }
