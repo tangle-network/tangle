@@ -264,10 +264,9 @@ fn test_delegate_assets() {
 			.unwrap()
 			.delegations
 			.iter()
-			.find(|x| x.delegator == delegator_account
+			.any(|x| x.delegator == delegator_account
 				&& x.asset_id == Asset::Custom(1)
-				&& x.amount == 100)
-			.is_some());
+				&& x.amount == 100));
 	});
 }
 

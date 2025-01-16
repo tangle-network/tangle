@@ -215,7 +215,7 @@ fn mainnet_genesis(
 
 		Precompiles::used_addresses_h160().for_each(|address| {
 			map.insert(
-				address.into(),
+				address,
 				fp_evm::GenesisAccount {
 					nonce: Default::default(),
 					balance: Default::default(),
