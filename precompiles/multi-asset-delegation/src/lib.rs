@@ -44,7 +44,6 @@ use tangle_primitives::types::rewards::LockMultiplier;
 use evm_erc20_utils::*;
 use fp_evm::PrecompileHandle;
 use frame_support::{
-	__private::log,
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	traits::Currency,
 };
@@ -243,16 +242,6 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
 		let caller = handle.context().caller;
-
-		log::debug!(
-			target: "evm",
-			"deposit: caller={:?}, asset_id={:?}, token_address={:?}, amount={:?}, lock_multiplier={:?}",
-			caller,
-			asset_id,
-			token_address,
-			amount,
-			lock_multiplier,
-		);
 
 		let (who, deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
