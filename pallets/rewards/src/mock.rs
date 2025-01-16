@@ -36,8 +36,8 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::services::Asset;
 use tangle_primitives::types::rewards::UserDepositWithLocks;
+use tangle_primitives::{services::Asset, BlueprintId};
 
 use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
@@ -258,11 +258,9 @@ pub struct MockDelegationData {
 }
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId>
 	for MockDelegationManager
 {
-	type AssetId = AssetId;
-
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
@@ -289,15 +287,24 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Asset<Self::AssetId>,
+		_asset_id: &Asset<AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)> {
 		Default::default()
+	}
+
+	fn has_delegator_selected_blueprint(
+		_delegator: &AccountId,
+		_operator: &AccountId,
+		_blueprint_id: BlueprintId,
+	) -> bool {
+		// For mock implementation, always return true
+		true
 	}
 
 	fn slash_operator(
@@ -309,7 +316,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<Self::AssetId>,
+		asset_id: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
 			delegation_info.borrow().deposits.get(&(who.clone(), asset_id)).cloned()

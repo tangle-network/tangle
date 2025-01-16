@@ -261,11 +261,9 @@ impl pallet_assets::Config for Runtime {
 pub type AssetId = u32;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId>
 	for MockDelegationManager
 {
-	type AssetId = AssetId;
-
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
@@ -292,15 +290,24 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 
 	fn get_total_delegation_by_asset_id(
 		_operator: &AccountId,
-		_asset_id: &Asset<Self::AssetId>,
+		_asset_id: &Asset<AssetId>,
 	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)> {
 		Default::default()
+	}
+
+	fn has_delegator_selected_blueprint(
+		_delegator: &AccountId,
+		_operator: &AccountId,
+		_blueprint_id: tangle_primitives::BlueprintId,
+	) -> bool {
+		// For mock implementation, always return true
+		true
 	}
 
 	fn slash_operator(
@@ -308,11 +315,12 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 		_blueprint_id: tangle_primitives::BlueprintId,
 		_percentage: sp_runtime::Percent,
 	) {
+		// For mock implementation, do nothing
 	}
 
 	fn get_user_deposit_with_locks(
 		_who: &AccountId,
-		_asset_id: Asset<Self::AssetId>,
+		_asset_id: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, u64>> {
 		None
 	}

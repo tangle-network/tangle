@@ -28,7 +28,7 @@ use frame_system::pallet_prelude::*;
 use sp_runtime::{traits::Get, DispatchResult};
 use tangle_primitives::traits::MultiAssetDelegationInfo;
 
-mod functions;
+pub mod functions;
 mod impls;
 mod rpc;
 pub mod types;
@@ -188,6 +188,7 @@ pub mod module {
 			Self::AccountId,
 			BalanceOf<Self>,
 			BlockNumberFor<Self>,
+			Self::AssetId,
 		>;
 
 		/// Number of eras that slashes are deferred by, after computation.

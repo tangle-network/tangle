@@ -14,9 +14,7 @@ use sp_std::prelude::*;
 /// * `AssetId`: The type representing an asset identifier.
 /// * `Balance`: The type representing a balance or amount.
 /// * `BlockNumber`: The type representing a block number.
-pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
-	type AssetId;
-
+pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// Get the current round index.
 	///
 	/// This method returns the current round index, which may be used to track
@@ -81,10 +79,8 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 	/// # Returns
 	///
 	/// The total delegation amount as a `Balance`.
-	fn get_total_delegation_by_asset_id(
-		operator: &AccountId,
-		asset_id: &Asset<Self::AssetId>,
-	) -> Balance;
+	fn get_total_delegation_by_asset_id(operator: &AccountId, asset_id: &Asset<AssetId>)
+		-> Balance;
 
 	/// Get all delegators for a specific operator.
 	///
@@ -101,7 +97,27 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 	/// delegator account identifier, delegation amount, and asset identifier.
 	fn get_delegators_for_operator(
 		operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)>;
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)>;
+
+	/// Check if a delegator has selected a specific blueprint for a given operator.
+	///
+	/// This method checks whether the delegator has included the specified blueprint
+	/// in their blueprint selection for their delegation to the given operator.
+	///
+	/// # Parameters
+	///
+	/// * `delegator`: A reference to the account identifier of the delegator.
+	/// * `operator`: A reference to the account identifier of the operator.
+	/// * `blueprint_id`: The blueprint ID to check.
+	///
+	/// # Returns
+	///
+	/// `true` if the delegator has selected the blueprint for the operator, otherwise `false`.
+	fn has_delegator_selected_blueprint(
+		delegator: &AccountId,
+		operator: &AccountId,
+		blueprint_id: crate::BlueprintId,
+	) -> bool;
 
 	fn slash_operator(
 		operator: &AccountId,
@@ -111,6 +127,6 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<Self::AssetId>,
+		asset_id: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>>;
 }
