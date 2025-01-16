@@ -838,3 +838,78 @@ fn lrt_deposit_withdraw_erc20() {
 		anyhow::Ok(())
 	});
 }
+
+#[test]
+fn lrt_rewards() {
+	run_mad_test(|t| async move {
+		let alice = TestAccount::Alice;
+		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
+		// Join operators
+		let tnt = U256::from(100_000u128);
+		assert!(join_as_operator(&alice_provider, tnt).await?);
+		// Setup a LRT Vault for Alice.
+		let lrt_address = deploy_tangle_lrt(
+			alice_provider.clone(),
+			t.weth,
+			alice.address().to_account_id().0,
+			"Liquid Restaked Ether",
+			"lrtETH",
+		)
+		.await?;
+
+		// Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		// Mint WETH for Bob
+		let weth_amount = parse_ether("10").unwrap();
+		let weth = MockERC20::new(t.weth, &bob_provider);
+		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
+
+		// Approve LRT contract to spend WETH
+		let deposit_amount = weth_amount.div(U256::from(2));
+		let approve_result =
+			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
+		assert!(approve_result.status());
+		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+
+		// Deposit WETH to LRT
+		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		let deposit_result = lrt
+			.deposit(deposit_amount, bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
+		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Wait for two new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
+		let vault_id = 0;
+		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
+		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?;
+		let apy = cfg.map(|c| c.apy).unwrap();
+		info!("APY: {}%", apy.0);
+
+		let rewards_addr = api::apis().rewards_api().query_user_rewards(
+			lrt_address.to_account_id(),
+			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+		);
+		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
+		match user_rewards {
+			Ok(rewards) => {
+				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
+				assert!(rewards > 0);
+			},
+			Err(e) => {
+				error!("Error: {:?}", e);
+				bail!("Error while fetching user rewards");
+			},
+		}
+
+		anyhow::Ok(())
+	});
+}
