@@ -211,7 +211,7 @@ pub type TanglePrecompilesAt<R> = (
 	PrecompileAt<
 		AddressU64<2082>,
 		MultiAssetDelegationPrecompile<R>,
-		(CallableByContract, CallableByPrecompile, SubcallWithMaxNesting<2>),
+		(CallableByContract, CallableByPrecompile, SubcallWithMaxNesting<1>),
 	>,
 	PrecompileAt<
 		AddressU64<2083>,
