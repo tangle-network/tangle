@@ -802,8 +802,41 @@ fn lrt_deposit_withdraw_erc20() {
 			})
 		);
 
-		// Schedule a withdrawal
+		// Wait for a new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
 		let withdraw_amount = deposit_amount.div(U256::from(2));
+		info!("Scheduling unstake of {} lrtETH", format_ether(withdraw_amount));
+		// Schedule unstake
+		let sch_unstake_result = lrt
+			.scheduleUnstake(withdraw_amount)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(sch_unstake_result.status());
+		info!("Scheduled unstake of {} lrtETH", format_ether(withdraw_amount));
+
+		// Wait for a new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
+		// Execute the unstake
+		let exec_unstake_result = lrt
+			.executeUnstake()
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(exec_unstake_result.status());
+		info!("Executed unstake of {} lrtETH", format_ether(withdraw_amount));
+
+		// Schedule a withdrawal
 		let sch_withdraw_result = lrt
 			.scheduleWithdraw(withdraw_amount)
 			.send()

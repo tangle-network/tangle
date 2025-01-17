@@ -50,7 +50,7 @@ use frame_support::{
 use pallet_evm::AddressMapping;
 use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
 use precompile_utils::prelude::*;
-use sp_core::{H160, H256, U256};
+use sp_core::{H256, U256};
 use sp_runtime::traits::Dispatchable;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{services::Asset, types::WrappedAccountId32};
@@ -411,10 +411,17 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
+		frame_support::__private::log::debug!(
+			target: "evm",
+			"scheduleDelegatorUnstake: operator: {:?}, asset_id: {:?}, token_address: {:?}, amount: {:?}",
+			operator,
+			asset_id,
+			token_address,
+			amount
+		);
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
-		let operator =
-			Runtime::AddressMapping::into_account_id(H160::from_slice(&operator.0[12..]));
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
@@ -461,8 +468,7 @@ where
 
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
-		let operator =
-			Runtime::AddressMapping::into_account_id(H160::from_slice(&operator.0[12..]));
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
