@@ -123,6 +123,7 @@ where
 		AccountId,
 		AssetId,
 	>,
+	C::Api: pallet_rewards_rpc::RewardsRuntimeApi<Block, AccountId, AssetId, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
 	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
@@ -141,6 +142,7 @@ where
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
+	use pallet_rewards_rpc::{RewardsApiServer, RewardsClient};
 	use pallet_services_rpc::{ServicesApiServer, ServicesClient};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
@@ -161,6 +163,7 @@ where
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
+	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
 
 	if let Some(babe) = babe {
 		let BabeDeps { babe_worker_handle, keystore } = babe;

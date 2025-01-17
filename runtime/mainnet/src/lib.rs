@@ -48,8 +48,9 @@ use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_multi_asset_delegation::RoundChangeSessionManager;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
-use pallet_session::historical as pallet_session_historical;
+use pallet_session::historical::{self as pallet_session_historical, NoteHistoricalRoot};
 pub use pallet_staking::StakerStatus;
 #[allow(deprecated)]
 use pallet_transaction_payment::{
@@ -407,7 +408,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = pallet_staking::StashOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	type SessionManager = RoundChangeSessionManager<Self, NoteHistoricalRoot<Self, Staking>>;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
@@ -425,8 +426,8 @@ impl pallet_session::historical::Config for Runtime {
 // varies
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_025_000, // min inflation of 2.5%
-		max_inflation: 0_050_000, // max inflation of 5% (acheived only at ideal stake)
+		min_inflation: 0_015_000, // min inflation of 1.5%
+		max_inflation: 0_025_000, // max inflation of 2.5% (acheived only at ideal stake)
 		ideal_stake: 0_600_000, // ideal stake (60% of total supply)
 		falloff: 0_050_000,
 		max_piece_count: 40,
@@ -1444,7 +1445,16 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
+	(
+		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
+		// AssetId limits
+		// 0 - 1000 (reserved for future use)
+		// 1000 - 50000 (reserved for LST pools)
+		// 50000 - 1000000 (reserved for native assets)
+		// set user start at 50_000, everything below is reserved for system use
+		migrations::assets_indices_migration_01162025::SetNextAssetId<ConstU128<50_000>, Runtime>,
+		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
+	),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
@@ -1919,6 +1929,16 @@ impl_runtime_apis! {
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
+	}
+
+	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
+		fn query_user_rewards(
+			account_id: AccountId,
+			asset_id: tangle_primitives::services::Asset<AssetId>,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
+			Ok(rewards)
 		}
 	}
 

@@ -136,6 +136,28 @@ fn update_roles_works() {
 	})
 }
 
+#[test]
+fn set_last_pool_id_works() {
+	ExtBuilder::default().build().execute_with(|| {
+		// Non-root account should not be able to set last pool id
+		assert_noop!(Lst::set_last_pool_id(RuntimeOrigin::signed(1), 5), DispatchError::BadOrigin);
+
+		// Root should be able to set last pool id
+		assert_ok!(Lst::set_last_pool_id(RuntimeOrigin::root(), 5));
+
+		// Verify the storage is updated
+		assert_eq!(Lst::last_pool_id(), 5);
+
+		// Verify event is emitted
+		System::assert_has_event(Event::LastPoolIdUpdated { pool_id: 5 }.into());
+
+		// Root should be able to update it again
+		assert_ok!(Lst::set_last_pool_id(RuntimeOrigin::root(), 10));
+		assert_eq!(Lst::last_pool_id(), 10);
+		System::assert_has_event(Event::LastPoolIdUpdated { pool_id: 10 }.into());
+	});
+}
+
 const DOT: Balance = 10u128.pow(10u32);
 const POLKADOT_TOTAL_ISSUANCE_GENESIS: Balance = DOT * 10u128.pow(9u32);
 

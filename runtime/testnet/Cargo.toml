@@ -89,12 +89,13 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 pallet-tangle-lst = { workspace = true }
-pallet-rewards = { workspace = true }
 
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
 pallet-services = { workspace = true }
 pallet-services-rpc-runtime-api = { workspace = true }
+pallet-rewards = { workspace = true }
+pallet-rewards-rpc-runtime-api = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
 tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
@@ -257,6 +258,7 @@ std = [
     "pallet-multi-asset-delegation/std",
     "pallet-tangle-lst/std",
     "pallet-services-rpc-runtime-api/std",
+    "pallet-rewards-rpc-runtime-api/std",
     "pallet-rewards/std",
 
     # Frontier

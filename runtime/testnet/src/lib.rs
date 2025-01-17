@@ -50,8 +50,9 @@ use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_multi_asset_delegation::RoundChangeSessionManager;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
-use pallet_session::historical as pallet_session_historical;
+use pallet_session::historical::{self as pallet_session_historical, NoteHistoricalRoot};
 pub use pallet_staking::StakerStatus;
 #[allow(deprecated)]
 use pallet_transaction_payment::{
@@ -414,7 +415,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = pallet_staking::StashOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	type SessionManager = RoundChangeSessionManager<Self, NoteHistoricalRoot<Self, Staking>>;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = ();
@@ -432,8 +433,8 @@ impl pallet_session::historical::Config for Runtime {
 // varies
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
-		min_inflation: 0_025_000, // min inflation of 2.5%
-		max_inflation: 0_050_000, // max inflation of 5% (acheived only at ideal stake)
+		min_inflation: 0_015_000, // min inflation of 1.5%
+		max_inflation: 0_025_000, // max inflation of 2.5% (acheived only at ideal stake)
 		ideal_stake: 0_600_000, // ideal stake (60% of total supply)
 		falloff: 0_050_000,
 		max_piece_count: 40,
@@ -1355,7 +1356,15 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	migrations::MigrateSessionKeys<Runtime>,
+	(
+		migrations::MigrateSessionKeys<Runtime>,
+		// AssetId limits
+		// 0 - 1000 (reserved for future use)
+		// 1000 - 50000 (reserved for LST pools)
+		// 50000 - 1000000 (reserved for native assets)
+		// set user start at 50_000, everything below is reserved for system use
+		migrations::SetNextAssetId<ConstU128<50_000>, Runtime>,
+	),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
@@ -1461,9 +1470,9 @@ impl pallet_assets::Config for Runtime {
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 10_000;
+	pub const MinOperatorBondAmount: Balance = 100;
 	pub const BondDuration: u32 = 10;
-	pub const MinDelegateAmount : Balance = 1000;
+	pub const MinDelegateAmount : Balance = 1;
 	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
@@ -1475,6 +1484,37 @@ parameter_types! {
 	pub const MaxUnstakeRequests: u32 = 5;
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+
+}
+
+#[cfg(feature = "fast-runtime")]
+parameter_types! {
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveOperatorsDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveDelegatorsDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const DelegationBondLessDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const OperatorBondLessDelay: u32 = 1;
+}
+
+#[cfg(not(feature = "fast-runtime"))]
+parameter_types! {
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveOperatorsDelay: u32 = 10;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveDelegatorsDelay: u32 = 10;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const DelegationBondLessDelay: u32 = 5;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const OperatorBondLessDelay: u32 = 5;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -1483,10 +1523,10 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
 	type ServiceManager = Services;
-	type LeaveOperatorsDelay = ConstU32<10>;
-	type OperatorBondLessDelay = ConstU32<1>;
-	type LeaveDelegatorsDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<5>;
+	type LeaveOperatorsDelay = LeaveOperatorsDelay;
+	type OperatorBondLessDelay = OperatorBondLessDelay;
+	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
+	type DelegationBondLessDelay = DelegationBondLessDelay;
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
@@ -1579,6 +1619,16 @@ impl_runtime_apis! {
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
+	}
+
+	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
+		fn query_user_rewards(
+			account_id: AccountId,
+			asset_id: tangle_primitives::services::Asset<AssetId>,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
+			Ok(rewards)
 		}
 	}
 

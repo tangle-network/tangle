@@ -698,7 +698,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				}))
 				.unwrap()
 				.encode_input(&[
-					ethabi::Token::Address(mock_address(i as u8).into()),
+					ethabi::Token::Address(mock_address(i as u8)),
 					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
 				])
 				.unwrap(),

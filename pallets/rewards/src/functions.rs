@@ -85,6 +85,37 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	pub fn calculate_rewards(
+		account_id: &T::AccountId,
+		asset: Asset<T::AssetId>,
+	) -> Result<(BalanceOf<T>, BalanceOf<T>), DispatchError> {
+		// find the vault for the asset id
+		// if the asset is not in a reward vault, do nothing
+		let vault_id =
+			AssetLookupRewardVaults::<T>::get(asset).ok_or(Error::<T>::AssetNotInVault)?;
+
+		// lets read the user deposits from the delegation manager
+		let deposit_info =
+			T::DelegationManager::get_user_deposit_with_locks(&account_id.clone(), asset)
+				.ok_or(Error::<T>::NoRewardsAvailable)?;
+
+		// read the asset reward config
+		let reward_config = RewardConfigStorage::<T>::get(vault_id);
+
+		// find the total vault score
+		let total_score = TotalRewardVaultScore::<T>::get(vault_id);
+
+		// get the users last claim
+		let last_claim = UserClaimedReward::<T>::get(account_id, vault_id);
+
+		Self::calculate_deposit_rewards_with_lock_multiplier(
+			total_score,
+			deposit_info,
+			reward_config.ok_or(Error::<T>::RewardConfigNotFound)?,
+			last_claim,
+		)
+	}
+
 	/// Calculates and pays out rewards for a given account and asset.
 	///
 	/// This function orchestrates the reward calculation and payout process by:
@@ -116,27 +147,7 @@ impl<T: Config> Pallet<T> {
 		let vault_id =
 			AssetLookupRewardVaults::<T>::get(asset).ok_or(Error::<T>::AssetNotInVault)?;
 
-		// lets read the user deposits from the delegation manager
-		let deposit_info =
-			T::DelegationManager::get_user_deposit_with_locks(&account_id.clone(), asset)
-				.ok_or(Error::<T>::NoRewardsAvailable)?;
-
-		// read the asset reward config
-		let reward_config = RewardConfigStorage::<T>::get(vault_id);
-
-		// find the total vault score
-		let total_score = TotalRewardVaultScore::<T>::get(vault_id);
-
-		// get the users last claim
-		let last_claim = UserClaimedReward::<T>::get(account_id, vault_id);
-
-		let (total_rewards, rewards_to_be_paid) =
-			Self::calculate_deposit_rewards_with_lock_multiplier(
-				total_score,
-				deposit_info,
-				reward_config.ok_or(Error::<T>::RewardConfigNotFound)?,
-				last_claim,
-			)?;
+		let (total_rewards, rewards_to_be_paid) = Self::calculate_rewards(account_id, asset)?;
 
 		// mint new TNT rewards and trasnfer to the user
 		let _ = T::Currency::deposit_creating(account_id, rewards_to_be_paid);
