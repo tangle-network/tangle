@@ -1,0 +1,18 @@
+[package]
+name = "account-util"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+
+[dependencies]
+frame-support = { workspace = true, features = ["std"]  }
+sp-core = { workspace = true, features = ["std"]  }
+sp-runtime = { workspace = true, features = ["std"]  }
+sp-std = { workspace = true, features = ["std"]  }
+pallet-airdrop-claims = { workspace = true, features = ["std"]  }
+pallet-vesting = { workspace = true, features = ["std"]  }
+tangle-primitives = { workspace = true, features = ["std"]  }
