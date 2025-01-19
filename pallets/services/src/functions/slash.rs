@@ -1,13 +1,15 @@
 use crate::{
-	types::{BalanceOf, Service, UnappliedSlash},
-	Config, Error, Event, Pallet,
+	types::{BalanceOf, UnappliedSlash},
+	Config, Error, Pallet,
 };
 use frame_support::pallet_prelude::*;
-use frame_support::traits::Get;
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{traits::Zero, Percent};
 use sp_std::vec::Vec;
-use tangle_primitives::{services::Asset, traits::MultiAssetDelegationInfo};
+use tangle_primitives::{
+	services::{Asset, Service},
+	traits::MultiAssetDelegationInfo,
+};
 
 impl<T: Config> Pallet<T> {
 	/// Calculates and creates an unapplied slash for an operator and their delegators.
@@ -33,7 +35,7 @@ impl<T: Config> Pallet<T> {
 
 		// Find operator's exposure percentage for this service
 		let operator_exposure = service
-			.operators
+			.native_asset_security
 			.iter()
 			.find(|(op, _)| op == offender)
 			.map(|(_, exposure)| *exposure)
@@ -49,21 +51,25 @@ impl<T: Config> Pallet<T> {
 		// Get all delegators for this operator
 		let delegators = T::OperatorDelegationManager::get_delegators_for_operator(offender);
 
-		// For each asset in the service
-		for (asset, operator_commitments) in service.asset_security.iter() {
-			// Find this operator's commitment for this asset
-			let asset_exposure = operator_commitments
-				.iter()
-				.find(|(op, _)| op == offender)
-				.map(|(_, exposure)| *exposure)
-				.ok_or(Error::<T>::OffenderNotOperator)?;
+		// Get the asset commitments for the offending operator
+		let offender_commitments = service
+			.non_native_asset_security
+			.iter()
+			.find(|(op, _)| op == offender)
+			.map(|(_, commitments)| commitments)
+			.ok_or(Error::<T>::OffenderNotOperator)?;
+
+		// For each asset commitment of the offending operator
+		for commitment in offender_commitments {
+			let asset = &commitment.asset;
+			let asset_exposure = commitment.exposure_percent;
 
 			// Calculate slashes for delegators who selected this blueprint
 			for (delegator, stake, delegator_asset) in delegators.iter() {
 				// Only slash if the delegator's asset matches and they selected this blueprint
 				let should_slash = match (delegator_asset, asset) {
 					(Asset::Custom(d_asset), Asset::Custom(s_asset)) => d_asset == s_asset,
-					(Asset::Erc20(d_asset), Asset::Erc20(s_asset)) => d_asset == s_asset,
+					(Asset::Erc20(d_asset), Asset::Erc20(s_asset)) => d_asset.0 == s_asset.0,
 					_ => false,
 				}
 					&& T::OperatorDelegationManager::has_delegator_selected_blueprint(
@@ -77,7 +83,7 @@ impl<T: Config> Pallet<T> {
 					let slash_amount = slash_percent.mul_floor(exposed_delegation);
 
 					if !slash_amount.is_zero() {
-						delegator_slashes.push((delegator.clone(), *asset, slash_amount));
+						delegator_slashes.push((delegator.clone(), asset.clone(), slash_amount));
 					}
 				}
 			}

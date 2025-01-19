@@ -17,14 +17,21 @@
 use super::{
 	constraints::Constraints,
 	jobs::{type_checker, JobDefinition},
-	types::{ApprovalState, Asset, PriceTargets},
-	AssetSecurityCommitment, Gadget, TypeCheckError,
+	types::{ApprovalState, Asset},
+	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BoundedString, Gadget,
+	TypeCheckError,
 };
 use crate::{Account, BlueprintId};
-use educe::{Educe, *};
+use educe::Educe;
 use frame_support::pallet_prelude::*;
-use sp_core::{ByteArray, H160};
+use sp_core::H160;
 use sp_runtime::Percent;
+use sp_std::{vec, vec::Vec};
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+#[cfg(feature = "std")]
+use std::string::String;
 
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -279,12 +286,12 @@ impl<C: Constraints> ServiceBlueprint<C> {
     derive(serde::Serialize, serde::Deserialize),
     serde(bound(
         serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: Deserialize<'de>"
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT"
     )),
-    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT)))
 )]
 
-pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId> {
+pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	/// The blueprint ID this request is for
 	pub blueprint: BlueprintId,
 	/// The account that requested the service
@@ -303,7 +310,7 @@ pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId> {
 		BoundedVec<(AccountId, ApprovalState<AssetId>), C::MaxOperatorsPerService>,
 }
 
-impl<C: Constraints, AccountId, BlockNumber, AssetId: PartialOrd>
+impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 	ServiceRequest<C, AccountId, BlockNumber, AssetId>
 {
 	/// Returns true if all the operators are [ApprovalState::Approved].
@@ -330,7 +337,6 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: PartialOrd>
 	/// Validates that an operator's security commitments meet the requirements
 	pub fn validate_commitments(
 		&self,
-		native_exposure: Percent,
 		asset_commitments: &[AssetSecurityCommitment<AssetId>],
 	) -> bool
 	where
@@ -349,9 +355,24 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: PartialOrd>
 
 /// A staging service payment is a payment that is made for a service request
 /// but will be paid when the service is created or refunded if the service is rejected.
-#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen)]
-#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-pub struct StagingServicePayment<AccountId, AssetId, Balance> {
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen, Copy)]
+#[educe(
+    Default(bound(AccountId: Default, Balance: Default, AssetId: Default)),
+    Clone(bound(AccountId: Clone, Balance: Clone, AssetId: Clone)),
+    PartialEq(bound(AccountId: PartialEq, Balance: PartialEq, AssetId: PartialEq)),
+    Eq
+)]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+    feature = "std",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(bound(
+        serialize = "AccountId: Serialize, Balance: Serialize, AssetId: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, Balance: Deserialize<'de>, AssetId: AssetIdT",
+    )),
+    educe(Debug(bound(AccountId: core::fmt::Debug, Balance: core::fmt::Debug, AssetId: AssetIdT)))
+)]
+pub struct StagingServicePayment<AccountId, AssetId: AssetIdT, Balance> {
 	/// The service request ID.
 	pub request_id: u64,
 	/// Where the refund should go.
@@ -360,22 +381,6 @@ pub struct StagingServicePayment<AccountId, AssetId, Balance> {
 	pub asset: Asset<AssetId>,
 	/// The amount of the asset that is paid.
 	pub amount: Balance,
-}
-
-impl<AccountId, AssetId, Balance> Default for StagingServicePayment<AccountId, AssetId, Balance>
-where
-	AccountId: ByteArray,
-	AssetId: sp_runtime::traits::Zero,
-	Balance: Default,
-{
-	fn default() -> Self {
-		Self {
-			request_id: Default::default(),
-			refund_to: Account::default(),
-			asset: Asset::default(),
-			amount: Default::default(),
-		}
-	}
 }
 
 /// A Service is an instance of a service blueprint.
@@ -396,11 +401,11 @@ where
     derive(serde::Serialize, serde::Deserialize),
     serde(bound(
         serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: Deserialize<'de>",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT",
     )),
-    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT)))
 )]
-pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
+pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	/// Unique identifier for this service instance
 	pub id: u64,
 	/// The blueprint this service was created from
@@ -409,12 +414,14 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
 	pub owner: AccountId,
 	/// The assets and their security commitments from operators.
 	/// This represents the actual security backing the service.
-	pub asset_security:
-		BoundedVec<(Asset<AssetId>, Vec<(AccountId, Percent)>), C::MaxAssetsPerService>,
+	pub non_native_asset_security: BoundedVec<
+		(AccountId, BoundedVec<AssetSecurityCommitment<AssetId>, C::MaxAssetsPerService>),
+		C::MaxOperatorsPerService,
+	>,
+	/// Active operators and their native currency exposure percentages
+	pub native_asset_security: BoundedVec<(AccountId, Percent), C::MaxOperatorsPerService>,
 	/// Accounts permitted to call service functions
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
-	/// Active operators and their native currency exposure percentages
-	pub operators: BoundedVec<(AccountId, Percent), C::MaxOperatorsPerService>,
 	/// Time-to-live in blocks
 	pub ttl: BlockNumber,
 }
@@ -437,11 +444,11 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId> {
     derive(serde::Serialize, serde::Deserialize),
     serde(bound(
         serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: Deserialize<'de>",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT",
     )),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId> {
+pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	/// The blueprint ID.
 	pub blueprint_id: u64,
 	/// The service blueprint.

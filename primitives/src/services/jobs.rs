@@ -23,7 +23,10 @@ use sp_core::H160;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
-use super::field::{Field, FieldType};
+use super::{
+	field::{Field, FieldType},
+	BoundedString,
+};
 
 /// A Job Definition is a definition of a job that can be called.
 /// It contains the input and output fields of the job with the permitted caller.

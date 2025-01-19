@@ -414,6 +414,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxMasterBlueprintServiceManagerRevisions: u32 = u32::MAX;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const NativeExposureMinimum: Percent = Percent::from_percent(10);
 }
 
 impl Config for Runtime {
@@ -447,6 +451,7 @@ impl Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
+	type NativeExposureMinimum = NativeExposureMinimum;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
 	type SlashDeferDuration = SlashDeferDuration;

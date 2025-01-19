@@ -1,11 +1,14 @@
 use super::*;
 use crate::services::Asset;
 use frame_system::Config;
+use parity_scale_codec::{Decode, Encode};
+use scale_info::TypeInfo;
+use services::AssetIdT;
 use sp_std::vec::Vec;
 
 /// Represents different types of rewards a user can earn
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub struct UserRewards<Balance, BlockNumber, AssetId, MaxServiceRewards: Get<u32>> {
+pub struct UserRewards<Balance, BlockNumber, AssetId: AssetIdT, MaxServiceRewards: Get<u32>> {
 	/// Rewards earned from restaking (in TNT)
 	pub restaking_rewards: Balance,
 	/// Boost rewards information
@@ -15,14 +18,14 @@ pub struct UserRewards<Balance, BlockNumber, AssetId, MaxServiceRewards: Get<u32
 }
 
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub struct UserRestakeUpdate<Balance, AssetId> {
+pub struct UserRestakeUpdate<Balance, AssetId: AssetIdT> {
 	pub asset: Asset<AssetId>,
 	pub amount: Balance,
 	pub multiplier: LockMultiplier,
 }
 
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub struct ServiceRewards<AssetId, Balance> {
+pub struct ServiceRewards<AssetId: AssetIdT, Balance> {
 	asset_id: Asset<AssetId>,
 	amount: Balance,
 }
@@ -48,7 +51,7 @@ impl<Balance: Default, BlockNumber: Default> Default for BoostInfo<Balance, Bloc
 	}
 }
 
-impl<Balance: Default, BlockNumber: Default, AssetId, MaxServiceRewards: Get<u32>> Default
+impl<Balance: Default, BlockNumber: Default, AssetId: AssetIdT, MaxServiceRewards: Get<u32>> Default
 	for UserRewards<Balance, BlockNumber, AssetId, MaxServiceRewards>
 {
 	fn default() -> Self {

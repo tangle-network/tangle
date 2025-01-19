@@ -15,14 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::BoundedVec;
 use parity_scale_codec::HasCompact;
-use sp_runtime::Percent;
-use sp_std::{marker::PhantomData, prelude::*};
-use tangle_primitives::{
-	services::{Asset, Constraints, Field},
-	BlueprintId,
-};
+use sp_std::prelude::*;
+use tangle_primitives::services::{Asset, Constraints};
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
