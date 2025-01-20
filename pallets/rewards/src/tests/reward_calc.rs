@@ -35,7 +35,7 @@ fn test_calculate_rewards_zero_deposit() {
 			boost_multiplier: None,
 		};
 
-		let last_claim = None;
+		let last_claim = Some((0, 0));
 
 		let result = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
 			total_deposit,
@@ -245,7 +245,7 @@ fn test_calculate_rewards_zero_cap() {
 			boost_multiplier: None,
 		};
 
-		let last_claim = None;
+        let last_claim = Some((0, 0));
 
 		let result = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
 			total_deposit,
