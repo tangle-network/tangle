@@ -785,6 +785,9 @@ fn lrt_deposit_withdraw_erc20() {
 		let bob_balance = weth.balanceOf(bob.address()).call().await?;
 		assert_eq!(bob_balance._0, weth_amount - deposit_amount);
 
+		let mad_weth_balance = weth.balanceOf(t.pallet_account_id.to_address()).call().await?;
+		assert_eq!(mad_weth_balance._0, deposit_amount);
+
 		// LRT should be a delegator to the operator in the MAD pallet.
 		let operator_key = api::storage()
 			.multi_asset_delegation()
@@ -807,7 +810,14 @@ fn lrt_deposit_withdraw_erc20() {
 		info!("New session started: {}", session_index);
 
 		let withdraw_amount = deposit_amount.div(U256::from(2));
-		info!("Scheduling unstake of {} lrtETH", format_ether(withdraw_amount));
+		info!(
+			?lrt_address,
+			?t.weth,
+			deposit_amount = %format_ether(deposit_amount),
+			withdraw_amount = %format_ether(withdraw_amount),
+			"Scheduling unstake of {} lrtETH",
+			format_ether(withdraw_amount)
+		);
 		// Schedule unstake
 		let sch_unstake_result = lrt
 			.scheduleUnstake(withdraw_amount)

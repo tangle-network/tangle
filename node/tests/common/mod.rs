@@ -8,6 +8,7 @@ use alloy::{
 	},
 	transports::BoxTransport,
 };
+use parity_scale_codec::Encode;
 use sc_cli::{CliConfiguration, SubstrateCli};
 use sp_tracing::warn;
 use tangle::{chainspec, cli, eth, service};
@@ -190,6 +191,10 @@ pub trait AddressConverter {
 	fn to_account_id(&self) -> subxt::utils::AccountId32;
 }
 
+pub trait AccountIdConverter {
+	fn to_address(&self) -> alloy::primitives::Address;
+}
+
 impl AddressConverter for alloy::primitives::Address {
 	fn to_account_id(&self) -> subxt::utils::AccountId32 {
 		let mut data = [0u8; 24];
@@ -198,6 +203,16 @@ impl AddressConverter for alloy::primitives::Address {
 		let hash = sp_core::blake2_256(&data);
 
 		subxt::utils::AccountId32(hash)
+	}
+}
+
+impl AccountIdConverter for subxt::utils::AccountId32 {
+	fn to_address(&self) -> alloy::primitives::Address {
+		self.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			alloy::primitives::Address::from(addr)
+		})
 	}
 }
 
