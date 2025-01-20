@@ -54,7 +54,6 @@
 //!
 //! - The reward vaults will consider all assets in parity, so only add the same type of asset in
 //!   the same vault.
-//!
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
@@ -196,6 +195,11 @@ pub mod pallet {
 		RewardConfigForAssetVault<BalanceOf<T>>,
 		OptionQuery,
 	>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn blocks_for_apy)]
+	/// Storage for the reward configuration, which includes APY, cap for assets
+	pub type ApyBlocks<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]

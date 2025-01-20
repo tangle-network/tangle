@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::{
-	AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet, RewardConfigForAssetVault,
-	RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit, TotalRewardVaultScore,
-	UserClaimedReward,
+	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet,
+	RewardConfigForAssetVault, RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit,
+	TotalRewardVaultScore, UserClaimedReward,
 };
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{
 	traits::{CheckedDiv, CheckedMul, Saturating, Zero},
-	DispatchError, DispatchResult, Percent,
+	DispatchError, DispatchResult, Percent, SaturatedConversion,
 };
 use sp_std::vec::Vec;
 use tangle_primitives::{
@@ -83,7 +83,7 @@ impl<T: Config> Pallet<T> {
 	pub fn calculate_rewards(
 		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
-	) -> Result<(BalanceOf<T>, BalanceOf<T>), DispatchError> {
+	) -> Result<BalanceOf<T>, DispatchError> {
 		// find the vault for the asset id
 		// if the asset is not in a reward vault, do nothing
 		let vault_id =
@@ -145,17 +145,23 @@ impl<T: Config> Pallet<T> {
 		let vault_id =
 			AssetLookupRewardVaults::<T>::get(asset).ok_or(Error::<T>::AssetNotInVault)?;
 
-		let (total_rewards, rewards_to_be_paid) = Self::calculate_rewards(account_id, asset)?;
+		let rewards_to_be_paid = Self::calculate_rewards(account_id, asset)?;
 
 		// mint new TNT rewards and trasnfer to the user
 		let _ = T::Currency::deposit_creating(account_id, rewards_to_be_paid);
 
 		// update the last claim
-		UserClaimedReward::<T>::insert(
+		UserClaimedReward::<T>::try_mutate(
 			account_id,
 			vault_id,
-			(frame_system::Pallet::<T>::block_number(), total_rewards),
-		);
+			|maybe_claim| -> DispatchResult {
+				let current_block = frame_system::Pallet::<T>::block_number();
+				let total_claimed = maybe_claim.map(|(_, amount)| amount).unwrap_or_default();
+				*maybe_claim =
+					Some((current_block, total_claimed.saturating_add(rewards_to_be_paid)));
+				Ok(())
+			},
+		)?;
 
 		Self::deposit_event(Event::RewardsClaimed {
 			account: account_id.clone(),
@@ -163,10 +169,10 @@ impl<T: Config> Pallet<T> {
 			amount: rewards_to_be_paid,
 		});
 
-		Ok(total_rewards)
+		Ok(rewards_to_be_paid)
 	}
 
-	/// Calculates the APY based on the total deposit and deposit cap.
+	/// Calculate the APY based on the total deposit and deposit cap.
 	/// The goal is to ensure the APY is proportional to the total deposit.
 	///
 	/// # Returns
@@ -183,11 +189,28 @@ impl<T: Config> Pallet<T> {
 		original_apy: Percent,
 	) -> Option<Percent> {
 		if deposit_cap.is_zero() {
-			return None;
+			return None
 		}
-		
+
 		let propotion = Percent::from_rational(total_deposit, deposit_cap);
 		original_apy.checked_mul(&propotion)
+	}
+
+	/// Calculate the per-block reward amount for a given total reward
+	///
+	/// # Arguments
+	/// * `total_reward` - The total reward amount to be distributed
+	///
+	/// # Returns
+	/// * `Option<BalanceOf<T>>` - The per-block reward amount, or None if division fails
+	pub fn calculate_reward_per_block(total_reward: BalanceOf<T>) -> Option<BalanceOf<T>> {
+		let apy_blocks = ApyBlocks::<T>::get();
+		if apy_blocks.is_zero() {
+			return None
+		}
+
+		let apy_blocks_balance = BalanceOf::<T>::from(apy_blocks.saturated_into::<u32>());
+		Some(total_reward / apy_blocks_balance)
 	}
 
 	/// Calculates rewards for deposits considering both unlocked amounts and locked amounts with
@@ -204,16 +227,13 @@ impl<T: Config> Pallet<T> {
 	/// * `total_asset_score` - Total score for the asset across all deposits
 	/// * `deposit` - User's deposit information including locked amounts
 	/// * `reward` - Reward configuration for the asset vault
-	/// * `last_claim` - Timestamp and amount of user's last reward claim
+	/// * `last_claim` - Block number and amount of last claim, if any
 	///
 	/// # Returns
-	/// * `Ok(BalanceOf<T>)` - The calculated rewards
-	/// * `Err(DispatchError)` - If any arithmetic operation overflows
+	/// * `Ok((BalanceOf<T>, BalanceOf<T>))` - Tuple of (total rewards, rewards to be paid)
+	/// * `Err(DispatchError)` - If any arithmetic operation fails
 	///
-	/// # Assumptions and Constraints
-	/// * Lock multipliers are fixed at: 1x (1 month), 2x (2 months), 3x (3 months), 6x (6 months)
-	/// * APY is applied proportionally to the lock period remaining
-	/// * Rewards scale with:
+	/// The reward amount is affected by:
 	///   - The proportion of user's deposit to total deposits
 	///   - The proportion of total deposits to deposit capacity
 	///   - The lock multiplier (if applicable)
@@ -224,7 +244,7 @@ impl<T: Config> Pallet<T> {
 		deposit: UserDepositWithLocks<BalanceOf<T>, BlockNumberFor<T>>,
 		reward: RewardConfigForAssetVault<BalanceOf<T>>,
 		last_claim: Option<(BlockNumberFor<T>, BalanceOf<T>)>,
-	) -> Result<(BalanceOf<T>, BalanceOf<T>), DispatchError> {
+	) -> Result<BalanceOf<T>, DispatchError> {
 		// Start with unlocked amount as base score
 		let mut user_score = deposit.unlocked_amount;
 
@@ -233,15 +253,18 @@ impl<T: Config> Pallet<T> {
 		let last_claim_block = last_claim.map(|(block, _)| block).unwrap_or(current_block);
 
 		// Add score with lock multipliers if any
-		if let Some(locks) = deposit.amount_with_locks {
-			for lock in locks {
-				if lock.expiry_block > last_claim_block {
-					// Calculate lock reward:
-					// amount * APY * multiplier
-					let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
-					let lock_score = lock.amount.saturating_mul(multiplier);
+		// only if the admin has enabled boost multiplier for the vault
+		if reward.boost_multiplier.is_some() {
+			if let Some(locks) = deposit.amount_with_locks {
+				for lock in locks {
+					if lock.expiry_block > last_claim_block {
+						// Calculate lock reward:
+						// amount * APY * multiplier
+						let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
+						let lock_score = lock.amount.saturating_mul(multiplier);
 
-					user_score = user_score.saturating_add(lock_score);
+						user_score = user_score.saturating_add(lock_score);
+					}
 				}
 			}
 		}
@@ -251,13 +274,21 @@ impl<T: Config> Pallet<T> {
 		let apy = Self::calculate_propotional_apy(total_deposit, deposit_cap, reward.apy)
 			.ok_or(Error::<T>::ArithmeticError)?;
 
+		let tnt_total_supply = T::Currency::total_issuance();
+		let total_tnt_reward_by_apy = apy.mul_floor(tnt_total_supply);
+
 		// Calculate the user rewards
-		let total_reward_tnt_amount = apy.mul_floor(user_score);
+		let total_reward_tnt_amount_for_user = apy.mul_floor(user_score);
 
-		// lets remove any already claimed rewards
-		let rewards_to_be_paid = total_reward_tnt_amount
-			.saturating_sub(last_claim.map(|(_, amount)| amount).unwrap_or(Zero::zero()));
+		// Calculate rewards per block
+		let total_reward_tnt_amount_for_user_per_block =
+			Self::calculate_reward_per_block(total_reward_tnt_amount_for_user)
+				.ok_or(Error::<T>::ArithmeticError)?;
 
-		Ok((total_reward_tnt_amount, rewards_to_be_paid))
+		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
+		let rewards_to_be_paid = total_reward_tnt_amount_for_user_per_block
+			.saturating_mul(BalanceOf::<T>::from(blocks_to_be_paid.saturated_into::<u32>()));
+
+		Ok(rewards_to_be_paid)
 	}
 }

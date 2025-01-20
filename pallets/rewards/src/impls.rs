@@ -16,7 +16,7 @@
 
 use crate::{
 	AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet, RewardConfigStorage,
-	TotalRewardVaultDeposit, TotalRewardVaultScore, UserServiceReward,
+	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward, UserServiceReward,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{traits::Saturating, DispatchError};
@@ -30,7 +30,7 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 	type Error = DispatchError;
 
 	fn record_deposit(
-		_account_id: &T::AccountId,
+		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		lock_multiplier: Option<LockMultiplier>,
@@ -66,6 +66,18 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 				asset,
 				lock_multiplier,
 			});
+
+			// If this user has never claimed rewards, create an entry
+			// this will give us a starting point for reward claim
+			if !UserClaimedReward::<T>::contains_key(account_id, vault_id) {
+				let current_block = frame_system::Pallet::<T>::block_number();
+				let default_balance: BalanceOf<T> = 0_u32.into();
+				UserClaimedReward::<T>::insert(
+					account_id,
+					vault_id,
+					(current_block, default_balance),
+				);
+			}
 		}
 		Ok(())
 	}
