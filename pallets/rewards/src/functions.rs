@@ -259,7 +259,7 @@ impl<T: Config> Pallet<T> {
 				for lock in locks {
 					if lock.expiry_block > last_claim_block {
 						// Calculate lock reward:
-						// amount * APY * multiplier
+						// amount * multiplier
 						let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
 						let lock_score = lock.amount.saturating_mul(multiplier);
 
@@ -274,19 +274,21 @@ impl<T: Config> Pallet<T> {
 		let apy = Self::calculate_propotional_apy(total_deposit, deposit_cap, reward.apy)
 			.ok_or(Error::<T>::ArithmeticError)?;
 
+		// Calculate total rewards pool from total issuance
 		let tnt_total_supply = T::Currency::total_issuance();
-		let total_tnt_reward_by_apy = apy.mul_floor(tnt_total_supply);
+		let total_annual_rewards = apy.mul_floor(tnt_total_supply);
 
-		// Calculate the user rewards
-		let total_reward_tnt_amount_for_user = apy.mul_floor(user_score);
+		// Calculate per block reward pool first to minimize precision loss
+		let total_reward_per_block = Self::calculate_reward_per_block(total_annual_rewards)
+			.ok_or(Error::<T>::ArithmeticError)?;
 
-		// Calculate rewards per block
-		let total_reward_tnt_amount_for_user_per_block =
-			Self::calculate_reward_per_block(total_reward_tnt_amount_for_user)
-				.ok_or(Error::<T>::ArithmeticError)?;
+		// Calculate user's proportion of rewards based on their score
+		let user_proportion = Percent::from_rational(user_score, total_asset_score);
+		let user_reward_per_block = user_proportion.mul_floor(total_reward_per_block);
 
+		// Calculate total rewards for the period
 		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
-		let rewards_to_be_paid = total_reward_tnt_amount_for_user_per_block
+		let rewards_to_be_paid = user_reward_per_block
 			.saturating_mul(BalanceOf::<T>::from(blocks_to_be_paid.saturated_into::<u32>()));
 
 		Ok(rewards_to_be_paid)
