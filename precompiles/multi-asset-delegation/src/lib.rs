@@ -40,8 +40,6 @@ pub mod mock_evm;
 #[cfg(test)]
 mod tests;
 
-use core::iter::Sum;
-
 use tangle_primitives::types::rewards::LockMultiplier;
 
 use evm_erc20_utils::*;
@@ -74,7 +72,7 @@ where
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
-	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec + Sum<BalanceOf<Runtime>>,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u128>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
@@ -458,14 +456,6 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		frame_support::__private::log::debug!(
-			target: "evm",
-			"scheduleDelegatorUnstake: operator: {:?}, asset_id: {:?}, token_address: {:?}, amount: {:?}",
-			operator,
-			asset_id,
-			token_address,
-			amount
-		);
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
