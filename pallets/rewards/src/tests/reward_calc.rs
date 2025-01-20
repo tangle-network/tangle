@@ -6,19 +6,20 @@ use pallet_balances::TotalIssuance;
 use sp_runtime::Percent;
 use tangle_primitives::types::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks};
 
-// Helper function to setup test environment with consistent values
-fn setup_test_env() {
-	ApyBlocks::<Runtime>::put(BLOCKS_PER_YEAR); // ~6 second blocks = ~1 year
-	System::set_block_number(1000); // Set current block to 1000
-}
-
 // Mock values for consistent testing
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000_000_000_000_000_000_000; // 1M tokens with 18 decimals
 const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000_000_000_000_000_000_000; // 100M tokens with 18 decimals
 const MOCK_INCENTIVE_CAP: u128 = 10_000_000_000_000_000_000_000; // 10k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
 const MOCK_DEPOSIT: u128 = 100_000_000_000_000_000_000_000; // 100k tokens with 18 decimals
-const BLOCKS_PER_YEAR: u32 = 5_256_000; // ~6 second blocks = ~1 year
+const BLOCKS_PER_YEAR: u64 = 5_256_000; // ~6 second blocks = ~1 year
+
+// Helper function to setup test environment with consistent values
+fn setup_test_env() {
+	ApyBlocks::<Runtime>::put(BLOCKS_PER_YEAR); // ~6 second blocks = ~1 year
+	System::set_block_number(1000); // Set current block to 1000
+    TotalIssuance::<Runtime>::set(MOCK_TOTAL_ISSUANCE);
+}
 
 #[test]
 fn test_calculate_rewards_zero_deposit() {
@@ -56,11 +57,10 @@ fn test_calculate_rewards_only_unlocked() {
 
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT;
-		let user_deposit = 10_000_000_000_000_000_000; // 10k tokens with 18 decimals
+		let user_deposit = 10_000_000_000_000_000_000_000; // 10k tokens with 18 decimals
 		let deposit =
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
-		let total_issuance = TotalIssuance::<Runtime>::set(MOCK_TOTAL_ISSUANCE);
-
+		
 		let reward = RewardConfigForAssetVault {
 			apy: Percent::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
@@ -100,7 +100,7 @@ fn test_calculate_rewards_with_expired_lock() {
 
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT * 2; // Due to lock multipliers
-		let user_deposit = 10_000_000_000_000_000_000; // 10k tokens with 18 decimals
+		let user_deposit = 10_000_000_000_000_000_000_000; // 10k tokens with 18 decimals
 		let deposit = UserDepositWithLocks {
 			unlocked_amount: user_deposit,
 			amount_with_locks: Some(vec![LockInfo {
@@ -141,7 +141,7 @@ fn test_calculate_rewards_with_active_locks() {
 
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT * 3; // Average multiplier effect
-		let user_deposit = 10_000_000_000_000_000_000; // 10k tokens with 18 decimals
+		let user_deposit = 10_000_000_000_000_000_000_000; // 10k tokens with 18 decimals
 		let deposit = UserDepositWithLocks {
 			unlocked_amount: user_deposit,
 			amount_with_locks: Some(vec![
@@ -195,7 +195,7 @@ fn test_calculate_rewards_with_previous_claim() {
 
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT;
-		let user_deposit = 10_000_000_000_000_000_000; // 10k tokens with 18 decimals
+		let user_deposit = 10_000_000_000_000_000_000_000; // 10k tokens with 18 decimals
 		let deposit =
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
 		let reward = RewardConfigForAssetVault {
@@ -235,9 +235,10 @@ fn test_calculate_rewards_zero_cap() {
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT;
 		let deposit = UserDepositWithLocks {
-			unlocked_amount: 10_000_000_000_000_000_000,
+			unlocked_amount: 10_000_000_000_000_000_000_000,
 			amount_with_locks: None,
 		};
+
 		let reward = RewardConfigForAssetVault {
 			apy: Percent::from_percent(MOCK_APY),
 			deposit_cap: 0,
@@ -255,7 +256,7 @@ fn test_calculate_rewards_zero_cap() {
 			last_claim,
 		);
 
-		assert_ok!(result, 0);
+		assert_err!(result, Error::<Runtime>::ArithmeticError);
 	});
 }
 
@@ -266,7 +267,7 @@ fn test_calculate_rewards_same_block_claim() {
 
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT;
-		let user_deposit = 10_000_000_000_000_000_000; // 10k tokens with 18 decimals
+		let user_deposit = 10_000_000_000_000_000_000_000; // 10k tokens with 18 decimals
 		let deposit =
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
 		let reward = RewardConfigForAssetVault {

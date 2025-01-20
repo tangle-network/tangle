@@ -18,6 +18,7 @@ use crate::{
 	RewardConfigForAssetVault, RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit,
 	TotalRewardVaultScore, UserClaimedReward,
 };
+use log::debug;
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{
@@ -281,10 +282,13 @@ impl<T: Config> Pallet<T> {
 		// Calculate per block reward pool first to minimize precision loss
 		let total_reward_per_block = Self::calculate_reward_per_block(total_annual_rewards)
 			.ok_or(Error::<T>::ArithmeticError)?;
+		debug!("total reward per block: {:?}", total_reward_per_block);
 
 		// Calculate user's proportion of rewards based on their score
 		let user_proportion = Percent::from_rational(user_score, total_asset_score);
+		println!("user proportion: {:?}", user_proportion);
 		let user_reward_per_block = user_proportion.mul_floor(total_reward_per_block);
+		println!("user reward per block: {:?}", user_reward_per_block);
 
 		// Calculate total rewards for the period
 		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
