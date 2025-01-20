@@ -18,9 +18,9 @@ use crate::{
 	RewardConfigForAssetVault, RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit,
 	TotalRewardVaultScore, UserClaimedReward,
 };
-use log::debug;
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
+use log::debug;
 use sp_runtime::{
 	traits::{CheckedDiv, CheckedMul, Saturating, Zero},
 	DispatchError, DispatchResult, Percent, SaturatedConversion,
