@@ -1,6 +1,5 @@
 use super::*;
 use crate::ApyBlocks;
-use frame_support::{assert_noop, assert_ok};
 use sp_runtime::Percent;
 
 #[test]

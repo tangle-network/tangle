@@ -273,7 +273,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 
 	fn is_operator_active(operator: &AccountId) -> bool {
 		if operator == &mock_pub_key(10) {
-			return false
+			return false;
 		}
 		true
 	}

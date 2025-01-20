@@ -22,7 +22,7 @@ use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
 use log::debug;
 use sp_runtime::{
-	traits::{CheckedDiv, CheckedMul, Saturating, Zero},
+	traits::{CheckedMul, Saturating, Zero},
 	DispatchError, DispatchResult, Percent, SaturatedConversion,
 };
 use sp_std::vec::Vec;
@@ -190,7 +190,7 @@ impl<T: Config> Pallet<T> {
 		original_apy: Percent,
 	) -> Option<Percent> {
 		if deposit_cap.is_zero() {
-			return None
+			return None;
 		}
 
 		let propotion = Percent::from_rational(total_deposit, deposit_cap);
@@ -207,7 +207,7 @@ impl<T: Config> Pallet<T> {
 	pub fn calculate_reward_per_block(total_reward: BalanceOf<T>) -> Option<BalanceOf<T>> {
 		let apy_blocks = ApyBlocks::<T>::get();
 		if apy_blocks.is_zero() {
-			return None
+			return None;
 		}
 
 		let apy_blocks_balance = BalanceOf::<T>::from(apy_blocks.saturated_into::<u32>());
@@ -286,9 +286,9 @@ impl<T: Config> Pallet<T> {
 
 		// Calculate user's proportion of rewards based on their score
 		let user_proportion = Percent::from_rational(user_score, total_asset_score);
-		println!("user proportion: {:?}", user_proportion);
+		debug!("user proportion: {:?}", user_proportion);
 		let user_reward_per_block = user_proportion.mul_floor(total_reward_per_block);
-		println!("user reward per block: {:?}", user_reward_per_block);
+		debug!("user reward per block: {:?}", user_reward_per_block);
 
 		// Calculate total rewards for the period
 		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
