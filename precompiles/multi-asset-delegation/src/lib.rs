@@ -39,6 +39,9 @@ pub mod mock;
 pub mod mock_evm;
 #[cfg(test)]
 mod tests;
+
+use core::iter::Sum;
+
 use tangle_primitives::types::rewards::LockMultiplier;
 
 use evm_erc20_utils::*;
@@ -71,10 +74,52 @@ where
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
-	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec + Sum<BalanceOf<Runtime>>,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u128>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
+	#[precompile::public("balanceOf(address,uint256,address)")]
+	fn balance_of(
+		handle: &mut impl PrecompileHandle,
+		who: Address,
+		asset_id: U256,
+		token_address: Address,
+	) -> EvmResult<U256> {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let who = Runtime::AddressMapping::into_account_id(who.0);
+		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+		else {
+			return Ok(U256::zero());
+		};
+		let asset = match (asset_id.as_u128(), token_address.0 .0) {
+			(0, erc20_token) if erc20_token != [0; 20] => Asset::Erc20(erc20_token.into()),
+			(other_asset_id, _) => Asset::Custom(other_asset_id.into()),
+		};
+		let amount = delegator.deposits.get(&asset).map(|d| d.amount).unwrap_or_default();
+		Ok(amount.into())
+	}
+
+	#[precompile::public("delegatedBalanceOf(address,uint256,address)")]
+	fn delegated_balance_of(
+		handle: &mut impl PrecompileHandle,
+		who: Address,
+		asset_id: U256,
+		token_address: Address,
+	) -> EvmResult<U256> {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let who = Runtime::AddressMapping::into_account_id(who.0);
+		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+		else {
+			return Ok(U256::zero());
+		};
+		let asset = match (asset_id.as_u128(), token_address.0 .0) {
+			(0, erc20_token) if erc20_token != [0; 20] => Asset::Erc20(erc20_token.into()),
+			(other_asset_id, _) => Asset::Custom(other_asset_id.into()),
+		};
+		let amount = delegator.deposits.get(&asset).map(|d| d.delegated_amount).unwrap_or_default();
+		Ok(amount.into())
+	}
+
 	#[precompile::public("joinOperators(uint256)")]
 	fn join_operators(handle: &mut impl PrecompileHandle, bond_amount: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
