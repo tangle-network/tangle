@@ -121,13 +121,15 @@ interface MultiAssetDelegation {
     /// @param who The address of the account.
     /// @param assetId The ID of the asset (0 for ERC20).
     /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
+    /// @return The total balance of the delegator.
     /// @custom:selector 467f4cb9
-    function balanceOf(address who, uint256 assetId, address tokenAddress) external;
+    function balanceOf(address who, uint256 assetId, address tokenAddress) external view returns (uint256);
 
     /// @dev Get the delegated balance of the delegator.
     /// @param who The address of the delegator.
     /// @param assetId The ID of the asset (0 for ERC20).
     /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
+    /// @return The delegated balance of the delegator.
     /// @custom:selector aabd20df
-    function delegatedBalanceOf(address who, uint256 assetId, address tokenAddress) external;
+    function delegatedBalanceOf(address who, uint256 assetId, address tokenAddress) external view returns (uint256);
 }

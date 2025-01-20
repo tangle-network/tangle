@@ -79,6 +79,7 @@ where
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	#[precompile::public("balanceOf(address,uint256,address)")]
+	#[precompile::view]
 	fn balance_of(
 		handle: &mut impl PrecompileHandle,
 		who: Address,
@@ -100,6 +101,7 @@ where
 	}
 
 	#[precompile::public("delegatedBalanceOf(address,uint256,address)")]
+	#[precompile::view]
 	fn delegated_balance_of(
 		handle: &mut impl PrecompileHandle,
 		who: Address,
