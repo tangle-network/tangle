@@ -37,7 +37,7 @@ use pallet_multi_asset_delegation::{
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use rand::{seq::SliceRandom, Rng};
-use sp_runtime::traits::{Scale, Zero};
+use sp_runtime::traits::Scale;
 use sp_runtime::DispatchResult;
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
@@ -87,7 +87,7 @@ fn join_operators<R: Rng>(rng: &mut R, who: &Address) -> DispatchResult {
 	let multiplier = rng.gen_range(1..50u64);
 	let who_account_id = <TestAccount as AddressMapping<AccountId>>::into_account_id(who.0);
 	let _ = Balances::deposit_creating(&who_account_id, minimum_bond.mul(multiplier));
-	let bond_amount = minimum_bond.mul(multiplier).into();
+	let bond_amount = minimum_bond.mul(multiplier);
 	MultiAssetDelegation::join_operators(RuntimeOrigin::signed(who_account_id), bond_amount)
 }
 

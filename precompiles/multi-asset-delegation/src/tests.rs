@@ -263,7 +263,7 @@ fn test_delegate_assets_insufficient_balance() {
 					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [14, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});

@@ -146,9 +146,7 @@ where
 	#[precompile::view]
 	fn min_nominator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let min_nominator_bond: U256 = pallet_staking::MinNominatorBond::<Runtime>::get()
-			.try_into()
-			.map_err(|_| revert("Amount is too large for provided balance type"))?;
+		let min_nominator_bond: U256 = pallet_staking::MinNominatorBond::<Runtime>::get().into();
 		Ok(min_nominator_bond)
 	}
 
@@ -157,9 +155,7 @@ where
 	#[precompile::view]
 	fn min_validator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let min_validator_bond: U256 = pallet_staking::MinValidatorBond::<Runtime>::get()
-			.try_into()
-			.map_err(|_| revert("Amount is too large for provided balance type"))?;
+		let min_validator_bond: U256 = pallet_staking::MinValidatorBond::<Runtime>::get().into();
 		Ok(min_validator_bond)
 	}
 
@@ -168,9 +164,7 @@ where
 	#[precompile::view]
 	fn min_active_stake(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let min_active_stake: U256 = pallet_staking::MinimumActiveStake::<Runtime>::get()
-			.try_into()
-			.map_err(|_| revert("Amount is too large for provided balance type"))?;
+		let min_active_stake: U256 = pallet_staking::MinimumActiveStake::<Runtime>::get().into();
 		Ok(min_active_stake)
 	}
 
@@ -218,9 +212,8 @@ where
 	#[precompile::view]
 	fn eras_total_stake(handle: &mut impl PrecompileHandle, era_index: u32) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let total_stake: U256 = <pallet_staking::Pallet<Runtime>>::eras_total_stake(era_index)
-			.try_into()
-			.map_err(|_| revert("Amount is too large for provided balance type"))?;
+		let total_stake: U256 =
+			<pallet_staking::Pallet<Runtime>>::eras_total_stake(era_index).into();
 
 		Ok(total_stake)
 	}
@@ -448,7 +441,7 @@ where
 		let who: Vec<Runtime::AccountId> =
 			who.into_iter().map(Self::convert_to_account_id).collect::<Result<_, _>>()?;
 
-		let who = who.into_iter().map(|id| Runtime::Lookup::unlookup(id)).collect();
+		let who = who.into_iter().map(Runtime::Lookup::unlookup).collect();
 
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
