@@ -1314,7 +1314,7 @@ declare module '@polkadot/api-base/types/storage' {
       currentPlannedSession: AugmentedQuery<ApiType, () => Observable<u32>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Indices of validators that have offended in the active era. The offenders are disabled for a
-       * whole era. For this reason they are kept here - only staking pallet knows about eras. The
+       * whole era. For this reason they are kept here - only staking pallet know about eras. The
        * implementor of [`DisablingStrategy`] defines if a validator should be disabled which
        * implicitly means that the implementor also controls the max number of disabled validators.
        * 

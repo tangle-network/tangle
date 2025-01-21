@@ -25026,7 +25026,7 @@ pub mod api {
 					)
 				}
 				#[doc = " Indices of validators that have offended in the active era. The offenders are disabled for a"]
-				#[doc = " whole era. For this reason they are kept here - only staking pallet knows about eras. The"]
+				#[doc = " whole era. For this reason they are kept here - only staking pallet know about eras. The"]
 				#[doc = " implementor of [`DisablingStrategy`] defines if a validator should be disabled which"]
 				#[doc = " implicitly means that the implementor also controls the max number of disabled validators."]
 				#[doc = ""]

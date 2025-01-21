@@ -121,7 +121,7 @@ where
 	<<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
 	AssetIdOf<Runtime, Instance>: Display,
 {
-	/// PrecompileSet discriminant. Allows to knows if the address maps to an asset id,
+	/// PrecompileSet discriminant. Allows to know if the address maps to an asset id,
 	/// and if this is the case which one.
 	#[precompile::discriminant]
 	fn discriminant(address: H160, gas: u64) -> DiscriminantResult<AssetIdOf<Runtime, Instance>> {
