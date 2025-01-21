@@ -166,7 +166,7 @@ impl<T: Config> Pallet<T> {
 		let service_request = ServiceRequest {
 			blueprint: blueprint_id,
 			owner: caller.clone(),
-			asset_security: bounded_requirements,
+			non_native_asset_security: bounded_requirements,
 			ttl,
 			args,
 			permitted_callers,

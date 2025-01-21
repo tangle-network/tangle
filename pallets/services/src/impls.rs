@@ -123,7 +123,12 @@ impl<T: crate::Config, Balance: Default>
 		true // For benchmarking, always return true
 	}
 
-	fn slash_operator(_operator: &T::AccountId, _blueprint_id: BlueprintId, _percentage: Percent) {
+	fn slash_operator(
+		_operator: &T::AccountId,
+		_blueprint_id: BlueprintId,
+		_service_id: InstanceId,
+		_percentage: Percent,
+	) {
 		// For benchmarking, do nothing
 	}
 

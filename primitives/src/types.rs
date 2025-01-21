@@ -60,6 +60,15 @@ pub type RoundIndex = u32;
 /// Blueprint ID
 pub type BlueprintId = u64;
 
+/// Service request ID
+pub type ServiceRequestId = u64;
+
+/// Service instance ID
+pub type InstanceId = u64;
+
+/// Job call ID
+pub type JobCallId = u64;
+
 /// The address format for describing accounts.
 pub type Address = MultiAddress<AccountId, Index>;
 

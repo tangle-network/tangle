@@ -41,6 +41,18 @@ fn test_ecdsa_key() -> [u8; 65] {
 	public_key.to_bytes().to_vec().try_into().unwrap()
 }
 
+fn get_security_requirement(a: AssetId, p: &[u8; 2]) -> AssetSecurityRequirement<AssetId> {
+	AssetSecurityRequirement {
+		asset: Asset::Custom(a),
+		min_exposure_percent: Percent::from_percent(p[0]),
+		max_exposure_percent: Percent::from_percent(p[1]),
+	}
+}
+
+fn get_security_commitment(a: AssetId, p: u8) -> AssetSecurityCommitment<AssetId> {
+	AssetSecurityCommitment { asset: Asset::Custom(a), exposure_percent: Percent::from_percent(p) }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MachineKind {
 	Large,
@@ -92,6 +104,10 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		registration_params: bounded_vec![],
 		request_params: bounded_vec![],
 		gadget: Default::default(),
+		supported_membership_models: bounded_vec![
+			MembershipModel::Fixed { min_operators: 1 },
+			MembershipModel::Dynamic { min_operators: 1, max_operators: None },
+		],
 	}
 }
 
@@ -410,10 +426,14 @@ fn request_service() {
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
-			vec![USDC, WETH],
+			vec![
+				get_security_requirement(USDC, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
+			MembershipModel::Fixed { min_operators: 3 }
 		));
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -422,7 +442,8 @@ fn request_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10)
+			Percent::from_percent(10),
+			vec![get_security_commitment(USDC, 10), get_security_commitment(WETH, 10),],
 		));
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceRequestApproved {

@@ -287,7 +287,7 @@ where
 		// Retrieve and validate the service request
 		let request = pallet_services::ServiceRequests::<Runtime>::get(request_id).unwrap();
 		// Treat the asset approval descriptions in order
-		let request_assets = request.asset_security;
+		let request_assets = request.non_native_asset_security;
 		let native_asset_exposure: Percent = Percent::from_percent(native_restaking_percent);
 		let non_native_asset_exposures: Vec<AssetSecurityCommitment<Runtime::AssetId>> =
 			request_assets

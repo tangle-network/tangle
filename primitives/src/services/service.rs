@@ -300,7 +300,8 @@ pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId: Asset
 	pub owner: AccountId,
 	/// The assets required for this service along with their security requirements.
 	/// This defines both which assets are needed and how much security backing is required.
-	pub asset_security: BoundedVec<AssetSecurityRequirement<AssetId>, C::MaxAssetsPerService>,
+	pub non_native_asset_security:
+		BoundedVec<AssetSecurityRequirement<AssetId>, C::MaxAssetsPerService>,
 	/// Time-to-live for this request in blocks
 	pub ttl: BlockNumber,
 	/// Arguments for service initialization
@@ -347,7 +348,7 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 		AssetId: PartialEq,
 	{
 		// Ensure commitments exist for all required assets
-		self.asset_security.iter().all(|req| {
+		self.non_native_asset_security.iter().all(|req| {
 			asset_commitments.iter().any(|commit| {
 				commit.asset == req.asset
 					&& commit.exposure_percent >= req.min_exposure_percent

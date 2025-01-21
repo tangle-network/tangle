@@ -67,6 +67,10 @@ impl<T: Config> Pallet<T> {
 			asset_exposures.len() <= T::MaxAssetsPerService::get() as usize,
 			Error::<T>::MaxAssetsPerServiceExceeded
 		);
+        // Ensure asset exposures length matches requested assets length
+        ensure!(
+            asset_exposures.len() == request.non_native_asset_security
+        )
 
 		// Find and update operator's approval state
 		let updated = request
@@ -256,7 +260,7 @@ impl<T: Config> Pallet<T> {
 			request_id,
 			service_id,
 			blueprint_id: request.blueprint,
-			assets: request.asset_security.iter().map(|a| a.asset.clone()).collect(),
+			assets: request.non_native_asset_security.iter().map(|a| a.asset.clone()).collect(),
 		});
 
 		Ok(())

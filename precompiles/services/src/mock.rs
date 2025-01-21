@@ -431,6 +431,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 	fn slash_operator(
 		_operator: &AccountId,
 		_blueprint_id: tangle_primitives::BlueprintId,
+		_service_id: tangle_primitives::InstanceId,
 		_percentage: sp_runtime::Percent,
 	) {
 	}

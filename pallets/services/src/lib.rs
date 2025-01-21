@@ -29,7 +29,7 @@ use sp_runtime::{traits::Get, DispatchResult};
 use tangle_primitives::{
 	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
 	traits::MultiAssetDelegationInfo,
-	BlueprintId,
+	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 };
 
 pub mod functions;
@@ -524,17 +524,17 @@ pub mod module {
 	/// The next free ID for a service request.
 	#[pallet::storage]
 	#[pallet::getter(fn next_service_request_id)]
-	pub type NextServiceRequestId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextServiceRequestId<T> = StorageValue<_, ServiceRequestId, ValueQuery>;
 
 	/// The next free ID for a service Instance.
 	#[pallet::storage]
 	#[pallet::getter(fn next_instance_id)]
-	pub type NextInstanceId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextInstanceId<T> = StorageValue<_, InstanceId, ValueQuery>;
 
 	/// The next free ID for a service call.
 	#[pallet::storage]
 	#[pallet::getter(fn next_job_call_id)]
-	pub type NextJobCallId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextJobCallId<T> = StorageValue<_, JobCallId, ValueQuery>;
 
 	/// The next free ID for a unapplied slash.
 	#[pallet::storage]
