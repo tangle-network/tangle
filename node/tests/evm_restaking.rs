@@ -483,9 +483,7 @@ fn operator_join_delegator_delegate_asset_id() {
 		let tnt = U256::from(100_000u128);
 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
@@ -541,7 +539,7 @@ fn operator_join_delegator_delegate_asset_id() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				alice.account_id().0.into(),
 				U256::from(t.usdc_asset_id),
 				Address::ZERO,
 				U256::from(delegate_amount),
@@ -746,7 +744,7 @@ fn lrt_deposit_withdraw_erc20() {
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
 			t.weth,
-			alice.address().to_account_id().0,
+			alice.account_id().0,
 			"Liquid Restaked Ether",
 			"lrtETH",
 		)
@@ -794,9 +792,7 @@ fn lrt_deposit_withdraw_erc20() {
 		assert_eq!(mad_weth_balance._0, deposit_amount);
 
 		// LRT should be a delegator to the operator in the MAD pallet.
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
@@ -900,7 +896,7 @@ fn lrt_rewards() {
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
 			t.weth,
-			alice.address().to_account_id().0,
+			alice.account_id().0,
 			"Liquid Restaked Ether",
 			"lrtETH",
 		)
