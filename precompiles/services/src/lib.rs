@@ -11,7 +11,9 @@ use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::services::{Asset, Field, OperatorPreferences, ServiceBlueprint};
+use tangle_primitives::services::{
+	Asset, Field, OperatorPreferences, PriceTargets, ServiceBlueprint,
+};
 
 #[cfg(test)]
 mod mock;
@@ -378,6 +380,52 @@ where
 
 		// inside this call, we do check if the caller is authorized to dispute the slash
 		let call = pallet_services::Call::<Runtime>::dispute { era, index };
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	/// Update price targets for a blueprint.
+	#[precompile::public("updatePriceTargets(uint256,uint256[])")]
+	fn update_price_targets(
+		handle: &mut impl PrecompileHandle,
+		blueprint_id: U256,
+		price_targets: Vec<U256>,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		let blueprint_id: u64 = blueprint_id.as_u64();
+
+		// Convert price targets into the correct struct
+		let price_targets = {
+			let mut targets = price_targets.into_iter();
+			PriceTargets {
+				cpu: targets.next().map_or(0, |v| v.as_u64()),
+				mem: targets.next().map_or(0, |v| v.as_u64()),
+				storage_hdd: targets.next().map_or(0, |v| v.as_u64()),
+				storage_ssd: targets.next().map_or(0, |v| v.as_u64()),
+				storage_nvme: targets.next().map_or(0, |v| v.as_u64()),
+			}
+		};
+
+		let call =
+			pallet_services::Call::<Runtime>::update_price_targets { blueprint_id, price_targets };
+
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	/// Pre-register as an operator for a specific blueprint.
+	#[precompile::public("preRegister(uint256)")]
+	fn pre_register(handle: &mut impl PrecompileHandle, blueprint_id: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		let blueprint_id: u64 = blueprint_id.as_u64();
+		let call = pallet_services::Call::<Runtime>::pre_register { blueprint_id };
+
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())

@@ -7,7 +7,8 @@ address constant PREIMAGE_ADDRESS = 0x0000000000000000000000000000000000000813;
 /// @dev The Preimage contract's instance.
 Preimage constant PREIMAGE_CONTRACT = Preimage(PREIMAGE_ADDRESS);
 
-/// @author The Moonbeam Team
+/// @author Tangle Network
+/// @author Originally built by Moonbeam Team
 /// @title Pallet Preimage Interface
 /// @title The interface through which solidity contracts will interact with the Preimage pallet
 /// @custom:address 0x0000000000000000000000000000000000000813

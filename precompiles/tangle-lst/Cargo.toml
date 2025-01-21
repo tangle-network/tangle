@@ -19,6 +19,7 @@ parity-scale-codec = { workspace = true, features = ["derive"] }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
+sp-arithmetic = { workspace = true }
 
 # Frontier
 fp-evm = { workspace = true }

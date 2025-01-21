@@ -72,8 +72,8 @@ pub trait AddressToAssetId<AssetId> {
 
 /// The following distribution has been decided for the precompiles
 /// 0-1023: Ethereum Mainnet Precompiles
-/// 1024-2047 Precompiles that are not in Ethereum Mainnet but are neither Moonbeam specific
-/// 2048-4095 Moonbeam specific precompiles
+/// 1024-2047 Precompiles that are not in Ethereum Mainnet but are neither Tangle specific
+/// 2048-4095 Tangle specific precompiles
 /// Asset precompiles can only fall between
 /// 0xFFFFFFFF00000000000000000000000000000000 - 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 /// The precompile for AssetId X, where X is a u128 (i.e.16 bytes), if 0XFFFFFFFF + Bytes(AssetId)
@@ -121,7 +121,7 @@ where
 	<<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
 	AssetIdOf<Runtime, Instance>: Display,
 {
-	/// PrecompileSet discriminant. Allows to knows if the address maps to an asset id,
+	/// PrecompileSet discriminant. Allows knowing if the address maps to an asset id,
 	/// and if this is the case which one.
 	#[precompile::discriminant]
 	fn discriminant(address: H160, gas: u64) -> DiscriminantResult<AssetIdOf<Runtime, Instance>> {
