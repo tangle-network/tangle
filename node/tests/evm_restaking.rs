@@ -380,26 +380,35 @@ pub struct TestInputs {
 }
 
 /// Helper function for joining as an operator
-async fn join_as_operator(provider: &AlloyProviderWithWallet, stake: U256) -> anyhow::Result<bool> {
-	let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, provider);
-	let result = precompile
-		.joinOperators(stake)
-		.send()
-		.await?
-		.with_timeout(Some(Duration::from_secs(5)))
-		.get_receipt()
-		.await?;
-	Ok(result.status())
+async fn join_as_operator(
+	client: &subxt::OnlineClient<subxt::PolkadotConfig>,
+	caller: tangle_subxt::subxt_signer::sr25519::Keypair,
+	stake: u128,
+) -> anyhow::Result<bool> {
+	let join_call = api::tx().multi_asset_delegation().join_operators(stake);
+	let mut result = client.tx().sign_and_submit_then_watch_default(&join_call, &caller).await?;
+	while let Some(Ok(s)) = result.next().await {
+		if let TxStatus::InBestBlock(b) = s {
+			let _evs = match b.wait_for_success().await {
+				Ok(evs) => evs,
+				Err(e) => {
+					error!("Error: {:?}", e);
+					break;
+				},
+			};
+			break;
+		}
+	}
+	Ok(true)
 }
 
 #[test]
 fn operator_join_delegator_delegate_erc20() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
 		let operator_key = api::storage()
 			.multi_asset_delegation()
@@ -472,11 +481,9 @@ fn operator_join_delegator_delegate_erc20() {
 fn operator_join_delegator_delegate_asset_id() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
-
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
 		let operator_key = api::storage()
 			.multi_asset_delegation()
@@ -736,7 +743,7 @@ fn lrt_deposit_withdraw_erc20() {
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
@@ -889,7 +896,8 @@ fn lrt_rewards() {
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
+
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),

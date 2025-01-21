@@ -520,7 +520,6 @@ where
 		let reward_destination = match payee {
 			0 => pallet_staking::RewardDestination::Staked,
 			1 => pallet_staking::RewardDestination::Stash,
-			2 => pallet_staking::RewardDestination::Controller,
 			3 => pallet_staking::RewardDestination::Account(controller.clone()),
 			4 => pallet_staking::RewardDestination::None,
 			_ => return Err(revert("Invalid reward destination")),
