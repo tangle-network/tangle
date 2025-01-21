@@ -39,8 +39,8 @@ use tangle_primitives::{
 	TESTNET_LOCAL_SS58_PREFIX,
 };
 use tangle_testnet_runtime::{
-	AccountId, Balance, MaxVestingSchedules, Perbill, StakerStatus, TreasuryPalletId, UNIT,
-	WASM_BINARY,
+	AccountId, Balance, MaxVestingSchedules, Perbill, Precompiles, StakerStatus, TreasuryPalletId,
+	UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -259,7 +259,7 @@ fn testnet_genesis(
 	// contract often automatically adds a check that the contract bytecode is non-empty.
 	// For that reason a dummy code (0x60006000fd) can be inserted at the precompile address
 	// to pass that check.
-	let _revert_bytecode = [0x60, 0x00, 0x60, 0x00, 0xFD];
+	let revert_bytecode = [0x60, 0x00, 0x60, 0x00, 0xFD];
 
 	let evm_accounts = {
 		let mut map = BTreeMap::new();
@@ -268,17 +268,17 @@ fn testnet_genesis(
 			map.insert(address, account);
 		}
 
-		// Precompiles::used_addresses().for_each(|address| {
-		// 	map.insert(
-		// 		address.into(),
-		// 		fp_evm::GenesisAccount {
-		// 			nonce: Default::default(),
-		// 			balance: Default::default(),
-		// 			storage: Default::default(),
-		// 			code: revert_bytecode.clone(),
-		// 		},
-		// 	);
-		// });
+		Precompiles::used_addresses_h160().for_each(|address| {
+			map.insert(
+				address,
+				fp_evm::GenesisAccount {
+					nonce: Default::default(),
+					balance: Default::default(),
+					storage: Default::default(),
+					code: revert_bytecode.to_vec(),
+				},
+			);
+		});
 
 		let fully_loaded_accounts = get_fully_funded_accounts_for([
 			"8efcaf2c4ebbf88bf07f3bb44a2869c4c675ad7a",

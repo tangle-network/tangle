@@ -86,7 +86,7 @@ pub fn erc20_transfer(
 
 	log::debug!(
 		target: "evm",
-		"erc20_transfer: context: {:?}, exit_reason: {:?}, input: ({:?}, {}), output: 0x{}",
+		"ERC20.transfer: context: {:?}, exit_reason: {:?}, input: ({:?}, {}), output: 0x{}",
 		context,
 		exit_reason,
 		to.0,
