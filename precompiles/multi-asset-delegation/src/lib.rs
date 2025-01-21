@@ -120,66 +120,6 @@ where
 		Ok(amount.into())
 	}
 
-	#[precompile::public("joinOperators(uint256)")]
-	fn join_operators(handle: &mut impl PrecompileHandle, bond_amount: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let bond_amount: BalanceOf<Runtime> =
-			bond_amount.try_into().map_err(|_| revert("Invalid bond amount"))?;
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::join_operators { bond_amount };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("scheduleLeaveOperators()")]
-	fn schedule_leave_operators(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::schedule_leave_operators {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("cancelLeaveOperators()")]
-	fn cancel_leave_operators(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::cancel_leave_operators {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("executeLeaveOperators()")]
-	fn execute_leave_operators(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_leave_operators {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("operatorBondMore(uint256)")]
-	fn operator_bond_more(handle: &mut impl PrecompileHandle, additional_bond: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let additional_bond: BalanceOf<Runtime> =
-			additional_bond.try_into().map_err(|_| revert("Invalid bond amount"))?;
-		let call =
-			pallet_multi_asset_delegation::Call::<Runtime>::operator_bond_more { additional_bond };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	#[precompile::public("executeWithdraw()")]
 	fn execute_withdraw(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
@@ -210,68 +150,6 @@ where
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(pallet_account_id).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("scheduleOperatorUnstake(uint256)")]
-	fn schedule_operator_unstake(
-		handle: &mut impl PrecompileHandle,
-		unstake_amount: U256,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let unstake_amount: BalanceOf<Runtime> =
-			unstake_amount.try_into().map_err(|_| revert("Invalid unstake amount"))?;
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::schedule_operator_unstake {
-			unstake_amount,
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("executeOperatorUnstake()")]
-	fn execute_operator_unstake(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_operator_unstake {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("cancelOperatorUnstake()")]
-	fn cancel_operator_unstake(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::cancel_operator_unstake {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("goOffline()")]
-	fn go_offline(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::go_offline {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	#[precompile::public("goOnline()")]
-	fn go_online(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::go_online {};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())
 	}

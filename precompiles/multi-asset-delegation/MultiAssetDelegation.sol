@@ -12,49 +12,6 @@ MultiAssetDelegation constant MULTI_ASSET_DELEGATION_CONTRACT = MultiAssetDelega
 /// @title The interface through which solidity contracts will interact with the MultiAssetDelegation pallet
 /// @custom:address 0x0000000000000000000000000000000000000822
 interface MultiAssetDelegation {
-    /// @dev Join as an operator with a bond amount.
-    /// @param bondAmount The amount to bond as an operator.
-    /// @custom:selector de883d74
-    function joinOperators(uint256 bondAmount) external;
-
-    /// @dev Schedule to leave as an operator.
-    /// @custom:selector ce3edd76
-    function scheduleLeaveOperators() external;
-
-    /// @dev Cancel the scheduled leave as an operator.
-    /// @custom:selector 9b1300c1
-    function cancelLeaveOperators() external;
-
-    /// @dev Execute the leave as an operator.
-    /// @custom:selector 0de1fc17
-    function executeLeaveOperators() external;
-
-    /// @dev Bond more as an operator.
-    /// @param additionalBond The additional amount to bond.
-    /// @custom:selector eede281b
-    function operatorBondMore(uint256 additionalBond) external;
-
-    /// @dev Schedule to unstake as an operator.
-    /// @param unstakeAmount The amount to unstake.
-    /// @custom:selector 44aff252
-    function scheduleOperatorUnstake(uint256 unstakeAmount) external;
-
-    /// @dev Execute the unstake as an operator.
-    /// @custom:selector b0dfce06
-    function executeOperatorUnstake() external;
-
-    /// @dev Cancel the scheduled unstake as an operator.
-    /// @custom:selector ac359f2b
-    function cancelOperatorUnstake() external;
-
-    /// @dev Go offline as an operator.
-    /// @custom:selector a6485ccd
-    function goOffline() external;
-
-    /// @dev Go online as an operator.
-    /// @custom:selector 6e5b676b
-    function goOnline() external;
-
     /// @dev Deposit an amount of an asset.
     /// @param assetId The ID of the asset (0 for ERC20).
     /// @param tokenAddress The address of the ERC20 token (if assetId is 0).
