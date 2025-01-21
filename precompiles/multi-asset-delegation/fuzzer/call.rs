@@ -21,7 +21,6 @@
 //! # Debugging a panic
 //! Once a panic is found, it can be debugged with
 //! `cargo hfuzz run-debug mad-fuzzer hfuzz_workspace/mad-fuzzer/*.fuzz`.
-
 use fp_evm::Context;
 use fp_evm::PrecompileSet;
 use frame_support::traits::{Currency, Get};
@@ -39,6 +38,7 @@ use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use rand::{seq::SliceRandom, Rng};
 use sp_runtime::traits::{Scale, Zero};
+use sp_runtime::DispatchResult;
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
@@ -82,13 +82,13 @@ fn fund_account<R: Rng>(rng: &mut R, address: &Address) {
 }
 
 /// Join operators call.
-fn join_operators_call<R: Rng>(rng: &mut R, who: &Address) -> (PCall, Address) {
+fn join_operators<R: Rng>(rng: &mut R, who: &Address) -> DispatchResult {
 	let minimum_bond = <<Runtime as mad::Config>::MinOperatorBondAmount as Get<Balance>>::get();
 	let multiplier = rng.gen_range(1..50u64);
 	let who_account_id = <TestAccount as AddressMapping<AccountId>>::into_account_id(who.0);
 	let _ = Balances::deposit_creating(&who_account_id, minimum_bond.mul(multiplier));
 	let bond_amount = minimum_bond.mul(multiplier).into();
-	(PCall::join_operators { bond_amount }, *who)
+	MultiAssetDelegation::join_operators(RuntimeOrigin::signed(who_account_id), bond_amount)
 }
 
 fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Address)> {
@@ -147,19 +147,17 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 				let count = rng.gen_range(1..MaxDelegatorBlueprints::get());
 				(0..count).map(|_| rng.gen::<u64>()).collect::<Vec<_>>()
 			};
-			vec![
-				join_operators_call(&mut rng, &operator),
-				(
-					PCall::delegate {
-						operator: operator.0.into(),
-						asset_id,
-						token_address,
-						amount,
-						blueprint_selection,
-					},
-					who,
-				),
-			]
+			join_operators(&mut rng, &operator).unwrap();
+			vec![(
+				PCall::delegate {
+					operator: operator.0.into(),
+					asset_id,
+					token_address,
+					amount,
+					blueprint_selection,
+				},
+				who,
+			)]
 		},
 		_ if op == PCall::schedule_delegator_unstake_selectors()[0] => {
 			// Schedule delegator unstakes
@@ -171,18 +169,16 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 				Asset::Erc20(token) => (0.into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
-			vec![
-				join_operators_call(&mut rng, &operator),
-				(
-					PCall::schedule_delegator_unstake {
-						operator: operator.0.into(),
-						asset_id,
-						token_address,
-						amount,
-					},
-					who,
-				),
-			]
+			join_operators(&mut rng, &operator).unwrap();
+			vec![(
+				PCall::schedule_delegator_unstake {
+					operator: operator.0.into(),
+					asset_id,
+					token_address,
+					amount,
+				},
+				who,
+			)]
 		},
 		_ if op == PCall::execute_delegator_unstake_selectors()[0] => {
 			// Execute delegator unstake
@@ -200,18 +196,16 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 				Asset::Erc20(token) => (0.into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
-			vec![
-				join_operators_call(&mut rng, &operator),
-				(
-					PCall::cancel_delegator_unstake {
-						operator: operator.0.into(),
-						asset_id,
-						token_address,
-						amount,
-					},
-					who,
-				),
-			]
+			join_operators(&mut rng, &operator).unwrap();
+			vec![(
+				PCall::cancel_delegator_unstake {
+					operator: operator.0.into(),
+					asset_id,
+					token_address,
+					amount,
+				},
+				who,
+			)]
 		},
 		_ => {
 			unimplemented!("unknown call name: {}", op)
