@@ -68,7 +68,6 @@ pub struct RawStepLog {
 	#[serde(serialize_with = "u256_serialize")]
 	pub depth: U256,
 
-	//error: TODO
 	#[serde(serialize_with = "u256_serialize")]
 	pub gas: U256,
 

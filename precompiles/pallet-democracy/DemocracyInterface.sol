@@ -111,8 +111,6 @@ interface Democracy {
     /// This is necessary for calculating the weight of the call.
     function second(uint256 propIndex, uint256 secondsUpperBound) external;
 
-    //TODO should we have an alternative `simpleSecond` where the upper bound is read from storage?
-
     /// Vote in a referendum.
     /// @custom:selector 6cd18b0d
     ///

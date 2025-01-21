@@ -61,7 +61,8 @@ pub const SELECTOR_LOG_DEPOSIT: [u8; 32] = keccak256!("Deposit(address,uint256)"
 pub const SELECTOR_LOG_WITHDRAWAL: [u8; 32] = keccak256!("Withdrawal(address,uint256)");
 
 /// Solidity selector of the TransferNative log, which is the Keccak of the Log signature.
-pub const SELECTOR_LOG_TRANSFER_NATIVE: [u8; 32] = keccak256!("TransferNative(bytes32,uint256)");
+pub const SELECTOR_LOG_TRANSFER_NATIVE: [u8; 32] =
+	keccak256!("TransferNative(address,bytes32,uint256)");
 
 /// Associates pallet Instance to a prefix used for the Approves storage.
 /// This trait is implemented for () and the 16 substrate Instance.
