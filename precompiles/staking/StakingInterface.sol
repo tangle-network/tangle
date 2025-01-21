@@ -51,6 +51,11 @@ interface Staking {
     /// @return Total stake in era.
     function erasTotalStake(uint32 eraIndex) external view returns (uint256);
 
+    /// @dev Get total reward points for an era
+    /// @param eraIndex The era index to query
+    /// @return Total reward points for the era
+    function erasTotalRewardPoints(uint32 eraIndex) external view returns (uint32);
+
     /// @dev Nominate a set of validators.
     /// @param targets Array of validators' addresses to nominate.
     function nominate(bytes32[] calldata targets) external;
@@ -90,4 +95,6 @@ interface Staking {
     /// @dev Rebond a portion of the unbonded tokens.
     /// @param value Amount of tokens to rebond.
     function rebond(uint256 value) external;
+
+    
 }
