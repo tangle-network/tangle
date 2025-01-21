@@ -410,9 +410,7 @@ fn operator_join_delegator_delegate_erc20() {
 		let tnt = U256::from(100_000u128);
 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
@@ -446,7 +444,7 @@ fn operator_join_delegator_delegate_erc20() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				alice.account_id().0.into(),
 				U256::ZERO,
 				*usdc.address(),
 				delegate_amount,
