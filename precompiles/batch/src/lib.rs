@@ -223,7 +223,7 @@ where
 					return Err(PrecompileFailure::Fatal { exit_status })
 				},
 
-				// BatchAll : Reverts and errors are immediatly forwarded.
+				// BatchAll : Reverts and errors are immediately forwarded.
 				(Mode::BatchAll, ExitReason::Revert(exit_status)) => {
 					return Err(PrecompileFailure::Revert { exit_status, output })
 				},

@@ -328,7 +328,7 @@ impl CacheRequester {
 
 /// Data stored for each block in the cache.
 /// `active_batch_count` represents the number of batches using this
-/// block. It will increase immediatly when a batch is created, but will be
+/// block. It will increase immediately when a batch is created, but will be
 /// decrease only after the batch ends and its expiration delay passes.
 /// It allows to keep the data in the cache for following requests that would use
 /// this block, which is important to handle pagination efficiently.
@@ -595,7 +595,7 @@ where
 	}
 
 	/// Handle a request to get the traces of the provided block.
-	/// - If the result is stored in the cache, it sends it immediatly.
+	/// - If the result is stored in the cache, it sends it immediately.
 	/// - If the block is currently being pooled, it is added in this block cache waiting list, and
 	///   all requests concerning this block will be satisfied when the tracing for this block is
 	///   finished.

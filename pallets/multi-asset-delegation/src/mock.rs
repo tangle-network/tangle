@@ -278,12 +278,12 @@ pub struct MockServiceManager;
 
 impl tangle_primitives::traits::ServiceManager<AccountId, Balance> for MockServiceManager {
 	fn get_active_blueprints_count(_account: &AccountId) -> usize {
-		// we dont care
+		// we don't care
 		Default::default()
 	}
 
 	fn get_active_services_count(_account: &AccountId) -> usize {
-		// we dont care
+		// we don't care
 		Default::default()
 	}
 
@@ -293,7 +293,7 @@ impl tangle_primitives::traits::ServiceManager<AccountId, Balance> for MockServi
 	}
 
 	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
-		todo!(); // we dont care
+		todo!(); // we don't care
 	}
 }
 

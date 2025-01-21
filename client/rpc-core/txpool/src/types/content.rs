@@ -38,7 +38,7 @@ pub struct Transaction {
 	/// Recipient
 	#[serde(serialize_with = "to_serialize")]
 	pub to: Option<H160>,
-	/// Transfered value
+	/// Transferred value
 	pub value: U256,
 	/// Gas Price
 	pub gas_price: U256,
