@@ -1,20 +1,22 @@
-#[cfg(not(feature = "std"))]
-use alloc::{boxed::Box, string::String, vec, vec::Vec};
-
-#[cfg(feature = "std")]
-use std::{boxed::Box, string::String, vec::Vec};
-
 use ethabi::{Function, StateMutability, Token};
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
-use sp_core::{H160, U256};
+use frame_system::pallet_prelude::BlockNumberFor;
+use parity_scale_codec::Encode;
+use sp_core::{Get, H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
+use sp_std::{boxed::Box, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, BlueprintServiceManager, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, Field,
 	MasterBlueprintServiceManagerRevision, OperatorPreferences, Service, ServiceBlueprint,
 };
 
-use super::*;
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+#[cfg(feature = "std")]
+use std::string::String;
+
 use crate::types::BalanceOf;
+use crate::{Config, Error, Event, MasterBlueprintServiceManagerRevisions, Pallet, Pays, Weight};
 
 #[allow(clippy::too_many_arguments)]
 impl<T: Config> Pallet<T> {
@@ -462,7 +464,6 @@ impl<T: Config> Pallet<T> {
 		operators: &[OperatorPreferences],
 		request_args: &[Field<T::Constraints, T::AccountId>],
 		permitted_callers: &[T::AccountId],
-		_assets: &[T::AssetId],
 		ttl: BlockNumberFor<T>,
 		paymet_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
@@ -524,7 +525,6 @@ impl<T: Config> Pallet<T> {
 							})
 							.collect(),
 					),
-					// Token::Array(vec![]),
 					Token::Uint(ethabi::Uint::from(ttl.into())),
 					paymet_asset.to_ethabi(),
 					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
@@ -557,7 +557,6 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		owner: &T::AccountId,
 		permitted_callers: &[T::AccountId],
-		_assets: &[T::AssetId],
 		ttl: BlockNumberFor<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]

@@ -29,7 +29,7 @@ use sp_runtime::{
 	DispatchError, Serialize,
 };
 use std::sync::Arc;
-use tangle_primitives::services::{Constraints, RpcServicesWithBlueprint};
+use tangle_primitives::services::{AssetIdT, Constraints, RpcServicesWithBlueprint};
 
 type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
@@ -41,7 +41,7 @@ where
 	X: Constraints,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 	BlockNumber: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AssetId: AssetIdT,
 {
 	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
 	fn query_services_with_blueprints_by_operator(
@@ -70,7 +70,7 @@ impl<C, X, Block, AccountId, AssetId>
 where
 	Block: BlockT,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AssetId: AssetIdT,
 	X: Constraints,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	C::Api: ServicesRuntimeApi<Block, X, AccountId, AssetId>,

@@ -17,6 +17,7 @@ use super::*;
 pub mod ordered_set;
 pub mod rewards;
 use frame_support::pallet_prelude::*;
+use parity_scale_codec::Codec;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::{ByteArray, RuntimeDebug};
@@ -99,16 +100,9 @@ pub enum Account<AccountId> {
 	Address(sp_core::H160),
 }
 
-impl<AccountId> Default for Account<AccountId>
-where
-	AccountId: ByteArray,
-{
+impl<AccountId> Default for Account<AccountId> {
 	fn default() -> Self {
-		// This should be good enough to make the account for any account id type.
-		let empty = [0u8; 64];
-		let account_id =
-			AccountId::from_slice(&empty[0..AccountId::LEN]).expect("never fails; qed");
-		Account::Id(account_id)
+		Account::<AccountId>::Address(sp_core::H160([0u8; 20]))
 	}
 }
 

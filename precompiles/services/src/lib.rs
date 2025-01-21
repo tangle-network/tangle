@@ -11,7 +11,10 @@ use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
-use tangle_primitives::services::{Asset, Field, OperatorPreferences, ServiceBlueprint};
+use tangle_primitives::services::{
+	Asset, AssetSecurityCommitment, AssetSecurityRequirement, Field, OperatorPreferences,
+	ServiceBlueprint,
+};
 
 #[cfg(test)]
 mod mock;
@@ -135,13 +138,13 @@ where
 
 	/// Request a new service.
 	#[precompile::public(
-		"requestService(uint256,uint256[],bytes,bytes,bytes,uint256,uint256,address,uint256)"
+		"requestService(uint256,bytes[],bytes,bytes,bytes,uint256,uint256,address,uint256)"
 	)]
 	#[precompile::payable]
 	fn request_service(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: U256,
-		assets: Vec<U256>,
+		asset_security_requirements: Vec<UnboundedBytes>,
 		permitted_callers_data: UnboundedBytes,
 		service_providers_data: UnboundedBytes,
 		request_args_data: UnboundedBytes,
@@ -155,6 +158,8 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
 
 		let blueprint_id: u64 = blueprint_id.as_u64();
+		let asset_security_requirements_data: Vec<Vec<u8>> =
+			asset_security_requirements.into_iter().map(|x| x.into()).collect();
 		let permitted_callers_data: Vec<u8> = permitted_callers_data.into();
 		let service_providers_data: Vec<u8> = service_providers_data.into();
 		let request_args_data: Vec<u8> = request_args_data.into();
@@ -171,8 +176,12 @@ where
 			Decode::decode(&mut &request_args_data[..])
 				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
 
-		let assets: Vec<Runtime::AssetId> =
-			assets.into_iter().map(|asset| asset.as_u32().into()).collect();
+		let asset_security_requirements: Vec<AssetSecurityRequirement<Runtime::AssetId>> =
+			asset_security_requirements_data
+				.into_iter()
+				.map(|req| Decode::decode(&mut &req[..]))
+				.collect::<Result<_, _>>()
+				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
 
 		let value_bytes = {
 			let value = handle.context().apparent_value;
@@ -227,7 +236,7 @@ where
 			permitted_callers,
 			operators,
 			ttl,
-			assets,
+			asset_security_requirements,
 			request_args,
 			payment_asset,
 			value: amount,
@@ -254,18 +263,36 @@ where
 	}
 
 	/// Approve a request.
-	#[precompile::public("approve(uint256,uint8)")]
+	#[precompile::public("approve(uint256,uint8,uint8[])")]
 	fn approve(
 		handle: &mut impl PrecompileHandle,
 		request_id: U256,
-		restaking_percent: u8,
+		native_restaking_percent: u8,
+		non_native_restaking_percentages: Vec<u8>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let request_id: u64 = request_id.as_u64();
-		let restaking_percent: Percent = Percent::from_percent(restaking_percent);
+		// Retrieve and validate the service request
+		let request = pallet_services::ServiceRequests::<Runtime>::get(request_id).unwrap();
+		// Treat the asset approval descriptions in order
+		let request_assets = request.asset_security;
+		let native_asset_exposure: Percent = Percent::from_percent(native_restaking_percent);
+		let non_native_asset_exposures: Vec<AssetSecurityCommitment<Runtime::AssetId>> =
+			request_assets
+				.into_iter()
+				.zip(non_native_restaking_percentages)
+				.map(|(req, percent)| AssetSecurityCommitment {
+					asset: req.asset,
+					exposure_percent: Percent::from_percent(percent),
+				})
+				.collect();
 
-		let call = pallet_services::Call::<Runtime>::approve { request_id, restaking_percent };
+		let call = pallet_services::Call::<Runtime>::approve {
+			request_id,
+			native_asset_exposure,
+			non_native_asset_exposures,
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 

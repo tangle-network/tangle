@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::{BalanceOf, OperatorStatus};
+use crate::types::{BalanceOf, DelegatorBlueprintSelection, OperatorStatus};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{traits::Zero, Percent};
 use sp_std::prelude::*;
@@ -23,11 +23,10 @@ use tangle_primitives::{
 	services::Asset, traits::MultiAssetDelegationInfo, BlueprintId, RoundIndex,
 };
 
-impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>>
+impl<T: crate::Config>
+	MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>, T::AssetId>
 	for crate::Pallet<T>
 {
-	type AssetId = T::AssetId;
-
 	fn get_current_round() -> RoundIndex {
 		Self::current_round()
 	}
@@ -60,7 +59,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, Bloc
 
 	fn get_delegators_for_operator(
 		operator: &T::AccountId,
-	) -> Vec<(T::AccountId, BalanceOf<T>, Asset<Self::AssetId>)> {
+	) -> Vec<(T::AccountId, BalanceOf<T>, Asset<T::AssetId>)> {
 		Operators::<T>::get(operator).map_or(Vec::new(), |metadata| {
 			metadata
 				.delegations
@@ -68,6 +67,28 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, Bloc
 				.map(|stake| (stake.delegator.clone(), stake.amount, stake.asset_id))
 				.collect()
 		})
+	}
+
+	fn has_delegator_selected_blueprint(
+		delegator: &T::AccountId,
+		operator: &T::AccountId,
+		blueprint_id: BlueprintId,
+	) -> bool {
+		// Get delegator metadata
+		if let Some(metadata) = Delegators::<T>::get(delegator) {
+			// Find delegation to specific operator and check its blueprint selection
+			metadata.delegations.iter().any(|delegation| {
+				delegation.operator == *operator
+					&& match &delegation.blueprint_selection {
+						DelegatorBlueprintSelection::Fixed(blueprints) => {
+							blueprints.contains(&blueprint_id)
+						},
+						DelegatorBlueprintSelection::All => true,
+					}
+			})
+		} else {
+			false
+		}
 	}
 
 	fn slash_operator(operator: &T::AccountId, blueprint_id: BlueprintId, percentage: Percent) {
