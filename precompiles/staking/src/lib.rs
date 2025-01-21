@@ -202,7 +202,7 @@ where
 	fn is_nominator(handle: &mut impl PrecompileHandle, nominator: Address) -> EvmResult<bool> {
 		let nominator_account = Runtime::AddressMapping::into_account_id(nominator.0);
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let is_nominator = pallet_staking::Validators::<Runtime>::contains_key(nominator_account);
+		let is_nominator = pallet_staking::Nominators::<Runtime>::contains_key(nominator_account);
 		Ok(is_nominator)
 	}
 
