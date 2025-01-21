@@ -16,13 +16,15 @@
 
 //! # Rewards Pallet
 //!
-//! A flexible reward distribution system that supports multiple vaults with configurable reward parameters.
+//! A flexible reward distribution system that supports multiple vaults with configurable reward
+//! parameters.
 //!
 //! ## Overview
 //!
-//! The Rewards pallet provides a mechanism for distributing rewards to users who deposit assets into
-//! various vaults. Each vault can have its own reward configuration, including APY rates and deposit caps.
-//! The system supports both unlocked deposits and locked deposits with multipliers for longer lock periods.
+//! The Rewards pallet provides a mechanism for distributing rewards to users who deposit assets
+//! into various vaults. Each vault can have its own reward configuration, including APY rates and
+//! deposit caps. The system supports both unlocked deposits and locked deposits with multipliers
+//! for longer lock periods.
 //!
 //! ## Reward Vaults
 //!
@@ -36,16 +38,11 @@
 //!
 //! Rewards are calculated based on several factors:
 //!
-//! 1. Base Rewards:
-//!    ```text
-//!    Base Reward = APY * (user_deposit / total_deposits) * (total_deposits / deposit_capacity)
-//!    ```
+//! 1. Base Rewards: ```text Base Reward = APY * (user_deposit / total_deposits) * (total_deposits /
+//!    deposit_capacity) ```
 //!
-//! 2. Locked Deposits:
-//!    For locked deposits, additional rewards are calculated using:
-//!    ```text
-//!    Lock Reward = Base Reward * lock_multiplier * (remaining_lock_time / total_lock_time)
-//!    ```
+//! 2. Locked Deposits: For locked deposits, additional rewards are calculated using: ```text Lock
+//!    Reward = Base Reward * lock_multiplier * (remaining_lock_time / total_lock_time) ```
 //!
 //! Lock multipliers increase rewards based on lock duration:
 //! - One Month: 1.1x
@@ -55,9 +52,8 @@
 //!
 //! ## Notes
 //!
-//! - The reward vaults will consider all assets in parity, so only add the same type of asset in the same vault.
-//!
-//!
+//! - The reward vaults will consider all assets in parity, so only add the same type of asset in
+//!   the same vault.
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
@@ -92,9 +88,9 @@ pub mod pallet {
 		traits::{Currency, LockableCurrency, ReservableCurrency},
 		PalletId,
 	};
-
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::AccountIdConversion;
+	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -138,10 +134,18 @@ pub mod pallet {
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
-	/// Stores the total score for each asset
+	/// Stores the total score for each vault
+	/// The difference between this and total_reward_vault_deposit is that this includes locked
+	/// deposits multiplied by the lock multiplier
 	#[pallet::storage]
 	#[pallet::getter(fn total_reward_vault_score)]
 	pub type TotalRewardVaultScore<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::VaultId, BalanceOf<T>, ValueQuery>;
+
+	/// Stores the total deposit for each vault
+	#[pallet::storage]
+	#[pallet::getter(fn total_reward_vault_deposit)]
+	pub type TotalRewardVaultDeposit<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::VaultId, BalanceOf<T>, ValueQuery>;
 
 	/// Stores the service reward for a given user
@@ -192,6 +196,11 @@ pub mod pallet {
 		OptionQuery,
 	>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn blocks_for_apy)]
+	/// Storage for the reward configuration, which includes APY, cap for assets
+	pub type ApyBlocks<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -219,6 +228,19 @@ pub mod pallet {
 		},
 		VaultRewardConfigUpdated {
 			vault_id: T::VaultId,
+		},
+		/// Total score in vault updated
+		TotalScoreUpdated {
+			vault_id: T::VaultId,
+			asset: Asset<T::AssetId>,
+			total_score: BalanceOf<T>,
+			lock_multiplier: Option<LockMultiplier>,
+		},
+		/// Total deposit in vault updated
+		TotalDepositUpdated {
+			vault_id: T::VaultId,
+			asset: Asset<T::AssetId>,
+			total_deposit: BalanceOf<T>,
 		},
 	}
 

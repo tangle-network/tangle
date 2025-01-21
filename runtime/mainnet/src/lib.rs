@@ -1939,8 +1939,7 @@ impl_runtime_apis! {
 			account_id: AccountId,
 			asset_id: tangle_primitives::services::Asset<AssetId>,
 		) -> Result<Balance, sp_runtime::DispatchError> {
-			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
-			Ok(rewards)
+			Rewards::calculate_rewards(&account_id, asset_id)
 		}
 	}
 
