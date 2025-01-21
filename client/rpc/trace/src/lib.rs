@@ -720,7 +720,10 @@ where
 				// last batch containing it.
 				let mut remove = false;
 				if let Some(block_cache) = self.cached_blocks.get_mut(&block) {
-					block_cache.active_batch_count -= 1;
+					block_cache.active_batch_count = block_cache
+						.active_batch_count
+						.checked_sub(1)
+						.expect("active_batch_count underflow");
 
 					if block_cache.active_batch_count == 0 {
 						remove = true;

@@ -192,7 +192,7 @@ impl<
 		let mut total = Balance::default();
 		for stake in &self.delegations {
 			if stake.asset_id == asset_id {
-				total += stake.amount.clone();
+				total = total.checked_add(&stake.amount).unwrap_or_else(|| total);
 			}
 		}
 		total

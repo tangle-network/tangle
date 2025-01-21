@@ -41,7 +41,7 @@ where
 		let mut total_stake = Balance::default();
 		for stake in &self.delegations {
 			if stake.asset_id == asset_id {
-				total_stake += stake.amount;
+				total_stake = total_stake.checked_add(&stake.amount).unwrap_or(total_stake);
 			}
 		}
 		total_stake
@@ -53,7 +53,7 @@ where
 
 		for stake in &self.delegations {
 			let entry = stake_by_asset.entry(stake.asset_id).or_default();
-			*entry += stake.amount;
+			*entry = entry.checked_add(&stake.amount).unwrap_or(*entry);
 		}
 
 		stake_by_asset.into_iter().collect()
