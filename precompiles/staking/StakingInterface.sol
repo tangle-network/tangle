@@ -95,4 +95,35 @@ interface Staking {
     /// @dev Rebond a portion of the unbonded tokens.
     /// @param value Amount of tokens to rebond.
     function rebond(uint256 value) external;
+
+    /// @dev Declare the desire to validate for the origin controller.
+    /// @param commission The commission as parts per billion.
+    function validate(uint256 commission) external;
+
+    /// @dev Remove all staking-related data for a stash account.
+    /// @param stash The stash account to reap.
+    function reapStash(bytes32 stash) external;
+
+    /// @dev Remove nominator status from multiple accounts.
+    /// @param who The accounts to kick.
+    function kick(bytes32[] calldata who) external;
+
+    /// @dev Stop nominating or validating for another account.
+    /// @param controller The controller account to chill.
+    function chillOther(bytes32 controller) external;
+
+    /// @dev Force a validator to have at least the minimum commission.
+    /// @param validatorStash The validator's stash account.
+    function forceApplyMinCommission(bytes32 validatorStash) external;
+
+    /// @dev Pay out rewards for a validator and era by page.
+    /// @param validatorStash The validator's stash account.
+    /// @param era The era to pay out.
+    /// @param page The page number.
+    function payoutStakersByPage(bytes32 validatorStash, uint32 era, uint32 page) external;
+
+    /// @dev Update the reward destination for a stash account.
+    /// @param stash The stash account.
+    /// @param payee The reward destination type (0-Staked, 1-Stash, 2-Account, 3-None).
+    function updatePayee(bytes32 stash, uint8 payee) external;
 }

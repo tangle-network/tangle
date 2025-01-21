@@ -47,7 +47,10 @@ use frame_support::{
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
 use sp_core::{H160, H256, U256};
-use sp_runtime::traits::{Dispatchable, StaticLookup};
+use sp_runtime::{
+	traits::{Dispatchable, StaticLookup},
+	Perbill,
+};
 use sp_std::{convert::TryInto, marker::PhantomData, vec, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
 
@@ -111,6 +114,10 @@ where
 		};
 
 		Ok(payee)
+	}
+
+	fn convert_to_account_id(account: H256) -> EvmResult<Runtime::AccountId> {
+		Self::parse_32byte_address(account.0.to_vec())
 	}
 }
 
@@ -394,6 +401,136 @@ where
 
 		// Dispatch call (if enough gas).
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("validate(uint256)")]
+	fn validate(handle: &mut impl PrecompileHandle, commission: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let commission_value: u32 =
+			commission.try_into().map_err(|_| revert("Commission overflow"))?;
+		let prefs = pallet_staking::ValidatorPrefs {
+			commission: Perbill::from_parts(commission_value),
+			blocked: false,
+		};
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::validate { prefs },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("reapStash(bytes32)")]
+	fn reap_stash(handle: &mut impl PrecompileHandle, stash: H256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let stash = Self::convert_to_account_id(stash)?;
+		let num_slashing_spans = 0u32; // Default to 0 as it's the most common case
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::reap_stash { stash, num_slashing_spans },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("kick(bytes32[])")]
+	fn kick(handle: &mut impl PrecompileHandle, who: Vec<H256>) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let who: Vec<Runtime::AccountId> =
+			who.into_iter().map(Self::convert_to_account_id).collect::<Result<_, _>>()?;
+
+		let who = who.into_iter().map(|id| Runtime::Lookup::unlookup(id)).collect();
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::kick { who },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("chillOther(bytes32)")]
+	fn chill_other(handle: &mut impl PrecompileHandle, controller: H256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let stash = Self::convert_to_account_id(controller)?;
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::chill_other { stash },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("forceApplyMinCommission(bytes32)")]
+	fn force_apply_min_commission(
+		handle: &mut impl PrecompileHandle,
+		validator_stash: H256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let validator_stash = Self::convert_to_account_id(validator_stash)?;
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::force_apply_min_commission { validator_stash },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("payoutStakersByPage(bytes32,uint32,uint32)")]
+	fn payout_stakers_by_page(
+		handle: &mut impl PrecompileHandle,
+		validator_stash: H256,
+		era: u32,
+		page: u32,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let validator_stash = Self::convert_to_account_id(validator_stash)?;
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::payout_stakers_by_page { validator_stash, era, page },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("updatePayee(bytes32,uint8)")]
+	fn update_payee(handle: &mut impl PrecompileHandle, stash: H256, payee: u8) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let controller = Self::convert_to_account_id(stash)?;
+		let reward_destination = match payee {
+			0 => pallet_staking::RewardDestination::Staked,
+			1 => pallet_staking::RewardDestination::Stash,
+			2 => pallet_staking::RewardDestination::Controller,
+			3 => pallet_staking::RewardDestination::Account(controller.clone()),
+			4 => pallet_staking::RewardDestination::None,
+			_ => return Err(revert("Invalid reward destination")),
+		};
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_staking::Call::<Runtime>::set_payee { payee: reward_destination },
+		)?;
 
 		Ok(())
 	}
