@@ -8,7 +8,9 @@ use alloy::{
 	},
 	transports::BoxTransport,
 };
+use parity_scale_codec::Encode;
 use sc_cli::{CliConfiguration, SubstrateCli};
+use sp_tracing::warn;
 use tangle::{chainspec, cli, eth, service};
 use tangle_primitives::types::Block;
 use tangle_subxt::{subxt, subxt_signer};
@@ -189,6 +191,10 @@ pub trait AddressConverter {
 	fn to_account_id(&self) -> subxt::utils::AccountId32;
 }
 
+pub trait AccountIdConverter {
+	fn to_address(&self) -> alloy::primitives::Address;
+}
+
 impl AddressConverter for alloy::primitives::Address {
 	fn to_account_id(&self) -> subxt::utils::AccountId32 {
 		let mut data = [0u8; 24];
@@ -197,6 +203,16 @@ impl AddressConverter for alloy::primitives::Address {
 		let hash = sp_core::blake2_256(&data);
 
 		subxt::utils::AccountId32(hash)
+	}
+}
+
+impl AccountIdConverter for subxt::utils::AccountId32 {
+	fn to_address(&self) -> alloy::primitives::Address {
+		self.using_encoded(|b| {
+			let mut addr = [0u8; 20];
+			addr.copy_from_slice(&b[0..20]);
+			alloy::primitives::Address::from(addr)
+		})
 	}
 }
 
@@ -216,6 +232,7 @@ where
 		"--rpc-methods=unsafe",
 		"--rpc-external",
 		"--rpc-port=9944",
+		"--ethapi=trace,debug,txpool",
 		#[cfg(feature = "manual-seal")]
 		"--sealing=manual",
 		"--auto-insert-keys",
@@ -258,6 +275,7 @@ where
 		max_past_logs: cli.eth.max_past_logs,
 		tracing_raw_max_memory_usage: cli.eth.tracing_raw_max_memory_usage,
 	};
+	warn!("Starting the node with the following RPC config: {:?}", rpc_config);
 
 	runner
 		.async_run(|config| {

@@ -23,4 +23,9 @@ interface Vesting {
     /// @param target The address of the account to transfer funds to.
     /// @param index The index of the vesting schedule to transfer.
     function vestedTransfer(bytes32 target, uint8 index) external returns (uint8);
+
+    /// @dev Merge two vesting schedules together.
+    /// @param schedule1Index The index of the first vesting schedule.
+    /// @param schedule2Index The index of the second vesting schedule.
+    function mergeSchedules(uint32 schedule1Index, uint32 schedule2Index) external returns (uint8);
 }

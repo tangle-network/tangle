@@ -1,18 +1,19 @@
-// Copyright 2019-2022 PureStake Inc.
-// This file is part of Moonbeam.
+// Copyright 2022-2025 Tangle Foundation.
+// This file is part of Tangle.
+// This file originated in Moonbeam's codebase.
 
-// Moonbeam is free software: you can redistribute it and/or modify
+// Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Moonbeam is distributed in the hope that it will be useful,
+// Tangle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
+// along with Tangle. If not, see <http://www.gnu.org/licenses/>.
 
 //! Environmental-aware externalities for EVM tracing in Wasm runtime. This enables
 //! capturing the - potentially large - trace output data in the host and keep
@@ -46,7 +47,7 @@ pub trait Ext {
 	fn call_list_new(&mut self) {}
 
 	// New design, proxy events.
-	/// An `Evm` event proxied by the Moonbeam runtime to this host function.
+	/// An `Evm` event proxied by the Tangle runtime to this host function.
 	/// evm -> runtime -> host.
 	fn evm_event(&mut self, event: Vec<u8>) {
 		if let Ok(event) = EvmEvent::decode(&mut &event[..]) {
@@ -54,7 +55,7 @@ pub trait Ext {
 		}
 	}
 
-	/// A `Gasometer` event proxied by the Moonbeam runtime to this host function.
+	/// A `Gasometer` event proxied by the Tangle runtime to this host function.
 	/// evm_gasometer -> runtime -> host.
 	fn gasometer_event(&mut self, event: Vec<u8>) {
 		if let Ok(event) = GasometerEvent::decode(&mut &event[..]) {
@@ -62,7 +63,7 @@ pub trait Ext {
 		}
 	}
 
-	/// A `Runtime` event proxied by the Moonbeam runtime to this host function.
+	/// A `Runtime` event proxied by the Tangle runtime to this host function.
 	/// evm_runtime -> runtime -> host.
 	fn runtime_event(&mut self, event: Vec<u8>) {
 		if let Ok(event) = RuntimeEvent::decode(&mut &event[..]) {

@@ -132,6 +132,13 @@ impl From<TestAccount> for H160 {
 	}
 }
 
+impl From<TestAccount> for Address {
+	fn from(x: TestAccount) -> Address {
+		let h160: H160 = x.into();
+		Address::from(h160)
+	}
+}
+
 impl From<TestAccount> for AccountId32 {
 	fn from(x: TestAccount) -> Self {
 		match x {
@@ -246,12 +253,12 @@ pub struct MockServiceManager;
 
 impl ServiceManager<AccountId, Balance> for MockServiceManager {
 	fn get_active_blueprints_count(_account: &AccountId) -> usize {
-		// we dont care
+		// we don't care
 		Default::default()
 	}
 
 	fn get_active_services_count(_account: &AccountId) -> usize {
-		// we dont care
+		// we don't care
 		Default::default()
 	}
 
@@ -261,7 +268,7 @@ impl ServiceManager<AccountId, Balance> for MockServiceManager {
 	}
 
 	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
-		// we dont care
+		// we don't care
 		Default::default()
 	}
 }

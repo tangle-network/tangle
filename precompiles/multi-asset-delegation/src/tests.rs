@@ -1,6 +1,6 @@
 use crate::{mock::*, mock_evm::*, U256};
 use frame_support::{assert_ok, traits::Currency};
-use pallet_multi_asset_delegation::{types::OperatorStatus, CurrentRound, Delegators, Operators};
+use pallet_multi_asset_delegation::{CurrentRound, Delegators, Operators};
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use sp_core::H160;
@@ -31,45 +31,6 @@ fn test_unimplemented_selector_reverts() {
 		PrecompilesValue::get()
 			.prepare_test(Alice, Precompile1, vec![1u8, 2, 3, 4])
 			.execute_reverts(|output| output == b"Unknown selector");
-	});
-}
-
-#[test]
-fn test_join_operators() {
-	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let initial_balance = Balances::free_balance(account);
-		assert!(Operators::<Runtime>::get(account).is_none());
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::join_operators { bond_amount: U256::from(10_000) },
-			)
-			.execute_returns(());
-
-		assert!(Operators::<Runtime>::get(account).is_some());
-		let expected_balance = initial_balance - 10_000;
-		assert_eq!(Balances::free_balance(account), expected_balance);
-	});
-}
-
-#[test]
-fn test_join_operators_insufficient_balance() {
-	ExtBuilder::default().build().execute_with(|| {
-		let account = sp_core::sr25519::Public::from(TestAccount::Eve);
-		Balances::make_free_balance_be(&account, 500);
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Eve,
-				H160::from_low_u64_be(1),
-				PCall::join_operators { bond_amount: U256::from(10_000) },
-			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 1, error: [2, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
-
-		assert_eq!(Balances::free_balance(account), 500);
 	});
 }
 
@@ -218,6 +179,8 @@ fn test_deposit_assets_insufficient_balance_erc20() {
 			.execute_reverts(|output| output == b"Failed to transfer ERC20 tokens: false");
 
 		assert!(Delegators::<Runtime>::get(delegator_account).is_none());
+
+		// Delegate
 	});
 }
 
@@ -300,9 +263,92 @@ fn test_delegate_assets_insufficient_balance() {
 					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [14, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
+	});
+}
+
+#[test]
+fn test_unstake_assets_erc20() {
+	ExtBuilder::default().build().execute_with(|| {
+		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+
+		Balances::make_free_balance_be(&operator_account, 20_000);
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator_account),
+			10_000
+		));
+
+		create_and_mint_tokens(1, delegator_account, 500);
+		Balances::make_free_balance_be(&delegator_account, 500);
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::deposit {
+					asset_id: U256::zero(),
+					amount: U256::from(200),
+					token_address: Address(USDC_ERC20),
+					lock_multiplier: 0,
+				},
+			)
+			.with_subcall_handle(|subcall| {
+				// Intercept the call
+				assert!(!subcall.is_static);
+				assert_eq!(subcall.address, USDC_ERC20);
+				assert_eq!(subcall.context.caller, TestAccount::Alex.into());
+				assert_eq!(subcall.context.apparent_value, U256::zero());
+				assert_eq!(subcall.context.address, USDC_ERC20);
+				assert_eq!(subcall.input[0..4], keccak256!("transfer(address,uint256)")[0..4]);
+				// if all of the above passed, then it is okay.
+
+				let mut out = SubcallOutput::succeed();
+				out.output = ethabi::encode(&[ethabi::Token::Bool(true)]).to_vec();
+				out
+			})
+			.execute_returns(());
+
+		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegate {
+					operator: operator_account.into(),
+					asset_id: U256::zero(),
+					amount: U256::from(200),
+					token_address: Address(USDC_ERC20),
+					blueprint_selection: Default::default(),
+				},
+			)
+			.execute_returns(());
+
+		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+
+		// Unstake
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::schedule_delegator_unstake {
+					operator: operator_account.into(),
+					asset_id: U256::zero(),
+					amount: U256::from(200),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(());
+
+		let d = Delegators::<Runtime>::get(delegator_account).unwrap();
+		assert!(d
+			.delegator_unstake_requests
+			.iter()
+			.any(|x| x.amount == 200 && x.asset_id == Asset::Erc20(USDC_ERC20)));
 	});
 }
 
@@ -582,8 +628,9 @@ fn test_cancel_withdraw() {
 }
 
 #[test]
-fn test_operator_go_offline_and_online() {
+fn balance_of_works() {
 	ExtBuilder::default().build().execute_with(|| {
+		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
 		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
@@ -592,24 +639,304 @@ fn test_operator_go_offline_and_online() {
 			10_000
 		));
 
+		create_and_mint_tokens(1, delegator_account, 500);
+		Balances::make_free_balance_be(&delegator_account, 500);
+
+		// Not a delegator yet.
 		PrecompilesValue::get()
-			.prepare_test(TestAccount::Bobo, H160::from_low_u64_be(1), PCall::go_offline {})
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::zero());
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::zero());
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::deposit {
+					asset_id: U256::zero(),
+					amount: U256::from(200),
+					token_address: Address(USDC_ERC20),
+					lock_multiplier: 0,
+				},
+			)
+			.with_subcall_handle(|subcall| {
+				// Intercept the call
+				assert!(!subcall.is_static);
+				assert_eq!(subcall.address, USDC_ERC20);
+				assert_eq!(subcall.context.caller, TestAccount::Alex.into());
+				assert_eq!(subcall.context.apparent_value, U256::zero());
+				assert_eq!(subcall.context.address, USDC_ERC20);
+				assert_eq!(subcall.input[0..4], keccak256!("transfer(address,uint256)")[0..4]);
+				// if all of the above passed, then it is okay.
+
+				let mut out = SubcallOutput::succeed();
+				out.output = ethabi::encode(&[ethabi::Token::Bool(true)]).to_vec();
+				out
+			})
 			.execute_returns(());
 
-		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status
-				== OperatorStatus::Inactive
-		);
+		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+
+		// Deposit successful, now check balance
 
 		PrecompilesValue::get()
-			.prepare_test(TestAccount::Bobo, H160::from_low_u64_be(1), PCall::go_online {})
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(200));
+
+		// This should still zero, since it's not delegated yet.
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::zero());
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegate {
+					operator: operator_account.into(),
+					asset_id: U256::zero(),
+					amount: U256::from(100),
+					token_address: Address(USDC_ERC20),
+					blueprint_selection: Default::default(),
+				},
+			)
 			.execute_returns(());
 
-		assert!(
-			MultiAssetDelegation::operator_info(operator_account).unwrap().status
-				== OperatorStatus::Active
-		);
+		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		// Delegated balance should now be 100
+		// Deposit balance should be the same as before.
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(200));
 
-		assert_eq!(Balances::free_balance(operator_account), 20_000 - 10_000);
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(100));
+
+		// Unstake
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::schedule_delegator_unstake {
+					operator: operator_account.into(),
+					asset_id: U256::zero(),
+					amount: U256::from(50),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(());
+
+		let d = Delegators::<Runtime>::get(delegator_account).unwrap();
+		assert!(d
+			.delegator_unstake_requests
+			.iter()
+			.any(|x| x.amount == 50 && x.asset_id == Asset::Erc20(USDC_ERC20)));
+
+		// Now check balance again
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(200));
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(100));
+
+		MultiAssetDelegation::handle_round_change(5);
+		// Execute unstake
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::execute_delegator_unstake {},
+			)
+			.execute_returns(());
+
+		// Check balance again
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(200));
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(50));
+
+		// Schedule withdraw
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::schedule_withdraw {
+					asset_id: U256::zero(),
+					amount: U256::from(100),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(());
+
+		// Check balance again
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(100));
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(50));
+
+		MultiAssetDelegation::handle_round_change(6);
+
+		// Execute withdraw
+		PrecompilesValue::get()
+			.prepare_test(TestAccount::Alex, H160::from_low_u64_be(1), PCall::execute_withdraw {})
+			.with_subcall_handle(|subcall| {
+				// Intercept the call
+				assert!(!subcall.is_static);
+				assert_eq!(subcall.address, USDC_ERC20);
+				assert_eq!(subcall.context.caller, MultiAssetDelegation::pallet_evm_account());
+				assert_eq!(subcall.context.apparent_value, U256::zero());
+				assert_eq!(subcall.context.address, USDC_ERC20);
+				assert_eq!(subcall.input[0..4], keccak256!("transfer(address,uint256)")[0..4]);
+				// if all of the above passed, then it is okay.
+
+				let mut out = SubcallOutput::succeed();
+				out.output = ethabi::encode(&[ethabi::Token::Bool(true)]).to_vec();
+				out
+			})
+			.execute_returns(());
+
+		// Check balance again
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(100));
+
+		PrecompilesValue::get()
+			.prepare_test(
+				TestAccount::Alex,
+				H160::from_low_u64_be(1),
+				PCall::delegated_balance_of {
+					who: TestAccount::Alex.into(),
+					asset_id: U256::zero(),
+					token_address: Address(USDC_ERC20),
+				},
+			)
+			.execute_returns(U256::from(50));
 	});
+}
+
+#[test]
+fn test_solidity_interface_has_all_function_selectors_documented_and_implemented() {
+	check_precompile_implements_solidity_interfaces(
+		&["MultiAssetDelegation.sol"],
+		PCall::supports_selector,
+	)
 }

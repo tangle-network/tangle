@@ -7,7 +7,8 @@ address constant CALL_PERMIT_ADDRESS = 0x000000000000000000000000000000000000080
 /// @dev The CallPermit contract's instance.
 CallPermit constant CALL_PERMIT_CONTRACT = CallPermit(CALL_PERMIT_ADDRESS);
 
-/// @author The Moonbeam Team
+/// @author Tangle Network
+/// @author Originally built by Moonbeam Team
 /// @title Call Permit Interface
 /// @dev The interface aims to be a general-purpose tool to perform gas-less transactions. It uses the EIP-712 standard,
 /// and signed messages can be dispatched by another network participant with a transaction

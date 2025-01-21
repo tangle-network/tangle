@@ -172,4 +172,22 @@ where
 			None => Err(revert("No vesting schedule found for the sender")),
 		}
 	}
+
+	#[precompile::public("mergeSchedules(uint32,uint32)")]
+	fn merge_schedules(
+		handle: &mut impl PrecompileHandle,
+		schedule1_index: u32,
+		schedule2_index: u32,
+	) -> EvmResult {
+		let caller = handle.context().caller;
+		let caller_account = Runtime::AddressMapping::into_account_id(caller);
+
+		// Construct the call
+		let call =
+			pallet_vesting::Call::<Runtime>::merge_schedules { schedule1_index, schedule2_index };
+
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(caller_account).into(), call)?;
+
+		Ok(())
+	}
 }

@@ -52,11 +52,12 @@ pub mod api {
 		"Lst",
 		"Rewards",
 	];
-	pub static RUNTIME_APIS: [&str; 16usize] = [
+	pub static RUNTIME_APIS: [&str; 17usize] = [
 		"Core",
 		"Metadata",
 		"BlockBuilder",
 		"ServicesApi",
+		"RewardsApi",
 		"EthereumRuntimeRPCApi",
 		"ConvertTransactionRuntimeApi",
 		"TaggedTransactionQueue",
@@ -107,6 +108,9 @@ pub mod api {
 			}
 			pub fn services_api(&self) -> services_api::ServicesApi {
 				services_api::ServicesApi
+			}
+			pub fn rewards_api(&self) -> rewards_api::RewardsApi {
+				rewards_api::RewardsApi
 			}
 			pub fn ethereum_runtime_rpc_api(
 				&self,
@@ -732,6 +736,76 @@ pub mod api {
 				)]
 				pub struct QueryServicesWithBlueprintsByOperator {
 					pub operator: query_services_with_blueprints_by_operator::Operator,
+				}
+			}
+		}
+		pub mod rewards_api {
+			use super::root_mod;
+			use super::runtime_types;
+			pub struct RewardsApi;
+			impl RewardsApi {
+				#[doc = " Query all the rewards that this operator is providing along with their blueprints."]
+				#[doc = ""]
+				#[doc = " ## Arguments"]
+				#[doc = " - `operator`: The operator account id."]
+				#[doc = " ## Return"]
+				#[doc = " - [`RpcRewardsWithBlueprint`]: A list of rewards with their blueprints."]
+				pub fn query_user_rewards(
+					&self,
+					account_id: types::query_user_rewards::AccountId,
+					asset_id: types::query_user_rewards::AssetId,
+				) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+					types::QueryUserRewards,
+					types::query_user_rewards::output::Output,
+				> {
+					::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+						"RewardsApi",
+						"query_user_rewards",
+						types::QueryUserRewards { account_id, asset_id },
+						[
+							46u8, 226u8, 33u8, 74u8, 67u8, 130u8, 55u8, 151u8, 57u8, 20u8, 186u8,
+							107u8, 95u8, 50u8, 110u8, 155u8, 193u8, 245u8, 88u8, 102u8, 120u8,
+							204u8, 68u8, 225u8, 130u8, 225u8, 54u8, 78u8, 59u8, 75u8, 64u8, 255u8,
+						],
+					)
+				}
+			}
+			pub mod types {
+				use super::runtime_types;
+				pub mod query_user_rewards {
+					use super::runtime_types;
+					pub type AccountId = ::subxt::ext::subxt_core::utils::AccountId32;
+					pub type AssetId =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
+					pub mod output {
+						use super::runtime_types;
+						pub type Output = ::core::result::Result<
+							::core::primitive::u128,
+							runtime_types::sp_runtime::DispatchError,
+						>;
+					}
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub struct QueryUserRewards {
+					pub account_id: query_user_rewards::AccountId,
+					pub asset_id: query_user_rewards::AssetId,
 				}
 			}
 		}
@@ -3678,9 +3752,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				83u8, 92u8, 60u8, 232u8, 161u8, 29u8, 48u8, 238u8, 84u8, 44u8, 120u8, 124u8, 99u8,
-				86u8, 193u8, 48u8, 169u8, 241u8, 198u8, 29u8, 169u8, 145u8, 68u8, 35u8, 85u8,
-				179u8, 198u8, 227u8, 66u8, 186u8, 124u8, 221u8,
+				99u8, 93u8, 193u8, 42u8, 211u8, 104u8, 234u8, 235u8, 171u8, 3u8, 153u8, 72u8, 70u8,
+				163u8, 182u8, 100u8, 8u8, 50u8, 39u8, 108u8, 150u8, 209u8, 247u8, 109u8, 156u8,
+				247u8, 215u8, 61u8, 186u8, 239u8, 214u8, 181u8,
 			]
 	}
 	pub mod system {
@@ -4885,10 +4959,9 @@ pub mod api {
 						"Events",
 						(),
 						[
-							66u8, 225u8, 157u8, 197u8, 20u8, 49u8, 178u8, 155u8, 55u8, 247u8,
-							244u8, 27u8, 204u8, 232u8, 170u8, 209u8, 107u8, 126u8, 128u8, 38u8,
-							194u8, 244u8, 116u8, 216u8, 187u8, 237u8, 159u8, 35u8, 247u8, 158u8,
-							91u8, 69u8,
+							45u8, 92u8, 3u8, 147u8, 173u8, 150u8, 111u8, 24u8, 237u8, 254u8, 227u8,
+							245u8, 243u8, 249u8, 160u8, 187u8, 44u8, 102u8, 192u8, 53u8, 54u8,
+							14u8, 98u8, 119u8, 87u8, 48u8, 94u8, 121u8, 184u8, 166u8, 241u8, 167u8,
 						],
 					)
 				}
@@ -5582,9 +5655,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							104u8, 243u8, 183u8, 73u8, 83u8, 234u8, 164u8, 179u8, 6u8, 107u8, 67u8,
-							149u8, 235u8, 16u8, 42u8, 90u8, 249u8, 201u8, 222u8, 150u8, 170u8,
-							30u8, 43u8, 196u8, 37u8, 157u8, 170u8, 67u8, 59u8, 221u8, 169u8, 188u8,
+							163u8, 184u8, 237u8, 177u8, 162u8, 77u8, 210u8, 38u8, 204u8, 177u8,
+							239u8, 115u8, 85u8, 253u8, 142u8, 16u8, 154u8, 51u8, 139u8, 236u8,
+							162u8, 164u8, 164u8, 226u8, 3u8, 37u8, 90u8, 171u8, 41u8, 241u8, 196u8,
+							230u8,
 						],
 					)
 				}
@@ -5607,9 +5681,10 @@ pub mod api {
 							weight,
 						},
 						[
-							215u8, 34u8, 23u8, 153u8, 100u8, 61u8, 32u8, 12u8, 189u8, 228u8, 72u8,
-							213u8, 232u8, 117u8, 226u8, 202u8, 5u8, 38u8, 106u8, 93u8, 8u8, 90u8,
-							249u8, 226u8, 10u8, 112u8, 234u8, 229u8, 102u8, 33u8, 5u8, 100u8,
+							137u8, 66u8, 229u8, 37u8, 3u8, 74u8, 65u8, 42u8, 189u8, 95u8, 177u8,
+							192u8, 82u8, 248u8, 226u8, 134u8, 131u8, 68u8, 9u8, 147u8, 210u8,
+							108u8, 223u8, 134u8, 252u8, 54u8, 158u8, 187u8, 68u8, 193u8, 65u8,
+							48u8,
 						],
 					)
 				}
@@ -5648,9 +5723,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							44u8, 47u8, 139u8, 71u8, 178u8, 40u8, 185u8, 191u8, 46u8, 165u8, 200u8,
-							70u8, 32u8, 77u8, 82u8, 205u8, 30u8, 69u8, 11u8, 254u8, 44u8, 116u8,
-							105u8, 77u8, 199u8, 188u8, 54u8, 13u8, 79u8, 115u8, 51u8, 242u8,
+							250u8, 73u8, 102u8, 88u8, 6u8, 214u8, 90u8, 202u8, 72u8, 254u8, 81u8,
+							104u8, 160u8, 200u8, 172u8, 12u8, 84u8, 44u8, 66u8, 121u8, 92u8, 124u8,
+							176u8, 24u8, 175u8, 226u8, 136u8, 154u8, 22u8, 26u8, 214u8, 72u8,
 						],
 					)
 				}
@@ -16574,10 +16649,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							177u8, 185u8, 60u8, 203u8, 108u8, 119u8, 224u8, 73u8, 94u8, 154u8, 7u8,
-							37u8, 77u8, 100u8, 193u8, 219u8, 235u8, 133u8, 224u8, 150u8, 208u8,
-							253u8, 134u8, 7u8, 121u8, 145u8, 163u8, 72u8, 119u8, 237u8, 139u8,
-							165u8,
+							168u8, 245u8, 229u8, 113u8, 186u8, 50u8, 189u8, 28u8, 4u8, 93u8, 20u8,
+							203u8, 155u8, 237u8, 159u8, 226u8, 149u8, 3u8, 159u8, 24u8, 12u8,
+							185u8, 35u8, 57u8, 143u8, 92u8, 87u8, 233u8, 153u8, 54u8, 192u8, 229u8,
 						],
 					)
 				}
@@ -16610,9 +16684,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							78u8, 80u8, 61u8, 233u8, 178u8, 156u8, 126u8, 234u8, 121u8, 226u8,
-							143u8, 185u8, 190u8, 210u8, 79u8, 141u8, 93u8, 193u8, 24u8, 233u8, 0u8,
-							50u8, 65u8, 31u8, 51u8, 218u8, 113u8, 69u8, 121u8, 82u8, 92u8, 239u8,
+							110u8, 199u8, 178u8, 207u8, 130u8, 62u8, 107u8, 71u8, 208u8, 197u8,
+							174u8, 180u8, 216u8, 155u8, 219u8, 9u8, 110u8, 31u8, 230u8, 190u8,
+							251u8, 38u8, 152u8, 236u8, 217u8, 107u8, 61u8, 176u8, 140u8, 144u8,
+							84u8, 235u8,
 						],
 					)
 				}
@@ -17003,10 +17078,9 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							185u8, 49u8, 29u8, 63u8, 134u8, 160u8, 131u8, 52u8, 195u8, 14u8, 233u8,
-							173u8, 155u8, 140u8, 220u8, 255u8, 111u8, 249u8, 87u8, 92u8, 171u8,
-							142u8, 229u8, 54u8, 181u8, 176u8, 137u8, 203u8, 106u8, 175u8, 39u8,
-							62u8,
+							145u8, 29u8, 250u8, 9u8, 203u8, 90u8, 35u8, 56u8, 124u8, 105u8, 43u8,
+							203u8, 252u8, 210u8, 53u8, 30u8, 138u8, 8u8, 31u8, 220u8, 36u8, 53u8,
+							7u8, 200u8, 158u8, 212u8, 95u8, 250u8, 29u8, 26u8, 240u8, 160u8,
 						],
 					)
 				}
@@ -17030,10 +17104,9 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							185u8, 49u8, 29u8, 63u8, 134u8, 160u8, 131u8, 52u8, 195u8, 14u8, 233u8,
-							173u8, 155u8, 140u8, 220u8, 255u8, 111u8, 249u8, 87u8, 92u8, 171u8,
-							142u8, 229u8, 54u8, 181u8, 176u8, 137u8, 203u8, 106u8, 175u8, 39u8,
-							62u8,
+							145u8, 29u8, 250u8, 9u8, 203u8, 90u8, 35u8, 56u8, 124u8, 105u8, 43u8,
+							203u8, 252u8, 210u8, 53u8, 30u8, 138u8, 8u8, 31u8, 220u8, 36u8, 53u8,
+							7u8, 200u8, 158u8, 212u8, 95u8, 250u8, 29u8, 26u8, 240u8, 160u8,
 						],
 					)
 				}
@@ -33437,9 +33510,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							170u8, 120u8, 244u8, 215u8, 159u8, 130u8, 64u8, 248u8, 162u8, 92u8,
-							252u8, 99u8, 196u8, 12u8, 134u8, 221u8, 199u8, 37u8, 48u8, 159u8, 67u8,
-							183u8, 154u8, 93u8, 64u8, 51u8, 150u8, 138u8, 42u8, 125u8, 191u8, 21u8,
+							26u8, 185u8, 207u8, 48u8, 159u8, 175u8, 62u8, 226u8, 116u8, 183u8,
+							146u8, 248u8, 197u8, 153u8, 236u8, 61u8, 201u8, 157u8, 222u8, 179u8,
+							149u8, 138u8, 15u8, 184u8, 40u8, 117u8, 66u8, 3u8, 39u8, 54u8, 45u8,
+							174u8,
 						],
 					)
 				}
@@ -33482,9 +33556,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							233u8, 84u8, 88u8, 220u8, 250u8, 230u8, 53u8, 70u8, 200u8, 49u8, 34u8,
-							90u8, 138u8, 217u8, 219u8, 227u8, 138u8, 45u8, 40u8, 210u8, 48u8,
-							152u8, 220u8, 67u8, 99u8, 239u8, 130u8, 0u8, 18u8, 131u8, 175u8, 106u8,
+							26u8, 94u8, 109u8, 26u8, 181u8, 255u8, 182u8, 61u8, 62u8, 224u8, 107u8,
+							167u8, 217u8, 156u8, 189u8, 252u8, 30u8, 214u8, 131u8, 162u8, 105u8,
+							96u8, 26u8, 20u8, 160u8, 239u8, 58u8, 127u8, 15u8, 29u8, 143u8, 175u8,
 						],
 					)
 				}
@@ -33523,9 +33597,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							26u8, 48u8, 231u8, 40u8, 187u8, 247u8, 71u8, 102u8, 215u8, 81u8, 45u8,
-							11u8, 12u8, 11u8, 140u8, 101u8, 145u8, 60u8, 224u8, 101u8, 50u8, 85u8,
-							129u8, 158u8, 93u8, 163u8, 248u8, 179u8, 50u8, 215u8, 60u8, 49u8,
+							43u8, 61u8, 59u8, 243u8, 190u8, 84u8, 93u8, 176u8, 22u8, 212u8, 47u8,
+							136u8, 46u8, 126u8, 48u8, 255u8, 134u8, 234u8, 169u8, 212u8, 238u8,
+							106u8, 72u8, 137u8, 130u8, 169u8, 11u8, 211u8, 195u8, 70u8, 206u8,
+							52u8,
 						],
 					)
 				}
@@ -33550,10 +33625,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							86u8, 120u8, 18u8, 16u8, 48u8, 232u8, 57u8, 152u8, 246u8, 123u8, 41u8,
-							45u8, 51u8, 85u8, 114u8, 206u8, 146u8, 164u8, 50u8, 195u8, 199u8,
-							118u8, 153u8, 118u8, 201u8, 247u8, 57u8, 11u8, 137u8, 93u8, 165u8,
-							204u8,
+							174u8, 234u8, 82u8, 253u8, 6u8, 3u8, 178u8, 254u8, 69u8, 119u8, 49u8,
+							52u8, 80u8, 107u8, 193u8, 127u8, 173u8, 96u8, 102u8, 255u8, 72u8,
+							206u8, 95u8, 209u8, 209u8, 184u8, 253u8, 174u8, 217u8, 173u8, 209u8,
+							59u8,
 						],
 					)
 				}
@@ -38549,9 +38624,9 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							36u8, 112u8, 231u8, 84u8, 153u8, 73u8, 93u8, 209u8, 62u8, 76u8, 85u8,
-							41u8, 65u8, 147u8, 23u8, 7u8, 52u8, 218u8, 247u8, 249u8, 127u8, 105u8,
-							58u8, 58u8, 86u8, 183u8, 66u8, 148u8, 159u8, 47u8, 1u8, 177u8,
+							130u8, 215u8, 236u8, 248u8, 241u8, 29u8, 96u8, 180u8, 1u8, 145u8, 53u8,
+							182u8, 25u8, 109u8, 56u8, 113u8, 48u8, 24u8, 250u8, 131u8, 5u8, 204u8,
+							180u8, 179u8, 14u8, 64u8, 89u8, 93u8, 90u8, 8u8, 135u8, 200u8,
 						],
 					)
 				}
@@ -38581,10 +38656,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							100u8, 96u8, 223u8, 113u8, 197u8, 79u8, 127u8, 17u8, 10u8, 109u8,
-							119u8, 140u8, 168u8, 255u8, 27u8, 80u8, 52u8, 125u8, 18u8, 99u8, 90u8,
-							243u8, 112u8, 79u8, 74u8, 247u8, 191u8, 114u8, 184u8, 67u8, 186u8,
-							49u8,
+							164u8, 238u8, 25u8, 157u8, 116u8, 162u8, 95u8, 95u8, 55u8, 241u8,
+							107u8, 43u8, 111u8, 167u8, 42u8, 155u8, 201u8, 4u8, 166u8, 8u8, 191u8,
+							235u8, 251u8, 170u8, 217u8, 174u8, 106u8, 181u8, 154u8, 156u8, 4u8,
+							37u8,
 						],
 					)
 				}
@@ -38610,10 +38685,9 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							254u8, 236u8, 247u8, 111u8, 228u8, 2u8, 141u8, 46u8, 149u8, 46u8,
-							200u8, 248u8, 143u8, 11u8, 71u8, 47u8, 116u8, 198u8, 101u8, 80u8,
-							244u8, 68u8, 1u8, 202u8, 184u8, 221u8, 205u8, 233u8, 140u8, 100u8,
-							213u8, 89u8,
+							214u8, 27u8, 118u8, 220u8, 93u8, 23u8, 59u8, 220u8, 20u8, 2u8, 89u8,
+							222u8, 82u8, 0u8, 63u8, 5u8, 25u8, 166u8, 169u8, 135u8, 250u8, 164u8,
+							204u8, 33u8, 2u8, 53u8, 58u8, 58u8, 214u8, 157u8, 255u8, 204u8,
 						],
 					)
 				}
@@ -38636,9 +38710,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							50u8, 240u8, 106u8, 208u8, 186u8, 70u8, 231u8, 190u8, 151u8, 167u8,
-							27u8, 105u8, 189u8, 163u8, 223u8, 39u8, 35u8, 70u8, 130u8, 217u8, 61u8,
-							11u8, 201u8, 70u8, 5u8, 64u8, 67u8, 70u8, 81u8, 177u8, 60u8, 213u8,
+							155u8, 249u8, 58u8, 170u8, 84u8, 86u8, 119u8, 177u8, 35u8, 5u8, 161u8,
+							91u8, 56u8, 152u8, 217u8, 204u8, 239u8, 240u8, 235u8, 68u8, 71u8,
+							238u8, 123u8, 218u8, 131u8, 134u8, 155u8, 76u8, 132u8, 65u8, 6u8, 45u8,
 						],
 					)
 				}
@@ -38664,9 +38738,10 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							95u8, 201u8, 187u8, 141u8, 50u8, 90u8, 145u8, 42u8, 68u8, 174u8, 13u8,
-							90u8, 98u8, 79u8, 63u8, 236u8, 222u8, 224u8, 161u8, 211u8, 71u8, 15u8,
-							188u8, 52u8, 133u8, 55u8, 224u8, 99u8, 142u8, 82u8, 130u8, 65u8,
+							51u8, 107u8, 41u8, 241u8, 110u8, 148u8, 41u8, 79u8, 214u8, 100u8,
+							231u8, 137u8, 189u8, 87u8, 95u8, 227u8, 243u8, 26u8, 157u8, 205u8,
+							38u8, 82u8, 39u8, 170u8, 48u8, 7u8, 60u8, 49u8, 156u8, 9u8, 253u8,
+							137u8,
 						],
 					)
 				}
@@ -38689,9 +38764,9 @@ pub mod api {
 							weight,
 						},
 						[
-							135u8, 148u8, 175u8, 193u8, 215u8, 123u8, 165u8, 22u8, 123u8, 243u8,
-							190u8, 183u8, 191u8, 15u8, 48u8, 146u8, 93u8, 56u8, 38u8, 171u8, 16u8,
-							253u8, 228u8, 198u8, 46u8, 39u8, 117u8, 19u8, 26u8, 12u8, 70u8, 168u8,
+							159u8, 157u8, 208u8, 9u8, 147u8, 219u8, 203u8, 156u8, 60u8, 101u8,
+							159u8, 133u8, 136u8, 114u8, 94u8, 228u8, 78u8, 73u8, 57u8, 249u8, 79u8,
+							156u8, 94u8, 132u8, 24u8, 26u8, 91u8, 232u8, 213u8, 75u8, 32u8, 105u8,
 						],
 					)
 				}
@@ -39166,9 +39241,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							108u8, 216u8, 152u8, 4u8, 93u8, 13u8, 249u8, 119u8, 34u8, 61u8, 97u8,
-							245u8, 129u8, 62u8, 207u8, 161u8, 43u8, 34u8, 113u8, 75u8, 165u8, 35u8,
-							252u8, 215u8, 159u8, 170u8, 40u8, 64u8, 160u8, 3u8, 42u8, 27u8,
+							207u8, 95u8, 82u8, 84u8, 239u8, 174u8, 168u8, 233u8, 98u8, 227u8,
+							228u8, 232u8, 228u8, 199u8, 96u8, 83u8, 47u8, 252u8, 22u8, 166u8,
+							208u8, 119u8, 7u8, 195u8, 160u8, 121u8, 73u8, 75u8, 132u8, 72u8, 216u8,
+							195u8,
 						],
 					)
 				}
@@ -39230,10 +39306,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							1u8, 100u8, 146u8, 226u8, 26u8, 79u8, 235u8, 59u8, 210u8, 107u8, 0u8,
-							56u8, 165u8, 175u8, 83u8, 234u8, 208u8, 100u8, 101u8, 87u8, 138u8,
-							100u8, 189u8, 65u8, 212u8, 101u8, 175u8, 250u8, 138u8, 126u8, 70u8,
-							91u8,
+							225u8, 29u8, 101u8, 181u8, 6u8, 234u8, 234u8, 21u8, 86u8, 204u8, 183u8,
+							123u8, 134u8, 162u8, 197u8, 2u8, 212u8, 36u8, 218u8, 35u8, 23u8, 151u8,
+							92u8, 3u8, 1u8, 230u8, 186u8, 126u8, 132u8, 242u8, 174u8, 13u8,
 						],
 					)
 				}
@@ -42366,10 +42441,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							27u8, 220u8, 137u8, 175u8, 120u8, 237u8, 245u8, 233u8, 76u8, 183u8,
-							229u8, 113u8, 192u8, 39u8, 118u8, 181u8, 211u8, 8u8, 254u8, 117u8,
-							127u8, 146u8, 217u8, 214u8, 249u8, 226u8, 17u8, 156u8, 209u8, 34u8,
-							180u8, 186u8,
+							219u8, 170u8, 34u8, 33u8, 216u8, 139u8, 65u8, 77u8, 100u8, 199u8,
+							220u8, 153u8, 173u8, 6u8, 184u8, 194u8, 91u8, 120u8, 19u8, 254u8,
+							215u8, 127u8, 219u8, 216u8, 48u8, 119u8, 176u8, 242u8, 40u8, 62u8, 5u8,
+							248u8,
 						],
 					)
 				}
@@ -42629,9 +42704,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							81u8, 66u8, 67u8, 103u8, 145u8, 192u8, 9u8, 6u8, 49u8, 211u8, 145u8,
-							127u8, 122u8, 176u8, 198u8, 228u8, 51u8, 57u8, 62u8, 88u8, 186u8,
-							157u8, 207u8, 141u8, 23u8, 64u8, 219u8, 36u8, 229u8, 15u8, 84u8, 49u8,
+							26u8, 14u8, 246u8, 164u8, 123u8, 24u8, 159u8, 255u8, 212u8, 222u8,
+							64u8, 132u8, 179u8, 182u8, 135u8, 142u8, 158u8, 180u8, 150u8, 214u8,
+							63u8, 171u8, 154u8, 37u8, 59u8, 87u8, 57u8, 179u8, 25u8, 155u8, 41u8,
+							166u8,
 						],
 					)
 				}
@@ -49955,6 +50031,35 @@ pub mod api {
 					const PALLET: &'static str = "Lst";
 					const CALL: &'static str = "set_commission_claim_permission";
 				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				pub struct SetLastPoolId {
+					pub pool_id: set_last_pool_id::PoolId,
+				}
+				pub mod set_last_pool_id {
+					use super::runtime_types;
+					pub type PoolId = ::core::primitive::u32;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetLastPoolId {
+					const PALLET: &'static str = "Lst";
+					const CALL: &'static str = "set_last_pool_id";
+				}
 			}
 			pub struct TransactionApi;
 			impl TransactionApi {
@@ -50702,6 +50807,23 @@ pub mod api {
 						],
 					)
 				}
+				pub fn set_last_pool_id(
+					&self,
+					pool_id: types::set_last_pool_id::PoolId,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetLastPoolId>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Lst",
+						"set_last_pool_id",
+						types::SetLastPoolId { pool_id },
+						[
+							144u8, 224u8, 38u8, 208u8, 118u8, 48u8, 28u8, 112u8, 196u8, 139u8,
+							69u8, 15u8, 119u8, 203u8, 144u8, 76u8, 255u8, 43u8, 23u8, 79u8, 27u8,
+							30u8, 157u8, 242u8, 51u8, 91u8, 255u8, 79u8, 157u8, 242u8, 162u8,
+							100u8,
+						],
+					)
+				}
 			}
 		}
 		#[doc = "Events of this pallet."]
@@ -51260,6 +51382,32 @@ pub mod api {
 			impl ::subxt::ext::subxt_core::events::StaticEvent for MinBalanceExcessAdjusted {
 				const PALLET: &'static str = "Lst";
 				const EVENT: &'static str = "MinBalanceExcessAdjusted";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "The last PoolId is updated"]
+			pub struct LastPoolIdUpdated {
+				pub pool_id: last_pool_id_updated::PoolId,
+			}
+			pub mod last_pool_id_updated {
+				use super::runtime_types;
+				pub type PoolId = ::core::primitive::u32;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for LastPoolIdUpdated {
+				const PALLET: &'static str = "Lst";
+				const EVENT: &'static str = "LastPoolIdUpdated";
 			}
 		}
 		pub mod storage {
@@ -66615,7 +66763,7 @@ pub mod api {
 				)]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to stake"] # [doc = "* `pool_id` - Target pool ID"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* Member must have `existential deposit + amount` in account"] # [doc = "* Pool must be in [`PoolState::Open`] state"] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Bond additional funds into an existing pool position."] # [doc = ""] # [doc = "Additional funds can come from either free balance or accumulated rewards."] # [doc = "Automatically pays out all pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `extra` - Source and amount of additional funds"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = "* Must have permission to bond extra if not self"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* This transaction prioritizes readability and correctness over optimization"] # [doc = "* Multiple storage reads/writes are performed to reuse code"] # [doc = "* See `bond_extra_other` to bond pending rewards of other members"] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "Unbond points from a member's pool position, collecting any pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to unbond from"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `unbonding_points` - Amount of points to unbond"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is blocked and caller is root/bouncer (kick)"] # [doc = "  - Pool is destroying and member is not depositor"] # [doc = "  - Pool is destroying, member is depositor, and pool is empty"] # [doc = "* Permissioned (caller must be member) if:"] # [doc = "  - Caller is not depositor"] # [doc = "  - Caller is depositor, pool is destroying, and pool is empty"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"] # [doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"] # [doc = ""] # [doc = "# Note"] # [doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."] # [doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"] # [doc = "if chunks cannot be released."] unbond { member_account : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Withdraws unbonded funds from the pool's staking account."] # [doc = ""] # [doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."] # [doc = "Prevents `NoMoreChunks` errors from the staking system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Can be signed by any account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans to check"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotDestroying`] - Pool is in destroying state"] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Withdraw unbonded funds from a member account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is in destroy mode and target is not depositor"] # [doc = "  - Target is depositor and only member in sub pools"] # [doc = "  - Pool is blocked and caller is root/bouncer"] # [doc = "* Permissioned if caller is target and not depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to withdraw from"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolMemberNotFound`] - Member account not found"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"] # [doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"] # [doc = ""] # [doc = "If target is depositor, pool will be destroyed."] withdraw_unbonded { member_account : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Create a new delegation pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the initial depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"] # [doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 7)] # [doc = "Create a new delegation pool with a previously used pool ID."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `pool_id` - Pool ID to reuse"] # [doc = "* `name` - Optional pool name"] # [doc = "* `icon` - Optional pool icon"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"] # [doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 8)] # [doc = "Nominate validators on behalf of the pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool nominator or root role can nominate validators"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `validators` - List of validator accounts to nominate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Forwards nomination call to staking pallet using pool's bonded account."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"] # [doc = "changed again under any circumstances."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool bouncer or root role can set any state"] # [doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `state` - New state to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"] # [doc = "commission, member count and roles."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "Updates the metadata for a given pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the pool bouncer or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `metadata` - New metadata to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "Updates the global configuration parameters for nomination pools."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by Root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"] # [doc = "* `min_create_bond` - Config operation for minimum bond to create a pool  "] # [doc = "* `max_pools` - Config operation for maximum number of pools"] # [doc = "* `global_max_commission` - Config operation for maximum global commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "Update the roles of a pool."] # [doc = ""] # [doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."] # [doc = "Emits a `RolesUpdated` event on successful update."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be Root or pool root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `new_root` - New root role configuration"] # [doc = "* `new_nominator` - New nominator role configuration  "] # [doc = "* `new_bouncer` - New bouncer role configuration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be signed by pool nominator or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "Bond additional funds for a pool member into their respective pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must match member account for bonding from free balance/pending rewards"] # [doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"] # [doc = "  `PermissionlessCompound` claim permissions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `member` - Pool member account to bond for"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `extra` - Amount to bond from free balance or pending rewards"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"] # [doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"] bond_extra_other { member : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "Set or remove the commission rate and payee for a pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"] # [doc = "lower values allowed thereafter. Current commission will be reduced if above new max."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `max_commission` - The new maximum commission rate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "Set the commission change rate for a pool."] # [doc = ""] # [doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"] # [doc = "restrictive than the current."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."] # [doc = "* `pool_id` - The identifier of the pool to set commission change rate for."] # [doc = "* `change_rate` - The new commission change rate configuration."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "Claim pending commission for a pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by an account with commission claim permission."] # [doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"] # [doc = "is reset to zero."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."] # [doc = "* `pool_id` - The identifier of the pool to claim commission from."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Top up the deficit or withdraw the excess ED from the pool."] # [doc = ""] # [doc = "When a pool is created, the pool depositor transfers ED to the reward account of the"] # [doc = "pool. ED is subject to change and over time, the deposit in the reward account may be"] # [doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"] # [doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"] # [doc = "pool by either topping up the deficit or claiming the excess."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set or remove a pool's commission claim permission."] # [doc = ""] # [doc = "Only the `Root` role of the pool is able to configure commission claim permissions."] # [doc = "This determines which accounts are allowed to claim the pool's pending commission."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."] # [doc = "* `pool_id` - The identifier of the pool to set permissions for."] # [doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , } , }
+					# [codec (index = 0)] # [doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to stake"] # [doc = "* `pool_id` - Target pool ID"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* Member must have `existential deposit + amount` in account"] # [doc = "* Pool must be in [`PoolState::Open`] state"] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Bond additional funds into an existing pool position."] # [doc = ""] # [doc = "Additional funds can come from either free balance or accumulated rewards."] # [doc = "Automatically pays out all pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `extra` - Source and amount of additional funds"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = "* Must have permission to bond extra if not self"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* This transaction prioritizes readability and correctness over optimization"] # [doc = "* Multiple storage reads/writes are performed to reuse code"] # [doc = "* See `bond_extra_other` to bond pending rewards of other members"] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "Unbond points from a member's pool position, collecting any pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to unbond from"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `unbonding_points` - Amount of points to unbond"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is blocked and caller is root/bouncer (kick)"] # [doc = "  - Pool is destroying and member is not depositor"] # [doc = "  - Pool is destroying, member is depositor, and pool is empty"] # [doc = "* Permissioned (caller must be member) if:"] # [doc = "  - Caller is not depositor"] # [doc = "  - Caller is depositor, pool is destroying, and pool is empty"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"] # [doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"] # [doc = ""] # [doc = "# Note"] # [doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."] # [doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"] # [doc = "if chunks cannot be released."] unbond { member_account : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Withdraws unbonded funds from the pool's staking account."] # [doc = ""] # [doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."] # [doc = "Prevents `NoMoreChunks` errors from the staking system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Can be signed by any account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans to check"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotDestroying`] - Pool is in destroying state"] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Withdraw unbonded funds from a member account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is in destroy mode and target is not depositor"] # [doc = "  - Target is depositor and only member in sub pools"] # [doc = "  - Pool is blocked and caller is root/bouncer"] # [doc = "* Permissioned if caller is target and not depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to withdraw from"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolMemberNotFound`] - Member account not found"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"] # [doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"] # [doc = ""] # [doc = "If target is depositor, pool will be destroyed."] withdraw_unbonded { member_account : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Create a new delegation pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the initial depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"] # [doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 7)] # [doc = "Create a new delegation pool with a previously used pool ID."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `pool_id` - Pool ID to reuse"] # [doc = "* `name` - Optional pool name"] # [doc = "* `icon` - Optional pool icon"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"] # [doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 8)] # [doc = "Nominate validators on behalf of the pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool nominator or root role can nominate validators"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `validators` - List of validator accounts to nominate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Forwards nomination call to staking pallet using pool's bonded account."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"] # [doc = "changed again under any circumstances."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool bouncer or root role can set any state"] # [doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `state` - New state to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"] # [doc = "commission, member count and roles."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "Updates the metadata for a given pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the pool bouncer or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `metadata` - New metadata to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "Updates the global configuration parameters for nomination pools."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by Root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"] # [doc = "* `min_create_bond` - Config operation for minimum bond to create a pool  "] # [doc = "* `max_pools` - Config operation for maximum number of pools"] # [doc = "* `global_max_commission` - Config operation for maximum global commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "Update the roles of a pool."] # [doc = ""] # [doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."] # [doc = "Emits a `RolesUpdated` event on successful update."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be Root or pool root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `new_root` - New root role configuration"] # [doc = "* `new_nominator` - New nominator role configuration  "] # [doc = "* `new_bouncer` - New bouncer role configuration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be signed by pool nominator or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "Bond additional funds for a pool member into their respective pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must match member account for bonding from free balance/pending rewards"] # [doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"] # [doc = "  `PermissionlessCompound` claim permissions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `member` - Pool member account to bond for"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `extra` - Amount to bond from free balance or pending rewards"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"] # [doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"] bond_extra_other { member : :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "Set or remove the commission rate and payee for a pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"] # [doc = "lower values allowed thereafter. Current commission will be reduced if above new max."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `max_commission` - The new maximum commission rate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "Set the commission change rate for a pool."] # [doc = ""] # [doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"] # [doc = "restrictive than the current."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."] # [doc = "* `pool_id` - The identifier of the pool to set commission change rate for."] # [doc = "* `change_rate` - The new commission change rate configuration."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "Claim pending commission for a pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by an account with commission claim permission."] # [doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"] # [doc = "is reset to zero."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."] # [doc = "* `pool_id` - The identifier of the pool to claim commission from."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Top up the deficit or withdraw the excess ED from the pool."] # [doc = ""] # [doc = "When a pool is created, the pool depositor transfers ED to the reward account of the"] # [doc = "pool. ED is subject to change and over time, the deposit in the reward account may be"] # [doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"] # [doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"] # [doc = "pool by either topping up the deficit or claiming the excess."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set or remove a pool's commission claim permission."] # [doc = ""] # [doc = "Only the `Root` role of the pool is able to configure commission claim permissions."] # [doc = "This determines which accounts are allowed to claim the pool's pending commission."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."] # [doc = "* `pool_id` - The identifier of the pool to set permissions for."] # [doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 23)] set_last_pool_id { pool_id : :: core :: primitive :: u32 , } , }
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -66793,7 +66941,7 @@ pub mod api {
 				)]
 				#[doc = "Events of this pallet."]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has become bonded in a pool."] Bonded { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been"] # [doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"] # [doc = "  pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "  dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return for `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , }
+					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has become bonded in a pool."] Bonded { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been"] # [doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"] # [doc = "  pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "  dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return for `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt :: ext :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "The last PoolId is updated"] LastPoolIdUpdated { pool_id : :: core :: primitive :: u32 , } , }
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
