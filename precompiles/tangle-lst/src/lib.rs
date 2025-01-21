@@ -324,201 +324,191 @@ where
 		Ok(())
 	}
 
-    #[precompile::public("chill(uint256)")]
-    fn chill(handle: &mut impl PrecompileHandle, pool_id: U256) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(origin).into(),
-            pallet_tangle_lst::Call::<Runtime>::chill { pool_id },
-        )?;
-        
-        Ok(())
-    }
+	#[precompile::public("chill(uint256)")]
+	fn chill(handle: &mut impl PrecompileHandle, pool_id: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-    #[precompile::public("bondExtraOther(uint256,bytes32,uint256)")]
-    fn bond_extra_other(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-        who: H256,
-        amount: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let member = Self::convert_to_account_id(who)?;
-        let extra = pallet_tangle_lst::BondExtra::FreeBalance(
-            amount.try_into().map_err(|_| revert("Amount overflow"))?
-        );
-        let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(origin).into(),
-            pallet_tangle_lst::Call::<Runtime>::bond_extra_other { 
-                pool_id,
-                member: Runtime::Lookup::unlookup(member),
-                extra,
-            },
-        )?;
-        
-        Ok(())
-    }
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
-    #[precompile::public("setCommission(uint256,uint256)")]
-    fn set_commission(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-        new_commission: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let commission_value: u32 = new_commission.try_into().map_err(|_| revert("Commission overflow"))?;
-        let commission = if commission_value == 0 {
-            None
-        } else {
-            let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-            Some((Perbill::from_parts(commission_value), origin))
-        };
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-            pallet_tangle_lst::Call::<Runtime>::set_commission { 
-                pool_id,
-                new_commission: commission,
-            },
-        )?;
-        
-        Ok(())
-    }
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(origin).into(),
+			pallet_tangle_lst::Call::<Runtime>::chill { pool_id },
+		)?;
 
-    #[precompile::public("setCommissionMax(uint256,uint256)")]
-    fn set_commission_max(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-        max_commission: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let max_commission_value: u32 = max_commission.try_into().map_err(|_| revert("Max commission overflow"))?;
-        let max_commission = Perbill::from_parts(max_commission_value);
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-            pallet_tangle_lst::Call::<Runtime>::set_commission_max { 
-                pool_id,
-                max_commission,
-            },
-        )?;
-        
-        Ok(())
-    }
+		Ok(())
+	}
 
-    #[precompile::public("setCommissionChangeRate(uint256,uint256,uint256)")]
-    fn set_commission_change_rate(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-        max_increase: U256,
-        min_delay: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let max_increase_value: u32 = max_increase.try_into().map_err(|_| revert("Max increase overflow"))?;
-        let min_delay: BlockNumberFor<Runtime> = min_delay.try_into().map_err(|_| revert("Min delay overflow"))?;
-        
-        let change_rate = pallet_tangle_lst::CommissionChangeRate {
-            max_increase: Perbill::from_parts(max_increase_value),
-            min_delay,
-        };
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-            pallet_tangle_lst::Call::<Runtime>::set_commission_change_rate { 
-                pool_id,
-                change_rate,
-            },
-        )?;
-        
-        Ok(())
-    }
+	#[precompile::public("bondExtraOther(uint256,bytes32,uint256)")]
+	fn bond_extra_other(
+		handle: &mut impl PrecompileHandle,
+		pool_id: U256,
+		who: H256,
+		amount: U256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-    #[precompile::public("claimCommission(uint256)")]
-    fn claim_commission(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(origin).into(),
-            pallet_tangle_lst::Call::<Runtime>::claim_commission { pool_id },
-        )?;
-        
-        Ok(())
-    }
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let member = Self::convert_to_account_id(who)?;
+		let extra = pallet_tangle_lst::BondExtra::FreeBalance(
+			amount.try_into().map_err(|_| revert("Amount overflow"))?,
+		);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
-    #[precompile::public("adjustPoolDeposit(uint256)")]
-    fn adjust_pool_deposit(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-            pallet_tangle_lst::Call::<Runtime>::adjust_pool_deposit { 
-                pool_id,
-            },
-        )?;
-        
-        Ok(())
-    }
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(origin).into(),
+			pallet_tangle_lst::Call::<Runtime>::bond_extra_other {
+				pool_id,
+				member: Runtime::Lookup::unlookup(member),
+				extra,
+			},
+		)?;
 
-    #[precompile::public("setCommissionClaimPermission(uint256,uint8)")]
-    fn set_commission_claim_permission(
-        handle: &mut impl PrecompileHandle,
-        pool_id: U256,
-        permission: u8,
-    ) -> EvmResult {
-        handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-        
-        let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-        let permission = match permission {
-            0 => Some(pallet_tangle_lst::CommissionClaimPermission::Permissionless),
-            1 => Some(pallet_tangle_lst::CommissionClaimPermission::Account(
-                Runtime::AddressMapping::into_account_id(handle.context().caller)
-            )),
-            _ => None,
-        };
-        
-        RuntimeHelper::<Runtime>::try_dispatch(
-            handle,
-            Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-            pallet_tangle_lst::Call::<Runtime>::set_commission_claim_permission { 
-                pool_id,
-                permission,
-            },
-        )?;
-        
-        Ok(())
-    }
+		Ok(())
+	}
+
+	#[precompile::public("setCommission(uint256,uint256)")]
+	fn set_commission(
+		handle: &mut impl PrecompileHandle,
+		pool_id: U256,
+		new_commission: U256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let commission_value: u32 =
+			new_commission.try_into().map_err(|_| revert("Commission overflow"))?;
+		let commission = if commission_value == 0 {
+			None
+		} else {
+			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+			Some((Perbill::from_parts(commission_value), origin))
+		};
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_tangle_lst::Call::<Runtime>::set_commission {
+				pool_id,
+				new_commission: commission,
+			},
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("setCommissionMax(uint256,uint256)")]
+	fn set_commission_max(
+		handle: &mut impl PrecompileHandle,
+		pool_id: U256,
+		max_commission: U256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let max_commission_value: u32 =
+			max_commission.try_into().map_err(|_| revert("Max commission overflow"))?;
+		let max_commission = Perbill::from_parts(max_commission_value);
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_tangle_lst::Call::<Runtime>::set_commission_max { pool_id, max_commission },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("setCommissionChangeRate(uint256,uint256,uint256)")]
+	fn set_commission_change_rate(
+		handle: &mut impl PrecompileHandle,
+		pool_id: U256,
+		max_increase: U256,
+		min_delay: U256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let max_increase_value: u32 =
+			max_increase.try_into().map_err(|_| revert("Max increase overflow"))?;
+		let min_delay: BlockNumberFor<Runtime> =
+			min_delay.try_into().map_err(|_| revert("Min delay overflow"))?;
+
+		let change_rate = pallet_tangle_lst::CommissionChangeRate {
+			max_increase: Perbill::from_parts(max_increase_value),
+			min_delay,
+		};
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_tangle_lst::Call::<Runtime>::set_commission_change_rate { pool_id, change_rate },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("claimCommission(uint256)")]
+	fn claim_commission(handle: &mut impl PrecompileHandle, pool_id: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(origin).into(),
+			pallet_tangle_lst::Call::<Runtime>::claim_commission { pool_id },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("adjustPoolDeposit(uint256)")]
+	fn adjust_pool_deposit(handle: &mut impl PrecompileHandle, pool_id: U256) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_tangle_lst::Call::<Runtime>::adjust_pool_deposit { pool_id },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("setCommissionClaimPermission(uint256,uint8)")]
+	fn set_commission_claim_permission(
+		handle: &mut impl PrecompileHandle,
+		pool_id: U256,
+		permission: u8,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
+		let permission = match permission {
+			0 => Some(pallet_tangle_lst::CommissionClaimPermission::Permissionless),
+			1 => Some(pallet_tangle_lst::CommissionClaimPermission::Account(
+				Runtime::AddressMapping::into_account_id(handle.context().caller),
+			)),
+			_ => None,
+		};
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
+			pallet_tangle_lst::Call::<Runtime>::set_commission_claim_permission {
+				pool_id,
+				permission,
+			},
+		)?;
+
+		Ok(())
+	}
 }
 
 impl<Runtime> TangleLstPrecompile<Runtime>
