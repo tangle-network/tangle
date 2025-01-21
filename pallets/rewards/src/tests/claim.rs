@@ -1,4 +1,15 @@
 use super::*;
+use crate::{Event, UserClaimedReward};
+use frame_support::assert_ok;
+use frame_support::traits::Currency;
+use sp_runtime::Percent;
+use tangle_primitives::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks};
+
+fn run_to_block(n: u64) {
+	while System::block_number() < n {
+		System::set_block_number(System::block_number() + 1);
+	}
+}
 
 #[test]
 fn test_claim_rewards_with_invalid_asset() {
@@ -19,8 +30,8 @@ fn test_claim_rewards_with_invalid_asset() {
 			vault_id,
 			RewardConfigForAssetVault {
 				apy: Percent::from_percent(10),
-				deposit_cap: 1000,
-				incentive_cap: 1000,
+				deposit_cap: 1_000_000_000_000_000_000_000u128,
+				incentive_cap: 1_000_000_000_000_000_000_000u128,
 				boost_multiplier: Some(150),
 			}
 		));
@@ -54,9 +65,9 @@ fn test_claim_rewards_with_no_deposit() {
 			vault_id,
 			RewardConfigForAssetVault {
 				apy: Percent::from_percent(10),
-				deposit_cap: 1000,
-				incentive_cap: 1000,
-				boost_multiplier: Some(150),
+				deposit_cap: 1_000_000_000_000_000_000_000u128,
+				incentive_cap: 1_000_000_000_000_000_000u128,
+				boost_multiplier: Some(1),
 			}
 		));
 
@@ -76,280 +87,300 @@ fn test_claim_rewards_with_no_deposit() {
 	});
 }
 
-// #[test]
-// fn test_claim_rewards() {
-// 	new_test_ext().execute_with(|| {
-// 		let account: AccountId32 = AccountId32::new([1u8; 32]);
-// 		let vault_id = 1u32;
-// 		let asset = Asset::Custom(vault_id as u128);
-// 		let deposit = 100;
-// 		let apy = Percent::from_percent(10);
-// 		let deposit_cap = 1000;
-// 		let boost_multiplier = Some(150);
-// 		let incentive_cap = 1000;
+#[test]
+fn test_claim_rewards() {
+	new_test_ext().execute_with(|| {
+		let account: AccountId32 = AccountId32::new([1u8; 32]);
+		let vault_id = 1u32;
+		let asset = Asset::Custom(vault_id as u128);
+		let deposit = 100_000_000_000_000_000_000u128;
+		let apy = Percent::from_percent(10);
+		let deposit_cap = 1_000_000_000_000_000_000_000u128;
+		let boost_multiplier = Some(1);
+		let incentive_cap = 1_000_000_000_000_000_000u128;
 
-// 		// Configure the reward vault
-// 		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
-// 		));
+		// Fund rewards pallet with initial balance
+		let rewards_account = RewardsPallet::<Runtime>::account_id();
+		let initial_funding = 1_000_000_000_000_000_000_000_000u128; // 1M tokens
+		Balances::make_free_balance_be(&rewards_account, initial_funding);
 
-// 		// Add asset to vault
-// 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			asset,
-// 			AssetAction::Add,
-// 		));
+		// Configure the reward vault
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
+			RuntimeOrigin::root(),
+			vault_id,
+			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
+		));
 
-// 		// Mock deposit with UserDepositWithLocks
-// 		MOCK_DELEGATION_INFO.with(|m| {
-// 			m.borrow_mut().deposits.insert(
-// 				(account.clone(), asset),
-// 				UserDepositWithLocks { unlocked_amount: deposit, amount_with_locks: None },
-// 			);
-// 		});
+		// Add asset to vault
+		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
+			RuntimeOrigin::root(),
+			vault_id,
+			asset,
+			AssetAction::Add,
+		));
 
-// 		// Initial balance should be 0
-// 		assert_eq!(Balances::free_balance(&account), 0);
+		// Mock deposit with UserDepositWithLocks
+		MOCK_DELEGATION_INFO.with(|m| {
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: deposit, amount_with_locks: None },
+			);
+		});
 
-// 		// Claim rewards
-// 		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
-// 			RuntimeOrigin::signed(account.clone()),
-// 			asset
-// 		));
+		// Initial balance should be 0
+		assert_eq!(Balances::free_balance(&account), 0);
 
-// 		// Balance should be greater than 0 after claiming rewards
-// 		assert!(Balances::free_balance(&account) > 0);
+		// Claim rewards
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
+			RuntimeOrigin::signed(account.clone()),
+			asset
+		));
 
-// 		// Check events
-// 		System::assert_has_event(
-// 			Event::RewardsClaimed {
-// 				account: account.clone(),
-// 				asset,
-// 				amount: Balances::free_balance(&account),
-// 			}
-// 			.into(),
-// 		);
+		// Balance should be greater than 0 after claiming rewards
+		assert!(Balances::free_balance(&account) > 0);
 
-// 		// Check storage
-// 		assert!(UserClaimedReward::<Runtime>::contains_key(&account, vault_id));
-// 	});
-// }
+		// Check events
+		System::assert_has_event(
+			Event::RewardsClaimed {
+				account: account.clone(),
+				asset,
+				amount: Balances::free_balance(&account),
+			}
+			.into(),
+		);
 
-// #[test]
-// fn test_claim_rewards_multiple_times() {
-// 	new_test_ext().execute_with(|| {
-// 		let account: AccountId32 = AccountId32::new([1u8; 32]);
-// 		let vault_id = 1u32;
-// 		let asset = Asset::Custom(vault_id as u128);
-// 		let deposit = 100;
+		// Check storage
+		assert!(UserClaimedReward::<Runtime>::contains_key(&account, vault_id));
+	});
+}
 
-// 		// Configure the reward vault
-// 		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			RewardConfigForAssetVault {
-// 				apy: Percent::from_percent(10),
-// 				deposit_cap: 1000,
-// 				incentive_cap: 1000,
-// 				boost_multiplier: Some(150),
-// 			}
-// 		));
+#[test]
+fn test_claim_rewards_multiple_times() {
+	new_test_ext().execute_with(|| {
+		let account: AccountId32 = AccountId32::new([1u8; 32]);
+		let vault_id = 1u32;
+		let asset = Asset::Custom(vault_id as u128);
+		let deposit = 100_000_000_000_000_000_000u128;
 
-// 		// Add asset to vault
-// 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			asset,
-// 			AssetAction::Add,
-// 		));
+		// Fund rewards pallet with initial balance
+		let rewards_account = RewardsPallet::<Runtime>::account_id();
+		let initial_funding = 1_000_000_000_000_000_000_000_000u128; // 1M tokens
+		Balances::make_free_balance_be(&rewards_account, initial_funding);
 
-// 		// Mock deposit
-// 		MOCK_DELEGATION_INFO.with(|m| {
-// 			m.borrow_mut().deposits.insert(
-// 				(account.clone(), asset),
-// 				UserDepositWithLocks {
-// 					unlocked_amount: deposit,
-// 					amount_with_locks: Some(vec![LockInfo {
-// 						amount: deposit,
-// 						expiry_block: 3000_u64,
-// 						lock_multiplier: LockMultiplier::SixMonths,
-// 					}]),
-// 				},
-// 			);
-// 		});
+		// Configure the reward vault
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
+			RuntimeOrigin::root(),
+			vault_id,
+			RewardConfigForAssetVault {
+				apy: Percent::from_percent(10),
+				deposit_cap: 1_000_000_000_000_000_000_000u128,
+				incentive_cap: 1_000_000_000_000_000_000u128,
+				boost_multiplier: Some(1),
+			}
+		));
 
-// 		// Initial balance should be 0
-// 		assert_eq!(Balances::free_balance(&account), 0);
+		// Add asset to vault
+		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
+			RuntimeOrigin::root(),
+			vault_id,
+			asset,
+			AssetAction::Add,
+		));
 
-// 		// Run some blocks to accumulate initial rewards
-// 		run_to_block(100);
+		// Mock deposit
+		MOCK_DELEGATION_INFO.with(|m| {
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks {
+					unlocked_amount: deposit,
+					amount_with_locks: Some(vec![LockInfo {
+						amount: deposit,
+						expiry_block: 3000_u64,
+						lock_multiplier: LockMultiplier::SixMonths,
+					}]),
+				},
+			);
+		});
 
-// 		// Claim rewards first time
-// 		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
-// 			RuntimeOrigin::signed(account.clone()),
-// 			asset
-// 		));
+		// Initial balance should be 0
+		assert_eq!(Balances::free_balance(&account), 0);
 
-// 		let first_claim_balance = Balances::free_balance(&account);
-// 		assert!(first_claim_balance > 0);
+		// Run some blocks to accumulate initial rewards
+		run_to_block(100);
 
-// 		// Run more blocks to accumulate more rewards
-// 		run_to_block(1000);
+		// Claim rewards first time
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
+			RuntimeOrigin::signed(account.clone()),
+			asset
+		));
 
-// 		// Claim rewards second time
-// 		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
-// 			RuntimeOrigin::signed(account.clone()),
-// 			asset
-// 		));
-// 	});
-// }
+		let first_claim_balance = Balances::free_balance(&account);
+		assert!(first_claim_balance > 0);
 
-// #[test]
-// fn test_calculate_deposit_rewards_with_lock_multiplier() {
-// 	new_test_ext().execute_with(|| {
-// 		let account: AccountId32 = AccountId32::new([1u8; 32]);
-// 		let vault_id = 1u32;
-// 		let asset = Asset::Custom(vault_id as u128);
-// 		let deposit = 100;
-// 		let apy = Percent::from_percent(10);
-// 		let deposit_cap = 1000;
-// 		let boost_multiplier = Some(150);
-// 		let incentive_cap = 1000;
+		// Run more blocks to accumulate more rewards
+		run_to_block(1000);
 
-// 		// Configure the reward vault
-// 		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
-// 		));
+		// Claim rewards second time
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
+			RuntimeOrigin::signed(account.clone()),
+			asset
+		));
+	});
+}
 
-// 		// Add asset to vault
-// 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			asset,
-// 			AssetAction::Add,
-// 		));
+#[test]
+fn test_calculate_deposit_rewards_with_lock_multiplier() {
+	new_test_ext().execute_with(|| {
+		let account: AccountId32 = AccountId32::new([1u8; 32]);
+		let vault_id = 1u32;
+		let asset = Asset::Custom(vault_id as u128);
+		let deposit = 100_000_000_000_000_000_000u128;
+		let apy = Percent::from_percent(10);
+		let deposit_cap = 1_000_000_000_000_000_000_000u128;
+		let boost_multiplier = Some(1);
+		let incentive_cap = 1_000_000_000_000_000_000u128;
 
-// 		// Mock deposit with locked amounts
-// 		let lock_expiry = 3000_u64;
-// 		let lock_info = LockInfo {
-// 			amount: deposit,
-// 			expiry_block: lock_expiry,
-// 			lock_multiplier: LockMultiplier::SixMonths,
-// 		};
+		// Fund rewards pallet with initial balance
+		let rewards_account = RewardsPallet::<Runtime>::account_id();
+		let initial_funding = 1_000_000_000_000_000_000_000_000u128; // 1M tokens
+		Balances::make_free_balance_be(&rewards_account, initial_funding);
 
-// 		MOCK_DELEGATION_INFO.with(|m| {
-// 			m.borrow_mut().deposits.insert(
-// 				(account.clone(), asset),
-// 				UserDepositWithLocks {
-// 					unlocked_amount: deposit,
-// 					amount_with_locks: Some(vec![lock_info.clone()]),
-// 				},
-// 			);
-// 		});
+		// Configure the reward vault
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
+			RuntimeOrigin::root(),
+			vault_id,
+			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
+		));
 
-// 		// Calculate rewards with no previous claim
-// 		let total_score = BalanceOf::<Runtime>::from(200u32); // Total deposits of 200
-// 		let deposit_info = UserDepositWithLocks {
-// 			unlocked_amount: deposit,
-// 			amount_with_locks: Some(vec![lock_info]),
-// 		};
-// 		let reward_config =
-// 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier };
-// 		let last_claim = None;
+		// Add asset to vault
+		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
+			RuntimeOrigin::root(),
+			vault_id,
+			asset,
+			AssetAction::Add,
+		));
 
-// 		let (total_rewards, rewards_to_be_paid) =
-// 			RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
-// 				total_score,
-// 				deposit_info.clone(),
-// 				reward_config.clone(),
-// 				last_claim,
-// 			)
-// 			.unwrap();
+		// Mock deposit with locked amounts
+		let lock_expiry = 3000_u64;
+		let lock_info = LockInfo {
+			amount: deposit,
+			expiry_block: lock_expiry,
+			lock_multiplier: LockMultiplier::SixMonths,
+		};
 
-// 		// Verify rewards are greater than 0
-// 		assert!(total_rewards > 0);
-// 		assert_eq!(total_rewards, rewards_to_be_paid);
+		MOCK_DELEGATION_INFO.with(|m| {
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks {
+					unlocked_amount: deposit,
+					amount_with_locks: Some(vec![lock_info.clone()]),
+				},
+			);
+		});
 
-// 		// Test with previous claim
-// 		let previous_claim_amount = total_rewards / 2;
-// 		let last_claim = Some((1u64, previous_claim_amount));
+		// Calculate rewards with no previous claim
+		let total_score = BalanceOf::<Runtime>::from(200_000_000_000_000_000_000u128);
+		let deposit_info = UserDepositWithLocks {
+			unlocked_amount: deposit,
+			amount_with_locks: Some(vec![lock_info]),
+		};
+		let reward_config =
+			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier };
+		let last_claim = None;
 
-// 		let (total_rewards_2, rewards_to_be_paid_2) =
-// 			RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
-// 				total_score,
-// 				deposit_info,
-// 				reward_config,
-// 				last_claim,
-// 			)
-// 			.unwrap();
+		let total_rewards =
+			RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
+				total_score,
+				total_score,
+				deposit_info.clone(),
+				reward_config.clone(),
+				last_claim,
+			)
+			.unwrap();
 
-// 		// Verify rewards calculation with previous claim
-// 		assert_eq!(total_rewards, total_rewards_2);
-// 		assert_eq!(rewards_to_be_paid_2, total_rewards.saturating_sub(previous_claim_amount));
-// 	});
-// }
+		// Verify rewards are greater than 0
+		assert!(total_rewards > 0);
 
-// #[test]
-// fn test_calculate_deposit_rewards_with_expired_locks() {
-// 	new_test_ext().execute_with(|| {
-// 		let vault_id = 1u32;
-// 		let asset = Asset::Custom(vault_id as u128);
-// 		let deposit = 100;
-// 		let apy = Percent::from_percent(10);
-// 		let deposit_cap = 1000;
-// 		let boost_multiplier = Some(150);
-// 		let incentive_cap = 1000;
+		// Test with previous claim
+		let previous_claim_amount = total_rewards / 2;
+		let last_claim = Some((1u64, previous_claim_amount));
 
-// 		// Configure the reward vault
-// 		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
-// 		));
+		let total_rewards_2 =
+			RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
+				total_score,
+				total_score,
+				deposit_info,
+				reward_config,
+				last_claim,
+			)
+			.unwrap();
 
-// 		// Add asset to vault
-// 		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
-// 			RuntimeOrigin::root(),
-// 			vault_id,
-// 			asset,
-// 			AssetAction::Add,
-// 		));
+		// Verify rewards calculation with previous claim
+		assert_eq!(total_rewards, total_rewards_2);
+	});
+}
 
-// 		let total_score = BalanceOf::<Runtime>::from(200u32);
-// 		let reward_config =
-// 			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier };
+#[test]
+fn test_calculate_deposit_rewards_with_expired_locks() {
+	new_test_ext().execute_with(|| {
+		let vault_id = 1u32;
+		let asset = Asset::Custom(vault_id as u128);
+		let deposit = 100_000_000_000_000_000_000u128;
+		let apy = Percent::from_percent(10);
+		let deposit_cap = 1_000_000_000_000_000_000_000u128;
+		let boost_multiplier = Some(1);
+		let incentive_cap = 1_000_000_000_000_000_000u128;
 
-// 		// Test with expired lock
-// 		let expired_lock = LockInfo {
-// 			amount: deposit,
-// 			expiry_block: 50_u64, // Expired block
-// 			lock_multiplier: LockMultiplier::SixMonths,
-// 		};
+		// Fund rewards pallet with initial balance
+		let rewards_account = RewardsPallet::<Runtime>::account_id();
+		let initial_funding = 1_000_000_000_000_000_000_000_000u128; // 1M tokens
+		Balances::make_free_balance_be(&rewards_account, initial_funding);
 
-// 		let deposit_info = UserDepositWithLocks {
-// 			unlocked_amount: deposit,
-// 			amount_with_locks: Some(vec![expired_lock]),
-// 		};
+		// Configure the reward vault
+		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
+			RuntimeOrigin::root(),
+			vault_id,
+			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier }
+		));
 
-// 		// Run to block after expiry
-// 		run_to_block(100);
+		// Add asset to vault
+		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
+			RuntimeOrigin::root(),
+			vault_id,
+			asset,
+			AssetAction::Add,
+		));
 
-// 		let (total_rewards, rewards_to_be_paid) =
-// 			RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
-// 				total_score,
-// 				deposit_info,
-// 				reward_config,
-// 				None,
-// 			)
-// 			.unwrap();
+		let total_score = BalanceOf::<Runtime>::from(200_000_000_000_000_000_000u128);
+		let reward_config =
+			RewardConfigForAssetVault { apy, deposit_cap, incentive_cap, boost_multiplier };
 
-// 		// Verify only base rewards are calculated (no lock multiplier)
-// 		assert_eq!(total_rewards, rewards_to_be_paid);
-// 		assert!(total_rewards > 0);
-// 	});
-// }
+		// Test with expired lock
+		let expired_lock = LockInfo {
+			amount: deposit,
+			expiry_block: 50_u64, // Expired block
+			lock_multiplier: LockMultiplier::SixMonths,
+		};
+
+		let deposit_info = UserDepositWithLocks {
+			unlocked_amount: deposit,
+			amount_with_locks: Some(vec![expired_lock]),
+		};
+
+		// Run to block after expiry
+		run_to_block(100);
+
+		let total_rewards =
+			RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
+				total_score,
+				total_score,
+				deposit_info,
+				reward_config,
+				None,
+			)
+			.unwrap();
+
+		// Verify only base rewards are calculated (no lock multiplier)
+		assert!(total_rewards > 0);
+	});
+}

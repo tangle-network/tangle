@@ -1,6 +1,7 @@
 use super::*;
 use crate::ApyBlocks;
 use frame_support::assert_ok;
+use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_balances::TotalIssuance;
 use sp_runtime::Percent;
 use tangle_primitives::types::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks};
@@ -57,7 +58,7 @@ fn test_calculate_rewards_only_unlocked() {
 
 		let total_deposit = MOCK_DEPOSIT;
 		let total_asset_score = MOCK_DEPOSIT;
-		let user_deposit = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
+		let user_deposit = 10_000_ * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
 		let deposit =
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
 
@@ -92,7 +93,7 @@ fn test_calculate_rewards_only_unlocked() {
 
 		// Allow for some precision loss
 		// assert precision loss is less than 1 TNT
-		assert!(diff < EIGHTEEN_DECIMALS);
+		assert!(diff < 1 * EIGHTEEN_DECIMALS);
 	});
 }
 
@@ -148,7 +149,7 @@ fn test_calculate_rewards_with_expired_lock() {
 
 		// Allow for some precision loss
 		let diff = result.unwrap() - expected_to_pay;
-		assert!(diff < EIGHTEEN_DECIMALS);
+		assert!(diff < 1 * EIGHTEEN_DECIMALS);
 	});
 }
 
@@ -207,7 +208,7 @@ fn test_calculate_rewards_with_active_locks() {
 		// Allow for some precision loss
 		// assert precision loss is less than 1 TNT
 		let diff = result.unwrap() - expected_to_pay;
-		assert!(diff < EIGHTEEN_DECIMALS);
+		assert!(diff < 1 * EIGHTEEN_DECIMALS);
 	});
 }
 
@@ -249,7 +250,7 @@ fn test_calculate_rewards_with_previous_claim() {
 		// Allow for some precision loss
 		// assert precision loss is less than 1 TNT
 		let diff = result.unwrap() - expected_to_pay;
-		assert!(diff < EIGHTEEN_DECIMALS);
+		assert!(diff < 1 * EIGHTEEN_DECIMALS);
 	});
 }
 

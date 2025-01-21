@@ -432,7 +432,12 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
-	ext.execute_with(|| System::set_block_number(1));
+	ext.execute_with(|| {
+		System::set_block_number(1);
+		// Set total issuance for reward calculations
+		let total_issuance = 1_000_000_000_000_000_000_000_000u128; // 1M tokens with 18 decimals
+		<pallet_balances::TotalIssuance<Runtime>>::put(total_issuance);
+	});
 	ext
 }
 
