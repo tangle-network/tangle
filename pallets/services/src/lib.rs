@@ -25,9 +25,9 @@ use frame_support::{
 	traits::{Currency, ExistenceRequirement, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
-use sp_runtime::{traits::Get, DispatchResult, Percent};
+use sp_runtime::{traits::Get, DispatchResult};
 use tangle_primitives::{
-	services::{AssetSecurityCommitment, AssetSecurityRequirement},
+	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
 	traits::MultiAssetDelegationInfo,
 	BlueprintId,
 };
@@ -62,22 +62,12 @@ pub mod module {
 	use super::*;
 	use frame_support::{
 		dispatch::PostDispatchInfo,
-		traits::{
-			fungibles::{Inspect, Mutate},
-			tokens::Preservation,
-		},
+		traits::fungibles::{Inspect, Mutate},
 	};
 	use sp_core::H160;
-	use sp_runtime::{
-		traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero},
-		Percent,
-	};
+	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent};
 	use sp_std::vec::Vec;
-	use tangle_primitives::{
-		services::{MasterBlueprintServiceManagerRevision, *},
-		Account,
-	};
-	use types::*;
+	use tangle_primitives::services::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -319,6 +309,30 @@ pub mod module {
 		OnRejectFailure,
 		/// Service init hook
 		OnServiceInitHook,
+		/// Membership model not supported by blueprint
+		UnsupportedMembershipModel,
+		/// Service does not support dynamic membership
+		DynamicMembershipNotSupported,
+		/// Cannot join service - rejected by blueprint
+		JoinRejected,
+		/// Cannot leave service - rejected by blueprint
+		LeaveRejected,
+		/// Invalid minimum # of operators (zero) or greater than max
+		InvalidMinOperators,
+		/// Maximum operators reached
+		MaxOperatorsReached,
+		/// Insufficient # of operators
+		InsufficientOperators,
+		/// Can join hook failure
+		OnCanJoinFailure,
+		/// Can leave hook failure
+		OnCanLeaveFailure,
+		/// Operator join hook failure
+		OnOperatorJoinFailure,
+		/// Operator leave hook failure
+		OnOperatorLeaveFailure,
+		/// Operator is a member or has already joined the service
+		AlreadyJoined,
 	}
 
 	#[pallet::event]
@@ -1011,6 +1025,7 @@ pub mod module {
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			payment_asset: Asset<T::AssetId>,
 			#[pallet::compact] value: BalanceOf<T>,
+			membership_model: MembershipModel,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
@@ -1025,6 +1040,7 @@ pub mod module {
 				ttl,
 				payment_asset,
 				value,
+				membership_model,
 			)?;
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
@@ -1436,6 +1452,63 @@ pub mod module {
 			});
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+		/// Join a service instance as an operator
+		#[pallet::call_index(15)]
+		#[pallet::weight(10_000)]
+		pub fn join_service(
+			origin: OriginFor<T>,
+			instance_id: u64,
+			preferences: OperatorPreferences,
+			native_asset_exposure: Percent,
+			non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
+		) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Get service instance
+			let instance = Instances::<T>::get(instance_id)?;
+
+			// Check if operator is already in the set
+			ensure!(
+				!instance.native_asset_security.iter().any(|(op, _)| op == &operator),
+				Error::<T>::AlreadyJoined
+			);
+
+			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
+			let preferences = Self::operators(instance.blueprint, operator.clone())?;
+
+			// Call membership implementation
+			Self::do_join_service(
+				&blueprint,
+				instance.blueprint,
+				instance_id,
+				&operator,
+				&preferences,
+				native_asset_exposure,
+				non_native_asset_exposures,
+			)?;
+
+			Ok(())
+		}
+
+		/// Leave a service instance as an operator
+		#[pallet::call_index(16)]
+		#[pallet::weight(10_000)]
+		pub fn leave_service(origin: OriginFor<T>, instance_id: u64) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Get service instance
+			let instance = Instances::<T>::get(instance_id)?;
+
+			// Get blueprint
+			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
+			let _ = Self::operators(instance.blueprint, operator.clone())?;
+
+			// Call membership implementation
+			Self::do_leave_service(&blueprint, instance.blueprint, instance_id, &operator)?;
+
+			Ok(())
 		}
 	}
 }

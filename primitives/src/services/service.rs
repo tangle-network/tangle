@@ -17,14 +17,14 @@
 use super::{
 	constraints::Constraints,
 	jobs::{type_checker, JobDefinition},
-	types::{ApprovalState, Asset},
+	types::{ApprovalState, Asset, MembershipModel},
 	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BoundedString, Gadget,
 	TypeCheckError,
 };
 use crate::{Account, BlueprintId};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
-use sp_core::H160;
+use sp_core::{ConstU8, H160};
 use sp_runtime::Percent;
 use sp_std::{vec, vec::Vec};
 
@@ -140,6 +140,8 @@ pub struct ServiceBlueprint<C: Constraints> {
 	pub master_manager_revision: MasterBlueprintServiceManagerRevision,
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget<C>,
+	/// The membership models supported by this blueprint
+	pub supported_membership_models: BoundedVec<MembershipModel, ConstU32<2>>,
 }
 
 impl<C: Constraints> ServiceBlueprint<C> {
@@ -308,6 +310,8 @@ pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId: Asset
 	/// Operators and their approval states
 	pub operators_with_approval_state:
 		BoundedVec<(AccountId, ApprovalState<AssetId>), C::MaxOperatorsPerService>,
+	/// The membership model to use for this service instance
+	pub membership_model: MembershipModel,
 }
 
 impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
@@ -424,6 +428,8 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// Time-to-live in blocks
 	pub ttl: BlockNumber,
+	/// The membership model of the service
+	pub membership_model: MembershipModel,
 }
 
 /// RPC Response for query the blueprint along with the services instances of that blueprint.

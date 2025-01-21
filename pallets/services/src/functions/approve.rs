@@ -218,6 +218,7 @@ impl<T: Config> Pallet<T> {
 			native_asset_security: native_exposures,
 			permitted_callers: request.permitted_callers.clone(),
 			ttl: request.ttl,
+			membership_model: request.membership_model,
 		};
 
 		// Update storage

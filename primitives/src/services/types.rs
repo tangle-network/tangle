@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use core::fmt::Display;
+use core::{default, fmt::Display};
 
 use crate::{Account, Weight};
 use educe::Educe;
@@ -401,4 +401,19 @@ pub struct OperatorProfile<C: Constraints> {
 	pub services: BoundedBTreeSet<u64, C::MaxServicesPerOperator>,
 	/// The Blueprint IDs that I'm currently registered for.
 	pub blueprints: BoundedBTreeSet<u64, C::MaxBlueprintsPerOperator>,
+}
+
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum MembershipModel {
+	/// Fixed set of operators defined at service creation
+	Fixed { min_operators: u32 },
+	/// Operators can join/leave subject to blueprint rules
+	Dynamic { min_operators: u32, max_operators: Option<u32> },
+}
+
+impl Default for MembershipModel {
+	fn default() -> Self {
+		MembershipModel::Fixed { min_operators: 1 }
+	}
 }

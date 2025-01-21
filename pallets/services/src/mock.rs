@@ -35,7 +35,7 @@ use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
+	AccountId32, BuildStorage, Perbill, Percent,
 };
 use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner};

@@ -58,7 +58,9 @@ interface ServicesPrecompile {
 		uint256 ttl,
 		uint256 payment_asset_id,
 		address payment_token_address,
-		uint256 payment_amount
+		uint256 payment_amount,
+		uint32 min_operators,
+		uint32 max_operators
 	) external payable;
 
 	/// @notice Terminate a service

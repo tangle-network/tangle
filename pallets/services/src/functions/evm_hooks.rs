@@ -17,6 +17,9 @@ use std::string::String;
 
 use crate::types::BalanceOf;
 use crate::{Config, Error, Event, MasterBlueprintServiceManagerRevisions, Pallet, Pays, Weight};
+use frame_support::{ensure, pallet_prelude::*};
+use sp_runtime::DispatchError;
+use tangle_primitives::services::RunnerError;
 
 #[allow(clippy::too_many_arguments)]
 impl<T: Config> Pallet<T> {
@@ -202,7 +205,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// * `blueprint` - The service blueprint.
 	/// * `blueprint_id` - The blueprint ID.
-	/// * `prefrences` - The operator preferences.
+	/// * `preferences` - The operator preferences.
 	/// * `registration_args` - The registration arguments.
 	/// * `value` - The value to be sent with the call.
 	///
@@ -212,7 +215,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_register_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		prefrences: &OperatorPreferences,
+		preferences: &OperatorPreferences,
 		registration_args: &[Field<T::Constraints, T::AccountId>],
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -240,7 +243,7 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-				prefrences.to_ethabi(),
+				preferences.to_ethabi(),
 				Token::Bytes(Field::encode_to_ethabi(registration_args)),
 			],
 			value,
@@ -255,7 +258,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// * `blueprint` - The service blueprint.
 	/// * `blueprint_id` - The blueprint ID.
-	/// * `prefrences` - The operator preferences.
+	/// * `preferences` - The operator preferences.
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
@@ -263,7 +266,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_unregister_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		prefrences: &OperatorPreferences,
+		preferences: &OperatorPreferences,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -282,7 +285,7 @@ impl<T: Config> Pallet<T> {
 				constant: None,
 				state_mutability: StateMutability::NonPayable,
 			},
-			&[Token::Uint(ethabi::Uint::from(blueprint_id)), prefrences.to_ethabi()],
+			&[Token::Uint(ethabi::Uint::from(blueprint_id)), preferences.to_ethabi()],
 			Zero::zero(),
 		)
 	}
@@ -294,7 +297,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// * `blueprint` - The service blueprint.
 	/// * `blueprint_id` - The blueprint ID.
-	/// * `prefrences` - The operator preferences.
+	/// * `preferences` - The operator preferences.
 	///
 	/// # Returns
 	///
@@ -303,7 +306,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_update_price_targets(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		prefrences: &OperatorPreferences,
+		preferences: &OperatorPreferences,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -322,7 +325,7 @@ impl<T: Config> Pallet<T> {
 				constant: None,
 				state_mutability: StateMutability::Payable,
 			},
-			&[Token::Uint(ethabi::Uint::from(blueprint_id)), prefrences.to_ethabi()],
+			&[Token::Uint(ethabi::Uint::from(blueprint_id)), preferences.to_ethabi()],
 			Zero::zero(),
 		)
 	}
@@ -335,7 +338,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// * `blueprint` - The service blueprint.
 	/// * `blueprint_id` - The blueprint ID.
-	/// * `prefrences` - The operator preferences.
+	/// * `preferences` - The operator preferences.
 	/// * `request_id` - The request id.
 	/// * `restaking_percent` - The restaking percent.
 	///
@@ -345,7 +348,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_approve_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		prefrences: &OperatorPreferences,
+		preferences: &OperatorPreferences,
 		request_id: u64,
 		restaking_percent: u8,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -378,7 +381,7 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-				prefrences.to_ethabi(),
+				preferences.to_ethabi(),
 				Token::Uint(ethabi::Uint::from(request_id)),
 				Token::Uint(ethabi::Uint::from(restaking_percent)),
 			],
@@ -393,7 +396,7 @@ impl<T: Config> Pallet<T> {
 	/// # Parameters
 	/// * `blueprint` - The service blueprint.
 	/// * `blueprint_id` - The blueprint ID.
-	/// * `prefrences` - The operator preferences.
+	/// * `preferences` - The operator preferences.
 	/// * `request_id` - The request id.
 	///
 	/// # Returns
@@ -402,7 +405,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_reject_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		prefrences: &OperatorPreferences,
+		preferences: &OperatorPreferences,
 		request_id: u64,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
@@ -429,7 +432,7 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-				prefrences.to_ethabi(),
+				preferences.to_ethabi(),
 				Token::Uint(ethabi::Uint::from(request_id)),
 			],
 			Zero::zero(),
@@ -760,7 +763,7 @@ impl<T: Config> Pallet<T> {
 	/// * `service_id` - The service ID.
 	/// * `job` - The job index.
 	/// * `job_call_id` - The job call ID.
-	/// * `prefrences` - The operator preferences.
+	/// * `preferences` - The operator preferences.
 	/// * `inputs` - The input fields.
 	/// * `outputs` - The output fields.
 	///
@@ -773,7 +776,7 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		job: u8,
 		job_call_id: u64,
-		prefrences: &OperatorPreferences,
+		preferences: &OperatorPreferences,
 		inputs: &[Field<T::Constraints, T::AccountId>],
 		outputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -824,9 +827,241 @@ impl<T: Config> Pallet<T> {
 				Token::Uint(ethabi::Uint::from(service_id)),
 				Token::Uint(ethabi::Uint::from(job)),
 				Token::Uint(ethabi::Uint::from(job_call_id)),
-				prefrences.to_ethabi(),
+				preferences.to_ethabi(),
 				Token::Bytes(Field::encode_to_ethabi(inputs)),
 				Token::Bytes(Field::encode_to_ethabi(outputs)),
+			],
+			Zero::zero(),
+		)
+	}
+
+	/// Checks if an operator can join a service instance by calling the blueprint's EVM contract.
+	///
+	/// This function dispatches a call to the `canJoin` function of the service blueprint's manager contract
+	/// to determine if an operator is allowed to join a service instance.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint containing the contract details
+	/// * `blueprint_id` - The ID of the service blueprint
+	/// * `instance_id` - The ID of the service instance
+	/// * `operator` - The account ID of the operator trying to join
+	/// * `preferences` - The operator's preferences for joining the service
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the operator can join
+	///   - The weight of the EVM operation
+	pub fn can_join_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		instance_id: u64,
+		operator: &T::AccountId,
+		preferences: &OperatorPreferences,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("canJoin"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("blueprintId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("instanceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("operator"),
+						kind: ethabi::ParamType::Address,
+						internal_type: None,
+					},
+					OperatorPreferences::to_ethabi_param(),
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(instance_id)),
+				Token::Address(T::EvmAddressMapping::into_address(operator.clone())),
+				preferences.to_ethabi(),
+			],
+			Zero::zero(),
+		)
+	}
+
+	/// Notifies the blueprint's EVM contract that an operator has joined a service instance.
+	///
+	/// This function dispatches a call to the `onOperatorJoined` function of the service blueprint's
+	/// manager contract after an operator successfully joins a service instance.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint containing the contract details
+	/// * `blueprint_id` - The ID of the service blueprint
+	/// * `instance_id` - The ID of the service instance
+	/// * `operator` - The account ID of the operator that joined
+	/// * `preferences` - The operator's preferences used when joining
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the notification was successful
+	///   - The weight of the EVM operation
+	pub fn on_operator_joined_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		instance_id: u64,
+		operator: &T::AccountId,
+		preferences: &OperatorPreferences,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("onOperatorJoined"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("blueprintId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("instanceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("operator"),
+						kind: ethabi::ParamType::Address,
+						internal_type: None,
+					},
+					OperatorPreferences::to_ethabi_param(),
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(instance_id)),
+				Token::Address(T::EvmAddressMapping::into_address(operator.clone())),
+				preferences.to_ethabi(),
+			],
+			Zero::zero(),
+		)
+	}
+
+	/// Checks if an operator can leave a service instance by calling the blueprint's EVM contract.
+	///
+	/// This function dispatches a call to the `canLeave` function of the service blueprint's manager contract
+	/// to determine if an operator is allowed to leave a service instance.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint containing the contract details
+	/// * `blueprint_id` - The ID of the service blueprint
+	/// * `instance_id` - The ID of the service instance
+	/// * `operator` - The account ID of the operator trying to leave
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the operator can leave
+	///   - The weight of the EVM operation
+	pub fn can_leave_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		instance_id: u64,
+		operator: &T::AccountId,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("canLeave"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("blueprintId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("instanceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("operator"),
+						kind: ethabi::ParamType::Address,
+						internal_type: None,
+					},
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(instance_id)),
+				Token::Address(T::EvmAddressMapping::into_address(operator.clone())),
+			],
+			Zero::zero(),
+		)
+	}
+
+	/// Notifies the blueprint's EVM contract that an operator has left a service instance.
+	///
+	/// This function dispatches a call to the `onOperatorLeft` function of the service blueprint's
+	/// manager contract after an operator successfully leaves a service instance.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint containing the contract details
+	/// * `blueprint_id` - The ID of the service blueprint
+	/// * `instance_id` - The ID of the service instance
+	/// * `operator` - The account ID of the operator that left
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the notification was successful
+	///   - The weight of the EVM operation
+	pub fn on_operator_left_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		instance_id: u64,
+		operator: &T::AccountId,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("onOperatorLeft"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("blueprintId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("instanceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("operator"),
+						kind: ethabi::ParamType::Address,
+						internal_type: None,
+					},
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(instance_id)),
+				Token::Address(T::EvmAddressMapping::into_address(operator.clone())),
 			],
 			Zero::zero(),
 		)

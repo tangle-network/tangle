@@ -9640,6 +9640,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-orderbook"
+version = "1.2.5"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-assets",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-preimage"
 version = "37.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#f2081f6657f011634a483e3a4c91e54150c974c7"

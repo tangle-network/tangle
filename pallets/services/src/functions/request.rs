@@ -4,26 +4,18 @@ use crate::{
 };
 use frame_support::{
 	pallet_prelude::*,
-	traits::{
-		fungibles::{Inspect, Mutate},
-		tokens::Preservation,
-		Currency, ExistenceRequirement,
-	},
+	traits::{fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement},
 	BoundedVec,
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::{
-	traits::{Get, Zero},
-	DispatchResult, Percent,
-};
+use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	services::{
-		ApprovalState, Asset, AssetSecurityRequirement, EvmAddressMapping, Field, ServiceRequest,
-		StagingServicePayment,
+		ApprovalState, Asset, AssetSecurityRequirement, EvmAddressMapping, Field, MembershipModel,
+		ServiceRequest, StagingServicePayment,
 	},
-	traits::MultiAssetDelegationInfo,
 	Account,
 };
 
@@ -53,6 +45,7 @@ impl<T: Config> Pallet<T> {
 		ttl: BlockNumberFor<T>,
 		payment_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
+		membership_model: MembershipModel,
 	) -> Result<u64, DispatchError> {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
@@ -178,6 +171,7 @@ impl<T: Config> Pallet<T> {
 			args,
 			permitted_callers,
 			operators_with_approval_state,
+			membership_model,
 		};
 
 		ensure!(allowed, Error::<T>::InvalidRequestInput);

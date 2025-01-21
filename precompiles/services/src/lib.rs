@@ -12,8 +12,8 @@ use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{
-	Asset, AssetSecurityCommitment, AssetSecurityRequirement, Field, OperatorPreferences,
-	ServiceBlueprint,
+	Asset, AssetSecurityCommitment, AssetSecurityRequirement, Field, MembershipModel,
+	OperatorPreferences, ServiceBlueprint,
 };
 
 #[cfg(test)]
@@ -138,7 +138,7 @@ where
 
 	/// Request a new service.
 	#[precompile::public(
-		"requestService(uint256,bytes[],bytes,bytes,bytes,uint256,uint256,address,uint256)"
+		"requestService(uint256,bytes[],bytes,bytes,bytes,uint256,uint256,address,uint256,uint32,int32)"
 	)]
 	#[precompile::payable]
 	fn request_service(
@@ -152,6 +152,8 @@ where
 		payment_asset_id: U256,
 		payment_token_address: Address,
 		amount: U256,
+		min_operators: u32,
+		max_operators: u32,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let msg_sender = handle.context().caller;
@@ -230,6 +232,14 @@ where
 			},
 		};
 
+		let membership_model = if max_operators == 0 {
+			MembershipModel::Fixed { min_operators }
+		} else if max_operators == u32::MAX {
+			MembershipModel::Dynamic { min_operators, max_operators: None }
+		} else {
+			MembershipModel::Dynamic { min_operators, max_operators: Some(max_operators) }
+		};
+
 		let call = pallet_services::Call::<Runtime>::request {
 			evm_origin: Some(msg_sender),
 			blueprint_id,
@@ -240,6 +250,7 @@ where
 			request_args,
 			payment_asset,
 			value: amount,
+			membership_model,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

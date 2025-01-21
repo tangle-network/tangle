@@ -16,13 +16,13 @@
 
 //! Services primitives.
 
-mod constraints;
-mod evm;
-mod field;
-mod gadget;
-mod jobs;
-mod service;
-mod types;
+pub mod constraints;
+pub mod evm;
+pub mod field;
+pub mod gadget;
+pub mod jobs;
+pub mod service;
+pub mod types;
 
 pub use constraints::*;
 pub use evm::*;

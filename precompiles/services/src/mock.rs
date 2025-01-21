@@ -441,6 +441,14 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 	) -> Option<UserDepositWithLocks<Balance, u64>> {
 		None
 	}
+
+	fn has_delegator_selected_blueprint(
+		_delegator: &AccountId,
+		_operator: &AccountId,
+		_blueprint_id: tangle_primitives::BlueprintId,
+	) -> bool {
+		true
+	}
 }
 
 parameter_types! {
@@ -531,6 +539,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const SlashDeferDuration: u32 = 7;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const NativeExposureMinimum: Percent = Percent::from_percent(10);
 }
 
 impl pallet_services::Config for Runtime {
@@ -564,6 +576,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
+	type NativeExposureMinimum = NativeExposureMinimum;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
 	type SlashDeferDuration = SlashDeferDuration;
