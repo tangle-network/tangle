@@ -16,6 +16,7 @@
 
 use super::*;
 use frame_support::{pallet_prelude::*, BoundedVec};
+use sp_runtime::traits::CheckedAdd;
 use tangle_primitives::services::Asset;
 
 /// A snapshot of the operator state at the start of the round.
@@ -34,7 +35,7 @@ impl<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
 	OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations>
 where
 	AssetId: PartialEq + Ord + Copy,
-	Balance: Default + core::ops::AddAssign + Copy,
+	Balance: Default + core::ops::AddAssign + Copy + CheckedAdd,
 {
 	/// Calculates the total stake for a specific asset ID from all delegations.
 	pub fn get_stake_by_asset_id(&self, asset_id: Asset<AssetId>) -> Balance {

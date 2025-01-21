@@ -15,13 +15,14 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::ensure;
-use frame_support::{pallet_prelude::Get, BoundedVec};
-use sp_std::fmt::Debug;
-use sp_std::vec;
-use tangle_primitives::types::rewards::LockInfo;
-use tangle_primitives::types::rewards::LockMultiplier;
-use tangle_primitives::{services::Asset, BlueprintId};
+use frame_support::{ensure, pallet_prelude::Get, BoundedVec};
+use sp_runtime::traits::CheckedAdd;
+use sp_std::{fmt::Debug, vec};
+use tangle_primitives::{
+	services::Asset,
+	types::rewards::{LockInfo, LockMultiplier},
+	BlueprintId,
+};
 
 /// Represents how a delegator selects which blueprints to work with.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
@@ -186,7 +187,7 @@ impl<
 	pub fn calculate_delegation_by_asset(&self, asset_id: Asset<AssetId>) -> Balance
 	// Asset<AssetId>) -> Balance
 	where
-		Balance: Default + core::ops::AddAssign + Clone,
+		Balance: Default + core::ops::AddAssign + Clone + CheckedAdd,
 		AssetId: Eq + PartialEq,
 	{
 		let mut total = Balance::default();

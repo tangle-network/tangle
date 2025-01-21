@@ -21,7 +21,7 @@ use frame_support::{
 	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
 use sp_runtime::{
-	traits::{CheckedSub, Zero},
+	traits::{CheckedAdd, CheckedSub, Zero},
 	DispatchError, Percent,
 };
 use sp_std::vec::Vec;
@@ -217,7 +217,7 @@ impl<T: Config> Pallet<T> {
 					operator_metadata.delegations.remove(operator_delegation_index);
 					operator_metadata.delegation_count = operator_metadata
 						.delegation_count
-						.checked_sub(&1)
+						.checked_sub(1u32)
 						.ok_or(Error::<T>::InsufficientBalance)?;
 				}
 

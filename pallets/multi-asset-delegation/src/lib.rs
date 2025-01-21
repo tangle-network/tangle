@@ -411,6 +411,8 @@ pub mod pallet {
 		LockViolation,
 		/// Above deposit caps setup
 		DepositExceedsCapForAsset,
+		/// Overflow from math
+		OverflowRisk,
 	}
 
 	/// Hooks for the pallet.

@@ -137,9 +137,9 @@ where
 	#[precompile::public("minNominatorBond()")]
 	#[precompile::public("min_nominator_bond()")]
 	#[precompile::view]
-	fn min_nominator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<u128> {
+	fn min_nominator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let min_nominator_bond: u128 = pallet_staking::MinNominatorBond::<Runtime>::get()
+		let min_nominator_bond: U256 = pallet_staking::MinNominatorBond::<Runtime>::get()
 			.try_into()
 			.map_err(|_| revert("Amount is too large for provided balance type"))?;
 		Ok(min_nominator_bond)
@@ -148,9 +148,9 @@ where
 	#[precompile::public("minValidatorBond()")]
 	#[precompile::public("min_validator_bond()")]
 	#[precompile::view]
-	fn min_validator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<u128> {
+	fn min_validator_bond(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let min_validator_bond: u128 = pallet_staking::MinValidatorBond::<Runtime>::get()
+		let min_validator_bond: U256 = pallet_staking::MinValidatorBond::<Runtime>::get()
 			.try_into()
 			.map_err(|_| revert("Amount is too large for provided balance type"))?;
 		Ok(min_validator_bond)
@@ -159,9 +159,9 @@ where
 	#[precompile::public("minActiveStake()")]
 	#[precompile::public("min_active_stake()")]
 	#[precompile::view]
-	fn min_active_stake(handle: &mut impl PrecompileHandle) -> EvmResult<u128> {
+	fn min_active_stake(handle: &mut impl PrecompileHandle) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let min_active_stake: u128 = pallet_staking::MinimumActiveStake::<Runtime>::get()
+		let min_active_stake: U256 = pallet_staking::MinimumActiveStake::<Runtime>::get()
 			.try_into()
 			.map_err(|_| revert("Amount is too large for provided balance type"))?;
 		Ok(min_active_stake)
@@ -209,9 +209,9 @@ where
 	#[precompile::public("erasTotalStake(uint32)")]
 	#[precompile::public("eras_total_stake(uint32)")]
 	#[precompile::view]
-	fn eras_total_stake(handle: &mut impl PrecompileHandle, era_index: u32) -> EvmResult<u128> {
+	fn eras_total_stake(handle: &mut impl PrecompileHandle, era_index: u32) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let total_stake: u128 = <pallet_staking::Pallet<Runtime>>::eras_total_stake(era_index)
+		let total_stake: U256 = <pallet_staking::Pallet<Runtime>>::eras_total_stake(era_index)
 			.try_into()
 			.map_err(|_| revert("Amount is too large for provided balance type"))?;
 
