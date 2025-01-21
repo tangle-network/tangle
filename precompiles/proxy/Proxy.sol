@@ -7,7 +7,8 @@ address constant PROXY_ADDRESS = 0x000000000000000000000000000000000000080b;
 /// @dev The Proxy contract's instance.
 Proxy constant PROXY_CONTRACT = Proxy(PROXY_ADDRESS);
 
-/// @author The Moonbeam Team
+/// @author Tangle Network
+/// @author Originally built by Moonbeam Team
 /// @title Pallet Proxy Interface
 /// @title The interface through which solidity contracts will interact with the Proxy pallet
 /// @custom:address 0x000000000000000000000000000000000000080b

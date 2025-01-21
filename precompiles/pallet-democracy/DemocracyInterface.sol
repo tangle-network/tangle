@@ -7,7 +7,8 @@ address constant DEMOCRACY_ADDRESS = 0x0000000000000000000000000000000000000803;
 /// @dev The Democracy contract's instance.
 Democracy constant DEMOCRACY_CONTRACT = Democracy(DEMOCRACY_ADDRESS);
 
-/// @author The Moonbeam Team
+/// @author Tangle Network
+/// @author Originally built by Moonbeam Team
 /// @title Pallet Democracy Interface
 /// @dev The interface through which solidity contracts will interact with pallet-democracy.
 /// This interface does not exhaustively wrap pallet democracy, rather it wraps the most
