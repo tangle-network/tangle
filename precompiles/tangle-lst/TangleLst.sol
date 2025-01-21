@@ -107,4 +107,44 @@ interface TangleLst {
         bytes32 nominator,
         bytes32 bouncer
     ) external returns (uint8);
+
+    /// @dev Stop nominating for a pool
+    /// @param poolId The ID of the pool to chill
+    function chill(uint256 poolId) external;
+
+    /// @dev Bond extra tokens for another account
+    /// @param poolId The ID of the pool
+    /// @param who The account to bond extra for
+    /// @param amount The amount to bond extra
+    function bondExtraOther(uint256 poolId, bytes32 who, uint256 amount) external;
+
+    /// @dev Set commission for a pool
+    /// @param poolId The ID of the pool
+    /// @param newCommission The new commission value
+    /// @param payee The account to receive commission payments
+    function setCommission(uint256 poolId, uint256 newCommission, bytes32 payee) external;
+
+    /// @dev Set maximum commission for a pool
+    /// @param poolId The ID of the pool
+    /// @param maxCommission The maximum commission value
+    function setCommissionMax(uint256 poolId, uint256 maxCommission) external;
+
+    /// @dev Set commission change rate
+    /// @param poolId The ID of the pool
+    /// @param maxIncrease The maximum increase in commission
+    /// @param minDelay The minimum delay between changes
+    function setCommissionChangeRate(uint256 poolId, uint256 maxIncrease, uint256 minDelay) external;
+
+    /// @dev Claim commission for a pool
+    /// @param poolId The ID of the pool
+    function claimCommission(uint256 poolId) external;
+
+    /// @dev Adjust pool deposit
+    /// @param poolId The ID of the pool
+    function adjustPoolDeposit(uint256 poolId) external;
+
+    /// @dev Set commission claim permission
+    /// @param poolId The ID of the pool
+    /// @param permission The permission value (as uint8)
+    function setCommissionClaimPermission(uint256 poolId, uint8 permission) external;
 }
