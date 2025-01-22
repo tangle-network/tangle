@@ -121,8 +121,7 @@ interface TangleLst {
     /// @dev Set commission for a pool
     /// @param poolId The ID of the pool
     /// @param newCommission The new commission value
-    /// @param payee The account to receive commission payments
-    function setCommission(uint256 poolId, uint256 newCommission, bytes32 payee) external;
+    function setCommission(uint256 poolId, uint256 newCommission) external;
 
     /// @dev Set maximum commission for a pool
     /// @param poolId The ID of the pool
