@@ -97,7 +97,7 @@ fn get_total_supply() {
 		.execute_with(|| {
 			precompiles()
 				.prepare_test(CryptoAlith, Precompile1, PCall::total_supply {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(3500u64));
 		});
@@ -115,7 +115,7 @@ fn get_balances_known_user() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000u64));
 		});
@@ -133,7 +133,7 @@ fn get_balances_unknown_user() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u64));
 		});
@@ -223,7 +223,7 @@ fn check_allowance_existing() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(500u64));
 		});
@@ -244,7 +244,7 @@ fn check_allowance_not_existing() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u64));
 		});
@@ -278,7 +278,7 @@ fn transfer() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 
@@ -288,7 +288,7 @@ fn transfer() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 		});
@@ -353,7 +353,7 @@ fn transfer_from() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 
@@ -363,7 +363,7 @@ fn transfer_from() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 
@@ -376,7 +376,7 @@ fn transfer_from() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(100u64));
 		});
@@ -443,7 +443,7 @@ fn transfer_from_self() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 
@@ -453,7 +453,7 @@ fn transfer_from_self() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 		});
@@ -467,7 +467,7 @@ fn get_metadata_name() {
 		.execute_with(|| {
 			precompiles()
 				.prepare_test(CryptoAlith, Precompile1, PCall::name {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(UnboundedBytes::from("Mock token"));
 		});
@@ -481,7 +481,7 @@ fn get_metadata_symbol() {
 		.execute_with(|| {
 			precompiles()
 				.prepare_test(CryptoAlith, Precompile1, PCall::symbol {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(UnboundedBytes::from("MOCK"));
 		});
@@ -495,7 +495,7 @@ fn get_metadata_decimals() {
 		.execute_with(|| {
 			precompiles()
 				.prepare_test(CryptoAlith, Precompile1, PCall::decimals {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(18u8);
 		});
@@ -513,7 +513,7 @@ fn deposit(data: Vec<u8>) {
 					Precompile1,
 					PCall::balance_of { owner: Address(Precompile1.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -584,7 +584,7 @@ fn deposit(data: Vec<u8>) {
 					Precompile1,
 					PCall::balance_of { owner: Address(Precompile1.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -595,7 +595,7 @@ fn deposit(data: Vec<u8>) {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000));
 		});
@@ -629,7 +629,7 @@ fn deposit_zero() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Precompile1.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -664,7 +664,7 @@ fn deposit_zero() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Precompile1.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -675,7 +675,7 @@ fn deposit_zero() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000));
 		});
@@ -694,7 +694,7 @@ fn withdraw() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Precompile1.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -717,7 +717,7 @@ fn withdraw() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000));
 		});
@@ -736,7 +736,7 @@ fn withdraw_more_than_owned() {
 					Precompile1,
 					PCall::balance_of { owner: Address(Precompile1.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -752,7 +752,7 @@ fn withdraw_more_than_owned() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000));
 		});
@@ -767,7 +767,7 @@ fn permit_valid() {
 			let owner: H160 = CryptoAlith.into();
 			let spender: H160 = Bob.into();
 			let value: U256 = 500u16.into();
-			let deadline: U256 = 0u8.into(); // todo: proper timestamp
+			let deadline: U256 = 0u8.into();
 
 			let permit = Eip2612::<Runtime, NativeErc20Metadata>::generate_permit(
 				Precompile1.into(),
@@ -788,7 +788,7 @@ fn permit_valid() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -806,7 +806,7 @@ fn permit_valid() {
 						s: rs.s.b32().into(),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_log(log3(
 					Precompile1,
 					SELECTOR_LOG_APPROVAL,
@@ -825,7 +825,7 @@ fn permit_valid() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(500u16));
 
@@ -835,7 +835,7 @@ fn permit_valid() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1u8));
 		});
@@ -871,7 +871,7 @@ fn permit_invalid_nonce() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -900,7 +900,7 @@ fn permit_invalid_nonce() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u16));
 
@@ -910,7 +910,7 @@ fn permit_invalid_nonce() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 		});
@@ -933,7 +933,7 @@ fn permit_invalid_signature() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -962,7 +962,7 @@ fn permit_invalid_signature() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u16));
 
@@ -972,7 +972,7 @@ fn permit_invalid_signature() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 		});
@@ -1010,7 +1010,7 @@ fn permit_invalid_deadline() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -1039,7 +1039,7 @@ fn permit_invalid_deadline() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u16));
 
@@ -1049,7 +1049,7 @@ fn permit_invalid_deadline() {
 					Precompile1,
 					PCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 		});
@@ -1184,7 +1184,7 @@ fn permit_valid_with_metamask_signed_data() {
 			let owner: H160 = CryptoAlith.into();
 			let spender: H160 = Bob.into();
 			let value: U256 = 1000u16.into();
-			let deadline: U256 = 1u16.into(); // todo: proper timestamp
+			let deadline: U256 = 1u16.into();
 
 			let rsv = hex_literal::hex!(
 				"612960858951e133d05483804be5456a030be4ce6c000a855d865c0be75a8fc11d89ca96d5a153e8c
@@ -1211,7 +1211,7 @@ fn permit_valid_with_metamask_signed_data() {
 						s: s_real.into(),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_log(log3(
 					Precompile1,
 					SELECTOR_LOG_APPROVAL,
@@ -1263,7 +1263,7 @@ fn transfer_native() {
 					Precompile1,
 					PCall::balance_of { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 
@@ -1273,7 +1273,7 @@ fn transfer_native() {
 					Precompile1,
 					PCall::balance_of { owner: account_id_h160.into() },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 		});

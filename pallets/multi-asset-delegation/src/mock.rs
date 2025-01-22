@@ -293,7 +293,7 @@ impl tangle_primitives::traits::ServiceManager<AccountId, Balance> for MockServi
 	}
 
 	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
-		todo!(); // we don't care
+		unimplemented!(); // we don't care
 	}
 }
 

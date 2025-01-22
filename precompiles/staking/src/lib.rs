@@ -219,6 +219,7 @@ where
 	}
 
 	#[precompile::public("eras_total_reward_points(uint32)")]
+	#[precompile::public("erasTotalRewardPoints(uint32)")]
 	#[precompile::view]
 	fn eras_total_reward_points(
 		handle: &mut impl PrecompileHandle,
@@ -513,8 +514,8 @@ where
 		let reward_destination = match payee {
 			0 => pallet_staking::RewardDestination::Staked,
 			1 => pallet_staking::RewardDestination::Stash,
-			3 => pallet_staking::RewardDestination::Account(controller.clone()),
-			4 => pallet_staking::RewardDestination::None,
+			2 => pallet_staking::RewardDestination::Account(controller.clone()),
+			3 => pallet_staking::RewardDestination::None,
 			_ => return Err(revert("Invalid reward destination")),
 		};
 

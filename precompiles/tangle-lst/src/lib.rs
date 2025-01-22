@@ -1,7 +1,7 @@
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Tangle Foundation.
 //
-// This file is part of pallet-evm-precompile-multi-asset-delegation package.
+// This file is part of pallet-evm-precompile-tangle-lst package.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,21 +14,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This file contains the implementation of the MultiAssetDelegationPrecompile struct which
-//! provides an interface between the EVM and the native MultiAssetDelegation pallet of the runtime.
-//! It allows EVM contracts to call functions of the MultiAssetDelegation pallet, in order to enable
-//! EVM accounts to interact with the delegation system.
+//! This file contains the implementation of the TangleLstPrecompile struct which
+//! provides an interface between the EVM and the native TangleLst pallet of the runtime.
+//! It allows EVM contracts to call functions of the TangleLst pallet, in order to enable
+//! EVM accounts to interact with the liquid staking system.
 //!
-//! The MultiAssetDelegationPrecompile struct implements core methods that correspond to the
-//! functions of the MultiAssetDelegation pallet. These methods can be called from EVM contracts.
+//! The TangleLstPrecompile struct implements core methods that correspond to the
+//! functions of the TangleLst pallet. These methods can be called from EVM contracts.
 //! They include functions to join as an operator, delegate assets, withdraw assets, etc.
 //!
 //! Each method records the gas cost for the operation, performs the requested operation, and
 //! returns the result in a format that can be used by the EVM.
 //!
-//! The MultiAssetDelegationPrecompile struct is generic over the Runtime type, which is the type of
-//! the runtime that includes the MultiAssetDelegation pallet. This allows the precompile to work
-//! with any runtime that includes the MultiAssetDelegation pallet and meets the other trait bounds
+//! The TangleLstPrecompile struct is generic over the Runtime type, which is the type of
+//! the runtime that includes the TangleLst pallet. This allows the precompile to work
+//! with any runtime that includes the TangleLst pallet and meets the other trait bounds
 //! required by the precompile.
 
 #![cfg_attr(not(feature = "std"), no_std)]
