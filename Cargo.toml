@@ -372,6 +372,24 @@ rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "evm-tracer", default-features = false }
 
+# Hyperbridge EVM necessary dependencies
+alloy-sol-macro       = "0.7.7"
+alloy-sol-types       = { version = "0.7.7", default-features = false }
+alloy-primitives      = { version = "0.7.7", default-features = false, features = ["rlp"] }
+
+# Hyperbridge
+token-gateway-primitives    = { path = "pallets/token-gateway/primitives" }
+pallet-token-gateway        = { path = "pallets/token-gateway" }
+pallet-ismp                 = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+pallet-ismp-rpc             = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407" }
+pallet-ismp-runtime-api     = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+ismp-parachain 				= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+ismp-parachain-inherent 	= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+ismp-parachain-runtime-api  = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+ismp                        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+pallet-hyperbridge          = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+anyhow                      = { version = "1.0.93", default-features = false }
+
 # Polkadot XCM
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }

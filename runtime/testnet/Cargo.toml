@@ -124,7 +124,7 @@ pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 pallet-hotfix-sufficients = { workspace = true }
 
-## Tangle precompiles
+# Tangle precompiles
 pallet-evm-precompile-batch = { workspace = true }
 pallet-evm-precompile-call-permit = { workspace = true }
 pallet-evm-precompile-democracy = { workspace = true }
@@ -142,10 +142,16 @@ pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-tangle-lst = { workspace = true }
 precompile-utils = { workspace = true }
-
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
+
+# Hyperbridge
+# pallet-ismp = { workspace = true, features = ["unsigned"] }
+# pallet-ismp-runtime-api = { workspace = true }
+# ismp = { workspace = true }
+# pallet-hyperbridge = { workspace = true }
+# pallet-token-gateway = { workspace = true }
 
 # XCM
 xcm = { workspace = true }
