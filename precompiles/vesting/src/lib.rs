@@ -179,6 +179,7 @@ where
 		schedule1_index: u32,
 		schedule2_index: u32,
 	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let caller = handle.context().caller;
 		let caller_account = Runtime::AddressMapping::into_account_id(caller);
 
