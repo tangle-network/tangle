@@ -219,6 +219,7 @@ where
 	}
 
 	#[precompile::public("eras_total_reward_points(uint32)")]
+	#[precompile::public("erasTotalRewardPoints(uint32)")]
 	#[precompile::view]
 	fn eras_total_reward_points(
 		handle: &mut impl PrecompileHandle,
