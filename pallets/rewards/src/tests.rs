@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle. If not, see <http://www.gnu.org/licenses/>.
 use crate::{mock::*, types::*, AssetAction, Error, Pallet as RewardsPallet};
-use frame_support::{assert_err, assert_noop, assert_ok};
-use sp_runtime::{AccountId32, DispatchError, Percent};
+use frame_support::assert_err;
+use sp_runtime::{DispatchError, Percent};
 use tangle_primitives::services::Asset;
 
 pub mod apy_calc;

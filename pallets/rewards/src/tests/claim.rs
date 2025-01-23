@@ -6,7 +6,7 @@ use crate::{
 	TotalRewardVaultDeposit, TotalRewardVaultScore,
 };
 use frame_support::assert_noop;
-use frame_support::{assert_err, assert_ok, traits::Currency};
+use frame_support::{assert_ok, traits::Currency};
 use sp_runtime::Percent;
 use tangle_primitives::{
 	services::Asset,
@@ -276,7 +276,6 @@ fn test_claim_rewards_with_active_locks() {
 		// reward for locked 90k = 0.171232876712328767122 * 1000 = 171.232876712328767122
 		let expected_reward =
 			19 * EIGHTEEN_DECIMALS + 76 * EIGHTEEN_DECIMALS + 171 * EIGHTEEN_DECIMALS;
-		println!("Expected reward: {}", expected_reward);
 		let diff = if balance > expected_reward {
 			balance - expected_reward
 		} else {
