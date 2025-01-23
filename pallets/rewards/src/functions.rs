@@ -147,10 +147,7 @@ impl<T: Config> Pallet<T> {
 
 		let rewards_to_be_paid = Self::calculate_rewards(account_id, asset)?;
 
-		println!(
-			"rewards_to_be_paid: {:?}",
-			rewards_to_be_paid.saturated_into::<u128>()
-		);
+		println!("rewards_to_be_paid: {:?}", rewards_to_be_paid.saturated_into::<u128>());
 
 		// mint new TNT rewards and trasnfer to the user
 		let _ = T::Currency::deposit_creating(account_id, rewards_to_be_paid);
@@ -259,6 +256,8 @@ impl<T: Config> Pallet<T> {
 		let current_block = frame_system::Pallet::<T>::block_number();
 		let last_claim_block = last_claim.map(|(block, _)| block).unwrap_or(current_block);
 
+		println!("User unlocked score {:?}", user_score);
+
 		// Add score with lock multipliers if any
 		// only if the admin has enabled boost multiplier for the vault
 		if reward.boost_multiplier.is_some() {
@@ -270,11 +269,16 @@ impl<T: Config> Pallet<T> {
 						let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
 						let lock_score = lock.amount.saturating_mul(multiplier);
 
+						println!("lock_multiplier: {:?}", lock.lock_multiplier);
+						println!("lock_score: {:?}", lock_score);
+
 						user_score = user_score.saturating_add(lock_score);
 					}
 				}
 			}
 		}
+
+		println!("user_score after multiplier {:?}", user_score);
 
 		// if the user has no score, return 0
 		ensure!(!user_score.is_zero(), Error::<T>::NoRewardsAvailable);
