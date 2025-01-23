@@ -253,7 +253,7 @@ impl<T: Config> Pallet<T> {
 		// Calculate the propotional apy
 		let deposit_cap = reward.deposit_cap;
 		let apy = Self::calculate_propotional_apy(total_deposit, deposit_cap, reward.apy)
-			.ok_or(Error::<T>::ArithmeticError)?;
+			.ok_or(Error::<T>::CannotCalculatePropotionalApy)?;
 		log::debug!("apy: {:?}", apy);
 
 		// Calculate total rewards pool from total issuance
@@ -262,7 +262,7 @@ impl<T: Config> Pallet<T> {
 
 		// Calculate per block reward pool first to minimize precision loss
 		let total_reward_per_block = Self::calculate_reward_per_block(total_annual_rewards)
-			.ok_or(Error::<T>::ArithmeticError)?;
+			.ok_or(Error::<T>::CannotCalculateRewardPerBlock)?;
 		log::debug!("total_reward_per_block: {:?}", total_reward_per_block);
 
 		// Start with unlocked amount as base score

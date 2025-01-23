@@ -381,7 +381,7 @@ fn test_claim_rewards_with_zero_cap() {
 		// Should not be able to claim rewards with zero incentive cap
 		assert_noop!(
 			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone()), asset),
-			Error::<Runtime>::ArithmeticError
+			Error::<Runtime>::CannotCalculateRewardPerBlock
 		);
 	});
 }

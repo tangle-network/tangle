@@ -290,7 +290,7 @@ fn test_calculate_rewards_zero_cap() {
 			last_claim,
 		);
 
-		assert_err!(result, Error::<Runtime>::ArithmeticError);
+		assert_err!(result, Error::<Runtime>::CannotCalculatePropotionalApy);
 	});
 }
 

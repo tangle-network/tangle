@@ -269,7 +269,9 @@ pub mod pallet {
 		/// Error returned when the reward configuration for the vault is not found.
 		RewardConfigNotFound,
 		/// Arithmetic operation caused an overflow
-		ArithmeticError,
+		CannotCalculatePropotionalApy,
+		/// Error returned when trying to calculate reward per block
+		CannotCalculateRewardPerBlock,
 	}
 
 	#[pallet::call]
