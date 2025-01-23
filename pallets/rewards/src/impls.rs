@@ -90,6 +90,17 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		// find the vault for the asset id
 		// if the asset is not in a reward vault, do nothing
 		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset) {
+			// Update the reward vault deposit
+			let deposit = TotalRewardVaultDeposit::<T>::get(vault_id).saturating_sub(amount);
+			TotalRewardVaultDeposit::<T>::insert(vault_id, deposit);
+
+			// emit event
+			Self::deposit_event(Event::TotalDepositUpdated {
+				vault_id,
+				asset,
+				total_deposit: deposit,
+			});
+
 			// Update the reward vault score
 			let score = TotalRewardVaultScore::<T>::get(vault_id).saturating_sub(amount);
 			TotalRewardVaultScore::<T>::insert(vault_id, score);

@@ -201,8 +201,11 @@ fn test_claim_rewards_with_expired_lock() {
 		// Expected reward = 100M * 1% = 1M
 		// Rewards per block = Expected reward / 5_256_000 = 1M / 5_256_000 = 0.1902587519
 		// Claiming for block 1000
-		// so total reward = 0.1902587519 * 1000 = 190.2587519
-		let expected_reward = 28 * EIGHTEEN_DECIMALS;
+		// reward for unlocked 10k = 0.01902587519 * 1000 = 19.2587519
+		// reward for locked 10k = 0.038051750380517503805 * 900 = 34.246575342465753424500
+		// reward for expired locked 10k = 0.01902587519 * 100 = 1.92587519
+		let expected_reward =
+			19 * EIGHTEEN_DECIMALS + 34 * EIGHTEEN_DECIMALS + 2 * EIGHTEEN_DECIMALS;
 		let diff = if balance > expected_reward {
 			balance - expected_reward
 		} else {
@@ -268,8 +271,12 @@ fn test_claim_rewards_with_active_locks() {
 		// Expected reward = 100M * 1% = 1M
 		// Rewards per block = Expected reward / 5_256_000 = 1M / 5_256_000 = 0.1902587519
 		// Claiming for block 1000
-		// so total reward = 0.1902587519 * 1000 = 190.2587519
-		let expected_reward = 190 * EIGHTEEN_DECIMALS;
+		// reward for unlocked 10k = 0.01902587519 * 1000 = 19.2587519
+		// reward for locked 40k = 0.076103500761035007610 * 1000 = 76.103500761035007610
+		// reward for locked 90k = 0.171232876712328767122 * 1000 = 171.232876712328767122
+		let expected_reward =
+			19 * EIGHTEEN_DECIMALS + 76 * EIGHTEEN_DECIMALS + 171 * EIGHTEEN_DECIMALS;
+		println!("Expected reward: {}", expected_reward);
 		let diff = if balance > expected_reward {
 			balance - expected_reward
 		} else {
