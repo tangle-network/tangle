@@ -383,18 +383,11 @@ pallet-token-gateway        = { path = "pallets/token-gateway" }
 pallet-ismp                 = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
 pallet-ismp-rpc             = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407" }
 pallet-ismp-runtime-api     = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
-ismp-parachain 				= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
-ismp-parachain-inherent 	= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
-ismp-parachain-runtime-api  = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+ismp-grandpa 				= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
 ismp                        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
 pallet-hyperbridge          = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407", default-features = false }
+sp-mmr-primitives           = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 anyhow                      = { version = "1.0.93", default-features = false }
-
-# Polkadot XCM
-xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 
 # Subxt
 subxt = { version = "0.38.0", default-features = false }

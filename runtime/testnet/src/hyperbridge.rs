@@ -16,17 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::governance::TechAdminOrCouncil;
-use crate::{Balances, Ismp, IsmpParachain, NativeCurrencyId, Runtime, RuntimeEvent, Timestamp};
-use crate::{BncDecimals, Currencies};
-use crate::{TokenGateway, Treasury};
-use bifrost_asset_registry::AssetIdMaps;
-use bifrost_primitives::{AccountId, Balance};
+use crate::{Balances, EnsureRootOrHalfCouncil, Ismp, Runtime, RuntimeEvent, Timestamp};
 use frame_support::parameter_types;
 use ismp::{host::StateMachine, module::IsmpModule, router::IsmpRouter};
-use sp_core::Get;
 use sp_std::boxed::Box;
 use sp_std::vec::Vec;
+use tangle_primitives::Balance;
 
 impl pallet_hyperbridge::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -44,7 +39,7 @@ parameter_types! {
 impl pallet_ismp::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	// Modify the consensus client's permissions, for example, TechAdmin
-	type AdminOrigin = TechAdminOrCouncil;
+	type AdminOrigin = EnsureRootOrHalfCouncil;
 	// The state machine identifier of the chain -- parachain id
 	type HostStateMachine = HostStateMachine;
 	type TimestampProvider = Timestamp;
@@ -56,15 +51,14 @@ impl pallet_ismp::Config for Runtime {
 	// Co-processor
 	type Coprocessor = Coprocessor;
 	// A tuple of types implementing the ConsensusClient interface, which defines all consensus algorithms supported by this protocol deployment
-	type ConsensusClients = (ismp_parachain::ParachainConsensusClient<Runtime, IsmpParachain>,);
+	type ConsensusClients = (ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type WeightProvider = ();
 	type OffchainDB = ();
 }
 
-impl ismp_parachain::Config for Runtime {
+impl ismp_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	// pallet-ismp implements the IsmpHost
-	type IsmpHost = Ismp;
+	type IsmpHost = pallet_ismp::Pallet<Runtime>;
 }
 
 #[derive(Default)]
@@ -76,40 +70,7 @@ impl IsmpRouter for Router {
 			pallet_hyperbridge::PALLET_HYPERBRIDGE_ID => {
 				Ok(Box::new(pallet_hyperbridge::Pallet::<Runtime>::default()))
 			},
-			id if TokenGateway::is_token_gateway(&id) => {
-				Ok(Box::new(pallet_token_gateway::Pallet::<Runtime>::default()))
-			},
 			_ => Err(ismp::Error::ModuleNotFound(id))?,
 		}
 	}
-}
-
-/// Should provide an account that is funded and can be used to pay for asset creation
-pub struct AssetAdmin;
-impl Get<AccountId> for AssetAdmin {
-	fn get() -> AccountId {
-		Treasury::account_id()
-	}
-}
-
-impl pallet_token_gateway::Config for Runtime {
-	// configure the runtime event
-	type RuntimeEvent = RuntimeEvent;
-	// Configured as Pallet Ismp
-	type Dispatcher = Ismp;
-	// Configured as Pallet Assets
-	type Assets = Currencies;
-	// Configured as Pallet balances
-	type NativeCurrency = Balances;
-	// AssetAdmin account
-	type AssetAdmin = AssetAdmin;
-	// The Native asset Id
-	type NativeAssetId = NativeCurrencyId;
-	// A type that provides a function for creating unique asset ids
-	// A concrete implementation for your specific runtime is required
-	type AssetIdFactory = ();
-	// The precision of the native asset
-	type Decimals = BncDecimals;
-	type ControlOrigin = TechAdminOrCouncil;
-	type CurrencyIdConvert = AssetIdMaps<Runtime>;
 }

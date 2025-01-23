@@ -18,19 +18,19 @@ use alloc::string::ToString;
 use frame_support::PalletId;
 use sp_core::U256;
 use sp_runtime::traits::AccountIdConversion;
-use token_gateway_primitives::token_gateway_id;
+use token_gateway_primitives::PALLET_TOKEN_GATEWAY_ID;
 
 use crate::{Config, Pallet};
 
 impl<T: Config> Pallet<T> {
 	pub fn pallet_account() -> T::AccountId {
 		let mut inner = [0u8; 8];
-		inner.copy_from_slice(&token_gateway_id().0[0..8]);
+		inner.copy_from_slice(&PALLET_TOKEN_GATEWAY_ID[0..8]);
 		PalletId(inner).into_account_truncating()
 	}
 
 	pub fn is_token_gateway(id: &[u8]) -> bool {
-		id == &token_gateway_id().0
+		id == &PALLET_TOKEN_GATEWAY_ID
 	}
 }
 

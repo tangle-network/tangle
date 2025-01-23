@@ -147,17 +147,13 @@ rpc-primitives-debug = { workspace = true }
 rpc-primitives-txpool = { workspace = true }
 
 # Hyperbridge
-# pallet-ismp = { workspace = true, features = ["unsigned"] }
-# pallet-ismp-runtime-api = { workspace = true }
-# ismp = { workspace = true }
-# pallet-hyperbridge = { workspace = true }
-# pallet-token-gateway = { workspace = true }
-
-# XCM
-xcm = { workspace = true }
-xcm-builder = { workspace = true }
-xcm-executor = { workspace = true }
-polkadot-parachain-primitives = { workspace = true }
+pallet-ismp = { workspace = true, features = ["unsigned"] }
+pallet-ismp-runtime-api = { workspace = true }
+pallet-hyperbridge = { workspace = true }
+sp-mmr-primitives = { workspace = true }
+ismp = { workspace = true }
+ismp-grandpa = { workspace = true  }
+anyhow = { workspace = true }
 
 [features]
 runtime-benchmarks = [
@@ -182,10 +178,11 @@ runtime-benchmarks = [
     # Tangle
     "pallet-services/runtime-benchmarks",
     "pallet-airdrop-claims/runtime-benchmarks",
-
-    "xcm-builder/runtime-benchmarks",
     "pallet-multi-asset-delegation/runtime-benchmarks",
     "pallet-tangle-lst-benchmarking/runtime-benchmarks",
+
+    # Hyperbridge
+    "pallet-ismp/runtime-benchmarks",
 ]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 local-testing = []
@@ -313,11 +310,13 @@ std = [
     "pallet-evm-precompile-services/std",
     "pallet-evm-precompile-tangle-lst/std",
 
-    # XCM
-    "xcm/std",
-    "xcm-builder/std",
-    "xcm-executor/std",
-    "polkadot-parachain-primitives/std",
+    # Hyperbridge
+    "pallet-hyperbridge/std",
+    "pallet-ismp/std",
+    "ismp/std",
+    "ismp-grandpa/std",
+    "pallet-ismp-runtime-api/std",
+    "sp-mmr-primitives/std",
 ]
 integration-tests = ["tangle-primitives/integration-tests"]
 with-rocksdb-weights = []
