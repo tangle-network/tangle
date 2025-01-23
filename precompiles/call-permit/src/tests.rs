@@ -89,7 +89,7 @@ fn valid_permit_returns() {
 					CallPermit,
 					PCall::nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -180,7 +180,7 @@ fn valid_permit_reverts() {
 					CallPermit,
 					PCall::nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -270,7 +270,7 @@ fn invalid_permit_nonce() {
 					CallPermit,
 					PCall::nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -334,7 +334,7 @@ fn invalid_permit_gas_limit_too_low() {
 					CallPermit,
 					PCall::nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -400,7 +400,7 @@ fn invalid_permit_gas_limit_overflow() {
 					CallPermit,
 					PCall::nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -586,7 +586,7 @@ fn valid_permit_returns_with_metamask_signed_data() {
 					CallPermit,
 					PCall::nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 

@@ -131,7 +131,7 @@ fn get_total_supply() {
 
 			precompiles()
 				.prepare_test(CryptoAlith, ForeignAssetId(0u128), ForeignPCall::total_supply {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000u64));
 		});
@@ -163,7 +163,7 @@ fn get_balances_known_user() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000u64));
 		});
@@ -189,7 +189,7 @@ fn get_balances_unknown_user() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u64));
 		});
@@ -321,7 +321,7 @@ fn check_allowance_existing() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(500u64));
 		});
@@ -350,7 +350,7 @@ fn check_allowance_not_existing() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u64));
 		});
@@ -398,7 +398,7 @@ fn transfer() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 
@@ -408,7 +408,7 @@ fn transfer() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 		});
@@ -475,7 +475,6 @@ fn transfer_from() {
 				)
 				.execute_some();
 
-			// TODO: Duplicate approve (noop)?
 			precompiles()
 				.prepare_test(
 					CryptoAlith,
@@ -510,7 +509,7 @@ fn transfer_from() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 
@@ -520,7 +519,7 @@ fn transfer_from() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -530,7 +529,7 @@ fn transfer_from() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(Charlie.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 		});
@@ -705,7 +704,7 @@ fn transfer_from_self() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(600));
 
@@ -715,7 +714,7 @@ fn transfer_from_self() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(400));
 		});
@@ -745,19 +744,19 @@ fn get_metadata() {
 
 			precompiles()
 				.prepare_test(CryptoAlith, ForeignAssetId(0u128), ForeignPCall::name {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(UnboundedBytes::from("TestToken"));
 
 			precompiles()
 				.prepare_test(CryptoAlith, ForeignAssetId(0u128), ForeignPCall::symbol {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(UnboundedBytes::from("Test"));
 
 			precompiles()
 				.prepare_test(CryptoAlith, ForeignAssetId(0u128), ForeignPCall::decimals {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(12u8);
 		});
@@ -802,7 +801,7 @@ fn transfer_amount_overflow() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(Bob.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0));
 
@@ -812,7 +811,7 @@ fn transfer_amount_overflow() {
 					ForeignAssetId(0u128),
 					ForeignPCall::balance_of { who: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1000));
 		});
@@ -846,7 +845,6 @@ fn transfer_from_overflow() {
 				)
 				.execute_some();
 
-			// TODO: Duplicate approve of same value (noop?)
 			precompiles()
 				.prepare_test(
 					CryptoAlith,
@@ -894,7 +892,7 @@ fn permit_valid() {
 			let owner: H160 = CryptoAlith.into();
 			let spender: H160 = Bob.into();
 			let value: U256 = 500u16.into();
-			let deadline: U256 = 0u8.into(); // todo: proper timestamp
+			let deadline: U256 = 0u8.into();
 
 			let permit = Eip2612::<Runtime, pallet_assets::Instance1>::generate_permit(
 				ForeignAssetId(0u128).into(),
@@ -916,7 +914,7 @@ fn permit_valid() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -953,7 +951,7 @@ fn permit_valid() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(500u16));
 
@@ -963,7 +961,7 @@ fn permit_valid() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1u8));
 		});
@@ -999,7 +997,7 @@ fn permit_valid_named_asset() {
 			let owner: H160 = CryptoAlith.into();
 			let spender: H160 = Bob.into();
 			let value: U256 = 500u16.into();
-			let deadline: U256 = 0u8.into(); // todo: proper timestamp
+			let deadline: U256 = 0u8.into();
 
 			let permit = Eip2612::<Runtime, pallet_assets::Instance1>::generate_permit(
 				ForeignAssetId(0u128).into(),
@@ -1021,7 +1019,7 @@ fn permit_valid_named_asset() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -1058,7 +1056,7 @@ fn permit_valid_named_asset() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(500u16));
 
@@ -1068,7 +1066,7 @@ fn permit_valid_named_asset() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(1u8));
 		});
@@ -1119,7 +1117,7 @@ fn permit_invalid_nonce() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -1148,7 +1146,7 @@ fn permit_invalid_nonce() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u16));
 
@@ -1158,7 +1156,7 @@ fn permit_invalid_nonce() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 		});
@@ -1195,7 +1193,7 @@ fn permit_invalid_signature() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -1224,7 +1222,7 @@ fn permit_invalid_signature() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u16));
 
@@ -1234,7 +1232,7 @@ fn permit_invalid_signature() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 		});
@@ -1287,7 +1285,7 @@ fn permit_invalid_deadline() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 
@@ -1316,7 +1314,7 @@ fn permit_invalid_deadline() {
 						spender: Address(Bob.into()),
 					},
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u16));
 
@@ -1326,7 +1324,7 @@ fn permit_invalid_deadline() {
 					ForeignAssetId(0u128),
 					ForeignPCall::eip2612_nonces { owner: Address(CryptoAlith.into()) },
 				)
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(U256::from(0u8));
 		});
@@ -1356,7 +1354,7 @@ fn permit_valid_with_metamask_signed_data() {
 			let owner: H160 = CryptoAlith.into();
 			let spender: H160 = Bob.into();
 			let value: U256 = 1000u16.into();
-			let deadline: U256 = 1u16.into(); // todo: proper timestamp
+			let deadline: U256 = 1u16.into();
 
 			let rsv = hex!(
 				"3aac886f06729d76067b6b0dbae23978fe48224b10b5648265b8f0e8c4cf25ff7625965d64bf9a6069d

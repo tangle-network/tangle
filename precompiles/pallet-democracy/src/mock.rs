@@ -209,7 +209,7 @@ impl pallet_scheduler::Config for Runtime {
 	type ScheduleOrigin = EnsureRoot<AccountId>;
 	type MaxScheduledPerBlock = ();
 	type WeightInfo = ();
-	type OriginPrivilegeCmp = EqualPrivilegeOnly; // TODO : Simplest type, maybe there is better ?
+	type OriginPrivilegeCmp = EqualPrivilegeOnly;
 	type Preimages = ();
 }
 
