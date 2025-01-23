@@ -709,7 +709,6 @@ pub mod module {
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
 
 			Self::deposit_event(Event::BlueprintCreated { owner, blueprint_id });
-			// TODO: update weight for the creation of the blueprint.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -853,7 +852,6 @@ pub mod module {
 				registration_args,
 			});
 
-			// TODO: update weight for the registration.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -887,10 +885,8 @@ pub mod module {
 			let (allowed, _weight) =
 				Self::on_unregister_hook(&blueprint, blueprint_id, &preferences)?;
 			ensure!(allowed, Error::<T>::NotAllowedToUnregister);
-			// TODO: check if the caller is not providing any service for the blueprint.
 			Operators::<T>::remove(blueprint_id, &caller);
 
-			// TODO: also remove all the services that uses this blueprint?
 			let removed = OperatorsProfile::<T>::try_mutate_exists(&caller, |profile| {
 				profile
 					.as_mut()
@@ -900,7 +896,6 @@ pub mod module {
 
 			ensure!(removed, Error::<T>::NotRegistered);
 			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
-			// TODO: update weight for the unregistration.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1119,7 +1114,6 @@ pub mod module {
 				assets: assets.to_vec(),
 			});
 
-			// TODO: add weight for the request to the total weight.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1405,7 +1399,6 @@ pub mod module {
 				StagingServicePayments::<T>::remove(request_id);
 			}
 
-			// TODO: make use of the returned weight from the hook.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1433,7 +1426,6 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
-			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
 			let removed = UserServices::<T>::try_mutate(&caller, |service_ids| {
 				Result::<_, Error<T>>::Ok(service_ids.remove(&service_id))
@@ -1526,7 +1518,7 @@ pub mod module {
 				job,
 				args,
 			});
-			// TODO: add weight for the call to the total weight.
+
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1600,7 +1592,7 @@ pub mod module {
 				job: job_call.job,
 				result,
 			});
-			// TODO: add weight for the call to the total weight.
+
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1659,7 +1651,7 @@ pub mod module {
 				.collect::<Vec<_>>();
 			let total_slash =
 				others_slash.iter().fold(exposed_stake, |acc, (_, slash)| acc + *slash);
-			// TODO: take into account the delegators' asset kind.
+
 			// for now, we treat all assets equally, which is not the case in reality.
 			let unapplied_slash = UnappliedSlash {
 				service_id,

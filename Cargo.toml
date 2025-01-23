@@ -45,6 +45,8 @@ members = [
     "precompiles/services",
     "precompiles/tangle-lst",
     "precompiles/assets",
+    "precompiles/vesting",
+    "precompiles/staking",
     "tangle-subxt",
     "evm-tracer",
 ]
