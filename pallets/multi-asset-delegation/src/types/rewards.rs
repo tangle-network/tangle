@@ -17,15 +17,6 @@
 use super::*;
 use sp_runtime::Percent;
 
-/// Configuration for rewards associated with a specific asset.
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
-pub struct RewardConfigForAssetVault<Balance> {
-	// The annual percentage yield (APY) for the asset, represented as a Percent
-	pub apy: Percent,
-	// The minimum amount required before the asset can be rewarded.
-	pub cap: Balance,
-}
-
 /// Configuration for rewards in the system.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct RewardConfig<VaultId, Balance> {

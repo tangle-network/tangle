@@ -205,29 +205,26 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Rewards have been claimed by an account
-		RewardsClaimed {
-			account: T::AccountId,
-			asset: Asset<T::AssetId>,
-			amount: BalanceOf<T>,
-		},
+		RewardsClaimed { account: T::AccountId, asset: Asset<T::AssetId>, amount: BalanceOf<T> },
 		/// Event emitted when an incentive APY and cap are set for a reward vault
-		IncentiveAPYAndCapSet {
-			vault_id: T::VaultId,
-			apy: sp_runtime::Percent,
-			cap: BalanceOf<T>,
-		},
+		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
-		BlueprintWhitelisted {
-			blueprint_id: BlueprintId,
-		},
+		BlueprintWhitelisted { blueprint_id: BlueprintId },
 		/// Asset has been updated to reward vault
 		AssetUpdatedInVault {
 			vault_id: T::VaultId,
 			asset_id: Asset<T::AssetId>,
 			action: AssetAction,
 		},
+		/// Vault reward config updated
 		VaultRewardConfigUpdated {
 			vault_id: T::VaultId,
+			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
+		},
+		/// Vault created
+		RewardVaultCreated {
+			vault_id: T::VaultId,
+			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
 		},
 		/// Total score in vault updated
 		TotalScoreUpdated {
@@ -272,6 +269,12 @@ pub mod pallet {
 		CannotCalculatePropotionalApy,
 		/// Error returned when trying to calculate reward per block
 		CannotCalculateRewardPerBlock,
+		/// Incentive cap is greater than deposit cap
+		IncentiveCapGreaterThanDepositCap,
+		/// Boost multiplier must be 1
+		BoostMultiplierMustBeOne,
+		/// Vault already exists
+		VaultAlreadyExists,
 	}
 
 	#[pallet::call]
@@ -325,6 +328,56 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Creates a new reward configuration for a specific vault.
+		///
+		/// # Arguments
+		/// * `origin` - Origin of the call, must pass `ForceOrigin` check
+		/// * `vault_id` - The ID of the vault to update
+		/// * `new_config` - The new reward configuration containing:
+		///   * `apy` - Annual Percentage Yield for the vault
+		///   * `deposit_cap` - Maximum amount that can be deposited
+		///   * `incentive_cap` - Maximum amount of incentives that can be distributed
+		///   * `boost_multiplier` - Optional multiplier to boost rewards
+		///
+		/// # Events
+		/// * `VaultRewardConfigUpdated` - Emitted when vault reward config is updated
+		///
+		/// # Errors
+		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
+		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
+		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
+		#[pallet::call_index(3)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn create_vault_reward(
+			origin: OriginFor<T>,
+			vault_id: T::VaultId,
+			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
+		) -> DispatchResult {
+			let _who = T::ForceOrigin::ensure_origin(origin)?;
+
+			// ensure vault does not already exist
+			ensure!(
+				!RewardConfigStorage::<T>::contains_key(vault_id),
+				Error::<T>::VaultAlreadyExists
+			);
+
+			ensure!(
+				new_config.incentive_cap <= new_config.deposit_cap,
+				Error::<T>::IncentiveCapGreaterThanDepositCap
+			);
+
+			if let Some(boost_multiplier) = new_config.boost_multiplier {
+				// boost multipliers are handled by locks, this ensures the multiplier is 1
+				// we can change the multiplier to be customisable in the future, but for now we
+				// require it to be 1
+				ensure!(boost_multiplier == 1, Error::<T>::BoostMultiplierMustBeOne);
+			}
+
+			RewardConfigStorage::<T>::insert(vault_id, new_config.clone());
+			Self::deposit_event(Event::RewardVaultCreated { vault_id, new_config });
+			Ok(())
+		}
+
 		/// Updates the reward configuration for a specific vault.
 		///
 		/// # Arguments
@@ -341,7 +394,9 @@ pub mod pallet {
 		///
 		/// # Errors
 		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
-		#[pallet::call_index(3)]
+		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
+		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
+		#[pallet::call_index(4)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn update_vault_reward_config(
 			origin: OriginFor<T>,
@@ -349,9 +404,29 @@ pub mod pallet {
 			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
 		) -> DispatchResult {
 			let _who = T::ForceOrigin::ensure_origin(origin)?;
-			RewardConfigStorage::<T>::insert(vault_id, new_config);
-			Self::deposit_event(Event::VaultRewardConfigUpdated { vault_id });
-			Ok(())
+			ensure!(
+				new_config.incentive_cap <= new_config.deposit_cap,
+				Error::<T>::IncentiveCapGreaterThanDepositCap
+			);
+
+			if let Some(boost_multiplier) = new_config.boost_multiplier {
+				// boost multipliers are handled by locks, this ensures the multiplier is 1
+				// we can change the multiplier to be customisable in the future, but for now we
+				// require it to be 1
+				ensure!(boost_multiplier == 1, Error::<T>::BoostMultiplierMustBeOne);
+			}
+
+			RewardConfigStorage::<T>::try_mutate(vault_id, |config| -> DispatchResult {
+				// ensure config exists
+				ensure!(config.is_some(), Error::<T>::VaultNotFound);
+
+				// update config
+				*config = Some(new_config.clone());
+
+				Self::deposit_event(Event::VaultRewardConfigUpdated { vault_id, new_config });
+
+				Ok(())
+			})
 		}
 	}
 
