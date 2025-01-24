@@ -28,7 +28,6 @@ interface Democracy {
     /// Get details about all public porposals.
     /// @custom:selector
     /// @return (prop index, proposal hash, proposer)
-    /// TODO This is supposed to be a vec. Let's save this one for later.
     // function publicProps()
     //     external
     //     view

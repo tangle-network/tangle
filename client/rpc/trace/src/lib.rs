@@ -689,9 +689,6 @@ where
 		// In some cases it might be possible to receive traces of a block
 		// that has no entry in the cache because it was removed of the pool
 		// and received a permit concurrently. We just ignore it.
-		//
-		// TODO : Should we add it back ? Should it have an active_batch_count
-		// of 1 then ?
 		if let Some(block_cache) = self.cached_blocks.get_mut(&block_hash) {
 			if let CacheBlockState::Pooled { ref mut waiting_requests, .. } = block_cache.state {
 				tracing::trace!(

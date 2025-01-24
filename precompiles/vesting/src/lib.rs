@@ -1,8 +1,8 @@
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Tangle Foundation.
 //
-// This file is part of pallet-evm-precompile-staking package, originally developed by Purestake
-// Inc. Pallet-evm-precompile-staking package used in Tangle Network in terms of GPLv3.
+// This file is part of pallet-evm-precompile-vesting package, originally developed by Purestake
+// Inc. Pallet-evm-precompile-vesting package used in Tangle Network in terms of GPLv3.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@
 //! returns the result in a format that can be used by the EVM.
 //!
 //! The VestingPrecompile struct is generic over the Runtime type, which is the type of the runtime
-//! that includes the staking pallet. This allows the precompile to work with any runtime that
-//! includes the staking pallet and meets the other trait bounds required by the precompile.
+//! that includes the vesting pallet. This allows the precompile to work with any runtime that
+//! includes the vesting pallet and meets the other trait bounds required by the precompile.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -179,6 +179,7 @@ where
 		schedule1_index: u32,
 		schedule2_index: u32,
 	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let caller = handle.context().caller;
 		let caller_account = Runtime::AddressMapping::into_account_id(caller);
 
