@@ -508,7 +508,7 @@ fn test_decay_rate_works_as_expected() {
 
 		// Calculate expected rewards:
 		// 1. Total annual rewards = 100M * 1% APY * 95% (after decay)
-		let base_rewards = (MOCK_TOTAL_ISSUANCE as u128) * (MOCK_APY as u128) / 100;
+		let base_rewards = MOCK_TOTAL_ISSUANCE * (MOCK_APY as u128) / 100;
 		let total_annual_rewards = base_rewards * 95 / 100;
 
 		// 2. Per block rewards = total annual rewards / blocks per year

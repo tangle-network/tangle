@@ -16,17 +16,14 @@
 use crate::DecayRate;
 use crate::DecayStartPeriod;
 use crate::RewardVaultsPotAccount;
-use crate::SubaccountType;
 use crate::{
 	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet,
-	RewardConfigForAssetVault, RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit,
-	TotalRewardVaultScore, UserClaimedReward,
+	RewardConfigForAssetVault, RewardConfigStorage, TotalRewardVaultDeposit, TotalRewardVaultScore,
+	UserClaimedReward,
 };
-use frame_support::traits::Get;
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec;
-use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	traits::{CheckedMul, Saturating, Zero},
 	DispatchError, DispatchResult, Percent, SaturatedConversion,

@@ -15,27 +15,15 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use crate::RewardVaultsPotAccount;
 use crate::SubaccountType;
-use crate::{
-	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet,
-	RewardConfigForAssetVault, RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit,
-	TotalRewardVaultScore, UserClaimedReward,
-};
+use crate::{AssetLookupRewardVaults, Config, Error, Pallet, RewardVaults};
+use frame_support::ensure;
 use frame_support::traits::Get;
-use frame_support::{ensure, traits::Currency};
-use frame_system::pallet_prelude::BlockNumberFor;
-use scale_info::prelude::vec;
 use sp_runtime::traits::AccountIdConversion;
-use sp_runtime::{
-	traits::{CheckedMul, Saturating, Zero},
-	DispatchError, DispatchResult, Percent, SaturatedConversion,
-};
+use sp_runtime::{DispatchError, DispatchResult};
 use sp_std::vec::Vec;
-use tangle_primitives::{
-	services::Asset, traits::MultiAssetDelegationInfo, types::rewards::UserDepositWithLocks,
-};
+use tangle_primitives::services::Asset;
 
 pub mod rewards;
-pub use rewards::*;
 
 impl<T: Config> Pallet<T> {
 	pub fn remove_asset_from_vault(

@@ -3,12 +3,11 @@ use crate::BalanceOf;
 use crate::RewardConfigForAssetVault;
 use crate::UserClaimedReward;
 use crate::{
-	mock::*, tests::reward_calc::setup_test_env, Config, DecayRate, DecayStartPeriod, Error, Event,
+	mock::*, tests::reward_calc::setup_test_env, DecayRate, DecayStartPeriod, Error,
 	Pallet as RewardsPallet, TotalRewardVaultDeposit, TotalRewardVaultScore,
 };
 use frame_support::assert_noop;
 use frame_support::{assert_ok, traits::Currency};
-use sp_core::sr25519;
 use sp_runtime::Percent;
 use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::{
