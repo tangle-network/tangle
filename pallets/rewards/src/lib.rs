@@ -286,6 +286,8 @@ pub mod pallet {
 		TotalDepositLessThanIncentiveCap,
 		/// Pot account not found
 		PotAlreadyExists,
+		/// Pot account not found
+		PotAccountNotFound,
 	}
 
 	#[pallet::call]

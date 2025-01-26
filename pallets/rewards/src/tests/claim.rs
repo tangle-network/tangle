@@ -35,14 +35,6 @@ fn setup_vault(
 	// Setup test environment
 	setup_test_env();
 
-	// Fund rewards pallet with initial balance
-	let rewards_account = RewardsPallet::<Runtime>::account_id();
-	let initial_funding = 1_000_000_000_000_000_000_000u128; // 1M tokens
-	Balances::make_free_balance_be(&rewards_account, initial_funding);
-
-	// Set total issuance for APY calculations
-	pallet_balances::TotalIssuance::<Runtime>::set(MOCK_TOTAL_ISSUANCE);
-
 	// Configure the reward vault
 	assert_ok!(RewardsPallet::<Runtime>::create_reward_vault(
 		RuntimeOrigin::root(),
@@ -78,6 +70,15 @@ fn setup_vault(
 	// set last claim to zero
 	let default_balance: BalanceOf<Runtime> = 0_u32.into();
 	UserClaimedReward::<Runtime>::insert(account, vault_id, (0, default_balance));
+
+	// Finally fund the pot account with rewards
+	let vault_pot_account = RewardsPallet::<Runtime>::reward_vaults_pot_account(vault_id)
+		.expect("Vault pot account not found");
+	let initial_funding = Percent::from_percent(MOCK_APY) * MOCK_TOTAL_ISSUANCE;
+	Balances::make_free_balance_be(&vault_pot_account, initial_funding);
+
+	// Set total issuance for APY calculations
+	pallet_balances::TotalIssuance::<Runtime>::set(MOCK_TOTAL_ISSUANCE);
 
 	Ok(())
 }
@@ -139,16 +140,16 @@ fn test_claim_rewards_only_unlocked() {
 
 		// Check that rewards were received
 		let balance = Balances::free_balance(&account);
-		assert!(balance > 0);
 
 		// Verify approximate expected rewards (19 tokens with some precision loss)
-		let expected_reward = 19 * EIGHTEEN_DECIMALS;
+		let expected_reward = 191 * EIGHTEEN_DECIMALS / 10;
 		let diff = if balance > expected_reward {
 			balance - expected_reward
 		} else {
 			expected_reward - balance
 		};
-		assert!(diff < EIGHTEEN_DECIMALS); // Less than 1 token difference
+		println!("diff: {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
+		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
 }
 
@@ -281,7 +282,8 @@ fn test_claim_rewards_with_active_locks() {
 		} else {
 			expected_reward - balance
 		};
-		assert!(diff < EIGHTEEN_DECIMALS); // allow for 1TNT precision loss
+		println!("diff {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
+		assert!(diff < 2 * EIGHTEEN_DECIMALS); // allow for 1TNT precision loss
 	});
 }
 

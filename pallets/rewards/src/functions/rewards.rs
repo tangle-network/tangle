@@ -104,8 +104,17 @@ impl<T: Config> Pallet<T> {
 
 		log::debug!("rewards_to_be_paid: {:?}", rewards_to_be_paid.saturated_into::<u128>());
 
-		// mint new TNT rewards and trasnfer to the user
-		let _ = T::Currency::deposit_creating(account_id, rewards_to_be_paid);
+		// Get the pot account for this vault
+		let pot_account =
+			RewardVaultsPotAccount::<T>::get(vault_id).ok_or(Error::<T>::PotAccountNotFound)?;
+
+		// Transfer rewards from the pot account to the user
+		T::Currency::transfer(
+			&pot_account,
+			account_id,
+			rewards_to_be_paid,
+			frame_support::traits::ExistenceRequirement::AllowDeath,
+		)?;
 
 		// update the last claim
 		UserClaimedReward::<T>::try_mutate(
@@ -244,6 +253,8 @@ impl<T: Config> Pallet<T> {
 
 		// Calculate total rewards pool from total issuance
 		let tnt_total_supply = T::Currency::total_issuance();
+		log::debug!("tnt_total_supply: {:?}", tnt_total_supply);
+
 		let total_annual_rewards = apy.mul_floor(tnt_total_supply);
 
 		// Calculate per block reward pool first to minimize precision loss
@@ -261,9 +272,7 @@ impl<T: Config> Pallet<T> {
 		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
 		log::debug!(
 			"Current Block {:?}, Last Claim Block {:?}, Blocks to be paid {:?}",
-			current_block,
-			last_claim_block,
-			blocks_to_be_paid
+			current_block, last_claim_block, blocks_to_be_paid
 		);
 
 		log::debug!("User unlocked score {:?}", user_score);
