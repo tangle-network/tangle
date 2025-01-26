@@ -91,7 +91,8 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::AccountIdConversion;
 	use tangle_primitives::rewards::LockMultiplier;
-
+	use sp_runtime::Percent;
+	
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
@@ -207,6 +208,16 @@ pub mod pallet {
 	/// Storage for the reward configuration, which includes APY, cap for assets
 	pub type ApyBlocks<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn decay_start_period)]
+	/// Number of blocks after which decay starts (e.g., 432000 for 30 days with 6s blocks)
+	pub type DecayStartPeriod<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn decay_rate)]
+	/// Per-block decay rate in basis points (1/10000). e.g., 1 = 0.01% per block
+	pub type DecayRate<T: Config> = StorageValue<_, Percent, ValueQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -245,6 +256,11 @@ pub mod pallet {
 			vault_id: T::VaultId,
 			asset: Asset<T::AssetId>,
 			total_deposit: BalanceOf<T>,
+		},
+		/// Decay configuration was updated
+		DecayConfigUpdated {
+			start_period: BlockNumberFor<T>,
+			rate: Percent,
 		},
 	}
 
@@ -288,6 +304,8 @@ pub mod pallet {
 		PotAlreadyExists,
 		/// Pot account not found
 		PotAccountNotFound,
+		/// Decay rate is too high
+		InvalidDecayRate,
 	}
 
 	#[pallet::call]
@@ -426,6 +444,26 @@ pub mod pallet {
 
 				Ok(())
 			})
+		}
+
+		/// Update the decay configuration
+		#[pallet::call_index(5)]
+		#[pallet::weight(T::DbWeight::get().writes(2))]
+		pub fn update_decay_config(
+			origin: OriginFor<T>,
+			start_period: BlockNumberFor<T>,
+			rate: Percent,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+			
+			// Ensure rate is reasonable (max 10% decay)
+			ensure!(rate <= Percent::from_percent(10), Error::<T>::InvalidDecayRate);
+
+			DecayStartPeriod::<T>::put(start_period);
+			DecayRate::<T>::put(rate);
+
+			Self::deposit_event(Event::DecayConfigUpdated { start_period, rate });
+			Ok(())
 		}
 	}
 
