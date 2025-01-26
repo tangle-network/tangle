@@ -1,16 +1,19 @@
+use crate::AssetAction;
 use crate::BalanceOf;
 use crate::RewardConfigForAssetVault;
 use crate::UserClaimedReward;
 use crate::{
-	mock::*, tests::reward_calc::setup_test_env, AssetAction, Error, Pallet as RewardsPallet,
-	TotalRewardVaultDeposit, TotalRewardVaultScore,
+	mock::*, tests::reward_calc::setup_test_env, Config, DecayRate, DecayStartPeriod, Error, Event,
+	Pallet as RewardsPallet, TotalRewardVaultDeposit, TotalRewardVaultScore,
 };
 use frame_support::assert_noop;
 use frame_support::{assert_ok, traits::Currency};
+use sp_core::sr25519;
 use sp_runtime::Percent;
+use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::{
 	services::Asset,
-	types::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks},
+	types::rewards::{LockInfo, LockMultiplier},
 };
 
 // Mock values for consistent testing
@@ -203,7 +206,7 @@ fn test_claim_rewards_with_expired_lock() {
 		// Rewards per block = Expected reward / 5_256_000 = 1M / 5_256_000 = 0.1902587519
 		// Claiming for block 1000
 		// reward for unlocked 10k = 0.01902587519 * 1000 = 19.2587519
-		// reward for locked 10k = 0.038051750380517503805 * 900 = 34.246575342465753424500
+		// reward for locked 10k = 0.038051750761035007610 * 900 = 34.246575342465753424500
 		// reward for expired locked 10k = 0.01902587519 * 100 = 1.92587519
 		let expected_reward =
 			19 * EIGHTEEN_DECIMALS + 34 * EIGHTEEN_DECIMALS + 2 * EIGHTEEN_DECIMALS;
@@ -385,5 +388,124 @@ fn test_claim_rewards_with_zero_cap() {
 			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone()), asset),
 			Error::<Runtime>::CannotCalculateRewardPerBlock
 		);
+	});
+}
+
+#[test]
+fn test_claim_frequency_with_decay() {
+	new_test_ext().execute_with(|| {
+		let frequent_claimer = AccountId::new([1u8; 32]);
+		let infrequent_claimer = AccountId::new([2u8; 32]);
+		let deposit_amount = 10_000 * EIGHTEEN_DECIMALS;
+		let asset = Asset::Custom(1);
+		let vault_id = 1u32;
+
+		setup_test_env();
+
+		// Configure the reward vault
+		assert_ok!(RewardsPallet::<Runtime>::create_reward_vault(
+			RuntimeOrigin::root(),
+			vault_id,
+			RewardConfigForAssetVault {
+				apy: Percent::from_percent(MOCK_APY),
+				deposit_cap: MOCK_DEPOSIT_CAP,
+				incentive_cap: MOCK_INCENTIVE_CAP,
+				boost_multiplier: Some(1),
+			}
+		));
+
+		// Add asset to vault
+		assert_ok!(RewardsPallet::<Runtime>::manage_asset_reward_vault(
+			RuntimeOrigin::root(),
+			vault_id,
+			asset,
+			AssetAction::Add,
+		));
+
+		// Set deposit in mock delegation info
+		MOCK_DELEGATION_INFO.with(|m| {
+			m.borrow_mut().deposits.insert(
+				(frequent_claimer.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: deposit_amount, amount_with_locks: None },
+			);
+		});
+
+		// Mock deposit for infrequent claimer
+		MOCK_DELEGATION_INFO.with(|m| {
+			m.borrow_mut().deposits.insert(
+				(infrequent_claimer.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: deposit_amount, amount_with_locks: None },
+			);
+		});
+
+		// Set total deposit and total score for the vault
+		TotalRewardVaultDeposit::<Runtime>::insert(vault_id, MOCK_DEPOSIT * 2); // Both users
+		TotalRewardVaultScore::<Runtime>::insert(vault_id, MOCK_DEPOSIT * 2); // Both users
+
+		// Set last claim to zero
+		let default_balance: BalanceOf<Runtime> = 0_u32.into();
+		UserClaimedReward::<Runtime>::insert(
+			frequent_claimer.clone(),
+			vault_id,
+			(0, default_balance),
+		);
+		UserClaimedReward::<Runtime>::insert(
+			infrequent_claimer.clone(),
+			vault_id,
+			(0, default_balance),
+		);
+
+		// Fund the pot account with rewards
+		let vault_pot_account = RewardsPallet::<Runtime>::reward_vaults_pot_account(vault_id)
+			.expect("Vault pot account not found");
+		let initial_funding = Percent::from_percent(MOCK_APY) * MOCK_TOTAL_ISSUANCE * 2; // Double funding to ensure enough rewards
+		Balances::make_free_balance_be(&vault_pot_account, initial_funding);
+
+		// Set total issuance for APY calculations
+		pallet_balances::TotalIssuance::<Runtime>::set(MOCK_TOTAL_ISSUANCE);
+
+		// Set decay to start after 30 days (144000 blocks) with 5% decay
+		DecayStartPeriod::<Runtime>::set(144_000);
+		// decay rate to counteract 1% permonth inflation
+		DecayRate::<Runtime>::set(Percent::from_percent(10));
+
+		let blocks_per_month = 144_000_u64;
+		let total_months = 10;
+		let mut current_block = 1000;
+
+		// Frequent claimer claims every month for 10 months
+		let frequent_starting_balance = Balances::free_balance(&frequent_claimer);
+		for _ in 0..total_months {
+			System::set_block_number(current_block + blocks_per_month);
+			current_block += blocks_per_month;
+
+			assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
+				RuntimeOrigin::signed(frequent_claimer.clone()),
+				asset,
+			));
+
+			// simulate inflation, 1% per month
+			let supply = pallet_balances::TotalIssuance::<Runtime>::get();
+			let inflation = Percent::from_percent(1).mul_floor(supply);
+			pallet_balances::TotalIssuance::<Runtime>::set(supply + inflation);
+		}
+		let frequent_total_rewards =
+			Balances::free_balance(&frequent_claimer) - frequent_starting_balance;
+
+		// Infrequent claimer claims after 10 months
+		let infrequent_starting_balance = Balances::free_balance(&infrequent_claimer);
+		System::set_block_number(blocks_per_month * total_months);
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(
+			RuntimeOrigin::signed(infrequent_claimer.clone()),
+			asset,
+		));
+		let infrequent_total_rewards =
+			Balances::free_balance(&infrequent_claimer) - infrequent_starting_balance;
+
+		let difference = frequent_total_rewards.saturating_sub(infrequent_total_rewards);
+		let difference_percent = (difference / frequent_total_rewards) * 100;
+		assert!(difference_percent < 1);
+
+		panic!();
 	});
 }

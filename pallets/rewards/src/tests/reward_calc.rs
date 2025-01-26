@@ -5,8 +5,8 @@ use sp_runtime::Percent;
 use tangle_primitives::types::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks};
 
 // Mock values for consistent testing
-use crate::DecayStartPeriod;
 use crate::DecayRate;
+use crate::DecayStartPeriod;
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
 const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100M tokens with 18 decimals
@@ -464,67 +464,68 @@ fn test_decay_rate_works_as_expected() {
 		let total_deposit = MOCK_DEPOSIT;
 		let user_deposit = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
 		let total_asset_score = MOCK_DEPOSIT * 3; // Average multiplier effect
-			
-			// User has:
-			// - 10k unlocked (1x multiplier)
-			// - 20k with 2x multiplier (40k score)
-			// - 30k with 3x multiplier (90k score)
-			// Total score = 140k
-			let deposit = UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![
-					LockInfo {
-						amount: user_deposit * 2,
-						lock_multiplier: LockMultiplier::TwoMonths,
-						expiry_block: 2000,
-					},
-					LockInfo {
-						amount: user_deposit * 3,
-						lock_multiplier: LockMultiplier::ThreeMonths,
-						expiry_block: 2000,
-					},
-				]),
-			};
 
-			let reward = RewardConfigForAssetVault {
-				apy: Percent::from_percent(MOCK_APY),
-				deposit_cap: MOCK_DEPOSIT_CAP,
-				incentive_cap: MOCK_INCENTIVE_CAP,
-				boost_multiplier: Some(1),
-			};
+		// User has:
+		// - 10k unlocked (1x multiplier)
+		// - 20k with 2x multiplier (40k score)
+		// - 30k with 3x multiplier (90k score)
+		// Total score = 140k
+		let deposit = UserDepositWithLocks {
+			unlocked_amount: user_deposit,
+			amount_with_locks: Some(vec![
+				LockInfo {
+					amount: user_deposit * 2,
+					lock_multiplier: LockMultiplier::TwoMonths,
+					expiry_block: 2000,
+				},
+				LockInfo {
+					amount: user_deposit * 3,
+					lock_multiplier: LockMultiplier::ThreeMonths,
+					expiry_block: 2000,
+				},
+			]),
+		};
 
-			DecayStartPeriod::<Runtime>::set(BLOCKS_PER_YEAR/10);
-			// 5% decay after grace period
-			DecayRate::<Runtime>::set(Percent::from_percent(5));
-			System::set_block_number(BLOCKS_PER_YEAR/5);
+		let reward = RewardConfigForAssetVault {
+			apy: Percent::from_percent(MOCK_APY),
+			deposit_cap: MOCK_DEPOSIT_CAP,
+			incentive_cap: MOCK_INCENTIVE_CAP,
+			boost_multiplier: Some(1),
+		};
 
-			let result = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
-				total_deposit,
-				total_asset_score,
-				deposit,
-				reward,
-				Some((0, 0)),
-			);
+		DecayStartPeriod::<Runtime>::set(BLOCKS_PER_YEAR / 10);
+		// 5% decay after grace period
+		DecayRate::<Runtime>::set(Percent::from_percent(5));
+		System::set_block_number(BLOCKS_PER_YEAR / 5);
 
-			// Calculate expected rewards:
-			// 1. Total annual rewards = 100M * 1% APY * 95% (after decay)
-			let base_rewards = (MOCK_TOTAL_ISSUANCE as u128) * (MOCK_APY as u128) / 100;
-			let total_annual_rewards = base_rewards * 95 / 100;
-			
-			// 2. Per block rewards = total annual rewards / blocks per year
-			let rewards_per_block = total_annual_rewards / (BLOCKS_PER_YEAR as u128);
-			
-			// 3. User proportion calculation:
-			// - First 2000 blocks: Full score (140k/300k = 47%)
-			// - Remaining blocks: Reduced score (60k/300k = 20%)
-			let full_period_rewards = rewards_per_block * 2000 * 47 / 100;
-			let reduced_period_rewards = rewards_per_block * ((BLOCKS_PER_YEAR/5 - 2000) as u128) * 20 / 100;
-			
-			let expected_rewards = full_period_rewards + reduced_period_rewards;
-						
-			// Allow for some precision loss (0.1%)
-			let diff = result.unwrap().saturating_sub(expected_rewards);
-			let tolerance = total_annual_rewards / 1000;  // 0.1% of total rewards
-			assert!(diff < tolerance, "Difference {} exceeds tolerance {}", diff, tolerance);
-		});
-	}
+		let result = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
+			total_deposit,
+			total_asset_score,
+			deposit,
+			reward,
+			Some((0, 0)),
+		);
+
+		// Calculate expected rewards:
+		// 1. Total annual rewards = 100M * 1% APY * 95% (after decay)
+		let base_rewards = (MOCK_TOTAL_ISSUANCE as u128) * (MOCK_APY as u128) / 100;
+		let total_annual_rewards = base_rewards * 95 / 100;
+
+		// 2. Per block rewards = total annual rewards / blocks per year
+		let rewards_per_block = total_annual_rewards / (BLOCKS_PER_YEAR as u128);
+
+		// 3. User proportion calculation:
+		// - First 2000 blocks: Full score (140k/300k = 47%)
+		// - Remaining blocks: Reduced score (60k/300k = 20%)
+		let full_period_rewards = rewards_per_block * 2000 * 47 / 100;
+		let reduced_period_rewards =
+			rewards_per_block * ((BLOCKS_PER_YEAR / 5 - 2000) as u128) * 20 / 100;
+
+		let expected_rewards = full_period_rewards + reduced_period_rewards;
+
+		// Allow for some precision loss (0.1%)
+		let diff = result.unwrap().saturating_sub(expected_rewards);
+		let tolerance = total_annual_rewards / 1000; // 0.1% of total rewards
+		assert!(diff < tolerance, "Difference {} exceeds tolerance {}", diff, tolerance);
+	});
+}

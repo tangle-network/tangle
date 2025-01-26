@@ -90,9 +90,9 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::AccountIdConversion;
-	use tangle_primitives::rewards::LockMultiplier;
 	use sp_runtime::Percent;
-	
+	use tangle_primitives::rewards::LockMultiplier;
+
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
@@ -258,10 +258,7 @@ pub mod pallet {
 			total_deposit: BalanceOf<T>,
 		},
 		/// Decay configuration was updated
-		DecayConfigUpdated {
-			start_period: BlockNumberFor<T>,
-			rate: Percent,
-		},
+		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Percent },
 	}
 
 	#[pallet::error]
@@ -455,7 +452,7 @@ pub mod pallet {
 			rate: Percent,
 		) -> DispatchResult {
 			T::ForceOrigin::ensure_origin(origin)?;
-			
+
 			// Ensure rate is reasonable (max 10% decay)
 			ensure!(rate <= Percent::from_percent(10), Error::<T>::InvalidDecayRate);
 
