@@ -13,14 +13,18 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+use crate::RewardVaultsPotAccount;
+use crate::SubaccountType;
 use crate::{
 	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet,
 	RewardConfigForAssetVault, RewardConfigStorage, RewardVaults, TotalRewardVaultDeposit,
 	TotalRewardVaultScore, UserClaimedReward,
 };
+use frame_support::traits::Get;
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec;
+use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	traits::{CheckedMul, Saturating, Zero},
 	DispatchError, DispatchResult, Percent, SaturatedConversion,
@@ -175,6 +179,44 @@ impl<T: Config> Pallet<T> {
 		Ok(rewards_to_be_paid)
 	}
 
+	pub fn create_reward_vault_pot(vault_id: T::VaultId) -> Result<T::AccountId, DispatchError> {
+		// Initialize the vault pot for rewards
+		let pot_account_for_vault: T::AccountId =
+			T::PalletId::get().into_sub_account_truncating((SubaccountType::RewardPot, vault_id));
+		// Ensure the pot does not already exist
+		ensure!(RewardVaultsPotAccount::<T>::get(vault_id).is_none(), Error::<T>::PotAlreadyExists);
+		// Store the pot
+		RewardVaultsPotAccount::<T>::insert(vault_id, pot_account_for_vault.clone());
+		Ok(pot_account_for_vault)
+	}
+
+	/// Validates a reward configuration ensuring that:
+	/// 1. The incentive cap is not greater than the deposit cap
+	/// 2. If boost multiplier is set, it must be 1 (current limitation)
+	///
+	/// # Arguments
+	/// * `config` - The reward configuration to validate
+	///
+	/// # Returns
+	/// * `DispatchResult` - Ok if validation passes, Error otherwise
+	pub fn validate_reward_config(
+		config: &RewardConfigForAssetVault<BalanceOf<T>>,
+	) -> Result<(), Error<T>> {
+		ensure!(
+			config.incentive_cap <= config.deposit_cap,
+			Error::<T>::IncentiveCapGreaterThanDepositCap
+		);
+
+		if let Some(boost_multiplier) = config.boost_multiplier {
+			// boost multipliers are handled by locks, this ensures the multiplier is 1
+			// we can change the multiplier to be customisable in the future, but for now we
+			// require it to be 1
+			ensure!(boost_multiplier == 1, Error::<T>::BoostMultiplierMustBeOne);
+		}
+
+		Ok(())
+	}
+
 	/// Calculate the APY based on the total deposit and deposit cap.
 	/// The goal is to ensure the APY is proportional to the total deposit.
 	///
@@ -252,6 +294,11 @@ impl<T: Config> Pallet<T> {
 	) -> Result<BalanceOf<T>, DispatchError> {
 		// Calculate the propotional apy
 		let deposit_cap = reward.deposit_cap;
+
+		if reward.incentive_cap > total_deposit {
+			return Err(Error::<T>::TotalDepositLessThanIncentiveCap.into());
+		}
+
 		let apy = Self::calculate_propotional_apy(total_deposit, deposit_cap, reward.apy)
 			.ok_or(Error::<T>::CannotCalculatePropotionalApy)?;
 		log::debug!("apy: {:?}", apy);

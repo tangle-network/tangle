@@ -197,6 +197,12 @@ pub mod pallet {
 	>;
 
 	#[pallet::storage]
+	#[pallet::getter(fn reward_vaults_pot_account)]
+	/// Storage for the reward vaults
+	pub type RewardVaultsPotAccount<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::VaultId, T::AccountId, OptionQuery>;
+
+	#[pallet::storage]
 	#[pallet::getter(fn blocks_for_apy)]
 	/// Storage for the reward configuration, which includes APY, cap for assets
 	pub type ApyBlocks<T: Config> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
@@ -225,6 +231,7 @@ pub mod pallet {
 		RewardVaultCreated {
 			vault_id: T::VaultId,
 			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
+			pot_account: T::AccountId,
 		},
 		/// Total score in vault updated
 		TotalScoreUpdated {
@@ -275,6 +282,10 @@ pub mod pallet {
 		BoostMultiplierMustBeOne,
 		/// Vault already exists
 		VaultAlreadyExists,
+		/// Total deposit is less than incentive cap
+		TotalDepositLessThanIncentiveCap,
+		/// Pot account not found
+		PotAlreadyExists,
 	}
 
 	#[pallet::call]
@@ -348,7 +359,7 @@ pub mod pallet {
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
 		#[pallet::call_index(3)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn create_vault_reward(
+		pub fn create_reward_vault(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
 			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
@@ -361,20 +372,14 @@ pub mod pallet {
 				Error::<T>::VaultAlreadyExists
 			);
 
-			ensure!(
-				new_config.incentive_cap <= new_config.deposit_cap,
-				Error::<T>::IncentiveCapGreaterThanDepositCap
-			);
+			// Validate the new configuration
+			Self::validate_reward_config(&new_config)?;
 
-			if let Some(boost_multiplier) = new_config.boost_multiplier {
-				// boost multipliers are handled by locks, this ensures the multiplier is 1
-				// we can change the multiplier to be customisable in the future, but for now we
-				// require it to be 1
-				ensure!(boost_multiplier == 1, Error::<T>::BoostMultiplierMustBeOne);
-			}
+			// Initialize the vault pot for rewards
+			let pot_account = Self::create_reward_vault_pot(vault_id)?;
 
 			RewardConfigStorage::<T>::insert(vault_id, new_config.clone());
-			Self::deposit_event(Event::RewardVaultCreated { vault_id, new_config });
+			Self::deposit_event(Event::RewardVaultCreated { vault_id, new_config, pot_account });
 			Ok(())
 		}
 
@@ -404,17 +409,9 @@ pub mod pallet {
 			new_config: RewardConfigForAssetVault<BalanceOf<T>>,
 		) -> DispatchResult {
 			let _who = T::ForceOrigin::ensure_origin(origin)?;
-			ensure!(
-				new_config.incentive_cap <= new_config.deposit_cap,
-				Error::<T>::IncentiveCapGreaterThanDepositCap
-			);
 
-			if let Some(boost_multiplier) = new_config.boost_multiplier {
-				// boost multipliers are handled by locks, this ensures the multiplier is 1
-				// we can change the multiplier to be customisable in the future, but for now we
-				// require it to be 1
-				ensure!(boost_multiplier == 1, Error::<T>::BoostMultiplierMustBeOne);
-			}
+			// Validate the new configuration
+			Self::validate_reward_config(&new_config)?;
 
 			RewardConfigStorage::<T>::try_mutate(vault_id, |config| -> DispatchResult {
 				// ensure config exists

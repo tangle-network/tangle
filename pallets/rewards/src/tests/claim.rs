@@ -44,7 +44,7 @@ fn setup_vault(
 	pallet_balances::TotalIssuance::<Runtime>::set(MOCK_TOTAL_ISSUANCE);
 
 	// Configure the reward vault
-	assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
+	assert_ok!(RewardsPallet::<Runtime>::create_reward_vault(
 		RuntimeOrigin::root(),
 		vault_id,
 		RewardConfigForAssetVault {
@@ -350,7 +350,7 @@ fn test_claim_rewards_with_zero_cap() {
 		let rewards_account = RewardsPallet::<Runtime>::account_id();
 		Balances::make_free_balance_be(&rewards_account, MOCK_TOTAL_ISSUANCE);
 
-		assert_ok!(RewardsPallet::<Runtime>::update_vault_reward_config(
+		assert_ok!(RewardsPallet::<Runtime>::create_reward_vault(
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault {

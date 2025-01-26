@@ -45,7 +45,7 @@ fn test_calculate_rewards_zero_deposit() {
 			last_claim,
 		);
 
-		assert_err!(result, Error::<Runtime>::NoRewardsAvailable);
+		assert_err!(result, Error::<Runtime>::TotalDepositLessThanIncentiveCap);
 	});
 }
 

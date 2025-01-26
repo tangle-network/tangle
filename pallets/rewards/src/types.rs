@@ -51,3 +51,9 @@ pub enum AssetAction {
 	Add,
 	Remove,
 }
+
+/// Type for subaccounts
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub enum SubaccountType {
+	RewardPot,
+}
