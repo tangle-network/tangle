@@ -35,56 +35,6 @@ use tangle_primitives::{
 };
 
 impl<T: Config> Pallet<T> {
-	pub fn remove_asset_from_vault(
-		vault_id: &T::VaultId,
-		asset_id: &Asset<T::AssetId>,
-	) -> DispatchResult {
-		// Update RewardVaults storage
-		RewardVaults::<T>::try_mutate(vault_id, |maybe_assets| -> DispatchResult {
-			let assets = maybe_assets.as_mut().ok_or(Error::<T>::VaultNotFound)?;
-
-			// Ensure the asset is in the vault
-			ensure!(assets.contains(asset_id), Error::<T>::AssetNotInVault);
-
-			assets.retain(|id| id != asset_id);
-
-			Ok(())
-		})?;
-
-		// Update AssetLookupRewardVaults storage
-		AssetLookupRewardVaults::<T>::remove(asset_id);
-
-		Ok(())
-	}
-
-	pub fn add_asset_to_vault(
-		vault_id: &T::VaultId,
-		asset_id: &Asset<T::AssetId>,
-	) -> DispatchResult {
-		// Ensure the asset is not already associated with any vault
-		ensure!(
-			!AssetLookupRewardVaults::<T>::contains_key(asset_id),
-			Error::<T>::AssetAlreadyInVault
-		);
-
-		// Update RewardVaults storage
-		RewardVaults::<T>::try_mutate(vault_id, |maybe_assets| -> DispatchResult {
-			let assets = maybe_assets.get_or_insert_with(Vec::new);
-
-			// Ensure the asset is not already in the vault
-			ensure!(!assets.contains(asset_id), Error::<T>::AssetAlreadyInVault);
-
-			assets.push(*asset_id);
-
-			Ok(())
-		})?;
-
-		// Update AssetLookupRewardVaults storage
-		AssetLookupRewardVaults::<T>::insert(asset_id, vault_id);
-
-		Ok(())
-	}
-
 	pub fn calculate_rewards(
 		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
@@ -177,17 +127,6 @@ impl<T: Config> Pallet<T> {
 		});
 
 		Ok(rewards_to_be_paid)
-	}
-
-	pub fn create_reward_vault_pot(vault_id: T::VaultId) -> Result<T::AccountId, DispatchError> {
-		// Initialize the vault pot for rewards
-		let pot_account_for_vault: T::AccountId =
-			T::PalletId::get().into_sub_account_truncating((SubaccountType::RewardPot, vault_id));
-		// Ensure the pot does not already exist
-		ensure!(RewardVaultsPotAccount::<T>::get(vault_id).is_none(), Error::<T>::PotAlreadyExists);
-		// Store the pot
-		RewardVaultsPotAccount::<T>::insert(vault_id, pot_account_for_vault.clone());
-		Ok(pot_account_for_vault)
 	}
 
 	/// Validates a reward configuration ensuring that:
