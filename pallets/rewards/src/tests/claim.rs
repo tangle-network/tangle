@@ -504,7 +504,5 @@ fn test_claim_frequency_with_decay() {
 		let difference = frequent_total_rewards.saturating_sub(infrequent_total_rewards);
 		let difference_percent = (difference / frequent_total_rewards) * 100;
 		assert!(difference_percent < 1);
-
-		panic!();
 	});
 }
