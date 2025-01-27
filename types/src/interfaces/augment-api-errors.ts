@@ -1178,10 +1178,6 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotLeavingOperator: AugmentedError<ApiType>;
       /**
-       * The round does not match the scheduled leave round.
-       **/
-      NotLeavingRound: AugmentedError<ApiType>;
-      /**
        * The operator is not offline.
        **/
       NotOfflineOperator: AugmentedError<ApiType>;
@@ -1193,6 +1189,10 @@ declare module '@polkadot/api-base/types/errors' {
        * No withdraw requests found
        **/
       NowithdrawRequests: AugmentedError<ApiType>;
+      /**
+       * Overflow from math
+       **/
+      OverflowRisk: AugmentedError<ApiType>;
       /**
        * An unstake request is already pending
        **/
@@ -1524,10 +1524,6 @@ declare module '@polkadot/api-base/types/errors' {
     };
     rewards: {
       /**
-       * Arithmetic operation caused an overflow
-       **/
-      ArithmeticError: AugmentedError<ApiType>;
-      /**
        * Asset already exists in a reward vault
        **/
       AssetAlreadyInVault: AugmentedError<ApiType>;
@@ -1548,9 +1544,25 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintIdNotFound: AugmentedError<ApiType>;
       /**
+       * Boost multiplier must be 1
+       **/
+      BoostMultiplierMustBeOne: AugmentedError<ApiType>;
+      /**
+       * Arithmetic operation caused an overflow
+       **/
+      CannotCalculatePropotionalApy: AugmentedError<ApiType>;
+      /**
+       * Error returned when trying to calculate reward per block
+       **/
+      CannotCalculateRewardPerBlock: AugmentedError<ApiType>;
+      /**
        * Error returned when trying to add a blueprint ID that already exists.
        **/
       DuplicateBlueprintId: AugmentedError<ApiType>;
+      /**
+       * Incentive cap is greater than deposit cap
+       **/
+      IncentiveCapGreaterThanDepositCap: AugmentedError<ApiType>;
       /**
        * Insufficient rewards balance in pallet account
        **/
@@ -1560,13 +1572,33 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidAPY: AugmentedError<ApiType>;
       /**
+       * Decay rate is too high
+       **/
+      InvalidDecayRate: AugmentedError<ApiType>;
+      /**
        * No rewards available to claim
        **/
       NoRewardsAvailable: AugmentedError<ApiType>;
       /**
+       * Pot account not found
+       **/
+      PotAccountNotFound: AugmentedError<ApiType>;
+      /**
+       * Pot account not found
+       **/
+      PotAlreadyExists: AugmentedError<ApiType>;
+      /**
        * Error returned when the reward configuration for the vault is not found.
        **/
       RewardConfigNotFound: AugmentedError<ApiType>;
+      /**
+       * Total deposit is less than incentive cap
+       **/
+      TotalDepositLessThanIncentiveCap: AugmentedError<ApiType>;
+      /**
+       * Vault already exists
+       **/
+      VaultAlreadyExists: AugmentedError<ApiType>;
       /**
        * The reward vault does not exist
        **/

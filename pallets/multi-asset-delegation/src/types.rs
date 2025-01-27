@@ -25,11 +25,9 @@ use tangle_primitives::types::RoundIndex;
 
 pub mod delegator;
 pub mod operator;
-pub mod rewards;
 
 pub use delegator::*;
 pub use operator::*;
-pub use rewards::*;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
