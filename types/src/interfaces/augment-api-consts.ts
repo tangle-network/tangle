@@ -616,6 +616,10 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       operatorBondLessDelay: u32 & AugmentedConst<ApiType>;
       /**
+       * The pallet's account ID.
+       **/
+      palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
        * Generic const
        **/
       [key: string]: Codec;
