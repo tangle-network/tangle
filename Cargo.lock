@@ -4939,7 +4939,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "ed448-goldilocks-plus",
  "parity-scale-codec",
@@ -4966,7 +4966,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "p384",
  "parity-scale-codec",
@@ -5020,7 +5020,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1-tr"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "k256",
  "parity-scale-codec",
@@ -8456,7 +8456,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -9529,7 +9529,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -9699,7 +9699,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -9757,7 +9757,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-rewards-rpc-runtime-api",
@@ -9770,7 +9770,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc-runtime-api"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -9798,7 +9798,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -9855,7 +9855,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-services-rpc-runtime-api",
@@ -9868,7 +9868,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "parity-scale-codec",
  "sp-api",
@@ -15805,7 +15805,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "alloy",
  "anyhow",
@@ -15901,7 +15901,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -15910,7 +15910,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -15941,7 +15941,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -16068,7 +16068,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "evm-tracer",
  "fixed",
@@ -16255,7 +16255,7 @@ checksum = "3369f5ac52d5eb6ab48c6b4ffdc8efbcad6b89c765749064ba298f2c68a16a76"
 
 [[package]]
 name = "tg-frost-core"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "byteorder",
  "const-crc32-nostd",
