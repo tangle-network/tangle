@@ -1,14 +1,7 @@
 use super::*;
 use crate::types::BalanceOf;
-use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::Percent;
 use sp_std::{vec, vec::Vec};
-use tangle_primitives::{
-	rewards::UserDepositWithLocks,
-	services::{Asset, Constraints},
-	traits::ServiceManager,
-	BlueprintId,
-};
+use tangle_primitives::{services::Constraints, traits::ServiceManager, BlueprintId};
 
 impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxFields = T::MaxFields;
@@ -121,15 +114,6 @@ impl<T: crate::Config, Balance: Default>
 		_blueprint_id: BlueprintId,
 	) -> bool {
 		true // For benchmarking, always return true
-	}
-
-	fn slash_operator(
-		_operator: &T::AccountId,
-		_blueprint_id: BlueprintId,
-		_service_id: InstanceId,
-		_percentage: Percent,
-	) {
-		// For benchmarking, do nothing
 	}
 
 	fn get_user_deposit_with_locks(

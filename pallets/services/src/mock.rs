@@ -269,7 +269,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 	}
 
 	fn is_operator(_operator: &AccountId) -> bool {
-		// dont care
+		// don't care
 		true
 	}
 
@@ -308,15 +308,6 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 	) -> bool {
 		// For mock implementation, always return true
 		true
-	}
-
-	fn slash_operator(
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-		_service_id: tangle_primitives::InstanceId,
-		_percentage: sp_runtime::Percent,
-	) {
-		// For mock implementation, do nothing
 	}
 
 	fn get_user_deposit_with_locks(

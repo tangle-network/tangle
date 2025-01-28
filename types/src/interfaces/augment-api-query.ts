@@ -1075,9 +1075,21 @@ declare module '@polkadot/api-base/types/storage' {
     };
     rewards: {
       /**
+       * Storage for the reward configuration, which includes APY, cap for assets
+       **/
+      apyBlocks: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
        * Storage for the reward vaults
        **/
       assetLookupRewardVaults: AugmentedQuery<ApiType, (arg: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => Observable<Option<u32>>, [TanglePrimitivesServicesAsset]> & QueryableStorageEntry<ApiType, [TanglePrimitivesServicesAsset]>;
+      /**
+       * Per-block decay rate in basis points (1/10000). e.g., 1 = 0.01% per block
+       **/
+      decayRate: AugmentedQuery<ApiType, () => Observable<Percent>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Number of blocks after which decay starts (e.g., 432000 for 30 days with 6s blocks)
+       **/
+      decayStartPeriod: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Storage for the reward configuration, which includes APY, cap for assets
        **/
@@ -1087,7 +1099,17 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       rewardVaults: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<Vec<TanglePrimitivesServicesAsset>>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**
-       * Stores the total score for each asset
+       * Storage for the reward vaults
+       **/
+      rewardVaultsPotAccount: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<AccountId32>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * Stores the total deposit for each vault
+       **/
+      totalRewardVaultDeposit: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u128>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * Stores the total score for each vault
+       * The difference between this and total_reward_vault_deposit is that this includes locked
+       * deposits multiplied by the lock multiplier
        **/
       totalRewardVaultScore: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<u128>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
       /**

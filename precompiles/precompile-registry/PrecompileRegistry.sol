@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.3;
 
-/// @author The Moonbeam Team
+/// @author Tangle Network
+/// @author Originally built by Moonbeam Team
 /// @title Precompile Registry
 /// @dev Interface to the set of available precompiles.
 interface PrecompileRegistry {

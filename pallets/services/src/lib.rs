@@ -277,6 +277,8 @@ pub mod module {
 		DuplicateAsset,
 		/// The maximum number of assets per service has been exceeded.
 		MaxAssetsPerServiceExceeded,
+		/// Assets don't match
+		InvalidAssetMatching,
 		/// Offender is not a registered operator.
 		OffenderNotOperator,
 		/// Offender is not an active operator.
@@ -737,7 +739,6 @@ pub mod module {
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
 
 			Self::deposit_event(Event::BlueprintCreated { owner, blueprint_id });
-			// TODO: update weight for the creation of the blueprint.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -881,7 +882,6 @@ pub mod module {
 				registration_args,
 			});
 
-			// TODO: update weight for the registration.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -915,10 +915,8 @@ pub mod module {
 			let (allowed, _weight) =
 				Self::on_unregister_hook(&blueprint, blueprint_id, &preferences)?;
 			ensure!(allowed, Error::<T>::NotAllowedToUnregister);
-			// TODO: check if the caller is not providing any service for the blueprint.
 			Operators::<T>::remove(blueprint_id, &caller);
 
-			// TODO: also remove all the services that uses this blueprint?
 			let removed = OperatorsProfile::<T>::try_mutate_exists(&caller, |profile| {
 				profile
 					.as_mut()
@@ -928,7 +926,6 @@ pub mod module {
 
 			ensure!(removed, Error::<T>::NotRegistered);
 			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
-			// TODO: update weight for the unregistration.
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1136,7 +1133,6 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
-			// TODO: allow permissioned callers to terminate the service?
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
 			let removed = UserServices::<T>::try_mutate(&caller, |service_ids| {
 				Result::<_, Error<T>>::Ok(service_ids.remove(&service_id))
@@ -1229,7 +1225,7 @@ pub mod module {
 				job,
 				args,
 			});
-			// TODO: add weight for the call to the total weight.
+
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1303,7 +1299,7 @@ pub mod module {
 				job: job_call.job,
 				result,
 			});
-			// TODO: add weight for the call to the total weight.
+
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1460,7 +1456,6 @@ pub mod module {
 		pub fn join_service(
 			origin: OriginFor<T>,
 			instance_id: u64,
-			preferences: OperatorPreferences,
 			native_asset_exposure: Percent,
 			non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResult {

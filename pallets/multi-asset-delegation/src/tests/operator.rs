@@ -660,6 +660,7 @@ fn slash_operator_success() {
 		assert_ok!(MultiAssetDelegation::slash_operator(
 			&Alice.to_account_id(),
 			blueprint_id,
+			0, // TODO: create a service
 			slash_percentage
 		));
 

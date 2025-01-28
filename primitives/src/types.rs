@@ -17,10 +17,9 @@ use super::*;
 pub mod ordered_set;
 pub mod rewards;
 use frame_support::pallet_prelude::*;
-use parity_scale_codec::Codec;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ByteArray, RuntimeDebug};
+use sp_core::RuntimeDebug;
 use sp_runtime::{generic, AccountId32, OpaqueExtrinsic};
 
 /// Block header type as expected by this runtime.

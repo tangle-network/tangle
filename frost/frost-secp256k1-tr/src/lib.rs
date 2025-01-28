@@ -212,7 +212,6 @@ fn negate_nonce(nonce: &frost_core::round1::Nonce<S>) -> frost_core::round1::Non
 
 // Negate a SigningNonces
 fn negate_nonces(signing_nonces: &round1::SigningNonces) -> round1::SigningNonces {
-	// TODO: this recomputes commitments which is expensive, and not needed.
 	// Create an `internals` SigningNonces::from_nonces_and_commitments or
 	// something similar.
 	round1::SigningNonces::from_nonces(

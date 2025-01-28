@@ -13,22 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
-use crate::{types::*, Pallet};
-use frame_support::{
-	ensure,
-	pallet_prelude::DispatchResult,
-	traits::{fungibles::Mutate, tokens::Preservation, Get},
-};
-use sp_runtime::{
-	traits::{CheckedSub, Zero},
-	DispatchError, Percent,
-};
+
+use crate::{types::*, Config, Delegators, Error, Operators, Pallet};
+use frame_support::{ensure, pallet_prelude::DispatchResult, traits::Get};
+use sp_runtime::traits::{CheckedAdd, CheckedSub, Zero};
 use sp_std::vec::Vec;
-use tangle_primitives::{
-	services::{Asset, EvmAddressMapping},
-	BlueprintId,
-};
+use tangle_primitives::services::Asset;
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
@@ -70,7 +60,8 @@ impl<T: Config> Pallet<T> {
 				.iter_mut()
 				.find(|d| d.operator == operator && d.asset_id == asset_id)
 			{
-				delegation.amount += amount;
+				delegation.amount =
+					delegation.amount.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
 			} else {
 				// Create the new delegation
 				let new_delegation = BondInfoDelegator {
@@ -108,7 +99,10 @@ impl<T: Config> Pallet<T> {
 				if let Some(existing_delegation) =
 					delegations.iter_mut().find(|d| d.delegator == who && d.asset_id == asset_id)
 				{
-					existing_delegation.amount += amount;
+					existing_delegation.amount = existing_delegation
+						.amount
+						.checked_add(&amount)
+						.ok_or(Error::<T>::OverflowRisk)?;
 				} else {
 					delegations
 						.try_push(delegation)
@@ -164,7 +158,8 @@ impl<T: Config> Pallet<T> {
 			let delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
-			delegation.amount -= amount;
+			delegation.amount =
+				delegation.amount.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
 
 			// Create the unstake request
 			let current_round = Self::current_round();
@@ -202,12 +197,18 @@ impl<T: Config> Pallet<T> {
 
 				// Reduce the amount in the operator's delegation
 				ensure!(operator_delegation.amount >= amount, Error::<T>::InsufficientBalance);
-				operator_delegation.amount -= amount;
+				operator_delegation.amount = operator_delegation
+					.amount
+					.checked_sub(&amount)
+					.ok_or(Error::<T>::InsufficientBalance)?;
 
 				// Remove the delegation if the remaining amount is zero
 				if operator_delegation.amount.is_zero() {
 					operator_metadata.delegations.remove(operator_delegation_index);
-					operator_metadata.delegation_count -= 1;
+					operator_metadata.delegation_count = operator_metadata
+						.delegation_count
+						.checked_sub(1u32)
+						.ok_or(Error::<T>::InsufficientBalance)?;
 				}
 
 				Ok(())
@@ -315,14 +316,20 @@ impl<T: Config> Pallet<T> {
 						.iter_mut()
 						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
 					{
-						delegation.amount += amount;
+						delegation.amount = delegation
+							.amount
+							.checked_add(&amount)
+							.ok_or(Error::<T>::OverflowRisk)?;
 					} else {
 						delegations
 							.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
 							.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 
 						// Increase the delegation count only when a new delegation is added
-						operator_metadata.delegation_count += 1;
+						operator_metadata.delegation_count = operator_metadata
+							.delegation_count
+							.checked_add(1)
+							.ok_or(Error::<T>::OverflowRisk)?;
 					}
 					operator_metadata.delegations = delegations;
 
@@ -337,7 +344,10 @@ impl<T: Config> Pallet<T> {
 			if let Some(delegation) = delegations.iter_mut().find(|d| {
 				d.operator == unstake_request.operator && d.asset_id == unstake_request.asset_id
 			}) {
-				delegation.amount += unstake_request.amount;
+				delegation.amount = delegation
+					.amount
+					.checked_add(&unstake_request.amount)
+					.ok_or(Error::<T>::OverflowRisk)?;
 			} else {
 				// Create a new delegation
 				delegations
@@ -350,86 +360,6 @@ impl<T: Config> Pallet<T> {
 					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 			}
 			metadata.delegations = delegations;
-
-			Ok(())
-		})
-	}
-
-	/// Slashes a delegator's stake.
-	///
-	/// # Arguments
-	///
-	/// * `delegator` - The account ID of the delegator.
-	/// * `operator` - The account ID of the operator.
-	/// * `blueprint_id` - The ID of the blueprint.
-	/// * `percentage` - The percentage of the stake to slash.
-	///
-	/// # Errors
-	///
-	/// Returns an error if the delegator is not found, or if the delegation is not active.
-	pub fn slash_delegator(
-		delegator: &T::AccountId,
-		operator: &T::AccountId,
-		blueprint_id: BlueprintId,
-		percentage: Percent,
-	) -> Result<(), DispatchError> {
-		Delegators::<T>::try_mutate(delegator, |maybe_metadata| {
-			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
-
-			let delegation = metadata
-				.delegations
-				.iter_mut()
-				.find(|d| &d.operator == operator)
-				.ok_or(Error::<T>::NoActiveDelegation)?;
-
-			// Check delegation type and blueprint_id
-			match &delegation.blueprint_selection {
-				DelegatorBlueprintSelection::Fixed(blueprints) => {
-					// For fixed delegation, ensure the blueprint_id is in the list
-					ensure!(blueprints.contains(&blueprint_id), Error::<T>::BlueprintNotSelected);
-				},
-				DelegatorBlueprintSelection::All => {
-					// For "All" type, no need to check blueprint_id
-				},
-			}
-
-			// Calculate and apply slash
-			let slash_amount = percentage.mul_floor(delegation.amount);
-			delegation.amount = delegation
-				.amount
-				.checked_sub(&slash_amount)
-				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
-
-			match delegation.asset_id {
-				Asset::Custom(asset_id) => {
-					// Transfer slashed amount to the treasury
-					let _ = T::Fungibles::transfer(
-						asset_id,
-						&Self::pallet_account(),
-						&T::SlashedAmountRecipient::get(),
-						slash_amount,
-						Preservation::Expendable,
-					);
-				},
-				Asset::Erc20(address) => {
-					let slashed_amount_recipient_evm =
-						T::EvmAddressMapping::into_address(T::SlashedAmountRecipient::get());
-					let (success, _weight) = Self::erc20_transfer(
-						address,
-						&Self::pallet_evm_account(),
-						slashed_amount_recipient_evm,
-						slash_amount,
-					)
-					.map_err(|_| Error::<T>::ERC20TransferFailed)?;
-					ensure!(success, Error::<T>::ERC20TransferFailed);
-				},
-			}
-
-			// emit event
-			Self::deposit_event(Event::DelegatorSlashed {
-				who: delegator.clone(),
-				amount: slash_amount,
-			});
 
 			Ok(())
 		})

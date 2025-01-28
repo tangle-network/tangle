@@ -36,8 +36,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::types::rewards::UserDepositWithLocks;
-use tangle_primitives::{services::Asset, BlueprintId};
+use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks, BlueprintId};
 
 use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
@@ -266,7 +265,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 	}
 
 	fn is_operator(_operator: &AccountId) -> bool {
-		// dont care
+		// don't care
 		true
 	}
 
@@ -305,14 +304,6 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 	) -> bool {
 		// For mock implementation, always return true
 		true
-	}
-
-	fn slash_operator(
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-		_service_id: tangle_primitives::InstanceId,
-		_percentage: sp_runtime::Percent,
-	) {
 	}
 
 	fn get_user_deposit_with_locks(
@@ -441,7 +432,12 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
-	ext.execute_with(|| System::set_block_number(1));
+	ext.execute_with(|| {
+		System::set_block_number(1);
+		// Set total issuance for reward calculations
+		let total_issuance = 1_000_000_000_000_000_000_000_000u128; // 1M tokens with 18 decimals
+		<pallet_balances::TotalIssuance<Runtime>>::put(total_issuance);
+	});
 	ext
 }
 

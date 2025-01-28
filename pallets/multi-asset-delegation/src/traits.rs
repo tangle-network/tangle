@@ -16,7 +16,7 @@
 use super::*;
 use crate::types::{BalanceOf, DelegatorBlueprintSelection, OperatorStatus};
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::{traits::Zero, Percent};
+use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 use tangle_primitives::types::rewards::UserDepositWithLocks;
 use tangle_primitives::{
@@ -89,10 +89,6 @@ impl<T: crate::Config>
 		} else {
 			false
 		}
-	}
-
-	fn slash_operator(operator: &T::AccountId, blueprint_id: BlueprintId, percentage: Percent) {
-		let _ = Pallet::<T>::slash_operator(operator, blueprint_id, percentage);
 	}
 
 	fn get_user_deposit_with_locks(

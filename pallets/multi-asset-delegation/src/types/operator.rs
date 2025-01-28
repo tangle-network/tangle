@@ -16,6 +16,7 @@
 
 use super::*;
 use frame_support::{pallet_prelude::*, BoundedVec};
+use sp_runtime::traits::CheckedAdd;
 use tangle_primitives::services::Asset;
 
 /// A snapshot of the operator state at the start of the round.
@@ -34,14 +35,14 @@ impl<AccountId, Balance, AssetId: Encode + Decode, MaxDelegations: Get<u32>>
 	OperatorSnapshot<AccountId, Balance, AssetId, MaxDelegations>
 where
 	AssetId: PartialEq + Ord + Copy,
-	Balance: Default + core::ops::AddAssign + Copy,
+	Balance: Default + core::ops::AddAssign + Copy + CheckedAdd,
 {
 	/// Calculates the total stake for a specific asset ID from all delegations.
 	pub fn get_stake_by_asset_id(&self, asset_id: Asset<AssetId>) -> Balance {
 		let mut total_stake = Balance::default();
 		for stake in &self.delegations {
 			if stake.asset_id == asset_id {
-				total_stake += stake.amount;
+				total_stake = total_stake.checked_add(&stake.amount).unwrap_or(total_stake);
 			}
 		}
 		total_stake
@@ -53,7 +54,7 @@ where
 
 		for stake in &self.delegations {
 			let entry = stake_by_asset.entry(stake.asset_id).or_default();
-			*entry += stake.amount;
+			*entry = entry.checked_add(&stake.amount).unwrap_or(*entry);
 		}
 
 		stake_by_asset.into_iter().collect()

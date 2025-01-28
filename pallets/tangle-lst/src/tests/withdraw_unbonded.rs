@@ -69,7 +69,7 @@ fn withdraw_unbonded_works_against_slashed_no_era_sub_pool() {
 				SubPoolsStorage::<Runtime>::insert(1, sub_pools);
 
 				// Adjust the TVL for this non-api usage (direct sub-pool modification)
-				TotalValueLocked::<Runtime>::mutate(|x| *x -= 295);
+				TotalValueLocked::<Runtime>::mutate(|x| *x = x.saturating_sub(295));
 
 				// Update the equivalent of the unbonding chunks for the `StakingMock`
 				let mut x = UnbondingBalanceMap::get();

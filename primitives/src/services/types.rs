@@ -14,20 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use core::{default, fmt::Display};
-
-use crate::{Account, Weight};
 use educe::Educe;
-use fp_evm::CallInfo;
-use frame_support::{pallet_prelude::*, traits::tokens::AssetId};
+use frame_support::pallet_prelude::*;
 use serde::Deserializer;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ByteArray, RuntimeDebug, H160, U256};
-use sp_runtime::{
-	traits::{AtLeast32Bit, AtLeast32BitUnsigned},
-	Percent,
-};
+use sp_core::{RuntimeDebug, H160};
+use sp_runtime::{traits::AtLeast32BitUnsigned, Percent};
+use sp_std::fmt::Display;
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec, vec::Vec};

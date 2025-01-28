@@ -202,8 +202,8 @@ pallet_assets::runtime_benchmarks_enabled! {
 	}
 }
 
-// These parameters dont matter much as this will only be called by root with the forced arguments
-// No deposit is substracted with those methods
+// These parameters don't matter much as this will only be called by root with the forced arguments
+// No deposit is subtracted with those methods
 parameter_types! {
 	pub const AssetDeposit: Balance = 0;
 	pub const ApprovalDeposit: Balance = 0;

@@ -177,6 +177,9 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
+// Precompiles
+pub type Precompiles = precompiles::TanglePrecompiles<Runtime>;
+
 pub const MAXIMUM_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
 
 parameter_types! {
@@ -1936,8 +1939,7 @@ impl_runtime_apis! {
 			account_id: AccountId,
 			asset_id: tangle_primitives::services::Asset<AssetId>,
 		) -> Result<Balance, sp_runtime::DispatchError> {
-			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
-			Ok(rewards)
+			Rewards::calculate_rewards(&account_id, asset_id)
 		}
 	}
 

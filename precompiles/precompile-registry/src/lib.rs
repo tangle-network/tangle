@@ -45,8 +45,7 @@ where
 	#[precompile::view]
 	fn is_precompile(handle: &mut impl PrecompileHandle, address: Address) -> EvmResult<bool> {
 		// We consider the precompile set is optimized to do at most one storage read.
-		// In the case of , the storage item that can be read is pallet_asset::Asset
-		// (TODO make it more generic, maybe add a const generic on PrecompileRegistry type)
+		// In the case of tangle, the storage item that can be read is pallet_asset::Asset
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
 		handle.record_db_read::<Runtime>(175)?;
@@ -60,8 +59,7 @@ where
 		address: Address,
 	) -> EvmResult<bool> {
 		// We consider the precompile set is optimized to do at most one storage read.
-		// In the case of , the storage item that can be read is pallet_asset::Asset
-		// (TODO make it more generic, maybe add a const generic on PrecompileRegistry type)
+		// In the case of tangle, the storage item that can be read is pallet_asset::Asset
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
 		handle.record_db_read::<Runtime>(175)?;
@@ -80,8 +78,7 @@ where
 		// Prevent touching addresses that are not precompiles.
 		//
 		// We consider the precompile set is optimized to do at most one storage read.
-		// In the case of , the storage item that can be read is pallet_asset::Asset
-		// (TODO make it more generic, maybe add a const generic on PrecompileRegistry type)
+		// In the case of tangle, the storage item that can be read is pallet_asset::Asset
 		// Storage item: Asset:
 		// Blake2_128(16) + AssetId(16) + AssetDetails((4 * AccountId(20)) + (3 * Balance(16)) + 15)
 		handle.record_db_read::<Runtime>(175)?;
@@ -92,7 +89,7 @@ where
 		// pallet_evm::create_account read storage item pallet_evm::AccountCodes
 		//
 		// AccountCodes: Blake2128(16) + H160(20) + Vec(5)
-		// We asume an existing precompile can hold at most 5 bytes worth of dummy code.
+		// We assume an existing precompile can hold at most 5 bytes worth of dummy code.
 		handle.record_db_read::<Runtime>(41)?;
 		pallet_evm::Pallet::<Runtime>::create_account(address.0, DUMMY_CODE.to_vec());
 

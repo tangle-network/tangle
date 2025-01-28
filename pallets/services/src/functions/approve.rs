@@ -67,10 +67,24 @@ impl<T: Config> Pallet<T> {
 			asset_exposures.len() <= T::MaxAssetsPerService::get() as usize,
 			Error::<T>::MaxAssetsPerServiceExceeded
 		);
-        // Ensure asset exposures length matches requested assets length
-        ensure!(
-            asset_exposures.len() == request.non_native_asset_security
-        )
+		// Ensure asset exposures length matches requested assets length
+		ensure!(
+			asset_exposures.len() == request.non_native_asset_security.len(),
+			Error::<T>::InvalidAssetMatching
+		);
+		// Ensure no duplicate assets in exposures
+		let mut seen_assets = sp_std::collections::btree_set::BTreeSet::new();
+		for exposure in asset_exposures.iter() {
+			ensure!(seen_assets.insert(&exposure.asset), Error::<T>::DuplicateAsset);
+		}
+
+		// Ensure all assets in request have matching exposures in same order
+		for (i, required_asset) in request.non_native_asset_security.iter().enumerate() {
+			ensure!(
+				asset_exposures[i].asset == required_asset.asset,
+				Error::<T>::InvalidAssetMatching
+			);
+		}
 
 		// Find and update operator's approval state
 		let updated = request

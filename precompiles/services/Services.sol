@@ -1,44 +1,29 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: GPL-3.0-only
+pragma solidity >=0.8.3;
 
-/// @title ServicesPrecompile Interface
-/// @dev This interface is meant to interact with the ServicesPrecompile in the Tangle network.
-interface ServicesPrecompile {
-	/// @dev Invalid Permitted Callers provided
-	error InvalidPermittedCallers();
-	/// @dev Invalid Service Providers provided
-	error InvalidOperatorsList();
-	/// @dev Invalid Request Arguments provided
-	error InvalidRequestArguments();
-	/// @dev Invalid TTL Value provided
-	error InvalidTTL();
-	/// @dev Invalid Payment Amount provided
-	error InvalidAmount();
-	/// @dev `msg.value` must be zero when using ERC20 token for payment
-	error ValueMustBeZeroForERC20();
-	/// @dev `msg.value` must be zero when using custom asset for payment
-	error ValueMustBeZeroForCustomAsset();
-	/// @dev Payment asset should be either custom or ERC20
-	error PaymentAssetShouldBeCustomOrERC20();
+/// @dev The Services contract's address.
+address constant SERVICES_ADDRESS = 0x0000000000000000000000000000000000000900;
 
-	/// @notice Create a new service blueprint
-	/// @param blueprint_data The blueprint data encoded as bytes
-	function createBlueprint(bytes calldata blueprint_data) external;
+/// @dev The Services contract's instance.
+Services constant SERVICES_CONTRACT = Services(SERVICES_ADDRESS);
 
-	/// @notice Register an operator for a specific blueprint
-	/// @param blueprint_id The ID of the blueprint to register for
-	/// @param preferences The operator's preferences encoded as bytes
-	/// @param registration_args The registration arguments encoded as bytes
-	function registerOperator(
-		uint256 blueprint_id,
-		bytes calldata preferences,
-		bytes calldata registration_args
-	) external payable;
+/// @title Pallet Services Interface
+/// @dev The interface through which solidity contracts will interact with Services pallet
+/// We follow this same interface including four-byte function selectors, in the precompile that
+/// wraps the pallet
+/// @custom:address 0x0000000000000000000000000000000000000900
+interface Services {
+    /// @dev Create a new blueprint.
+    /// @param blueprint_data The blueprint data in SCALE-encoded format.
+    function createBlueprint(bytes calldata blueprint_data) external;
 
-	/// @notice Unregister an operator from a specific blueprint
-	/// @param blueprint_id The ID of the blueprint to unregister from
-	function unregisterOperator(uint256 blueprint_id) external;
+    /// @dev Register as an operator for a specific blueprint.
+    /// @param blueprint_id The blueprint ID.
+    /// @param preferences The operator preferences in SCALE-encoded format.
+    /// @param registration_args The registration arguments in SCALE-encoded format.
+    function registerOperator(uint256 blueprint_id, bytes calldata preferences, bytes calldata registration_args) external payable;
 
+<<<<<<< HEAD
 	/// @notice Request a service from a specific blueprint
 	/// @param blueprint_id The ID of the blueprint
 	/// @param assets The list of assets to use for the service
@@ -62,58 +47,86 @@ interface ServicesPrecompile {
 		uint32 min_operators,
 		uint32 max_operators
 	) external payable;
+=======
+    /// @dev Pre-register as an operator for a specific blueprint.
+    /// @param blueprint_id The blueprint ID.
+    function preRegister(uint256 blueprint_id) external;
+>>>>>>> main
 
-	/// @notice Terminate a service
-	/// @param service_id The ID of the service to terminate
-	function terminateService(uint256 service_id) external;
+    /// @dev Unregister as an operator from a blueprint.
+    /// @param blueprint_id The blueprint ID.
+    function unregisterOperator(uint256 blueprint_id) external;
 
-	/// @notice Approve a service request
-	/// @param request_id The ID of the service request to approve
-	/// @param restaking_percent The amount of your restake to be exposed to the service in percentage [0, 100]
-	function approve(uint256 request_id, uint8 restaking_percent) external;
+    /// @dev Request a new service.
+    /// @param blueprint_id The blueprint ID.
+    /// @param assets The list of asset IDs.
+    /// @param permitted_callers The permitted callers in SCALE-encoded format.
+    /// @param service_providers The service providers in SCALE-encoded format.
+    /// @param request_args The request arguments in SCALE-encoded format.
+    /// @param ttl The time-to-live for the request.
+    /// @param payment_asset_id The payment asset ID.
+    /// @param payment_token_address The payment token address.
+    /// @param amount The payment amount.
+    function requestService(
+        uint256 blueprint_id,
+        uint256[] calldata assets,
+        bytes calldata permitted_callers,
+        bytes calldata service_providers,
+        bytes calldata request_args,
+        uint256 ttl,
+        uint256 payment_asset_id,
+        address payment_token_address,
+        uint256 amount
+    ) external payable;
 
-	/// @notice Reject a service request
-	/// @param request_id The ID of the service request to reject
-	function reject(uint256 request_id) external;
+    /// @dev Terminate a service.
+    /// @param service_id The service ID.
+    function terminateService(uint256 service_id) external;
 
-	/// @notice Call a job in the service
-	/// @param service_id The ID of the service
-	/// @param job The job index (as uint8)
-	/// @param args_data The arguments of the job encoded as bytes
-	function callJob(
-		uint256 service_id,
-		uint8 job,
-		bytes calldata args_data
-	) external;
+    /// @dev Approve a request.
+    /// @param request_id The request ID.
+    /// @param restaking_percent The restaking percentage.
+    function approve(uint256 request_id, uint8 restaking_percent) external;
 
-	/// @notice Submit the result of a job call
-	/// @param service_id The ID of the service
-	/// @param call_id The ID of the call
-	/// @param result_data The result data encoded as bytes
-	function submitResult(
-		uint256 service_id,
-		uint256 call_id,
-		bytes calldata result_data
-	) external;
+    /// @dev Reject a service request.
+    /// @param request_id The request ID.
+    function reject(uint256 request_id) external;
 
-	/// @notice Slash an operator (offender) for a service id with a given percent of their exposed stake for that service.
-	///
-	/// The caller needs to be an authorized Slash Origin for this service.
-	/// Note that this does not apply the slash directly, but instead schedules a deferred call to apply the slash
-	/// by another entity.
-	/// @param offender The operator to be slashed encoded as bytes
-	/// @param service_id The ID of the service to slash for
-	/// @param percent The percent of the offender's exposed stake to slash
-	function slash(
-		bytes calldata offender,
-		uint256 service_id,
-		uint8 percent
-	) external;
+    /// @dev Call a job in the service.
+    /// @param service_id The service ID.
+    /// @param job The job ID.
+    /// @param args_data The job arguments in SCALE-encoded format.
+    function callJob(uint256 service_id, uint8 job, bytes calldata args_data) external;
 
-	/// @notice Dispute an Unapplied Slash for a service id.
-	///
-	/// The caller needs to be an authorized Dispute Origin for this service.
-	/// @param era The era of the unapplied slash.
-	/// @param slash_index The index of the unapplied slash in the era.
-	function dispute(uint32 era, uint32 slash_index) external;
+    /// @dev Submit the result for a job call.
+    /// @param service_id The service ID.
+    /// @param call_id The call ID.
+    /// @param result_data The result data in SCALE-encoded format.
+    function submitResult(uint256 service_id, uint256 call_id, bytes calldata result_data) external;
+
+    /// @dev Slash an operator for a service.
+    /// @param offender The offender in SCALE-encoded format.
+    /// @param service_id The service ID.
+    /// @param percent The slash percentage.
+    function slash(bytes calldata offender, uint256 service_id, uint8 percent) external;
+
+    /// @dev Dispute an unapplied slash.
+    /// @param era The era number.
+    /// @param index The index of the slash.
+    function dispute(uint32 era, uint32 index) external;
+
+    /// @dev Update price targets for a blueprint.
+    /// @param blueprint_id The blueprint ID.
+    /// @param price_targets The new price targets.
+    function updatePriceTargets(uint256 blueprint_id, uint256[] calldata price_targets) external;
+
+    /// @dev Custom errors for the Services precompile
+    error InvalidPermittedCallers();
+    error InvalidOperatorsList();
+    error InvalidRequestArguments();
+    error InvalidTTL();
+    error InvalidAmount();
+    error ValueMustBeZeroForERC20();
+    error ValueMustBeZeroForCustomAsset();
+    error PaymentAssetShouldBeCustomOrERC20();
 }

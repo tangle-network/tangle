@@ -119,28 +119,6 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 		blueprint_id: crate::BlueprintId,
 	) -> bool;
 
-	/// Slash an operator for a particular blueprint and service. The slash
-	/// percentage defines the amount of assets delegated to the operator that
-	/// should be slashed.
-	///
-	/// This method iterates over all delegators and assets exposed by the service
-	/// and slashes them proportionally by the `percentage`.
-	///
-	/// # Parameters
-	///
-	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `blueprint_id`: The blueprint ID of the corresponding service.
-	/// * `service_id`: The service ID where the slashing event originated from.
-	/// * `percentage`: The severity of the slashing event, as a percentage.
-	///
-	/// Method should not fail and should process entire slash.
-	fn slash_operator(
-		operator: &AccountId,
-		blueprint_id: crate::BlueprintId,
-		service_id: crate::InstanceId,
-		percentage: sp_runtime::Percent,
-	);
-
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
 		asset_id: Asset<AssetId>,

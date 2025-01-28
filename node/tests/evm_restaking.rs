@@ -8,6 +8,7 @@ use core::future::Future;
 use core::ops::Div;
 use core::time::Duration;
 
+use alloy::primitives::utils::*;
 use alloy::primitives::*;
 use alloy::providers::Provider;
 use alloy::sol;
@@ -35,6 +36,13 @@ sol! {
 sol! {
 	#[sol(rpc, all_derives)]
 	"../precompiles/multi-asset-delegation/MultiAssetDelegation.sol",
+}
+
+sol! {
+	#[allow(clippy::too_many_arguments)]
+	#[sol(rpc, all_derives)]
+	TangleLiquidRestakingVault,
+	"tests/fixtures/TangleLiquidRestakingVault.json",
 }
 
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
@@ -151,6 +159,33 @@ async fn create_asset(
 	Ok(())
 }
 
+/// Deploys and initializes an Tangle Liquid Restaking Vault contract
+async fn deploy_tangle_lrt(
+	provider: AlloyProviderWithWallet,
+	base_token: Address,
+	operator: [u8; 32],
+	name: &str,
+	symbol: &str,
+) -> anyhow::Result<Address> {
+	info!(
+		%base_token,
+		%name,
+		%symbol,
+		"Deploying Tangle LRT contract...");
+	let token = TangleLiquidRestakingVault::deploy(
+		provider.clone(),
+		base_token,
+		operator.into(),
+		vec![],
+		MULTI_ASSET_DELEGATION,
+		name.into(),
+		symbol.into(),
+	)
+	.await?;
+	info!("Deployed {} Tangle LRT contract at address: {}", symbol, token.address());
+	Ok(*token.address())
+}
+
 /// Setup the E2E test environment.
 #[track_caller]
 pub fn run_mad_test<TFn, F>(f: TFn)
@@ -214,6 +249,8 @@ where
 
 		// Create a new vault and these assets to it.
 		let vault_id = 0;
+		let deposit_cap = parse_ether("100").unwrap();
+		let incentive_cap = parse_ether("100").unwrap();
 		let update_vault_reward_config = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
 				api::runtime_types::pallet_rewards::pallet::Call::update_vault_reward_config {
@@ -221,8 +258,8 @@ where
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
 							apy: api::runtime_types::sp_arithmetic::per_things::Percent(1),
-							incentive_cap: 100_000_000_000_000,
-							deposit_cap: 100_000_000_000_000,
+							incentive_cap: incentive_cap.to::<u128>(),
+							deposit_cap: deposit_cap.to::<u128>(),
 							boost_multiplier: None,
 						},
 				},
@@ -308,12 +345,13 @@ where
 			wbtc_asset_id: 2,
 		};
 		let result = f(test_inputs).await;
-		assert!(result.is_ok(), "Test failed: {result:?}");
 		if result.is_ok() {
 			info!("***************** Test passed **********");
 		} else {
 			error!("***************** Test failed **********");
+			error!("{:?}", result);
 		}
+		assert!(result.is_ok(), "Test failed: {result:?}");
 		result
 	});
 }
@@ -342,30 +380,37 @@ pub struct TestInputs {
 }
 
 /// Helper function for joining as an operator
-async fn join_as_operator(provider: &AlloyProviderWithWallet, stake: U256) -> anyhow::Result<bool> {
-	let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, provider);
-	let result = precompile
-		.joinOperators(stake)
-		.send()
-		.await?
-		.with_timeout(Some(Duration::from_secs(5)))
-		.get_receipt()
-		.await?;
-	Ok(result.status())
+async fn join_as_operator(
+	client: &subxt::OnlineClient<subxt::PolkadotConfig>,
+	caller: tangle_subxt::subxt_signer::sr25519::Keypair,
+	stake: u128,
+) -> anyhow::Result<bool> {
+	let join_call = api::tx().multi_asset_delegation().join_operators(stake);
+	let mut result = client.tx().sign_and_submit_then_watch_default(&join_call, &caller).await?;
+	while let Some(Ok(s)) = result.next().await {
+		if let TxStatus::InBestBlock(b) = s {
+			let _evs = match b.wait_for_success().await {
+				Ok(evs) => evs,
+				Err(e) => {
+					error!("Error: {:?}", e);
+					break;
+				},
+			};
+			break;
+		}
+	}
+	Ok(true)
 }
 
 #[test]
 fn operator_join_delegator_delegate_erc20() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
@@ -399,7 +444,7 @@ fn operator_join_delegator_delegate_erc20() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				alice.account_id().0.into(),
 				U256::ZERO,
 				*usdc.address(),
 				delegate_amount,
@@ -434,15 +479,11 @@ fn operator_join_delegator_delegate_erc20() {
 fn operator_join_delegator_delegate_asset_id() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
-
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
@@ -498,7 +539,7 @@ fn operator_join_delegator_delegate_asset_id() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				alice.account_id().0.into(),
 				U256::from(t.usdc_asset_id),
 				Address::ZERO,
 				U256::from(delegate_amount),
@@ -689,4 +730,231 @@ fn deposits_withdraw_asset_id() {
 
 		anyhow::Ok(())
 	})
+}
+
+#[test]
+fn lrt_deposit_withdraw_erc20() {
+	run_mad_test(|t| async move {
+		let alice = TestAccount::Alice;
+		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
+		// Join operators
+		let tnt = U256::from(100_000u128);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
+		// Setup a LRT Vault for Alice.
+		let lrt_address = deploy_tangle_lrt(
+			alice_provider.clone(),
+			t.weth,
+			alice.account_id().0,
+			"Liquid Restaked Ether",
+			"lrtETH",
+		)
+		.await?;
+
+		// Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		// Mint WETH for Bob
+		let weth_amount = parse_ether("10").unwrap();
+		let weth = MockERC20::new(t.weth, &bob_provider);
+		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
+		info!("Minted {} WETH for Bob", format_ether(weth_amount));
+
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, weth_amount);
+
+		// Approve LRT contract to spend WETH
+		let deposit_amount = weth_amount.div(U256::from(2));
+		let approve_result =
+			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
+		assert!(approve_result.status());
+		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+
+		// Deposit WETH to LRT
+		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		let deposit_result = lrt
+			.deposit(deposit_amount, bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
+		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Bob deposited `deposit_amount` WETH, should receive `deposit_amount` lrtETH in return
+		let lrt_balance = lrt.balanceOf(bob.address()).call().await?;
+		assert_eq!(lrt_balance._0, deposit_amount);
+		// Bob should have `weth_amount - deposit_amount` WETH
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, weth_amount - deposit_amount);
+
+		let mad_weth_balance = weth.balanceOf(t.pallet_account_id.to_address()).call().await?;
+		assert_eq!(mad_weth_balance._0, deposit_amount);
+
+		// LRT should be a delegator to the operator in the MAD pallet.
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
+		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+		assert!(maybe_operator.is_some());
+		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
+		assert_eq!(
+			maybe_operator.map(|p| p.delegations.0[0].clone()),
+			Some(DelegatorBond {
+				delegator: lrt_address.to_account_id(),
+				amount: deposit_amount.to::<u128>(),
+				asset_id: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+				__ignore: std::marker::PhantomData
+			})
+		);
+
+		// Wait for a new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
+		let withdraw_amount = deposit_amount.div(U256::from(2));
+		info!(
+			?lrt_address,
+			?t.weth,
+			deposit_amount = %format_ether(deposit_amount),
+			withdraw_amount = %format_ether(withdraw_amount),
+			"Scheduling unstake of {} lrtETH",
+			format_ether(withdraw_amount)
+		);
+		// Schedule unstake
+		let sch_unstake_result = lrt
+			.scheduleUnstake(withdraw_amount)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(sch_unstake_result.status());
+		info!("Scheduled unstake of {} lrtETH", format_ether(withdraw_amount));
+
+		// Wait for a new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
+		// Execute the unstake
+		let exec_unstake_result = lrt
+			.executeUnstake()
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(exec_unstake_result.status());
+		info!("Executed unstake of {} lrtETH", format_ether(withdraw_amount));
+
+		// Schedule a withdrawal
+		let sch_withdraw_result = lrt
+			.scheduleWithdraw(withdraw_amount)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(sch_withdraw_result.status());
+		info!("Scheduled withdrawal of {} lrtETH", format_ether(withdraw_amount));
+
+		// Wait for two new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+		// Execute the withdrawal
+		let exec_withdraw_result = lrt
+			.withdraw(withdraw_amount, bob.address(), bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(exec_withdraw_result.status());
+
+		// Bob deposited `deposit_amount` and withdrew `withdraw_amount`
+		// `deposit_amount` is 1/2 of the minted amount
+		// `withdraw_amount` is 1/2 of the deposited amount
+		// So, Bob should have `weth_amount - deposit_amount + withdraw_amount` WETH
+		let expected_balance = weth_amount - deposit_amount + withdraw_amount;
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, expected_balance);
+
+		anyhow::Ok(())
+	});
+}
+
+#[test]
+fn lrt_rewards() {
+	run_mad_test(|t| async move {
+		let alice = TestAccount::Alice;
+		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
+		// Join operators
+		let tnt = U256::from(100_000u128);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
+
+		// Setup a LRT Vault for Alice.
+		let lrt_address = deploy_tangle_lrt(
+			alice_provider.clone(),
+			t.weth,
+			alice.account_id().0,
+			"Liquid Restaked Ether",
+			"lrtETH",
+		)
+		.await?;
+
+		// Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		// Mint WETH for Bob
+		let weth_amount = parse_ether("10").unwrap();
+		let weth = MockERC20::new(t.weth, &bob_provider);
+		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
+
+		// Approve LRT contract to spend WETH
+		let deposit_amount = weth_amount.div(U256::from(2));
+		let approve_result =
+			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
+		assert!(approve_result.status());
+		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+
+		// Deposit WETH to LRT
+		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		let deposit_result = lrt
+			.deposit(deposit_amount, bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
+		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Wait for two new sessions to happen
+		let session_index = wait_for_next_session(&t.subxt).await?;
+		info!("New session started: {}", session_index);
+
+		let vault_id = 0;
+		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
+		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?;
+		let apy = cfg.map(|c| c.apy).unwrap();
+		info!("APY: {}%", apy.0);
+
+		let rewards_addr = api::apis().rewards_api().query_user_rewards(
+			lrt_address.to_account_id(),
+			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+		);
+		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
+		match user_rewards {
+			Ok(rewards) => {
+				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
+				assert!(rewards > 0);
+			},
+			Err(e) => {
+				error!("Error: {:?}", e);
+				bail!("Error while fetching user rewards");
+			},
+		}
+
+		anyhow::Ok(())
+	});
 }
