@@ -549,7 +549,7 @@ fn test_claim_rewards_other() {
 		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
 }
-    
+
 fn test_update_apy_blocks() {
 	new_test_ext_raw_authorities().execute_with(|| {
 		// Try updating APY blocks with non-root (should fail)
