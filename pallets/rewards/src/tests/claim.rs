@@ -549,3 +549,26 @@ fn test_claim_rewards_other() {
 		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
 }
+    
+fn test_update_apy_blocks() {
+	new_test_ext_raw_authorities().execute_with(|| {
+		// Try updating APY blocks with non-root (should fail)
+		assert_noop!(
+			RewardsPallet::<Runtime>::update_apy_blocks(
+				RuntimeOrigin::signed(AccountId::new([1u8; 32])),
+				1000
+			),
+			sp_runtime::DispatchError::BadOrigin,
+		);
+
+		// Update APY blocks with root (should succeed)
+		assert_ok!(RewardsPallet::<Runtime>::update_apy_blocks(RuntimeOrigin::root(), 1000));
+
+		// Verify the storage was updated
+		assert_eq!(RewardsPallet::<Runtime>::blocks_for_apy(), 1000);
+
+		// Update to a different value
+		assert_ok!(RewardsPallet::<Runtime>::update_apy_blocks(RuntimeOrigin::root(), 2000));
+		assert_eq!(RewardsPallet::<Runtime>::blocks_for_apy(), 2000);
+	});
+}

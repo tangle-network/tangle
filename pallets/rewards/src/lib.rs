@@ -76,6 +76,7 @@ pub mod types;
 pub use types::*;
 pub mod functions;
 pub mod impls;
+
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
 
@@ -258,6 +259,8 @@ pub mod pallet {
 		},
 		/// Decay configuration was updated
 		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Percent },
+		/// The number of blocks for APY calculation has been updated
+		ApyBlocksUpdated { blocks: BlockNumberFor<T> },
 	}
 
 	#[pallet::error]
@@ -302,6 +305,38 @@ pub mod pallet {
 		PotAccountNotFound,
 		/// Decay rate is too high
 		InvalidDecayRate,
+	}
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		/// The number of blocks used for APY calculation
+		pub apy_blocks: BlockNumberFor<T>,
+		/// Number of blocks after which decay starts
+		pub decay_start_period: BlockNumberFor<T>,
+		/// Per-block decay rate in basis points
+		pub decay_rate: Percent,
+	}
+
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self {
+				// Default to 1 year worth of blocks (assuming 6s block time)
+				apy_blocks: BlockNumberFor::<T>::from(5_256_000u32),
+				// Default to 30 days worth of blocks
+				decay_start_period: BlockNumberFor::<T>::from(432000u32),
+				// Default to 1% per block
+				decay_rate: Percent::from_percent(1),
+			}
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+		fn build(&self) {
+			ApyBlocks::<T>::put(self.apy_blocks);
+			DecayStartPeriod::<T>::put(self.decay_start_period);
+			DecayRate::<T>::put(self.decay_rate);
+		}
 	}
 
 	#[pallet::call]
@@ -483,6 +518,22 @@ pub mod pallet {
 			DecayRate::<T>::put(rate);
 
 			Self::deposit_event(Event::DecayConfigUpdated { start_period, rate });
+			Ok(())
+		}
+
+		/// Update the number of blocks used for APY calculation
+		#[pallet::call_index(6)]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
+		pub fn update_apy_blocks(
+			origin: OriginFor<T>,
+			blocks: BlockNumberFor<T>,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Update the storage
+			ApyBlocks::<T>::put(blocks);
+
+			Self::deposit_event(Event::ApyBlocksUpdated { blocks });
 			Ok(())
 		}
 	}
