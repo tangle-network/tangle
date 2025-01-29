@@ -504,6 +504,52 @@ fn test_claim_frequency_with_decay() {
 }
 
 #[test]
+fn test_claim_rewards_other() {
+	new_test_ext().execute_with(|| {
+		let account: AccountId = AccountId::new([1u8; 32]);
+		let other_account: AccountId = AccountId::new([2u8; 32]);
+		let vault_id = 1u32;
+		let asset = Asset::Custom(1);
+		let user_deposit = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens
+
+		setup_vault(account.clone(), vault_id, asset).unwrap();
+
+		// Mock deposit with only unlocked amount
+		MOCK_DELEGATION_INFO.with(|m| {
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
+			);
+		});
+
+		// Initial balance should be 0
+		assert_eq!(Balances::free_balance(&account), 0);
+
+		// Run to block 1000
+		run_to_block(1000);
+
+		// Claim rewards for account from account 2
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(
+			RuntimeOrigin::signed(other_account.clone()),
+			account.clone(),
+			asset
+		));
+
+		// Check that rewards were received
+		let balance = Balances::free_balance(&account);
+
+		// Verify approximate expected rewards (19 tokens with some precision loss)
+		let expected_reward = 191 * EIGHTEEN_DECIMALS / 10;
+		let diff = if balance > expected_reward {
+			balance - expected_reward
+		} else {
+			expected_reward - balance
+		};
+		println!("diff: {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
+		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
+	});
+}
+
 fn test_update_apy_blocks() {
 	new_test_ext_raw_authorities().execute_with(|| {
 		// Try updating APY blocks with non-root (should fail)

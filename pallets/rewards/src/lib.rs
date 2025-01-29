@@ -353,6 +353,30 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Claim rewards for another account
+		///
+		/// The dispatch origin must be signed.
+		///
+		/// Parameters:
+		/// - `who`: The account to claim rewards for
+		/// - `asset`: The asset to claim rewards for
+		///
+		/// Emits `RewardsClaimed` event when successful.
+		#[pallet::call_index(6)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn claim_rewards_other(
+			origin: OriginFor<T>,
+			who: T::AccountId,
+			asset: Asset<T::AssetId>,
+		) -> DispatchResult {
+			ensure_signed(origin)?;
+
+			// calculate and payout rewards for the specified account
+			Self::calculate_and_payout_rewards(&who, asset)?;
+
+			Ok(())
+		}
+
 		/// Manage asset id to vault rewards.
 		///
 		/// # Permissions
