@@ -5,8 +5,7 @@ use sp_runtime::Percent;
 use tangle_primitives::types::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks};
 
 // Mock values for consistent testing
-use crate::DecayRate;
-use crate::DecayStartPeriod;
+use crate::{DecayRate, DecayStartPeriod};
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
 const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100M tokens with 18 decimals
@@ -371,12 +370,11 @@ fn test_calculate_rewards_with_multiple_claims() {
 		// 1. User's total score = 10k (unlocked) + (10k * 2) (locked) = 30k
 		// 2. User's proportion = 30k / 200k = 15%
 		// 3. APY = 10% = 0.1 tokens per token per year
-		// 4. Rewards per block = (Total deposit * APY) / blocks_per_year
-		//    = (100k * 0.1) / 3504 ≈ 2.85388127853881278 tokens/block
-		// 5. User reward per block = 2.85388127853881278 * 15%
-		//    = 0.428538127853881278 tokens/block
-		// 6. Total reward for 1000 blocks = 0.428538127853881278 * 1000
-		//    = 28.538812785388127853 tokens
+		// 4. Rewards per block = (Total deposit * APY) / blocks_per_year = (100k * 0.1) / 3504 ≈
+		//    2.85388127853881278 tokens/block
+		// 5. User reward per block = 2.85388127853881278 * 15% = 0.428538127853881278 tokens/block
+		// 6. Total reward for 1000 blocks = 0.428538127853881278 * 1000 = 28.538812785388127853
+		//    tokens
 		System::set_block_number(1000);
 		let result1 = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
 			total_deposit,
@@ -428,10 +426,8 @@ fn test_calculate_rewards_with_multiple_claims() {
 		// 1. User's total score = 10k + 10k (unlocked + locked without multiplier)
 		// 2. User's proportion = 20k / 200k = 10%
 		// 3. Same APY and rewards per block
-		// 4. User reward per block = 1.9 * 10%
-		//    = 0.019 tokens/block
-		// 5. Total reward for 1000 blocks = 0.019 * 1000
-		//    = 19.25 tokens
+		// 4. User reward per block = 1.9 * 10% = 0.019 tokens/block
+		// 5. Total reward for 1000 blocks = 0.019 * 1000 = 19.25 tokens
 		System::set_block_number(4000);
 		let result4 = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(
 			total_deposit,
