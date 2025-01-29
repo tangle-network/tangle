@@ -1,16 +1,12 @@
-use crate::AssetAction;
-use crate::BalanceOf;
-use crate::RewardConfigForAssetVault;
-use crate::UserClaimedReward;
 use crate::{
-	mock::*, tests::reward_calc::setup_test_env, DecayRate, DecayStartPeriod, Error,
-	Pallet as RewardsPallet, TotalRewardVaultDeposit, TotalRewardVaultScore,
+	mock::*, tests::reward_calc::setup_test_env, AssetAction, BalanceOf, DecayRate,
+	DecayStartPeriod, Error, Pallet as RewardsPallet, RewardConfigForAssetVault,
+	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
 };
-use frame_support::assert_noop;
-use frame_support::{assert_ok, traits::Currency};
+use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::Percent;
-use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::{
+	rewards::UserDepositWithLocks,
 	services::Asset,
 	types::rewards::{LockInfo, LockMultiplier},
 };
@@ -504,5 +500,29 @@ fn test_claim_frequency_with_decay() {
 		let difference = frequent_total_rewards.saturating_sub(infrequent_total_rewards);
 		let difference_percent = (difference / frequent_total_rewards) * 100;
 		assert!(difference_percent < 1);
+	});
+}
+
+#[test]
+fn test_update_apy_blocks() {
+	new_test_ext_raw_authorities().execute_with(|| {
+		// Try updating APY blocks with non-root (should fail)
+		assert_noop!(
+			RewardsPallet::<Runtime>::update_apy_blocks(
+				RuntimeOrigin::signed(AccountId::new([1u8; 32])),
+				1000
+			),
+			sp_runtime::DispatchError::BadOrigin,
+		);
+
+		// Update APY blocks with root (should succeed)
+		assert_ok!(RewardsPallet::<Runtime>::update_apy_blocks(RuntimeOrigin::root(), 1000));
+
+		// Verify the storage was updated
+		assert_eq!(RewardsPallet::<Runtime>::blocks_for_apy(), 1000);
+
+		// Update to a different value
+		assert_ok!(RewardsPallet::<Runtime>::update_apy_blocks(RuntimeOrigin::root(), 2000));
+		assert_eq!(RewardsPallet::<Runtime>::blocks_for_apy(), 2000);
 	});
 }

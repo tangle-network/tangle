@@ -89,8 +89,7 @@ pub mod pallet {
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::AccountIdConversion;
-	use sp_runtime::Percent;
+	use sp_runtime::{traits::AccountIdConversion, Percent};
 	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
@@ -259,6 +258,8 @@ pub mod pallet {
 		},
 		/// Decay configuration was updated
 		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Percent },
+		/// The number of blocks for APY calculation has been updated
+		ApyBlocksUpdated { blocks: BlockNumberFor<T> },
 	}
 
 	#[pallet::error]
@@ -460,6 +461,22 @@ pub mod pallet {
 			DecayRate::<T>::put(rate);
 
 			Self::deposit_event(Event::DecayConfigUpdated { start_period, rate });
+			Ok(())
+		}
+
+		/// Update the number of blocks used for APY calculation
+		#[pallet::call_index(6)]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
+		pub fn update_apy_blocks(
+			origin: OriginFor<T>,
+			blocks: BlockNumberFor<T>,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Update the storage
+			ApyBlocks::<T>::put(blocks);
+
+			Self::deposit_event(Event::ApyBlocksUpdated { blocks });
 			Ok(())
 		}
 	}

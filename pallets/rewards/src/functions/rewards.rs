@@ -13,13 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::DecayRate;
-use crate::DecayStartPeriod;
-use crate::RewardVaultsPotAccount;
 use crate::{
-	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet,
-	RewardConfigForAssetVault, RewardConfigStorage, TotalRewardVaultDeposit, TotalRewardVaultScore,
-	UserClaimedReward,
+	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, DecayRate, DecayStartPeriod, Error,
+	Event, Pallet, RewardConfigForAssetVault, RewardConfigStorage, RewardVaultsPotAccount,
+	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
 };
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
@@ -181,7 +178,7 @@ impl<T: Config> Pallet<T> {
 		original_apy: Percent,
 	) -> Option<Percent> {
 		if deposit_cap.is_zero() {
-			return None;
+			return None
 		}
 
 		let propotion = Percent::from_rational(total_deposit, deposit_cap);
@@ -198,7 +195,7 @@ impl<T: Config> Pallet<T> {
 	pub fn calculate_reward_per_block(total_reward: BalanceOf<T>) -> Option<BalanceOf<T>> {
 		let apy_blocks = ApyBlocks::<T>::get();
 		if apy_blocks.is_zero() {
-			return None;
+			return None
 		}
 
 		log::debug!("calculate_reward_per_block : total_reward: {:?}", total_reward);
@@ -217,7 +214,7 @@ impl<T: Config> Pallet<T> {
 
 		// If we haven't reached the decay period yet, no decay
 		if blocks_since_last_claim <= start_period {
-			return Percent::from_percent(100);
+			return Percent::from_percent(100)
 		}
 
 		let decay_rate = DecayRate::<T>::get();
@@ -263,7 +260,7 @@ impl<T: Config> Pallet<T> {
 		let deposit_cap = reward.deposit_cap;
 
 		if reward.incentive_cap > total_deposit {
-			return Err(Error::<T>::TotalDepositLessThanIncentiveCap.into());
+			return Err(Error::<T>::TotalDepositLessThanIncentiveCap.into())
 		}
 
 		let apy = Self::calculate_propotional_apy(total_deposit, deposit_cap, reward.apy)
