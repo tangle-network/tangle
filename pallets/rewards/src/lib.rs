@@ -76,7 +76,7 @@ pub mod types;
 pub use types::*;
 pub mod functions;
 pub mod impls;
-use frame_support::traits::GenesisBuild;
+
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
 
@@ -317,7 +317,6 @@ pub mod pallet {
 		pub decay_rate: Percent,
 	}
 
-	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
 			Self {
