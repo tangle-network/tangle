@@ -76,6 +76,7 @@ pub mod types;
 pub use types::*;
 pub mod functions;
 pub mod impls;
+use frame_support::traits::GenesisBuild;
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
 
@@ -304,6 +305,39 @@ pub mod pallet {
 		PotAccountNotFound,
 		/// Decay rate is too high
 		InvalidDecayRate,
+	}
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		/// The number of blocks used for APY calculation
+		pub apy_blocks: BlockNumberFor<T>,
+		/// Number of blocks after which decay starts
+		pub decay_start_period: BlockNumberFor<T>,
+		/// Per-block decay rate in basis points
+		pub decay_rate: Percent,
+	}
+
+	#[cfg(feature = "std")]
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self {
+				// Default to 1 year worth of blocks (assuming 6s block time)
+				apy_blocks: BlockNumberFor::<T>::from(5_256_000u32),
+				// Default to 30 days worth of blocks
+				decay_start_period: BlockNumberFor::<T>::from(432000u32),
+				// Default to 1% per block
+				decay_rate: Percent::from_percent(1),
+			}
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+		fn build(&self) {
+			ApyBlocks::<T>::put(self.apy_blocks);
+			DecayStartPeriod::<T>::put(self.decay_start_period);
+			DecayRate::<T>::put(self.decay_rate);
+		}
 	}
 
 	#[pallet::call]
