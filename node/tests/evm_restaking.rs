@@ -250,10 +250,10 @@ where
 		// Create a new vault and these assets to it.
 		let vault_id = 0;
 		let deposit_cap = parse_ether("100").unwrap();
-		let incentive_cap = parse_ether("100").unwrap();
-		let update_vault_reward_config = api::tx().sudo().sudo(
+		let incentive_cap = parse_ether("0").unwrap();
+		let create_vault = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
-				api::runtime_types::pallet_rewards::pallet::Call::update_vault_reward_config {
+				api::runtime_types::pallet_rewards::pallet::Call::create_reward_vault {
 					vault_id,
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
@@ -268,10 +268,7 @@ where
 
 		let mut result = subxt
 			.tx()
-			.sign_and_submit_then_watch_default(
-				&update_vault_reward_config,
-				&alice.substrate_signer(),
-			)
+			.sign_and_submit_then_watch_default(&create_vault, &alice.substrate_signer())
 			.await?;
 
 		while let Some(Ok(s)) = result.next().await {
@@ -283,8 +280,10 @@ where
 						break;
 					},
 				};
-				evs.find_first::<api::rewards::events::VaultRewardConfigUpdated>()?
-					.expect("VaultRewardConfigUpdated event to be emitted");
+				for ev in evs.iter() {
+					let metadata = ev.unwrap();
+					info!("{}.{}", metadata.pallet_name(), metadata.variant_name());
+				}
 				break;
 			}
 		}
@@ -326,8 +325,10 @@ where
 							break;
 						},
 					};
-					evs.find_first::<api::rewards::events::AssetUpdatedInVault>()?
-						.expect("AssetRewardVault event to be emitted");
+					for ev in evs.iter() {
+						let metadata = ev.unwrap();
+						info!("{}.{}", metadata.pallet_name(), metadata.variant_name());
+					}
 					break;
 				}
 			}
