@@ -304,7 +304,7 @@ impl<T: Config> Pallet<T> {
 		let current_block = frame_system::Pallet::<T>::block_number();
 		let last_claim_block = last_claim.map(|(block, _)| block).unwrap_or(current_block);
 		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
-		log::info!(target: "rewards", 
+		log::info!(target: "rewards",
 			"Current Block {:?}, Last Claim Block {:?}, Blocks to be paid {:?}",
 			current_block,
 			last_claim_block,
