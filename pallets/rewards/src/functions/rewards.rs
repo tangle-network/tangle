@@ -30,6 +30,8 @@ use tangle_primitives::{
 	services::Asset, traits::MultiAssetDelegationInfo, types::rewards::UserDepositWithLocks,
 };
 
+pub(crate) const LOG_TARGET: &str = "runtime::rewards";
+
 impl<T: Config> Pallet<T> {
 	pub fn calculate_rewards(
 		account_id: &T::AccountId,
@@ -98,7 +100,7 @@ impl<T: Config> Pallet<T> {
 
 		let rewards_to_be_paid = Self::calculate_rewards(account_id, asset)?;
 
-		log::debug!("rewards_to_be_paid: {:?}", rewards_to_be_paid.saturated_into::<u128>());
+		log::debug!(target: LOG_TARGET, "rewards_to_be_paid: {:?}", rewards_to_be_paid.saturated_into::<u128>());
 
 		// Get the pot account for this vault
 		let pot_account =
@@ -181,6 +183,8 @@ impl<T: Config> Pallet<T> {
 			return None;
 		}
 
+		log::debug!(target: LOG_TARGET, "calculate_propotional_apy : total_deposit: {:?}, deposit_cap: {:?}, original_apy: {:?}",
+			total_deposit, deposit_cap, original_apy);
 		let propotion = Percent::from_rational(total_deposit, deposit_cap);
 		original_apy.checked_mul(&propotion)
 	}
@@ -198,7 +202,7 @@ impl<T: Config> Pallet<T> {
 			return None;
 		}
 
-		log::debug!("calculate_reward_per_block : total_reward: {:?}", total_reward);
+		log::debug!(target: LOG_TARGET, "calculate_reward_per_block : total_reward: {:?}", total_reward);
 
 		let apy_blocks_balance = BalanceOf::<T>::from(apy_blocks.saturated_into::<u32>());
 		Some(total_reward / apy_blocks_balance)
@@ -263,13 +267,17 @@ impl<T: Config> Pallet<T> {
 			return Err(Error::<T>::TotalDepositLessThanIncentiveCap.into());
 		}
 
+		log::debug!(target: LOG_TARGET, "total_deposit: {:?}, total_asset_score: {:?}, deposit: {:?}, reward: {:?}, last_claim: {:?}",
+			total_deposit, total_asset_score, deposit, reward, last_claim);
+		log::debug!(target: LOG_TARGET, "deposit_cap: {:?}, apy: {:?}",
+			deposit_cap, reward.apy);
 		let apy = Self::calculate_propotional_apy(total_deposit, deposit_cap, reward.apy)
 			.ok_or(Error::<T>::CannotCalculatePropotionalApy)?;
-		log::debug!("apy: {:?}", apy);
+		log::debug!(target: LOG_TARGET, "Calculated propotional apy: {:?}", apy);
 
 		// Calculate total rewards pool from total issuance
 		let tnt_total_supply = T::Currency::total_issuance();
-		log::debug!("tnt_total_supply: {:?}", tnt_total_supply);
+		log::debug!(target: LOG_TARGET, "tnt_total_supply: {:?}", tnt_total_supply);
 
 		let total_annual_rewards = apy.mul_floor(tnt_total_supply);
 
@@ -278,17 +286,17 @@ impl<T: Config> Pallet<T> {
 			frame_system::Pallet::<T>::block_number(),
 			last_claim.map(|(block, _)| block).unwrap_or_default(),
 		);
-		log::debug!("total annual rewards before decay: {:?}", total_annual_rewards);
-		log::debug!("decay_factor: {:?}", decay_factor);
+		log::debug!(target: LOG_TARGET, "total annual rewards before decay: {:?}", total_annual_rewards);
+		log::debug!(target: LOG_TARGET, "decay_factor: {:?}", decay_factor);
 
 		// Apply decay to total rewards
 		let total_annual_rewards = decay_factor.mul_floor(total_annual_rewards);
-		log::debug!("total annual rewards after decay: {:?}", total_annual_rewards);
+		log::debug!(target: LOG_TARGET, "total annual rewards after decay: {:?}", total_annual_rewards);
 
 		// Calculate per block reward pool first to minimize precision loss
 		let total_reward_per_block = Self::calculate_reward_per_block(total_annual_rewards)
 			.ok_or(Error::<T>::CannotCalculateRewardPerBlock)?;
-		log::debug!("total_reward_per_block: {:?}", total_reward_per_block);
+		log::debug!(target: LOG_TARGET, "total_reward_per_block: {:?}", total_reward_per_block);
 
 		// Start with unlocked amount as base score
 		let user_unlocked_score = deposit.unlocked_amount;
@@ -298,14 +306,14 @@ impl<T: Config> Pallet<T> {
 		let current_block = frame_system::Pallet::<T>::block_number();
 		let last_claim_block = last_claim.map(|(block, _)| block).unwrap_or(current_block);
 		let blocks_to_be_paid = current_block.saturating_sub(last_claim_block);
-		log::debug!(
+		log::debug!(target: LOG_TARGET,
 			"Current Block {:?}, Last Claim Block {:?}, Blocks to be paid {:?}",
 			current_block,
 			last_claim_block,
 			blocks_to_be_paid
 		);
 
-		log::debug!("User unlocked score {:?}", user_score);
+		log::debug!(target: LOG_TARGET, "User unlocked score {:?}", user_score);
 
 		// array of (score, blocks)
 		let mut user_rewards_score_by_blocks: Vec<(BalanceOf<T>, BlockNumberFor<T>)> = vec![];
@@ -323,7 +331,7 @@ impl<T: Config> Pallet<T> {
 							//    (remaining_lock_time / total_lock_time)
 							let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
 							let lock_score = lock.amount.saturating_mul(multiplier);
-							log::debug!("user lock has not expired and still active, lock_multiplier: {:?}, lock_score: {:?}", lock.lock_multiplier, lock_score);
+							log::debug!(target: LOG_TARGET, "user lock has not expired and still active, lock_multiplier: {:?}, lock_score: {:?}", lock.lock_multiplier, lock_score);
 
 							user_rewards_score_by_blocks.push((lock_score, blocks_to_be_paid));
 						} else {
@@ -334,7 +342,7 @@ impl<T: Config> Pallet<T> {
 							let multiplier_applied_blocks =
 								lock.expiry_block.saturating_sub(last_claim_block);
 
-							log::debug!("user lock has partially expired, lock_multiplier: {:?}, lock_score: {:?}, multiplier_applied_blocks: {:?}, blocks_to_be_paid: {:?}",
+							log::debug!(target: LOG_TARGET, "user lock has partially expired, lock_multiplier: {:?}, lock_score: {:?}, multiplier_applied_blocks: {:?}, blocks_to_be_paid: {:?}",
 								lock.lock_multiplier, lock_score, multiplier_applied_blocks, blocks_to_be_paid);
 
 							user_rewards_score_by_blocks
@@ -354,14 +362,14 @@ impl<T: Config> Pallet<T> {
 			}
 		}
 
-		log::debug!("user rewards array {:?}", user_rewards_score_by_blocks);
+		log::debug!(target: LOG_TARGET, "user rewards array {:?}", user_rewards_score_by_blocks);
 
 		// if the user has no score, return 0
 		// calculate the total score for the user
 		let total_score_for_user = user_rewards_score_by_blocks
 			.iter()
 			.fold(BalanceOf::<T>::zero(), |acc, (score, _blocks)| acc.saturating_add(*score));
-		log::debug!("total score: {:?}", total_score_for_user);
+		log::debug!(target: LOG_TARGET, "total score: {:?}", total_score_for_user);
 		ensure!(!total_score_for_user.is_zero(), Error::<T>::NoRewardsAvailable);
 
 		// Calculate user's proportion of rewards based on their score
@@ -369,23 +377,23 @@ impl<T: Config> Pallet<T> {
 		let mut total_rewards_to_be_paid_to_user = BalanceOf::<T>::zero();
 		for (score, blocks) in user_rewards_score_by_blocks {
 			let user_proportion = Percent::from_rational(score, total_asset_score);
-			log::debug!("user_proportion: {:?}", user_proportion);
+			log::debug!(target: LOG_TARGET, "user_proportion: {:?}", user_proportion);
 			let user_reward_per_block = user_proportion.mul_floor(total_reward_per_block);
 
 			// Calculate total rewards for the period
-			log::debug!("last_claim_block: {:?}, total_reward_per_block: {:?}, user reward per block: {:?}, blocks: {:?}", 
+			log::debug!(target: LOG_TARGET, "last_claim_block: {:?}, total_reward_per_block: {:?}, user reward per block: {:?}, blocks: {:?}", 
 				last_claim_block, total_reward_per_block, user_reward_per_block, blocks);
 
 			let rewards_to_be_paid = user_reward_per_block
 				.saturating_mul(BalanceOf::<T>::from(blocks.saturated_into::<u32>()));
 
-			log::debug!("rewards_to_be_paid: {:?}", rewards_to_be_paid);
+			log::debug!(target: LOG_TARGET, "rewards_to_be_paid: {:?}", rewards_to_be_paid);
 
 			total_rewards_to_be_paid_to_user =
 				total_rewards_to_be_paid_to_user.saturating_add(rewards_to_be_paid);
 		}
 
-		log::debug!("total_rewards_to_be_paid_to_user: {:?}", total_rewards_to_be_paid_to_user);
+		log::debug!(target: LOG_TARGET, "total_rewards_to_be_paid_to_user: {:?}", total_rewards_to_be_paid_to_user);
 		Ok(total_rewards_to_be_paid_to_user)
 	}
 }

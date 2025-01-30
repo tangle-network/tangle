@@ -362,7 +362,7 @@ pub mod pallet {
 		/// - `asset`: The asset to claim rewards for
 		///
 		/// Emits `RewardsClaimed` event when successful.
-		#[pallet::call_index(6)]
+		#[pallet::call_index(2)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn claim_rewards_other(
 			origin: OriginFor<T>,
@@ -394,7 +394,7 @@ pub mod pallet {
 		///
 		/// * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
 		/// * [`Error::AssetNotInVault`] - Asset does not exist in vault
-		#[pallet::call_index(2)]
+		#[pallet::call_index(3)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn manage_asset_reward_vault(
 			origin: OriginFor<T>,
@@ -432,7 +432,7 @@ pub mod pallet {
 		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
 		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
-		#[pallet::call_index(3)]
+		#[pallet::call_index(4)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn create_reward_vault(
 			origin: OriginFor<T>,
@@ -476,7 +476,7 @@ pub mod pallet {
 		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
 		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
-		#[pallet::call_index(4)]
+		#[pallet::call_index(5)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn update_vault_reward_config(
 			origin: OriginFor<T>,
@@ -502,7 +502,7 @@ pub mod pallet {
 		}
 
 		/// Update the decay configuration
-		#[pallet::call_index(5)]
+		#[pallet::call_index(6)]
 		#[pallet::weight(T::DbWeight::get().writes(2))]
 		pub fn update_decay_config(
 			origin: OriginFor<T>,
@@ -522,7 +522,7 @@ pub mod pallet {
 		}
 
 		/// Update the number of blocks used for APY calculation
-		#[pallet::call_index(6)]
+		#[pallet::call_index(7)]
 		#[pallet::weight(T::DbWeight::get().writes(1))]
 		pub fn update_apy_blocks(
 			origin: OriginFor<T>,
