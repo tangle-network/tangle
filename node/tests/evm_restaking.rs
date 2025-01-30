@@ -190,10 +190,8 @@ async fn deploy_tangle_lrt(
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
-const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100M tokens with 18 decimals
-const MOCK_INCENTIVE_CAP: u128 = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
-const MOCK_APY: u8 = 10; // 10% APY
 const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_APY: u8 = 10; // 10% APY
 
 /// Setup the E2E test environment.
 #[track_caller]
@@ -300,7 +298,7 @@ where
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
 							apy: api::runtime_types::sp_arithmetic::per_things::Percent(MOCK_APY),
 							deposit_cap: MOCK_DEPOSIT_CAP,
-							incentive_cap: MOCK_INCENTIVE_CAP,
+							incentive_cap: 1,
 							boost_multiplier: Some(1),
 						},
 				},
@@ -938,7 +936,7 @@ fn lrt_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		let deposit = U256::from(cfg.incentive_cap) * U256::from(2);
+		let deposit = U256::from(MOCK_DEPOSIT);
 
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(

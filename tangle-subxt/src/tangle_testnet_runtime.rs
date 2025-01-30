@@ -52283,14 +52283,9 @@ pub mod api {
 					Eq,
 					PartialEq,
 				)]
-				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-				#[codec(dumb_trait_bound)]
-				#[decode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-				)]
-				#[encode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim rewards for another account"]
 				#[doc = ""]
 				#[doc = "The dispatch origin must be signed."]
@@ -52306,32 +52301,27 @@ pub mod api {
 				}
 				pub mod claim_rewards_other {
 					use super::runtime_types;
-					pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+					pub type Who = ::subxt_core::utils::AccountId32;
 					pub type Asset =
 						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
 				}
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ClaimRewardsOther {
+				impl ::subxt_core::blocks::StaticExtrinsic for ClaimRewardsOther {
 					const PALLET: &'static str = "Rewards";
 					const CALL: &'static str = "claim_rewards_other";
 				}
 				#[derive(
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
 					Clone,
 					Debug,
 					Eq,
 					PartialEq,
 				)]
-				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-				#[codec(dumb_trait_bound)]
-				#[decode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-				)]
-				#[encode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Manage asset id to vault rewards."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
@@ -52502,23 +52492,18 @@ pub mod api {
 					const CALL: &'static str = "update_decay_config";
 				}
 				#[derive(
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
 					Clone,
 					Debug,
 					Eq,
 					PartialEq,
 				)]
-				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-				#[codec(dumb_trait_bound)]
-				#[decode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-				)]
-				#[encode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Update the number of blocks used for APY calculation"]
 				pub struct UpdateApyBlocks {
 					pub blocks: update_apy_blocks::Blocks,
@@ -52527,7 +52512,7 @@ pub mod api {
 					use super::runtime_types;
 					pub type Blocks = ::core::primitive::u64;
 				}
-				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for UpdateApyBlocks {
+				impl ::subxt_core::blocks::StaticExtrinsic for UpdateApyBlocks {
 					const PALLET: &'static str = "Rewards";
 					const CALL: &'static str = "update_apy_blocks";
 				}
@@ -52564,9 +52549,8 @@ pub mod api {
 					&self,
 					who: types::claim_rewards_other::Who,
 					asset: types::claim_rewards_other::Asset,
-				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimRewardsOther>
-				{
-					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ClaimRewardsOther> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Rewards",
 						"claim_rewards_other",
 						types::ClaimRewardsOther { who, asset },
@@ -52710,9 +52694,8 @@ pub mod api {
 				pub fn update_apy_blocks(
 					&self,
 					blocks: types::update_apy_blocks::Blocks,
-				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UpdateApyBlocks>
-				{
-					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+				) -> ::subxt_core::tx::payload::StaticPayload<types::UpdateApyBlocks> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Rewards",
 						"update_apy_blocks",
 						types::UpdateApyBlocks { blocks },
@@ -53006,19 +52989,18 @@ pub mod api {
 				const EVENT: &'static str = "DecayConfigUpdated";
 			}
 			#[derive(
-				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
 				Clone,
 				Debug,
 				Eq,
 				PartialEq,
 			)]
-			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-			#[codec(dumb_trait_bound)]
-			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
-			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The number of blocks for APY calculation has been updated"]
 			pub struct ApyBlocksUpdated {
 				pub blocks: apy_blocks_updated::Blocks,
@@ -53027,7 +53009,7 @@ pub mod api {
 				use super::runtime_types;
 				pub type Blocks = ::core::primitive::u64;
 			}
-			impl ::subxt::ext::subxt_core::events::StaticEvent for ApyBlocksUpdated {
+			impl ::subxt_core::events::StaticEvent for ApyBlocksUpdated {
 				const PALLET: &'static str = "Rewards";
 				const EVENT: &'static str = "ApyBlocksUpdated";
 			}
@@ -64758,7 +64740,7 @@ pub mod api {
 					#[doc = ""]
 					#[doc = "Emits `RewardsClaimed` event when successful."]
 					claim_rewards_other {
-						who: ::subxt::ext::subxt_core::utils::AccountId32,
+						who: ::subxt_core::utils::AccountId32,
 						asset: runtime_types::tangle_primitives::services::Asset<
 							::core::primitive::u128,
 						>,
