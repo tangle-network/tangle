@@ -13,13 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::DecayRate;
-use crate::DecayStartPeriod;
-use crate::RewardVaultsPotAccount;
 use crate::{
-	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet,
-	RewardConfigForAssetVault, RewardConfigStorage, TotalRewardVaultDeposit, TotalRewardVaultScore,
-	UserClaimedReward,
+	ApyBlocks, AssetLookupRewardVaults, BalanceOf, Config, DecayRate, DecayStartPeriod, Error,
+	Event, Pallet, RewardConfigForAssetVault, RewardConfigStorage, RewardVaultsPotAccount,
+	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
 };
 use frame_support::{ensure, traits::Currency};
 use frame_system::pallet_prelude::BlockNumberFor;
