@@ -3530,6 +3530,18 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       claimRewards: AugmentedSubmittable<(asset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset]>;
       /**
+       * Claim rewards for another account
+       * 
+       * The dispatch origin must be signed.
+       * 
+       * Parameters:
+       * - `who`: The account to claim rewards for
+       * - `asset`: The asset to claim rewards for
+       * 
+       * Emits `RewardsClaimed` event when successful.
+       **/
+      claimRewardsOther: AugmentedSubmittable<(who: AccountId32 | string | Uint8Array, asset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset]>;
+      /**
        * Creates a new reward configuration for a specific vault.
        * 
        * # Arguments
@@ -3570,6 +3582,10 @@ declare module '@polkadot/api-base/types/submittable' {
        * * [`Error::AssetNotInVault`] - Asset does not exist in vault
        **/
       manageAssetRewardVault: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, TanglePrimitivesServicesAsset, PalletRewardsAssetAction]>;
+      /**
+       * Update the number of blocks used for APY calculation
+       **/
+      updateApyBlocks: AugmentedSubmittable<(blocks: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
       /**
        * Update the decay configuration
        **/
