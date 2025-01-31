@@ -13,7 +13,12 @@ export class User {
     }
 
     public getPrivateKey(): string {
-        return this.keyPair.uri || '';
+        // For sr25519 keypairs, we can access the seed/private key through the meta
+        if (this.keyPair.meta && typeof this.keyPair.meta.suri === 'string') {
+            return this.keyPair.meta.suri;
+        }
+        // Fallback to using the address if no private key is available
+        return `${this.keyPair.type}-${this.keyPair.address}`;
     }
 
     public getKeyPair(): KeyringPair {
@@ -21,8 +26,9 @@ export class User {
     }
 
     public async updateBalance(api: ApiPromise): Promise<void> {
-        const { data: balance } = await api.query.system.account(this.address);
-        this.balance = BigInt(balance.free.toString());
+        const accountData = await api.query.system.account(this.address);
+        const free = (accountData as any).data.free;
+        this.balance = BigInt(free.toString());
     }
 
     public async sendTransaction(api: ApiPromise, recipient: string, amount: bigint): Promise<string> {
@@ -32,6 +38,46 @@ export class User {
             return hash.toString();
         } catch (error) {
             console.error(`Transaction failed for user ${this.address}:`, error);
+            throw error;
+        }
+    }
+
+    public async depositTnt(api: ApiPromise, amount: bigint): Promise<string> {
+        try {
+            // Call the deposit function in the staking pallet
+            const deposit = api.tx.multiAssetDelegation.bond(this.address, amount, 'Staked');
+            const hash = await deposit.signAndSend(this.keyPair);
+            return hash.toString();
+        } catch (error) {
+            console.error(`Deposit failed for user ${this.address}:`, error);
+            throw error;
+        }
+    }
+
+    public async delegateTnt(api: ApiPromise, validatorAddress: string, amount: bigint): Promise<string> {
+        try {
+            // First bond if not already bonded
+            const bondTx = api.tx.multiAssetDelegation.bond(this.address, amount, 'Staked');
+            await bondTx.signAndSend(this.keyPair);
+
+            // Then nominate a validator
+            const nominateTx = api.tx.staking.nominate([validatorAddress]);
+            const hash = await nominateTx.signAndSend(this.keyPair);
+            return hash.toString();
+        } catch (error) {
+            console.error(`Delegation failed for user ${this.address}:`, error);
+            throw error;
+        }
+    }
+
+    public async claimRewards(api: ApiPromise): Promise<string> {
+        try {
+            // Claim rewards from the rewards pallet
+            const claimTx = api.tx.rewards.claim();
+            const hash = await claimTx.signAndSend(this.keyPair);
+            return hash.toString();
+        } catch (error) {
+            console.error(`Claiming rewards failed for user ${this.address}:`, error);
             throw error;
         }
     }

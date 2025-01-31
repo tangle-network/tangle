@@ -3,6 +3,12 @@ import { Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 import * as dotenv from 'dotenv';
 import { User } from './types/user';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { GenerateChildUsers } from './actions/generateChildUsers';
+import { DepositTnt } from './actions/depositTnt';
+import { DelegateTnt } from './actions/delegateTnt';
+import { ClaimRewards } from './actions/claimRewards';
 
 dotenv.config();
 
@@ -11,7 +17,7 @@ class UserSimulation {
     private users: User[] = [];
     private keyring: Keyring | null = null;
 
-    async initialize(wsEndpoint: string = process.env.NODE_URL || 'ws://127.0.0.1:9944') {
+    async initialize(wsEndpoint: string = process.env.NODE_URL || 'wss://testnet-rpc.tangle.tools') {
         try {
             // Wait for the crypto to be ready
             await cryptoWaitReady();
@@ -20,9 +26,28 @@ class UserSimulation {
             this.keyring = new Keyring({ type: 'sr25519' });
 
             // Connect to the Tangle network
+            console.log('Connecting to Tangle Network at:', wsEndpoint);
             const wsProvider = new WsProvider(wsEndpoint);
-            this.api = await ApiPromise.create({ provider: wsProvider });
+            
+            // Wait for the provider to be connected
+            await new Promise<void>((resolve, reject) => {
+                wsProvider.on('connected', () => {
+                    console.log('WebSocket connected successfully');
+                    resolve();
+                });
+                wsProvider.on('error', (error) => {
+                    console.error('WebSocket connection error:', error);
+                    reject(error);
+                });
+            });
 
+            this.api = await ApiPromise.create({ 
+                provider: wsProvider,
+                throwOnConnect: true
+            });
+
+            // Wait for the API to be ready
+            await this.api.isReady;
             console.log('Connected to Tangle Network');
             return true;
         } catch (error) {
@@ -90,6 +115,16 @@ class UserSimulation {
     getUsers(): User[] {
         return this.users;
     }
+
+    getApi(): ApiPromise {
+        if (!this.api) throw new Error('API not initialized');
+        return this.api;
+    }
+
+    getKeyring(): Keyring {
+        if (!this.keyring) throw new Error('Keyring not initialized');
+        return this.keyring;
+    }
 }
 
 async function main() {
@@ -100,11 +135,87 @@ async function main() {
             throw new Error('Failed to initialize simulation');
         }
 
-        // Create 5 users
-        await simulation.createUsers(5);
-        
-        // Simulate 10 transactions between users
-        await simulation.simulateTransactions(10);
+        // Create users if not already created
+        if (simulation.getUsers().length === 0) {
+            await simulation.createUsers(1); // Create at least one base user
+        }
+
+        const baseUser = simulation.getUsers()[0];
+        if (!baseUser) {
+            throw new Error('Failed to create base user');
+        }
+
+        // Parse command line arguments
+        const args = await yargs(hideBin(process.argv))
+            .command('generateChildUsers', 'Generate child users from a base user', {
+                count: {
+                    description: 'Number of child users to generate',
+                    alias: 'c',
+                    type: 'number',
+                    demandOption: true
+                }
+            })
+            .command('depositTnt', 'Deposit TNT tokens for staking', {
+                amount: {
+                    description: 'Amount of TNT to deposit',
+                    type: 'string',
+                    demandOption: true
+                }
+            })
+            .command('delegateTnt', 'Delegate TNT tokens to a validator', {
+                amount: {
+                    description: 'Amount of TNT to delegate',
+                    type: 'string',
+                    demandOption: true
+                },
+                validator: {
+                    description: 'Address of the validator to delegate to',
+                    type: 'string',
+                    demandOption: true
+                }
+            })
+            .command('claimRewards', 'Claim staking rewards')
+            .help()
+            .alias('help', 'h')
+            .parseAsync();
+
+        const command = args._[0];
+        switch (command) {
+            case 'generateChildUsers': {
+                const count = args.count as number;
+                if (typeof count === 'number') {
+                    const action = new GenerateChildUsers();
+                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, count);
+                }
+                break;
+            }
+            case 'depositTnt': {
+                const amount = args.amount as string;
+                if (typeof amount === 'string') {
+                    const action = new DepositTnt();
+                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, BigInt(amount));
+                }
+                break;
+            }
+            case 'delegateTnt': {
+                const amount = args.amount as string;
+                const validator = args.validator as string;
+                if (typeof amount === 'string' && typeof validator === 'string') {
+                    const action = new DelegateTnt();
+                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, BigInt(amount), validator);
+                }
+                break;
+            }
+            case 'claimRewards': {
+                const action = new ClaimRewards();
+                await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser);
+                break;
+            }
+            default: {
+                console.log('Please specify a valid command and arguments');
+                break;
+            }
+        }
         
     } catch (error) {
         console.error('Error in simulation:', error);
