@@ -23,6 +23,7 @@ use frame_support::{
 };
 use sp_core::H160;
 use tangle_primitives::services::{Asset, EvmAddressMapping};
+use tangle_primitives::traits::RewardsManager;
 use tangle_primitives::types::rewards::LockMultiplier;
 
 impl<T: Config> Pallet<T> {
@@ -102,6 +103,9 @@ impl<T: Config> Pallet<T> {
 				let new_deposit = Deposit::new(amount, lock_multiplier, now);
 				metadata.deposits.insert(asset_id, new_deposit);
 			}
+
+			let _ = T::RewardsManager::record_deposit(&who, asset_id, amount, lock_multiplier);
+
 			Ok(())
 		})?;
 
@@ -144,6 +148,8 @@ impl<T: Config> Pallet<T> {
 				.try_push(WithdrawRequest { asset_id, amount, requested_round: current_round })
 				.map_err(|_| Error::<T>::MaxWithdrawRequestsExceeded)?;
 			metadata.withdraw_requests = withdraw_requests;
+
+			let _ = T::RewardsManager::record_withdrawal(&who, asset_id, amount);
 
 			Ok(())
 		})

@@ -13,13 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::RewardVaultsPotAccount;
-use crate::SubaccountType;
-use crate::{AssetLookupRewardVaults, Config, Error, Pallet, RewardVaults};
-use frame_support::ensure;
-use frame_support::traits::Get;
-use sp_runtime::traits::AccountIdConversion;
-use sp_runtime::{DispatchError, DispatchResult};
+use crate::{
+	AssetLookupRewardVaults, Config, Error, Pallet, RewardVaults, RewardVaultsPotAccount,
+	SubaccountType,
+};
+use frame_support::{ensure, traits::Get};
+use sp_runtime::{traits::AccountIdConversion, DispatchError, DispatchResult};
 use sp_std::vec::Vec;
 use tangle_primitives::services::Asset;
 
