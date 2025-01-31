@@ -1449,14 +1449,13 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 	(
-		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
+		migrations::MigrateSessionKeys<Runtime>,
 		// AssetId limits
 		// 0 - 1000 (reserved for future use)
 		// 1000 - 50000 (reserved for LST pools)
 		// 50000 - 1000000 (reserved for native assets)
 		// set user start at 50_000, everything below is reserved for system use
-		migrations::assets_indices_migration_01162025::SetNextAssetId<ConstU128<50_000>, Runtime>,
-		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
+		migrations::SetNextAssetId<ConstU128<50_000>, Runtime>,
 	),
 >;
 

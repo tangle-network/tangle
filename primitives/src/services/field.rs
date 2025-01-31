@@ -528,7 +528,7 @@ impl<'de, S: Get<u32>> serde::Deserialize<'de> for BoundedString<S> {
 	{
 		struct StringVisitor<S: Get<u32>>(PhantomData<S>);
 
-		impl<S: Get<u32>> serde::de::Visitor<'_> for StringVisitor<S> {
+		impl<'de, S: Get<u32>> serde::de::Visitor<'de> for StringVisitor<S> {
 			type Value = String;
 
 			fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
