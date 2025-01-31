@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.2.5"
+version = "1.2.7"
 authors = ["Tangle Foundation."]
 edition = "2021"
 license = "Unlicense"
@@ -46,6 +46,8 @@ members = [
     "precompiles/services",
     "precompiles/tangle-lst",
     "precompiles/assets",
+    "precompiles/vesting",
+    "precompiles/staking",
     "tangle-subxt",
     "evm-tracer",
 ]

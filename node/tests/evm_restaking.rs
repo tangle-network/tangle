@@ -15,6 +15,7 @@ use alloy::sol;
 use anyhow::bail;
 use sp_runtime::traits::AccountIdConversion;
 use sp_tracing::{error, info};
+use tangle_primitives::time::SECONDS_PER_BLOCK;
 use tangle_runtime::PalletId;
 use tangle_subxt::subxt;
 use tangle_subxt::subxt::tx::TxStatus;
@@ -186,6 +187,12 @@ async fn deploy_tangle_lrt(
 	Ok(*token.address())
 }
 
+// Mock values for consistent testing
+const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
+const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_APY: u8 = 10; // 10% APY
+
 /// Setup the E2E test environment.
 #[track_caller]
 pub fn run_mad_test<TFn, F>(f: TFn)
@@ -249,29 +256,21 @@ where
 
 		// Create a new vault and these assets to it.
 		let vault_id = 0;
-		let deposit_cap = parse_ether("100").unwrap();
-		let incentive_cap = parse_ether("100").unwrap();
-		let update_vault_reward_config = api::tx().sudo().sudo(
+		// in Manual Sealing and fast runtime, we have 1 block per sec
+		// we consider 1 year as 50 blocks, for testing purposes
+		let one_year_blocks = SECONDS_PER_BLOCK * 50;
+
+		let set_apy_blocks = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
-				api::runtime_types::pallet_rewards::pallet::Call::update_vault_reward_config {
-					vault_id,
-					new_config:
-						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
-							apy: api::runtime_types::sp_arithmetic::per_things::Percent(1),
-							incentive_cap: incentive_cap.to::<u128>(),
-							deposit_cap: deposit_cap.to::<u128>(),
-							boost_multiplier: None,
-						},
+				api::runtime_types::pallet_rewards::pallet::Call::update_apy_blocks {
+					blocks: one_year_blocks,
 				},
 			),
 		);
 
 		let mut result = subxt
 			.tx()
-			.sign_and_submit_then_watch_default(
-				&update_vault_reward_config,
-				&alice.substrate_signer(),
-			)
+			.sign_and_submit_then_watch_default(&set_apy_blocks, &alice.substrate_signer())
 			.await?;
 
 		while let Some(Ok(s)) = result.next().await {
@@ -283,8 +282,47 @@ where
 						break;
 					},
 				};
-				evs.find_first::<api::rewards::events::VaultRewardConfigUpdated>()?
-					.expect("VaultRewardConfigUpdated event to be emitted");
+				for ev in evs.iter() {
+					let metadata = ev.unwrap();
+					info!("{}.{}", metadata.pallet_name(), metadata.variant_name());
+				}
+				break;
+			}
+		}
+
+		let create_vault = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
+				api::runtime_types::pallet_rewards::pallet::Call::create_reward_vault {
+					vault_id,
+					new_config:
+						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
+							apy: api::runtime_types::sp_arithmetic::per_things::Percent(MOCK_APY),
+							deposit_cap: MOCK_DEPOSIT_CAP,
+							incentive_cap: 1,
+							boost_multiplier: Some(1),
+						},
+				},
+			),
+		);
+
+		let mut result = subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&create_vault, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				for ev in evs.iter() {
+					let metadata = ev.unwrap();
+					info!("{}.{}", metadata.pallet_name(), metadata.variant_name());
+				}
 				break;
 			}
 		}
@@ -326,8 +364,10 @@ where
 							break;
 						},
 					};
-					evs.find_first::<api::rewards::events::AssetUpdatedInVault>()?
-						.expect("AssetRewardVault event to be emitted");
+					for ev in evs.iter() {
+						let metadata = ev.unwrap();
+						info!("{}.{}", metadata.pallet_name(), metadata.variant_name());
+					}
 					break;
 				}
 			}
@@ -380,30 +420,37 @@ pub struct TestInputs {
 }
 
 /// Helper function for joining as an operator
-async fn join_as_operator(provider: &AlloyProviderWithWallet, stake: U256) -> anyhow::Result<bool> {
-	let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, provider);
-	let result = precompile
-		.joinOperators(stake)
-		.send()
-		.await?
-		.with_timeout(Some(Duration::from_secs(5)))
-		.get_receipt()
-		.await?;
-	Ok(result.status())
+async fn join_as_operator(
+	client: &subxt::OnlineClient<subxt::PolkadotConfig>,
+	caller: tangle_subxt::subxt_signer::sr25519::Keypair,
+	stake: u128,
+) -> anyhow::Result<bool> {
+	let join_call = api::tx().multi_asset_delegation().join_operators(stake);
+	let mut result = client.tx().sign_and_submit_then_watch_default(&join_call, &caller).await?;
+	while let Some(Ok(s)) = result.next().await {
+		if let TxStatus::InBestBlock(b) = s {
+			let _evs = match b.wait_for_success().await {
+				Ok(evs) => evs,
+				Err(e) => {
+					error!("Error: {:?}", e);
+					break;
+				},
+			};
+			break;
+		}
+	}
+	Ok(true)
 }
 
 #[test]
 fn operator_join_delegator_delegate_erc20() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
@@ -437,7 +484,7 @@ fn operator_join_delegator_delegate_erc20() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				alice.account_id().0.into(),
 				U256::ZERO,
 				*usdc.address(),
 				delegate_amount,
@@ -472,15 +519,11 @@ fn operator_join_delegator_delegate_erc20() {
 fn operator_join_delegator_delegate_asset_id() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
-
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
@@ -536,7 +579,7 @@ fn operator_join_delegator_delegate_asset_id() {
 
 		let delegate_result = precompile
 			.delegate(
-				alice.address().to_account_id().0.into(),
+				alice.account_id().0.into(),
 				U256::from(t.usdc_asset_id),
 				Address::ZERO,
 				U256::from(delegate_amount),
@@ -736,12 +779,12 @@ fn lrt_deposit_withdraw_erc20() {
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
 			t.weth,
-			alice.address().to_account_id().0,
+			alice.account_id().0,
 			"Liquid Restaked Ether",
 			"lrtETH",
 		)
@@ -789,9 +832,7 @@ fn lrt_deposit_withdraw_erc20() {
 		assert_eq!(mad_weth_balance._0, deposit_amount);
 
 		// LRT should be a delegator to the operator in the MAD pallet.
-		let operator_key = api::storage()
-			.multi_asset_delegation()
-			.operators(alice.address().to_account_id());
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
 		assert!(maybe_operator.is_some());
 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
@@ -889,12 +930,19 @@ fn lrt_rewards() {
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&alice_provider, tnt).await?);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
+
+		let vault_id = 0;
+		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
+		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
+
+		let deposit = U256::from(MOCK_DEPOSIT);
+
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
 			t.weth,
-			alice.address().to_account_id().0,
+			alice.account_id().0,
 			"Liquid Restaked Ether",
 			"lrtETH",
 		)
@@ -904,12 +952,12 @@ fn lrt_rewards() {
 		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 		// Mint WETH for Bob
-		let weth_amount = parse_ether("10").unwrap();
+		let weth_amount = deposit;
 		let weth = MockERC20::new(t.weth, &bob_provider);
 		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
 
 		// Approve LRT contract to spend WETH
-		let deposit_amount = weth_amount.div(U256::from(2));
+		let deposit_amount = weth_amount;
 		let approve_result =
 			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
 		assert!(approve_result.status());
@@ -927,14 +975,10 @@ fn lrt_rewards() {
 		assert!(deposit_result.status());
 		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
 
-		// Wait for two new sessions to happen
-		let session_index = wait_for_next_session(&t.subxt).await?;
-		info!("New session started: {}", session_index);
+		// Wait for one year to pass
+		wait_for_more_blocks(&t.provider, 51).await;
 
-		let vault_id = 0;
-		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
-		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?;
-		let apy = cfg.map(|c| c.apy).unwrap();
+		let apy = cfg.apy;
 		info!("APY: {}%", apy.0);
 
 		let rewards_addr = api::apis().rewards_api().query_user_rewards(

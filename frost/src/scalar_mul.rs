@@ -22,8 +22,6 @@ use crate::{Ciphersuite, Element, Field, Group, Scalar};
 ///
 /// This function is similar to `div_ceil` that is [available on
 /// Nightly](https://github.com/rust-lang/rust/issues/88581).
-// TODO: remove this function and use `div_ceil()` instead when `int_roundings`
-// is stabilized.
 const fn div_ceil(lhs: usize, rhs: usize) -> usize {
 	let d = lhs / rhs;
 	let r = lhs % rhs;

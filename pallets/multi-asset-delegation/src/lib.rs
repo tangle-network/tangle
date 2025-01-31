@@ -69,7 +69,6 @@ mod tests;
 pub mod weights;
 
 // #[cfg(feature = "runtime-benchmarks")]
-// TODO(@1xstj): Fix benchmarking and re-enable
 // mod benchmarking;
 
 pub mod functions;
@@ -319,8 +318,6 @@ pub mod pallet {
 		AlreadyLeaving,
 		/// The account is not leaving as an operator.
 		NotLeavingOperator,
-		/// The round does not match the scheduled leave round.
-		NotLeavingRound,
 		/// Leaving round not reached
 		LeavingRoundNotReached,
 		/// There is no scheduled unstake request.
@@ -411,6 +408,8 @@ pub mod pallet {
 		LockViolation,
 		/// Above deposit caps setup
 		DepositExceedsCapForAsset,
+		/// Overflow from math
+		OverflowRisk,
 	}
 
 	/// Hooks for the pallet.

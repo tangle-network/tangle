@@ -1,18 +1,19 @@
-// Copyright 2019-2022 PureStake Inc.
-// This file is part of Moonbeam.
+// Copyright 2022-2025 Tangle Foundation.
+// This file is part of Tangle.
+// This file originated in Moonbeam's codebase.
 
-// Moonbeam is free software: you can redistribute it and/or modify
+// Tangle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Moonbeam is distributed in the hope that it will be useful,
+// Tangle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
+// along with Tangle. If not, see <http://www.gnu.org/licenses/>.
 
 //! `trace_filter` RPC handler and its associated service task.
 //! The RPC handler rely on `CacheTask` which provides a future that must be run inside a tokio
@@ -327,7 +328,7 @@ impl CacheRequester {
 
 /// Data stored for each block in the cache.
 /// `active_batch_count` represents the number of batches using this
-/// block. It will increase immediatly when a batch is created, but will be
+/// block. It will increase immediately when a batch is created, but will be
 /// decrease only after the batch ends and its expiration delay passes.
 /// It allows to keep the data in the cache for following requests that would use
 /// this block, which is important to handle pagination efficiently.
@@ -594,7 +595,7 @@ where
 	}
 
 	/// Handle a request to get the traces of the provided block.
-	/// - If the result is stored in the cache, it sends it immediatly.
+	/// - If the result is stored in the cache, it sends it immediately.
 	/// - If the block is currently being pooled, it is added in this block cache waiting list, and
 	///   all requests concerning this block will be satisfied when the tracing for this block is
 	///   finished.
@@ -688,9 +689,6 @@ where
 		// In some cases it might be possible to receive traces of a block
 		// that has no entry in the cache because it was removed of the pool
 		// and received a permit concurrently. We just ignore it.
-		//
-		// TODO : Should we add it back ? Should it have an active_batch_count
-		// of 1 then ?
 		if let Some(block_cache) = self.cached_blocks.get_mut(&block_hash) {
 			if let CacheBlockState::Pooled { ref mut waiting_requests, .. } = block_cache.state {
 				tracing::trace!(
@@ -720,7 +718,10 @@ where
 				// last batch containing it.
 				let mut remove = false;
 				if let Some(block_cache) = self.cached_blocks.get_mut(&block) {
-					block_cache.active_batch_count -= 1;
+					block_cache.active_batch_count = block_cache
+						.active_batch_count
+						.checked_sub(1)
+						.expect("active_batch_count underflow");
 
 					if block_cache.active_batch_count == 0 {
 						remove = true;

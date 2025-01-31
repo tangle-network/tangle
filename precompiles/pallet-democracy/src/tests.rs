@@ -92,8 +92,6 @@ fn selectors() {
 	assert!(PCall::standard_vote_selectors().contains(&0x6cd18b0d));
 	assert!(PCall::un_delegate_selectors().contains(&0x1eef225c));
 	assert!(PCall::unlock_selectors().contains(&0x2f6c493c));
-
-	// TODO also test logs once we have them
 }
 
 #[test]
@@ -122,7 +120,7 @@ fn prop_count_zero() {
 		// Assert that no props have been opened.
 		precompiles()
 			.prepare_test(Alice, Precompile1, PCall::public_prop_count {})
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(U256::zero())
 	});
@@ -145,7 +143,7 @@ fn prop_count_non_zero() {
 
 			precompiles()
 				.prepare_test(Alice, Precompile1, PCall::public_prop_count {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(1u32);
 		});
@@ -170,7 +168,7 @@ fn deposit_of_non_zero() {
 
 			precompiles()
 				.prepare_test(Alice, Precompile1, PCall::deposit_of { prop_index: 0.into() })
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(1000u32);
 		});
@@ -190,7 +188,7 @@ fn lowest_unbaked_zero() {
 	ExtBuilder::default().build().execute_with(|| {
 		precompiles()
 			.prepare_test(Alice, Precompile1, PCall::lowest_unbaked {})
-			.expect_cost(0) // TODO: Test db read/write costs
+			.expect_cost(0)
 			.expect_no_logs()
 			.execute_returns(0u32);
 	});
@@ -251,7 +249,7 @@ fn lowest_unbaked_non_zero() {
 
 			precompiles()
 				.prepare_test(Alice, Precompile1, PCall::lowest_unbaked {})
-				.expect_cost(0) // TODO: Test db read/write costs
+				.expect_cost(0)
 				.expect_no_logs()
 				.execute_returns(1u32);
 		});

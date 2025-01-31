@@ -402,7 +402,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 	}
 
 	fn is_operator(_operator: &AccountId) -> bool {
-		// dont care
+		// don't care
 		true
 	}
 

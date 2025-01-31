@@ -17,7 +17,7 @@ interface TangleLst {
         uint256 poolId,
         uint8 extraType,
         uint256 extra
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Unbond from a pool.
     /// @param memberAccount The account of the member.
@@ -27,7 +27,7 @@ interface TangleLst {
         bytes32 memberAccount,
         uint256 poolId,
         uint256 unbondingPoints
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Withdraw unbonded funds from a pool.
     /// @param poolId The ID of the pool.
@@ -35,7 +35,7 @@ interface TangleLst {
     function poolWithdrawUnbonded(
         uint256 poolId,
         uint32 numSlashingSpans
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Withdraw unbonded funds for a member.
     /// @param memberAccount The account of the member.
@@ -45,7 +45,7 @@ interface TangleLst {
         bytes32 memberAccount,
         uint256 poolId,
         uint32 numSlashingSpans
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Create a new pool.
     /// @param amount The initial amount to create the pool with.
@@ -61,7 +61,7 @@ interface TangleLst {
         bytes32 bouncer,
         bytes calldata name,
         bytes calldata icon
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Nominate validators for a pool.
     /// @param poolId The ID of the pool.
@@ -69,12 +69,12 @@ interface TangleLst {
     function nominate(
         uint256 poolId,
         bytes32[] calldata validators
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Set the state of a pool.
     /// @param poolId The ID of the pool.
     /// @param state The new state (0 for Open, 1 for Blocked, 2 for Destroying).
-    function setState(uint256 poolId, uint8 state) external returns (uint8);
+    function setState(uint256 poolId, uint8 state) external;
 
     /// @dev Set metadata for a pool.
     /// @param poolId The ID of the pool.
@@ -82,7 +82,7 @@ interface TangleLst {
     function setMetadata(
         uint256 poolId,
         bytes calldata metadata
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Set global configurations (only callable by root).
     /// @param minJoinBond The minimum bond required to join a pool (0 for no change).
@@ -94,7 +94,7 @@ interface TangleLst {
         uint256 minCreateBond,
         uint32 maxPools,
         uint32 globalMaxCommission
-    ) external returns (uint8);
+    ) external;
 
     /// @dev Update roles for a pool.
     /// @param poolId The ID of the pool.
@@ -106,5 +106,44 @@ interface TangleLst {
         bytes32 root,
         bytes32 nominator,
         bytes32 bouncer
-    ) external returns (uint8);
+    ) external;
+
+    /// @dev Stop nominating for a pool
+    /// @param poolId The ID of the pool to chill
+    function chill(uint256 poolId) external;
+
+    /// @dev Bond extra tokens for another account
+    /// @param poolId The ID of the pool
+    /// @param who The account to bond extra for
+    /// @param amount The amount to bond extra
+    function bondExtraOther(uint256 poolId, bytes32 who, uint256 amount) external;
+
+    /// @dev Set commission for a pool
+    /// @param poolId The ID of the pool
+    /// @param newCommission The new commission value
+    function setCommission(uint256 poolId, uint256 newCommission) external;
+
+    /// @dev Set maximum commission for a pool
+    /// @param poolId The ID of the pool
+    /// @param maxCommission The maximum commission value
+    function setCommissionMax(uint256 poolId, uint256 maxCommission) external;
+
+    /// @dev Set commission change rate
+    /// @param poolId The ID of the pool
+    /// @param maxIncrease The maximum increase in commission
+    /// @param minDelay The minimum delay between changes
+    function setCommissionChangeRate(uint256 poolId, uint256 maxIncrease, uint256 minDelay) external;
+
+    /// @dev Claim commission for a pool
+    /// @param poolId The ID of the pool
+    function claimCommission(uint256 poolId) external;
+
+    /// @dev Adjust pool deposit
+    /// @param poolId The ID of the pool
+    function adjustPoolDeposit(uint256 poolId) external;
+
+    /// @dev Set commission claim permission
+    /// @param poolId The ID of the pool
+    /// @param permission The permission value (as uint8)
+    function setCommissionClaimPermission(uint256 poolId, uint8 permission) external;
 }

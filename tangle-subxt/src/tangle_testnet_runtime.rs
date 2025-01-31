@@ -3752,9 +3752,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				99u8, 93u8, 193u8, 42u8, 211u8, 104u8, 234u8, 235u8, 171u8, 3u8, 153u8, 72u8, 70u8,
-				163u8, 182u8, 100u8, 8u8, 50u8, 39u8, 108u8, 150u8, 209u8, 247u8, 109u8, 156u8,
-				247u8, 215u8, 61u8, 186u8, 239u8, 214u8, 181u8,
+				216u8, 14u8, 24u8, 71u8, 175u8, 82u8, 151u8, 116u8, 63u8, 40u8, 178u8, 57u8, 189u8,
+				65u8, 53u8, 149u8, 48u8, 106u8, 205u8, 173u8, 7u8, 227u8, 211u8, 209u8, 227u8,
+				120u8, 88u8, 52u8, 66u8, 63u8, 91u8, 181u8,
 			]
 	}
 	pub mod system {
@@ -4959,9 +4959,9 @@ pub mod api {
 						"Events",
 						(),
 						[
-							45u8, 92u8, 3u8, 147u8, 173u8, 150u8, 111u8, 24u8, 237u8, 254u8, 227u8,
-							245u8, 243u8, 249u8, 160u8, 187u8, 44u8, 102u8, 192u8, 53u8, 54u8,
-							14u8, 98u8, 119u8, 87u8, 48u8, 94u8, 121u8, 184u8, 166u8, 241u8, 167u8,
+							123u8, 180u8, 141u8, 105u8, 42u8, 50u8, 84u8, 92u8, 94u8, 42u8, 229u8,
+							200u8, 60u8, 229u8, 182u8, 253u8, 247u8, 50u8, 2u8, 70u8, 104u8, 60u8,
+							54u8, 42u8, 138u8, 186u8, 208u8, 243u8, 218u8, 238u8, 7u8, 157u8,
 						],
 					)
 				}
@@ -5655,10 +5655,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							163u8, 184u8, 237u8, 177u8, 162u8, 77u8, 210u8, 38u8, 204u8, 177u8,
-							239u8, 115u8, 85u8, 253u8, 142u8, 16u8, 154u8, 51u8, 139u8, 236u8,
-							162u8, 164u8, 164u8, 226u8, 3u8, 37u8, 90u8, 171u8, 41u8, 241u8, 196u8,
-							230u8,
+							201u8, 59u8, 181u8, 102u8, 217u8, 180u8, 238u8, 104u8, 67u8, 14u8,
+							253u8, 17u8, 153u8, 184u8, 163u8, 154u8, 141u8, 61u8, 19u8, 122u8,
+							200u8, 211u8, 161u8, 11u8, 198u8, 1u8, 239u8, 47u8, 75u8, 128u8, 154u8,
+							238u8,
 						],
 					)
 				}
@@ -5681,10 +5681,10 @@ pub mod api {
 							weight,
 						},
 						[
-							137u8, 66u8, 229u8, 37u8, 3u8, 74u8, 65u8, 42u8, 189u8, 95u8, 177u8,
-							192u8, 82u8, 248u8, 226u8, 134u8, 131u8, 68u8, 9u8, 147u8, 210u8,
-							108u8, 223u8, 134u8, 252u8, 54u8, 158u8, 187u8, 68u8, 193u8, 65u8,
-							48u8,
+							210u8, 127u8, 58u8, 29u8, 213u8, 135u8, 114u8, 187u8, 225u8, 157u8,
+							71u8, 13u8, 107u8, 54u8, 86u8, 243u8, 175u8, 227u8, 242u8, 229u8,
+							104u8, 59u8, 146u8, 226u8, 80u8, 57u8, 24u8, 214u8, 99u8, 34u8, 58u8,
+							99u8,
 						],
 					)
 				}
@@ -5723,9 +5723,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							250u8, 73u8, 102u8, 88u8, 6u8, 214u8, 90u8, 202u8, 72u8, 254u8, 81u8,
-							104u8, 160u8, 200u8, 172u8, 12u8, 84u8, 44u8, 66u8, 121u8, 92u8, 124u8,
-							176u8, 24u8, 175u8, 226u8, 136u8, 154u8, 22u8, 26u8, 214u8, 72u8,
+							106u8, 11u8, 208u8, 91u8, 72u8, 219u8, 204u8, 166u8, 149u8, 64u8,
+							228u8, 196u8, 127u8, 79u8, 170u8, 47u8, 110u8, 98u8, 161u8, 54u8,
+							135u8, 106u8, 205u8, 155u8, 182u8, 132u8, 244u8, 223u8, 65u8, 62u8,
+							40u8, 186u8,
 						],
 					)
 				}
@@ -16649,9 +16650,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							168u8, 245u8, 229u8, 113u8, 186u8, 50u8, 189u8, 28u8, 4u8, 93u8, 20u8,
-							203u8, 155u8, 237u8, 159u8, 226u8, 149u8, 3u8, 159u8, 24u8, 12u8,
-							185u8, 35u8, 57u8, 143u8, 92u8, 87u8, 233u8, 153u8, 54u8, 192u8, 229u8,
+							108u8, 68u8, 137u8, 246u8, 93u8, 139u8, 200u8, 194u8, 209u8, 121u8,
+							119u8, 181u8, 129u8, 70u8, 117u8, 128u8, 125u8, 53u8, 89u8, 55u8, 74u8,
+							254u8, 179u8, 67u8, 119u8, 11u8, 101u8, 236u8, 142u8, 55u8, 185u8,
+							146u8,
 						],
 					)
 				}
@@ -16684,10 +16686,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							110u8, 199u8, 178u8, 207u8, 130u8, 62u8, 107u8, 71u8, 208u8, 197u8,
-							174u8, 180u8, 216u8, 155u8, 219u8, 9u8, 110u8, 31u8, 230u8, 190u8,
-							251u8, 38u8, 152u8, 236u8, 217u8, 107u8, 61u8, 176u8, 140u8, 144u8,
-							84u8, 235u8,
+							131u8, 15u8, 135u8, 194u8, 194u8, 42u8, 95u8, 198u8, 3u8, 151u8, 224u8,
+							90u8, 103u8, 13u8, 142u8, 193u8, 208u8, 210u8, 35u8, 251u8, 236u8, 2u8,
+							230u8, 180u8, 59u8, 181u8, 130u8, 239u8, 69u8, 72u8, 147u8, 89u8,
 						],
 					)
 				}
@@ -17078,9 +17079,10 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							145u8, 29u8, 250u8, 9u8, 203u8, 90u8, 35u8, 56u8, 124u8, 105u8, 43u8,
-							203u8, 252u8, 210u8, 53u8, 30u8, 138u8, 8u8, 31u8, 220u8, 36u8, 53u8,
-							7u8, 200u8, 158u8, 212u8, 95u8, 250u8, 29u8, 26u8, 240u8, 160u8,
+							194u8, 72u8, 100u8, 210u8, 30u8, 167u8, 18u8, 224u8, 38u8, 138u8,
+							204u8, 89u8, 179u8, 248u8, 222u8, 20u8, 145u8, 155u8, 216u8, 130u8,
+							14u8, 150u8, 197u8, 23u8, 24u8, 196u8, 175u8, 156u8, 160u8, 139u8,
+							99u8, 136u8,
 						],
 					)
 				}
@@ -17104,9 +17106,10 @@ pub mod api {
 							_0.borrow(),
 						),
 						[
-							145u8, 29u8, 250u8, 9u8, 203u8, 90u8, 35u8, 56u8, 124u8, 105u8, 43u8,
-							203u8, 252u8, 210u8, 53u8, 30u8, 138u8, 8u8, 31u8, 220u8, 36u8, 53u8,
-							7u8, 200u8, 158u8, 212u8, 95u8, 250u8, 29u8, 26u8, 240u8, 160u8,
+							194u8, 72u8, 100u8, 210u8, 30u8, 167u8, 18u8, 224u8, 38u8, 138u8,
+							204u8, 89u8, 179u8, 248u8, 222u8, 20u8, 145u8, 155u8, 216u8, 130u8,
+							14u8, 150u8, 197u8, 23u8, 24u8, 196u8, 175u8, 156u8, 160u8, 139u8,
+							99u8, 136u8,
 						],
 					)
 				}
@@ -33510,10 +33513,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							26u8, 185u8, 207u8, 48u8, 159u8, 175u8, 62u8, 226u8, 116u8, 183u8,
-							146u8, 248u8, 197u8, 153u8, 236u8, 61u8, 201u8, 157u8, 222u8, 179u8,
-							149u8, 138u8, 15u8, 184u8, 40u8, 117u8, 66u8, 3u8, 39u8, 54u8, 45u8,
-							174u8,
+							172u8, 203u8, 48u8, 164u8, 208u8, 83u8, 45u8, 146u8, 59u8, 61u8, 225u8,
+							127u8, 189u8, 5u8, 170u8, 222u8, 100u8, 55u8, 22u8, 140u8, 16u8, 224u8,
+							247u8, 57u8, 142u8, 215u8, 65u8, 32u8, 159u8, 1u8, 200u8, 232u8,
 						],
 					)
 				}
@@ -33556,9 +33558,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							26u8, 94u8, 109u8, 26u8, 181u8, 255u8, 182u8, 61u8, 62u8, 224u8, 107u8,
-							167u8, 217u8, 156u8, 189u8, 252u8, 30u8, 214u8, 131u8, 162u8, 105u8,
-							96u8, 26u8, 20u8, 160u8, 239u8, 58u8, 127u8, 15u8, 29u8, 143u8, 175u8,
+							234u8, 73u8, 70u8, 149u8, 149u8, 4u8, 216u8, 215u8, 56u8, 151u8, 249u8,
+							143u8, 152u8, 243u8, 54u8, 197u8, 171u8, 45u8, 44u8, 57u8, 49u8, 129u8,
+							208u8, 151u8, 90u8, 30u8, 107u8, 121u8, 111u8, 125u8, 120u8, 92u8,
 						],
 					)
 				}
@@ -33597,10 +33599,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							43u8, 61u8, 59u8, 243u8, 190u8, 84u8, 93u8, 176u8, 22u8, 212u8, 47u8,
-							136u8, 46u8, 126u8, 48u8, 255u8, 134u8, 234u8, 169u8, 212u8, 238u8,
-							106u8, 72u8, 137u8, 130u8, 169u8, 11u8, 211u8, 195u8, 70u8, 206u8,
-							52u8,
+							217u8, 184u8, 179u8, 2u8, 88u8, 200u8, 243u8, 116u8, 77u8, 108u8, 50u8,
+							32u8, 20u8, 11u8, 207u8, 145u8, 166u8, 127u8, 74u8, 219u8, 6u8, 106u8,
+							230u8, 231u8, 219u8, 158u8, 231u8, 43u8, 69u8, 137u8, 105u8, 33u8,
 						],
 					)
 				}
@@ -33625,10 +33626,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							174u8, 234u8, 82u8, 253u8, 6u8, 3u8, 178u8, 254u8, 69u8, 119u8, 49u8,
-							52u8, 80u8, 107u8, 193u8, 127u8, 173u8, 96u8, 102u8, 255u8, 72u8,
-							206u8, 95u8, 209u8, 209u8, 184u8, 253u8, 174u8, 217u8, 173u8, 209u8,
-							59u8,
+							208u8, 56u8, 91u8, 102u8, 35u8, 97u8, 103u8, 209u8, 127u8, 55u8, 59u8,
+							127u8, 9u8, 75u8, 253u8, 38u8, 149u8, 101u8, 45u8, 57u8, 249u8, 133u8,
+							238u8, 35u8, 44u8, 126u8, 71u8, 234u8, 97u8, 189u8, 133u8, 140u8,
 						],
 					)
 				}
@@ -38624,9 +38624,10 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							130u8, 215u8, 236u8, 248u8, 241u8, 29u8, 96u8, 180u8, 1u8, 145u8, 53u8,
-							182u8, 25u8, 109u8, 56u8, 113u8, 48u8, 24u8, 250u8, 131u8, 5u8, 204u8,
-							180u8, 179u8, 14u8, 64u8, 89u8, 93u8, 90u8, 8u8, 135u8, 200u8,
+							116u8, 145u8, 109u8, 128u8, 25u8, 39u8, 246u8, 147u8, 235u8, 138u8,
+							141u8, 212u8, 72u8, 138u8, 1u8, 201u8, 102u8, 30u8, 133u8, 236u8,
+							185u8, 59u8, 33u8, 240u8, 26u8, 105u8, 196u8, 198u8, 35u8, 19u8, 75u8,
+							54u8,
 						],
 					)
 				}
@@ -38656,10 +38657,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							164u8, 238u8, 25u8, 157u8, 116u8, 162u8, 95u8, 95u8, 55u8, 241u8,
-							107u8, 43u8, 111u8, 167u8, 42u8, 155u8, 201u8, 4u8, 166u8, 8u8, 191u8,
-							235u8, 251u8, 170u8, 217u8, 174u8, 106u8, 181u8, 154u8, 156u8, 4u8,
-							37u8,
+							168u8, 68u8, 8u8, 2u8, 206u8, 221u8, 149u8, 3u8, 24u8, 238u8, 6u8,
+							237u8, 32u8, 45u8, 4u8, 212u8, 205u8, 155u8, 75u8, 145u8, 226u8, 177u8,
+							137u8, 174u8, 30u8, 239u8, 241u8, 16u8, 166u8, 70u8, 204u8, 152u8,
 						],
 					)
 				}
@@ -38685,9 +38685,9 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							214u8, 27u8, 118u8, 220u8, 93u8, 23u8, 59u8, 220u8, 20u8, 2u8, 89u8,
-							222u8, 82u8, 0u8, 63u8, 5u8, 25u8, 166u8, 169u8, 135u8, 250u8, 164u8,
-							204u8, 33u8, 2u8, 53u8, 58u8, 58u8, 214u8, 157u8, 255u8, 204u8,
+							168u8, 10u8, 247u8, 202u8, 78u8, 64u8, 78u8, 227u8, 22u8, 253u8, 228u8,
+							140u8, 92u8, 97u8, 122u8, 129u8, 53u8, 246u8, 216u8, 179u8, 237u8,
+							232u8, 140u8, 96u8, 32u8, 70u8, 31u8, 106u8, 102u8, 22u8, 61u8, 246u8,
 						],
 					)
 				}
@@ -38710,9 +38710,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							155u8, 249u8, 58u8, 170u8, 84u8, 86u8, 119u8, 177u8, 35u8, 5u8, 161u8,
-							91u8, 56u8, 152u8, 217u8, 204u8, 239u8, 240u8, 235u8, 68u8, 71u8,
-							238u8, 123u8, 218u8, 131u8, 134u8, 155u8, 76u8, 132u8, 65u8, 6u8, 45u8,
+							1u8, 88u8, 219u8, 255u8, 247u8, 29u8, 171u8, 86u8, 158u8, 255u8, 4u8,
+							140u8, 178u8, 47u8, 221u8, 41u8, 10u8, 3u8, 107u8, 15u8, 191u8, 154u8,
+							192u8, 4u8, 201u8, 48u8, 114u8, 42u8, 119u8, 60u8, 166u8, 78u8,
 						],
 					)
 				}
@@ -38738,10 +38738,9 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							51u8, 107u8, 41u8, 241u8, 110u8, 148u8, 41u8, 79u8, 214u8, 100u8,
-							231u8, 137u8, 189u8, 87u8, 95u8, 227u8, 243u8, 26u8, 157u8, 205u8,
-							38u8, 82u8, 39u8, 170u8, 48u8, 7u8, 60u8, 49u8, 156u8, 9u8, 253u8,
-							137u8,
+							6u8, 149u8, 123u8, 101u8, 18u8, 136u8, 86u8, 112u8, 239u8, 130u8, 44u8,
+							17u8, 94u8, 148u8, 54u8, 202u8, 64u8, 248u8, 98u8, 173u8, 245u8, 80u8,
+							37u8, 131u8, 67u8, 140u8, 250u8, 102u8, 47u8, 190u8, 33u8, 26u8,
 						],
 					)
 				}
@@ -38764,9 +38763,10 @@ pub mod api {
 							weight,
 						},
 						[
-							159u8, 157u8, 208u8, 9u8, 147u8, 219u8, 203u8, 156u8, 60u8, 101u8,
-							159u8, 133u8, 136u8, 114u8, 94u8, 228u8, 78u8, 73u8, 57u8, 249u8, 79u8,
-							156u8, 94u8, 132u8, 24u8, 26u8, 91u8, 232u8, 213u8, 75u8, 32u8, 105u8,
+							44u8, 93u8, 26u8, 3u8, 87u8, 247u8, 53u8, 65u8, 178u8, 166u8, 18u8,
+							117u8, 44u8, 160u8, 153u8, 243u8, 162u8, 82u8, 145u8, 245u8, 128u8,
+							249u8, 173u8, 117u8, 242u8, 92u8, 196u8, 200u8, 203u8, 65u8, 94u8,
+							96u8,
 						],
 					)
 				}
@@ -39241,10 +39241,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							207u8, 95u8, 82u8, 84u8, 239u8, 174u8, 168u8, 233u8, 98u8, 227u8,
-							228u8, 232u8, 228u8, 199u8, 96u8, 83u8, 47u8, 252u8, 22u8, 166u8,
-							208u8, 119u8, 7u8, 195u8, 160u8, 121u8, 73u8, 75u8, 132u8, 72u8, 216u8,
-							195u8,
+							13u8, 9u8, 198u8, 41u8, 228u8, 145u8, 105u8, 83u8, 82u8, 21u8, 191u8,
+							196u8, 161u8, 50u8, 241u8, 34u8, 180u8, 0u8, 7u8, 155u8, 164u8, 170u8,
+							208u8, 224u8, 81u8, 44u8, 250u8, 119u8, 134u8, 53u8, 237u8, 13u8,
 						],
 					)
 				}
@@ -39306,9 +39305,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							225u8, 29u8, 101u8, 181u8, 6u8, 234u8, 234u8, 21u8, 86u8, 204u8, 183u8,
-							123u8, 134u8, 162u8, 197u8, 2u8, 212u8, 36u8, 218u8, 35u8, 23u8, 151u8,
-							92u8, 3u8, 1u8, 230u8, 186u8, 126u8, 132u8, 242u8, 174u8, 13u8,
+							50u8, 163u8, 161u8, 28u8, 175u8, 92u8, 158u8, 3u8, 50u8, 104u8, 246u8,
+							63u8, 14u8, 62u8, 200u8, 97u8, 9u8, 117u8, 116u8, 126u8, 173u8, 15u8,
+							57u8, 8u8, 28u8, 156u8, 88u8, 179u8, 204u8, 100u8, 4u8, 131u8,
 						],
 					)
 				}
@@ -42441,10 +42440,10 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							219u8, 170u8, 34u8, 33u8, 216u8, 139u8, 65u8, 77u8, 100u8, 199u8,
-							220u8, 153u8, 173u8, 6u8, 184u8, 194u8, 91u8, 120u8, 19u8, 254u8,
-							215u8, 127u8, 219u8, 216u8, 48u8, 119u8, 176u8, 242u8, 40u8, 62u8, 5u8,
-							248u8,
+							249u8, 21u8, 37u8, 222u8, 122u8, 222u8, 225u8, 31u8, 133u8, 198u8,
+							17u8, 124u8, 58u8, 210u8, 217u8, 67u8, 197u8, 227u8, 76u8, 91u8, 237u8,
+							178u8, 67u8, 31u8, 27u8, 164u8, 152u8, 42u8, 228u8, 235u8, 180u8,
+							241u8,
 						],
 					)
 				}
@@ -42704,10 +42703,9 @@ pub mod api {
 							call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							26u8, 14u8, 246u8, 164u8, 123u8, 24u8, 159u8, 255u8, 212u8, 222u8,
-							64u8, 132u8, 179u8, 182u8, 135u8, 142u8, 158u8, 180u8, 150u8, 214u8,
-							63u8, 171u8, 154u8, 37u8, 59u8, 87u8, 57u8, 179u8, 25u8, 155u8, 41u8,
-							166u8,
+							203u8, 77u8, 75u8, 228u8, 190u8, 1u8, 170u8, 204u8, 114u8, 70u8, 134u8,
+							207u8, 43u8, 182u8, 196u8, 177u8, 53u8, 41u8, 175u8, 76u8, 5u8, 195u8,
+							251u8, 183u8, 80u8, 240u8, 85u8, 112u8, 136u8, 155u8, 99u8, 27u8,
 						],
 					)
 				}
@@ -52285,14 +52283,45 @@ pub mod api {
 					Eq,
 					PartialEq,
 				)]
-				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-				#[codec(dumb_trait_bound)]
-				#[decode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Claim rewards for another account"]
+				#[doc = ""]
+				#[doc = "The dispatch origin must be signed."]
+				#[doc = ""]
+				#[doc = "Parameters:"]
+				#[doc = "- `who`: The account to claim rewards for"]
+				#[doc = "- `asset`: The asset to claim rewards for"]
+				#[doc = ""]
+				#[doc = "Emits `RewardsClaimed` event when successful."]
+				pub struct ClaimRewardsOther {
+					pub who: claim_rewards_other::Who,
+					pub asset: claim_rewards_other::Asset,
+				}
+				pub mod claim_rewards_other {
+					use super::runtime_types;
+					pub type Who = ::subxt_core::utils::AccountId32;
+					pub type Asset =
+						runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ClaimRewardsOther {
+					const PALLET: &'static str = "Rewards";
+					const CALL: &'static str = "claim_rewards_other";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
 				)]
-				#[encode_as_type(
-					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Manage asset id to vault rewards."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
@@ -52344,6 +52373,58 @@ pub mod api {
 				#[encode_as_type(
 					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
 				)]
+				#[doc = "Creates a new reward configuration for a specific vault."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
+				#[doc = "* `vault_id` - The ID of the vault to update"]
+				#[doc = "* `new_config` - The new reward configuration containing:"]
+				#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+				#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
+				#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
+				#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
+				#[doc = ""]
+				#[doc = "# Events"]
+				#[doc = "* `VaultRewardConfigUpdated` - Emitted when vault reward config is updated"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = "* `BadOrigin` - If caller is not authorized through `ForceOrigin`"]
+				#[doc = "* `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap"]
+				#[doc = "* `BoostMultiplierMustBeOne` - If boost multiplier is not 1"]
+				pub struct CreateRewardVault {
+					pub vault_id: create_reward_vault::VaultId,
+					pub new_config: create_reward_vault::NewConfig,
+				}
+				pub mod create_reward_vault {
+					use super::runtime_types;
+					pub type VaultId = ::core::primitive::u32;
+					pub type NewConfig =
+						runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
+							::core::primitive::u128,
+						>;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for CreateRewardVault {
+					const PALLET: &'static str = "Rewards";
+					const CALL: &'static str = "create_reward_vault";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
 				#[doc = "Updates the reward configuration for a specific vault."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
@@ -52360,6 +52441,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = "* `BadOrigin` - If caller is not authorized through `ForceOrigin`"]
+				#[doc = "* `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap"]
+				#[doc = "* `BoostMultiplierMustBeOne` - If boost multiplier is not 1"]
 				pub struct UpdateVaultRewardConfig {
 					pub vault_id: update_vault_reward_config::VaultId,
 					pub new_config: update_vault_reward_config::NewConfig,
@@ -52375,6 +52458,63 @@ pub mod api {
 				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for UpdateVaultRewardConfig {
 					const PALLET: &'static str = "Rewards";
 					const CALL: &'static str = "update_vault_reward_config";
+				}
+				#[derive(
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+					:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+					:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+				)]
+				#[encode_as_type(
+					crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+				)]
+				#[doc = "Update the decay configuration"]
+				pub struct UpdateDecayConfig {
+					pub start_period: update_decay_config::StartPeriod,
+					pub rate: update_decay_config::Rate,
+				}
+				pub mod update_decay_config {
+					use super::runtime_types;
+					pub type StartPeriod = ::core::primitive::u64;
+					pub type Rate = runtime_types::sp_arithmetic::per_things::Percent;
+				}
+				impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for UpdateDecayConfig {
+					const PALLET: &'static str = "Rewards";
+					const CALL: &'static str = "update_decay_config";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Update the number of blocks used for APY calculation"]
+				pub struct UpdateApyBlocks {
+					pub blocks: update_apy_blocks::Blocks,
+				}
+				pub mod update_apy_blocks {
+					use super::runtime_types;
+					pub type Blocks = ::core::primitive::u64;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for UpdateApyBlocks {
+					const PALLET: &'static str = "Rewards";
+					const CALL: &'static str = "update_apy_blocks";
 				}
 			}
 			pub struct TransactionApi;
@@ -52393,6 +52533,32 @@ pub mod api {
 							246u8, 122u8, 185u8, 167u8, 37u8, 175u8, 105u8, 52u8, 1u8, 229u8,
 							118u8, 141u8, 131u8, 54u8, 72u8, 108u8, 95u8, 76u8, 170u8, 179u8,
 							122u8, 84u8,
+						],
+					)
+				}
+				#[doc = "Claim rewards for another account"]
+				#[doc = ""]
+				#[doc = "The dispatch origin must be signed."]
+				#[doc = ""]
+				#[doc = "Parameters:"]
+				#[doc = "- `who`: The account to claim rewards for"]
+				#[doc = "- `asset`: The asset to claim rewards for"]
+				#[doc = ""]
+				#[doc = "Emits `RewardsClaimed` event when successful."]
+				pub fn claim_rewards_other(
+					&self,
+					who: types::claim_rewards_other::Who,
+					asset: types::claim_rewards_other::Asset,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ClaimRewardsOther> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"Rewards",
+						"claim_rewards_other",
+						types::ClaimRewardsOther { who, asset },
+						[
+							156u8, 186u8, 123u8, 58u8, 164u8, 199u8, 154u8, 99u8, 175u8, 143u8,
+							218u8, 147u8, 191u8, 177u8, 92u8, 155u8, 191u8, 133u8, 97u8, 60u8,
+							41u8, 244u8, 232u8, 28u8, 213u8, 5u8, 52u8, 160u8, 161u8, 109u8, 121u8,
+							181u8,
 						],
 					)
 				}
@@ -52432,6 +52598,42 @@ pub mod api {
 						],
 					)
 				}
+				#[doc = "Creates a new reward configuration for a specific vault."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
+				#[doc = "* `vault_id` - The ID of the vault to update"]
+				#[doc = "* `new_config` - The new reward configuration containing:"]
+				#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+				#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
+				#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
+				#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
+				#[doc = ""]
+				#[doc = "# Events"]
+				#[doc = "* `VaultRewardConfigUpdated` - Emitted when vault reward config is updated"]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = "* `BadOrigin` - If caller is not authorized through `ForceOrigin`"]
+				#[doc = "* `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap"]
+				#[doc = "* `BoostMultiplierMustBeOne` - If boost multiplier is not 1"]
+				pub fn create_reward_vault(
+					&self,
+					vault_id: types::create_reward_vault::VaultId,
+					new_config: types::create_reward_vault::NewConfig,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CreateRewardVault>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Rewards",
+						"create_reward_vault",
+						types::CreateRewardVault { vault_id, new_config },
+						[
+							206u8, 217u8, 216u8, 5u8, 223u8, 44u8, 252u8, 24u8, 136u8, 248u8,
+							168u8, 118u8, 162u8, 199u8, 236u8, 58u8, 79u8, 160u8, 243u8, 243u8,
+							57u8, 32u8, 90u8, 140u8, 141u8, 211u8, 148u8, 56u8, 106u8, 15u8, 14u8,
+							14u8,
+						],
+					)
+				}
 				#[doc = "Updates the reward configuration for a specific vault."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
@@ -52448,6 +52650,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = "* `BadOrigin` - If caller is not authorized through `ForceOrigin`"]
+				#[doc = "* `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap"]
+				#[doc = "* `BoostMultiplierMustBeOne` - If boost multiplier is not 1"]
 				pub fn update_vault_reward_config(
 					&self,
 					vault_id: types::update_vault_reward_config::VaultId,
@@ -52464,6 +52668,41 @@ pub mod api {
 							134u8, 178u8, 160u8, 171u8, 223u8, 51u8, 185u8, 34u8, 90u8, 54u8,
 							199u8, 219u8, 39u8, 58u8, 70u8, 249u8, 155u8, 58u8, 67u8, 220u8, 125u8,
 							132u8,
+						],
+					)
+				}
+				#[doc = "Update the decay configuration"]
+				pub fn update_decay_config(
+					&self,
+					start_period: types::update_decay_config::StartPeriod,
+					rate: types::update_decay_config::Rate,
+				) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UpdateDecayConfig>
+				{
+					::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+						"Rewards",
+						"update_decay_config",
+						types::UpdateDecayConfig { start_period, rate },
+						[
+							140u8, 236u8, 230u8, 237u8, 112u8, 250u8, 18u8, 251u8, 46u8, 121u8,
+							43u8, 143u8, 185u8, 170u8, 120u8, 174u8, 134u8, 82u8, 249u8, 173u8,
+							254u8, 113u8, 237u8, 104u8, 159u8, 66u8, 228u8, 111u8, 91u8, 11u8,
+							146u8, 177u8,
+						],
+					)
+				}
+				#[doc = "Update the number of blocks used for APY calculation"]
+				pub fn update_apy_blocks(
+					&self,
+					blocks: types::update_apy_blocks::Blocks,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::UpdateApyBlocks> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"Rewards",
+						"update_apy_blocks",
+						types::UpdateApyBlocks { blocks },
+						[
+							98u8, 147u8, 159u8, 28u8, 148u8, 51u8, 110u8, 115u8, 31u8, 92u8, 175u8,
+							43u8, 78u8, 246u8, 16u8, 77u8, 40u8, 52u8, 61u8, 174u8, 226u8, 105u8,
+							243u8, 179u8, 62u8, 217u8, 211u8, 204u8, 146u8, 99u8, 139u8, 110u8,
 						],
 					)
 				}
@@ -52605,16 +52844,174 @@ pub mod api {
 			#[codec(dumb_trait_bound)]
 			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Vault reward config updated"]
 			pub struct VaultRewardConfigUpdated {
 				pub vault_id: vault_reward_config_updated::VaultId,
+				pub new_config: vault_reward_config_updated::NewConfig,
 			}
 			pub mod vault_reward_config_updated {
 				use super::runtime_types;
 				pub type VaultId = ::core::primitive::u32;
+				pub type NewConfig =
+					runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
+						::core::primitive::u128,
+					>;
 			}
 			impl ::subxt::ext::subxt_core::events::StaticEvent for VaultRewardConfigUpdated {
 				const PALLET: &'static str = "Rewards";
 				const EVENT: &'static str = "VaultRewardConfigUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Vault created"]
+			pub struct RewardVaultCreated {
+				pub vault_id: reward_vault_created::VaultId,
+				pub new_config: reward_vault_created::NewConfig,
+				pub pot_account: reward_vault_created::PotAccount,
+			}
+			pub mod reward_vault_created {
+				use super::runtime_types;
+				pub type VaultId = ::core::primitive::u32;
+				pub type NewConfig =
+					runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
+						::core::primitive::u128,
+					>;
+				pub type PotAccount = ::subxt::ext::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for RewardVaultCreated {
+				const PALLET: &'static str = "Rewards";
+				const EVENT: &'static str = "RewardVaultCreated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Total score in vault updated"]
+			pub struct TotalScoreUpdated {
+				pub vault_id: total_score_updated::VaultId,
+				pub asset: total_score_updated::Asset,
+				pub total_score: total_score_updated::TotalScore,
+				pub lock_multiplier: total_score_updated::LockMultiplier,
+			}
+			pub mod total_score_updated {
+				use super::runtime_types;
+				pub type VaultId = ::core::primitive::u32;
+				pub type Asset =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
+				pub type TotalScore = ::core::primitive::u128;
+				pub type LockMultiplier = ::core::option::Option<
+					runtime_types::tangle_primitives::types::rewards::LockMultiplier,
+				>;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for TotalScoreUpdated {
+				const PALLET: &'static str = "Rewards";
+				const EVENT: &'static str = "TotalScoreUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Total deposit in vault updated"]
+			pub struct TotalDepositUpdated {
+				pub vault_id: total_deposit_updated::VaultId,
+				pub asset: total_deposit_updated::Asset,
+				pub total_deposit: total_deposit_updated::TotalDeposit,
+			}
+			pub mod total_deposit_updated {
+				use super::runtime_types;
+				pub type VaultId = ::core::primitive::u32;
+				pub type Asset =
+					runtime_types::tangle_primitives::services::Asset<::core::primitive::u128>;
+				pub type TotalDeposit = ::core::primitive::u128;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for TotalDepositUpdated {
+				const PALLET: &'static str = "Rewards";
+				const EVENT: &'static str = "TotalDepositUpdated";
+			}
+			#[derive(
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+				:: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+				:: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+			#[doc = "Decay configuration was updated"]
+			pub struct DecayConfigUpdated {
+				pub start_period: decay_config_updated::StartPeriod,
+				pub rate: decay_config_updated::Rate,
+			}
+			pub mod decay_config_updated {
+				use super::runtime_types;
+				pub type StartPeriod = ::core::primitive::u64;
+				pub type Rate = runtime_types::sp_arithmetic::per_things::Percent;
+			}
+			impl ::subxt::ext::subxt_core::events::StaticEvent for DecayConfigUpdated {
+				const PALLET: &'static str = "Rewards";
+				const EVENT: &'static str = "DecayConfigUpdated";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "The number of blocks for APY calculation has been updated"]
+			pub struct ApyBlocksUpdated {
+				pub blocks: apy_blocks_updated::Blocks,
+			}
+			pub mod apy_blocks_updated {
+				use super::runtime_types;
+				pub type Blocks = ::core::primitive::u64;
+			}
+			impl ::subxt_core::events::StaticEvent for ApyBlocksUpdated {
+				const PALLET: &'static str = "Rewards";
+				const EVENT: &'static str = "ApyBlocksUpdated";
 			}
 		}
 		pub mod storage {
@@ -52624,6 +53021,11 @@ pub mod api {
 				pub mod total_reward_vault_score {
 					use super::runtime_types;
 					pub type TotalRewardVaultScore = ::core::primitive::u128;
+					pub type Param0 = ::core::primitive::u32;
+				}
+				pub mod total_reward_vault_deposit {
+					use super::runtime_types;
+					pub type TotalRewardVaultDeposit = ::core::primitive::u128;
 					pub type Param0 = ::core::primitive::u32;
 				}
 				pub mod user_service_reward {
@@ -52660,10 +53062,29 @@ pub mod api {
 						>;
 					pub type Param0 = ::core::primitive::u32;
 				}
+				pub mod reward_vaults_pot_account {
+					use super::runtime_types;
+					pub type RewardVaultsPotAccount = ::subxt::ext::subxt_core::utils::AccountId32;
+					pub type Param0 = ::core::primitive::u32;
+				}
+				pub mod apy_blocks {
+					use super::runtime_types;
+					pub type ApyBlocks = ::core::primitive::u64;
+				}
+				pub mod decay_start_period {
+					use super::runtime_types;
+					pub type DecayStartPeriod = ::core::primitive::u64;
+				}
+				pub mod decay_rate {
+					use super::runtime_types;
+					pub type DecayRate = runtime_types::sp_arithmetic::per_things::Percent;
+				}
 			}
 			pub struct StorageApi;
 			impl StorageApi {
-				#[doc = " Stores the total score for each asset"]
+				#[doc = " Stores the total score for each vault"]
+				#[doc = " The difference between this and total_reward_vault_deposit is that this includes locked"]
+				#[doc = " deposits multiplied by the lock multiplier"]
 				pub fn total_reward_vault_score_iter(
 					&self,
 				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -52684,7 +53105,9 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = " Stores the total score for each asset"]
+				#[doc = " Stores the total score for each vault"]
+				#[doc = " The difference between this and total_reward_vault_deposit is that this includes locked"]
+				#[doc = " deposits multiplied by the lock multiplier"]
 				pub fn total_reward_vault_score(
 					&self,
 					_0: impl ::core::borrow::Borrow<types::total_reward_vault_score::Param0>,
@@ -52707,6 +53130,53 @@ pub mod api {
 							81u8, 149u8, 62u8, 176u8, 255u8, 187u8, 21u8, 2u8, 204u8, 121u8, 214u8,
 							125u8, 223u8, 182u8, 204u8, 248u8, 232u8, 123u8, 163u8, 177u8, 173u8,
 							25u8, 97u8, 90u8, 204u8, 82u8, 152u8, 36u8, 20u8, 13u8, 13u8, 189u8,
+						],
+					)
+				}
+				#[doc = " Stores the total deposit for each vault"]
+				pub fn total_reward_vault_deposit_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::total_reward_vault_deposit::TotalRewardVaultDeposit,
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"TotalRewardVaultDeposit",
+						(),
+						[
+							153u8, 26u8, 119u8, 97u8, 24u8, 180u8, 52u8, 220u8, 10u8, 27u8, 120u8,
+							176u8, 18u8, 120u8, 19u8, 196u8, 16u8, 104u8, 16u8, 73u8, 255u8, 227u8,
+							177u8, 254u8, 182u8, 35u8, 27u8, 27u8, 5u8, 106u8, 0u8, 63u8,
+						],
+					)
+				}
+				#[doc = " Stores the total deposit for each vault"]
+				pub fn total_reward_vault_deposit(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::total_reward_vault_deposit::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::total_reward_vault_deposit::Param0,
+					>,
+					types::total_reward_vault_deposit::TotalRewardVaultDeposit,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"TotalRewardVaultDeposit",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							153u8, 26u8, 119u8, 97u8, 24u8, 180u8, 52u8, 220u8, 10u8, 27u8, 120u8,
+							176u8, 18u8, 120u8, 19u8, 196u8, 16u8, 104u8, 16u8, 73u8, 255u8, 227u8,
+							177u8, 254u8, 182u8, 35u8, 27u8, 27u8, 5u8, 106u8, 0u8, 63u8,
 						],
 					)
 				}
@@ -53022,6 +53492,117 @@ pub mod api {
 							85u8, 116u8, 237u8, 245u8, 144u8, 61u8, 218u8, 181u8, 11u8, 129u8,
 							196u8, 245u8, 46u8, 142u8, 68u8, 87u8, 87u8, 120u8, 122u8, 111u8, 59u8,
 							219u8, 226u8, 166u8, 9u8, 21u8, 235u8, 215u8, 165u8, 191u8, 14u8, 64u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward vaults"]
+				pub fn reward_vaults_pot_account_iter(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::reward_vaults_pot_account::RewardVaultsPotAccount,
+					(),
+					(),
+					::subxt::ext::subxt_core::utils::Yes,
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"RewardVaultsPotAccount",
+						(),
+						[
+							37u8, 51u8, 253u8, 251u8, 66u8, 90u8, 154u8, 16u8, 216u8, 200u8, 64u8,
+							151u8, 93u8, 34u8, 232u8, 112u8, 13u8, 166u8, 96u8, 33u8, 163u8, 36u8,
+							214u8, 248u8, 191u8, 206u8, 24u8, 245u8, 60u8, 21u8, 115u8, 123u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward vaults"]
+				pub fn reward_vaults_pot_account(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::reward_vaults_pot_account::Param0>,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+						types::reward_vaults_pot_account::Param0,
+					>,
+					types::reward_vaults_pot_account::RewardVaultsPotAccount,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"RewardVaultsPotAccount",
+						::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
+							_0.borrow(),
+						),
+						[
+							37u8, 51u8, 253u8, 251u8, 66u8, 90u8, 154u8, 16u8, 216u8, 200u8, 64u8,
+							151u8, 93u8, 34u8, 232u8, 112u8, 13u8, 166u8, 96u8, 33u8, 163u8, 36u8,
+							214u8, 248u8, 191u8, 206u8, 24u8, 245u8, 60u8, 21u8, 115u8, 123u8,
+						],
+					)
+				}
+				#[doc = " Storage for the reward configuration, which includes APY, cap for assets"]
+				pub fn apy_blocks(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::apy_blocks::ApyBlocks,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"ApyBlocks",
+						(),
+						[
+							71u8, 90u8, 224u8, 106u8, 55u8, 84u8, 146u8, 87u8, 161u8, 20u8, 43u8,
+							111u8, 227u8, 227u8, 185u8, 203u8, 21u8, 232u8, 91u8, 165u8, 12u8,
+							94u8, 49u8, 109u8, 220u8, 193u8, 205u8, 54u8, 30u8, 41u8, 137u8, 135u8,
+						],
+					)
+				}
+				#[doc = " Number of blocks after which decay starts (e.g., 432000 for 30 days with 6s blocks)"]
+				pub fn decay_start_period(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::decay_start_period::DecayStartPeriod,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"DecayStartPeriod",
+						(),
+						[
+							74u8, 132u8, 62u8, 230u8, 220u8, 148u8, 138u8, 23u8, 193u8, 248u8,
+							78u8, 1u8, 90u8, 174u8, 38u8, 101u8, 163u8, 242u8, 17u8, 217u8, 197u8,
+							80u8, 222u8, 187u8, 116u8, 101u8, 139u8, 146u8, 138u8, 103u8, 109u8,
+							122u8,
+						],
+					)
+				}
+				#[doc = " Per-block decay rate in basis points (1/10000). e.g., 1 = 0.01% per block"]
+				pub fn decay_rate(
+					&self,
+				) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+					(),
+					types::decay_rate::DecayRate,
+					::subxt::ext::subxt_core::utils::Yes,
+					::subxt::ext::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+						"Rewards",
+						"DecayRate",
+						(),
+						[
+							210u8, 127u8, 222u8, 215u8, 161u8, 70u8, 11u8, 27u8, 111u8, 118u8,
+							56u8, 16u8, 25u8, 169u8, 134u8, 193u8, 175u8, 87u8, 169u8, 205u8, 55u8,
+							100u8, 57u8, 47u8, 245u8, 87u8, 26u8, 227u8, 165u8, 10u8, 143u8, 116u8,
 						],
 					)
 				}
@@ -61508,143 +62089,143 @@ pub mod api {
 					#[doc = "The account is not leaving as an operator."]
 					NotLeavingOperator,
 					#[codec(index = 6)]
-					#[doc = "The round does not match the scheduled leave round."]
-					NotLeavingRound,
-					#[codec(index = 7)]
 					#[doc = "Leaving round not reached"]
 					LeavingRoundNotReached,
-					#[codec(index = 8)]
+					#[codec(index = 7)]
 					#[doc = "There is no scheduled unstake request."]
 					NoScheduledBondLess,
-					#[codec(index = 9)]
+					#[codec(index = 8)]
 					#[doc = "The unstake request is not satisfied."]
 					BondLessRequestNotSatisfied,
-					#[codec(index = 10)]
+					#[codec(index = 9)]
 					#[doc = "The operator is not active."]
 					NotActiveOperator,
-					#[codec(index = 11)]
+					#[codec(index = 10)]
 					#[doc = "The operator is not offline."]
 					NotOfflineOperator,
-					#[codec(index = 12)]
+					#[codec(index = 11)]
 					#[doc = "The account is already a delegator."]
 					AlreadyDelegator,
-					#[codec(index = 13)]
+					#[codec(index = 12)]
 					#[doc = "The account is not a delegator."]
 					NotDelegator,
-					#[codec(index = 14)]
+					#[codec(index = 13)]
 					#[doc = "A withdraw request already exists."]
 					WithdrawRequestAlreadyExists,
-					#[codec(index = 15)]
+					#[codec(index = 14)]
 					#[doc = "The account has insufficient balance."]
 					InsufficientBalance,
-					#[codec(index = 16)]
+					#[codec(index = 15)]
 					#[doc = "There is no withdraw request."]
 					NoWithdrawRequest,
-					#[codec(index = 17)]
+					#[codec(index = 16)]
 					#[doc = "There is no unstake request."]
 					NoBondLessRequest,
-					#[codec(index = 18)]
+					#[codec(index = 17)]
 					#[doc = "The unstake request is not ready."]
 					BondLessNotReady,
-					#[codec(index = 19)]
+					#[codec(index = 18)]
 					#[doc = "A unstake request already exists."]
 					BondLessRequestAlreadyExists,
-					#[codec(index = 20)]
+					#[codec(index = 19)]
 					#[doc = "There are active services using the asset."]
 					ActiveServicesUsingAsset,
-					#[codec(index = 21)]
+					#[codec(index = 20)]
 					#[doc = "There is not active delegation"]
 					NoActiveDelegation,
-					#[codec(index = 22)]
+					#[codec(index = 21)]
 					#[doc = "The asset is not whitelisted"]
 					AssetNotWhitelisted,
-					#[codec(index = 23)]
+					#[codec(index = 22)]
 					#[doc = "The origin is not authorized to perform this action"]
 					NotAuthorized,
-					#[codec(index = 24)]
+					#[codec(index = 23)]
 					#[doc = "Maximum number of blueprints exceeded"]
 					MaxBlueprintsExceeded,
-					#[codec(index = 25)]
+					#[codec(index = 24)]
 					#[doc = "The asset ID is not found"]
 					AssetNotFound,
-					#[codec(index = 26)]
+					#[codec(index = 25)]
 					#[doc = "The blueprint ID is already whitelisted"]
 					BlueprintAlreadyWhitelisted,
-					#[codec(index = 27)]
+					#[codec(index = 26)]
 					#[doc = "No withdraw requests found"]
 					NowithdrawRequests,
-					#[codec(index = 28)]
+					#[codec(index = 27)]
 					#[doc = "No matching withdraw reqests found"]
 					NoMatchingwithdrawRequest,
-					#[codec(index = 29)]
+					#[codec(index = 28)]
 					#[doc = "Asset already exists in a reward vault"]
 					AssetAlreadyInVault,
-					#[codec(index = 30)]
+					#[codec(index = 29)]
 					#[doc = "Asset not found in reward vault"]
 					AssetNotInVault,
-					#[codec(index = 31)]
+					#[codec(index = 30)]
 					#[doc = "The reward vault does not exist"]
 					VaultNotFound,
-					#[codec(index = 32)]
+					#[codec(index = 31)]
 					#[doc = "Error returned when trying to add a blueprint ID that already exists."]
 					DuplicateBlueprintId,
-					#[codec(index = 33)]
+					#[codec(index = 32)]
 					#[doc = "Error returned when trying to remove a blueprint ID that doesn't exist."]
 					BlueprintIdNotFound,
-					#[codec(index = 34)]
+					#[codec(index = 33)]
 					#[doc = "Error returned when trying to add/remove blueprint IDs while not in Fixed mode."]
 					NotInFixedMode,
-					#[codec(index = 35)]
+					#[codec(index = 34)]
 					#[doc = "Error returned when the maximum number of delegations is exceeded."]
 					MaxDelegationsExceeded,
-					#[codec(index = 36)]
+					#[codec(index = 35)]
 					#[doc = "Error returned when the maximum number of unstake requests is exceeded."]
 					MaxUnstakeRequestsExceeded,
-					#[codec(index = 37)]
+					#[codec(index = 36)]
 					#[doc = "Error returned when the maximum number of withdraw requests is exceeded."]
 					MaxWithdrawRequestsExceeded,
-					#[codec(index = 38)]
+					#[codec(index = 37)]
 					#[doc = "Deposit amount overflow"]
 					DepositOverflow,
-					#[codec(index = 39)]
+					#[codec(index = 38)]
 					#[doc = "Unstake underflow"]
 					UnstakeAmountTooLarge,
-					#[codec(index = 40)]
+					#[codec(index = 39)]
 					#[doc = "Overflow while adding stake"]
 					StakeOverflow,
-					#[codec(index = 41)]
+					#[codec(index = 40)]
 					#[doc = "Underflow while reducing stake"]
 					InsufficientStakeRemaining,
-					#[codec(index = 42)]
+					#[codec(index = 41)]
 					#[doc = "APY exceeds maximum allowed by the extrinsic"]
 					APYExceedsMaximum,
-					#[codec(index = 43)]
+					#[codec(index = 42)]
 					#[doc = "Cap cannot be zero"]
 					CapCannotBeZero,
-					#[codec(index = 44)]
+					#[codec(index = 43)]
 					#[doc = "Cap exceeds total supply of asset"]
 					CapExceedsTotalSupply,
-					#[codec(index = 45)]
+					#[codec(index = 44)]
 					#[doc = "An unstake request is already pending"]
 					PendingUnstakeRequestExists,
-					#[codec(index = 46)]
+					#[codec(index = 45)]
 					#[doc = "The blueprint is not selected"]
 					BlueprintNotSelected,
-					#[codec(index = 47)]
+					#[codec(index = 46)]
 					#[doc = "Erc20 transfer failed"]
 					ERC20TransferFailed,
-					#[codec(index = 48)]
+					#[codec(index = 47)]
 					#[doc = "EVM encode error"]
 					EVMAbiEncode,
-					#[codec(index = 49)]
+					#[codec(index = 48)]
 					#[doc = "EVM decode error"]
 					EVMAbiDecode,
-					#[codec(index = 50)]
+					#[codec(index = 49)]
 					#[doc = "Cannot unstake with locks"]
 					LockViolation,
-					#[codec(index = 51)]
+					#[codec(index = 50)]
 					#[doc = "Above deposit caps setup"]
 					DepositExceedsCapForAsset,
+					#[codec(index = 51)]
+					#[doc = "Overflow from math"]
+					OverflowRisk,
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64149,6 +64730,22 @@ pub mod api {
 						>,
 					},
 					#[codec(index = 2)]
+					#[doc = "Claim rewards for another account"]
+					#[doc = ""]
+					#[doc = "The dispatch origin must be signed."]
+					#[doc = ""]
+					#[doc = "Parameters:"]
+					#[doc = "- `who`: The account to claim rewards for"]
+					#[doc = "- `asset`: The asset to claim rewards for"]
+					#[doc = ""]
+					#[doc = "Emits `RewardsClaimed` event when successful."]
+					claim_rewards_other {
+						who: ::subxt_core::utils::AccountId32,
+						asset: runtime_types::tangle_primitives::services::Asset<
+							::core::primitive::u128,
+						>,
+					},
+					#[codec(index = 3)]
 					#[doc = "Manage asset id to vault rewards."]
 					#[doc = ""]
 					#[doc = "# Permissions"]
@@ -64173,7 +64770,32 @@ pub mod api {
 						>,
 						action: runtime_types::pallet_rewards::types::AssetAction,
 					},
-					#[codec(index = 3)]
+					#[codec(index = 4)]
+					#[doc = "Creates a new reward configuration for a specific vault."]
+					#[doc = ""]
+					#[doc = "# Arguments"]
+					#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
+					#[doc = "* `vault_id` - The ID of the vault to update"]
+					#[doc = "* `new_config` - The new reward configuration containing:"]
+					#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+					#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
+					#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
+					#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
+					#[doc = ""]
+					#[doc = "# Events"]
+					#[doc = "* `VaultRewardConfigUpdated` - Emitted when vault reward config is updated"]
+					#[doc = ""]
+					#[doc = "# Errors"]
+					#[doc = "* `BadOrigin` - If caller is not authorized through `ForceOrigin`"]
+					#[doc = "* `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap"]
+					#[doc = "* `BoostMultiplierMustBeOne` - If boost multiplier is not 1"]
+					create_reward_vault {
+						vault_id: ::core::primitive::u32,
+						new_config: runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
+							::core::primitive::u128,
+						>,
+					},
+					#[codec(index = 5)]
 					#[doc = "Updates the reward configuration for a specific vault."]
 					#[doc = ""]
 					#[doc = "# Arguments"]
@@ -64190,12 +64812,23 @@ pub mod api {
 					#[doc = ""]
 					#[doc = "# Errors"]
 					#[doc = "* `BadOrigin` - If caller is not authorized through `ForceOrigin`"]
+					#[doc = "* `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap"]
+					#[doc = "* `BoostMultiplierMustBeOne` - If boost multiplier is not 1"]
 					update_vault_reward_config {
 						vault_id: ::core::primitive::u32,
 						new_config: runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
 							::core::primitive::u128,
 						>,
 					},
+					#[codec(index = 6)]
+					#[doc = "Update the decay configuration"]
+					update_decay_config {
+						start_period: ::core::primitive::u64,
+						rate: runtime_types::sp_arithmetic::per_things::Percent,
+					},
+					#[codec(index = 7)]
+					#[doc = "Update the number of blocks used for APY calculation"]
+					update_apy_blocks { blocks: ::core::primitive::u64 },
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64252,7 +64885,31 @@ pub mod api {
 					RewardConfigNotFound,
 					#[codec(index = 11)]
 					#[doc = "Arithmetic operation caused an overflow"]
-					ArithmeticError,
+					CannotCalculatePropotionalApy,
+					#[codec(index = 12)]
+					#[doc = "Error returned when trying to calculate reward per block"]
+					CannotCalculateRewardPerBlock,
+					#[codec(index = 13)]
+					#[doc = "Incentive cap is greater than deposit cap"]
+					IncentiveCapGreaterThanDepositCap,
+					#[codec(index = 14)]
+					#[doc = "Boost multiplier must be 1"]
+					BoostMultiplierMustBeOne,
+					#[codec(index = 15)]
+					#[doc = "Vault already exists"]
+					VaultAlreadyExists,
+					#[codec(index = 16)]
+					#[doc = "Total deposit is less than incentive cap"]
+					TotalDepositLessThanIncentiveCap,
+					#[codec(index = 17)]
+					#[doc = "Pot account not found"]
+					PotAlreadyExists,
+					#[codec(index = 18)]
+					#[doc = "Pot account not found"]
+					PotAccountNotFound,
+					#[codec(index = 19)]
+					#[doc = "Decay rate is too high"]
+					InvalidDecayRate,
 				}
 				#[derive(
 					:: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64303,7 +64960,52 @@ pub mod api {
 						action: runtime_types::pallet_rewards::types::AssetAction,
 					},
 					#[codec(index = 4)]
-					VaultRewardConfigUpdated { vault_id: ::core::primitive::u32 },
+					#[doc = "Vault reward config updated"]
+					VaultRewardConfigUpdated {
+						vault_id: ::core::primitive::u32,
+						new_config: runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
+							::core::primitive::u128,
+						>,
+					},
+					#[codec(index = 5)]
+					#[doc = "Vault created"]
+					RewardVaultCreated {
+						vault_id: ::core::primitive::u32,
+						new_config: runtime_types::pallet_rewards::types::RewardConfigForAssetVault<
+							::core::primitive::u128,
+						>,
+						pot_account: ::subxt::ext::subxt_core::utils::AccountId32,
+					},
+					#[codec(index = 6)]
+					#[doc = "Total score in vault updated"]
+					TotalScoreUpdated {
+						vault_id: ::core::primitive::u32,
+						asset: runtime_types::tangle_primitives::services::Asset<
+							::core::primitive::u128,
+						>,
+						total_score: ::core::primitive::u128,
+						lock_multiplier: ::core::option::Option<
+							runtime_types::tangle_primitives::types::rewards::LockMultiplier,
+						>,
+					},
+					#[codec(index = 7)]
+					#[doc = "Total deposit in vault updated"]
+					TotalDepositUpdated {
+						vault_id: ::core::primitive::u32,
+						asset: runtime_types::tangle_primitives::services::Asset<
+							::core::primitive::u128,
+						>,
+						total_deposit: ::core::primitive::u128,
+					},
+					#[codec(index = 8)]
+					#[doc = "Decay configuration was updated"]
+					DecayConfigUpdated {
+						start_period: ::core::primitive::u64,
+						rate: runtime_types::sp_arithmetic::per_things::Percent,
+					},
+					#[codec(index = 9)]
+					#[doc = "The number of blocks for APY calculation has been updated"]
+					ApyBlocksUpdated { blocks: ::core::primitive::u64 },
 				}
 			}
 			pub mod types {

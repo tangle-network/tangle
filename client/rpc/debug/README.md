@@ -1,19 +1,17 @@
 A port crate of some of the tracing related rpc requests from the go-ethereum [debug namespace](https://geth.ethereum.org/docs/interacting-with-geth/rpc/ns-debug). Includes `debug_traceTransaction`, `debug_traceBlockByNumber` and `debug_traceBlockByHash`.
 
-## How tracing works in Moonbeam
+## How tracing works in Tangle
 
 Runtime wasms compiled with the `tracing` evm feature will emit events related to entering/exiting substates or opcode execution. This events are used by developers or indexer services to get a granular view on an evm transaction.
 
-Tracing wasms for each moonbeam/river/base runtime versions live at `moonbeam-runtime-overrides` repository in github.
+Tracing functionality in tangle makes heavy use of [environmental](https://docs.rs/environmental/latest/environmental/):
 
-Tracing functionality in Moonbeam makes heavy use of [environmental](https://docs.rs/environmental/latest/environmental/):
-
-- The rpc request must create a runtime api instance to replay the transaction. The runtime api call is made `using` `environmental`.
-- Once in the wasm, the target evm transaction is replayed by calling the evm also `using` `environmental`.
-- This allows:
-  1. Listen to new events from the evm in the moonbeam runtime wasm.
-  2. Proxy those events to the client (through a host function), which is also listening for events from the runtime.
-- This way we don't make use of (limited) wasm memory, and instead store the evm emitted events content in the client.
+-   The rpc request must create a runtime api instance to replay the transaction. The runtime api call is made `using` `environmental`.
+-   Once in the wasm, the target evm transaction is replayed by calling the evm also `using` `environmental`.
+-   This allows:
+    1. Listen to new events from the evm in the tangle runtime wasm.
+    2. Proxy those events to the client (through a host function), which is also listening for events from the runtime.
+-   This way we don't make use of (limited) wasm memory, and instead store the evm emitted events content in the client.
 
 Once the evm execution concludes, the runtime context exited and all events have been stored in the client memory, we support formatting the captured events in different ways that are convenient for the end-user, like raw format (opcode level tracing), callTracer (used as a default formatter by geth) or blockscout custom tracer.
 
@@ -63,8 +61,8 @@ sp_api::decl_runtime_apis! {
 
 Substrate provides two macro attributes to do what we want: `api_version` and `changed_in`.
 
-- `api_version`: is the current version of the Api. In our case we updated it to `#[api_version(2)]`.
-- changed_in: is meant to describe for `decl_runtime_apis` macro past implementations of methods. In this case, we anotate our previous implementation with `#[changed_in(2)]`, telling the `decl_runtime_apis` macro that this is the implementation to use before version 2. In fact, this attribute will rename the method name for the trait in the client side to `METHOD_before_version_VERSION`, so `trace_transaction_before_version_2` in our example.
+-   `api_version`: is the current version of the Api. In our case we updated it to `#[api_version(2)]`.
+-   changed_in: is meant to describe for `decl_runtime_apis` macro past implementations of methods. In this case, we anotate our previous implementation with `#[changed_in(2)]`, telling the `decl_runtime_apis` macro that this is the implementation to use before version 2. In fact, this attribute will rename the method name for the trait in the client side to `METHOD_before_version_VERSION`, so `trace_transaction_before_version_2` in our example.
 
 The un-anotated method is considered the default implemetation, and holds the current `trace_transaction` signature, with the new header argument and the empty result.
 

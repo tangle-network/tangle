@@ -85,8 +85,15 @@ interface IERC20 {
     /// @custom:selector ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
     /// @param from address The address sending the tokens
     /// @param to address The address receiving the tokens.
-    /// @param value uint256 The amount of tokens transfered.
+    /// @param value uint256 The amount of tokens transferred.
     event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /// @dev Event emited when a native transfer has been performed.
+    /// @custom:selector 252d1c824457d58ee034ca5279c879eea06e3cf5f3d0df73d9f6939f9d081c8c
+    /// @param from address The address sending the tokens
+    /// @param to bytes32 The accountId32 receiving the tokens.
+    /// @param value uint256 The amount of tokens transferred.
+    event TransferNative(address indexed from, bytes32 indexed to, uint256 value);
 
     /// @dev Event emited when an approval has been registered.
     /// @custom:selector 8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925

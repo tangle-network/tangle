@@ -17,8 +17,7 @@ use crate::Config;
 use frame_support::traits::Currency;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::Percent;
-use sp_runtime::RuntimeDebug;
+use sp_runtime::{Percent, RuntimeDebug};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 pub type BalanceOf<T> =
@@ -51,4 +50,10 @@ pub struct RewardConfig<VaultId, Balance> {
 pub enum AssetAction {
 	Add,
 	Remove,
+}
+
+/// Type for subaccounts
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub enum SubaccountType {
+	RewardPot,
 }

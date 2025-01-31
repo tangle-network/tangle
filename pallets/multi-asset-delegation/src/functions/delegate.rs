@@ -21,7 +21,7 @@ use frame_support::{
 	traits::{fungibles::Mutate, tokens::Preservation, Get},
 };
 use sp_runtime::{
-	traits::{CheckedSub, Zero},
+	traits::{CheckedAdd, CheckedSub, Zero},
 	DispatchError, Percent,
 };
 use sp_std::vec::Vec;
@@ -70,7 +70,8 @@ impl<T: Config> Pallet<T> {
 				.iter_mut()
 				.find(|d| d.operator == operator && d.asset_id == asset_id)
 			{
-				delegation.amount += amount;
+				delegation.amount =
+					delegation.amount.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
 			} else {
 				// Create the new delegation
 				let new_delegation = BondInfoDelegator {
@@ -108,7 +109,10 @@ impl<T: Config> Pallet<T> {
 				if let Some(existing_delegation) =
 					delegations.iter_mut().find(|d| d.delegator == who && d.asset_id == asset_id)
 				{
-					existing_delegation.amount += amount;
+					existing_delegation.amount = existing_delegation
+						.amount
+						.checked_add(&amount)
+						.ok_or(Error::<T>::OverflowRisk)?;
 				} else {
 					delegations
 						.try_push(delegation)
@@ -164,7 +168,8 @@ impl<T: Config> Pallet<T> {
 			let delegation = &mut metadata.delegations[delegation_index];
 			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
-			delegation.amount -= amount;
+			delegation.amount =
+				delegation.amount.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
 
 			// Create the unstake request
 			let current_round = Self::current_round();
@@ -202,12 +207,18 @@ impl<T: Config> Pallet<T> {
 
 				// Reduce the amount in the operator's delegation
 				ensure!(operator_delegation.amount >= amount, Error::<T>::InsufficientBalance);
-				operator_delegation.amount -= amount;
+				operator_delegation.amount = operator_delegation
+					.amount
+					.checked_sub(&amount)
+					.ok_or(Error::<T>::InsufficientBalance)?;
 
 				// Remove the delegation if the remaining amount is zero
 				if operator_delegation.amount.is_zero() {
 					operator_metadata.delegations.remove(operator_delegation_index);
-					operator_metadata.delegation_count -= 1;
+					operator_metadata.delegation_count = operator_metadata
+						.delegation_count
+						.checked_sub(1u32)
+						.ok_or(Error::<T>::InsufficientBalance)?;
 				}
 
 				Ok(())
@@ -315,14 +326,20 @@ impl<T: Config> Pallet<T> {
 						.iter_mut()
 						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
 					{
-						delegation.amount += amount;
+						delegation.amount = delegation
+							.amount
+							.checked_add(&amount)
+							.ok_or(Error::<T>::OverflowRisk)?;
 					} else {
 						delegations
 							.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
 							.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 
 						// Increase the delegation count only when a new delegation is added
-						operator_metadata.delegation_count += 1;
+						operator_metadata.delegation_count = operator_metadata
+							.delegation_count
+							.checked_add(1)
+							.ok_or(Error::<T>::OverflowRisk)?;
 					}
 					operator_metadata.delegations = delegations;
 
@@ -337,7 +354,10 @@ impl<T: Config> Pallet<T> {
 			if let Some(delegation) = delegations.iter_mut().find(|d| {
 				d.operator == unstake_request.operator && d.asset_id == unstake_request.asset_id
 			}) {
-				delegation.amount += unstake_request.amount;
+				delegation.amount = delegation
+					.amount
+					.checked_add(&unstake_request.amount)
+					.ok_or(Error::<T>::OverflowRisk)?;
 			} else {
 				// Create a new delegation
 				delegations

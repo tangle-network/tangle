@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesServicesAsset, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesAsset, TanglePrimitivesServicesField, TanglePrimitivesServicesOperatorPreferences, TanglePrimitivesServicesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -698,6 +698,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       Destroyed: AugmentedEvent<ApiType, [poolId: u32], { poolId: u32 }>;
       /**
+       * The last PoolId is updated
+       **/
+      LastPoolIdUpdated: AugmentedEvent<ApiType, [poolId: u32], { poolId: u32 }>;
+      /**
        * A member has been removed from a pool.
        * 
        * The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked).
@@ -1047,6 +1051,10 @@ declare module '@polkadot/api-base/types/events' {
     };
     rewards: {
       /**
+       * The number of blocks for APY calculation has been updated
+       **/
+      ApyBlocksUpdated: AugmentedEvent<ApiType, [blocks: u64], { blocks: u64 }>;
+      /**
        * Asset has been updated to reward vault
        **/
       AssetUpdatedInVault: AugmentedEvent<ApiType, [vaultId: u32, assetId: TanglePrimitivesServicesAsset, action: PalletRewardsAssetAction], { vaultId: u32, assetId: TanglePrimitivesServicesAsset, action: PalletRewardsAssetAction }>;
@@ -1055,6 +1063,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       BlueprintWhitelisted: AugmentedEvent<ApiType, [blueprintId: u64], { blueprintId: u64 }>;
       /**
+       * Decay configuration was updated
+       **/
+      DecayConfigUpdated: AugmentedEvent<ApiType, [startPeriod: u64, rate: Percent], { startPeriod: u64, rate: Percent }>;
+      /**
        * Event emitted when an incentive APY and cap are set for a reward vault
        **/
       IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [vaultId: u32, apy: Percent, cap: u128], { vaultId: u32, apy: Percent, cap: u128 }>;
@@ -1062,7 +1074,22 @@ declare module '@polkadot/api-base/types/events' {
        * Rewards have been claimed by an account
        **/
       RewardsClaimed: AugmentedEvent<ApiType, [account: AccountId32, asset: TanglePrimitivesServicesAsset, amount: u128], { account: AccountId32, asset: TanglePrimitivesServicesAsset, amount: u128 }>;
-      VaultRewardConfigUpdated: AugmentedEvent<ApiType, [vaultId: u32], { vaultId: u32 }>;
+      /**
+       * Vault created
+       **/
+      RewardVaultCreated: AugmentedEvent<ApiType, [vaultId: u32, newConfig: PalletRewardsRewardConfigForAssetVault, potAccount: AccountId32], { vaultId: u32, newConfig: PalletRewardsRewardConfigForAssetVault, potAccount: AccountId32 }>;
+      /**
+       * Total deposit in vault updated
+       **/
+      TotalDepositUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesAsset, totalDeposit: u128], { vaultId: u32, asset: TanglePrimitivesServicesAsset, totalDeposit: u128 }>;
+      /**
+       * Total score in vault updated
+       **/
+      TotalScoreUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesAsset, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier>], { vaultId: u32, asset: TanglePrimitivesServicesAsset, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier> }>;
+      /**
+       * Vault reward config updated
+       **/
+      VaultRewardConfigUpdated: AugmentedEvent<ApiType, [vaultId: u32, newConfig: PalletRewardsRewardConfigForAssetVault], { vaultId: u32, newConfig: PalletRewardsRewardConfigForAssetVault }>;
       /**
        * Generic event
        **/

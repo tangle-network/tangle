@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1205, // v1.2.5
+	spec_version: 1207, // v1.2.7
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1627,8 +1627,7 @@ impl_runtime_apis! {
 			account_id: AccountId,
 			asset_id: tangle_primitives::services::Asset<AssetId>,
 		) -> Result<Balance, sp_runtime::DispatchError> {
-			let (rewards, _) = Rewards::calculate_rewards(&account_id, asset_id)?;
-			Ok(rewards)
+			Rewards::calculate_rewards(&account_id, asset_id)
 		}
 	}
 
