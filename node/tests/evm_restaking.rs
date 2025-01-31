@@ -189,7 +189,8 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 1000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
 
 /// Setup the E2E test environment.
@@ -297,7 +298,7 @@ where
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
 							apy: api::runtime_types::sp_arithmetic::per_things::Percent(MOCK_APY),
 							deposit_cap: MOCK_DEPOSIT_CAP,
-							incentive_cap: 0,
+							incentive_cap: 1,
 							boost_multiplier: Some(1),
 						},
 				},
@@ -935,7 +936,7 @@ fn mad_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		let deposit = U256::from(tnt) * U256::from(2);
+		let deposit = U256::from(MOCK_DEPOSIT);
 
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
@@ -951,16 +952,16 @@ fn mad_rewards() {
 		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 		// Mint WETH for Bob
-		let usdc_amount = deposit;
-		let usdc = MockERC20::new(t.usdc, &bob_provider);
-		usdc.mint(bob.address(), usdc_amount).send().await?.get_receipt().await?;
+		let weth_amount = deposit;
+		let weth = MockERC20::new(t.weth, &bob_provider);
+		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
 
-		// // Approve LRT contract to spend WETH
-		// let deposit_amount = weth_amount;
-		// let approve_result =
-		// 	weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
-		// assert!(approve_result.status());
-		// info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+		// Approve LRT contract to spend WETH
+		let deposit_amount = weth_amount;
+		let approve_result =
+			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
+		assert!(approve_result.status());
+		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
 
 		// // Deposit WETH to LRT
 		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);

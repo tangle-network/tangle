@@ -164,7 +164,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1205, // v1.2.5
+	spec_version: 1207, // v1.2.7
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1449,13 +1449,14 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 	(
-		migrations::MigrateSessionKeys<Runtime>,
+		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
 		// AssetId limits
 		// 0 - 1000 (reserved for future use)
 		// 1000 - 50000 (reserved for LST pools)
 		// 50000 - 1000000 (reserved for native assets)
 		// set user start at 50_000, everything below is reserved for system use
-		migrations::SetNextAssetId<ConstU128<50_000>, Runtime>,
+		migrations::assets_indices_migration_01162025::SetNextAssetId<ConstU128<50_000>, Runtime>,
+		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
 	),
 >;
 

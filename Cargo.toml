@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.2.5"
+version = "1.2.7"
 authors = ["Tangle Foundation."]
 edition = "2021"
 license = "Unlicense"
@@ -10,6 +10,7 @@ exclude = ["examples"]
 
 [workspace]
 members = [
+    "account-util",
     "primitives",
     "primitives/crypto",
     "primitives/rpc/*",
