@@ -2115,7 +2115,11 @@ declare module '@polkadot/types/lookup' {
       readonly startPeriod: u64;
       readonly rate: Percent;
     } & Struct;
-    readonly type: 'RewardsClaimed' | 'IncentiveAPYAndCapSet' | 'BlueprintWhitelisted' | 'AssetUpdatedInVault' | 'VaultRewardConfigUpdated' | 'RewardVaultCreated' | 'TotalScoreUpdated' | 'TotalDepositUpdated' | 'DecayConfigUpdated';
+    readonly isApyBlocksUpdated: boolean;
+    readonly asApyBlocksUpdated: {
+      readonly blocks: u64;
+    } & Struct;
+    readonly type: 'RewardsClaimed' | 'IncentiveAPYAndCapSet' | 'BlueprintWhitelisted' | 'AssetUpdatedInVault' | 'VaultRewardConfigUpdated' | 'RewardVaultCreated' | 'TotalScoreUpdated' | 'TotalDepositUpdated' | 'DecayConfigUpdated' | 'ApyBlocksUpdated';
   }
 
   /** @name PalletRewardsAssetAction (150) */
@@ -4685,6 +4689,11 @@ declare module '@polkadot/types/lookup' {
     readonly asClaimRewards: {
       readonly asset: TanglePrimitivesServicesAsset;
     } & Struct;
+    readonly isClaimRewardsOther: boolean;
+    readonly asClaimRewardsOther: {
+      readonly who: AccountId32;
+      readonly asset: TanglePrimitivesServicesAsset;
+    } & Struct;
     readonly isManageAssetRewardVault: boolean;
     readonly asManageAssetRewardVault: {
       readonly vaultId: u32;
@@ -4706,7 +4715,11 @@ declare module '@polkadot/types/lookup' {
       readonly startPeriod: u64;
       readonly rate: Percent;
     } & Struct;
-    readonly type: 'ClaimRewards' | 'ManageAssetRewardVault' | 'CreateRewardVault' | 'UpdateVaultRewardConfig' | 'UpdateDecayConfig';
+    readonly isUpdateApyBlocks: boolean;
+    readonly asUpdateApyBlocks: {
+      readonly blocks: u64;
+    } & Struct;
+    readonly type: 'ClaimRewards' | 'ClaimRewardsOther' | 'ManageAssetRewardVault' | 'CreateRewardVault' | 'UpdateVaultRewardConfig' | 'UpdateDecayConfig' | 'UpdateApyBlocks';
   }
 
   /** @name PalletSudoError (457) */

@@ -1990,7 +1990,10 @@ export default {
       },
       DecayConfigUpdated: {
         startPeriod: 'u64',
-        rate: 'Percent'
+        rate: 'Percent',
+      },
+      ApyBlocksUpdated: {
+        blocks: 'u64'
       }
     }
   },
@@ -4540,6 +4543,10 @@ export default {
       claim_rewards: {
         asset: 'TanglePrimitivesServicesAsset',
       },
+      claim_rewards_other: {
+        who: 'AccountId32',
+        asset: 'TanglePrimitivesServicesAsset',
+      },
       manage_asset_reward_vault: {
         vaultId: 'u32',
         assetId: 'TanglePrimitivesServicesAsset',
@@ -4555,7 +4562,10 @@ export default {
       },
       update_decay_config: {
         startPeriod: 'u64',
-        rate: 'Percent'
+        rate: 'Percent',
+      },
+      update_apy_blocks: {
+        blocks: 'u64'
       }
     }
   },

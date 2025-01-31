@@ -1051,6 +1051,10 @@ declare module '@polkadot/api-base/types/events' {
     };
     rewards: {
       /**
+       * The number of blocks for APY calculation has been updated
+       **/
+      ApyBlocksUpdated: AugmentedEvent<ApiType, [blocks: u64], { blocks: u64 }>;
+      /**
        * Asset has been updated to reward vault
        **/
       AssetUpdatedInVault: AugmentedEvent<ApiType, [vaultId: u32, assetId: TanglePrimitivesServicesAsset, action: PalletRewardsAssetAction], { vaultId: u32, assetId: TanglePrimitivesServicesAsset, action: PalletRewardsAssetAction }>;
