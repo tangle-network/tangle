@@ -19,8 +19,9 @@ use crate::Weight;
 use educe::Educe;
 use fp_evm::CallInfo;
 use frame_support::pallet_prelude::*;
+use serde::Deserializer;
 #[cfg(feature = "std")]
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use sp_core::{ByteArray, RuntimeDebug, H160, U256};
 use sp_runtime::Percent;
 

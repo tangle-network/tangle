@@ -38,7 +38,7 @@ impl<T: crate::Config> MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, Bloc
 
 	fn is_operator_active(operator: &T::AccountId) -> bool {
 		Operators::<T>::get(operator)
-			.is_some_and(|metadata| matches!(metadata.status, OperatorStatus::Active))
+			.map_or(false, |metadata| matches!(metadata.status, OperatorStatus::Active))
 	}
 
 	fn get_operator_stake(operator: &T::AccountId) -> BalanceOf<T> {
