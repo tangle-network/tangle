@@ -4,7 +4,7 @@ use pallet_evm::GasWeightMapping;
 use scale_info::TypeInfo;
 
 parameter_types! {
-	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
+	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
 }
 
 pub struct PalletEvmRunner;
@@ -155,7 +155,9 @@ impl pallet_services::Config for Runtime {
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
 	type Fungibles = Assets;
-	type PalletEVMAddress = ServicesEVMAddress;
+	type PalletId = ServicesPalletId;
+	type SlashRecipient = TreasuryAccount;
+	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type EvmAddressMapping = PalletEVMAddressMapping;

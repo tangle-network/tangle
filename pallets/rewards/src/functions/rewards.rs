@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
 use crate::DecayRate;
 use crate::DecayStartPeriod;
 use crate::RewardVaultsPotAccount;

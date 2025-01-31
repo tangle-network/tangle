@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::services::{constraints::Constraints, types::TypeCheckError};
-use educe::{Educe, *};
+use educe::Educe;
 use frame_support::pallet_prelude::*;
 use parity_scale_codec::Encode;
 use sp_core::H160;

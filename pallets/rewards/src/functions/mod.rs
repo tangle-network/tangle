@@ -24,6 +24,7 @@ use sp_std::vec::Vec;
 use tangle_primitives::services::Asset;
 
 pub mod rewards;
+pub mod services;
 
 impl<T: Config> Pallet<T> {
 	pub fn remove_asset_from_vault(

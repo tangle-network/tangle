@@ -119,6 +119,21 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 		blueprint_id: crate::BlueprintId,
 	) -> bool;
 
+	/// Get a user's deposit and associated locks for a specific asset.
+	///
+	/// This method retrieves information about a user's deposit for a given asset,
+	/// including both the unlocked amount and any time-locked portions.
+	///
+	/// # Parameters
+	///
+	/// * `who`: A reference to the account identifier of the user.
+	/// * `asset_id`: The asset identifier for which to get deposit information.
+	///
+	/// # Returns
+	///
+	/// An `Option` containing the user's deposit information if it exists:
+	/// - `Some(UserDepositWithLocks)` containing the unlocked amount and any time-locks
+	/// - `None` if no deposit exists for this user and asset
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
 		asset_id: Asset<AssetId>,

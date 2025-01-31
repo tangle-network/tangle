@@ -14,64 +14,43 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::types::{BlueprintId, InstanceId};
-use sp_runtime::Percent;
+use crate::services::UnappliedSlash;
+use frame_support::weights::Weight;
+use sp_runtime::DispatchError;
 
 /// Trait for managing slashing in the Tangle network.
 /// This trait provides functionality to slash operators and delegators.
-pub trait SlashManager<AccountId> {
-	type Error;
-
+pub trait SlashManager<AccountId, Balance, AssetId> {
 	/// Slash a delegator's stake for an offense.
 	///
 	/// # Parameters
+	/// * `unapplied_slash` - The unapplied slash record containing slash details
 	/// * `delegator` - The account of the delegator being slashed
-	/// * `offending_operator` - The operator account associated with the offense
-	/// * `blueprint_id` - The blueprint ID where the offense occurred
-	/// * `service_id` - The service instance ID where the offense occurred
-	/// * `percentage` - The percentage of stake to slash
 	fn slash_delegator(
+		unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
 		delegator: &AccountId,
-		offending_operator: &AccountId,
-		blueprint_id: BlueprintId,
-		service_id: InstanceId,
-		percentage: Percent,
-	) -> Result<(), Self::Error>;
+	) -> Result<Weight, DispatchError>;
 
 	/// Slash an operator's stake for an offense.
 	///
 	/// # Parameters
-	/// * `offending_operator` - The operator account being slashed
-	/// * `blueprint_id` - The blueprint ID where the offense occurred
-	/// * `service_id` - The service instance ID where the offense occurred
-	/// * `percentage` - The percentage of stake to slash
+	/// * `unapplied_slash` - The unapplied slash record containing slash details
 	fn slash_operator(
-		offending_operator: &AccountId,
-		blueprint_id: BlueprintId,
-		service_id: InstanceId,
-		percentage: Percent,
-	) -> Result<(), Self::Error>;
+		unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
+	) -> Result<Weight, DispatchError>;
 }
 
-impl<AccountId> SlashManager<AccountId> for () {
-	type Error = &'static str;
-
+impl<AccountId, Balance, AssetId> SlashManager<AccountId, Balance, AssetId> for () {
 	fn slash_delegator(
+		_unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
 		_delegator: &AccountId,
-		_offending_operator: &AccountId,
-		_blueprint_id: BlueprintId,
-		_service_id: InstanceId,
-		_percentage: Percent,
-	) -> Result<(), Self::Error> {
-		Ok(())
+	) -> Result<Weight, DispatchError> {
+		Ok(Weight::zero())
 	}
 
 	fn slash_operator(
-		_offending_operator: &AccountId,
-		_blueprint_id: BlueprintId,
-		_service_id: InstanceId,
-		_percentage: Percent,
-	) -> Result<(), Self::Error> {
-		Ok(())
+		_unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
+	) -> Result<Weight, DispatchError> {
+		Ok(Weight::zero())
 	}
 }

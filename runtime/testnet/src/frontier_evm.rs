@@ -96,7 +96,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		who: &H160,
 		fee: U256,
 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		let pallet_services_address = pallet_services::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
 			return Ok(None);
@@ -113,7 +113,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		base_fee: U256,
 		already_withdrawn: Self::LiquidityInfo,
 	) -> Self::LiquidityInfo {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		let pallet_services_address = pallet_services::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
 			return already_withdrawn;

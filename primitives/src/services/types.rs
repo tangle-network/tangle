@@ -16,11 +16,11 @@
 
 use educe::Educe;
 use frame_support::pallet_prelude::*;
-use serde::Deserializer;
 #[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use sp_core::{RuntimeDebug, H160};
 use sp_runtime::{traits::AtLeast32BitUnsigned, Percent};
+use sp_staking::EraIndex;
 use sp_std::fmt::Display;
 
 #[cfg(not(feature = "std"))]
@@ -410,4 +410,27 @@ impl Default for MembershipModel {
 	fn default() -> Self {
 		MembershipModel::Fixed { min_operators: 1 }
 	}
+}
+
+/// A pending slash record. The value of the slash has been computed but not applied yet,
+/// rather deferred for several eras.
+#[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[scale_info(skip_type_params(Balance))]
+pub struct UnappliedSlash<AccountId, Balance, AssetId> {
+	/// The era the slash was reported.
+	pub era: EraIndex,
+	/// The Blueprint Id of the service being slashed.
+	pub blueprint_id: u64,
+	/// The Service Instance Id on which the slash is applied.
+	pub service_id: u64,
+	/// The account ID of the offending operator.
+	pub operator: AccountId,
+	/// The operator's own slash in native currency
+	pub own: Balance,
+	/// All other slashed restakers and amounts per asset.
+	/// (delegator, asset, amount)
+	pub others: Vec<(AccountId, Asset<AssetId>, Balance)>,
+	/// Reporters of the offence; bounty payout recipients.
+	pub reporters: Vec<AccountId>,
 }

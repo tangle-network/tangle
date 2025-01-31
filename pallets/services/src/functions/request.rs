@@ -87,7 +87,7 @@ impl<T: Config> Pallet<T> {
 				Asset::Custom(asset_id) if asset_id == Zero::zero() => {
 					T::Currency::transfer(
 						&caller,
-						&Self::account_id(),
+						&Self::pallet_account(),
 						value,
 						ExistenceRequirement::KeepAlive,
 					)?;
@@ -98,7 +98,7 @@ impl<T: Config> Pallet<T> {
 					T::Fungibles::transfer(
 						asset_id,
 						&caller,
-						&Self::account_id(),
+						&Self::pallet_account(),
 						value,
 						Preservation::Preserve,
 					)?;
@@ -110,7 +110,7 @@ impl<T: Config> Pallet<T> {
 					let mapped_origin = T::EvmAddressMapping::into_account_id(evm_origin);
 					ensure!(mapped_origin == caller, DispatchError::BadOrigin);
 					let (success, _weight) =
-						Self::erc20_transfer(token, evm_origin, Self::address(), value)
+						Self::erc20_transfer(token, evm_origin, Self::pallet_evm_account(), value)
 							.map_err(|_| Error::<T>::OnErc20TransferFailure)?;
 					ensure!(success, Error::<T>::ERC20TransferFailed);
 					Account::from(evm_origin)

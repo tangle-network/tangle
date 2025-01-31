@@ -49,13 +49,8 @@ impl<T: Config> Pallet<T> {
 			// Slash each delegator
 			for delegator in operator_data.delegations.iter() {
 				// Ignore errors from individual delegator slashing
-				let _ = Self::slash_delegator(
-					&delegator.delegator,
-					operator,
-					blueprint_id,
-					service_id,
-					percentage,
-				);
+				let _ =
+					Self::slash_delegator(&delegator.delegator, operator, blueprint_id, percentage);
 			}
 
 			// transfer the slashed amount to the treasury
@@ -90,7 +85,6 @@ impl<T: Config> Pallet<T> {
 		delegator: &T::AccountId,
 		operator: &T::AccountId,
 		blueprint_id: BlueprintId,
-		_service_id: InstanceId,
 		percentage: Percent,
 	) -> Result<(), DispatchError> {
 		Delegators::<T>::try_mutate(delegator, |maybe_metadata| {
@@ -102,7 +96,9 @@ impl<T: Config> Pallet<T> {
 				.find(|d| &d.operator == operator)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Check delegation type and blueprint_id
+			// Sanity check the delegation type and blueprint_id. This shouldn't
+			// ever fail, since `slash_delegator` is called from the service module,
+			// which checks the blueprint_id before calling this function,
 			match &delegation.blueprint_selection {
 				DelegatorBlueprintSelection::Fixed(blueprints) => {
 					// For fixed delegation, ensure the blueprint_id is in the list
@@ -119,31 +115,6 @@ impl<T: Config> Pallet<T> {
 				.amount
 				.checked_sub(&slash_amount)
 				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
-
-			match delegation.asset_id {
-				Asset::Custom(asset_id) => {
-					// Transfer slashed amount to the treasury
-					let _ = T::Fungibles::transfer(
-						asset_id,
-						&Self::pallet_account(),
-						&T::SlashedAmountRecipient::get(),
-						slash_amount,
-						Preservation::Expendable,
-					);
-				},
-				Asset::Erc20(address) => {
-					let slashed_amount_recipient_evm =
-						T::EvmAddressMapping::into_address(T::SlashedAmountRecipient::get());
-					let (success, _weight) = Self::erc20_transfer(
-						address,
-						&Self::pallet_evm_account(),
-						slashed_amount_recipient_evm,
-						slash_amount,
-					)
-					.map_err(|_| Error::<T>::ERC20TransferFailed)?;
-					ensure!(success, Error::<T>::ERC20TransferFailed);
-				},
-			}
 
 			// emit event
 			Self::deposit_event(Event::DelegatorSlashed {

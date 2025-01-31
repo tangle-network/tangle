@@ -24,6 +24,7 @@ use frame_election_provider_support::{
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
+	PalletId,
 };
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
@@ -209,7 +210,9 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
+	pub const ServicePalletAccountId: PalletId = PalletId(*b"Services");
+
+	pub const SlashRecipient: AccountId = AccountId32::new([9u8; 32]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -417,7 +420,9 @@ impl Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
 	type Fungibles = Assets;
-	type PalletEVMAddress = ServicesEVMAddress;
+	type PalletId = ServicePalletAccountId;
+	type SlashRecipient = SlashRecipient;
+	type SlashManager = ();
 	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
@@ -641,7 +646,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		<Staking as Hooks<u64>>::on_initialize(1);
 
 		let call = <Runtime as pallet_services::Config>::EvmRunner::call(
-			Services::address(),
+			Services::pallet_evm_account(),
 			USDC_ERC20,
 			serde_json::from_value::<ethabi::Function>(json!({
 				"name": "initialize",
@@ -682,7 +687,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		// Mint
 		for i in 1..=authorities.len() {
 			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
-				Services::address(),
+				Services::pallet_evm_account(),
 				USDC_ERC20,
 				serde_json::from_value::<ethabi::Function>(json!({
 					"name": "mint",

@@ -5,7 +5,7 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
 use sp_core::{Get, H160, U256};
-use sp_runtime::traits::{UniqueSaturatedInto, Zero};
+use sp_runtime::traits::{AccountIdConversion, UniqueSaturatedInto, Zero};
 use sp_std::{boxed::Box, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, BlueprintServiceManager, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, Field,
@@ -19,23 +19,20 @@ use std::string::String;
 
 #[allow(clippy::too_many_arguments)]
 impl<T: Config> Pallet<T> {
-	/// Returns the account id of the pallet.
+	/// Returns the account ID of the pallet.
+	pub fn pallet_account() -> T::AccountId {
+		T::PalletId::get().into_account_truncating()
+	}
+
+	/// Returns the EVM account id of the pallet.
 	///
 	/// This function retrieves the account id associated with the pallet by converting
 	/// the pallet evm address to an account id.
 	///
 	/// # Returns
 	/// * `T::AccountId` - The account id of the pallet.
-	pub fn account_id() -> T::AccountId {
-		T::EvmAddressMapping::into_account_id(Self::address())
-	}
-
-	/// Returns the EVM address of the pallet.
-	///
-	/// # Returns
-	/// * `H160` - The address of the pallet.
-	pub fn address() -> H160 {
-		T::PalletEVMAddress::get()
+	pub fn pallet_evm_account() -> H160 {
+		T::EvmAddressMapping::into_address(Self::pallet_account())
 	}
 
 	/// Get the address of the master blueprint service manager at a given revision.
@@ -139,7 +136,7 @@ impl<T: Config> Pallet<T> {
 				let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 300_000;
 				let value = U256::zero();
-				let info = Self::evm_call(Self::address(), bsm, value, data, gas_limit)?;
+				let info = Self::evm_call(Self::pallet_evm_account(), bsm, value, data, gas_limit)?;
 				let weight = Self::weight_from_call_info(&info);
 				log::debug!(
 					target: "evm",
@@ -1281,7 +1278,8 @@ impl<T: Config> Pallet<T> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 300_000;
-		let info = Self::evm_call(Self::address(), erc20, U256::zero(), data, gas_limit)?;
+		let info =
+			Self::evm_call(Self::pallet_evm_account(), erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 
 		// decode the result and return it
@@ -1324,7 +1322,7 @@ impl<T: Config> Pallet<T> {
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 300_000;
 		let value = value.using_encoded(U256::from_little_endian);
-		let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
+		let info = Self::evm_call(Self::pallet_evm_account(), contract, value, data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 		Ok((info, weight))
 	}

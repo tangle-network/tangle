@@ -15,9 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use parity_scale_codec::HasCompact;
-use sp_std::prelude::*;
-use tangle_primitives::services::{Asset, Constraints};
+use tangle_primitives::services::Constraints;
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -42,22 +40,3 @@ pub type MaxAssetsPerServiceOf<T> = <ConstraintsFor<T> as Constraints>::MaxAsset
 #[codec(mel_bound(skip_type_params(T)))]
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConstraintsOf<T>(sp_std::marker::PhantomData<T>);
-
-/// A pending slash record. The value of the slash has been computed but not applied yet,
-/// rather deferred for several eras.
-#[derive(Encode, Decode, RuntimeDebug, TypeInfo, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-#[scale_info(skip_type_params(Balance))]
-pub struct UnappliedSlash<AccountId, Balance: HasCompact, AssetId> {
-	/// The Service Instance Id on which the slash is applied.
-	pub service_id: u64,
-	/// The account ID of the offending operator.
-	pub operator: AccountId,
-	/// The operator's own slash in native currency
-	pub own: Balance,
-	/// All other slashed restakers and amounts per asset.
-	/// (delegator, asset, amount)
-	pub others: Vec<(AccountId, Asset<AssetId>, Balance)>,
-	/// Reporters of the offence; bounty payout recipients.
-	pub reporters: Vec<AccountId>,
-}

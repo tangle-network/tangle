@@ -22,10 +22,13 @@
 extern crate alloc;
 use frame_support::{
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, ReservableCurrency},
+	traits::{Currency, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
-use sp_runtime::{traits::Get, DispatchResult};
+use sp_runtime::{
+	traits::{Get, Zero},
+	DispatchResult,
+};
 use tangle_primitives::{
 	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
 	traits::MultiAssetDelegationInfo,
@@ -63,6 +66,7 @@ pub mod module {
 	use frame_support::{
 		dispatch::PostDispatchInfo,
 		traits::fungibles::{Inspect, Mutate},
+		PalletId,
 	};
 	use sp_core::H160;
 	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent};
@@ -81,9 +85,13 @@ pub mod module {
 		type Fungibles: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
 			+ Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
-		/// `Pallet` EVM Address.
+		/// PalletId used for deriving the AccountId and EVM address.
+		/// This account receives slashed assets upon slash event processing.
 		#[pallet::constant]
-		type PalletEVMAddress: Get<H160>;
+		type PalletId: Get<PalletId>;
+
+		#[pallet::constant]
+		type SlashRecipient: Get<Self::AccountId>;
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
@@ -178,6 +186,13 @@ pub mod module {
 			Self::AssetId,
 		>;
 
+		/// Manager for slashing that dispatches slash operations to `pallet-multi-asset-delegation`.
+		type SlashManager: tangle_primitives::traits::SlashManager<
+			Self::AccountId,
+			BalanceOf<Self>,
+			Self::AssetId,
+		>;
+
 		/// Number of eras that slashes are deferred by, after computation.
 		///
 		/// This should be less than the bonding duration. Set to 0 if slashes
@@ -200,10 +215,39 @@ pub mod module {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
 			// Ensure that the pallet's configuration is valid.
-			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM
-			//    address.
-			let account_id = T::EvmAddressMapping::into_account_id(Self::address());
-			assert_eq!(account_id, Self::account_id(), "Services: AccountId mapping is incorrect.");
+			// 1. Make sure that pallet's substrate address maps correctly back to the EVM address
+			let evm_address = T::EvmAddressMapping::into_address(Self::pallet_account());
+			assert_eq!(
+				evm_address,
+				Self::pallet_evm_account(),
+				"Services: EVM address mapping is incorrect."
+			);
+		}
+
+		/// On initialize, we should check for any unapplied slashes and apply them.
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			let mut weight = Zero::zero();
+			let current_era = T::OperatorDelegationManager::get_current_round();
+			let slash_defer_duration = T::SlashDeferDuration::get();
+
+			// Only process slashes from eras that have completed their deferral period
+			let process_era = current_era.saturating_sub(slash_defer_duration);
+
+			// Get all unapplied slashes for this era
+			let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
+			for (index, slash) in prefix_iter {
+				match Self::apply_slash(slash) {
+					Ok(weight_used) => {
+						weight = weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
+						// Remove the slash from storage after successful application
+						UnappliedSlashes::<T>::remove(process_era, index);
+					},
+					Err(_) => {
+						log::error!("Failed to apply slash for index: {:?}", index);
+					},
+				}
+			}
+			weight
 		}
 	}
 
@@ -303,6 +347,8 @@ pub mod module {
 		ExpectedAccountId,
 		/// Request hook failure
 		OnRequestFailure,
+		/// Register hook failure
+		OnRegisterHookFailed,
 		/// ERC20 transfer hook failure
 		OnErc20TransferFailure,
 		/// Approve service request hook failure
@@ -503,7 +549,32 @@ pub mod module {
 			/// Era index
 			era: u32,
 		},
-
+		/// An Operator has been slashed.
+		OperatorSlashed {
+			/// The account that has been slashed.
+			operator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
+		/// A Delegator has been slashed.
+		DelegatorSlashed {
+			/// The account that has been slashed.
+			delegator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
 		/// The Master Blueprint Service Manager has been revised.
 		MasterBlueprintServiceManagerRevised {
 			/// The revision number of the Master Blueprint Service Manager.
@@ -824,64 +895,7 @@ pub mod module {
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let (_, blueprint) = Self::blueprints(blueprint_id)?;
-
-			ensure!(
-				T::OperatorDelegationManager::is_operator_active(&caller),
-				Error::<T>::OperatorNotActive
-			);
-
-			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
-			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
-			blueprint
-				.type_check_registration(&registration_args)
-				.map_err(Error::<T>::TypeCheck)?;
-
-			// Transfer the registration value to the pallet
-			T::Currency::transfer(
-				&caller,
-				&Self::account_id(),
-				value,
-				ExistenceRequirement::KeepAlive,
-			)?;
-
-			let (allowed, _weight) = Self::on_register_hook(
-				&blueprint,
-				blueprint_id,
-				&preferences,
-				&registration_args,
-				value,
-			)?;
-
-			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
-
-			Operators::<T>::insert(blueprint_id, &caller, preferences);
-
-			OperatorsProfile::<T>::try_mutate(&caller, |profile| {
-				match profile {
-					Ok(p) => {
-						p.blueprints
-							.try_insert(blueprint_id)
-							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
-					},
-					Err(_) => {
-						let mut blueprints = BoundedBTreeSet::new();
-						blueprints
-							.try_insert(blueprint_id)
-							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
-						*profile = Ok(OperatorProfile { blueprints, ..Default::default() });
-					},
-				};
-				Result::<_, Error<T>>::Ok(())
-			})?;
-
-			Self::deposit_event(Event::Registered {
-				provider: caller.clone(),
-				blueprint_id,
-				preferences,
-				registration_args,
-			});
-
+			Self::do_register(&caller, blueprint_id, preferences, registration_args, value)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1352,12 +1366,11 @@ pub mod module {
 			);
 
 			// Calculate the slash amounts for operator and delegators
-			let unapplied_slash = Self::calculate_slash(&service, &offender, percent)?;
+			let unapplied_slash = Self::calculate_slash(&caller, &service, &offender, percent)?;
 
 			// Store the slash for later processing
 			let index = Self::next_unapplied_slash_index();
-			let era = T::OperatorDelegationManager::get_current_round();
-			UnappliedSlashes::<T>::insert(era, index, unapplied_slash.clone());
+			UnappliedSlashes::<T>::insert(unapplied_slash.era, index, unapplied_slash.clone());
 			NextUnappliedSlashIndex::<T>::set(index.saturating_add(1));
 
 			Self::deposit_event(Event::<T>::UnappliedSlash {
@@ -1366,7 +1379,7 @@ pub mod module {
 				blueprint_id: service.blueprint,
 				service_id,
 				amount: unapplied_slash.own,
-				era,
+				era: unapplied_slash.era,
 			});
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })

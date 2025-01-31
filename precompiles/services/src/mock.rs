@@ -428,14 +428,6 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 		Default::default()
 	}
 
-	fn slash_operator(
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-		_service_id: tangle_primitives::InstanceId,
-		_percentage: sp_runtime::Percent,
-	) {
-	}
-
 	fn get_user_deposit_with_locks(
 		_who: &AccountId,
 		_asset_id: Asset<AssetId>,

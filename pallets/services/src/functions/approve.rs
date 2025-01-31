@@ -304,7 +304,7 @@ impl<T: Config> Pallet<T> {
 		match payment.asset.clone() {
 			Asset::Custom(asset_id) if asset_id == Zero::zero() => {
 				T::Currency::transfer(
-					&Self::account_id(),
+					&Self::pallet_account(),
 					&mbsm_account_id,
 					payment.amount,
 					ExistenceRequirement::AllowDeath,
@@ -313,16 +313,20 @@ impl<T: Config> Pallet<T> {
 			Asset::Custom(asset_id) => {
 				T::Fungibles::transfer(
 					asset_id,
-					&Self::account_id(),
+					&Self::pallet_account(),
 					&mbsm_account_id,
 					payment.amount,
 					Preservation::Expendable,
 				)?;
 			},
 			Asset::Erc20(token) => {
-				let (success, _weight) =
-					Self::erc20_transfer(token, Self::address(), mbsm_address, payment.amount)
-						.map_err(|_| Error::<T>::OnErc20TransferFailure)?;
+				let (success, _weight) = Self::erc20_transfer(
+					token,
+					Self::pallet_evm_account(),
+					mbsm_address,
+					payment.amount,
+				)
+				.map_err(|_| Error::<T>::OnErc20TransferFailure)?;
 				ensure!(success, Error::<T>::ERC20TransferFailed);
 			},
 		}
