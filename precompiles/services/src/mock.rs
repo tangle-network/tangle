@@ -751,7 +751,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		<Staking as Hooks<u64>>::on_initialize(1);
 
 		let call = <Runtime as pallet_services::Config>::EvmRunner::call(
-			Services::address(),
+			Services::pallet_evm_account(),
 			USDC_ERC20,
 			serde_json::from_value::<ethabi::Function>(json!({
 				"name": "initialize",
@@ -792,7 +792,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		// Mint
 		for a in authorities {
 			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
-				Services::address(),
+				Services::pallet_evm_account(),
 				USDC_ERC20,
 				serde_json::from_value::<ethabi::Function>(json!({
 					"name": "mint",

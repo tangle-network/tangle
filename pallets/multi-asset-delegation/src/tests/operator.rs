@@ -20,8 +20,10 @@ use crate::{
 };
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::{Alice, Bob, Eve};
-use sp_runtime::Percent;
-use tangle_primitives::services::Asset;
+use tangle_primitives::{
+	services::{Asset, UnappliedSlash},
+	traits::SlashManager,
+};
 
 #[test]
 fn join_operator_success() {
@@ -625,19 +627,22 @@ fn slash_operator_success() {
 			operator_stake
 		));
 
-		// Setup delegators
-		let delegator_stake = 5_000;
-		let asset_id = Asset::Custom(1);
+		// Setup delegators with different assets and blueprint selections
+		let delegator1_stake = 5_000;
+		let delegator2_stake = 3_000;
+		let asset1 = Asset::Custom(1);
+		let asset2 = Asset::Custom(2);
 		let blueprint_id = 1;
+		let service_id = 42;
 
-		create_and_mint_tokens(1, Bob.to_account_id(), delegator_stake);
-		mint_tokens(Bob.to_account_id(), 1, Bob.to_account_id(), delegator_stake);
+		// Setup first delegator with asset1 and selected blueprint
+		create_and_mint_tokens(1, Bob.to_account_id(), delegator1_stake);
+		mint_tokens(Bob.to_account_id(), 1, Bob.to_account_id(), delegator1_stake);
 
-		// Setup delegator with fixed blueprint selection
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(Bob.to_account_id()),
-			asset_id,
-			delegator_stake,
+			asset1,
+			delegator1_stake,
 			None,
 			None
 		));
@@ -650,37 +655,79 @@ fn slash_operator_success() {
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(Bob.to_account_id()),
 			Alice.to_account_id(),
-			asset_id,
-			delegator_stake,
+			asset1,
+			delegator1_stake,
 			Fixed(vec![blueprint_id].try_into().unwrap()),
 		));
 
-		// Slash 50% of stakes
-		let slash_percentage = Percent::from_percent(50);
-		assert_ok!(MultiAssetDelegation::slash_operator(
-			&Alice.to_account_id(),
-			blueprint_id,
-			0, // TODO: create a service
-			slash_percentage
+		// Setup second delegator with asset2 but without selecting the blueprint
+		create_and_mint_tokens(2, Eve.to_account_id(), delegator2_stake);
+		mint_tokens(Eve.to_account_id(), 2, Eve.to_account_id(), delegator2_stake);
+
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(Eve.to_account_id()),
+			asset2,
+			delegator2_stake,
+			None,
+			None
 		));
+
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(Eve.to_account_id()),
+			Alice.to_account_id(),
+			asset2,
+			delegator2_stake,
+			Fixed(vec![].try_into().unwrap()),
+		));
+
+		// Create UnappliedSlash with 50% slash for operator and first delegator only
+		let exposed_stake = operator_stake / 2; // 50% of operator stake
+		let exposed_delegation = delegator1_stake / 2; // 50% of delegator1 stake
+
+		let unapplied_slash = UnappliedSlash {
+			era: 1,
+			blueprint_id,
+			service_id,
+			operator: Alice.to_account_id(),
+			own: exposed_stake,
+			others: vec![(Bob.to_account_id(), asset1, exposed_delegation)],
+			reporters: vec![Eve.to_account_id()], // reporter doesn't matter for this test
+		};
+
+		// Apply the slash
+		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
 
 		// Verify operator stake was slashed
 		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
-		assert_eq!(operator_info.stake, operator_stake / 2);
+		assert_eq!(operator_info.stake, operator_stake - exposed_stake);
 
-		// Verify delegator stake was slashed
-		let delegator = MultiAssetDelegation::delegators(Bob.to_account_id()).unwrap();
-		let delegation = delegator
+		// Verify first delegator (Bob) was slashed
+		let delegator1 = MultiAssetDelegation::delegators(Bob.to_account_id()).unwrap();
+		let delegation1 = delegator1
 			.delegations
 			.iter()
-			.find(|d| d.operator == Alice.to_account_id())
+			.find(|d| d.operator == Alice.to_account_id() && d.asset_id == asset1)
 			.unwrap();
-		assert_eq!(delegation.amount, delegator_stake / 2);
+		assert_eq!(delegation1.amount, delegator1_stake - exposed_delegation);
 
-		// Verify event
+		// Verify second delegator (Eve) was NOT slashed since they didn't select the blueprint
+		let delegator2 = MultiAssetDelegation::delegators(Eve.to_account_id()).unwrap();
+		let delegation2 = delegator2
+			.delegations
+			.iter()
+			.find(|d| d.operator == Alice.to_account_id() && d.asset_id == asset2)
+			.unwrap();
+		assert_eq!(delegation2.amount, delegator2_stake); // Amount unchanged
+
+		// Verify events
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorSlashed {
 			who: Alice.to_account_id(),
-			amount: operator_stake / 2,
+			amount: exposed_stake,
+		}));
+
+		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::DelegatorSlashed {
+			who: Bob.to_account_id(),
+			amount: exposed_delegation,
 		}));
 	});
 }
@@ -688,12 +735,18 @@ fn slash_operator_success() {
 #[test]
 fn slash_operator_not_an_operator() {
 	new_test_ext().execute_with(|| {
+		let unapplied_slash = UnappliedSlash {
+			era: 1,
+			blueprint_id: 1,
+			service_id: 42,
+			operator: Alice.to_account_id(),
+			own: 5_000,
+			others: vec![],
+			reporters: vec![Eve.to_account_id()],
+		};
+
 		assert_noop!(
-			MultiAssetDelegation::slash_operator(
-				&Alice.to_account_id(),
-				1,
-				Percent::from_percent(50)
-			),
+			MultiAssetDelegation::slash_operator(&unapplied_slash),
 			Error::<Runtime>::NotAnOperator
 		);
 	});
@@ -709,12 +762,18 @@ fn slash_operator_not_active() {
 		));
 		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(Alice.to_account_id())));
 
+		let unapplied_slash = UnappliedSlash {
+			era: 1,
+			blueprint_id: 1,
+			service_id: 42,
+			operator: Alice.to_account_id(),
+			own: 5_000,
+			others: vec![],
+			reporters: vec![Eve.to_account_id()],
+		};
+
 		assert_noop!(
-			MultiAssetDelegation::slash_operator(
-				&Alice.to_account_id(),
-				1,
-				Percent::from_percent(50)
-			),
+			MultiAssetDelegation::slash_operator(&unapplied_slash),
 			Error::<Runtime>::NotActiveOperator
 		);
 	});
@@ -729,13 +788,15 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 			10_000
 		));
 
-		create_and_mint_tokens(1, Bob.to_account_id(), 10_000);
-
 		// Setup delegator with fixed blueprint selection
+		let delegator_stake = 5_000;
+		let asset_id = Asset::Custom(1);
+		create_and_mint_tokens(1, Bob.to_account_id(), delegator_stake);
+
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(Bob.to_account_id()),
-			Asset::Custom(1),
-			5_000,
+			asset_id,
+			delegator_stake,
 			None,
 			None
 		));
@@ -748,20 +809,30 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(Bob.to_account_id()),
 			Alice.to_account_id(),
-			Asset::Custom(1),
-			5_000,
-			Fixed(vec![2].try_into().unwrap()),
+			asset_id,
+			delegator_stake,
+			Fixed(vec![2].try_into().unwrap()), // Selected blueprint 2, not 1
 		));
 
-		// Try to slash with unselected blueprint
-		assert_noop!(
-			MultiAssetDelegation::slash_delegator(
-				&Bob.to_account_id(),
-				&Alice.to_account_id(),
-				5,
-				Percent::from_percent(50)
-			),
-			Error::<Runtime>::BlueprintNotSelected
-		);
+		// Create UnappliedSlash for blueprint 1
+		let unapplied_slash = UnappliedSlash {
+			era: 1,
+			blueprint_id: 1,
+			service_id: 42,
+			operator: Alice.to_account_id(),
+			own: 5_000,
+			others: vec![(Bob.to_account_id(), asset_id, 2_500)],
+			reporters: vec![Eve.to_account_id()],
+		};
+
+		// Verify delegator is not slashed since they didn't select blueprint 1
+		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
+		let delegator = MultiAssetDelegation::delegators(Bob.to_account_id()).unwrap();
+		let delegation = delegator
+			.delegations
+			.iter()
+			.find(|d| d.operator == Alice.to_account_id())
+			.unwrap();
+		assert_eq!(delegation.amount, delegator_stake); // Amount unchanged
 	});
 }

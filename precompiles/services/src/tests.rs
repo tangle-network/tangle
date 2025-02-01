@@ -254,7 +254,7 @@ fn test_request_service_with_erc20() {
 			.execute_returns(());
 
 		assert_ok!(
-			Services::query_erc20_balance_of(USDC_ERC20, Services::address())
+			Services::query_erc20_balance_of(USDC_ERC20, Services::pallet_evm_account())
 				.map(|(balance, _)| balance),
 			U256::zero(),
 		);
@@ -285,7 +285,7 @@ fn test_request_service_with_erc20() {
 
 		// Services pallet address now should have 5 USDC
 		assert_ok!(
-			Services::query_erc20_balance_of(USDC_ERC20, Services::address())
+			Services::query_erc20_balance_of(USDC_ERC20, Services::pallet_evm_account())
 				.map(|(balance, _)| balance),
 			payment_amount
 		);
