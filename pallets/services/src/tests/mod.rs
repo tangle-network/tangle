@@ -38,6 +38,14 @@ pub const EVE: u8 = 5;
 pub const KEYGEN_JOB_ID: u8 = 0;
 pub const SIGN_JOB_ID: u8 = 1;
 
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MachineKind {
+	Large,
+	Medium,
+	Small,
+}
+
 /// All prices are specified in USD/hr (in u64, so 1e6 = 1$)
 fn price_targets(kind: MachineKind) -> PriceTargets {
 	match kind {

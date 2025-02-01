@@ -15,10 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::mock::*;
-use frame_support::{assert_err, assert_noop, assert_ok};
+use frame_support::{assert_err, assert_ok};
 use sp_runtime::Percent;
-use tangle_primitives::services::*;
 
 #[test]
 fn unapplied_slash() {

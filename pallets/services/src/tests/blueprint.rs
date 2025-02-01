@@ -15,10 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::mock::*;
-use frame_support::{assert_err, assert_noop, assert_ok};
-use sp_runtime::Percent;
-use tangle_primitives::services::*;
+use frame_support::{assert_err, assert_ok};
 
 #[test]
 fn update_mbsm() {

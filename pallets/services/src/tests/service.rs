@@ -15,11 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use crate::mock::*;
-use frame_support::{assert_err, assert_noop, assert_ok};
+use frame_support::{assert_err, assert_ok};
 use sp_core::U256;
 use sp_runtime::Percent;
-use tangle_primitives::services::*;
 
 #[test]
 fn request_service() {
@@ -232,7 +230,7 @@ fn request_service_with_payment_asset() {
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 		// The Pallet account now has 5 USDC
-		assert_eq!(Assets::balance(USDC, Services::account_id()), payment);
+		assert_eq!(Assets::balance(USDC, Services::pallet_account()), payment);
 		// Charlie Balance should be decreased by 5 USDC
 		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
 
@@ -256,7 +254,7 @@ fn request_service_with_payment_asset() {
 		let mbsm_account_id = address_to_account_id(mbsm_address);
 		assert_eq!(Assets::balance(USDC, mbsm_account_id), payment);
 		// Pallet account should have 0 USDC
-		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
+		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 
 		// Now the service should be initiated
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -468,7 +466,7 @@ fn reject_service_with_payment_asset() {
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 		// The Pallet account now has 5 USDC
-		assert_eq!(Assets::balance(USDC, Services::account_id()), payment);
+		assert_eq!(Assets::balance(USDC, Services::pallet_account()), payment);
 		// Charlie Balance should be decreased by 5 USDC
 		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
 
@@ -477,7 +475,7 @@ fn reject_service_with_payment_asset() {
 
 		// The Payment should be now refunded to the requester.
 		// Pallet account should have 0 USDC
-		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
+		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 		// Charlie Balance should be back to the original
 		assert_eq!(Assets::balance(USDC, charlie), before_balance);
 	});
