@@ -14,7 +14,6 @@
 tmp
 
 local-test
-pallets/orderbook
 
 # Parachain fixtures
 genesis-state-local
