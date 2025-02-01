@@ -40,11 +40,13 @@ impl<T: Config> Pallet<T> {
 	/// 3. The operator's delegation records
 	///
 	/// # Performance Considerations
+	///
 	/// - Single storage read for operator verification
 	/// - Single storage write for delegation update
 	/// - Bounded by MaxDelegations for new delegations
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The account ID of the operator to delegate to
 	/// * `asset_id` - The asset being delegated
@@ -54,6 +56,7 @@ impl<T: Config> Pallet<T> {
 	///   - All: Work with all available blueprints
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NotAnOperator` - Target account is not an operator
 	/// * `InsufficientBalance` - Not enough deposited balance
@@ -62,6 +65,7 @@ impl<T: Config> Pallet<T> {
 	/// * `OperatorNotActive` - Operator is not in active status
 	///
 	/// # Example
+	///
 	/// ```ignore
 	/// // Delegate 100 tokens to operator with Fixed blueprint selection
 	/// let blueprint_ids = vec![1, 2, 3];
@@ -143,17 +147,20 @@ impl<T: Config> Pallet<T> {
 	/// the available delegated amount.
 	///
 	/// # Performance Considerations
+	///
 	/// - Single storage read for delegation verification
 	/// - Single storage write for request creation
 	/// - Bounded by MaxUnstakeRequests
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The account ID of the operator
 	/// * `asset_id` - The asset to unstake
 	/// * `amount` - The amount to unstake
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NoActiveDelegation` - No active delegation found for operator and asset
 	/// * `InsufficientBalance` - Trying to unstake more than delegated
@@ -161,6 +168,7 @@ impl<T: Config> Pallet<T> {
 	/// * `InvalidAmount` - Attempting to unstake zero tokens
 	///
 	/// # Example
+	///
 	/// ```ignore
 	/// // Schedule unstaking of 50 tokens from operator
 	/// process_schedule_delegator_unstake(
@@ -218,22 +226,26 @@ impl<T: Config> Pallet<T> {
 	/// It performs a simple lookup and removal of the matching request.
 	///
 	/// # Performance Considerations
+	///
 	/// - Single storage read for request verification
 	/// - Single storage write for request removal
 	/// - O(n) search through unstake requests
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The operator whose unstake request to cancel
 	/// * `asset_id` - The asset of the unstake request
 	/// * `amount` - The exact amount of the unstake request to cancel
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NoBondLessRequest` - No matching unstake request found
 	/// * `InvalidAmount` - Amount specified is zero
 	///
 	/// # Example
+	///
 	/// ```ignore
 	/// // Cancel an unstake request for 50 tokens
 	/// process_cancel_delegator_unstake(
@@ -281,14 +293,17 @@ impl<T: Config> Pallet<T> {
 	/// 3. Removes zero-amount delegations and processed requests
 	///
 	/// # Performance Considerations
+	///
 	/// - Uses batch processing to minimize storage reads/writes
 	/// - Aggregates updates by asset and operator
 	/// - Removes items in reverse order to avoid unnecessary shifting
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NoBondLessRequest` - No unstake requests exist
 	/// * `BondLessNotReady` - No requests are ready for execution
@@ -379,18 +394,21 @@ impl<T: Config> Pallet<T> {
 	/// 3. It tracks total nomination delegations to prevent over-delegation
 	///
 	/// # Performance Considerations
+	///
 	/// - External call to staking system for verification
 	/// - Single storage read for delegation lookup
 	/// - Single storage write for delegation update
 	/// - Additional storage write for token locking
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The operator to delegate to
 	/// * `amount` - The amount of nominated tokens to delegate
 	/// * `blueprint_selection` - Strategy for selecting which blueprints to work with
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NotNominator` - Account has no nominated tokens
 	/// * `InsufficientBalance` - Not enough nominated tokens available
@@ -399,6 +417,7 @@ impl<T: Config> Pallet<T> {
 	/// * `InvalidAmount` - Amount specified is zero
 	///
 	/// # Example
+	///
 	/// ```ignore
 	/// // Delegate 1000 nominated tokens to operator
 	/// process_delegate_nominations(
@@ -504,17 +523,20 @@ impl<T: Config> Pallet<T> {
 	/// 3. Creates an unstake request that can be executed after the delay period
 	///
 	/// # Performance Considerations
+	///
 	/// - Single storage read for delegation verification
 	/// - Single storage write for request creation
 	/// - O(n) search through delegations
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The operator to unstake from
 	/// * `amount` - The amount of nominated tokens to unstake
 	/// * `blueprint_selection` - The blueprint selection to use after unstaking
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NoActiveDelegation` - No active nomination delegation found
 	/// * `InsufficientBalance` - Trying to unstake more than delegated
@@ -523,6 +545,7 @@ impl<T: Config> Pallet<T> {
 	/// * `AssetNotWhitelisted` - Invalid asset type for nominations
 	///
 	/// # Example
+	///
 	/// ```ignore
 	/// // Schedule unstaking of 500 nominated tokens
 	/// process_schedule_delegator_nomination_unstake(
@@ -580,19 +603,23 @@ impl<T: Config> Pallet<T> {
 	/// This function removes a pending unstake request without modifying any actual delegations.
 	///
 	/// # Performance Considerations
+	///
 	/// - Single storage read for request verification
 	/// - Single storage write for request removal
 	/// - O(n) search through unstake requests
 	///
 	/// # Arguments
+	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The operator whose unstake request to cancel
 	///
 	/// # Errors
+	///
 	/// * `NotDelegator` - Account is not a delegator
 	/// * `NoBondLessRequest` - No matching unstake request found
 	///
 	/// # Example
+	///
 	/// ```ignore
 	/// // Cancel nomination unstake request from operator
 	/// process_cancel_delegator_nomination_unstake(
