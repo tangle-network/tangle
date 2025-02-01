@@ -225,7 +225,7 @@ pub mod module {
 		}
 
 		/// On initialize, we should check for any unapplied slashes and apply them.
-		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
 			let mut weight = Zero::zero();
 			let current_era = T::OperatorDelegationManager::get_current_round();
 			let slash_defer_duration = T::SlashDeferDuration::get();

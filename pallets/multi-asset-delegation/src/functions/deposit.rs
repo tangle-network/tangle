@@ -204,7 +204,7 @@ impl<T: Config> Pallet<T> {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure there are outstanding withdraw requests
-			ensure!(!metadata.withdraw_requests.is_empty(), Error::<T>::NowithdrawRequests);
+			ensure!(!metadata.withdraw_requests.is_empty(), Error::<T>::NoWithdrawRequests);
 
 			let current_round = Self::current_round();
 			let delay = T::LeaveDelegatorsDelay::get();

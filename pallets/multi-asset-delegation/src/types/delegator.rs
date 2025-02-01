@@ -16,7 +16,7 @@
 
 use super::*;
 use frame_support::{ensure, pallet_prelude::Get, BoundedVec};
-use sp_runtime::traits::CheckedAdd;
+use sp_runtime::traits::{CheckedAdd, Saturating};
 use sp_std::{fmt::Debug, vec};
 use tangle_primitives::{
 	services::Asset,
@@ -54,7 +54,7 @@ pub enum DelegatorStatus {
 pub struct WithdrawRequest<AssetId: Encode + Decode, Balance> {
 	/// The ID of the asset to be withdrawd.
 	pub asset_id: Asset<AssetId>,
-	/// The amount of the asset to be withdrawd.
+	/// The amount of the asset to be withdrawn.
 	pub amount: Balance,
 	/// The round in which the withdraw was requested.
 	pub requested_round: RoundIndex,
@@ -73,6 +73,24 @@ pub struct BondLessRequest<AccountId, AssetId: Encode + Decode, Balance, MaxBlue
 	pub requested_round: RoundIndex,
 	/// The blueprint selection of the delegator.
 	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
+	/// Whether this unstake request is for a nomination delegation
+	pub is_nomination: bool,
+}
+
+/// Represents a delegation bond from a delegator to an operator.
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
+pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBlueprints: Get<u32>>
+{
+	/// The operator being delegated to.
+	pub operator: AccountId,
+	/// The amount being delegated.
+	pub amount: Balance,
+	/// The asset being delegated.
+	pub asset_id: Asset<AssetId>,
+	/// The blueprint selection for this delegation.
+	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
+	/// Whether this delegation is from nominated tokens
+	pub is_nomination: bool,
 }
 
 /// Stores the state of a delegator, including deposits, delegations, and requests.
@@ -185,7 +203,6 @@ impl<
 
 	/// Calculates the total delegation amount for a specific asset.
 	pub fn calculate_delegation_by_asset(&self, asset_id: Asset<AssetId>) -> Balance
-	// Asset<AssetId>) -> Balance
 	where
 		Balance: Default + core::ops::AddAssign + Clone + CheckedAdd,
 		AssetId: Eq + PartialEq,
@@ -208,6 +225,32 @@ impl<
 		AccountId: Eq + PartialEq,
 	{
 		self.delegations.iter().filter(|&stake| stake.operator == operator).collect()
+	}
+
+	/// Calculate total nomination delegations
+	pub fn total_nomination_delegations(&self) -> Balance
+	where
+		Balance: Default + core::ops::AddAssign + Clone + Saturating,
+		AssetId: Eq + PartialEq,
+	{
+		self.delegations
+			.iter()
+			.filter(|d| d.is_nomination)
+			.fold(Balance::default(), |acc, delegation| {
+				acc.saturating_add(delegation.amount.clone())
+			})
+	}
+
+	/// Find nomination delegation by operator
+	pub fn get_nomination_delegation_by_operator(
+		&self,
+		operator: &AccountId,
+	) -> Option<&BondInfoDelegator<AccountId, Balance, AssetId, MaxBlueprints>>
+	where
+		AccountId: PartialEq,
+		AssetId: Eq,
+	{
+		self.delegations.iter().find(|d| &d.operator == operator && d.is_nomination)
 	}
 }
 
@@ -332,18 +375,4 @@ impl<
 
 		Ok(())
 	}
-}
-
-/// Represents a stake between a delegator and an operator.
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
-pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBlueprints: Get<u32>>
-{
-	/// The account ID of the operator.
-	pub operator: AccountId,
-	/// The amount bonded.
-	pub amount: Balance,
-	/// The ID of the bonded asset.
-	pub asset_id: Asset<AssetId>,
-	/// The blueprint selection mode for this delegator.
-	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 }

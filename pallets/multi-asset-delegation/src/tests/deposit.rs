@@ -406,7 +406,7 @@ fn execute_withdraw_should_fail_if_no_withdraw_request() {
 
 		assert_noop!(
 			MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who.clone()), None),
-			Error::<Runtime>::NowithdrawRequests
+			Error::<Runtime>::NoWithdrawRequests
 		);
 	});
 }

@@ -43,6 +43,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
 	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
 };
+use sp_staking::currency_to_vote::U128CurrencyToVote;
 use std::cell::RefCell;
 use tangle_primitives::{
 	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
@@ -199,7 +200,7 @@ impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 	type UnixTime = pallet_timestamp::Pallet<Self>;
-	type CurrencyToVote = ();
+	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
@@ -391,6 +392,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;

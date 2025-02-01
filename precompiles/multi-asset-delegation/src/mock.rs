@@ -43,6 +43,7 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage,
 };
+use sp_staking::StakingInterface;
 use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 use tangle_primitives::traits::{RewardsManager, ServiceManager};
@@ -365,6 +366,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = ();
+	type StakingInterface = MockStakingInterface;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type EvmRunner = MockedEvmRunner;
@@ -561,5 +564,108 @@ impl ExtBuilder {
 			System::set_block_number(1);
 		});
 		ext
+	}
+}
+
+pub struct MockStakingInterface;
+
+impl StakingInterface for MockStakingInterface {
+	type CurrencyToVote = ();
+	type AccountId = AccountId;
+	type Balance = Balance;
+
+	fn minimum_nominator_bond() -> Self::Balance {
+		unimplemented!()
+	}
+
+	fn minimum_validator_bond() -> Self::Balance {
+		unimplemented!()
+	}
+
+	fn stash_by_ctrl(_controller: &Self::AccountId) -> Result<Self::AccountId, DispatchError> {
+		unimplemented!()
+	}
+
+	fn bonding_duration() -> sp_staking::EraIndex {
+		unimplemented!()
+	}
+
+	fn current_era() -> sp_staking::EraIndex {
+		unimplemented!()
+	}
+
+	fn stake(_who: &Self::AccountId) -> Result<sp_staking::Stake<Self::Balance>, DispatchError> {
+		unimplemented!()
+	}
+
+	fn bond(
+		_who: &Self::AccountId,
+		_value: Self::Balance,
+		_payee: &Self::AccountId,
+	) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn nominate(
+		_who: &Self::AccountId,
+		_validators: Vec<Self::AccountId>,
+	) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn chill(_who: &Self::AccountId) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn bond_extra(_who: &Self::AccountId, _extra: Self::Balance) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn unbond(_stash: &Self::AccountId, _value: Self::Balance) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn update_payee(
+		_stash: &Self::AccountId,
+		_reward_acc: &Self::AccountId,
+	) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn withdraw_unbonded(
+		_stash: Self::AccountId,
+		_num_slashing_spans: u32,
+	) -> Result<bool, DispatchError> {
+		unimplemented!()
+	}
+
+	fn desired_validator_count() -> u32 {
+		unimplemented!()
+	}
+
+	fn election_ongoing() -> bool {
+		unimplemented!()
+	}
+
+	fn force_unstake(_who: Self::AccountId) -> sp_runtime::DispatchResult {
+		unimplemented!()
+	}
+
+	fn is_exposed_in_era(_who: &Self::AccountId, _era: &sp_staking::EraIndex) -> bool {
+		unimplemented!()
+	}
+
+	fn status(
+		_who: &Self::AccountId,
+	) -> Result<sp_staking::StakerStatus<Self::AccountId>, DispatchError> {
+		unimplemented!()
+	}
+
+	fn is_virtual_staker(_who: &Self::AccountId) -> bool {
+		unimplemented!()
+	}
+
+	fn slash_reward_fraction() -> sp_runtime::Perbill {
+		unimplemented!()
 	}
 }
