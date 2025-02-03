@@ -26,6 +26,7 @@ use frame_support::{
 	pallet_prelude::{Hooks, Weight},
 	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, OneSessionHandler},
+	PalletId,
 };
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
@@ -38,7 +39,9 @@ use serde_json::json;
 use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
-	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
+	testing::UintAuthorityId,
+	traits::{AccountIdConversion, ConvertInto},
+	AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
 use tangle_primitives::rewards::UserDepositWithLocks;
@@ -215,7 +218,8 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
+	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
+	pub const DummySlashRecipient: AccountId = AccountId32::new([0u8; 32]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -544,7 +548,9 @@ impl pallet_services::Config for Runtime {
 	type Currency = Balances;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type PalletEVMAddress = ServicesEVMAddress;
+	type PalletId = ServicesPalletId;
+	type SlashRecipient = DummySlashRecipient;
+	type SlashManager = ();
 	type EvmRunner = MockedEvmRunner;
 	type EvmAddressMapping = PalletEVMAddressMapping;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;

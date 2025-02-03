@@ -154,10 +154,11 @@ fn deploy() -> Deployment {
 		vec![alice.clone()],
 		vec![bob.clone()],
 		Default::default(),
-		vec![WETH],
+		vec![get_security_requirement(WETH, &[10, 20])],
 		100,
 		Asset::Custom(USDC),
 		0,
+		MembershipModel::Fixed { min_operators: 1 },
 	));
 
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
@@ -167,6 +168,7 @@ fn deploy() -> Deployment {
 		RuntimeOrigin::signed(bob.clone()),
 		service_id,
 		bob_exposed_restake_percentage,
+		vec![get_security_commitment(WETH, 10)],
 	));
 
 	assert!(Instances::<Runtime>::contains_key(service_id));

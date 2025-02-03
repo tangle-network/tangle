@@ -10,12 +10,24 @@ use pallet_services::{types::ConstraintsOf, Instances, Operators, OperatorsProfi
 use parity_scale_codec::Encode;
 use precompile_utils::{prelude::UnboundedBytes, testing::*};
 use sp_core::{ecdsa, Pair, H160, U256};
-use sp_runtime::{bounded_vec, AccountId32};
+use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
-	BlueprintServiceManager, FieldType, JobDefinition, JobMetadata,
-	MasterBlueprintServiceManagerRevision, OperatorPreferences, PriceTargets, ServiceBlueprint,
-	ServiceMetadata,
+	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager, FieldType,
+	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModel,
+	OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
 };
+
+fn get_security_requirement(a: AssetId, p: &[u8; 2]) -> AssetSecurityRequirement<AssetId> {
+	AssetSecurityRequirement {
+		asset: Asset::Custom(a),
+		min_exposure_percent: Percent::from_percent(p[0]),
+		max_exposure_percent: Percent::from_percent(p[1]),
+	}
+}
+
+fn get_security_commitment(a: AssetId, p: u8) -> AssetSecurityCommitment<AssetId> {
+	AssetSecurityCommitment { asset: Asset::Custom(a), exposure_percent: Percent::from_percent(p) }
+}
 
 fn test_ecdsa_key() -> [u8; 65] {
 	let (ecdsa_key, _) = ecdsa::Pair::generate();
@@ -78,6 +90,10 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		registration_params: bounded_vec![],
 		request_params: bounded_vec![],
 		gadget: Default::default(),
+		supported_membership_models: bounded_vec![
+			MembershipModel::Fixed { min_operators: 1 },
+			MembershipModel::Dynamic { min_operators: 1, max_operators: None },
+		],
 	}
 }
 #[test]
@@ -194,11 +210,16 @@ fn test_request_service() {
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
-					assets: [WETH].into_iter().map(Into::into).collect(),
+					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
+						.into_iter()
+						.map(|r| r.encode().into())
+						.collect(),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
 					payment_token_address: Default::default(),
 					amount: U256::from(0),
+					min_operators: 1,
+					max_operators: u32::MAX,
 				},
 			)
 			.execute_returns(());
@@ -208,7 +229,12 @@ fn test_request_service() {
 			.prepare_test(
 				TestAccount::Bob,
 				H160::from_low_u64_be(1),
-				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+				PCall::approve {
+					request_id: U256::from(0),
+					native_restaking_percent: 10,
+					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
+						.encode(),
+				},
 			)
 			.execute_returns(());
 
@@ -274,11 +300,16 @@ fn test_request_service_with_erc20() {
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
-					assets: [TNT, WETH].into_iter().map(Into::into).collect(),
+					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
+						.into_iter()
+						.map(|r| r.encode().into())
+						.collect(),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
 					payment_token_address: USDC_ERC20.into(),
 					amount: payment_amount,
+					min_operators: 1,
+					max_operators: u32::MAX,
 				},
 			)
 			.execute_returns(());
@@ -295,7 +326,12 @@ fn test_request_service_with_erc20() {
 			.prepare_test(
 				TestAccount::Bob,
 				H160::from_low_u64_be(1),
-				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+				PCall::approve {
+					request_id: U256::from(0),
+					native_restaking_percent: 10,
+					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
+						.encode(),
+				},
 			)
 			.execute_returns(());
 
@@ -340,7 +376,7 @@ fn test_request_service_with_asset() {
 			)
 			.execute_returns(());
 
-		assert_eq!(Assets::balance(USDC, Services::account_id()), 0);
+		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 
 		// Finally, request the service
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
@@ -358,24 +394,34 @@ fn test_request_service_with_asset() {
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
-					assets: [TNT, WETH].into_iter().map(Into::into).collect(),
+					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
+						.into_iter()
+						.map(|r| r.encode().into())
+						.collect(),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(USDC),
 					payment_token_address: Default::default(),
 					amount: payment_amount,
+					min_operators: 1,
+					max_operators: u32::MAX,
 				},
 			)
 			.execute_returns(());
 
 		// Services pallet address now should have 5 USDC
-		assert_eq!(Assets::balance(USDC, Services::account_id()), payment_amount.as_u128());
+		assert_eq!(Assets::balance(USDC, Services::pallet_account()), payment_amount.as_u128());
 
 		// Approve the service request by the operator(s)
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Bob,
 				H160::from_low_u64_be(1),
-				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+				PCall::approve {
+					request_id: U256::from(0),
+					native_restaking_percent: 10,
+					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
+						.encode(),
+				},
 			)
 			.execute_returns(());
 
@@ -482,11 +528,16 @@ fn test_terminate_service() {
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
-					assets: [WETH].into_iter().map(Into::into).collect(),
+					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
+						.into_iter()
+						.map(|r| r.encode().into())
+						.collect(),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
 					payment_token_address: Default::default(),
 					amount: U256::from(0),
+					min_operators: 1,
+					max_operators: u32::MAX,
 				},
 			)
 			.execute_returns(());
@@ -496,7 +547,12 @@ fn test_terminate_service() {
 			.prepare_test(
 				TestAccount::Bob,
 				H160::from_low_u64_be(1),
-				PCall::approve { request_id: U256::from(0), restaking_percent: 10 },
+				PCall::approve {
+					request_id: U256::from(0),
+					native_restaking_percent: 10,
+					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
+						.encode(),
+				},
 			)
 			.execute_returns(());
 

@@ -784,7 +784,7 @@ impl<T: Config> Pallet<T> {
 		required_amount: BalanceOf<T>,
 	) -> Result<BalanceOf<T>, Error<T>> {
 		let stake = T::StakingInterface::stake(who).map_err(|_| Error::<T>::NotNominator)?;
-		ensure!(stake.active >= required_amount, Error::<T>::InsufficientBalance);
+		ensure!(stake.total >= required_amount, Error::<T>::InsufficientBalance);
 		Ok(stake.active)
 	}
 
