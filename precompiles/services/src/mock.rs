@@ -253,7 +253,7 @@ impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
 	type AssetId = AssetId;
-	type AssetIdParameter = u32;
+	type AssetIdParameter = u128;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -391,7 +391,7 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 	}
 }
 
-pub type AssetId = u32;
+pub type AssetId = u128;
 
 pub struct MockDelegationManager;
 impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId>
