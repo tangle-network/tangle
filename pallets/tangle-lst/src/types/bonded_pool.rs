@@ -148,11 +148,11 @@ impl<T: Config> BondedPool<T> {
 	}
 
 	pub fn is_root(&self, who: &T::AccountId) -> bool {
-		self.roles.root.as_ref().map_or(false, |root| root == who)
+		self.roles.root.as_ref() == Some(who)
 	}
 
 	pub fn is_bouncer(&self, who: &T::AccountId) -> bool {
-		self.roles.bouncer.as_ref().map_or(false, |bouncer| bouncer == who)
+		self.roles.bouncer.as_ref() == Some(who)
 	}
 
 	pub fn can_update_roles(&self, who: &T::AccountId) -> bool {
@@ -160,8 +160,7 @@ impl<T: Config> BondedPool<T> {
 	}
 
 	pub fn can_nominate(&self, who: &T::AccountId) -> bool {
-		self.is_root(who)
-			|| self.roles.nominator.as_ref().map_or(false, |nominator| nominator == who)
+		self.is_root(who) || self.roles.nominator.as_ref() == Some(who)
 	}
 
 	pub fn can_kick(&self, who: &T::AccountId) -> bool {
