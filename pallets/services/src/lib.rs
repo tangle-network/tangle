@@ -803,7 +803,6 @@ pub mod module {
 
 			let (allowed, _weight) =
 				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;
-
 			ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
 
 			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));

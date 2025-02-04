@@ -232,7 +232,7 @@ fn job_result() {
 		));
 
 		// submit signing job
-		let signing_job_call_id = 1;
+
 		let data_hash = sp_core::keccak_256(&[1; 32]);
 
 		assert_ok!(Services::call(
@@ -256,6 +256,7 @@ fn job_result() {
 		// 0x000000000000000000000000000000000000000 as the address of the signer.
 		// even though the signature is correct, and we have the precomiles in the runtime.
 		//
+		// let signing_job_call_id = 1;
 		// assert_ok!(Services::submit_result(
 		//     RuntimeOrigin::signed(bob.clone()),
 		//     0,

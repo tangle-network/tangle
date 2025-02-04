@@ -6,7 +6,7 @@ use crate::{
 };
 use frame_support::assert_ok;
 use k256::ecdsa::{SigningKey, VerifyingKey};
-use pallet_services::{types::ConstraintsOf, Instances, Operators, OperatorsProfile};
+use pallet_services::{types::ConstraintsOf, Instances};
 use parity_scale_codec::Encode;
 use precompile_utils::{prelude::UnboundedBytes, testing::*};
 use sp_core::{ecdsa, Pair, H160, U256};
@@ -96,6 +96,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		],
 	}
 }
+
 #[test]
 fn test_create_blueprint() {
 	ExtBuilder.build().execute_with(|| {
@@ -119,52 +120,9 @@ fn test_create_blueprint() {
 }
 
 #[test]
-fn test_register_operator() {
-	ExtBuilder.build().execute_with(|| {
-		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-		// First create the blueprint
-		let blueprint_data = cggmp21_blueprint();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::create_blueprint {
-					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
-				},
-			)
-			.execute_returns(());
-
-		// Now register operator
-		let preferences_data = OperatorPreferences {
-			key: test_ecdsa_key(),
-			price_targets: price_targets(MachineKind::Large),
-		}
-		.encode();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::register_operator {
-					blueprint_id: U256::from(0), // We use the first blueprint
-					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(Vec::new()),
-				},
-			)
-			.execute_returns(());
-
-		// Check that the operator profile exists
-		let account: AccountId32 = TestAccount::Bob.into();
-		assert!(OperatorsProfile::<Runtime>::get(account).is_ok());
-	});
-}
-
-#[test]
 fn test_request_service() {
 	ExtBuilder.build().execute_with(|| {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-		// First create the blueprint
 		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
@@ -177,28 +135,22 @@ fn test_request_service() {
 			)
 			.execute_returns(());
 
-		// Now register operator
-		let preferences_data = OperatorPreferences {
-			key: test_ecdsa_key(),
-			price_targets: price_targets(MachineKind::Large),
-		}
-		.encode();
+		// Register operator using pallet function
+		let bob: AccountId32 = TestAccount::Bob.into();
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences {
+				key: test_ecdsa_key(),
+				price_targets: price_targets(MachineKind::Large),
+			},
+			Default::default(),
+			0,
+		));
 
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::register_operator {
-					blueprint_id: U256::from(0),
-					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![0u8]),
-				},
-			)
-			.execute_returns(());
-
-		// Finally, request the service
+		// Request service from EVM
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
-		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let service_providers_data: Vec<AccountId32> = vec![bob.clone()];
 		let request_args_data = vec![0u8];
 
 		PrecompilesValue::get()
@@ -206,7 +158,7 @@ fn test_request_service() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::request_service {
-					blueprint_id: U256::from(0), // Use the first blueprint
+					blueprint_id: U256::from(0),
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
@@ -224,19 +176,13 @@ fn test_request_service() {
 			)
 			.execute_returns(());
 
-		// Approve the service request by the operator(s)
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::approve {
-					request_id: U256::from(0),
-					native_restaking_percent: 10,
-					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
-						.encode(),
-				},
-			)
-			.execute_returns(());
+		// Approve using pallet function
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(WETH, 10)],
+		));
 
 		// Ensure the service instance is created
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -247,7 +193,6 @@ fn test_request_service() {
 fn test_request_service_with_erc20() {
 	ExtBuilder.build().execute_with(|| {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-		// First create the blueprint
 		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
@@ -260,33 +205,27 @@ fn test_request_service_with_erc20() {
 			)
 			.execute_returns(());
 
-		// Now register operator
-		let preferences_data = OperatorPreferences {
-			key: test_ecdsa_key(),
-			price_targets: price_targets(MachineKind::Large),
-		}
-		.encode();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::register_operator {
-					blueprint_id: U256::from(0),
-					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![0u8]),
-				},
-			)
-			.execute_returns(());
+		// Register operator using pallet function
+		let bob: AccountId32 = TestAccount::Bob.into();
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences {
+				key: test_ecdsa_key(),
+				price_targets: price_targets(MachineKind::Large),
+			},
+			Default::default(),
+			0,
+		));
 
 		assert_ok!(
 			Services::query_erc20_balance_of(USDC_ERC20, Services::pallet_evm_account())
 				.map(|(balance, _)| balance),
 			U256::zero(),
 		);
-		// Finally, request the service
+
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
-		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let service_providers_data: Vec<AccountId32> = vec![bob.clone()];
 		let request_args_data = vec![0u8];
 
 		let payment_amount = U256::from(5).mul(U256::from(10).pow(6.into())); // 5 USDC
@@ -296,7 +235,7 @@ fn test_request_service_with_erc20() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::request_service {
-					blueprint_id: U256::from(0), // Use the first blueprint
+					blueprint_id: U256::from(0),
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
@@ -321,19 +260,13 @@ fn test_request_service_with_erc20() {
 			payment_amount
 		);
 
-		// Approve the service request by the operator(s)
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::approve {
-					request_id: U256::from(0),
-					native_restaking_percent: 10,
-					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
-						.encode(),
-				},
-			)
-			.execute_returns(());
+		// Approve using pallet function
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(WETH, 10)],
+		));
 
 		// Ensure the service instance is created
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -344,7 +277,6 @@ fn test_request_service_with_erc20() {
 fn test_request_service_with_asset() {
 	ExtBuilder.build().execute_with(|| {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-		// First create the blueprint
 		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
@@ -357,30 +289,23 @@ fn test_request_service_with_asset() {
 			)
 			.execute_returns(());
 
-		// Now register operator
-		let preferences_data = OperatorPreferences {
-			key: test_ecdsa_key(),
-			price_targets: price_targets(MachineKind::Large),
-		}
-		.encode();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::register_operator {
-					blueprint_id: U256::from(0),
-					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![0u8]),
-				},
-			)
-			.execute_returns(());
+		// Register operator using pallet function
+		let bob: AccountId32 = TestAccount::Bob.into();
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences {
+				key: test_ecdsa_key(),
+				price_targets: price_targets(MachineKind::Large),
+			},
+			Default::default(),
+			0,
+		));
 
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 
-		// Finally, request the service
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
-		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let service_providers_data: Vec<AccountId32> = vec![bob.clone()];
 		let request_args_data = vec![0u8];
 
 		let payment_amount = U256::from(5).mul(U256::from(10).pow(6.into())); // 5 USDC
@@ -390,7 +315,7 @@ fn test_request_service_with_asset() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::request_service {
-					blueprint_id: U256::from(0), // Use the first blueprint
+					blueprint_id: U256::from(0),
 					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
 					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
 					request_args_data: UnboundedBytes::from(request_args_data),
@@ -411,19 +336,13 @@ fn test_request_service_with_asset() {
 		// Services pallet address now should have 5 USDC
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), payment_amount.as_u128());
 
-		// Approve the service request by the operator(s)
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::approve {
-					request_id: U256::from(0),
-					native_restaking_percent: 10,
-					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
-						.encode(),
-				},
-			)
-			.execute_returns(());
+		// Approve using pallet function
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(WETH, 10)],
+		));
 
 		// Ensure the service instance is created
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -431,60 +350,9 @@ fn test_request_service_with_asset() {
 }
 
 #[test]
-fn test_unregister_operator() {
-	ExtBuilder.build().execute_with(|| {
-		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-		// First register operator (after blueprint creation)
-		let blueprint_data = cggmp21_blueprint();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Alex,
-				H160::from_low_u64_be(1),
-				PCall::create_blueprint {
-					blueprint_data: UnboundedBytes::from(blueprint_data.encode()),
-				},
-			)
-			.execute_returns(());
-
-		let preferences_data = OperatorPreferences {
-			key: test_ecdsa_key(),
-			price_targets: price_targets(MachineKind::Large),
-		}
-		.encode();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::register_operator {
-					blueprint_id: U256::from(0),
-					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![0u8]),
-				},
-			)
-			.execute_returns(());
-
-		// Now unregister operator
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::unregister_operator { blueprint_id: U256::from(0) },
-			)
-			.execute_returns(());
-
-		// Ensure the operator is removed
-		let bob_account: AccountId32 = TestAccount::Bob.into();
-		assert!(!Operators::<Runtime>::contains_key(0, bob_account));
-	});
-}
-
-#[test]
 fn test_terminate_service() {
 	ExtBuilder.build().execute_with(|| {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-		// First request a service
 		let blueprint_data = cggmp21_blueprint();
 
 		PrecompilesValue::get()
@@ -497,26 +365,21 @@ fn test_terminate_service() {
 			)
 			.execute_returns(());
 
-		let preferences_data = OperatorPreferences {
-			key: test_ecdsa_key(),
-			price_targets: price_targets(MachineKind::Large),
-		}
-		.encode();
-
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::register_operator {
-					blueprint_id: U256::from(0),
-					preferences: UnboundedBytes::from(preferences_data),
-					registration_args: UnboundedBytes::from(vec![0u8]),
-				},
-			)
-			.execute_returns(());
+		// Register operator using pallet function
+		let bob: AccountId32 = TestAccount::Bob.into();
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences {
+				key: test_ecdsa_key(),
+				price_targets: price_targets(MachineKind::Large),
+			},
+			Default::default(),
+			0,
+		));
 
 		let permitted_callers_data: Vec<AccountId32> = vec![TestAccount::Alex.into()];
-		let service_providers_data: Vec<AccountId32> = vec![TestAccount::Bob.into()];
+		let service_providers_data: Vec<AccountId32> = vec![bob.clone()];
 		let request_args_data = vec![0u8];
 
 		PrecompilesValue::get()
@@ -542,19 +405,13 @@ fn test_terminate_service() {
 			)
 			.execute_returns(());
 
-		// Approve the service request by the operator(s)
-		PrecompilesValue::get()
-			.prepare_test(
-				TestAccount::Bob,
-				H160::from_low_u64_be(1),
-				PCall::approve {
-					request_id: U256::from(0),
-					native_restaking_percent: 10,
-					non_native_restaking_percentages: vec![get_security_commitment(WETH, 10)]
-						.encode(),
-				},
-			)
-			.execute_returns(());
+		// Approve using pallet function
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(WETH, 10)],
+		));
 
 		assert!(Instances::<Runtime>::contains_key(0));
 

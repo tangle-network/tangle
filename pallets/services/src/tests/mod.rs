@@ -16,7 +16,7 @@
 
 use super::*;
 use crate::mock::*;
-use frame_support::{assert_err, assert_noop, assert_ok};
+use frame_support::assert_ok;
 use sp_core::bounded_vec;
 use sp_core::Pair;
 use sp_runtime::Percent;

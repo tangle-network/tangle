@@ -39,9 +39,7 @@ use serde_json::json;
 use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
-	testing::UintAuthorityId,
-	traits::{AccountIdConversion, ConvertInto},
-	AccountId32, BuildStorage, Perbill,
+	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
 use tangle_primitives::rewards::UserDepositWithLocks;
@@ -613,6 +611,7 @@ pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 
+#[allow(dead_code)]
 pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;

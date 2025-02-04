@@ -12,8 +12,7 @@ use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{
-	Asset, AssetSecurityCommitment, AssetSecurityRequirement, Field, MembershipModel,
-	OperatorPreferences, PriceTargets, ServiceBlueprint,
+	Asset, AssetSecurityRequirement, Field, MembershipModel, OperatorPreferences, ServiceBlueprint,
 };
 
 #[cfg(test)]
@@ -68,6 +67,7 @@ where
 			Decode::decode(&mut &blueprint_data[..])
 				.map_err(|_| revert("Invalid blueprint data"))?;
 
+		// println!("createBlueprint: {:?}", blueprint);
 		let call = pallet_services::Call::<Runtime>::create_blueprint { blueprint };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
@@ -273,57 +273,6 @@ where
 		Ok(())
 	}
 
-	/// Approve a request.
-	#[precompile::public("approve(uint256,uint8,uint8[])")]
-	fn approve(
-		handle: &mut impl PrecompileHandle,
-		request_id: U256,
-		native_restaking_percent: u8,
-		non_native_restaking_percentages: Vec<u8>,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let request_id: u64 = request_id.as_u64();
-		// Retrieve and validate the service request
-		let request = pallet_services::ServiceRequests::<Runtime>::get(request_id).unwrap();
-		// Treat the asset approval descriptions in order
-		let request_assets = request.non_native_asset_security;
-		let native_asset_exposure: Percent = Percent::from_percent(native_restaking_percent);
-		let non_native_asset_exposures: Vec<AssetSecurityCommitment<Runtime::AssetId>> =
-			request_assets
-				.into_iter()
-				.zip(non_native_restaking_percentages)
-				.map(|(req, percent)| AssetSecurityCommitment {
-					asset: req.asset,
-					exposure_percent: Percent::from_percent(percent),
-				})
-				.collect();
-
-		let call = pallet_services::Call::<Runtime>::approve {
-			request_id,
-			native_asset_exposure,
-			non_native_asset_exposures,
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Reject a service request.
-	#[precompile::public("reject(uint256)")]
-	fn reject(handle: &mut impl PrecompileHandle, request_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let request_id: u64 = request_id.as_u64();
-
-		let call = pallet_services::Call::<Runtime>::reject { request_id };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	/// Call a job in the service.
 	#[precompile::public("callJob(uint256,uint8,bytes)")]
 	fn call_job(
@@ -342,34 +291,6 @@ where
 				.map_err(|_| revert("Invalid job call arguments data"))?;
 
 		let call = pallet_services::Call::<Runtime>::call { service_id, job, args: decoded_args };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Submit the result for a job call.
-	#[precompile::public("submitResult(uint256,uint256,bytes)")]
-	fn submit_result(
-		handle: &mut impl PrecompileHandle,
-		service_id: U256,
-		call_id: U256,
-		result_data: UnboundedBytes,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let service_id: u64 = service_id.as_u64();
-		let call_id: u64 = call_id.as_u64();
-		let result: Vec<u8> = result_data.into();
-
-		let decoded_result: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
-			Decode::decode(&mut &result[..]).map_err(|_| revert("Invalid job result data"))?;
-
-		let call = pallet_services::Call::<Runtime>::submit_result {
-			service_id,
-			call_id,
-			result: decoded_result,
-		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -416,52 +337,6 @@ where
 
 		// inside this call, we do check if the caller is authorized to dispute the slash
 		let call = pallet_services::Call::<Runtime>::dispute { era, index };
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Update price targets for a blueprint.
-	#[precompile::public("updatePriceTargets(uint256,uint256[])")]
-	fn update_price_targets(
-		handle: &mut impl PrecompileHandle,
-		blueprint_id: U256,
-		price_targets: Vec<U256>,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-
-		// Convert price targets into the correct struct
-		let price_targets = {
-			let mut targets = price_targets.into_iter();
-			PriceTargets {
-				cpu: targets.next().map_or(0, |v| v.as_u64()),
-				mem: targets.next().map_or(0, |v| v.as_u64()),
-				storage_hdd: targets.next().map_or(0, |v| v.as_u64()),
-				storage_ssd: targets.next().map_or(0, |v| v.as_u64()),
-				storage_nvme: targets.next().map_or(0, |v| v.as_u64()),
-			}
-		};
-
-		let call =
-			pallet_services::Call::<Runtime>::update_price_targets { blueprint_id, price_targets };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Pre-register as an operator for a specific blueprint.
-	#[precompile::public("preRegister(uint256)")]
-	fn pre_register(handle: &mut impl PrecompileHandle, blueprint_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-		let call = pallet_services::Call::<Runtime>::pre_register { blueprint_id };
-
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())
