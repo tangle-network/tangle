@@ -81,12 +81,15 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
-				result: bounded_vec![FieldType::Bytes],
+				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
-				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
-				result: bounded_vec![FieldType::Bytes],
+				params: bounded_vec![
+					FieldType::Uint64,
+					FieldType::List(Box::new(FieldType::Uint8))
+				],
+				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
 			},
 		],
 		registration_params: bounded_vec![],
@@ -967,7 +970,7 @@ fn job_result() {
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			keygen_job_call_id,
-			bounded_vec![Field::Bytes(dkg.to_raw_vec().try_into().unwrap())],
+			bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
 		));
 
 		// submit signing job
@@ -980,7 +983,7 @@ fn job_result() {
 			SIGN_JOB_ID,
 			bounded_vec![
 				Field::Uint64(keygen_job_call_id),
-				Field::Bytes(data_hash.to_vec().try_into().unwrap())
+				Field::from(BoundedVec::try_from(data_hash.to_vec()).unwrap())
 			],
 		));
 
@@ -1071,13 +1074,13 @@ fn unapplied_slash() {
 			bounded_vec![Field::Uint8(1)],
 		));
 		// sumbit an invalid result
-		let mut dkg = vec![0; 33];
+		let mut dkg = vec![0u8; 33];
 		dkg[32] = 1;
 		assert_ok!(Services::submit_result(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			job_call_id,
-			bounded_vec![Field::Bytes(dkg.try_into().unwrap())],
+			bounded_vec![Field::from(BoundedVec::try_from(dkg).unwrap())],
 		));
 
 		let slash_percent = Percent::from_percent(50);
