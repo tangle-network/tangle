@@ -18,7 +18,10 @@ use crate::{
 	Event, Pallet, RewardConfigForAssetVault, RewardConfigStorage, RewardVaultsPotAccount,
 	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
 };
-use frame_support::{ensure, traits::Currency};
+use frame_support::{
+	ensure,
+	traits::{Currency, Get},
+};
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec;
 use sp_runtime::{
@@ -153,6 +156,26 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::IncentiveCapGreaterThanDepositCap
 		);
 
+		ensure!(
+			config.incentive_cap <= T::MaxIncentiveCap::get(),
+			Error::<T>::IncentiveCapGreaterThanMaxIncentiveCap
+		);
+
+		ensure!(
+			config.deposit_cap <= T::MaxDepositCap::get(),
+			Error::<T>::DepositCapGreaterThanMaxDepositCap
+		);
+
+		ensure!(
+			config.incentive_cap >= T::MinIncentiveCap::get(),
+			Error::<T>::IncentiveCapLessThanMinIncentiveCap
+		);
+
+		ensure!(
+			config.deposit_cap >= T::MinDepositCap::get(),
+			Error::<T>::DepositCapLessThanMinDepositCap
+		);
+
 		if let Some(boost_multiplier) = config.boost_multiplier {
 			// boost multipliers are handled by locks, this ensures the multiplier is 1
 			// we can change the multiplier to be customisable in the future, but for now we
@@ -180,7 +203,7 @@ impl<T: Config> Pallet<T> {
 		original_apy: Percent,
 	) -> Option<Percent> {
 		if deposit_cap.is_zero() {
-			return None;
+			return None
 		}
 
 		log::debug!(target: LOG_TARGET, "calculate_propotional_apy : total_deposit: {:?}, deposit_cap: {:?}, original_apy: {:?}",
@@ -199,7 +222,7 @@ impl<T: Config> Pallet<T> {
 	pub fn calculate_reward_per_block(total_reward: BalanceOf<T>) -> Option<BalanceOf<T>> {
 		let apy_blocks = ApyBlocks::<T>::get();
 		if apy_blocks.is_zero() {
-			return None;
+			return None
 		}
 
 		log::debug!(target: LOG_TARGET, "calculate_reward_per_block : total_reward: {:?}", total_reward);
@@ -218,7 +241,7 @@ impl<T: Config> Pallet<T> {
 
 		// If we haven't reached the decay period yet, no decay
 		if blocks_since_last_claim <= start_period {
-			return Percent::from_percent(100);
+			return Percent::from_percent(100)
 		}
 
 		let decay_rate = DecayRate::<T>::get();
@@ -264,7 +287,7 @@ impl<T: Config> Pallet<T> {
 		let deposit_cap = reward.deposit_cap;
 
 		if reward.incentive_cap > total_deposit {
-			return Err(Error::<T>::TotalDepositLessThanIncentiveCap.into());
+			return Err(Error::<T>::TotalDepositLessThanIncentiveCap.into())
 		}
 
 		log::debug!(target: LOG_TARGET, "total_deposit: {:?}, total_asset_score: {:?}, deposit: {:?}, reward: {:?}, last_claim: {:?}",

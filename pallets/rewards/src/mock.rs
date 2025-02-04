@@ -34,7 +34,7 @@ use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
+	AccountId32, BuildStorage, Perbill, Percent,
 };
 use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
 
@@ -46,6 +46,8 @@ pub type Balance = u128;
 type Nonce = u32;
 pub type AssetId = u128;
 pub type BlockNumber = u64;
+
+const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
@@ -235,6 +237,11 @@ impl pallet_assets::Config for Runtime {
 
 parameter_types! {
 	pub RewardsPID: PalletId = PalletId(*b"PotStake");
+	pub const MaxDepositCap: u128 = EIGHTEEN_DECIMALS * 100_000_000;
+	pub const MaxIncentiveCap: u128 = EIGHTEEN_DECIMALS * 100_000;
+	pub const MaxApy: Percent = Percent::from_percent(20);
+	pub const MinDepositCap: u128 = 0;
+	pub const MinIncentiveCap: u128 = 0;
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -245,6 +252,11 @@ impl pallet_rewards::Config for Runtime {
 	type VaultId = u32;
 	type DelegationManager = MockDelegationManager;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxApy = MaxApy;
+	type MaxDepositCap = MaxDepositCap;
+	type MaxIncentiveCap = MaxIncentiveCap;
+	type MinIncentiveCap = MinIncentiveCap;
+	type MinDepositCap = MinDepositCap;
 }
 
 thread_local! {
@@ -273,7 +285,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 
 	fn is_operator_active(operator: &AccountId) -> bool {
 		if operator == &mock_pub_key(10) {
-			return false;
+			return false
 		}
 		true
 	}
