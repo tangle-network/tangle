@@ -15,8 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-use fp_evm::{ExitError, PrecompileFailure};
 use fp_evm::PrecompileHandle;
+use fp_evm::{ExitError, PrecompileFailure};
 use precompile_utils::prelude::*;
 use sp_core::{sr25519, ConstU32};
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256};
@@ -42,12 +42,20 @@ mod tests;
 macro_rules! verify_signature {
 	($impl_type:ty, $key:expr, $signature:expr, $msg:expr, $key_default:expr, $sig_default:expr) => {{
 		let verifying_key: VerifyingKey<$impl_type> =
-			VerifyingKey::deserialize($key.try_into().unwrap_or($key_default))
-				.map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("InvalidVerifyingKeyDeserialization".into()) })?;
-		let sig: Signature<$impl_type> =
-			Signature::deserialize($signature.try_into().unwrap_or($sig_default))
-				.map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("InvalidSignatureDeserialization".into()) })?;
-		verifying_key.verify($msg, &sig).map_err(|_| PrecompileFailure::Error { exit_status: ExitError::Other("InvalidSignature".into()) })?;
+			VerifyingKey::deserialize($key.try_into().unwrap_or($key_default)).map_err(|_| {
+				PrecompileFailure::Error {
+					exit_status: ExitError::Other("InvalidVerifyingKeyDeserialization".into()),
+				}
+			})?;
+		let sig: Signature<$impl_type> = Signature::deserialize(
+			$signature.try_into().unwrap_or($sig_default),
+		)
+		.map_err(|_| PrecompileFailure::Error {
+			exit_status: ExitError::Other("InvalidSignatureDeserialization".into()),
+		})?;
+		verifying_key.verify($msg, &sig).map_err(|_| PrecompileFailure::Error {
+			exit_status: ExitError::Other("InvalidSignature".into()),
+		})?;
 		Ok(false)
 	}};
 }
