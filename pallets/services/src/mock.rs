@@ -510,7 +510,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> sp_io::TestExternalities {
 pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const HOOKS_TEST: H160 = H160([0x22; 20]);
-pub const USDC_ERC20: H160 = H160([0x23; 20]);
+pub const USDC_ERC20: H160 = H160(hex_literal::hex!("A0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"));
 
 pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;

@@ -1320,7 +1320,7 @@ impl<T: Config> Pallet<T> {
 	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
+		let gas_limit = 1_000_000;
 		let value = value.using_encoded(U256::from_little_endian);
 		let info = Self::evm_call(Self::pallet_evm_account(), contract, value, data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);

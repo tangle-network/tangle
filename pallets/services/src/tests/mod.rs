@@ -80,12 +80,15 @@ pub(crate) fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
-				result: bounded_vec![FieldType::Bytes],
+				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
-				params: bounded_vec![FieldType::Uint64, FieldType::Bytes],
-				result: bounded_vec![FieldType::Bytes],
+				params: bounded_vec![
+					FieldType::Uint64,
+					FieldType::List(Box::new(FieldType::Uint8))
+				],
+				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
 			},
 		],
 		registration_params: bounded_vec![],

@@ -123,10 +123,14 @@ impl<AssetId: AssetIdT> Asset<AssetId> {
 					ethabi::Token::FixedBytes(asset_id_bytes.into()),
 				])
 			},
-			Asset::Erc20(addr) => ethabi::Token::Tuple(vec![
-				ethabi::Token::Uint(1.into()),
-				ethabi::Token::FixedBytes(addr.to_fixed_bytes().into()),
-			]),
+			Asset::Erc20(addr) => {
+				let mut addr_bytes = [0u8; 32];
+				addr_bytes[12..].copy_from_slice(addr.as_fixed_bytes());
+				ethabi::Token::Tuple(vec![
+					ethabi::Token::Uint(1.into()),
+					ethabi::Token::FixedBytes(addr_bytes.into()),
+				])
+			},
 		}
 	}
 }

@@ -137,20 +137,20 @@ fn hooks() {
 		]);
 
 		// OnJobCall hook should be called
-		assert_ok!(Services::call(RuntimeOrigin::signed(charlie.clone()), 1, 0, bounded_vec![],));
+		assert_ok!(Services::call(RuntimeOrigin::signed(charlie.clone()), 0, 0, bounded_vec![],));
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnJobCall()")]);
 
 		// OnJobResult hook should be called
 		assert_ok!(Services::submit_result(
 			RuntimeOrigin::signed(bob.clone()),
-			1,
+			0,
 			0,
 			bounded_vec![],
 		));
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnJobResult()")]);
 
 		// OnServiceTermination hook should be called
-		assert_ok!(Services::terminate(RuntimeOrigin::signed(charlie.clone()), 1));
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(charlie.clone()), 0));
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnServiceTermination()")]);
 	});
 }
