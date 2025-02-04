@@ -1219,6 +1219,7 @@ impl pallet_tangle_lst::Config for Runtime {
 
 parameter_types! {
 	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
+	
 }
 
 impl pallet_rewards::Config for Runtime {
