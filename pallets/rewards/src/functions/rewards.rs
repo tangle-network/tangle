@@ -18,7 +18,10 @@ use crate::{
 	Event, Pallet, RewardConfigForAssetVault, RewardConfigStorage, RewardVaultsPotAccount,
 	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
 };
-use frame_support::{ensure, traits::Currency};
+use frame_support::{
+	ensure,
+	traits::{Currency, Get},
+};
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec;
 use sp_runtime::{
@@ -151,6 +154,26 @@ impl<T: Config> Pallet<T> {
 		ensure!(
 			config.incentive_cap <= config.deposit_cap,
 			Error::<T>::IncentiveCapGreaterThanDepositCap
+		);
+
+		ensure!(
+			config.incentive_cap <= T::MaxIncentiveCap::get(),
+			Error::<T>::IncentiveCapGreaterThanMaxIncentiveCap
+		);
+
+		ensure!(
+			config.deposit_cap <= T::MaxDepositCap::get(),
+			Error::<T>::DepositCapGreaterThanMaxDepositCap
+		);
+
+		ensure!(
+			config.incentive_cap >= T::MinIncentiveCap::get(),
+			Error::<T>::IncentiveCapLessThanMinIncentiveCap
+		);
+
+		ensure!(
+			config.deposit_cap >= T::MinDepositCap::get(),
+			Error::<T>::DepositCapLessThanMinDepositCap
 		);
 
 		if let Some(boost_multiplier) = config.boost_multiplier {
