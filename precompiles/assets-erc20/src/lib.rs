@@ -81,7 +81,7 @@ pub trait AddressToAssetId<AssetId> {
 /// exists in pallet-assets
 /// We cannot do this right now, so instead we check whether the total supply is zero. If so, we
 /// do not route to the precompiles
-
+///
 /// This means that every address that starts with 0xFFFFFFFF will go through an additional db read,
 /// but the probability for this to happen is 2^-32 for random addresses
 pub struct Erc20AssetsPrecompileSet<Runtime, Instance: 'static = ()>(

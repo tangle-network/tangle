@@ -37,7 +37,7 @@ impl<T: crate::Config>
 
 	fn is_operator_active(operator: &T::AccountId) -> bool {
 		Operators::<T>::get(operator)
-			.map_or(false, |metadata| matches!(metadata.status, OperatorStatus::Active))
+			.is_some_and(|metadata| matches!(metadata.status, OperatorStatus::Active))
 	}
 
 	fn get_operator_stake(operator: &T::AccountId) -> BalanceOf<T> {
