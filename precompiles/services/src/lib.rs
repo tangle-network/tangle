@@ -67,7 +67,6 @@ where
 			Decode::decode(&mut &blueprint_data[..])
 				.map_err(|_| revert("Invalid blueprint data"))?;
 
-		// println!("createBlueprint: {:?}", blueprint);
 		let call = pallet_services::Call::<Runtime>::create_blueprint { blueprint };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

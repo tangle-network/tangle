@@ -98,6 +98,11 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 }
 
 #[test]
+fn test_solidity_interface_has_all_function_selectors_documented_and_implemented() {
+	check_precompile_implements_solidity_interfaces(&["Services.sol"], PCall::supports_selector)
+}
+
+#[test]
 fn test_create_blueprint() {
 	ExtBuilder.build().execute_with(|| {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));

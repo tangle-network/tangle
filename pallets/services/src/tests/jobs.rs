@@ -228,7 +228,7 @@ fn job_result() {
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			keygen_job_call_id,
-			bounded_vec![Field::Bytes(dkg.to_raw_vec().try_into().unwrap())],
+			bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
 		));
 
 		// submit signing job
@@ -241,7 +241,7 @@ fn job_result() {
 			SIGN_JOB_ID,
 			bounded_vec![
 				Field::Uint64(keygen_job_call_id),
-				Field::Bytes(data_hash.to_vec().try_into().unwrap())
+				Field::from(BoundedVec::try_from(data_hash.to_vec()).unwrap())
 			],
 		));
 

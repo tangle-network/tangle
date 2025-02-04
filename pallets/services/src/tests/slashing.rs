@@ -36,13 +36,13 @@ fn unapplied_slash() {
 		));
 
 		// Submit an invalid result that should trigger slashing
-		let mut dkg = vec![0; 33];
+		let mut dkg = vec![0u8; 33];
 		dkg[32] = 1;
 		assert_ok!(Services::submit_result(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
 			job_call_id,
-			bounded_vec![Field::Bytes(dkg.try_into().unwrap())],
+			bounded_vec![Field::from(BoundedVec::try_from(dkg).unwrap())],
 		));
 
 		let slash_percent = Percent::from_percent(50);
