@@ -89,7 +89,7 @@ pub mod pallet {
 	use scale_info::TypeInfo;
 	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_staking::{OnStakingUpdate, SessionIndex, StakingInterface};
+	use sp_staking::{OnStakingUpdate, SessionIndex, Stake, StakingInterface};
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
 	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
@@ -1231,5 +1231,9 @@ pub mod pallet {
 		}
 	}
 
-	impl<C: Config> OnStakingUpdate<C::AccountId, BalanceOf<C>> for Pallet<C> {}
+	impl<C: Config> OnStakingUpdate<C::AccountId, BalanceOf<C>> for Pallet<C> {
+		fn on_stake_update(_who: &C::AccountId, _prev_stake: Option<Stake<BalanceOf<C>>>) {
+			unimplemented!("Custom stake update logic not implemented")
+		}
+	}
 }

@@ -613,3 +613,53 @@ fn native_restaking_should_work() {
 		assert_eq!(locks[1].amount, delegate_amount);
 	});
 }
+
+#[test]
+fn unbond_should_fail_if_delegated_nomination() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Dave.into();
+		let validator = Staking::invulnerables()[0].clone();
+		let operator: AccountId = Alice.into();
+		let amount = 100_000;
+		let delegate_amount = amount / 2;
+		// Bond Some TNT
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		// Nominate the validator
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
+
+		System::set_block_number(2);
+		Session::on_initialize(2);
+		Staking::on_initialize(2);
+		Session::on_finalize(2);
+		Staking::on_finalize(2);
+
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Restake
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			delegate_amount,
+			Default::default(),
+		));
+
+		// Try to unbond from the staking pallet
+		assert_ok!(Staking::unbond(RuntimeOrigin::signed(who.clone()), amount));
+
+		// Assert
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, 0);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 1);
+
+		todo!("This test should fail but it is passing");
+	});
+}
