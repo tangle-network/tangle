@@ -441,7 +441,7 @@ impl<T: Config> Pallet<T> {
 		let nominated_amount = Self::verify_nomination_amount(&who, amount)?;
 
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
-			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+			let metadata = maybe_metadata.get_or_insert_with(Default::default);
 
 			// Calculate new total after this delegation
 			let current_total = metadata.total_nomination_delegations();

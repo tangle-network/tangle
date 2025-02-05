@@ -89,7 +89,7 @@ pub mod pallet {
 	use scale_info::TypeInfo;
 	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_staking::{SessionIndex, StakingInterface};
+	use sp_staking::{OnStakingUpdate, SessionIndex, StakingInterface};
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
 	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
@@ -1230,4 +1230,6 @@ pub mod pallet {
 			I::end_session(i)
 		}
 	}
+
+	impl<C: Config> OnStakingUpdate<C::AccountId, BalanceOf<C>> for Pallet<C> {}
 }
