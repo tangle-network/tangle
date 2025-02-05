@@ -220,7 +220,7 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Self>;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = ConstU32<84>;
-	type EventListeners = ();
+	type EventListeners = MultiAssetDelegation;
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
@@ -461,6 +461,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	ext
 }
 
+pub const TNT: AssetId = 0;
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 pub const VDOT: AssetId = 4;
 
@@ -518,6 +519,14 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
+
+	let staking_config = pallet_staking::GenesisConfig::<Runtime> {
+		validator_count: 3,
+		invulnerables: authorities.clone(),
+		..Default::default()
+	};
+
+	staking_config.assimilate_storage(&mut t).unwrap();
 
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
