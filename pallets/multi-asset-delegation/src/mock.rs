@@ -43,6 +43,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
 	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
 };
+use sp_staking::currency_to_vote::U128CurrencyToVote;
 use std::cell::RefCell;
 use tangle_primitives::{
 	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
@@ -199,7 +200,7 @@ impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 	type UnixTime = pallet_timestamp::Pallet<Self>;
-	type CurrencyToVote = ();
+	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
@@ -219,7 +220,7 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Self>;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = ConstU32<84>;
-	type EventListeners = ();
+	type EventListeners = MultiAssetDelegation;
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
@@ -391,6 +392,8 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
@@ -458,6 +461,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	ext
 }
 
+pub const TNT: AssetId = 0;
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 pub const VDOT: AssetId = 4;
 
@@ -515,6 +519,14 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
+
+	let staking_config = pallet_staking::GenesisConfig::<Runtime> {
+		validator_count: 3,
+		invulnerables: authorities.clone(),
+		..Default::default()
+	};
+
+	staking_config.assimilate_storage(&mut t).unwrap();
 
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);

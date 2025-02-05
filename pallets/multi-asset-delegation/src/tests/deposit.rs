@@ -367,7 +367,7 @@ fn execute_withdraw_should_work() {
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
-			crate::Event::Executedwithdraw { who: who.clone() },
+			crate::Event::ExecutedWithdraw { who: who.clone() },
 		));
 	});
 }
@@ -406,7 +406,7 @@ fn execute_withdraw_should_fail_if_no_withdraw_request() {
 
 		assert_noop!(
 			MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who.clone()), None),
-			Error::<Runtime>::NowithdrawRequests
+			Error::<Runtime>::NoWithdrawRequests
 		);
 	});
 }
@@ -548,7 +548,7 @@ fn cancel_withdraw_should_work() {
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
-			crate::Event::Cancelledwithdraw { who: who.clone() },
+			crate::Event::CancelledWithdraw { who: who.clone() },
 		));
 	});
 }

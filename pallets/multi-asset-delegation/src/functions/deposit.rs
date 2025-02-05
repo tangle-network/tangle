@@ -13,8 +13,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
-use crate::{types::*, Pallet};
+
+use crate::{types::*, Config, Delegators, Error, Pallet};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
@@ -204,7 +204,7 @@ impl<T: Config> Pallet<T> {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
 			// Ensure there are outstanding withdraw requests
-			ensure!(!metadata.withdraw_requests.is_empty(), Error::<T>::NowithdrawRequests);
+			ensure!(!metadata.withdraw_requests.is_empty(), Error::<T>::NoWithdrawRequests);
 
 			let current_round = Self::current_round();
 			let delay = T::LeaveDelegatorsDelay::get();

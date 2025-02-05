@@ -14,16 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::{Config, Pallet};
 use frame_system::RawOrigin;
 use sp_runtime::traits::BadOrigin;
-
-use super::*;
 
 pub mod delegate;
 pub mod deposit;
 pub mod evm;
 pub mod operator;
 pub mod session_manager;
+pub mod slash;
 
 /// Ensure that the origin `o` represents the current pallet (i.e. transaction).
 /// Returns `Ok` if the origin is the current pallet, `Err` otherwise.

@@ -74,6 +74,8 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
+pallet-evm-precompile-balances-erc20 = { workspace = true }
+pallet-evm-precompileset-assets-erc20 = { workspace = true }
 
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }

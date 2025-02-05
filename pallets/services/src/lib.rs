@@ -22,16 +22,24 @@
 extern crate alloc;
 use frame_support::{
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, ReservableCurrency},
+	traits::{Currency, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
-use sp_runtime::{traits::Get, DispatchResult};
-use tangle_primitives::traits::MultiAssetDelegationInfo;
+use sp_runtime::{
+	traits::{Get, Zero},
+	DispatchResult,
+};
+use tangle_primitives::{
+	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
+	traits::MultiAssetDelegationInfo,
+	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
+};
 
-mod functions;
+pub mod functions;
 mod impls;
 mod rpc;
 pub mod types;
+use types::*;
 
 #[cfg(test)]
 mod mock;
@@ -46,7 +54,6 @@ mod benchmarking;
 pub mod weights;
 
 pub use module::*;
-use tangle_primitives::BlueprintId;
 pub use weights::WeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -58,22 +65,13 @@ pub mod module {
 	use super::*;
 	use frame_support::{
 		dispatch::PostDispatchInfo,
-		traits::{
-			fungibles::{Inspect, Mutate},
-			tokens::Preservation,
-		},
+		traits::fungibles::{Inspect, Mutate},
+		PalletId,
 	};
 	use sp_core::H160;
-	use sp_runtime::{
-		traits::{AtLeast32BitUnsigned, MaybeSerializeDeserialize, Zero},
-		Percent,
-	};
+	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent};
 	use sp_std::vec::Vec;
-	use tangle_primitives::{
-		services::{MasterBlueprintServiceManagerRevision, *},
-		Account,
-	};
-	use types::*;
+	use tangle_primitives::services::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -87,9 +85,13 @@ pub mod module {
 		type Fungibles: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
 			+ Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
-		/// `Pallet` EVM Address.
+		/// PalletId used for deriving the AccountId and EVM address.
+		/// This account receives slashed assets upon slash event processing.
 		#[pallet::constant]
-		type PalletEVMAddress: Get<H160>;
+		type PalletId: Get<PalletId>;
+
+		#[pallet::constant]
+		type SlashRecipient: Get<Self::AccountId>;
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
@@ -103,14 +105,7 @@ pub mod module {
 		type EvmAddressMapping: tangle_primitives::services::EvmAddressMapping<Self::AccountId>;
 
 		/// The asset ID type.
-		type AssetId: AtLeast32BitUnsigned
-			+ Parameter
-			+ Member
-			+ MaybeSerializeDeserialize
-			+ Clone
-			+ Copy
-			+ PartialOrd
-			+ MaxEncodedLen;
+		type AssetId: AssetIdT;
 
 		/// Maximum number of fields in a job call.
 		#[pallet::constant]
@@ -188,6 +183,14 @@ pub mod module {
 			Self::AccountId,
 			BalanceOf<Self>,
 			BlockNumberFor<Self>,
+			Self::AssetId,
+		>;
+
+		/// Manager for slashing that dispatches slash operations to `pallet-multi-asset-delegation`.
+		type SlashManager: tangle_primitives::traits::SlashManager<
+			Self::AccountId,
+			BalanceOf<Self>,
+			Self::AssetId,
 		>;
 
 		/// Number of eras that slashes are deferred by, after computation.
@@ -200,6 +203,10 @@ pub mod module {
 		/// The origin which can manage Add a new Master Blueprint Service Manager revision.
 		type MasterBlueprintServiceManagerUpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
+		/// The minimum percentage of native token stake that operators must expose for slashing.
+		#[pallet::constant]
+		type NativeExposureMinimum: Get<Percent> + Default + Parameter + MaybeSerializeDeserialize;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -208,10 +215,39 @@ pub mod module {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
 			// Ensure that the pallet's configuration is valid.
-			// 1. Make sure that pallet's associated AccountId value maps correctly to the EVM
-			//    address.
-			let account_id = T::EvmAddressMapping::into_account_id(Self::address());
-			assert_eq!(account_id, Self::account_id(), "Services: AccountId mapping is incorrect.");
+			// 1. Make sure that pallet's substrate address maps correctly back to the EVM address
+			let evm_address = T::EvmAddressMapping::into_address(Self::pallet_account());
+			assert_eq!(
+				evm_address,
+				Self::pallet_evm_account(),
+				"Services: EVM address mapping is incorrect."
+			);
+		}
+
+		/// On initialize, we should check for any unapplied slashes and apply them.
+		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
+			let mut weight = Zero::zero();
+			let current_era = T::OperatorDelegationManager::get_current_round();
+			let slash_defer_duration = T::SlashDeferDuration::get();
+
+			// Only process slashes from eras that have completed their deferral period
+			let process_era = current_era.saturating_sub(slash_defer_duration);
+
+			// Get all unapplied slashes for this era
+			let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
+			for (index, slash) in prefix_iter {
+				match Self::apply_slash(slash) {
+					Ok(weight_used) => {
+						weight = weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
+						// Remove the slash from storage after successful application
+						UnappliedSlashes::<T>::remove(process_era, index);
+					},
+					Err(_) => {
+						log::error!("Failed to apply slash for index: {:?}", index);
+					},
+				}
+			}
+			weight
 		}
 	}
 
@@ -281,8 +317,12 @@ pub mod module {
 		OperatorNotActive,
 		/// No assets provided for the service, at least one asset is required.
 		NoAssetsProvided,
+		/// Duplicate assets provided
+		DuplicateAsset,
 		/// The maximum number of assets per service has been exceeded.
 		MaxAssetsPerServiceExceeded,
+		/// Assets don't match
+		InvalidAssetMatching,
 		/// Offender is not a registered operator.
 		OffenderNotOperator,
 		/// Offender is not an active operator.
@@ -305,6 +345,42 @@ pub mod module {
 		ExpectedEVMAddress,
 		/// Expected the account to be an account ID.
 		ExpectedAccountId,
+		/// Request hook failure
+		OnRequestFailure,
+		/// Register hook failure
+		OnRegisterHookFailed,
+		/// ERC20 transfer hook failure
+		OnErc20TransferFailure,
+		/// Approve service request hook failure
+		OnApproveFailure,
+		/// Reject service request hook failure
+		OnRejectFailure,
+		/// Service init hook
+		OnServiceInitHook,
+		/// Membership model not supported by blueprint
+		UnsupportedMembershipModel,
+		/// Service does not support dynamic membership
+		DynamicMembershipNotSupported,
+		/// Cannot join service - rejected by blueprint
+		JoinRejected,
+		/// Cannot leave service - rejected by blueprint
+		LeaveRejected,
+		/// Invalid minimum # of operators (zero) or greater than max
+		InvalidMinOperators,
+		/// Maximum operators reached
+		MaxOperatorsReached,
+		/// Insufficient # of operators
+		InsufficientOperators,
+		/// Can join hook failure
+		OnCanJoinFailure,
+		/// Can leave hook failure
+		OnCanLeaveFailure,
+		/// Operator join hook failure
+		OnOperatorJoinFailure,
+		/// Operator leave hook failure
+		OnOperatorLeaveFailure,
+		/// Operator is a member or has already joined the service
+		AlreadyJoined,
 	}
 
 	#[pallet::event]
@@ -363,10 +439,10 @@ pub mod module {
 			blueprint_id: u64,
 			/// The list of operators that need to approve the service.
 			pending_approvals: Vec<T::AccountId>,
-			/// The list of operators that atomaticaly approved the service.
+			/// The list of operators that automatically approved the service.
 			approved: Vec<T::AccountId>,
-			/// The list of asset IDs that are being used to secure the service.
-			assets: Vec<T::AssetId>,
+			/// The list of asset security requirements for the service.
+			asset_security: Vec<(Asset<T::AssetId>, Vec<(T::AccountId, Percent)>)>,
 		},
 		/// A service request has been approved.
 		ServiceRequestApproved {
@@ -400,8 +476,8 @@ pub mod module {
 			service_id: u64,
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
-			/// The list of asset IDs that are being used to secure the service.
-			assets: Vec<T::AssetId>,
+			/// The list of assets that are being used to secure the service.
+			assets: Vec<Asset<T::AssetId>>,
 		},
 
 		/// A service has been terminated.
@@ -473,7 +549,32 @@ pub mod module {
 			/// Era index
 			era: u32,
 		},
-
+		/// An Operator has been slashed.
+		OperatorSlashed {
+			/// The account that has been slashed.
+			operator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
+		/// A Delegator has been slashed.
+		DelegatorSlashed {
+			/// The account that has been slashed.
+			delegator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
 		/// The Master Blueprint Service Manager has been revised.
 		MasterBlueprintServiceManagerRevised {
 			/// The revision number of the Master Blueprint Service Manager.
@@ -496,17 +597,17 @@ pub mod module {
 	/// The next free ID for a service request.
 	#[pallet::storage]
 	#[pallet::getter(fn next_service_request_id)]
-	pub type NextServiceRequestId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextServiceRequestId<T> = StorageValue<_, ServiceRequestId, ValueQuery>;
 
 	/// The next free ID for a service Instance.
 	#[pallet::storage]
 	#[pallet::getter(fn next_instance_id)]
-	pub type NextInstanceId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextInstanceId<T> = StorageValue<_, InstanceId, ValueQuery>;
 
 	/// The next free ID for a service call.
 	#[pallet::storage]
 	#[pallet::getter(fn next_job_call_id)]
-	pub type NextJobCallId<T> = StorageValue<_, u64, ValueQuery>;
+	pub type NextJobCallId<T> = StorageValue<_, JobCallId, ValueQuery>;
 
 	/// The next free ID for a unapplied slash.
 	#[pallet::storage]
@@ -614,7 +715,7 @@ pub mod module {
 		u32,
 		Identity,
 		u32,
-		UnappliedSlash<T::AccountId, BalanceOf<T>>,
+		UnappliedSlash<T::AccountId, BalanceOf<T>, T::AssetId>,
 		ResultQuery<Error<T>::UnappliedSlashNotFound>,
 	>;
 
@@ -702,7 +803,6 @@ pub mod module {
 
 			let (allowed, _weight) =
 				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;
-
 			ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
 
 			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));
@@ -794,64 +894,7 @@ pub mod module {
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let (_, blueprint) = Self::blueprints(blueprint_id)?;
-
-			ensure!(
-				T::OperatorDelegationManager::is_operator_active(&caller),
-				Error::<T>::OperatorNotActive
-			);
-
-			let already_registered = Operators::<T>::contains_key(blueprint_id, &caller);
-			ensure!(!already_registered, Error::<T>::AlreadyRegistered);
-			blueprint
-				.type_check_registration(&registration_args)
-				.map_err(Error::<T>::TypeCheck)?;
-
-			// Transfer the registration value to the pallet
-			T::Currency::transfer(
-				&caller,
-				&Self::account_id(),
-				value,
-				ExistenceRequirement::KeepAlive,
-			)?;
-
-			let (allowed, _weight) = Self::on_register_hook(
-				&blueprint,
-				blueprint_id,
-				&preferences,
-				&registration_args,
-				value,
-			)?;
-
-			ensure!(allowed, Error::<T>::InvalidRegistrationInput);
-
-			Operators::<T>::insert(blueprint_id, &caller, preferences);
-
-			OperatorsProfile::<T>::try_mutate(&caller, |profile| {
-				match profile {
-					Ok(p) => {
-						p.blueprints
-							.try_insert(blueprint_id)
-							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
-					},
-					Err(_) => {
-						let mut blueprints = BoundedBTreeSet::new();
-						blueprints
-							.try_insert(blueprint_id)
-							.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
-						*profile = Ok(OperatorProfile { blueprints, ..Default::default() });
-					},
-				};
-				Result::<_, Error<T>>::Ok(())
-			})?;
-
-			Self::deposit_event(Event::Registered {
-				provider: caller.clone(),
-				blueprint_id,
-				preferences,
-				registration_args,
-			});
-
+			Self::do_register(&caller, blueprint_id, preferences, registration_args, value)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -988,131 +1031,27 @@ pub mod module {
 			permitted_callers: Vec<T::AccountId>,
 			operators: Vec<T::AccountId>,
 			request_args: Vec<Field<T::Constraints, T::AccountId>>,
-			assets: Vec<T::AssetId>,
+			asset_security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			payment_asset: Asset<T::AssetId>,
 			#[pallet::compact] value: BalanceOf<T>,
+			membership_model: MembershipModel,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
-			blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
-			// ensure we at least have one asset
-			ensure!(!assets.is_empty(), Error::<T>::NoAssetsProvided);
-
-			let mut preferences = Vec::new();
-			let mut pending_approvals = Vec::new();
-			for provider in &operators {
-				let prefs = Self::operators(blueprint_id, provider)?;
-				pending_approvals.push(provider.clone());
-				preferences.push(prefs);
-			}
-
-			let mut native_value = Zero::zero();
-			let request_id = NextServiceRequestId::<T>::get();
-
-			if value != Zero::zero() {
-				// Payment transfer
-				let refund_to = match payment_asset {
-					// Handle the case of native currency.
-					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
-						T::Currency::transfer(
-							&caller,
-							&Self::account_id(),
-							value,
-							ExistenceRequirement::KeepAlive,
-						)?;
-						native_value = value;
-						Account::id(caller.clone())
-					},
-					Asset::Custom(asset_id) => {
-						T::Fungibles::transfer(
-							asset_id,
-							&caller,
-							&Self::account_id(),
-							value,
-							Preservation::Preserve,
-						)?;
-						Account::id(caller.clone())
-					},
-					Asset::Erc20(token) => {
-						// origin check.
-						let evm_origin = evm_origin.ok_or(Error::<T>::MissingEVMOrigin)?;
-						let mapped_origin = T::EvmAddressMapping::into_account_id(evm_origin);
-						ensure!(mapped_origin == caller, DispatchError::BadOrigin);
-						let (success, _weight) =
-							Self::erc20_transfer(token, evm_origin, Self::address(), value)?;
-						ensure!(success, Error::<T>::ERC20TransferFailed);
-						Account::from(evm_origin)
-					},
-				};
-
-				// Save the payment information for the service request.
-				let payment = StagingServicePayment {
-					request_id,
-					refund_to,
-					asset: payment_asset,
-					amount: value,
-				};
-
-				StagingServicePayments::<T>::insert(request_id, payment);
-			}
-
-			let (allowed, _weight) = Self::on_request_hook(
-				&blueprint,
+			Self::do_request(
+				caller,
+				evm_origin,
 				blueprint_id,
-				&caller,
-				request_id,
-				&preferences,
-				&request_args,
-				&permitted_callers,
-				&assets,
+				permitted_callers,
+				operators,
+				request_args,
+				asset_security_requirements,
 				ttl,
 				payment_asset,
 				value,
-				native_value,
+				membership_model,
 			)?;
-
-			let permitted_callers =
-				BoundedVec::<_, MaxPermittedCallersOf<T>>::try_from(permitted_callers)
-					.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
-			let assets = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets)
-				.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
-			let operators = pending_approvals
-				.iter()
-				.cloned()
-				.map(|v| (v, ApprovalState::Pending))
-				.collect::<Vec<_>>();
-
-			let args = BoundedVec::<_, MaxFieldsOf<T>>::try_from(request_args)
-				.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
-
-			let operators_with_approval_state =
-				BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
-					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
-
-			let service_request = ServiceRequest {
-				blueprint: blueprint_id,
-				owner: caller.clone(),
-				assets: assets.clone(),
-				ttl,
-				args,
-				permitted_callers,
-				operators_with_approval_state,
-			};
-
-			ensure!(allowed, Error::<T>::InvalidRequestInput);
-			ServiceRequests::<T>::insert(request_id, service_request);
-			NextServiceRequestId::<T>::set(request_id.saturating_add(1));
-
-			Self::deposit_event(Event::ServiceRequested {
-				owner: caller.clone(),
-				request_id,
-				blueprint_id,
-				pending_approvals,
-				approved: Default::default(),
-				assets: assets.to_vec(),
-			});
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -1128,177 +1067,28 @@ pub mod module {
 		///
 		/// * `origin` - The origin of the call, must be a signed account
 		/// * `request_id` - The ID of the service request to approve
-		/// * `restaking_percent` - Percentage of staked tokens to expose to this service (0-100)
+		/// * `native_exposure_percent` - Percentage of native token stake to expose
+		/// * `asset_exposure` - Vector of asset-specific exposure commitments
 		///
 		/// # Errors
 		///
 		/// * [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list
 		/// * [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook
+		/// * [`Error::InvalidRequestInput`] - Asset exposure commitments don't meet requirements
 		#[pallet::weight(T::WeightInfo::approve())]
 		pub fn approve(
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
-			#[pallet::compact] restaking_percent: Percent,
+			#[pallet::compact] native_asset_exposure: Percent,
+			non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let mut request = Self::service_requests(request_id)?;
-			let updated = request
-				.operators_with_approval_state
-				.iter_mut()
-				.find(|(v, _)| v == &caller)
-				.map(|(_, s)| *s = ApprovalState::Approved { restaking_percent });
-			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
-
-			let blueprint_id = request.blueprint;
-			let (_, blueprint) = Self::blueprints(blueprint_id)?;
-			let preferences = Operators::<T>::get(blueprint_id, caller.clone())?;
-			let approved = request
-				.operators_with_approval_state
-				.iter()
-				.filter_map(|(v, s)| {
-					if matches!(*s, ApprovalState::Approved { .. }) {
-						Some(v.clone())
-					} else {
-						None
-					}
-				})
-				.collect::<Vec<_>>();
-			let pending_approvals = request
-				.operators_with_approval_state
-				.iter()
-				.filter_map(
-					|(v, s)| if *s == ApprovalState::Pending { Some(v.clone()) } else { None },
-				)
-				.collect::<Vec<_>>();
-
-			let (allowed, _weight) = Self::on_approve_hook(
-				&blueprint,
-				blueprint_id,
-				&preferences,
+			Self::do_approve(
+				caller,
 				request_id,
-				restaking_percent.deconstruct(),
+				native_asset_exposure,
+				non_native_asset_exposures,
 			)?;
-
-			ensure!(allowed, Error::<T>::ApprovalInterrupted);
-			// we emit this event regardless of the outcome of the approval.
-			Self::deposit_event(Event::ServiceRequestApproved {
-				operator: caller.clone(),
-				request_id,
-				blueprint_id: request.blueprint,
-				pending_approvals,
-				approved,
-			});
-
-			if request.is_approved() {
-				// remove the service request.
-				ServiceRequests::<T>::remove(request_id);
-
-				let service_id = Self::next_instance_id();
-				let operators = request
-					.operators_with_approval_state
-					.into_iter()
-					.filter_map(|(v, state)| match state {
-						ApprovalState::Approved { restaking_percent } => {
-							Some((v, restaking_percent))
-						},
-						// N.B: this should not happen, as all operators are approved and checked
-						// above.
-						_ => None,
-					})
-					.collect::<Vec<_>>();
-
-				// add the service id to the list of services for each operator's profile.
-				for (operator, _) in &operators {
-					OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
-						profile
-							.as_mut()
-							.and_then(|p| p.services.try_insert(service_id).ok())
-							.ok_or(Error::<T>::NotRegistered)
-					})?;
-				}
-				let operators = BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
-					.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
-				let service = Service {
-					id: service_id,
-					blueprint: request.blueprint,
-					owner: request.owner.clone(),
-					assets: request.assets.clone(),
-					permitted_callers: request.permitted_callers.clone(),
-					operators,
-					ttl: request.ttl,
-				};
-
-				UserServices::<T>::try_mutate(&request.owner, |service_ids| {
-					Instances::<T>::insert(service_id, service);
-					NextInstanceId::<T>::set(service_id.saturating_add(1));
-					service_ids
-						.try_insert(service_id)
-						.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
-				})?;
-
-				// Payment
-				if let Some(payment) = Self::service_payment(request_id) {
-					// send payments to the MBSM
-					let mbsm_address = Self::mbsm_address_of(&blueprint)?;
-					let mbsm_account_id = T::EvmAddressMapping::into_account_id(mbsm_address);
-					match payment.asset {
-						Asset::Custom(asset_id) if asset_id == Zero::zero() => {
-							T::Currency::transfer(
-								&Self::account_id(),
-								&mbsm_account_id,
-								payment.amount,
-								ExistenceRequirement::AllowDeath,
-							)?;
-						},
-						Asset::Custom(asset_id) => {
-							T::Fungibles::transfer(
-								asset_id,
-								&Self::account_id(),
-								&mbsm_account_id,
-								payment.amount,
-								Preservation::Expendable,
-							)?;
-						},
-						Asset::Erc20(token) => {
-							let (success, _weight) = Self::erc20_transfer(
-								token,
-								Self::address(),
-								mbsm_address,
-								payment.amount,
-							)?;
-							ensure!(success, Error::<T>::ERC20TransferFailed);
-						},
-					}
-
-					// Remove the payment information.
-					StagingServicePayments::<T>::remove(request_id);
-				}
-
-				let (allowed, _weight) = Self::on_service_init_hook(
-					&blueprint,
-					blueprint_id,
-					request_id,
-					service_id,
-					&request.owner,
-					&request.permitted_callers,
-					&request.assets,
-					request.ttl,
-				)?;
-
-				ensure!(allowed, Error::<T>::ServiceInitializationInterrupted);
-
-				Self::deposit_event(Event::ServiceInitiated {
-					owner: request.owner,
-					request_id,
-					assets: request.assets.to_vec(),
-					service_id,
-					blueprint_id: request.blueprint,
-				});
-			} else {
-				// Update the service request.
-				ServiceRequests::<T>::insert(request_id, request);
-			}
-
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1328,77 +1118,7 @@ pub mod module {
 			#[pallet::compact] request_id: u64,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let mut request = Self::service_requests(request_id)?;
-			let updated = request.operators_with_approval_state.iter_mut().find_map(|(v, s)| {
-				if v == &caller {
-					*s = ApprovalState::Rejected;
-					Some(())
-				} else {
-					None
-				}
-			});
-
-			ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
-
-			let blueprint_id = request.blueprint;
-			let (_, blueprint) = Self::blueprints(blueprint_id)?;
-			let prefs = Operators::<T>::get(blueprint_id, caller.clone())?;
-
-			let (allowed, _weight) =
-				Self::on_reject_hook(&blueprint, blueprint_id, &prefs, request_id)?;
-
-			ensure!(allowed, Error::<T>::RejectionInterrupted);
-			Self::deposit_event(Event::ServiceRequestRejected {
-				operator: caller,
-				blueprint_id: request.blueprint,
-				request_id,
-			});
-
-			// Refund the payment
-			if let Some(payment) = Self::service_payment(request_id) {
-				match payment.asset {
-					Asset::Custom(asset_id) if asset_id == Zero::zero() => {
-						let refund_to = payment
-							.refund_to
-							.try_into_account_id()
-							.map_err(|_| Error::<T>::ExpectedAccountId)?;
-						T::Currency::transfer(
-							&Self::account_id(),
-							&refund_to,
-							payment.amount,
-							ExistenceRequirement::AllowDeath,
-						)?;
-					},
-					Asset::Custom(asset_id) => {
-						let refund_to = payment
-							.refund_to
-							.try_into_account_id()
-							.map_err(|_| Error::<T>::ExpectedAccountId)?;
-						T::Fungibles::transfer(
-							asset_id,
-							&Self::account_id(),
-							&refund_to,
-							payment.amount,
-							Preservation::Expendable,
-						)?;
-					},
-					Asset::Erc20(token) => {
-						let refund_to = payment
-							.refund_to
-							.try_into_address()
-							.map_err(|_| Error::<T>::ExpectedEVMAddress)?;
-						let (success, _weight) = Self::erc20_transfer(
-							token,
-							Self::address(),
-							refund_to,
-							payment.amount,
-						)?;
-						ensure!(success, Error::<T>::ERC20TransferFailed);
-					},
-				}
-				StagingServicePayments::<T>::remove(request_id);
-			}
-
+			Self::do_reject(caller, request_id)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1443,7 +1163,7 @@ pub mod module {
 
 			ensure!(allowed, Error::<T>::TerminationInterrupted);
 			// Remove the service from the operator's profile.
-			for (operator, _) in &service.operators {
+			for (operator, _) in &service.native_asset_security {
 				OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
 					profile
 						.as_mut()
@@ -1556,7 +1276,7 @@ pub mod module {
 			let blueprint_id = service.blueprint;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
-			let is_operator = service.operators.iter().any(|(v, _)| v == &caller);
+			let is_operator = service.native_asset_security.iter().any(|(v, _)| v == &caller);
 			ensure!(is_operator, DispatchError::BadOrigin);
 			let operator_preferences = Operators::<T>::get(blueprint_id, &caller)?;
 
@@ -1632,48 +1352,33 @@ pub mod module {
 			let slashing_origin = maybe_slashing_origin.ok_or(Error::<T>::NoSlashingOrigin)?;
 			ensure!(slashing_origin == caller, DispatchError::BadOrigin);
 
-			let (operator, restake_percent) =
-				match service.operators.iter().find(|(operator, _)| operator == &offender) {
-					Some((operator, restake_percent)) => (operator, restake_percent),
-					None => return Err(Error::<T>::OffenderNotOperator.into()),
-				};
-			let operator_is_active = T::OperatorDelegationManager::is_operator_active(&offender);
-			ensure!(operator_is_active, Error::<T>::OffenderNotActiveOperator);
+			// Verify offender is an operator for this service
+			ensure!(
+				service.native_asset_security.iter().any(|(op, _)| op == &offender),
+				Error::<T>::OffenderNotOperator
+			);
 
-			let total_own_stake = T::OperatorDelegationManager::get_operator_stake(operator);
-			// Only take the exposed restake percentage for this service.
-			let own_stake = restake_percent.mul_floor(total_own_stake);
-			let delegators = T::OperatorDelegationManager::get_delegators_for_operator(operator);
-			let exposed_stake = percent.mul_floor(own_stake);
-			let others_slash = delegators
-				.into_iter()
-				.map(|(delegator, stake, _asset_id)| (delegator, percent.mul_floor(stake)))
-				.collect::<Vec<_>>();
-			let total_slash =
-				others_slash.iter().fold(exposed_stake, |acc, (_, slash)| acc + *slash);
+			// Verify operator is active in delegation system
+			ensure!(
+				T::OperatorDelegationManager::is_operator_active(&offender),
+				Error::<T>::OffenderNotActiveOperator
+			);
 
-			// for now, we treat all assets equally, which is not the case in reality.
-			let unapplied_slash = UnappliedSlash {
-				service_id,
-				operator: offender.clone(),
-				own: exposed_stake,
-				others: others_slash,
-				reporters: Vec::from([caller]),
-				payout: total_slash,
-			};
+			// Calculate the slash amounts for operator and delegators
+			let unapplied_slash = Self::calculate_slash(&caller, &service, &offender, percent)?;
 
+			// Store the slash for later processing
 			let index = Self::next_unapplied_slash_index();
-			let era = T::OperatorDelegationManager::get_current_round();
-			UnappliedSlashes::<T>::insert(era, index, unapplied_slash);
+			UnappliedSlashes::<T>::insert(unapplied_slash.era, index, unapplied_slash.clone());
 			NextUnappliedSlashIndex::<T>::set(index.saturating_add(1));
 
 			Self::deposit_event(Event::<T>::UnappliedSlash {
 				index,
-				operator: offender.clone(),
+				operator: offender,
 				blueprint_id: service.blueprint,
 				service_id,
-				amount: total_slash,
-				era,
+				amount: unapplied_slash.own,
+				era: unapplied_slash.era,
 			});
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
@@ -1718,7 +1423,7 @@ pub mod module {
 				operator: unapplied_slash.operator,
 				blueprint_id: service.blueprint,
 				service_id: unapplied_slash.service_id,
-				amount: unapplied_slash.payout,
+				amount: unapplied_slash.own,
 				era,
 			});
 
@@ -1755,6 +1460,62 @@ pub mod module {
 			});
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+		/// Join a service instance as an operator
+		#[pallet::call_index(15)]
+		#[pallet::weight(10_000)]
+		pub fn join_service(
+			origin: OriginFor<T>,
+			instance_id: u64,
+			native_asset_exposure: Percent,
+			non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
+		) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Get service instance
+			let instance = Instances::<T>::get(instance_id)?;
+
+			// Check if operator is already in the set
+			ensure!(
+				!instance.native_asset_security.iter().any(|(op, _)| op == &operator),
+				Error::<T>::AlreadyJoined
+			);
+
+			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
+			let preferences = Self::operators(instance.blueprint, operator.clone())?;
+
+			// Call membership implementation
+			Self::do_join_service(
+				&blueprint,
+				instance.blueprint,
+				instance_id,
+				&operator,
+				&preferences,
+				native_asset_exposure,
+				non_native_asset_exposures,
+			)?;
+
+			Ok(())
+		}
+
+		/// Leave a service instance as an operator
+		#[pallet::call_index(16)]
+		#[pallet::weight(10_000)]
+		pub fn leave_service(origin: OriginFor<T>, instance_id: u64) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Get service instance
+			let instance = Instances::<T>::get(instance_id)?;
+
+			// Get blueprint
+			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
+			let _ = Self::operators(instance.blueprint, operator.clone())?;
+
+			// Call membership implementation
+			Self::do_leave_service(&blueprint, instance.blueprint, instance_id, &operator)?;
+
+			Ok(())
 		}
 	}
 }

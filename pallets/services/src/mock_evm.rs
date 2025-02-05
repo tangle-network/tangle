@@ -16,7 +16,7 @@
 #![allow(clippy::all)]
 use crate as pallet_services;
 use crate::mock::{
-	AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+	AccountId, AssetId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
 use fp_evm::FeeCalculator;
 use frame_support::{
@@ -36,18 +36,54 @@ use sp_runtime::{
 	ConsensusEngineId,
 };
 
+use pallet_evm_precompile_balances_erc20::{Erc20BalancesPrecompile, Erc20Metadata};
 use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
+use pallet_evm_precompileset_assets_erc20::{AddressToAssetId, Erc20AssetsPrecompileSet};
 
 use precompile_utils::precompile_set::{
 	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, PrecompileAt,
-	PrecompileSetBuilder, PrecompilesInRangeInclusive,
+	PrecompileSetBuilder, PrecompileSetStartingWith, PrecompilesInRangeInclusive,
 };
 
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
+
+pub struct NativeErc20Metadata;
+
+/// ERC20 metadata for the native token.
+impl Erc20Metadata for NativeErc20Metadata {
+	/// Returns the name of the token.
+	fn name() -> &'static str {
+		"Tangle Testnet Network Token"
+	}
+
+	/// Returns the symbol of the token.
+	fn symbol() -> &'static str {
+		"tTNT"
+	}
+
+	/// Returns the decimals places of the token.
+	fn decimals() -> u8 {
+		18
+	}
+
+	/// Must return `true` only if it represents the main native currency of
+	/// the network. It must be the currency used in `pallet_evm`.
+	fn is_native_currency() -> bool {
+		true
+	}
+}
+
+/// The asset precompile address prefix. Addresses that match against this prefix will be routed
+/// to Erc20AssetsPrecompileSet being marked as foreign
+pub const ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 4];
+
+parameter_types! {
+	pub ForeignAssetPrefix: &'static [u8] = ASSET_PRECOMPILE_ADDRESS_PREFIX;
+}
 
 #[precompile_utils::precompile_name_from_address]
 pub type DefaultPrecompiles = (
@@ -67,7 +103,20 @@ pub type DefaultPrecompiles = (
 
 pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 	R,
-	(PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), DefaultPrecompiles>,),
+	(
+		PrecompilesInRangeInclusive<(AddressU64<1>, AddressU64<2095>), DefaultPrecompiles>,
+		PrecompileAt<
+			AddressU64<2050>,
+			Erc20BalancesPrecompile<R, NativeErc20Metadata>,
+			(CallableByContract, CallableByPrecompile),
+		>,
+		// Prefixed precompile sets (XC20)
+		PrecompileSetStartingWith<
+			ForeignAssetPrefix,
+			Erc20AssetsPrecompileSet<R>,
+			CallableByContract,
+		>,
+	),
 >;
 
 parameter_types! {
@@ -81,6 +130,28 @@ impl pallet_timestamp::Config for Runtime {
 	type OnTimestampSet = ();
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
+}
+
+const ASSET_ID_SIZE: usize = core::mem::size_of::<AssetId>();
+
+impl AddressToAssetId<AssetId> for Runtime {
+	fn address_to_asset_id(address: H160) -> Option<AssetId> {
+		let mut data = [0u8; ASSET_ID_SIZE];
+		let address_bytes: [u8; 20] = address.into();
+		if ASSET_PRECOMPILE_ADDRESS_PREFIX.eq(&address_bytes[0..4]) {
+			data.copy_from_slice(&address_bytes[4..ASSET_ID_SIZE + 4]);
+			Some(AssetId::from_be_bytes(data))
+		} else {
+			None
+		}
+	}
+
+	fn asset_id_to_address(asset_id: AssetId) -> H160 {
+		let mut data = [0u8; 20];
+		data[0..4].copy_from_slice(ASSET_PRECOMPILE_ADDRESS_PREFIX);
+		data[4..ASSET_ID_SIZE + 4].copy_from_slice(&asset_id.to_be_bytes());
+		H160::from(data)
+	}
 }
 
 pub struct FixedGasPrice;
@@ -160,7 +231,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		who: &H160,
 		fee: U256,
 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		let pallet_services_address = pallet_services::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
 			return Ok(None);
@@ -177,7 +248,7 @@ impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
 		base_fee: U256,
 		already_withdrawn: Self::LiquidityInfo,
 	) -> Self::LiquidityInfo {
-		let pallet_services_address = pallet_services::Pallet::<Runtime>::address();
+		let pallet_services_address = pallet_services::Pallet::<Runtime>::pallet_evm_account();
 		// Make pallet services account free to use
 		if who == &pallet_services_address {
 			return already_withdrawn;

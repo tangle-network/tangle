@@ -275,9 +275,6 @@ pub enum FieldType {
 	/// A Field of `String` type.
 	#[codec(index = 10)]
 	String,
-	/// A Field of `Vec<u8>` type.
-	#[codec(index = 11)]
-	Bytes,
 	/// A Field of `Option<T>` type.
 	#[codec(index = 12)]
 	Optional(Box<FieldType>),

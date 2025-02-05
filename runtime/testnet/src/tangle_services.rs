@@ -1,7 +1,7 @@
 use super::*;
 
 parameter_types! {
-	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
+	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
 }
 
 pub struct PalletEvmRunner;
@@ -140,6 +140,9 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxMasterBlueprintServiceManagerVersions: u32 = u32::MAX;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const NativeExposureMinimum: Percent = Percent::from_percent(10);
 }
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
@@ -149,7 +152,9 @@ impl pallet_services::Config for Runtime {
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
 	type Fungibles = Assets;
-	type PalletEVMAddress = ServicesEVMAddress;
+	type PalletId = ServicesPalletId;
+	type SlashRecipient = TreasuryAccount;
+	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type EvmAddressMapping = PalletEVMAddressMapping;
@@ -178,6 +183,7 @@ impl pallet_services::Config for Runtime {
 	type SlashDeferDuration = SlashDeferDuration;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
+	type NativeExposureMinimum = NativeExposureMinimum;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]

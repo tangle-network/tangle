@@ -160,7 +160,7 @@ fn handle_round_change_with_unstake_should_work() {
 		assert_eq!(snapshot1.stake, 10_000);
 		assert_eq!(snapshot1.delegations.len(), 1);
 		assert_eq!(snapshot1.delegations[0].delegator, delegator1.clone());
-		assert_eq!(snapshot1.delegations[0].amount, amount1 - unstake_amount); // Amount reduced by unstake_amount
+		assert_eq!(snapshot1.delegations[0].amount, amount1); // Amount should be the same
 		assert_eq!(snapshot1.delegations[0].asset_id, asset_id);
 
 		// Check the snapshot for operator2
