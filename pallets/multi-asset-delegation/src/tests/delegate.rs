@@ -16,11 +16,8 @@
 #![allow(clippy::all)]
 use super::*;
 use crate::{CurrentRound, Error};
-use frame_support::{
-	assert_noop, assert_ok,
-	traits::{OnFinalize, OnInitialize},
-};
-use sp_keyring::AccountKeyring::{Alice, Bob, Dave};
+use frame_support::{assert_noop, assert_ok};
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie};
 use tangle_primitives::services::Asset;
 
 #[test]
@@ -555,111 +552,328 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 }
 
 #[test]
-fn native_restaking_should_work() {
+fn delegate_exceeds_max_delegations() {
 	new_test_ext().execute_with(|| {
-		// Arrange
-		let who: AccountId = Dave.into();
-		let validator = Staking::invulnerables()[0].clone();
+		let who: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
-		let amount = 100_000;
-		let delegate_amount = amount / 2;
-		// Bond Some TNT
-		assert_ok!(Staking::bond(
+		let amount = 100;
+
+		// Setup max number of operators
+		let mut operators = vec![];
+		for i in 0..MaxDelegations::get() {
+			let operator_account: AccountId = AccountId::new([i as u8; 32]);
+			// Give operator enough balance to join
+			Balances::force_set_balance(RuntimeOrigin::root(), operator_account.clone(), 100_000);
+			operators.push(operator_account.clone());
+			assert_ok!(MultiAssetDelegation::join_operators(
+				RuntimeOrigin::signed(operator_account),
+				10_000
+			));
+		}
+
+		// Create max number of delegations with same asset
+		let asset_id = Asset::Custom(999);
+		create_and_mint_tokens(999, who.clone(), amount * MaxDelegations::get() as u128);
+		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(who.clone()),
-			amount,
-			pallet_staking::RewardDestination::Staked
+			asset_id.clone(),
+			amount * MaxDelegations::get() as u128,
+			None,
+			None,
 		));
-		// Nominate the validator
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
 
-		System::set_block_number(2);
-		Session::on_initialize(2);
-		Staking::on_initialize(2);
-		Session::on_finalize(2);
-		Staking::on_finalize(2);
-		// Assert
-		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
-		assert_eq!(ledger.active, amount);
-		assert_eq!(ledger.total, amount);
-		assert_eq!(ledger.unlocking.len(), 0);
+		println!("Max delegations: {}", MaxDelegations::get());
+		for i in 0..MaxDelegations::get() {
+			assert_ok!(MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operators[i as usize].clone(),
+				asset_id.clone(),
+				1u128,
+				Default::default(),
+			));
+		}
 
+		let operator: AccountId = Charlie.into();
+		// Give operator enough balance to join
+		Balances::force_set_balance(RuntimeOrigin::root(), operator.clone(), 100_000);
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),
 			10_000
 		));
+		assert_noop!(
+			MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				asset_id,
+				amount,
+				Default::default(),
+			),
+			Error::<Runtime>::MaxDelegationsExceeded
+		);
 
-		// Restake
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(who.clone()),
-			operator.clone(),
-			delegate_amount,
-			Default::default(),
-		));
-		// Assert
+		// Verify state
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.delegations.len(), 1);
-		let delegation = &metadata.delegations[0];
-		assert_eq!(delegation.operator, operator.clone());
-		assert_eq!(delegation.amount, delegate_amount);
-		assert_eq!(delegation.asset_id, Asset::Custom(TNT));
-		// Check the locks
-		let locks = pallet_balances::Pallet::<Runtime>::locks(&who);
-		// 1 lock for the staking
-		// 1 lock for the delegation
-		assert_eq!(locks.len(), 2);
-		assert_eq!(&locks[0].id, b"staking ");
-		assert_eq!(locks[0].amount, amount);
-		assert_eq!(&locks[1].id, b"delegate");
-		assert_eq!(locks[1].amount, delegate_amount);
+		assert_eq!(metadata.delegations.len() as u32, MaxDelegations::get());
 	});
 }
 
 #[test]
-fn unbond_should_fail_if_delegated_nomination() {
+fn delegate_insufficient_deposit() {
 	new_test_ext().execute_with(|| {
-		// Arrange
-		let who: AccountId = Dave.into();
-		let validator = Staking::invulnerables()[0].clone();
+		let who: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
-		let amount = 100_000;
-		let delegate_amount = amount / 2;
-		// Bond Some TNT
-		assert_ok!(Staking::bond(
-			RuntimeOrigin::signed(who.clone()),
-			amount,
-			pallet_staking::RewardDestination::Staked
-		));
-		// Nominate the validator
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
+		let deposit_amount = 100;
+		let delegate_amount = deposit_amount + 1;
+		let asset_id = Asset::Custom(USDC);
 
-		System::set_block_number(2);
-		Session::on_initialize(2);
-		Staking::on_initialize(2);
-		Session::on_finalize(2);
-		Staking::on_finalize(2);
-
+		// Setup operator
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),
 			10_000
 		));
 
-		// Restake
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
+		create_and_mint_tokens(USDC, who.clone(), deposit_amount);
+
+		// Make deposit
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			asset_id.clone(),
+			deposit_amount,
+			None,
+			None,
+		));
+
+		// Try to delegate more than deposited
+		assert_noop!(
+			MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				asset_id.clone(),
+				delegate_amount,
+				Default::default(),
+			),
+			Error::<Runtime>::InsufficientBalance
+		);
+
+		// Verify state remains unchanged
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 0);
+		assert_eq!(metadata.deposits.len(), 1);
+		assert_eq!(metadata.deposits.get(&asset_id).unwrap().amount, deposit_amount);
+	});
+}
+
+#[test]
+fn delegate_to_inactive_operator() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 100;
+
+		// Setup operator but make them inactive
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(operator.clone())));
+
+		// Make deposit
+		create_and_mint_tokens(USDC, who.clone(), amount);
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			Asset::Custom(USDC),
+			amount,
+			None,
+			None,
+		));
+
+		// Try to delegate to inactive operator
+		assert_noop!(
+			MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				Asset::Custom(USDC),
+				amount,
+				Default::default(),
+			),
+			Error::<Runtime>::NotActiveOperator
+		);
+
+		// Verify state remains unchanged
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 0);
+	});
+}
+
+#[test]
+fn delegate_repeated_same_asset() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let initial_amount = 100;
+		let additional_amount = 50;
+
+		// Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Make deposit
+		create_and_mint_tokens(USDC, who.clone(), initial_amount + additional_amount);
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			Asset::Custom(USDC),
+			initial_amount + additional_amount,
+			None,
+			None,
+		));
+
+		// First delegation
+		assert_ok!(MultiAssetDelegation::delegate(
 			RuntimeOrigin::signed(who.clone()),
 			operator.clone(),
-			delegate_amount,
+			Asset::Custom(USDC),
+			initial_amount,
 			Default::default(),
 		));
 
-		// Try to unbond from the staking pallet
-		assert_ok!(Staking::unbond(RuntimeOrigin::signed(who.clone()), amount));
+		// Second delegation with same asset
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			Asset::Custom(USDC),
+			additional_amount,
+			Default::default(),
+		));
 
-		// Assert
-		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
-		assert_eq!(ledger.active, 0);
-		assert_eq!(ledger.total, amount);
-		assert_eq!(ledger.unlocking.len(), 1);
+		// Verify state
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.amount, initial_amount + additional_amount);
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.asset_id, Asset::Custom(USDC));
 
-		todo!("This test should fail but it is passing");
+		// Verify operator state
+		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 1);
+		let operator_delegation = &operator_metadata.delegations[0];
+		assert_eq!(operator_delegation.amount, initial_amount + additional_amount);
+		assert_eq!(operator_delegation.delegator, who);
+		assert_eq!(operator_delegation.asset_id, Asset::Custom(USDC));
+	});
+}
+
+#[test]
+fn delegate_multiple_assets_same_operator() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 100;
+
+		// Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Make deposits for different assets
+		for asset_id in [USDC, WETH].iter() {
+			create_and_mint_tokens(*asset_id, who.clone(), amount);
+			assert_ok!(MultiAssetDelegation::deposit(
+				RuntimeOrigin::signed(who.clone()),
+				Asset::Custom(*asset_id),
+				amount,
+				None,
+				None,
+			));
+			assert_ok!(MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				Asset::Custom(*asset_id),
+				amount,
+				Default::default(),
+			));
+		}
+
+		// Verify state
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 2);
+
+		// Verify each delegation
+		for (i, asset_id) in [USDC, WETH].iter().enumerate() {
+			let delegation = &metadata.delegations[i];
+			assert_eq!(delegation.amount, amount);
+			assert_eq!(delegation.operator, operator);
+			assert_eq!(delegation.asset_id, Asset::Custom(*asset_id));
+		}
+
+		// Verify operator state
+		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
+		assert_eq!(operator_metadata.delegation_count, 2);
+		for (i, asset_id) in [USDC, WETH].iter().enumerate() {
+			let operator_delegation = &operator_metadata.delegations[i];
+			assert_eq!(operator_delegation.amount, amount);
+			assert_eq!(operator_delegation.delegator, who);
+			assert_eq!(operator_delegation.asset_id, Asset::Custom(*asset_id));
+		}
+	});
+}
+
+#[test]
+fn delegate_zero_amount() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+
+		// Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Try to delegate zero amount
+		assert_noop!(
+			MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				Asset::Custom(USDC),
+				0,
+				Default::default(),
+			),
+			Error::<Runtime>::InvalidAmount
+		);
+	});
+}
+
+#[test]
+fn delegate_with_no_deposit() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 100;
+
+		// Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Try to delegate without deposit
+		assert_noop!(
+			MultiAssetDelegation::delegate(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				Asset::Custom(USDC),
+				amount,
+				Default::default(),
+			),
+			Error::<Runtime>::NotDelegator
+		);
+
+		// Verify state remains unchanged
+		let metadata = MultiAssetDelegation::delegators(who.clone());
+		assert_eq!(metadata.is_none(), true);
 	});
 }

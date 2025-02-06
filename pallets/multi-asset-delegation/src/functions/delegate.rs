@@ -673,11 +673,14 @@ impl<T: Config> Pallet<T> {
 				.find(|(_, r)| r.operator == operator && r.is_nomination)
 				.ok_or(Error::<T>::NoBondLessRequest)?;
 
-			ensure!(request.requested_round <= Self::current_round(), Error::<T>::BondLessNotReady);
+			let delay = T::DelegationBondLessDelay::get();
+			ensure!(
+				request.requested_round + delay <= Self::current_round(),
+				Error::<T>::BondLessNotReady
+			);
 
 			// Store the amount before removing the request
 			let unstake_amount = request.amount;
-
 			// Find the nomination delegation
 			let (delegation_index, current_amount) =
 				Self::find_nomination_delegation(&metadata.delegations, &operator)?
@@ -881,7 +884,7 @@ impl<T: Config> Pallet<T> {
 			*operator_updates.entry(delegation_key).or_default() += request.amount;
 			indices_to_remove.push(idx);
 		}
-
+		println!("indices_to_remove: {:?}", indices_to_remove);
 		ensure!(!indices_to_remove.is_empty(), Error::<T>::BondLessNotReady);
 		Ok((deposit_updates, delegation_updates, operator_updates, indices_to_remove))
 	}

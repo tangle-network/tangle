@@ -462,6 +462,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 pub const VDOT: AssetId = 4;
 

@@ -21,16 +21,6 @@ use sp_runtime::DispatchError;
 /// Trait for managing slashing in the Tangle network.
 /// This trait provides functionality to slash operators and delegators.
 pub trait SlashManager<AccountId, Balance, AssetId> {
-	/// Slash a delegator's stake for an offense.
-	///
-	/// # Parameters
-	/// * `unapplied_slash` - The unapplied slash record containing slash details
-	/// * `delegator` - The account of the delegator being slashed
-	fn slash_delegator(
-		unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
-		delegator: &AccountId,
-	) -> Result<Weight, DispatchError>;
-
 	/// Slash an operator's stake for an offense.
 	///
 	/// # Parameters
@@ -41,13 +31,6 @@ pub trait SlashManager<AccountId, Balance, AssetId> {
 }
 
 impl<AccountId, Balance, AssetId> SlashManager<AccountId, Balance, AssetId> for () {
-	fn slash_delegator(
-		_unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
-		_delegator: &AccountId,
-	) -> Result<Weight, DispatchError> {
-		Ok(Weight::zero())
-	}
-
 	fn slash_operator(
 		_unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
 	) -> Result<Weight, DispatchError> {

@@ -17,7 +17,10 @@
 use crate::{types::*, Config, Delegators, Error, Event, Operators, Pallet};
 use frame_support::{dispatch::DispatchResult, ensure, traits::Get, weights::Weight};
 use sp_runtime::{traits::CheckedSub, DispatchError};
-use tangle_primitives::{services::UnappliedSlash, traits::SlashManager};
+use tangle_primitives::{
+	services::{Asset, UnappliedSlash},
+	traits::SlashManager,
+};
 
 impl<T: Config> Pallet<T> {
 	/// Helper function to update operator storage for a slash
@@ -57,41 +60,32 @@ impl<T: Config> Pallet<T> {
 
 	/// Helper function to update delegator storage for a slash
 	pub(crate) fn do_slash_delegator(
-		unapplied_slash: &UnappliedSlash<T::AccountId, BalanceOf<T>, T::AssetId>,
+		operator: &T::AccountId,
 		delegator: &T::AccountId,
+		asset_id: Asset<T::AssetId>,
+		slash_amount: BalanceOf<T>,
 	) -> Result<Weight, DispatchError> {
 		let mut weight = T::DbWeight::get().reads(1);
 
-		let slash_amount = Delegators::<T>::try_mutate(
-			delegator,
-			|maybe_metadata| -> Result<BalanceOf<T>, DispatchError> {
-				let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+		Delegators::<T>::try_mutate(delegator, |maybe_metadata| -> DispatchResult {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-				// Find the delegation to the slashed operator
-				let delegation = metadata
-					.delegations
-					.iter_mut()
-					.find(|d| &d.operator == &unapplied_slash.operator)
-					.ok_or(Error::<T>::NoActiveDelegation)?;
+			// Find the delegation to the slashed operator
+			let delegation = metadata
+				.delegations
+				.iter_mut()
+				.find(|d| &d.operator == operator && d.asset_id == asset_id)
+				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-				// Find the slash amount for this delegator from the unapplied slash
-				let slash_amount = unapplied_slash
-					.others
-					.iter()
-					.find(|(d, _, _)| d == delegator)
-					.map(|(_, _, amount)| *amount)
-					.ok_or(Error::<T>::NoActiveDelegation)?;
+			// Update delegator's stake
+			delegation.amount = delegation
+				.amount
+				.checked_sub(&slash_amount)
+				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
 
-				// Update delegator's stake
-				delegation.amount = delegation
-					.amount
-					.checked_sub(&slash_amount)
-					.ok_or(Error::<T>::InsufficientStakeRemaining)?;
-
-				weight += T::DbWeight::get().writes(1);
-				Ok(slash_amount)
-			},
-		)?;
+			weight += T::DbWeight::get().writes(1);
+			Ok(())
+		})?;
 
 		// Emit event for delegator slash
 		Self::deposit_event(Event::DelegatorSlashed {
@@ -112,19 +106,18 @@ impl<T: Config> SlashManager<T::AccountId, BalanceOf<T>, T::AssetId> for Pallet<
 	fn slash_operator(
 		unapplied_slash: &UnappliedSlash<T::AccountId, BalanceOf<T>, T::AssetId>,
 	) -> Result<Weight, DispatchError> {
-		Self::do_slash_operator(unapplied_slash)
-	}
+		let mut total_weight = Self::do_slash_operator(unapplied_slash)?;
 
-	/// Updates delegator storage to reflect a slash.
-	/// This only updates the storage items and does not handle asset transfers.
-	///
-	/// # Arguments
-	/// * `unapplied_slash` - The unapplied slash record containing slash details
-	/// * `delegator` - The account of the delegator being slashed
-	fn slash_delegator(
-		unapplied_slash: &UnappliedSlash<T::AccountId, BalanceOf<T>, T::AssetId>,
-		delegator: &T::AccountId,
-	) -> Result<Weight, DispatchError> {
-		Self::do_slash_delegator(unapplied_slash, delegator)
+		// Also slash all delegators in the unapplied_slash.others list
+		for (delegator, asset_id, amount) in &unapplied_slash.others {
+			total_weight = total_weight.saturating_add(Self::do_slash_delegator(
+				&unapplied_slash.operator,
+				delegator,
+				*asset_id,
+				*amount,
+			)?);
+		}
+
+		Ok(total_weight)
 	}
 }

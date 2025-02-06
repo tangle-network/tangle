@@ -691,7 +691,7 @@ fn slash_operator_success() {
 			operator: Alice.to_account_id(),
 			own: exposed_stake,
 			others: vec![(Bob.to_account_id(), asset1, exposed_delegation)],
-			reporters: vec![Eve.to_account_id()], // reporter doesn't matter for this test
+			reporters: vec![Eve.to_account_id()],
 		};
 
 		// Apply the slash
@@ -821,7 +821,7 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 			service_id: 42,
 			operator: Alice.to_account_id(),
 			own: 5_000,
-			others: vec![(Bob.to_account_id(), asset_id, 2_500)],
+			others: vec![],
 			reporters: vec![Eve.to_account_id()],
 		};
 

@@ -16,54 +16,167 @@
 
 use super::*;
 use crate::{CurrentRound, Error};
-use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie};
+use frame_support::{
+	assert_noop, assert_ok,
+	traits::{Hooks, OnFinalize, OnInitialize},
+};
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
 use tangle_primitives::services::Asset;
 
 #[test]
-fn successful_native_restaking() {
+fn native_restaking_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = Dave.into();
+		let validator = Staking::invulnerables()[0].clone();
 		let operator: AccountId = Alice.into();
-		let nomination_amount = 100;
+		let amount = 100_000;
+		let delegate_amount = amount / 2;
+		// Bond Some TNT
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		// Nominate the validator
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
 
-		// Setup operator
+		System::set_block_number(2);
+		<Session as Hooks<BlockNumber>>::on_initialize(2);
+		<Staking as Hooks<BlockNumber>>::on_initialize(2);
+		<Session as Hooks<BlockNumber>>::on_finalize(2);
+		<Staking as Hooks<BlockNumber>>::on_finalize(2);
+		// Assert
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, amount);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 0);
+
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),
 			10_000
 		));
 
-		// Setup nomination for the delegator
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(
-			RuntimeOrigin::signed(who.clone()),
-			nomination_amount,
-			pallet_staking::RewardDestination::Staked
-		));
-
-		// Act - Delegate native stake
+		// Restake
 		assert_ok!(MultiAssetDelegation::delegate_nomination(
 			RuntimeOrigin::signed(who.clone()),
 			operator.clone(),
-			nomination_amount,
+			delegate_amount,
+			Default::default(),
+		));
+		// Assert
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator.clone());
+		assert_eq!(delegation.amount, delegate_amount);
+		assert_eq!(delegation.asset_id, Asset::Custom(TNT));
+		// Check the locks
+		let locks = pallet_balances::Pallet::<Runtime>::locks(&who);
+		// 1 lock for the staking
+		// 1 lock for the delegation
+		assert_eq!(locks.len(), 2);
+		assert_eq!(&locks[0].id, b"staking ");
+		assert_eq!(locks[0].amount, amount);
+		assert_eq!(&locks[1].id, b"delegate");
+		assert_eq!(locks[1].amount, delegate_amount);
+	});
+}
+
+#[test]
+fn unbond_should_fail_if_delegated_nomination() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Dave.into();
+		let validator = Staking::invulnerables()[0].clone();
+		let operator: AccountId = Alice.into();
+		let amount = 100_000;
+		let delegate_amount = amount / 2;
+		// Bond Some TNT
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		// Nominate the validator
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
+
+		System::set_block_number(2);
+		<Session as Hooks<BlockNumber>>::on_initialize(2);
+		<Staking as Hooks<BlockNumber>>::on_initialize(2);
+		<Session as Hooks<BlockNumber>>::on_finalize(2);
+		<Staking as Hooks<BlockNumber>>::on_finalize(2);
+
+		// Verify initial staking state
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, amount);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 0);
+
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Restake
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			delegate_amount,
 			Default::default(),
 		));
 
-		// Assert
+		// Verify delegation state
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.nomination_delegations.len(), 1);
-		let delegation = &metadata.nomination_delegations[0];
-		assert_eq!(delegation.operator, operator.clone());
-		assert_eq!(delegation.amount, nomination_amount);
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.amount, delegate_amount);
+		assert_eq!(delegation.is_nomination, true);
+		assert_eq!(delegation.asset_id, Asset::Custom(TNT));
 
 		// Check operator metadata
 		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
-		assert_eq!(operator_metadata.nomination_count, 1);
-		assert_eq!(operator_metadata.nomination_delegations.len(), 1);
-		let operator_delegation = &operator_metadata.nomination_delegations[0];
+		assert_eq!(operator_metadata.delegation_count, 1);
+		let operator_delegation = &operator_metadata.delegations[0];
 		assert_eq!(operator_delegation.delegator, who.clone());
-		assert_eq!(operator_delegation.amount, nomination_amount);
+		assert_eq!(operator_delegation.amount, delegate_amount);
+
+		// Check locks before unbond attempt
+		let locks = pallet_balances::Pallet::<Runtime>::locks(&who);
+		assert_eq!(locks.len(), 2);
+		assert_eq!(&locks[0].id, b"staking ");
+		assert_eq!(locks[0].amount, amount);
+		assert_eq!(&locks[1].id, b"delegate");
+		assert_eq!(locks[1].amount, delegate_amount);
+
+		// Try to unbond from the staking pallet - should fail
+		assert_noop!(
+			Staking::unbond(RuntimeOrigin::signed(who.clone()), amount),
+			Error::<Runtime>::InsufficientStakeRemaining
+		);
+
+		// Verify state remains unchanged after failed unbond
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, amount);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 0);
+
+		// Verify delegation state remains unchanged
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.amount, delegate_amount);
+		assert_eq!(delegation.is_nomination, true);
+
+		// Verify locks remain unchanged
+		let locks = pallet_balances::Pallet::<Runtime>::locks(&who);
+		assert_eq!(locks.len(), 2);
+		assert_eq!(&locks[0].id, b"staking ");
+		assert_eq!(locks[0].amount, amount);
+		assert_eq!(&locks[1].id, b"delegate");
+		assert_eq!(locks[1].amount, delegate_amount);
 	});
 }
 
@@ -84,8 +197,12 @@ fn successful_multiple_native_restaking() {
 		));
 
 		// Setup nomination
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			total_nomination,
+			pallet_staking::RewardDestination::Staked
+		));
 		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), total_nomination));
 
 		// First restake
 		assert_ok!(MultiAssetDelegation::delegate_nomination(
@@ -105,198 +222,23 @@ fn successful_multiple_native_restaking() {
 
 		// Assert
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.nomination_delegations.len(), 1);
-		let delegation = &metadata.nomination_delegations[0];
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator.clone());
 		assert_eq!(delegation.amount, first_restake + second_restake);
 
 		// Check operator metadata
 		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
-		assert_eq!(operator_metadata.nomination_count, 1);
-		assert_eq!(operator_metadata.nomination_delegations.len(), 1);
-		let operator_delegation = &operator_metadata.nomination_delegations[0];
+		assert_eq!(operator_metadata.delegation_count, 1);
+		let operator_delegation = &operator_metadata.delegations[0];
 		assert_eq!(operator_delegation.delegator, who.clone());
 		assert_eq!(operator_delegation.amount, first_restake + second_restake);
 	});
 }
 
 #[test]
-fn successful_native_and_non_native_restaking() {
+fn native_restake_exceeding_nomination_amount() {
 	new_test_ext().execute_with(|| {
-		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
-		let nomination_amount = 100;
-		let non_native_amount = 50;
-		let asset_id = Asset::Custom(VDOT);
-
-		// Setup operator
-		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator.clone()),
-			10_000
-		));
-
-		// Setup nomination
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), nomination_amount));
-
-		// Setup non-native asset
-		create_and_mint_tokens(VDOT, who.clone(), non_native_amount);
-
-		// Deposit non-native asset
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(who.clone()),
-			asset_id.clone(),
-			non_native_amount,
-			None,
-			None,
-		));
-
-		// Delegate native stake
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(who.clone()),
-			operator.clone(),
-			nomination_amount,
-			Default::default(),
-		));
-
-		// Delegate non-native asset
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(who.clone()),
-			operator.clone(),
-			asset_id.clone(),
-			non_native_amount,
-			Default::default(),
-		));
-
-		// Assert
-		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-
-		// Check nomination delegation
-		assert_eq!(metadata.nomination_delegations.len(), 1);
-		let nomination_delegation = &metadata.nomination_delegations[0];
-		assert_eq!(nomination_delegation.operator, operator.clone());
-		assert_eq!(nomination_delegation.amount, nomination_amount);
-
-		// Check non-native delegation
-		assert_eq!(metadata.delegations.len(), 1);
-		let asset_delegation = &metadata.delegations[0];
-		assert_eq!(asset_delegation.operator, operator.clone());
-		assert_eq!(asset_delegation.amount, non_native_amount);
-		assert_eq!(asset_delegation.asset_id, asset_id);
-
-		// Check operator metadata
-		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
-		assert_eq!(operator_metadata.nomination_count, 1);
-		assert_eq!(operator_metadata.delegation_count, 1);
-	});
-}
-
-#[test]
-fn successful_restaking_and_partial_unbond() {
-	new_test_ext().execute_with(|| {
-		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
-		let total_nomination = 100;
-		let restake_amount = 60;
-		let unbond_amount = 40;
-		let excessive_unbond = 70;
-
-		// Setup operator
-		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator.clone()),
-			10_000
-		));
-
-		// Setup nomination
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), total_nomination));
-
-		// Restake
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(who.clone()),
-			operator.clone(),
-			restake_amount,
-			Default::default(),
-		));
-
-		// Successful partial unbond
-		assert_ok!(Staking::unbond(RuntimeOrigin::signed(who.clone()), unbond_amount));
-
-		// Attempt excessive unbond - should fail
-		assert_noop!(
-			Staking::unbond(RuntimeOrigin::signed(who.clone()), excessive_unbond),
-			Error::<Runtime>::InsufficientStakeRemaining
-		);
-
-		// Assert
-		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.nomination_delegations.len(), 1);
-		let delegation = &metadata.nomination_delegations[0];
-		assert_eq!(delegation.amount, restake_amount);
-	});
-}
-
-#[test]
-fn fails_native_restake_no_nominations() {
-	new_test_ext().execute_with(|| {
-		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
-		let amount = 100;
-
-		// Setup operator
-		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator.clone()),
-			10_000
-		));
-
-		// Attempt to delegate without nomination
-		assert_noop!(
-			MultiAssetDelegation::delegate_nomination(
-				RuntimeOrigin::signed(who.clone()),
-				operator.clone(),
-				amount,
-				Default::default(),
-			),
-			Error::<Runtime>::NotNominator
-		);
-	});
-}
-
-#[test]
-fn fails_native_restake_not_operator() {
-	new_test_ext().execute_with(|| {
-		// Arrange
-		let who: AccountId = Bob.into();
-		let non_operator: AccountId = Charlie.into();
-		let amount = 100;
-
-		// Setup nomination
-		assert_ok!(Staking::nominate(
-			RuntimeOrigin::signed(who.clone()),
-			vec![non_operator.clone()]
-		));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), amount));
-
-		// Attempt to delegate to non-operator
-		assert_noop!(
-			MultiAssetDelegation::delegate_nomination(
-				RuntimeOrigin::signed(who.clone()),
-				non_operator.clone(),
-				amount,
-				Default::default(),
-			),
-			Error::<Runtime>::NotAnOperator
-		);
-	});
-}
-
-#[test]
-fn fails_native_restake_amount_exceeds_nomination() {
-	new_test_ext().execute_with(|| {
-		// Arrange
 		let who: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
 		let nomination_amount = 100;
@@ -309,10 +251,14 @@ fn fails_native_restake_amount_exceeds_nomination() {
 		));
 
 		// Setup nomination
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			nomination_amount,
+			pallet_staking::RewardDestination::Staked
+		));
 		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), nomination_amount));
 
-		// Attempt to delegate more than nominated
+		// Try to restake more than nominated
 		assert_noop!(
 			MultiAssetDelegation::delegate_nomination(
 				RuntimeOrigin::signed(who.clone()),
@@ -326,13 +272,11 @@ fn fails_native_restake_amount_exceeds_nomination() {
 }
 
 #[test]
-fn successful_native_restake_and_unstake() {
+fn native_restake_with_no_active_nomination() {
 	new_test_ext().execute_with(|| {
-		// Arrange
 		let who: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
-		let nomination_amount = 100;
-		let unstake_amount = 40;
+		let amount = 100;
 
 		// Setup operator
 		assert_ok!(MultiAssetDelegation::join_operators(
@@ -340,15 +284,75 @@ fn successful_native_restake_and_unstake() {
 			10_000
 		));
 
-		// Setup nomination
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), nomination_amount));
+		// Try to restake without nomination
+		assert_noop!(
+			MultiAssetDelegation::delegate_nomination(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+				amount,
+				Default::default(),
+			),
+			Error::<Runtime>::NotNominator
+		);
+	});
+}
 
-		// Delegate native stake
+#[test]
+fn native_restake_to_non_operator() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let non_operator: AccountId = Charlie.into();
+		let amount = 100;
+
+		// Setup nomination
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		assert_ok!(Staking::nominate(
+			RuntimeOrigin::signed(who.clone()),
+			vec![non_operator.clone()]
+		));
+
+		// Try to restake to non-operator
+		assert_noop!(
+			MultiAssetDelegation::delegate_nomination(
+				RuntimeOrigin::signed(who.clone()),
+				non_operator.clone(),
+				amount,
+				Default::default(),
+			),
+			Error::<Runtime>::NotAnOperator
+		);
+	});
+}
+
+#[test]
+fn native_restake_and_unstake_flow() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 100;
+		let unstake_amount = 40;
+
+		// Setup
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
+
+		// Restake
 		assert_ok!(MultiAssetDelegation::delegate_nomination(
 			RuntimeOrigin::signed(who.clone()),
 			operator.clone(),
-			nomination_amount,
+			amount,
 			Default::default(),
 		));
 
@@ -360,7 +364,14 @@ fn successful_native_restake_and_unstake() {
 			Default::default(),
 		));
 
-		// Simulate round passing
+		// Verify unstake request
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.operator, operator.clone());
+		assert_eq!(request.amount, unstake_amount);
+
+		// Move to next round
 		CurrentRound::<Runtime>::put(10);
 
 		// Execute unstake
@@ -369,78 +380,195 @@ fn successful_native_restake_and_unstake() {
 			operator.clone(),
 		));
 
-		// Assert
+		// Verify final state
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.nomination_delegations.len(), 1);
-		let delegation = &metadata.nomination_delegations[0];
-		assert_eq!(delegation.amount, nomination_amount - unstake_amount);
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.amount, amount - unstake_amount);
 	});
 }
 
 #[test]
-fn fails_native_restake_excessive_unstake() {
+fn native_restake_zero_amount() {
 	new_test_ext().execute_with(|| {
-		// Arrange
 		let who: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
-		let nomination_amount = 100;
-		let excessive_unstake = 150;
+		let amount = 100;
 
-		// Setup operator
+		// Setup
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),
 			10_000
 		));
-
-		// Setup nomination
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), nomination_amount));
-
-		// Delegate native stake
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
+		assert_ok!(Staking::bond(
 			RuntimeOrigin::signed(who.clone()),
-			operator.clone(),
-			nomination_amount,
-			Default::default(),
+			amount,
+			pallet_staking::RewardDestination::Staked
 		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
 
-		// Attempt to schedule excessive unstake
+		// Try to restake zero amount
 		assert_noop!(
-			MultiAssetDelegation::schedule_nomination_unstake(
+			MultiAssetDelegation::delegate_nomination(
 				RuntimeOrigin::signed(who.clone()),
 				operator.clone(),
-				excessive_unstake,
+				0,
 				Default::default(),
 			),
-			Error::<Runtime>::UnstakeAmountTooLarge
+			Error::<Runtime>::InvalidAmount
 		);
 	});
 }
 
 #[test]
-fn successful_native_restake_unstake_and_cancel() {
+fn native_restake_concurrent_operations() {
 	new_test_ext().execute_with(|| {
-		// Arrange
 		let who: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
-		let nomination_amount = 100;
-		let unstake_amount = 40;
+		let amount = 100;
 
-		// Setup operator
+		// Setup
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),
 			10_000
 		));
-
-		// Setup nomination
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
 		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
-		assert_ok!(Staking::bond(RuntimeOrigin::signed(who.clone()), nomination_amount));
 
-		// Delegate native stake
+		// Perform multiple operations in same block
 		assert_ok!(MultiAssetDelegation::delegate_nomination(
 			RuntimeOrigin::signed(who.clone()),
 			operator.clone(),
-			nomination_amount,
+			50,
+			Default::default(),
+		));
+		assert_ok!(MultiAssetDelegation::schedule_nomination_unstake(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			20,
+			Default::default(),
+		));
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			30,
+			Default::default(),
+		));
+
+		// Verify final state
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.amount, 80); // 50 + 30
+		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
+	});
+}
+
+#[test]
+fn native_restake_early_unstake_execution_fails() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 100;
+		let unstake_amount = 40;
+
+		// Setup
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
+
+		// Restake
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			amount,
+			Default::default(),
+		));
+
+		// Verify delegation state after restaking
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.amount, amount);
+		assert_eq!(delegation.is_nomination, true);
+		assert_eq!(metadata.delegator_unstake_requests.len(), 0);
+
+		// Schedule unstake
+		assert_ok!(MultiAssetDelegation::schedule_nomination_unstake(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			unstake_amount,
+			Default::default(),
+		));
+
+		// Verify unstake request state
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.operator, operator);
+		assert_eq!(request.amount, unstake_amount);
+		assert_eq!(request.is_nomination, true);
+
+		// Try to execute unstake immediately - should fail
+		assert_noop!(
+			MultiAssetDelegation::execute_nomination_unstake(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+			),
+			Error::<Runtime>::BondLessNotReady
+		);
+
+		// Verify state remains unchanged after failed execution
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.amount, amount);
+		assert_eq!(delegation.is_nomination, true);
+		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.operator, operator);
+		assert_eq!(request.amount, unstake_amount);
+		assert_eq!(request.is_nomination, true);
+	});
+}
+
+#[test]
+fn native_restake_cancel_unstake() {
+	new_test_ext().execute_with(|| {
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 100;
+		let unstake_amount = 40;
+
+		// Setup
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![operator.clone()]));
+
+		// Restake
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			amount,
 			Default::default(),
 		));
 
@@ -452,23 +580,34 @@ fn successful_native_restake_unstake_and_cancel() {
 			Default::default(),
 		));
 
-		// Cancel unstake
+		// Verify unstake request exists
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
+		let request = &metadata.delegator_unstake_requests[0];
+		assert_eq!(request.operator, operator.clone());
+		assert_eq!(request.amount, unstake_amount);
+
+		// Cancel unstake request
 		assert_ok!(MultiAssetDelegation::cancel_nomination_unstake(
 			RuntimeOrigin::signed(who.clone()),
 			operator.clone(),
 		));
 
-		// Assert
+		// Verify unstake request is removed
 		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
-		assert_eq!(metadata.nomination_delegations.len(), 1);
-		let delegation = &metadata.nomination_delegations[0];
-		assert_eq!(delegation.amount, nomination_amount);
-		assert!(metadata.nomination_unstake_requests.is_empty());
+		assert_eq!(metadata.delegator_unstake_requests.len(), 0);
 
-		// Check operator metadata
-		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();
-		assert_eq!(operator_metadata.nomination_count, 1);
-		let operator_delegation = &operator_metadata.nomination_delegations[0];
-		assert_eq!(operator_delegation.amount, nomination_amount);
+		// Verify delegation amount remains unchanged
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.amount, amount);
+
+		// Try to execute cancelled unstake - should fail
+		assert_noop!(
+			MultiAssetDelegation::execute_nomination_unstake(
+				RuntimeOrigin::signed(who.clone()),
+				operator.clone(),
+			),
+			Error::<Runtime>::NoBondLessRequest
+		);
 	});
 }
