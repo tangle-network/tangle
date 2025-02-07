@@ -30,7 +30,9 @@ use sp_runtime::{
 	DispatchResult,
 };
 use tangle_primitives::{
-	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
+	services::{
+		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
+	},
 	traits::MultiAssetDelegationInfo,
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 };

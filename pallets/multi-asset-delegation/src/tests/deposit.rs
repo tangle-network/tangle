@@ -20,7 +20,6 @@ use sp_keyring::AccountKeyring::Bob;
 use sp_runtime::{ArithmeticError, DispatchError};
 use tangle_primitives::services::{Asset, EvmAddressMapping};
 
-// helper function
 pub fn create_and_mint_tokens(
 	asset_id: AssetId,
 	recipient: <Runtime as frame_system::Config>::AccountId,

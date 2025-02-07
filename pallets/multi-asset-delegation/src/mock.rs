@@ -306,15 +306,19 @@ parameter_types! {
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
-	pub SlashedAmountRecipient : AccountId = AccountKeyring::Alice.into();
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxOperatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxWithdrawRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxUnstakeRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
 }
@@ -409,7 +413,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxWithdrawRequests = MaxWithdrawRequests;
 	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type MaxDelegations = MaxDelegations;
-	type SlashedAmountRecipient = SlashedAmountRecipient;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type EvmAddressMapping = PalletEVMAddressMapping;

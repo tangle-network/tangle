@@ -9839,6 +9839,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-evm-precompileset-assets-erc20",
+ "pallet-multi-asset-delegation",
  "pallet-session",
  "pallet-staking",
  "pallet-timestamp",
@@ -9854,6 +9855,7 @@ dependencies = [
  "sp-runtime",
  "sp-staking",
  "sp-std",
+ "sp-weights",
  "tangle-primitives",
 ]
 
