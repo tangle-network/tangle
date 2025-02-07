@@ -461,7 +461,7 @@ fn operator_join_delegator_delegate_erc20() {
 		let usdc = MockERC20::new(t.usdc, &bob_provider);
 
 		// Mint USDC for Bob
-		let mint_amount = U256::from(100_000_000u128);
+		let mint_amount = U256::from(100_000u128);
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
