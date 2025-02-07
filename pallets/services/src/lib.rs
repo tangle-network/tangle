@@ -236,6 +236,8 @@ pub mod module {
 			// Get all unapplied slashes for this era
 			let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
 			for (index, slash) in prefix_iter {
+				// TODO: This call must be all or nothing.
+				// TODO: If fail then revert all storage changes
 				match Self::apply_slash(slash) {
 					Ok(weight_used) => {
 						weight = weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);

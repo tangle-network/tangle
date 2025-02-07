@@ -121,6 +121,9 @@ impl<T: Config> Pallet<T> {
 	) -> Result<Weight, DispatchError> {
 		let mut weight: Weight = Weight::zero();
 		// Notify the multi-asset delegation system about the operator slash
+		// This call will also slash all delegators for the operator. Note, that
+		// the `SlashManager`` is solely responsible for updating the storage of
+		// the operator and delegators. The asset transfers are handled by this function.
 		let slash_operator_weight = T::SlashManager::slash_operator(&unapplied_slash)?;
 		weight += slash_operator_weight;
 
@@ -149,11 +152,6 @@ impl<T: Config> Pallet<T> {
 
 		// Process all delegator slashes
 		for (delegator, asset, slash_amount) in unapplied_slash.clone().others {
-			// Notify multi-asset delegation system about the delegator slash
-			let slash_delegator_weight =
-				T::SlashManager::slash_delegator(&unapplied_slash, &delegator)?;
-			weight += slash_delegator_weight;
-
 			// Transfer slashed assets to treasury
 			match asset {
 				Asset::Custom(asset_id) => {
