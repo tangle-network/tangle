@@ -189,7 +189,7 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 1_000_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
 
@@ -958,22 +958,6 @@ fn mad_rewards() {
 
 		// Approve LRT contract to spend WETH
 		let deposit_amount = weth_amount;
-		let approve_result =
-			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
-		assert!(approve_result.status());
-		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
-
-		// // Deposit WETH to LRT
-		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
-		// let deposit_result = lrt
-		// 	.deposit(deposit_amount, bob.address())
-		// 	.send()
-		// 	.await?
-		// 	.with_timeout(Some(Duration::from_secs(5)))
-		// 	.get_receipt()
-		// 	.await?;
-		// assert!(deposit_result.status());
-		// info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);

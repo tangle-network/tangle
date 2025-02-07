@@ -13,7 +13,7 @@ use tangle_primitives::{
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100M tokens with 18 decimals
 const MOCK_INCENTIVE_CAP: u128 = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
