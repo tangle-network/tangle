@@ -190,7 +190,7 @@ async fn deploy_tangle_lrt(
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 1000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
 
 /// Setup the E2E test environment.
@@ -936,7 +936,7 @@ fn mad_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		let deposit = U256::from(MOCK_DEPOSIT);
+		let deposit_amount = U256::from(MOCK_DEPOSIT);
 
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
@@ -951,17 +951,38 @@ fn mad_rewards() {
 		// Bob as delegator
 		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
-		// Mint WETH for Bob
-		let weth_amount = deposit;
-		let weth = MockERC20::new(t.weth, &bob_provider);
-		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
 
-		// Approve LRT contract to spend WETH
-		let deposit_amount = weth_amount;
+		// Mint USDC for Bob
+		let mint_amount = U256::from(100_000_000u128);
+		let mint_call = api::tx().assets().mint(
+			t.usdc_asset_id,
+			bob.address().to_account_id().into(),
+			mint_amount.to::<u128>(),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::assets::events::Issued>()?
+					.expect("Issued event to be emitted");
+				break;
+			}
+		}
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
-		let deposit_amount = U256::from(100_000_000u128);
 
 		// Deposit and delegate using asset ID
 		let deposit_result = precompile
