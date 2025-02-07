@@ -781,6 +781,43 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
+	/// Checks if an account can unbond a specified amount of tokens.
+	///
+	/// This function verifies whether unbonding a certain amount would leave sufficient
+	/// tokens to cover existing nomination delegations. It:
+	/// 1. Checks if the account is a nominator
+	/// 2. Calculates remaining stake after unbonding
+	/// 3. Verifies nominated delegations can still be covered
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account to check
+	/// * `amount` - The amount to potentially unbond
+	///
+	/// # Returns
+	///
+	/// * `true` if unbonding is allowed
+	/// * `false` if unbonding would leave insufficient stake for delegations
+	pub fn can_unbound(who: &T::AccountId, amount: BalanceOf<T>) -> bool {
+		let Ok(stake) = T::StakingInterface::stake(who) else {
+			// not a nominator
+			return true;
+		};
+		// Simulate the unbound operation
+		let remaining_stake = stake.active.saturating_sub(amount);
+		let delegator = Self::delegators(who).unwrap_or_default();
+		let nominated_amount =
+			delegator.delegations.iter().fold(BalanceOf::<T>::zero(), |acc, d| {
+				if d.is_nomination {
+					acc.saturating_add(d.amount)
+				} else {
+					acc
+				}
+			});
+		let restake_amount = remaining_stake.saturating_sub(nominated_amount);
+		!restake_amount.is_zero()
+	}
+
 	/// Helper function to verify and get nomination amount
 	fn verify_nomination_amount(
 		who: &T::AccountId,

@@ -66,6 +66,9 @@ pub mod mock_evm;
 #[cfg(test)]
 mod tests;
 
+#[cfg(any(test, feature = "fuzzing"))]
+mod extra;
+
 pub mod weights;
 
 // #[cfg(feature = "runtime-benchmarks")]
@@ -1228,12 +1231,6 @@ pub mod pallet {
 		}
 		fn end_session(i: SessionIndex) {
 			I::end_session(i)
-		}
-	}
-
-	impl<C: Config> OnStakingUpdate<C::AccountId, BalanceOf<C>> for Pallet<C> {
-		fn on_stake_update(_who: &C::AccountId, _prev_stake: Option<Stake<BalanceOf<C>>>) {
-			unimplemented!("Custom stake update logic not implemented")
 		}
 	}
 }

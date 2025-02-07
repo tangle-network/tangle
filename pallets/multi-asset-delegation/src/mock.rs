@@ -17,6 +17,7 @@
 use super::*;
 use crate::{self as pallet_multi_asset_delegation};
 use ethabi::Uint;
+use fp_self_contained::SelfContainedCall;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
@@ -25,7 +26,9 @@ use frame_support::{
 	construct_runtime, derive_impl,
 	pallet_prelude::{Hooks, Weight},
 	parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
+	traits::{
+		AsEnsureOriginWithArg, ConstU128, ConstU32, Contains, GetCallMetadata, OneSessionHandler,
+	},
 	PalletId,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
@@ -39,6 +42,7 @@ use sp_core::{sr25519, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
+	generic,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
 	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
@@ -220,7 +224,7 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Self>;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = ConstU32<84>;
-	type EventListeners = MultiAssetDelegation;
+	type EventListeners = ();
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
@@ -417,7 +421,17 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type WeightInfo = ();
 }
 
-type Block = frame_system::mocking::MockBlock<Runtime>;
+/// An unchecked extrinsic type to be used in tests.
+pub type MockUncheckedExtrinsic = generic::UncheckedExtrinsic<
+	AccountId,
+	RuntimeCall,
+	u32,
+	extra::CheckNominatedRestaked<Runtime>,
+>;
+
+/// An implementation of `sp_runtime::traits::Block` to be used in tests.
+type Block =
+	generic::Block<generic::Header<u64, sp_runtime::traits::BlakeTwo256>, MockUncheckedExtrinsic>;
 
 construct_runtime!(
 	pub enum Runtime

@@ -16,11 +16,15 @@
 
 use super::*;
 use crate::{CurrentRound, Error};
+use extra::CheckNominatedRestaked;
 use frame_support::{
-	assert_noop, assert_ok,
+	assert_err, assert_noop, assert_ok,
+	dispatch::DispatchInfo,
+	pallet_prelude::{InvalidTransaction, TransactionValidityError},
 	traits::{Hooks, OnFinalize, OnInitialize},
 };
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
+use sp_runtime::traits::SignedExtension;
 use tangle_primitives::services::Asset;
 
 #[test]
@@ -149,11 +153,17 @@ fn unbond_should_fail_if_delegated_nomination() {
 		assert_eq!(locks[0].amount, amount);
 		assert_eq!(&locks[1].id, b"delegate");
 		assert_eq!(locks[1].amount, delegate_amount);
+		let call = RuntimeCall::Staking(pallet_staking::Call::unbond { value: amount });
 
 		// Try to unbond from the staking pallet - should fail
-		assert_noop!(
-			Staking::unbond(RuntimeOrigin::signed(who.clone()), amount),
-			Error::<Runtime>::InsufficientStakeRemaining
+		assert_err!(
+			CheckNominatedRestaked::<Runtime>::new().validate(
+				&who,
+				&call,
+				&DispatchInfo::default(),
+				0
+			),
+			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
 		// Verify state remains unchanged after failed unbond
