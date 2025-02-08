@@ -72,7 +72,7 @@ pub mod module {
 	};
 	use sp_core::H160;
 	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent};
-	use sp_std::vec::Vec;
+	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
 	use tangle_primitives::services::*;
 
 	#[pallet::config]
@@ -263,6 +263,8 @@ pub mod module {
 		BlueprintCreationInterrupted,
 		/// The caller is already registered as a operator.
 		AlreadyRegistered,
+		/// The caller is registering with a key that is already registered
+		DuplicateKey,
 		/// The caller does not have the requirements to be a operator.
 		InvalidRegistrationInput,
 		/// The Operator is not allowed to unregister.
@@ -315,10 +317,18 @@ pub mod module {
 		EVMAbiDecode,
 		/// Operator profile not found.
 		OperatorProfileNotFound,
-		/// Maximum number of services per Provider reached.
-		MaxServicesPerProviderExceeded,
+		/// Maximum number of services per operator reached.
+		MaxServicesPerOperatorExceeded,
+		/// Maximum number of blueprints registered by the operator reached.
+		MaxBlueprintsPerOperatorExceeded,
 		/// The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
 		OperatorNotActive,
+		/// Duplicate operator registration.
+		DuplicateOperator,
+		/// Too many operators provided for the service's membership model
+		TooManyOperators,
+		/// Too few operators provided for the service's membership model
+		TooFewOperators,
 		/// No assets provided for the service, at least one asset is required.
 		NoAssetsProvided,
 		/// Duplicate assets provided
@@ -385,6 +395,14 @@ pub mod module {
 		OnOperatorLeaveFailure,
 		/// Operator is a member or has already joined the service
 		AlreadyJoined,
+		/// Caller is not an operator of the service
+		NotAnOperator,
+		/// Submitted result is empty
+		InvalidResultFormat,
+		/// Invalid slash percentage
+		InvalidSlashPercentage,
+		/// Invalid key (zero byte ECDSA key provided)
+		InvalidKey,
 	}
 
 	#[pallet::event]
@@ -572,6 +590,8 @@ pub mod module {
 			delegator: T::AccountId,
 			/// The amount of the slash.
 			amount: BalanceOf<T>,
+			/// The asset being slashed.
+			asset: Asset<T::AssetId>,
 			/// Service ID
 			service_id: u64,
 			/// Blueprint ID
@@ -892,12 +912,27 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::register())]
 		pub fn register(
 			origin: OriginFor<T>,
-			#[pallet::compact] blueprint_id: u64,
+			#[pallet::compact] blueprint_id: BlueprintId,
 			preferences: OperatorPreferences,
 			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
+			// Validate the operator preferences
+			ensure!(preferences.key != [0u8; 65], Error::<T>::InvalidKey);
+			// Check if operator is already registered for this blueprint
+			ensure!(
+				!Operators::<T>::contains_key(blueprint_id, &caller),
+				Error::<T>::AlreadyRegistered
+			);
+
+			// Check if the key is already in use by another operator
+			for (operator, prefs) in Operators::<T>::iter_prefix(blueprint_id) {
+				if operator != caller && prefs.key == preferences.key {
+					return Err(Error::<T>::DuplicateKey.into());
+				}
+			}
+
 			Self::do_register(&caller, blueprint_id, preferences, registration_args, value)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -1042,6 +1077,32 @@ pub mod module {
 			membership_model: MembershipModel,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
+			// Ensure all operators are active
+			for operator in operators.iter() {
+				ensure!(
+					T::OperatorDelegationManager::is_operator_active(&operator),
+					Error::<T>::OperatorNotActive,
+				);
+			}
+
+			// Ensure no duplicate operators
+			let mut seen_operators = BTreeSet::new();
+			for operator in operators.iter() {
+				ensure!(seen_operators.insert(operator), Error::<T>::DuplicateOperator);
+			}
+
+			// Check that the number of operators doesn't exceed the membership model max
+			match membership_model {
+				MembershipModel::Fixed { min_operators } => {
+					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
+				},
+				MembershipModel::Dynamic { min_operators, max_operators } => {
+					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
+					if let Some(max_ops) = max_operators {
+						ensure!(operators.len() <= max_ops as usize, Error::<T>::TooManyOperators);
+					}
+				},
+			}
 
 			Self::do_request(
 				caller,
@@ -1151,6 +1212,28 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
 			ensure!(service.owner == caller, DispatchError::BadOrigin);
+
+			// Apply any unapplied slashes for this service before termination
+			let current_era = T::OperatorDelegationManager::get_current_round();
+			let last_era = current_era.saturating_sub(1);
+
+			// Get slashes from current and last era
+			let current_slashes: Vec<_> = UnappliedSlashes::<T>::iter_prefix(current_era)
+				.filter(|(_, slash)| slash.service_id == service_id)
+				.collect();
+			let last_slashes: Vec<_> = UnappliedSlashes::<T>::iter_prefix(last_era)
+				.filter(|(_, slash)| slash.service_id == service_id)
+				.collect();
+
+			// Apply all slashes
+			for (_, slash) in current_slashes.into_iter().chain(last_slashes) {
+				Self::apply_slash(slash)?;
+			}
+
+			// Clean up storage
+			let _ = UnappliedSlashes::<T>::clear_prefix(current_era, u32::MAX, None);
+			let _ = UnappliedSlashes::<T>::clear_prefix(last_era, u32::MAX, None);
+
 			let removed = UserServices::<T>::try_mutate(&caller, |service_ids| {
 				Result::<_, Error<T>>::Ok(service_ids.remove(&service_id))
 			})?;
@@ -1289,6 +1372,8 @@ pub mod module {
 				.get(usize::from(job_call.job))
 				.ok_or(Error::<T>::JobDefinitionNotFound)?;
 
+			ensure!(!result.is_empty(), Error::<T>::InvalidResultFormat);
+
 			let bounded_result = BoundedVec::<_, MaxFieldsOf<T>>::try_from(result.clone())
 				.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
 
@@ -1355,6 +1440,9 @@ pub mod module {
 			let (maybe_slashing_origin, _used_weight) = Self::query_slashing_origin(&service)?;
 			let slashing_origin = maybe_slashing_origin.ok_or(Error::<T>::NoSlashingOrigin)?;
 			ensure!(slashing_origin == caller, DispatchError::BadOrigin);
+
+			// Ensure slash percent is greater than 0
+			ensure!(!percent.is_zero(), Error::<T>::InvalidSlashPercentage);
 
 			// Verify offender is an operator for this service
 			ensure!(

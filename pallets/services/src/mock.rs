@@ -45,8 +45,8 @@ use sp_weights::Weight;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
-	traits::{MultiAssetDelegationInfo, RewardsManager, ServiceManager},
-	types::{rewards::LockMultiplier, BlockNumber, RoundIndex},
+	traits::RewardsManager,
+	types::{rewards::LockMultiplier, BlockNumber},
 };
 
 pub type AccountId = AccountId32;
@@ -556,6 +556,10 @@ impl Default for ExtBuilder {
 
 pub fn mock_pub_key(id: u8) -> AccountId {
 	sr25519::Public::from_raw([id; 32]).into()
+}
+
+pub fn mock_pub_key_from_fixed_bytes(bytes: [u8; 32]) -> AccountId {
+	sr25519::Public::from_raw(bytes).into()
 }
 
 pub fn mock_address(id: u8) -> H160 {

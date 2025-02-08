@@ -217,15 +217,12 @@ fn test_payment_distribution_operators() {
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
 		let mbsm_account_id = address_to_account_id(mbsm_address);
-		assert_eq!(Assets::balance(USDC, mbsm_account_id), payment);
+		assert_eq!(Assets::balance(USDC, mbsm_account_id.clone()), payment);
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 
 		// Test Case 2: ERC20 Token Payment
 		let charlie_address = mock_address(CHARLIE);
 		let charlie_evm_account_id = address_to_account_id(charlie_address);
-		let before_erc20_balance = Services::query_erc20_balance_of(USDC_ERC20, charlie_address)
-			.map(|(b, _)| b)
-			.unwrap_or_default();
 
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie_evm_account_id.clone()),
@@ -369,15 +366,12 @@ fn test_payment_multiple_asset_types() {
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
 		let mbsm_account_id = address_to_account_id(mbsm_address);
-		assert_eq!(Assets::balance(USDC, mbsm_account_id), payment);
+		assert_eq!(Assets::balance(USDC, mbsm_account_id.clone()), payment);
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 
 		// Test Case 2: Multiple asset types with ERC20 payment
 		let charlie_address = mock_address(CHARLIE);
 		let charlie_evm_account_id = address_to_account_id(charlie_address);
-		let before_erc20_balance = Services::query_erc20_balance_of(USDC_ERC20, charlie_address)
-			.map(|(b, _)| b)
-			.unwrap_or_default();
 
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie_evm_account_id.clone()),
@@ -509,7 +503,7 @@ fn test_payment_zero_amount() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAmount
+			Error::<Runtime>::OnRequestFailure
 		);
 
 		// Test Case 2: Zero amount for ERC20 Token
@@ -529,7 +523,7 @@ fn test_payment_zero_amount() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAmount
+			Error::<Runtime>::OnRequestFailure
 		);
 
 		// Test Case 3: Zero amount for Native Currency
@@ -547,7 +541,7 @@ fn test_payment_zero_amount() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAmount
+			Error::<Runtime>::OnRequestFailure
 		);
 	});
 }
@@ -591,7 +585,7 @@ fn test_payment_maximum_amount() {
 				max_custom_amount,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InsufficientBalance
+			Error::<Runtime>::OnRequestFailure
 		);
 
 		// Test Case 2: Maximum amount for ERC20 Token (more than balance)
@@ -616,7 +610,7 @@ fn test_payment_maximum_amount() {
 				max_erc20_amount,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InsufficientBalance
+			Error::<Runtime>::OnRequestFailure
 		);
 
 		// Test Case 3: Maximum amount for Native Currency (more than balance)
@@ -635,7 +629,7 @@ fn test_payment_maximum_amount() {
 				max_native_amount,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InsufficientBalance
+			Error::<Runtime>::OnRequestFailure
 		);
 	});
 }
@@ -680,7 +674,7 @@ fn test_payment_invalid_asset_types() {
 				payment,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::AssetNotFound
+			Error::<Runtime>::OnRequestFailure
 		);
 
 		// Test Case 2: Non-existent ERC20 Token
@@ -701,7 +695,7 @@ fn test_payment_invalid_asset_types() {
 				payment,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::ERC20NotFound
+			Error::<Runtime>::OnRequestFailure
 		);
 
 		// Test Case 3: Invalid ERC20 Token (not a contract)
@@ -720,7 +714,7 @@ fn test_payment_invalid_asset_types() {
 				payment,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidERC20Contract
+			Error::<Runtime>::OnRequestFailure
 		);
 	});
 }

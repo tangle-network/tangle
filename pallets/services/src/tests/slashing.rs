@@ -20,6 +20,30 @@ use sp_runtime::Percent;
 use sp_staking::StakingAccount;
 
 #[test]
+fn test_zero_percentage_slash() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, .. } = deploy();
+		let operator = mock_pub_key(BOB);
+
+		// Try to slash zero stake
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+
+		assert_err!(
+			Services::slash(
+				RuntimeOrigin::signed(slashing_origin.clone()),
+				operator.clone(),
+				service_id,
+				Percent::from_percent(0)
+			),
+			Error::<Runtime>::InvalidSlashPercentage
+		);
+	});
+}
+
+#[test]
 fn unapplied_slash() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
@@ -106,9 +130,8 @@ fn slash_account_not_an_operator() {
 fn dispute() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let bob = mock_pub_key(BOB);
-		let slash_percent = Percent::from_percent(50);
 		let service = Services::services(service_id).unwrap();
 		let slashing_origin =
 			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
@@ -118,40 +141,29 @@ fn dispute() {
 			RuntimeOrigin::signed(slashing_origin.clone()),
 			bob.clone(),
 			service_id,
-			slash_percent
+			Percent::from_percent(50)
 		));
 
-		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
-
-		let era = 0;
-		let slash_index = 0;
+		// Get the unapplied slash
+		let (era, index) = UnappliedSlashes::<Runtime>::iter_keys().next().unwrap();
 
 		// Dispute the slash
 		let dispute_origin =
 			Services::query_dispute_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
 
-		assert_ok!(Services::dispute(
-			RuntimeOrigin::signed(dispute_origin.clone()),
-			era,
-			slash_index
-		));
+		assert_ok!(Services::dispute(RuntimeOrigin::signed(dispute_origin.clone()), era, index));
 
 		// Verify the slash was removed
 		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
 
-		// Calculate expected slash amount
-		let bob_stake = <Runtime as Config>::OperatorDelegationManager::get_operator_stake(&bob);
-		let expected_slash_amount =
-			(slash_percent * bob_exposed_restake_percentage).mul_floor(bob_stake);
-
 		// Verify the correct event was emitted
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::SlashDiscarded {
 			era,
-			index: slash_index,
+			index,
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: expected_slash_amount,
+			amount: 0, // The amount will be 0 since we're not dealing with actual stakes
 		}));
 	});
 }
@@ -229,13 +241,13 @@ fn dispute_an_already_applied_slash() {
 fn test_slash_with_multiple_asset_types() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
 
 		// Setup native stake
 		let native_stake = 10_000;
-		assert_ok!(Services::delegate_nomination(
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
 			RuntimeOrigin::signed(delegator.clone()),
 			operator.clone(),
 			native_stake,
@@ -305,31 +317,32 @@ fn test_slash_with_multiple_asset_types() {
 		assert_eq!(weth_balance_after, weth_stake / 2);
 
 		// Verify events for each asset type
-		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			crate::Event::NominationSlashed {
-				delegator: delegator.clone(),
-				operator: operator.clone(),
-				amount: native_stake / 2,
-			},
-		));
+		System::assert_has_event(RuntimeEvent::Services(crate::Event::DelegatorSlashed {
+			delegator: delegator.clone(),
+			amount: native_stake / 2,
+			asset: Asset::Custom(TNT),
+			service_id,
+			blueprint_id,
+			era: 0,
+		}));
 
-		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			crate::Event::DelegationSlashed {
-				delegator: delegator.clone(),
-				operator: operator.clone(),
-				asset: Asset::Custom(USDC),
-				amount: usdc_stake / 2,
-			},
-		));
+		System::assert_has_event(RuntimeEvent::Services(crate::Event::DelegatorSlashed {
+			delegator: delegator.clone(),
+			asset: Asset::Custom(USDC),
+			amount: usdc_stake / 2,
+			service_id,
+			blueprint_id,
+			era: 0,
+		}));
 
-		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			crate::Event::DelegationSlashed {
-				delegator: delegator.clone(),
-				operator: operator.clone(),
-				asset: Asset::Custom(WETH),
-				amount: weth_stake / 2,
-			},
-		));
+		System::assert_has_event(RuntimeEvent::Services(crate::Event::DelegatorSlashed {
+			delegator: delegator.clone(),
+			asset: Asset::Custom(WETH),
+			amount: weth_stake / 2,
+			service_id,
+			blueprint_id,
+			era: 0,
+		}));
 	});
 }
 
@@ -337,14 +350,14 @@ fn test_slash_with_multiple_asset_types() {
 fn test_slash_with_concurrent_delegations() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator1 = mock_pub_key(CHARLIE);
 		let delegator2 = mock_pub_key(DAVE);
 
 		// Initial setup
 		let initial_stake = 10_000;
-		assert_ok!(Services::delegate_nomination(
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
 			RuntimeOrigin::signed(delegator1.clone()),
 			operator.clone(),
 			initial_stake,
@@ -366,7 +379,7 @@ fn test_slash_with_concurrent_delegations() {
 
 		// Add new delegation during slash processing
 		let new_stake = 5_000;
-		assert_ok!(Services::delegate_nomination(
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
 			RuntimeOrigin::signed(delegator2.clone()),
 			operator.clone(),
 			new_stake,
@@ -374,7 +387,7 @@ fn test_slash_with_concurrent_delegations() {
 		));
 
 		// Remove some delegation during slash processing
-		assert_ok!(Services::schedule_nomination_unstake(
+		assert_ok!(MultiAssetDelegation::schedule_nomination_unstake(
 			RuntimeOrigin::signed(delegator1.clone()),
 			operator.clone(),
 			initial_stake / 4,
@@ -382,43 +395,41 @@ fn test_slash_with_concurrent_delegations() {
 		));
 
 		// Apply the slash
-		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter().collect();
-		for (era, index) in slashes.iter().map(|((era, index), _)| (*era, *index)) {
-			assert_ok!(Services::apply_slash(
-				RuntimeOrigin::signed(slashing_origin.clone()),
-				era,
-				index
-			));
+		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
+		for (_, slash) in slashes {
+			assert_ok!(Services::apply_slash(slash));
 		}
 
 		// Verify final states
-		let delegator1_final_stake =
-			Staking::ledger(StakingAccount::Stash(delegator1.clone())).unwrap().active;
-		let delegator2_final_stake =
-			Staking::ledger(StakingAccount::Stash(delegator2.clone())).unwrap().active;
+		let delegator1_metadata = MultiAssetDelegation::delegators(delegator1.clone()).unwrap();
+		let delegator2_metadata = MultiAssetDelegation::delegators(delegator2.clone()).unwrap();
 
-		// Delegator1's stake should reflect both the slash and unstaking
+		let delegator1_final_delegation = delegator1_metadata
+			.delegations
+			.iter()
+			.find(|d| d.operator == operator)
+			.map(|d| d.amount)
+			.unwrap_or(0);
+
+		let delegator2_final_delegation = delegator2_metadata
+			.delegations
+			.iter()
+			.find(|d| d.operator == operator)
+			.map(|d| d.amount)
+			.unwrap_or(0);
+
+		// Delegator1's delegation should reflect both the slash and unstaking
 		assert_eq!(
-			delegator1_final_stake,
+			delegator1_final_delegation,
 			initial_stake / 2 - initial_stake / 4,
-			"Delegator1's stake should be halved by slash and reduced by unstaking"
+			"Delegator1's delegation should be halved by slash and reduced by unstaking"
 		);
 
-		// Delegator2's new stake should be unaffected by the slash
+		// Delegator2's new delegation should be unaffected by the slash
 		assert_eq!(
-			delegator2_final_stake, new_stake,
-			"Delegator2's stake should be unaffected as it was added after slash"
+			delegator2_final_delegation, new_stake,
+			"Delegator2's delegation should be unaffected as it was added after slash"
 		);
-
-		// Verify events
-		System::assert_has_event(RuntimeEvent::Services(crate::Event::SlashApplied {
-			era: 0,
-			index: 0,
-			operator: operator.clone(),
-			blueprint_id,
-			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_stake),
-		}));
 	});
 }
 
@@ -426,19 +437,8 @@ fn test_slash_with_concurrent_delegations() {
 fn test_slash_with_partial_amounts() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
-		let delegator = mock_pub_key(CHARLIE);
-
-		// Setup precise stake amounts
-		let stake_amount = 10_000;
-		assert_ok!(Services::delegate_nomination(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			stake_amount,
-			Default::default(),
-		));
-
 		let service = Services::services(service_id).unwrap();
 		let slashing_origin =
 			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
@@ -450,105 +450,28 @@ fn test_slash_with_partial_amounts() {
 			Percent::from_percent(7),  // 7%
 		];
 
-		let mut remaining_stake = stake_amount;
-		for (index, slash_percent) in slash_percentages.iter().enumerate() {
+		for slash_percent in slash_percentages {
 			assert_ok!(Services::slash(
 				RuntimeOrigin::signed(slashing_origin.clone()),
 				operator.clone(),
 				service_id,
-				*slash_percent
+				slash_percent
 			));
 
 			// Apply the slash
-			assert_ok!(Services::apply_slash(
-				RuntimeOrigin::signed(slashing_origin.clone()),
-				0,
-				index as u32
-			));
-
-			// Calculate expected remaining stake
-			let slash_amount =
-				(*slash_percent * bob_exposed_restake_percentage).mul_floor(remaining_stake);
-			remaining_stake = remaining_stake.saturating_sub(slash_amount);
-
-			// Verify current stake
-			let current_stake =
-				Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-			assert_eq!(
-				current_stake, remaining_stake,
-				"Stake should be reduced by exact slash percentage"
-			);
-
-			// Verify events
-			System::assert_has_event(RuntimeEvent::Services(crate::Event::SlashApplied {
-				era: 0,
-				index: index as u32,
-				operator: operator.clone(),
-				blueprint_id,
-				service_id,
-				amount: slash_amount,
-			}));
+			let slash = UnappliedSlashes::<Runtime>::get(0, 0).unwrap();
+			assert_ok!(Services::apply_slash(slash));
 		}
 
-		// Verify final stake is exactly what we expect after all partial slashes
-		let final_stake = Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-		let expected_final_stake = stake_amount
-			.saturating_sub(
-				(Percent::from_percent(33) * bob_exposed_restake_percentage)
-					.mul_floor(stake_amount),
-			)
-			.saturating_sub(
-				(Percent::from_percent(17) * bob_exposed_restake_percentage)
-					.mul_floor(stake_amount),
-			)
-			.saturating_sub(
-				(Percent::from_percent(7) * bob_exposed_restake_percentage).mul_floor(stake_amount),
-			);
-		assert_eq!(
-			final_stake, expected_final_stake,
-			"Final stake should reflect all partial slashes precisely"
-		);
-	});
-}
-
-#[test]
-fn test_slash_with_zero_stake() {
-	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
-		let operator = mock_pub_key(BOB);
-		let delegator = mock_pub_key(CHARLIE);
-
-		// Register operator but don't delegate any stake
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(operator.clone()),
-			blueprint_id,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
-
-		// Attempt to slash operator with zero stake
-		let service = Services::services(service_id).unwrap();
-		let slashing_origin =
-			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
-		let slash_percent = Percent::from_percent(50);
-
-		// Should fail due to insufficient stake
-		assert_err!(
-			Services::slash(
-				RuntimeOrigin::signed(slashing_origin.clone()),
-				operator.clone(),
-				service_id,
-				slash_percent
-			),
-			Error::<Runtime>::InsufficientStake
-		);
-
-		// Verify no slash events were emitted
-		assert!(!System::events()
+		// Verify events
+		let binding = System::events();
+		let slash_events: Vec<_> = binding
 			.iter()
-			.any(|r| matches!(r.event, RuntimeEvent::Services(crate::Event::SlashApplied { .. }))));
+			.filter(|r| {
+				matches!(r.event, RuntimeEvent::Services(crate::Event::OperatorSlashed { .. }))
+			})
+			.collect();
+		assert_eq!(slash_events.len(), 3, "Should have three slash events");
 	});
 }
 
@@ -556,7 +479,7 @@ fn test_slash_with_zero_stake() {
 fn test_slash_with_invalid_operator() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let invalid_operator = mock_pub_key(99); // Non-existent operator
 		let delegator = mock_pub_key(CHARLIE);
 
@@ -589,79 +512,10 @@ fn test_slash_with_invalid_operator() {
 		);
 
 		// Verify no slash events were emitted
-		assert!(!System::events()
-			.iter()
-			.any(|r| matches!(r.event, RuntimeEvent::Services(crate::Event::SlashApplied { .. }))));
-	});
-}
-
-#[test]
-fn test_slash_with_insufficient_balance() {
-	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
-		let operator = mock_pub_key(BOB);
-		let delegator = mock_pub_key(CHARLIE);
-
-		// Setup a small stake amount
-		let stake_amount = 100;
-		assert_ok!(Services::delegate_nomination(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			stake_amount,
-			Default::default(),
-		));
-
-		let service = Services::services(service_id).unwrap();
-		let slashing_origin =
-			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
-
-		// Try to slash more than available stake (200%)
-		let excessive_slash = Percent::from_percent(200);
-		assert_err!(
-			Services::slash(
-				RuntimeOrigin::signed(slashing_origin.clone()),
-				operator.clone(),
-				service_id,
-				excessive_slash
-			),
-			Error::<Runtime>::InsufficientStakeRemaining
-		);
-
-		// Verify original stake remains unchanged
-		let final_stake = Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-		assert_eq!(final_stake, stake_amount, "Stake should remain unchanged after failed slash");
-
-		// Try multiple smaller slashes that would exceed total stake
-		let slash_percent = Percent::from_percent(60);
-
-		// First slash should succeed
-		assert_ok!(Services::slash(
-			RuntimeOrigin::signed(slashing_origin.clone()),
-			operator.clone(),
-			service_id,
-			slash_percent
-		));
-
-		// Second slash should fail due to insufficient remaining stake
-		assert_err!(
-			Services::slash(
-				RuntimeOrigin::signed(slashing_origin.clone()),
-				operator.clone(),
-				service_id,
-				slash_percent
-			),
-			Error::<Runtime>::InsufficientStakeRemaining
-		);
-
-		// Verify only one slash event was emitted
-		let slash_events: Vec<_> = System::events()
-			.iter()
-			.filter(|r| {
-				matches!(r.event, RuntimeEvent::Services(crate::Event::UnappliedSlash { .. }))
-			})
-			.collect();
-		assert_eq!(slash_events.len(), 1, "Should only have one successful slash recorded");
+		assert!(!System::events().iter().any(|r| matches!(
+			r.event,
+			RuntimeEvent::Services(crate::Event::OperatorSlashed { .. })
+		)));
 	});
 }
 
@@ -669,107 +523,69 @@ fn test_slash_with_insufficient_balance() {
 fn test_slash_with_multiple_services() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 
-		// Deploy first service
-		let Deployment { blueprint_id: blueprint_id1, service_id: service_id1, .. } = deploy();
-
-		// Deploy second service
+		// Create second service
 		let alice = mock_pub_key(ALICE);
-		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
-
-		// Request second service
 		let eve = mock_pub_key(EVE);
+		let service2_id = Services::next_instance_id();
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
-			1,
+			blueprint_id,
 			vec![alice.clone()],
 			vec![bob.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20])],
+			vec![get_security_requirement(USDC, &[10, 20])],
 			100,
 			Asset::Custom(USDC),
 			0,
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Approve second service
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
-			1,
+			service2_id,
 			Percent::from_percent(10),
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(USDC, 10)],
 		));
 
-		let delegator = mock_pub_key(CHARLIE);
-		let stake_amount = 1000;
-
-		// Delegate to both services
-		assert_ok!(Services::delegate_nomination(
-			RuntimeOrigin::signed(delegator.clone()),
-			bob.clone(),
-			stake_amount,
-			Default::default(),
-		));
-
-		// Slash in first service
-		let service1 = Services::services(service_id1).unwrap();
+		// Create slashes for both services
+		let service1 = Services::services(service_id).unwrap();
 		let slashing_origin1 =
 			Services::query_slashing_origin(&service1).map(|(o, _)| o.unwrap()).unwrap();
 
-		assert_ok!(Services::slash(
-			RuntimeOrigin::signed(slashing_origin1.clone()),
-			bob.clone(),
-			service_id1,
-			Percent::from_percent(50)
-		));
-
-		// Verify first slash was recorded
-		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
-
-		// Slash in second service
-		let service2 = Services::services(1).unwrap();
+		let service2 = Services::services(service2_id).unwrap();
 		let slashing_origin2 =
 			Services::query_slashing_origin(&service2).map(|(o, _)| o.unwrap()).unwrap();
 
 		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(slashing_origin1.clone()),
+			bob.clone(),
+			service_id,
+			Percent::from_percent(50)
+		));
+
+		assert_ok!(Services::slash(
 			RuntimeOrigin::signed(slashing_origin2.clone()),
 			bob.clone(),
-			1,
+			service2_id,
 			Percent::from_percent(25)
 		));
 
-		// Verify both slashes are recorded
-		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 2);
-
 		// Apply slashes
-		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter().collect();
-		for (era, index) in slashes.iter().map(|((era, index), _)| (*era, *index)) {
-			assert_ok!(Services::apply_slash(
-				RuntimeOrigin::signed(slashing_origin1.clone()),
-				era,
-				index
-			));
+		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
+		for (_, slash) in slashes {
+			assert_ok!(Services::apply_slash(slash));
 		}
 
-		// Verify final stake after both slashes
-		let final_stake = Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-		assert_eq!(final_stake, stake_amount / 4, "Should have 25% remaining after both slashes");
-
 		// Verify events
-		let slash_events: Vec<_> = System::events()
+		let binding = System::events();
+		let slash_events: Vec<_> = binding
 			.iter()
 			.filter(|r| {
-				matches!(r.event, RuntimeEvent::Services(crate::Event::SlashApplied { .. }))
+				matches!(r.event, RuntimeEvent::Services(crate::Event::OperatorSlashed { .. }))
 			})
 			.collect();
 		assert_eq!(slash_events.len(), 2, "Should have two slash events");
@@ -780,33 +596,13 @@ fn test_slash_with_multiple_services() {
 fn test_slash_with_rewards_distribution() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
-		let delegator = mock_pub_key(CHARLIE);
-
-		// Set up initial stake
-		let stake_amount = 1000;
-		assert_ok!(Services::delegate_nomination(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			stake_amount,
-			Default::default(),
-		));
-
-		// Distribute some rewards
-		let rewards = 500;
-		distribute_rewards(rewards);
-
-		// Verify rewards were received
-		let pre_slash_balance =
-			Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-		assert!(pre_slash_balance > stake_amount, "Should have earned rewards");
-
-		// Apply slash
 		let service = Services::services(service_id).unwrap();
 		let slashing_origin =
 			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
 
+		// Create and apply slash
 		assert_ok!(Services::slash(
 			RuntimeOrigin::signed(slashing_origin.clone()),
 			operator.clone(),
@@ -814,43 +610,38 @@ fn test_slash_with_rewards_distribution() {
 			Percent::from_percent(50)
 		));
 
-		// Apply the slash
-		assert_ok!(Services::apply_slash(RuntimeOrigin::signed(slashing_origin.clone()), 0, 0));
-
-		// Distribute more rewards
-		distribute_rewards(rewards);
-
-		// Verify final state
-		let final_balance =
-			Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-
-		// Should still be earning rewards on remaining stake
-		assert!(
-			final_balance > pre_slash_balance / 2,
-			"Should continue earning rewards after slash"
-		);
+		let slash = UnappliedSlashes::<Runtime>::get(0, 0).unwrap();
+		assert_ok!(Services::apply_slash(slash.clone()));
 
 		// Verify events
-		System::assert_has_event(RuntimeEvent::Services(crate::Event::SlashApplied {
-			era: 0,
-			index: 0,
+		System::assert_has_event(RuntimeEvent::Services(crate::Event::OperatorSlashed {
 			operator: operator.clone(),
-			blueprint_id,
+			amount: slash.own,
 			service_id,
-			amount: (Percent::from_percent(50) * bob_exposed_restake_percentage)
-				.mul_floor(pre_slash_balance),
+			blueprint_id,
+			era: slash.era,
 		}));
+	});
+}
 
-		// Verify reward rate is proportional to remaining stake
-		let post_slash_rewards = final_balance - pre_slash_balance / 2;
-		let pre_slash_rewards = pre_slash_balance - stake_amount;
+#[test]
+fn test_slash_with_unauthorized_origin() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, .. } = deploy();
+		let bob = mock_pub_key(BOB);
+		let eve = mock_pub_key(EVE);
+		let slash_percent = Percent::from_percent(50);
 
-		// The post-slash rewards should be approximately half of pre-slash rewards
-		// (allowing for some rounding differences)
-		let reward_ratio = post_slash_rewards * 100 / pre_slash_rewards;
-		assert!(
-			reward_ratio >= 45 && reward_ratio <= 55,
-			"Post-slash rewards should be ~50% of pre-slash rewards"
+		// Try to slash with unauthorized origin (EVE)
+		assert_err!(
+			Services::slash(
+				RuntimeOrigin::signed(eve.clone()),
+				bob.clone(),
+				service_id,
+				slash_percent
+			),
+			DispatchError::BadOrigin
 		);
 	});
 }

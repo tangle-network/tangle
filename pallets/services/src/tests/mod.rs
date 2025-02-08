@@ -170,7 +170,18 @@ fn deploy() -> Deployment {
 	assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 	assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
+	let alice = mock_pub_key(ALICE);
 	let bob = mock_pub_key(BOB);
+	let charlie = mock_pub_key(CHARLIE);
+	let dave = mock_pub_key(DAVE);
+	let eve = mock_pub_key(EVE);
+
+	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(alice.clone()), 1000));
+	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000));
+	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(charlie.clone()), 1000));
+	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(dave.clone()), 1000));
+	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(eve.clone()), 1000));
+
 	assert_ok!(Services::register(
 		RuntimeOrigin::signed(bob.clone()),
 		blueprint_id,

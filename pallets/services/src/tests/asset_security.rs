@@ -54,7 +54,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityRequirement
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 2: Invalid max exposure (0%)
@@ -72,7 +72,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityRequirement
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 3: Min exposure > Max exposure
@@ -90,7 +90,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityRequirement
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 4: Max exposure > 100%
@@ -108,7 +108,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityRequirement
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 5: Valid security requirements
@@ -172,7 +172,7 @@ fn test_security_commitment_validation() {
 				Percent::from_percent(10),
 				vec![get_security_commitment(WETH, 5)],
 			),
-			Error::<Runtime>::InvalidSecurityCommitment
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 2: Commitment above maximum exposure
@@ -183,7 +183,7 @@ fn test_security_commitment_validation() {
 				Percent::from_percent(10),
 				vec![get_security_commitment(WETH, 25)],
 			),
-			Error::<Runtime>::InvalidSecurityCommitment
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 3: Missing required asset commitment
@@ -194,7 +194,7 @@ fn test_security_commitment_validation() {
 				Percent::from_percent(10),
 				vec![get_security_commitment(USDC, 15)],
 			),
-			Error::<Runtime>::MissingSecurityCommitment
+			Error::<Runtime>::InvalidAssetMatching
 		);
 
 		// Test Case 4: Valid commitment

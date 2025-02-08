@@ -438,7 +438,6 @@ fn test_invalid_result_formats() {
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
-		let charlie = mock_pub_key(CHARLIE);
 		let eve = mock_pub_key(EVE);
 
 		assert_ok!(Services::register(
@@ -493,7 +492,7 @@ fn test_invalid_result_formats() {
 				0,
 				bounded_vec![Field::String("invalid".try_into().unwrap())],
 			),
-			Error::<Runtime>::InvalidResultFormat
+			Error::<Runtime>::InvalidResultFormat,
 		);
 	});
 }
