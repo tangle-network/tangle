@@ -1,5 +1,4 @@
 use frame_support::pallet_prelude::*;
-use frame_system::pallet_prelude::*;
 use mock::{AccountId, Runtime, RuntimeCall};
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
@@ -48,7 +47,7 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 
 	type AccountId = AccountId;
 
-	type Call = RuntimeCallFor<Runtime>;
+	type Call = RuntimeCall;
 
 	type AdditionalSigned = ();
 
@@ -72,6 +71,17 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 				} else {
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
 				}
+			},
+			RuntimeCall::Proxy(pallet_proxy::Call::proxy { ref call, real, .. }) => {
+				self.validate(real, call, _info, _len)
+			},
+			RuntimeCall::Utility(pallet_utility::Call::batch { ref calls })
+			| RuntimeCall::Utility(pallet_utility::Call::batch_all { ref calls })
+			| RuntimeCall::Utility(pallet_utility::Call::force_batch { ref calls }) => {
+				for call in calls {
+					self.validate(who, call, _info, _len)?;
+				}
+				Ok(ValidTransaction::default())
 			},
 			_ => Ok(ValidTransaction::default()),
 		}

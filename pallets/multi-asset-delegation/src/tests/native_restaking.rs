@@ -21,9 +21,9 @@ use frame_support::{
 	assert_err, assert_noop, assert_ok,
 	dispatch::DispatchInfo,
 	pallet_prelude::{InvalidTransaction, TransactionValidityError},
-	traits::{Hooks, OnFinalize, OnInitialize},
+	traits::Hooks,
 };
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave, Eve};
+use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
 use sp_runtime::traits::SignedExtension;
 use tangle_primitives::services::Asset;
 
@@ -136,7 +136,7 @@ fn unbond_should_fail_if_delegated_nomination() {
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator);
 		assert_eq!(delegation.amount, delegate_amount);
-		assert_eq!(delegation.is_nomination, true);
+		assert!(delegation.is_nomination);
 		assert_eq!(delegation.asset_id, Asset::Custom(TNT));
 
 		// Check operator metadata
@@ -178,7 +178,7 @@ fn unbond_should_fail_if_delegated_nomination() {
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator);
 		assert_eq!(delegation.amount, delegate_amount);
-		assert_eq!(delegation.is_nomination, true);
+		assert!(delegation.is_nomination);
 
 		// Verify locks remain unchanged
 		let locks = pallet_balances::Pallet::<Runtime>::locks(&who);
@@ -511,7 +511,7 @@ fn native_restake_early_unstake_execution_fails() {
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator);
 		assert_eq!(delegation.amount, amount);
-		assert_eq!(delegation.is_nomination, true);
+		assert!(delegation.is_nomination);
 		assert_eq!(metadata.delegator_unstake_requests.len(), 0);
 
 		// Schedule unstake
@@ -528,7 +528,7 @@ fn native_restake_early_unstake_execution_fails() {
 		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.operator, operator);
 		assert_eq!(request.amount, unstake_amount);
-		assert_eq!(request.is_nomination, true);
+		assert!(request.is_nomination);
 
 		// Try to execute unstake immediately - should fail
 		assert_noop!(
@@ -545,12 +545,12 @@ fn native_restake_early_unstake_execution_fails() {
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator);
 		assert_eq!(delegation.amount, amount);
-		assert_eq!(delegation.is_nomination, true);
+		assert!(delegation.is_nomination);
 		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
 		let request = &metadata.delegator_unstake_requests[0];
 		assert_eq!(request.operator, operator);
 		assert_eq!(request.amount, unstake_amount);
-		assert_eq!(request.is_nomination, true);
+		assert!(request.is_nomination);
 	});
 }
 
@@ -619,5 +619,223 @@ fn native_restake_cancel_unstake() {
 			),
 			Error::<Runtime>::NoBondLessRequest
 		);
+	});
+}
+
+#[test]
+fn proxy_unbond_should_fail_if_delegated_nomination() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Dave.into();
+		let proxy: AccountId = Charlie.into();
+		let validator = Staking::invulnerables()[0].clone();
+		let operator: AccountId = Alice.into();
+		let amount = 100_000;
+		let delegate_amount = amount / 2;
+
+		// Setup proxy with Staking type
+		assert_ok!(Proxy::add_proxy(
+			RuntimeOrigin::signed(who.clone()),
+			proxy.clone(),
+			ProxyType::Staking,
+			0
+		));
+
+		// Bond Some TNT
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		// Nominate the validator
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
+
+		System::set_block_number(2);
+		<Session as Hooks<BlockNumber>>::on_initialize(2);
+		<Staking as Hooks<BlockNumber>>::on_initialize(2);
+		<Session as Hooks<BlockNumber>>::on_finalize(2);
+		<Staking as Hooks<BlockNumber>>::on_finalize(2);
+
+		// Set up operator and delegation
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Restake through direct call
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			delegate_amount,
+			Default::default(),
+		));
+
+		// Try to unbond through proxy - should fail
+		let call = RuntimeCall::Staking(pallet_staking::Call::unbond { value: amount });
+		let proxy_call = RuntimeCall::Proxy(pallet_proxy::Call::proxy {
+			real: who.clone(),
+			force_proxy_type: None,
+			call: Box::new(call.clone()),
+		});
+
+		assert_err!(
+			CheckNominatedRestaked::<Runtime>::new().validate(
+				&proxy,
+				&proxy_call,
+				&DispatchInfo::default(),
+				0
+			),
+			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
+		);
+
+		// Verify state remains unchanged
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, amount);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 0);
+	});
+}
+
+#[test]
+fn batch_unbond_should_fail_if_delegated_nomination() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Dave.into();
+		let validator = Staking::invulnerables()[0].clone();
+		let operator: AccountId = Alice.into();
+		let amount = 100_000;
+		let delegate_amount = amount / 2;
+
+		// Bond Some TNT
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		// Nominate the validator
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
+
+		System::set_block_number(2);
+		<Session as Hooks<BlockNumber>>::on_initialize(2);
+		<Staking as Hooks<BlockNumber>>::on_initialize(2);
+		<Session as Hooks<BlockNumber>>::on_finalize(2);
+		<Staking as Hooks<BlockNumber>>::on_finalize(2);
+
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Restake
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			delegate_amount,
+			Default::default(),
+		));
+
+		// Try to unbond through batch call - should fail
+		let unbond_call = RuntimeCall::Staking(pallet_staking::Call::unbond { value: amount });
+		let batch_call =
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls: vec![unbond_call] });
+
+		assert_err!(
+			CheckNominatedRestaked::<Runtime>::new().validate(
+				&who,
+				&batch_call,
+				&DispatchInfo::default(),
+				0
+			),
+			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
+		);
+
+		// Verify state remains unchanged
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, amount);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 0);
+	});
+}
+
+#[test]
+fn proxy_batch_unbond_should_fail_if_delegated_nomination() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Dave.into();
+		let proxy: AccountId = Charlie.into();
+		let validator = Staking::invulnerables()[0].clone();
+		let operator: AccountId = Alice.into();
+		let amount = 100_000;
+		let delegate_amount = amount / 2;
+
+		// Setup proxy with Staking type
+		assert_ok!(Proxy::add_proxy(
+			RuntimeOrigin::signed(who.clone()),
+			proxy.clone(),
+			ProxyType::Staking,
+			0
+		));
+
+		// Bond Some TNT
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(who.clone()),
+			amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		// Nominate the validator
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![validator.clone()]));
+
+		System::set_block_number(2);
+		<Session as Hooks<BlockNumber>>::on_initialize(2);
+		<Staking as Hooks<BlockNumber>>::on_initialize(2);
+		<Session as Hooks<BlockNumber>>::on_finalize(2);
+		<Staking as Hooks<BlockNumber>>::on_finalize(2);
+
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Restake
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			delegate_amount,
+			Default::default(),
+		));
+
+		// Try to unbond through proxy batch call - should fail
+		let unbond_call = RuntimeCall::Staking(pallet_staking::Call::unbond { value: amount });
+		let batch_call =
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls: vec![unbond_call] });
+		let proxy_batch_call = RuntimeCall::Proxy(pallet_proxy::Call::proxy {
+			real: who.clone(),
+			force_proxy_type: None,
+			call: Box::new(batch_call.clone()),
+		});
+
+		assert_err!(
+			CheckNominatedRestaked::<Runtime>::new().validate(
+				&proxy,
+				&proxy_batch_call,
+				&DispatchInfo::default(),
+				0
+			),
+			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
+		);
+
+		// Verify state remains unchanged
+		let ledger = Staking::ledger(sp_staking::StakingAccount::Stash(who.clone())).unwrap();
+		assert_eq!(ledger.active, amount);
+		assert_eq!(ledger.total, amount);
+		assert_eq!(ledger.unlocking.len(), 0);
+
+		// Verify delegation state remains unchanged
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		assert_eq!(metadata.delegations.len(), 1);
+		let delegation = &metadata.delegations[0];
+		assert_eq!(delegation.operator, operator);
+		assert_eq!(delegation.amount, delegate_amount);
+		assert!(delegation.is_nomination);
 	});
 }
