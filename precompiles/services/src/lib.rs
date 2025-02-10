@@ -12,7 +12,7 @@ use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{
-	Asset, AssetSecurityRequirement, Field, MembershipModel, OperatorPreferences, ServiceBlueprint,
+	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
 };
 
 #[cfg(test)]
@@ -74,70 +74,9 @@ where
 		Ok(())
 	}
 
-	/// Register as an operator for a specific blueprint.
-	#[precompile::public("registerOperator(uint256,bytes,bytes)")]
-	#[precompile::payable]
-	fn register_operator(
-		handle: &mut impl PrecompileHandle,
-		blueprint_id: U256,
-		preferences: UnboundedBytes,
-		registration_args: UnboundedBytes,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		// msg.value
-		let value = handle.context().apparent_value;
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-		let preferences: Vec<u8> = preferences.into();
-		let registration_args: Vec<u8> = registration_args.into();
-		let preferences: OperatorPreferences = Decode::decode(&mut &preferences[..])
-			.map_err(|_| revert("Invalid preferences data"))?;
-
-		let registration_args: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
-			if registration_args.is_empty() {
-				Vec::new()
-			} else {
-				Decode::decode(&mut &registration_args[..])
-					.map_err(|_| revert("Invalid registration arguments"))?
-			};
-		let value_bytes = {
-			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
-			value.to_little_endian(&mut value_bytes);
-			value_bytes
-		};
-		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
-			.map_err(|_| revert("Value is not a valid balance"))?;
-		let call = pallet_services::Call::<Runtime>::register {
-			blueprint_id,
-			preferences,
-			registration_args,
-			value,
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Unregister as an operator from a blueprint.
-	#[precompile::public("unregisterOperator(uint256)")]
-	fn unregister_operator(handle: &mut impl PrecompileHandle, blueprint_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-
-		let call = pallet_services::Call::<Runtime>::unregister { blueprint_id };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	/// Request a new service.
 	#[precompile::public(
-		"requestService(uint256,bytes[],bytes,bytes,bytes,uint256,uint256,address,uint256,uint32,int32)"
+		"requestService(uint256,bytes[],bytes,bytes,bytes,uint256,uint256,address,uint256,uint32,uint32)"
 	)]
 	#[precompile::payable]
 	fn request_service(
