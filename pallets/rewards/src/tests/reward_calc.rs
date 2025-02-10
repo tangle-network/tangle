@@ -1,7 +1,7 @@
 use super::*;
 use crate::ApyBlocks;
 use frame_support::assert_ok;
-use sp_runtime::Percent;
+use sp_runtime::Perbill;
 use tangle_primitives::types::rewards::{LockInfo, LockMultiplier, UserDepositWithLocks};
 
 // Mock values for consistent testing
@@ -30,7 +30,7 @@ fn test_calculate_rewards_zero_deposit() {
 		let total_asset_score = 0;
 		let deposit = UserDepositWithLocks { unlocked_amount: 0, amount_with_locks: None };
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: None,
@@ -62,7 +62,7 @@ fn test_calculate_rewards_only_unlocked() {
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
 
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: None,
@@ -119,7 +119,7 @@ fn test_calculate_rewards_with_expired_lock() {
 		};
 
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: Some(1),
@@ -186,7 +186,7 @@ fn test_calculate_rewards_with_active_locks() {
 		};
 
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: Some(1),
@@ -231,7 +231,7 @@ fn test_calculate_rewards_with_previous_claim() {
 		let deposit =
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: None,
@@ -275,7 +275,7 @@ fn test_calculate_rewards_zero_cap() {
 		};
 
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: 0,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: None,
@@ -306,7 +306,7 @@ fn test_calculate_rewards_same_block_claim() {
 		let deposit =
 			UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None };
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: None,
@@ -359,7 +359,7 @@ fn test_calculate_rewards_with_multiple_claims() {
 
 		// Reward config with 10% APY (MOCK_APY = 10)
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: Some(1),
@@ -483,7 +483,7 @@ fn test_decay_rate_works_as_expected() {
 		};
 
 		let reward = RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: Some(1),
@@ -491,7 +491,7 @@ fn test_decay_rate_works_as_expected() {
 
 		DecayStartPeriod::<Runtime>::set(BLOCKS_PER_YEAR / 10);
 		// 5% decay after grace period
-		DecayRate::<Runtime>::set(Percent::from_percent(5));
+		DecayRate::<Runtime>::set(Perbill::from_percent(5));
 		System::set_block_number(BLOCKS_PER_YEAR / 5);
 
 		let result = RewardsPallet::<Runtime>::calculate_deposit_rewards_with_lock_multiplier(

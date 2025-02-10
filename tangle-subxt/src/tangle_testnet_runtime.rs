@@ -49864,31 +49864,6 @@ pub mod api {
 					const PALLET: &'static str = "Rewards";
 					const CALL: &'static str = "update_apy_blocks";
 				}
-				#[derive(
-					:: subxt_core :: ext :: codec :: Decode,
-					:: subxt_core :: ext :: codec :: Encode,
-					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
-					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
-					Clone,
-					Debug,
-					Eq,
-					PartialEq,
-				)]
-				# [codec (crate = :: subxt_core :: ext :: codec)]
-				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
-				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Update the number of blocks used for APY calculation"]
-				pub struct UpdateApyBlocks {
-					pub blocks: update_apy_blocks::Blocks,
-				}
-				pub mod update_apy_blocks {
-					use super::runtime_types;
-					pub type Blocks = ::core::primitive::u64;
-				}
-				impl ::subxt_core::blocks::StaticExtrinsic for UpdateApyBlocks {
-					const PALLET: &'static str = "Rewards";
-					const CALL: &'static str = "update_apy_blocks";
-				}
 			}
 			pub struct TransactionApi;
 			impl TransactionApi {
@@ -50367,31 +50342,6 @@ pub mod api {
 			)]
 			# [codec (crate = :: subxt_core :: ext :: codec)]
 			#[codec(dumb_trait_bound)]
-			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
-			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-			#[doc = "The number of blocks for APY calculation has been updated"]
-			pub struct ApyBlocksUpdated {
-				pub blocks: apy_blocks_updated::Blocks,
-			}
-			pub mod apy_blocks_updated {
-				use super::runtime_types;
-				pub type Blocks = ::core::primitive::u64;
-			}
-			impl ::subxt_core::events::StaticEvent for ApyBlocksUpdated {
-				const PALLET: &'static str = "Rewards";
-				const EVENT: &'static str = "ApyBlocksUpdated";
-			}
-			#[derive(
-				:: subxt_core :: ext :: codec :: Decode,
-				:: subxt_core :: ext :: codec :: Encode,
-				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
-				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
-				Clone,
-				Debug,
-				Eq,
-				PartialEq,
-			)]
-			# [codec (crate = :: subxt_core :: ext :: codec)]
 			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "The number of blocks for APY calculation has been updated"]

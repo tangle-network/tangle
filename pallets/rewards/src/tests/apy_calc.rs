@@ -1,13 +1,13 @@
 use super::*;
 use crate::ApyBlocks;
-use sp_runtime::Percent;
+use sp_runtime::Perbill;
 
 #[test]
 fn test_calculate_proportional_apy_zero_deposit() {
 	new_test_ext().execute_with(|| {
 		let total_deposit = 0;
 		let deposit_cap = 1000;
-		let original_apy = Percent::from_percent(10);
+		let original_apy = Perbill::from_percent(10);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,
@@ -16,7 +16,7 @@ fn test_calculate_proportional_apy_zero_deposit() {
 		);
 
 		// With zero deposit, APY should be zero
-		assert_eq!(result, Some(Percent::zero()));
+		assert_eq!(result, Some(Perbill::zero()));
 	});
 }
 
@@ -25,7 +25,7 @@ fn test_calculate_proportional_apy_full_cap() {
 	new_test_ext().execute_with(|| {
 		let deposit_cap = 1000;
 		let total_deposit = deposit_cap; // Full capacity
-		let original_apy = Percent::from_percent(10);
+		let original_apy = Perbill::from_percent(10);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,
@@ -43,7 +43,7 @@ fn test_calculate_proportional_apy_half_cap() {
 	new_test_ext().execute_with(|| {
 		let deposit_cap = 1000;
 		let total_deposit = deposit_cap / 2; // Half capacity
-		let original_apy = Percent::from_percent(10);
+		let original_apy = Perbill::from_percent(10);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,
@@ -52,7 +52,7 @@ fn test_calculate_proportional_apy_half_cap() {
 		);
 
 		// At half capacity, should return half of original APY
-		assert_eq!(result, Some(Percent::from_percent(5)));
+		assert_eq!(result, Some(Perbill::from_percent(5)));
 	});
 }
 
@@ -61,7 +61,7 @@ fn test_calculate_proportional_apy_zero_cap() {
 	new_test_ext().execute_with(|| {
 		let deposit_cap = 0;
 		let total_deposit = 100;
-		let original_apy = Percent::from_percent(10);
+		let original_apy = Perbill::from_percent(10);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,
@@ -79,7 +79,7 @@ fn test_calculate_proportional_apy_over_cap() {
 	new_test_ext().execute_with(|| {
 		let deposit_cap = 1000;
 		let total_deposit = deposit_cap * 2; // Double the cap
-		let original_apy = Percent::from_percent(10);
+		let original_apy = Perbill::from_percent(10);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,
@@ -88,7 +88,7 @@ fn test_calculate_proportional_apy_over_cap() {
 		);
 
 		// Over capacity should still work, but will return full APY
-		// This is because Percent::from_rational clamps to 100%
+		// This is because Perbill::from_rational clamps to 100%
 		assert_eq!(result, Some(original_apy));
 	});
 }
@@ -98,7 +98,7 @@ fn test_calculate_proportional_apy_max_values() {
 	new_test_ext().execute_with(|| {
 		let deposit_cap = u128::MAX;
 		let total_deposit = deposit_cap; // Max value
-		let original_apy = Percent::from_percent(100);
+		let original_apy = Perbill::from_percent(100);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,
@@ -116,7 +116,7 @@ fn test_calculate_proportional_apy_small_values() {
 	new_test_ext().execute_with(|| {
 		let deposit_cap = 1_000_000;
 		let total_deposit = 1; // Minimal deposit
-		let original_apy = Percent::from_percent(10);
+		let original_apy = Perbill::from_percent(10);
 
 		let result = RewardsPallet::<Runtime>::calculate_propotional_apy(
 			total_deposit,

@@ -4,7 +4,7 @@ use crate::{
 	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
 };
 use frame_support::{assert_noop, assert_ok, traits::Currency};
-use sp_runtime::Percent;
+use sp_runtime::Perbill;
 use tangle_primitives::{
 	rewards::UserDepositWithLocks,
 	services::Asset,
@@ -38,7 +38,7 @@ fn setup_vault(
 		RuntimeOrigin::root(),
 		vault_id,
 		RewardConfigForAssetVault {
-			apy: Percent::from_percent(MOCK_APY),
+			apy: Perbill::from_percent(MOCK_APY),
 			deposit_cap: MOCK_DEPOSIT_CAP,
 			incentive_cap: MOCK_INCENTIVE_CAP,
 			boost_multiplier: Some(1),
@@ -72,7 +72,7 @@ fn setup_vault(
 	// Finally fund the pot account with rewards
 	let vault_pot_account = RewardsPallet::<Runtime>::reward_vaults_pot_account(vault_id)
 		.expect("Vault pot account not found");
-	let initial_funding = Percent::from_percent(MOCK_APY) * MOCK_TOTAL_ISSUANCE;
+	let initial_funding = Perbill::from_percent(MOCK_APY) * MOCK_TOTAL_ISSUANCE;
 	Balances::make_free_balance_be(&vault_pot_account, initial_funding);
 
 	// Set total issuance for APY calculations
@@ -354,7 +354,7 @@ fn test_claim_rewards_with_zero_cap() {
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault {
-				apy: Percent::from_percent(MOCK_APY),
+				apy: Perbill::from_percent(MOCK_APY),
 				deposit_cap: MOCK_DEPOSIT_CAP,
 				incentive_cap: 0, // Zero incentive cap
 				boost_multiplier: Some(1),
@@ -402,7 +402,7 @@ fn test_claim_frequency_with_decay() {
 			RuntimeOrigin::root(),
 			vault_id,
 			RewardConfigForAssetVault {
-				apy: Percent::from_percent(MOCK_APY),
+				apy: Perbill::from_percent(MOCK_APY),
 				deposit_cap: MOCK_DEPOSIT_CAP,
 				incentive_cap: MOCK_INCENTIVE_CAP,
 				boost_multiplier: Some(1),
@@ -453,7 +453,7 @@ fn test_claim_frequency_with_decay() {
 		// Fund the pot account with rewards
 		let vault_pot_account = RewardsPallet::<Runtime>::reward_vaults_pot_account(vault_id)
 			.expect("Vault pot account not found");
-		let initial_funding = Percent::from_percent(MOCK_APY) * MOCK_TOTAL_ISSUANCE * 2; // Double funding to ensure enough rewards
+		let initial_funding = Perbill::from_percent(MOCK_APY) * MOCK_TOTAL_ISSUANCE * 2; // Double funding to ensure enough rewards
 		Balances::make_free_balance_be(&vault_pot_account, initial_funding);
 
 		// Set total issuance for APY calculations
@@ -462,7 +462,7 @@ fn test_claim_frequency_with_decay() {
 		// Set decay to start after 30 days (144000 blocks) with 5% decay
 		DecayStartPeriod::<Runtime>::set(144_000);
 		// decay rate to counteract 1% permonth inflation
-		DecayRate::<Runtime>::set(Percent::from_percent(10));
+		DecayRate::<Runtime>::set(Perbill::from_percent(10));
 
 		let blocks_per_month = 144_000_u64;
 		let total_months = 10;
@@ -481,7 +481,7 @@ fn test_claim_frequency_with_decay() {
 
 			// simulate inflation, 1% per month
 			let supply = pallet_balances::TotalIssuance::<Runtime>::get();
-			let inflation = Percent::from_percent(1).mul_floor(supply);
+			let inflation = Perbill::from_percent(1).mul_floor(supply);
 			pallet_balances::TotalIssuance::<Runtime>::set(supply + inflation);
 		}
 		let frequent_total_rewards =
@@ -498,8 +498,8 @@ fn test_claim_frequency_with_decay() {
 			Balances::free_balance(&infrequent_claimer) - infrequent_starting_balance;
 
 		let difference = frequent_total_rewards.saturating_sub(infrequent_total_rewards);
-		let difference_percent = (difference / frequent_total_rewards) * 100;
-		assert!(difference_percent < 1);
+		let difference_Perbill = (difference / frequent_total_rewards) * 100;
+		assert!(difference_Perbill < 1);
 	});
 }
 
