@@ -189,8 +189,8 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_DEPOSIT: u128 = 1000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 10_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
 
 /// Setup the E2E test environment.
