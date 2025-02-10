@@ -30,17 +30,13 @@ fn register_on_blueprint() {
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
 
-		let registration_call = Services::register(
-			RuntimeOrigin::signed(bob.clone()),
+		assert_ok!(join_and_register(
+			bob.clone(),
 			0,
-			OperatorPreferences {
-				key: bob_ecdsa_key,
-				price_targets: price_targets(MachineKind::Large),
-			},
-			Default::default(),
-			0,
-		);
-		assert_ok!(registration_call);
+			bob_ecdsa_key,
+			price_targets(MachineKind::Large),
+			1000,
+		));
 
 		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
 			provider: bob.clone(),
@@ -115,15 +111,12 @@ fn update_price_targets() {
 
 		let bob = mock_pub_key(BOB);
 		let bob_operator_ecdsa_key = test_ecdsa_key();
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
+		assert_ok!(join_and_register(
+			bob.clone(),
 			0,
-			OperatorPreferences {
-				key: bob_operator_ecdsa_key,
-				price_targets: price_targets(MachineKind::Small)
-			},
-			Default::default(),
-			0,
+			bob_operator_ecdsa_key,
+			price_targets(MachineKind::Small),
+			1000,
 		));
 
 		assert_eq!(
@@ -221,6 +214,9 @@ fn test_registration_max_blueprints() {
 		let alice = mock_pub_key(ALICE);
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
+
+		// Join as operator first
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000,));
 
 		// Create maximum number of blueprints
 		for i in 0..MaxBlueprintsPerOperator::get() {
@@ -326,28 +322,22 @@ fn test_registration_duplicate_keys() {
 		let ecdsa_key = test_ecdsa_key();
 
 		// First registration should succeed
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
+		assert_ok!(join_and_register(
+			bob.clone(),
 			0,
-			OperatorPreferences {
-				key: ecdsa_key,
-				price_targets: price_targets(MachineKind::Large),
-			},
-			Default::default(),
-			0,
+			ecdsa_key,
+			price_targets(MachineKind::Large),
+			1000,
 		));
 
 		// Second registration with same key should fail
 		assert_err!(
-			Services::register(
-				RuntimeOrigin::signed(charlie.clone()),
+			join_and_register(
+				charlie.clone(),
 				0,
-				OperatorPreferences {
-					key: ecdsa_key,
-					price_targets: price_targets(MachineKind::Large),
-				},
-				Default::default(),
-				0,
+				ecdsa_key,
+				price_targets(MachineKind::Large),
+				1000,
 			),
 			Error::<Runtime>::DuplicateKey
 		);
@@ -409,15 +399,12 @@ fn test_registration_during_active_services() {
 		);
 
 		// Try to register another operator for the same blueprint
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences {
-				key: test_ecdsa_key(),
-				price_targets: price_targets(MachineKind::Large),
-			},
-			Default::default(),
-			0,
+			test_ecdsa_key(),
+			price_targets(MachineKind::Large),
+			1000,
 		));
 
 		// Verify Charlie was registered successfully despite active service

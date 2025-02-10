@@ -30,31 +30,22 @@ fn request_service() {
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			charlie_ecdsa_key,
 			Default::default(),
-			0,
+			1000,
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let dave_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
@@ -158,13 +149,8 @@ fn request_service_with_no_assets() {
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 		let eve = mock_pub_key(EVE);
 		assert_err!(
 			Services::request(
@@ -198,13 +184,8 @@ fn request_service_with_payment_asset() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -274,13 +255,7 @@ fn request_service_with_payment_token() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -357,13 +332,8 @@ fn reject_service_with_payment_token() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie_address = mock_address(CHARLIE);
@@ -434,13 +404,8 @@ fn reject_service_with_payment_asset() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -499,15 +464,14 @@ fn test_service_creation_max_operators() {
 		for i in 0..max_operators + 1 {
 			let operator = mock_pub_key_from_fixed_bytes([i as u8; 32]);
 			if i < max_operators {
-				assert_ok!(Services::register(
-					RuntimeOrigin::signed(operator.clone()),
+				// Give operator sufficient balance to join
+				Balances::make_free_balance_be(&operator, 10_000);
+				assert_ok!(join_and_register(
+					operator.clone(),
 					0,
-					OperatorPreferences {
-						key: test_ecdsa_key(),
-						price_targets: Default::default()
-					},
+					test_ecdsa_key(),
 					Default::default(),
-					0,
+					1000,
 				));
 				operators.push(operator);
 			}
@@ -570,21 +534,17 @@ fn test_service_creation_min_operators() {
 
 		// Register some operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			charlie_ecdsa_key,
 			Default::default(),
-			0,
+			1000,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -652,13 +612,8 @@ fn test_service_creation_invalid_operators() {
 
 		// Register one valid operator
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		// Create an unregistered operator
 		let unregistered = mock_pub_key(CHARLIE);
@@ -697,21 +652,17 @@ fn test_service_creation_duplicate_operators() {
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			charlie_ecdsa_key,
 			Default::default(),
-			0,
+			1000,
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -749,21 +700,17 @@ fn test_service_creation_inactive_operators() {
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			charlie_ecdsa_key,
 			Default::default(),
-			0,
+			1000,
 		));
 
 		// Deactivate one operator
@@ -819,31 +766,22 @@ fn test_termination_with_partial_approvals() {
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			charlie_ecdsa_key,
 			Default::default(),
-			0,
+			1000,
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let dave_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
 
 		// Create service request
 		let eve = mock_pub_key(EVE);
@@ -911,13 +849,8 @@ fn test_operator_offline_during_active_service() {
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		// Create service
 		let eve = mock_pub_key(EVE);

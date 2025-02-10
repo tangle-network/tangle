@@ -926,9 +926,9 @@ pub mod module {
 				Error::<T>::AlreadyRegistered
 			);
 
-			// Check if the key is already in use by another operator
-			for (operator, prefs) in Operators::<T>::iter_prefix(blueprint_id) {
-				if operator != caller && prefs.key == preferences.key {
+			// Check if the key is already in use
+			for (_, prefs) in Operators::<T>::iter_prefix(blueprint_id) {
+				if prefs.key == preferences.key {
 					return Err(Error::<T>::DuplicateKey.into());
 				}
 			}

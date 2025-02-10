@@ -176,18 +176,12 @@ fn deploy() -> Deployment {
 	let dave = mock_pub_key(DAVE);
 	let eve = mock_pub_key(EVE);
 
-	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(alice.clone()), 1000));
-	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000));
-	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(charlie.clone()), 1000));
-	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(dave.clone()), 1000));
-	assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(eve.clone()), 1000));
-
-	assert_ok!(Services::register(
-		RuntimeOrigin::signed(bob.clone()),
+	assert_ok!(join_and_register(
+		bob.clone(),
 		blueprint_id,
-		OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+		test_ecdsa_key(),
 		Default::default(),
-		0,
+		1000
 	));
 
 	let eve = mock_pub_key(EVE);
@@ -219,6 +213,31 @@ fn deploy() -> Deployment {
 	assert!(Instances::<Runtime>::contains_key(service_id));
 
 	Deployment { blueprint_id, service_id, bob_exposed_restake_percentage }
+}
+
+pub fn join_and_register(
+	operator: AccountId,
+	blueprint_id: BlueprintId,
+	key: [u8; 65],
+	price_targets: PriceTargets,
+	stake_amount: Balance,
+) -> DispatchResult {
+	// Join operators with stake
+	assert_ok!(MultiAssetDelegation::join_operators(
+		RuntimeOrigin::signed(operator.clone()),
+		stake_amount
+	));
+
+	// Register for blueprint
+	assert_ok!(Services::register(
+		RuntimeOrigin::signed(operator.clone()),
+		blueprint_id,
+		OperatorPreferences { key, price_targets },
+		Default::default(),
+		0,
+	));
+
+	Ok(())
 }
 
 pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
