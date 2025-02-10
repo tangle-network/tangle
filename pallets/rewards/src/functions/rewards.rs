@@ -26,7 +26,7 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec;
 use sp_runtime::{
 	traits::{CheckedMul, Saturating, Zero},
-	DispatchError, DispatchResult, Percent, SaturatedConversion,
+	DispatchError, DispatchResult, Perbill, SaturatedConversion,
 };
 use sp_std::vec::Vec;
 use tangle_primitives::{
@@ -190,7 +190,7 @@ impl<T: Config> Pallet<T> {
 	/// The goal is to ensure the APY is proportional to the total deposit.
 	///
 	/// # Returns
-	/// * `Ok(Percent)` - The normalized APY
+	/// * `Ok(Perbill)` - The normalized APY
 	/// * `Err(DispatchError)` - If any arithmetic operation overflows
 	///
 	/// # Arguments
@@ -200,15 +200,15 @@ impl<T: Config> Pallet<T> {
 	pub fn calculate_propotional_apy(
 		total_deposit: BalanceOf<T>,
 		deposit_cap: BalanceOf<T>,
-		original_apy: Percent,
-	) -> Option<Percent> {
+		original_apy: Perbill,
+	) -> Option<Perbill> {
 		if deposit_cap.is_zero() {
 			return None;
 		}
 
 		log::debug!(target: LOG_TARGET, "calculate_propotional_apy : total_deposit: {:?}, deposit_cap: {:?}, original_apy: {:?}",
 			total_deposit, deposit_cap, original_apy);
-		let propotion = Percent::from_rational(total_deposit, deposit_cap);
+		let propotion = Perbill::from_rational(total_deposit, deposit_cap);
 		original_apy.checked_mul(&propotion)
 	}
 
@@ -235,20 +235,20 @@ impl<T: Config> Pallet<T> {
 	fn calculate_decay_factor(
 		current_block: BlockNumberFor<T>,
 		last_claim_block: BlockNumberFor<T>,
-	) -> Percent {
+	) -> Perbill {
 		let blocks_since_last_claim = current_block.saturating_sub(last_claim_block);
 		let start_period = DecayStartPeriod::<T>::get();
 
 		// If we haven't reached the decay period yet, no decay
 		if blocks_since_last_claim <= start_period {
-			return Percent::from_percent(100);
+			return Perbill::from_percent(100);
 		}
 
 		let decay_rate = DecayRate::<T>::get();
-		let decay_percent = 100_u8.saturating_sub(decay_rate.deconstruct());
+		let decay_percentage = 100_u32.saturating_sub(decay_rate.deconstruct());
 
 		// Ensure we don't decay below 90%
-		Percent::from_percent(decay_percent.max(90))
+		Perbill::from_percent(decay_percentage.max(90_u32))
 	}
 
 	/// Calculates rewards for deposits considering both unlocked amounts and locked amounts with
@@ -399,7 +399,7 @@ impl<T: Config> Pallet<T> {
 
 		let mut total_rewards_to_be_paid_to_user = BalanceOf::<T>::zero();
 		for (score, blocks) in user_rewards_score_by_blocks {
-			let user_proportion = Percent::from_rational(score, total_asset_score);
+			let user_proportion = Perbill::from_rational(score, total_asset_score);
 			log::debug!(target: LOG_TARGET, "user_proportion: {:?}", user_proportion);
 			let user_reward_per_block = user_proportion.mul_floor(total_reward_per_block);
 

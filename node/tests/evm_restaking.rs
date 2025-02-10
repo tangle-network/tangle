@@ -960,33 +960,25 @@ fn mad_rewards() {
 			mint_amount.to::<u128>(),
 		);
 
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
-			.await?;
-
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				evs.find_first::<api::assets::events::Issued>()?
-					.expect("Issued event to be emitted");
-				break;
-			}
-		}
+		// // Deposit WETH to LRT
+		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		// let deposit_result = lrt
+		// 	.deposit(deposit_amount, bob.address())
+		// 	.send()
+		// 	.await?
+		// 	.with_timeout(Some(Duration::from_secs(5)))
+		// 	.get_receipt()
+		// 	.await?;
+		// assert!(deposit_result.status());
+		// info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let deposit_amount = U256::from(100_000_000u128);
 
 		// Deposit and delegate using asset ID
 		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, deposit_amount, 0)
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(deposit_amount), 0)
 			.from(bob.address())
 			.send()
 			.await?
