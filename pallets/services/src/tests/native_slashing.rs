@@ -500,7 +500,6 @@ fn test_complete_slash_to_zero() {
 		// Verify applying the slash fails due to insufficient stake
 		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
 		for (_, slash) in slashes {
-			// TOD:
 			assert_err!(Services::apply_slash(slash), Error::<Runtime>::OperatorNotActive);
 		}
 
