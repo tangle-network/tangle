@@ -16,7 +16,7 @@ const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
 const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100M tokens with 18 decimals
 const MOCK_INCENTIVE_CAP: u128 = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
-const MOCK_APY: u8 = 10; // 10% APY
+const MOCK_APY: u32 = 10; // 10% APY
 const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 
 fn run_to_block(n: u64) {
@@ -498,8 +498,8 @@ fn test_claim_frequency_with_decay() {
 			Balances::free_balance(&infrequent_claimer) - infrequent_starting_balance;
 
 		let difference = frequent_total_rewards.saturating_sub(infrequent_total_rewards);
-		let difference_Perbill = (difference / frequent_total_rewards) * 100;
-		assert!(difference_Perbill < 1);
+		let difference_perbill = (difference / frequent_total_rewards) * 100;
+		assert!(difference_perbill < 1);
 	});
 }
 

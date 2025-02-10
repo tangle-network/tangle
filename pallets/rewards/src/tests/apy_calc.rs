@@ -125,8 +125,8 @@ fn test_calculate_proportional_apy_small_values() {
 		);
 
 		// Should handle very small proportions
-		// Expected: 0.0001% of 10% = ~0%
-		assert!(result.unwrap().is_zero());
+		// Expected: 0.0001% of 10%
+		assert_eq!(result, Some(Perbill::from_parts(100)));
 	});
 }
 

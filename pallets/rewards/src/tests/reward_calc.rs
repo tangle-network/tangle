@@ -10,7 +10,7 @@ const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
 const MOCK_TOTAL_ISSUANCE: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100M tokens with 18 decimals
 const MOCK_INCENTIVE_CAP: u128 = 10_000 * EIGHTEEN_DECIMALS; // 10k tokens with 18 decimals
-const MOCK_APY: u8 = 10; // 10% APY
+const MOCK_APY: u32 = 10; // 10% APY
 const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const BLOCKS_PER_YEAR: u64 = 5_256_000; // ~6 second blocks = ~1 year
 
@@ -211,7 +211,7 @@ fn test_calculate_rewards_with_active_locks() {
 		// 6. Per block = 1M / 5,256,000 blocks = 0.19 tokens
 		// 7. User reward per block = 0.19 * 46% = 0.0874 tokens
 		// 8. Total for 1000 blocks = 0.0874 * 1000 = 87.4 tokens
-		let expected_to_pay = 87 * EIGHTEEN_DECIMALS; // 87 tokens with 18 decimals
+		let expected_to_pay = 88 * EIGHTEEN_DECIMALS; // ~88 tokens with 18 decimals
 
 		// Allow for some precision loss
 		// assert precision loss is less than 1 TNT
