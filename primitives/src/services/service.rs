@@ -388,6 +388,16 @@ pub struct StagingServicePayment<AccountId, AssetId: AssetIdT, Balance> {
 	pub amount: Balance,
 }
 
+/// Type alias for asset security commitments per operator
+pub type OperatorAssetCommitments<AssetId, C> =
+	BoundedVec<AssetSecurityCommitment<AssetId>, <C as Constraints>::MaxAssetsPerService>;
+
+/// Type alias for operator security commitments
+pub type OperatorSecurityCommitments<AccountId, AssetId, C> = BoundedVec<
+	(AccountId, OperatorAssetCommitments<AssetId, C>),
+	<C as Constraints>::MaxOperatorsPerService,
+>;
+
 /// A Service is an instance of a service blueprint.
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(
@@ -419,10 +429,7 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	pub owner: AccountId,
 	/// The assets and their security commitments from operators.
 	/// This represents the actual security backing the service.
-	pub non_native_asset_security: BoundedVec<
-		(AccountId, BoundedVec<AssetSecurityCommitment<AssetId>, C::MaxAssetsPerService>),
-		C::MaxOperatorsPerService,
-	>,
+	pub non_native_asset_security: OperatorSecurityCommitments<AccountId, AssetId, C>,
 	/// Active operators and their native currency exposure percentages
 	pub native_asset_security: BoundedVec<(AccountId, Percent), C::MaxOperatorsPerService>,
 	/// Accounts permitted to call service functions

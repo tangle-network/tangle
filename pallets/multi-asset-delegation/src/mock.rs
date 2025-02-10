@@ -39,6 +39,7 @@ use sp_core::{sr25519, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
+	generic,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
 	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
@@ -220,7 +221,7 @@ impl pallet_staking::Config for Runtime {
 	type TargetList = pallet_staking::UseValidatorsMap<Self>;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type HistoryDepth = ConstU32<84>;
-	type EventListeners = MultiAssetDelegation;
+	type EventListeners = ();
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
@@ -420,7 +421,82 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type WeightInfo = ();
 }
 
-type Block = frame_system::mocking::MockBlock<Runtime>;
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+#[derive(
+	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
+)]
+pub enum ProxyType {
+	/// All calls can be proxied. This is the trivial/most permissive filter.
+	Any = 0,
+	/// Only extrinsics related to governance (democracy and collectives).
+	Governance = 1,
+	/// Allow to veto an announced proxy call.
+	CancelProxy = 2,
+	/// Allow extrinsic related to Balances.
+	Balances = 3,
+	/// Allow extrinsic related to Staking.
+	Staking = 4,
+}
+
+impl Default for ProxyType {
+	fn default() -> Self {
+		Self::Any
+	}
+}
+
+impl frame_support::traits::InstanceFilter<RuntimeCall> for ProxyType {
+	fn filter(&self, c: &RuntimeCall) -> bool {
+		match self {
+			ProxyType::Any => true,
+			ProxyType::Governance => false,
+			ProxyType::CancelProxy => false,
+			ProxyType::Balances => matches!(c, RuntimeCall::Balances(..)),
+			ProxyType::Staking => matches!(c, RuntimeCall::Staking(..)),
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		match (self, o) {
+			(x, y) if x == y => true,
+			(ProxyType::Any, _) => true,
+			(_, ProxyType::Any) => false,
+			_ => false,
+		}
+	}
+}
+
+impl pallet_proxy::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type ProxyType = ProxyType;
+	type ProxyDepositBase = ConstU128<1>;
+	type ProxyDepositFactor = ConstU128<1>;
+	type MaxProxies = ConstU32<32>;
+	type WeightInfo = ();
+	type MaxPending = ConstU32<32>;
+	type CallHasher = sp_runtime::traits::BlakeTwo256;
+	type AnnouncementDepositBase = ConstU128<1>;
+	type AnnouncementDepositFactor = ConstU128<1>;
+}
+
+impl pallet_utility::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type PalletsOrigin = OriginCaller;
+	type WeightInfo = ();
+}
+
+/// An unchecked extrinsic type to be used in tests.
+pub type MockUncheckedExtrinsic = generic::UncheckedExtrinsic<
+	AccountId,
+	RuntimeCall,
+	u32,
+	extra::CheckNominatedRestaked<Runtime>,
+>;
+
+/// An implementation of `sp_runtime::traits::Block` to be used in tests.
+type Block =
+	generic::Block<generic::Header<u64, sp_runtime::traits::BlakeTwo256>, MockUncheckedExtrinsic>;
 
 construct_runtime!(
 	pub enum Runtime
@@ -435,6 +511,8 @@ construct_runtime!(
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Proxy: pallet_proxy,
+		Utility: pallet_utility,
 	}
 );
 

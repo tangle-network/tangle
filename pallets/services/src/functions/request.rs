@@ -34,6 +34,7 @@ impl<T: Config> Pallet<T> {
 	/// * `ttl` - Time-to-live in blocks for the service request
 	/// * `payment_asset` - Asset used for payment (native, custom or ERC20)
 	/// * `value` - Payment amount for the service
+	#[allow(clippy::too_many_arguments)]
 	pub(crate) fn do_request(
 		caller: T::AccountId,
 		evm_origin: Option<H160>,

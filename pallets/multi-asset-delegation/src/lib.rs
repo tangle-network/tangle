@@ -66,6 +66,9 @@ pub mod mock_evm;
 #[cfg(test)]
 mod tests;
 
+#[cfg(any(test, feature = "fuzzing"))]
+mod extra;
+
 pub mod weights;
 
 // #[cfg(feature = "runtime-benchmarks")]
@@ -89,7 +92,7 @@ pub mod pallet {
 	use scale_info::TypeInfo;
 	use sp_core::H160;
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
-	use sp_staking::{OnStakingUpdate, SessionIndex, Stake, StakingInterface};
+	use sp_staking::{SessionIndex, StakingInterface};
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
 	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
@@ -1227,12 +1230,6 @@ pub mod pallet {
 		}
 		fn end_session(i: SessionIndex) {
 			I::end_session(i)
-		}
-	}
-
-	impl<C: Config> OnStakingUpdate<C::AccountId, BalanceOf<C>> for Pallet<C> {
-		fn on_stake_update(_who: &C::AccountId, _prev_stake: Option<Stake<BalanceOf<C>>>) {
-			unimplemented!("Custom stake update logic not implemented")
 		}
 	}
 }

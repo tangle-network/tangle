@@ -37,7 +37,7 @@ impl<T: Config> Pallet<T> {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
 		ensure!(
-			T::OperatorDelegationManager::is_operator_active(&operator),
+			T::OperatorDelegationManager::is_operator_active(operator),
 			Error::<T>::OperatorNotActive
 		);
 
@@ -47,7 +47,7 @@ impl<T: Config> Pallet<T> {
 
 		// Transfer the registration value to the pallet
 		T::Currency::transfer(
-			&operator,
+			operator,
 			&Self::pallet_account(),
 			value,
 			ExistenceRequirement::KeepAlive,
