@@ -941,10 +941,10 @@ fn mad_rewards() {
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
-			t.weth,
+			t.usdc,
 			alice.account_id().0,
-			"Liquid Restaked Ether",
-			"lrtETH",
+			"Liquid Restaked USDC",
+			"lrtUSDC",
 		)
 		.await?;
 
@@ -953,7 +953,7 @@ fn mad_rewards() {
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 
 		// Mint USDC for Bob
-		let mint_amount = U256::from(100_000_000u128);
+		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
 		let mint_call = api::tx().assets().mint(
 			t.usdc_asset_id,
 			bob.address().to_account_id().into(),
@@ -986,7 +986,7 @@ fn mad_rewards() {
 
 		// Deposit and delegate using asset ID
 		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(deposit_amount), 0)
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, deposit_amount, 0)
 			.from(bob.address())
 			.send()
 			.await?
@@ -1003,12 +1003,13 @@ fn mad_rewards() {
 
 		let rewards_addr = api::apis().rewards_api().query_user_rewards(
 			lrt_address.to_account_id(),
-			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+			Asset::Erc20((<[u8; 20]>::from(t.usdc)).into()),
 		);
+
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
 			Ok(rewards) => {
-				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
+				info!("User rewards: {} USDC", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
 			},
 			Err(e) => {
