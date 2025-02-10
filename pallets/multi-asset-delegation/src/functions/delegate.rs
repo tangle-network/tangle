@@ -30,6 +30,31 @@ use tangle_primitives::{services::Asset, traits::MultiAssetDelegationInfo, Round
 
 pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
 
+type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
+
+type DelegationResult<T> = Vec<(AccountIdOf<T>, Asset<<T as Config>::AssetId>, BalanceOf<T>)>;
+type BondLessRequestResult<T> = Result<
+	BondLessRequest<
+		AccountIdOf<T>,
+		<T as Config>::AssetId,
+		BalanceOf<T>,
+		<T as Config>::MaxDelegatorBlueprints,
+	>,
+	DispatchError,
+>;
+type DelegatorBondInfo<T> = BondInfoDelegator<
+	AccountIdOf<T>,
+	BalanceOf<T>,
+	<T as Config>::AssetId,
+	<T as Config>::MaxDelegatorBlueprints,
+>;
+type DepositUpdates<T> = BTreeMap<Asset<<T as Config>::AssetId>, BalanceOf<T>>;
+type DelegationUpdates<T> =
+	BTreeMap<(AccountIdOf<T>, Asset<<T as Config>::AssetId>), (usize, BalanceOf<T>)>;
+type OperatorUpdates<T> = BTreeMap<(AccountIdOf<T>, Asset<<T as Config>::AssetId>), BalanceOf<T>>;
+type AggregateResult<T> =
+	Result<(DepositUpdates<T>, DelegationUpdates<T>, OperatorUpdates<T>, Vec<usize>), Error<T>>;
+
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
 	///
@@ -311,78 +336,85 @@ impl<T: Config> Pallet<T> {
 	/// * `InsufficientBalance` - Insufficient balance for unstaking
 	pub fn process_execute_delegator_unstake(
 		who: T::AccountId,
-	) -> Result<Vec<(T::AccountId, Asset<T::AssetId>, BalanceOf<T>)>, DispatchError> {
-		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> Result<Vec<(T::AccountId, Asset<T::AssetId>, BalanceOf<T>)>, DispatchError> {
-			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
-			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
+	) -> Result<DelegationResult<T>, DispatchError> {
+		Delegators::<T>::try_mutate(
+			&who,
+			|maybe_metadata| -> Result<DelegationResult<T>, DispatchError> {
+				let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+				ensure!(
+					!metadata.delegator_unstake_requests.is_empty(),
+					Error::<T>::NoBondLessRequest
+				);
 
-			let current_round = Self::current_round();
-			let delay = T::DelegationBondLessDelay::get();
+				let current_round = Self::current_round();
+				let delay = T::DelegationBondLessDelay::get();
 
-			// Aggregate all updates from ready requests
-			let (deposit_updates, delegation_updates, operator_updates, indices_to_remove) =
-				Self::aggregate_unstake_requests(metadata, current_round, delay)?;
+				// Aggregate all updates from ready requests
+				let (deposit_updates, delegation_updates, operator_updates, indices_to_remove) =
+					Self::aggregate_unstake_requests(metadata, current_round, delay)?;
 
-			// Create a map to aggregate amounts by operator and asset
-			let mut event_aggregates = BTreeMap::<(T::AccountId, Asset<T::AssetId>), BalanceOf<T>>::new();
+				// Create a map to aggregate amounts by operator and asset
+				let mut event_aggregates =
+					BTreeMap::<(T::AccountId, Asset<T::AssetId>), BalanceOf<T>>::new();
 
-			// Sum up amounts by operator and asset
-			for &idx in &indices_to_remove {
-				if let Some(request) = metadata.delegator_unstake_requests.get(idx) {
-					let key = (request.operator.clone(), request.asset_id);
-					let entry = event_aggregates.entry(key).or_insert(Zero::zero());
-					*entry = entry.saturating_add(request.amount);
+				// Sum up amounts by operator and asset
+				for &idx in &indices_to_remove {
+					if let Some(request) = metadata.delegator_unstake_requests.get(idx) {
+						let key = (request.operator.clone(), request.asset_id);
+						let entry = event_aggregates.entry(key).or_insert(Zero::zero());
+						*entry = entry.saturating_add(request.amount);
+					}
 				}
-			}
 
-			// Apply updates in batches
-			// 1. Update deposits
-			for (asset_id, amount) in deposit_updates {
-				metadata
-					.deposits
-					.get_mut(&asset_id)
-					.ok_or(Error::<T>::InsufficientBalance)?
-					.decrease_delegated_amount(amount)
-					.map_err(|_| Error::<T>::InsufficientBalance)?;
-			}
-
-			// 2. Update delegations
-			let mut delegations_to_remove = Vec::new();
-			for ((_, _), (idx, amount)) in delegation_updates {
-				let delegation =
-					metadata.delegations.get_mut(idx).ok_or(Error::<T>::NoActiveDelegation)?;
-				ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
-
-				delegation.amount = delegation.amount.saturating_sub(amount);
-				if delegation.amount.is_zero() {
-					delegations_to_remove.push(idx);
+				// Apply updates in batches
+				// 1. Update deposits
+				for (asset_id, amount) in deposit_updates {
+					metadata
+						.deposits
+						.get_mut(&asset_id)
+						.ok_or(Error::<T>::InsufficientBalance)?
+						.decrease_delegated_amount(amount)
+						.map_err(|_| Error::<T>::InsufficientBalance)?;
 				}
-			}
 
-			// 3. Remove zero-amount delegations
-			delegations_to_remove.sort_unstable_by(|a, b| b.cmp(a));
-			for idx in delegations_to_remove {
-				metadata.delegations.remove(idx);
-			}
+				// 2. Update delegations
+				let mut delegations_to_remove = Vec::new();
+				for ((_, _), (idx, amount)) in delegation_updates {
+					let delegation =
+						metadata.delegations.get_mut(idx).ok_or(Error::<T>::NoActiveDelegation)?;
+					ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
 
-			// 4. Update operator metadata
-			for ((operator, asset_id), amount) in operator_updates {
-				Self::update_operator_metadata(&operator, &who, asset_id, amount, false)?;
-			}
+					delegation.amount = delegation.amount.saturating_sub(amount);
+					if delegation.amount.is_zero() {
+						delegations_to_remove.push(idx);
+					}
+				}
 
-			// 5. Remove processed requests
-			let mut indices = indices_to_remove;
-			indices.sort_unstable_by(|a, b| b.cmp(a));
-			for idx in indices {
-				metadata.delegator_unstake_requests.remove(idx);
-			}
+				// 3. Remove zero-amount delegations
+				delegations_to_remove.sort_unstable_by(|a, b| b.cmp(a));
+				for idx in delegations_to_remove {
+					metadata.delegations.remove(idx);
+				}
 
-			// Convert the aggregates map into a vector for return
-			Ok(event_aggregates
-				.into_iter()
-				.map(|((operator, asset_id), amount)| (operator, asset_id, amount))
-				.collect())
-		})
+				// 4. Update operator metadata
+				for ((operator, asset_id), amount) in operator_updates {
+					Self::update_operator_metadata(&operator, &who, asset_id, amount, false)?;
+				}
+
+				// 5. Remove processed requests
+				let mut indices = indices_to_remove;
+				indices.sort_unstable_by(|a, b| b.cmp(a));
+				for idx in indices {
+					metadata.delegator_unstake_requests.remove(idx);
+				}
+
+				// Convert the aggregates map into a vector for return
+				Ok(event_aggregates
+					.into_iter()
+					.map(|((operator, asset_id), amount)| (operator, asset_id, amount))
+					.collect())
+			},
+		)
 	}
 
 	/// Processes the delegation of nominated tokens to an operator.
@@ -630,31 +662,22 @@ impl<T: Config> Pallet<T> {
 	pub(crate) fn process_cancel_delegator_nomination_unstake(
 		who: &T::AccountId,
 		operator: T::AccountId,
-	) -> Result<
-		BondLessRequest<T::AccountId, T::AssetId, BalanceOf<T>, T::MaxDelegatorBlueprints>,
-		DispatchError,
-	> {
-		Delegators::<T>::try_mutate(
-			who,
-			|maybe_metadata| -> Result<
-				BondLessRequest<T::AccountId, T::AssetId, BalanceOf<T>, T::MaxDelegatorBlueprints>,
-				DispatchError,
-			> {
-				let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+	) -> BondLessRequestResult<T> {
+		Delegators::<T>::try_mutate(who, |maybe_metadata| -> BondLessRequestResult<T> {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-				// Find and remove the unstake request
-				let request_index = metadata
-					.delegator_unstake_requests
-					.iter()
-					.position(|r| r.operator == operator && r.is_nomination)
-					.ok_or(Error::<T>::NoBondLessRequest)?;
+			// Find and remove the unstake request
+			let request_index = metadata
+				.delegator_unstake_requests
+				.iter()
+				.position(|r| r.operator == operator && r.is_nomination)
+				.ok_or(Error::<T>::NoBondLessRequest)?;
 
-				// Remove the request
-				let request = metadata.delegator_unstake_requests.remove(request_index);
+			// Remove the request
+			let request = metadata.delegator_unstake_requests.remove(request_index);
 
-				Ok(request.clone())
-			},
-		)
+			Ok(request.clone())
+		})
 	}
 
 	/// Execute an unstake request for nomination delegations
@@ -830,12 +853,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Helper function to find and validate a nomination delegation
 	fn find_nomination_delegation(
-		delegations: &[BondInfoDelegator<
-			T::AccountId,
-			BalanceOf<T>,
-			T::AssetId,
-			T::MaxDelegatorBlueprints,
-		>],
+		delegations: &[DelegatorBondInfo<T>],
 		operator: &T::AccountId,
 	) -> Result<Option<(usize, BalanceOf<T>)>, Error<T>> {
 		if let Some((index, delegation)) = delegations
@@ -885,15 +903,7 @@ impl<T: Config> Pallet<T> {
 		metadata: &DelegatorMetadataOf<T>,
 		current_round: RoundIndex,
 		delay: RoundIndex,
-	) -> Result<
-		(
-			BTreeMap<Asset<T::AssetId>, BalanceOf<T>>, // deposit_updates
-			BTreeMap<(T::AccountId, Asset<T::AssetId>), (usize, BalanceOf<T>)>, // delegation_updates
-			BTreeMap<(T::AccountId, Asset<T::AssetId>), BalanceOf<T>>, // operator_updates
-			Vec<usize>,                                // indices_to_remove
-		),
-		Error<T>,
-	> {
+	) -> AggregateResult<T> {
 		let mut indices_to_remove = Vec::new();
 		let mut delegation_updates = BTreeMap::new();
 		let mut deposit_updates = BTreeMap::new();
