@@ -924,7 +924,7 @@ fn lrt_deposit_withdraw_erc20() {
 }
 
 #[test]
-fn lrt_rewards() {
+fn mad_rewards() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
@@ -963,17 +963,32 @@ fn lrt_rewards() {
 		assert!(approve_result.status());
 		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
 
-		// Deposit WETH to LRT
-		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
-		let deposit_result = lrt
-			.deposit(deposit_amount, bob.address())
+		// // Deposit WETH to LRT
+		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		// let deposit_result = lrt
+		// 	.deposit(deposit_amount, bob.address())
+		// 	.send()
+		// 	.await?
+		// 	.with_timeout(Some(Duration::from_secs(5)))
+		// 	.get_receipt()
+		// 	.await?;
+		// assert!(deposit_result.status());
+		// info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Delegate assets
+		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let deposit_amount = U256::from(100_000_000u128);
+
+		// Deposit and delegate using asset ID
+		let deposit_result = precompile
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(deposit_amount), 0)
+			.from(bob.address())
 			.send()
 			.await?
 			.with_timeout(Some(Duration::from_secs(5)))
 			.get_receipt()
 			.await?;
 		assert!(deposit_result.status());
-		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
 
 		// Wait for one year to pass
 		wait_for_more_blocks(&t.provider, 51).await;

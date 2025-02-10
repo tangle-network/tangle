@@ -921,7 +921,6 @@ impl<T: Config> Pallet<T> {
 			*operator_updates.entry(delegation_key).or_default() += request.amount;
 			indices_to_remove.push(idx);
 		}
-		println!("indices_to_remove: {:?}", indices_to_remove);
 		ensure!(!indices_to_remove.is_empty(), Error::<T>::BondLessNotReady);
 		Ok((deposit_updates, delegation_updates, operator_updates, indices_to_remove))
 	}
