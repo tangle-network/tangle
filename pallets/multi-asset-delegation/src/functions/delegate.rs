@@ -847,7 +847,7 @@ impl<T: Config> Pallet<T> {
 				delegation.asset_id == Asset::Custom(Zero::zero()),
 				Error::<T>::AssetNotWhitelisted
 			);
-			Ok(Some((index, delegation.amount.clone())))
+			Ok(Some((index, delegation.amount)))
 		} else {
 			Ok(None)
 		}

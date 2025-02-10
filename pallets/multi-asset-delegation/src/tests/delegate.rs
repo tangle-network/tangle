@@ -555,7 +555,6 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 fn delegate_exceeds_max_delegations() {
 	new_test_ext().execute_with(|| {
 		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
 		let amount = 100;
 
 		// Setup max number of operators
@@ -563,7 +562,11 @@ fn delegate_exceeds_max_delegations() {
 		for i in 0..MaxDelegations::get() {
 			let operator_account: AccountId = AccountId::new([i as u8; 32]);
 			// Give operator enough balance to join
-			Balances::force_set_balance(RuntimeOrigin::root(), operator_account.clone(), 100_000);
+			assert_ok!(Balances::force_set_balance(
+				RuntimeOrigin::root(),
+				operator_account.clone(),
+				100_000
+			));
 			operators.push(operator_account.clone());
 			assert_ok!(MultiAssetDelegation::join_operators(
 				RuntimeOrigin::signed(operator_account),
@@ -595,7 +598,7 @@ fn delegate_exceeds_max_delegations() {
 
 		let operator: AccountId = Charlie.into();
 		// Give operator enough balance to join
-		Balances::force_set_balance(RuntimeOrigin::root(), operator.clone(), 100_000);
+		assert_ok!(Balances::force_set_balance(RuntimeOrigin::root(), operator.clone(), 100_000));
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),
 			10_000
