@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.2.6"
+version = "1.2.8"
 authors = ["Tangle Foundation."]
 edition = "2021"
 license = "Unlicense"
@@ -381,9 +381,9 @@ xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-s
 polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
 
 # Subxt
-subxt = { version = "0.38.0", default-features = false }
-subxt-core = { version = "0.38.0", default-features = false }
-subxt-signer = { version = "0.38.0", default-features = false }
+subxt = { version = "0.39.0", default-features = false }
+subxt-core = { version = "0.39.0", default-features = false }
+subxt-signer = { version = "0.39.0", default-features = false }
 
 [profile.release]
 panic = "unwind"

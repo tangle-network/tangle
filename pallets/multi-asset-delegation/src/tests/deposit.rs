@@ -69,6 +69,12 @@ fn deposit_should_work_for_fungible_asset() {
 				asset_id: Asset::Custom(VDOT),
 			})
 		);
+
+		// Verify that rewards manager was called with correct parameters
+		assert_eq!(
+			MockRewardsManager::record_deposit_calls(),
+			vec![(who.clone(), Asset::Custom(VDOT), amount, None)]
+		);
 	});
 }
 
@@ -234,6 +240,12 @@ fn schedule_withdraw_should_work() {
 		let deposit = metadata.deposits.get(&asset_id).unwrap();
 		assert_eq!(deposit.amount, 0_u32.into());
 		assert!(!metadata.withdraw_requests.is_empty());
+
+		// Ensure that rewards pallet was called
+		assert_eq!(
+			MockRewardsManager::record_withdrawal_calls(),
+			vec![(who.clone(), Asset::Custom(VDOT), amount)]
+		);
 	});
 }
 

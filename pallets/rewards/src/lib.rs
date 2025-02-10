@@ -76,6 +76,7 @@ pub mod types;
 pub use types::*;
 pub mod functions;
 pub mod impls;
+
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
 
@@ -89,8 +90,7 @@ pub mod pallet {
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::AccountIdConversion;
-	use sp_runtime::Percent;
+	use sp_runtime::{traits::AccountIdConversion, Percent};
 	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
@@ -259,6 +259,8 @@ pub mod pallet {
 		},
 		/// Decay configuration was updated
 		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Percent },
+		/// The number of blocks for APY calculation has been updated
+		ApyBlocksUpdated { blocks: BlockNumberFor<T> },
 	}
 
 	#[pallet::error]
@@ -305,6 +307,38 @@ pub mod pallet {
 		InvalidDecayRate,
 	}
 
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		/// The number of blocks used for APY calculation
+		pub apy_blocks: BlockNumberFor<T>,
+		/// Number of blocks after which decay starts
+		pub decay_start_period: BlockNumberFor<T>,
+		/// Per-block decay rate in basis points
+		pub decay_rate: Percent,
+	}
+
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self {
+				// Default to 1 year worth of blocks (assuming 6s block time)
+				apy_blocks: BlockNumberFor::<T>::from(5_256_000u32),
+				// Default to 30 days worth of blocks
+				decay_start_period: BlockNumberFor::<T>::from(432000u32),
+				// Default to 1% per block
+				decay_rate: Percent::from_percent(1),
+			}
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+		fn build(&self) {
+			ApyBlocks::<T>::put(self.apy_blocks);
+			DecayStartPeriod::<T>::put(self.decay_start_period);
+			DecayRate::<T>::put(self.decay_rate);
+		}
+	}
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Claim rewards for a specific asset and reward type
@@ -314,6 +348,30 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 
 			// calculate and payout rewards
+			Self::calculate_and_payout_rewards(&who, asset)?;
+
+			Ok(())
+		}
+
+		/// Claim rewards for another account
+		///
+		/// The dispatch origin must be signed.
+		///
+		/// Parameters:
+		/// - `who`: The account to claim rewards for
+		/// - `asset`: The asset to claim rewards for
+		///
+		/// Emits `RewardsClaimed` event when successful.
+		#[pallet::call_index(2)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn claim_rewards_other(
+			origin: OriginFor<T>,
+			who: T::AccountId,
+			asset: Asset<T::AssetId>,
+		) -> DispatchResult {
+			ensure_signed(origin)?;
+
+			// calculate and payout rewards for the specified account
 			Self::calculate_and_payout_rewards(&who, asset)?;
 
 			Ok(())
@@ -336,7 +394,7 @@ pub mod pallet {
 		///
 		/// * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
 		/// * [`Error::AssetNotInVault`] - Asset does not exist in vault
-		#[pallet::call_index(2)]
+		#[pallet::call_index(3)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn manage_asset_reward_vault(
 			origin: OriginFor<T>,
@@ -374,7 +432,7 @@ pub mod pallet {
 		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
 		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
-		#[pallet::call_index(3)]
+		#[pallet::call_index(4)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn create_reward_vault(
 			origin: OriginFor<T>,
@@ -418,7 +476,7 @@ pub mod pallet {
 		/// * `BadOrigin` - If caller is not authorized through `ForceOrigin`
 		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
-		#[pallet::call_index(4)]
+		#[pallet::call_index(5)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn update_vault_reward_config(
 			origin: OriginFor<T>,
@@ -444,7 +502,7 @@ pub mod pallet {
 		}
 
 		/// Update the decay configuration
-		#[pallet::call_index(5)]
+		#[pallet::call_index(6)]
 		#[pallet::weight(T::DbWeight::get().writes(2))]
 		pub fn update_decay_config(
 			origin: OriginFor<T>,
@@ -460,6 +518,22 @@ pub mod pallet {
 			DecayRate::<T>::put(rate);
 
 			Self::deposit_event(Event::DecayConfigUpdated { start_period, rate });
+			Ok(())
+		}
+
+		/// Update the number of blocks used for APY calculation
+		#[pallet::call_index(7)]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
+		pub fn update_apy_blocks(
+			origin: OriginFor<T>,
+			blocks: BlockNumberFor<T>,
+		) -> DispatchResult {
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Update the storage
+			ApyBlocks::<T>::put(blocks);
+
+			Self::deposit_event(Event::ApyBlocksUpdated { blocks });
 			Ok(())
 		}
 	}

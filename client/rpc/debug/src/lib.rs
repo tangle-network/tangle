@@ -50,6 +50,7 @@ pub enum RequesterInput {
 	Block(RequestBlockId),
 }
 
+#[allow(clippy::large_enum_variant)]
 pub enum Response {
 	Single(single::TransactionTrace),
 	Block(Vec<single::TransactionTrace>),
@@ -470,7 +471,7 @@ where
 		match trace_type {
 			single::TraceType::CallList => {
 				let mut proxy = client_evm_tracing::listeners::CallList::default();
-				proxy.with_log = tracer_config.map_or(false, |cfg| cfg.with_log);
+				proxy.with_log = tracer_config.is_some_and(|cfg| cfg.with_log);
 				proxy.using(f)?;
 				proxy.finish_transaction();
 				let response = match tracer_input {
@@ -663,7 +664,7 @@ where
 					},
 					single::TraceType::CallList => {
 						let mut proxy = client_evm_tracing::listeners::CallList::default();
-						proxy.with_log = tracer_config.map_or(false, |cfg| cfg.with_log);
+						proxy.with_log = tracer_config.is_some_and(|cfg| cfg.with_log);
 						proxy.using(f)?;
 						proxy.finish_transaction();
 						let response = match tracer_input {
@@ -857,7 +858,7 @@ where
 			},
 			single::TraceType::CallList => {
 				let mut proxy = client_evm_tracing::listeners::CallList::default();
-				proxy.with_log = tracer_config.map_or(false, |cfg| cfg.with_log);
+				proxy.with_log = tracer_config.is_some_and(|cfg| cfg.with_log);
 				proxy.using(f)?;
 				proxy.finish_transaction();
 				let response = match tracer_input {

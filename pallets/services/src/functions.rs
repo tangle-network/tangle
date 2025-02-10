@@ -886,7 +886,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let slashing_origin = if let Some(data) = maybe_value {
 			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let slashing_origin = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let slashing_origin = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Address(who) = slashing_origin {
 				Some(T::EvmAddressMapping::into_account_id(*who))
 			} else {
@@ -952,7 +952,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let dispute_origin = if let Some(data) = maybe_value {
 			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let slashing_origin = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let slashing_origin = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Address(who) = slashing_origin {
 				Some(T::EvmAddressMapping::into_account_id(*who))
 			} else {
@@ -1011,7 +1011,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let success = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Bool(val) = success {
 				*val
 			} else {
@@ -1058,7 +1058,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let balance = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Uint(val) = success {
 				*val
 			} else {

@@ -38,15 +38,17 @@ use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
-use sp_runtime::DispatchError;
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
-	AccountId32, BoundToRuntimeAppPublic, BuildStorage, Perbill,
+	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
 };
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
-use tangle_primitives::traits::RewardsManager;
-use tangle_primitives::types::rewards::LockMultiplier;
+use std::cell::RefCell;
+use tangle_primitives::{
+	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	traits::RewardsManager,
+	types::rewards::LockMultiplier,
+};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -316,25 +318,39 @@ parameter_types! {
 	pub const MaxDelegations: u32 = 50;
 }
 
+type DepositCall = (AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>);
+type WithdrawalCall = (AccountId, Asset<AssetId>, Balance);
+
+thread_local! {
+	static DEPOSIT_CALLS: RefCell<Vec<DepositCall>> = RefCell::new(Vec::new());
+	static WITHDRAWAL_CALLS: RefCell<Vec<WithdrawalCall>> = RefCell::new(Vec::new());
+}
+
 pub struct MockRewardsManager;
 
 impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsManager {
 	type Error = DispatchError;
 
 	fn record_deposit(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-		_amount: Balance,
-		_lock_multiplier: Option<LockMultiplier>,
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+		lock_multiplier: Option<LockMultiplier>,
 	) -> Result<(), Self::Error> {
+		DEPOSIT_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), asset, amount, lock_multiplier));
+		});
 		Ok(())
 	}
 
 	fn record_withdrawal(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-		_amount: Balance,
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
 	) -> Result<(), Self::Error> {
+		WITHDRAWAL_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), asset, amount));
+		});
 		Ok(())
 	}
 
@@ -352,6 +368,21 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 
 	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(0_u32.into())
+	}
+}
+
+impl MockRewardsManager {
+	pub fn record_deposit_calls() -> Vec<DepositCall> {
+		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn record_withdrawal_calls() -> Vec<WithdrawalCall> {
+		WITHDRAWAL_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn clear_all() {
+		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
+		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
 	}
 }
 
@@ -421,19 +452,13 @@ pub fn account_id_to_address(account_id: AccountId) -> H160 {
 	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 }
 
-// pub fn address_to_account_id(address: H160) -> AccountId {
-// 	use pallet_evm::AddressMapping;
-// 	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
-// }
-
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	new_test_ext_raw_authorities()
+	let ext = new_test_ext_raw_authorities();
+	MockRewardsManager::clear_all();
+	ext
 }
 
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
-// pub const USDC: AssetId = 1;
-// pub const WETH: AssetId = 2;
-// pub const WBTC: AssetId = 3;
 pub const VDOT: AssetId = 4;
 
 // This function basically just builds a genesis storage key/value store according to
@@ -598,36 +623,3 @@ macro_rules! evm_log {
 		}
 	};
 }
-
-// /// Asserts that the EVM logs are as expected.
-// #[track_caller]
-// pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
-// 	assert_evm_events_contains(expected.iter().cloned().collect())
-// }
-
-// /// Asserts that the EVM events are as expected.
-// #[track_caller]
-// fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
-// 	let actual: Vec<fp_evm::Log> = System::events()
-// 		.iter()
-// 		.filter_map(|e| match e.event {
-// 			RuntimeEvent::EVM(pallet_evm::Event::Log { ref log }) => Some(log.clone()),
-// 			_ => None,
-// 		})
-// 		.collect();
-
-// 	// Check if `expected` is a subset of `actual`
-// 	let mut any_matcher = false;
-// 	for evt in expected {
-// 		if !actual.contains(&evt) {
-// 			panic!("Events don't match\nactual: {actual:?}\nexpected: {evt:?}");
-// 		} else {
-// 			any_matcher = true;
-// 		}
-// 	}
-
-// 	// At least one event should be present
-// 	if !any_matcher {
-// 		panic!("No events found");
-// 	}
-// }
