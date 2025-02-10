@@ -187,9 +187,6 @@ pub mod pallet {
 		/// The origin with privileged access
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
-		/// The address that receives slashed funds
-		type SlashedAmountRecipient: Get<Self::AccountId>;
-
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
 		type EvmRunner: tangle_primitives::services::EvmRunner<Self>;
@@ -459,6 +456,8 @@ pub mod pallet {
 		OverflowRisk,
 		/// Delegator is not a nominator
 		NotNominator,
+		/// Operator has active services and can't exit
+		CannotGoOfflineWithActiveServices,
 	}
 
 	/// Hooks for the pallet.

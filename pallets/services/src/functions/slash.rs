@@ -153,7 +153,7 @@ impl<T: Config> Pallet<T> {
 		// Process all delegator slashes
 		for (delegator, asset, slash_amount) in unapplied_slash.clone().others {
 			// Transfer slashed assets to treasury
-			match asset {
+			match asset.clone() {
 				Asset::Custom(asset_id) => {
 					T::Fungibles::transfer(
 						asset_id,
@@ -184,6 +184,7 @@ impl<T: Config> Pallet<T> {
 			Self::deposit_event(Event::DelegatorSlashed {
 				delegator: delegator.clone(),
 				amount: slash_amount,
+				asset,
 				service_id: unapplied_slash.service_id,
 				blueprint_id: unapplied_slash.blueprint_id,
 				era: unapplied_slash.era,

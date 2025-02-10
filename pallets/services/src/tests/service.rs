@@ -30,31 +30,22 @@ fn request_service() {
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			charlie_ecdsa_key,
 			Default::default(),
-			0,
+			1000,
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let dave_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
@@ -158,13 +149,8 @@ fn request_service_with_no_assets() {
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 		let eve = mock_pub_key(EVE);
 		assert_err!(
 			Services::request(
@@ -198,13 +184,8 @@ fn request_service_with_payment_asset() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -274,13 +255,7 @@ fn request_service_with_payment_token() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -357,13 +332,8 @@ fn reject_service_with_payment_token() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie_address = mock_address(CHARLIE);
@@ -434,13 +404,8 @@ fn reject_service_with_payment_asset() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -478,5 +443,452 @@ fn reject_service_with_payment_asset() {
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 		// Charlie Balance should be back to the original
 		assert_eq!(Assets::balance(USDC, charlie), before_balance);
+	});
+}
+
+#[test]
+fn test_service_creation_max_operators() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register maximum number of operators (using mock accounts)
+		let max_operators = MaxOperatorsPerService::get();
+		let mut operators = Vec::new();
+
+		for i in 0..max_operators + 1 {
+			let operator = mock_pub_key_from_fixed_bytes([i as u8; 32]);
+			if i < max_operators {
+				// Give operator sufficient balance to join
+				Balances::make_free_balance_be(&operator, 10_000);
+				assert_ok!(join_and_register(
+					operator.clone(),
+					0,
+					test_ecdsa_key(),
+					Default::default(),
+					1000,
+				));
+				operators.push(operator);
+			}
+		}
+
+		let eve = mock_pub_key(EVE);
+
+		// Try to create service with exactly max operators - should succeed
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			operators.clone(),
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: max_operators as u32 },
+		));
+
+		// Try to create service with more than max operators - should fail
+		let extra_operator = mock_pub_key_from_fixed_bytes([
+			0x4f, 0x12, 0x9a, 0xb3, 0x7d, 0x5e, 0x82, 0xf1, 0x34, 0xc6, 0x8b, 0x90, 0x45, 0x23,
+			0xa7, 0xd9, 0x6c, 0x15, 0xb8, 0xe4, 0x2f, 0x9d, 0x71, 0x3a, 0x58, 0xc2, 0x96, 0x4b,
+			0x0e, 0x87, 0xf5, 0xd3,
+		]);
+		operators.push(extra_operator);
+
+		assert_err!(
+			Services::request(
+				RuntimeOrigin::signed(eve.clone()),
+				None,
+				0,
+				vec![alice.clone()],
+				operators,
+				Default::default(),
+				vec![get_security_requirement(USDC, &[10, 20])],
+				100,
+				Asset::Custom(USDC),
+				0,
+				MembershipModel::Fixed { min_operators: (max_operators + 1) as u32 },
+			),
+			Error::<Runtime>::TooManyOperators
+		);
+	});
+}
+
+#[test]
+fn test_service_creation_min_operators() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register some operators
+		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+
+		let charlie = mock_pub_key(CHARLIE);
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
+			0,
+			charlie_ecdsa_key,
+			Default::default(),
+			1000,
+		));
+
+		let eve = mock_pub_key(EVE);
+
+		// Try to create service with zero operators - should fail
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 0 },
+		),);
+
+		// Try to create service with fewer operators than min_operators - should fail
+		assert_err!(
+			Services::request(
+				RuntimeOrigin::signed(eve.clone()),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone()],
+				Default::default(),
+				vec![get_security_requirement(USDC, &[10, 20])],
+				100,
+				Asset::Custom(USDC),
+				0,
+				MembershipModel::Fixed { min_operators: 2 },
+			),
+			Error::<Runtime>::InsufficientOperators
+		);
+
+		// Try to create service with exactly min_operators - should succeed
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 2 },
+		));
+	});
+}
+
+#[test]
+fn test_service_creation_invalid_operators() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register one valid operator
+		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+
+		// Create an unregistered operator
+		let unregistered = mock_pub_key(CHARLIE);
+		let eve = mock_pub_key(EVE);
+
+		// Try to create service with an unregistered operator - should fail
+		assert_err!(
+			Services::request(
+				RuntimeOrigin::signed(eve.clone()),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone(), unregistered.clone()],
+				Default::default(),
+				vec![get_security_requirement(USDC, &[10, 20])],
+				100,
+				Asset::Custom(USDC),
+				0,
+				MembershipModel::Fixed { min_operators: 2 },
+			),
+			Error::<Runtime>::NotAnOperator
+		);
+	});
+}
+
+#[test]
+fn test_service_creation_duplicate_operators() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+
+		let charlie = mock_pub_key(CHARLIE);
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
+			0,
+			charlie_ecdsa_key,
+			Default::default(),
+			1000,
+		));
+
+		let eve = mock_pub_key(EVE);
+
+		// Try to create service with duplicate operators - should fail
+		assert_err!(
+			Services::request(
+				RuntimeOrigin::signed(eve.clone()),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone(), bob.clone()],
+				Default::default(),
+				vec![get_security_requirement(USDC, &[10, 20])],
+				100,
+				Asset::Custom(USDC),
+				0,
+				MembershipModel::Fixed { min_operators: 2 },
+			),
+			Error::<Runtime>::DuplicateOperator
+		);
+	});
+}
+
+#[test]
+fn test_service_creation_inactive_operators() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+
+		let charlie = mock_pub_key(CHARLIE);
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
+			0,
+			charlie_ecdsa_key,
+			Default::default(),
+			1000,
+		));
+
+		// Deactivate one operator
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(charlie.clone())));
+
+		let eve = mock_pub_key(EVE);
+
+		// Try to create service with an inactive operator - should fail
+		assert_err!(
+			Services::request(
+				RuntimeOrigin::signed(eve.clone()),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone(), charlie.clone()],
+				Default::default(),
+				vec![get_security_requirement(USDC, &[10, 20])],
+				100,
+				Asset::Custom(USDC),
+				0,
+				MembershipModel::Fixed { min_operators: 2 },
+			),
+			Error::<Runtime>::OperatorNotActive
+		);
+
+		// Service creation with only active operators should succeed
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+	});
+}
+
+#[test]
+fn test_termination_with_partial_approvals() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+
+		let charlie = mock_pub_key(CHARLIE);
+		let charlie_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(
+			charlie.clone(),
+			0,
+			charlie_ecdsa_key,
+			Default::default(),
+			1000,
+		));
+
+		let dave = mock_pub_key(DAVE);
+		let dave_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
+
+		// Create service request
+		let eve = mock_pub_key(EVE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone(), dave.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
+		));
+
+		// Only two operators approve
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(USDC, 10)],
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			Percent::from_percent(20),
+			vec![get_security_commitment(USDC, 15)],
+		));
+
+		// Attempt to terminate service with partial approvals - should fail
+		assert_err!(
+			Services::terminate(RuntimeOrigin::signed(eve.clone()), 0),
+			Error::<Runtime>::ServiceNotFound
+		);
+
+		// Complete the approvals
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			Percent::from_percent(30),
+			vec![get_security_commitment(USDC, 20)],
+		));
+
+		// Now termination should succeed
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+
+		// Verify service is terminated
+		assert!(!Instances::<Runtime>::contains_key(0));
+	});
+}
+
+#[test]
+fn test_operator_offline_during_active_service() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+
+		// Create blueprint
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operator
+		let bob = mock_pub_key(BOB);
+		let bob_ecdsa_key = test_ecdsa_key();
+		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+
+		// Create service
+		let eve = mock_pub_key(EVE);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+
+		// Approve service request
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(USDC, 10)],
+		));
+
+		// Verify service is active
+		assert!(Instances::<Runtime>::contains_key(0));
+
+		// Attempt to go offline while service is active - should fail
+		assert_err!(
+			MultiAssetDelegation::go_offline(RuntimeOrigin::signed(bob.clone())),
+			pallet_multi_asset_delegation::Error::<Runtime>::CannotGoOfflineWithActiveServices
+		);
+
+		// Terminate the service
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+
+		// Now operator should be able to go offline
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(bob.clone())));
 	});
 }

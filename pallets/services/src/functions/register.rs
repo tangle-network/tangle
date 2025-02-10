@@ -41,8 +41,6 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::OperatorNotActive
 		);
 
-		let already_registered = Operators::<T>::contains_key(blueprint_id, operator);
-		ensure!(!already_registered, Error::<T>::AlreadyRegistered);
 		blueprint
 			.type_check_registration(&registration_args)
 			.map_err(Error::<T>::TypeCheck)?;
@@ -76,13 +74,13 @@ impl<T: Config> Pallet<T> {
 				Ok(p) => {
 					p.blueprints
 						.try_insert(blueprint_id)
-						.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
+						.map_err(|_| Error::<T>::MaxBlueprintsPerOperatorExceeded)?;
 				},
 				Err(_) => {
 					let mut blueprints = BoundedBTreeSet::new();
 					blueprints
 						.try_insert(blueprint_id)
-						.map_err(|_| Error::<T>::MaxServicesPerProviderExceeded)?;
+						.map_err(|_| Error::<T>::MaxBlueprintsPerOperatorExceeded)?;
 					*profile = Ok(OperatorProfile { blueprints, ..Default::default() });
 				},
 			};

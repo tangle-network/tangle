@@ -14,17 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::*;
-use crate::mock::*;
+pub use super::*;
+pub use crate::mock::*;
 use frame_support::assert_ok;
 use sp_core::bounded_vec;
 use sp_core::Pair;
 use sp_runtime::Percent;
 use tangle_primitives::services::*;
 
+mod asset_security;
 mod blueprint;
 mod hooks;
 mod jobs;
+mod native_slashing;
+mod payments;
 mod registration;
 mod service;
 mod slashing;
@@ -37,6 +40,34 @@ pub const EVE: u8 = 5;
 
 pub const KEYGEN_JOB_ID: u8 = 0;
 pub const SIGN_JOB_ID: u8 = 1;
+
+pub fn create_and_mint_tokens(
+	asset_id: AssetId,
+	recipient: <Runtime as frame_system::Config>::AccountId,
+	amount: Balance,
+) {
+	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, recipient.clone(), false, 1));
+	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset_id, recipient, amount));
+}
+
+pub fn mint_tokens(
+	owner: <Runtime as frame_system::Config>::AccountId,
+	asset_id: AssetId,
+	recipient: <Runtime as frame_system::Config>::AccountId,
+	amount: Balance,
+) {
+	assert_ok!(Assets::mint(RuntimeOrigin::signed(owner), asset_id, recipient, amount));
+}
+
+pub fn run_to_block(n: u64) {
+	while System::block_number() < n {
+		Balances::on_finalize(System::block_number());
+		System::on_finalize(System::block_number());
+		System::set_block_number(System::block_number() + 1);
+		System::on_initialize(System::block_number());
+		Services::on_initialize(System::block_number());
+	}
+}
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -139,13 +170,18 @@ fn deploy() -> Deployment {
 	assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 	assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
+	let alice = mock_pub_key(ALICE);
 	let bob = mock_pub_key(BOB);
-	assert_ok!(Services::register(
-		RuntimeOrigin::signed(bob.clone()),
+	let charlie = mock_pub_key(CHARLIE);
+	let dave = mock_pub_key(DAVE);
+	let eve = mock_pub_key(EVE);
+
+	assert_ok!(join_and_register(
+		bob.clone(),
 		blueprint_id,
-		OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+		test_ecdsa_key(),
 		Default::default(),
-		0,
+		1000
 	));
 
 	let eve = mock_pub_key(EVE);
@@ -177,4 +213,95 @@ fn deploy() -> Deployment {
 	assert!(Instances::<Runtime>::contains_key(service_id));
 
 	Deployment { blueprint_id, service_id, bob_exposed_restake_percentage }
+}
+
+pub fn join_and_register(
+	operator: AccountId,
+	blueprint_id: BlueprintId,
+	key: [u8; 65],
+	price_targets: PriceTargets,
+	stake_amount: Balance,
+) -> DispatchResult {
+	// Join operators with stake
+	assert_ok!(MultiAssetDelegation::join_operators(
+		RuntimeOrigin::signed(operator.clone()),
+		stake_amount
+	));
+
+	// Register for blueprint
+	assert_ok!(Services::register(
+		RuntimeOrigin::signed(operator.clone()),
+		blueprint_id,
+		OperatorPreferences { key, price_targets },
+		Default::default(),
+		0,
+	));
+
+	Ok(())
+}
+
+pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
+	let mut actual: Vec<RuntimeEvent> = System::events()
+		.into_iter()
+		.map(|e| e.event)
+		.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+		.collect();
+	expected.reverse();
+
+	for evt in expected {
+		let next = actual.pop().expect("event expected");
+		assert_eq!(next, evt, "Events don't match");
+	}
+	assert!(actual.is_empty(), "More events than expected");
+}
+
+/// Advance to the next era, triggering the era change calculations
+pub fn advance_era() {
+	let current_era = Staking::current_era().unwrap();
+	let current_session = Session::current_index();
+	let sessions_per_era = <Runtime as pallet_staking::Config>::SessionsPerEra::get();
+
+	// Advance sessions until we reach the next era
+	for _ in 0..=sessions_per_era {
+		Session::rotate_session();
+		let new_session = Session::current_index();
+		if new_session <= current_session {
+			break;
+		}
+		if Staking::current_era().unwrap() > current_era {
+			break;
+		}
+	}
+}
+
+/// Distribute rewards to validators and their nominators
+pub fn distribute_rewards(amount: Balance) {
+	let validators = Session::validators();
+	let reward_per_validator = amount / (validators.len() as u128);
+
+	for validator in validators {
+		let exposure = Staking::eras_stakers(Staking::active_era().unwrap().index, &validator);
+		let total_stake = exposure.total;
+		if total_stake == 0 {
+			continue;
+		}
+
+		// Calculate rewards
+		let validator_reward =
+			(exposure.own as u128 * reward_per_validator) / (total_stake as u128);
+		Balances::make_free_balance_be(
+			&validator,
+			Balances::free_balance(&validator) + validator_reward,
+		);
+
+		// Distribute rewards to nominators
+		for nominator in exposure.others {
+			let nominator_reward =
+				(nominator.value as u128 * reward_per_validator) / (total_stake as u128);
+			Balances::make_free_balance_be(
+				&nominator.who,
+				Balances::free_balance(&nominator.who) + nominator_reward,
+			);
+		}
+	}
 }

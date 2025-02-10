@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::assert_ok;
+use frame_support::{assert_err, assert_ok};
 use sp_core::{offchain::KeyTypeId, ByteArray};
 use sp_runtime::Percent;
 
@@ -263,5 +263,306 @@ fn job_result() {
 		//     signing_job_call_id,
 		//     bounded_vec![Field::Bytes(signature_bytes.try_into().unwrap())],
 		// ));
+	});
+}
+
+#[test]
+fn test_concurrent_job_execution() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let charlie = mock_pub_key(CHARLIE);
+		let dave = mock_pub_key(DAVE);
+		let eve = mock_pub_key(EVE);
+
+		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
+			assert_ok!(Services::register(
+				RuntimeOrigin::signed(operator.clone()),
+				0,
+				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+				Default::default(),
+				0,
+			));
+		}
+
+		// Create and approve service
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone(), dave.clone()],
+			Default::default(),
+			vec![get_security_requirement(WETH, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
+		));
+
+		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(operator),
+				0,
+				Percent::from_percent(10),
+				vec![get_security_commitment(WETH, 10)],
+			));
+		}
+
+		// Submit multiple concurrent job calls
+		assert_ok!(Services::call(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			0,
+			bounded_vec![Field::Uint8(1)],
+		));
+
+		assert_ok!(Services::call(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			0,
+			bounded_vec![Field::Uint8(2)],
+		));
+
+		// Verify both jobs are tracked
+		assert!(JobCalls::<Runtime>::contains_key(0, 0));
+		assert!(JobCalls::<Runtime>::contains_key(0, 1));
+
+		// Submit results for both jobs
+		let key_type = KeyTypeId(*b"mdkg");
+		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
+
+		assert_ok!(Services::submit_result(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			0,
+			bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
+		));
+
+		assert_ok!(Services::submit_result(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			1,
+			bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
+		));
+	});
+}
+
+#[test]
+fn test_result_submission_non_operators() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let charlie = mock_pub_key(CHARLIE);
+		let dave = mock_pub_key(DAVE);
+		let eve = mock_pub_key(EVE);
+
+		for operator in [bob.clone(), charlie.clone()] {
+			assert_ok!(Services::register(
+				RuntimeOrigin::signed(operator.clone()),
+				0,
+				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+				Default::default(),
+				0,
+			));
+		}
+
+		// Create and approve service
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone()],
+			Default::default(),
+			vec![get_security_requirement(WETH, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 2 },
+		));
+
+		for operator in [bob.clone(), charlie.clone()] {
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(operator),
+				0,
+				Percent::from_percent(10),
+				vec![get_security_commitment(WETH, 10)],
+			));
+		}
+
+		// Submit job call
+		assert_ok!(Services::call(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			0,
+			bounded_vec![Field::Uint8(1)],
+		));
+
+		// Non-operator tries to submit result
+		let key_type = KeyTypeId(*b"mdkg");
+		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
+
+		assert_err!(
+			Services::submit_result(
+				RuntimeOrigin::signed(dave.clone()),
+				0,
+				0,
+				bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
+			),
+			Error::<Runtime>::NotAnOperator
+		);
+	});
+}
+
+#[test]
+fn test_invalid_result_formats() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let eve = mock_pub_key(EVE);
+
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		// Create and approve service
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(WETH, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(WETH, 10)],
+		));
+
+		// Submit job call
+		assert_ok!(Services::call(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			0,
+			bounded_vec![Field::Uint8(1)],
+		));
+
+		// Try to submit empty result
+		assert_err!(
+			Services::submit_result(RuntimeOrigin::signed(bob.clone()), 0, 0, bounded_vec![],),
+			Error::<Runtime>::InvalidResultFormat
+		);
+
+		// Try to submit result with wrong field type
+		assert_err!(
+			Services::submit_result(
+				RuntimeOrigin::signed(bob.clone()),
+				0,
+				0,
+				bounded_vec![Field::String("invalid".try_into().unwrap())],
+			),
+			Error::<Runtime>::InvalidResultFormat,
+		);
+	});
+}
+
+#[test]
+fn test_result_submission_after_termination() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
+		let alice = mock_pub_key(ALICE);
+		let blueprint = cggmp21_blueprint();
+		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+
+		// Register operators
+		let bob = mock_pub_key(BOB);
+		let eve = mock_pub_key(EVE);
+
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			Default::default(),
+			0,
+		));
+
+		// Create and approve service
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(WETH, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			Percent::from_percent(10),
+			vec![get_security_commitment(WETH, 10)],
+		));
+
+		// Submit job call
+		assert_ok!(Services::call(
+			RuntimeOrigin::signed(eve.clone()),
+			0,
+			0,
+			bounded_vec![Field::Uint8(1)],
+		));
+
+		// Terminate service
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+
+		// Try to submit result after termination
+		let key_type = KeyTypeId(*b"mdkg");
+		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
+
+		assert_err!(
+			Services::submit_result(
+				RuntimeOrigin::signed(bob.clone()),
+				0,
+				0,
+				bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
+			),
+			Error::<Runtime>::ServiceNotFound
+		);
 	});
 }

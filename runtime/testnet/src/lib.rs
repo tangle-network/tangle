@@ -1532,7 +1532,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type SlashedAmountRecipient = TreasuryAccount;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
 	type RewardsManager = Rewards;

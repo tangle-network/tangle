@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use super::*;
+use crate::mock_evm::MockedEvmRunner;
 use crate::{self as pallet_services};
+use core::ops::Mul;
 use ethabi::Uint;
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -23,30 +24,35 @@ use frame_election_provider_support::{
 };
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
+	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, Hooks, OneSessionHandler},
 	PalletId,
 };
 use frame_system::EnsureRoot;
-use mock_evm::MockedEvmRunner;
 use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use scale_info::TypeInfo;
 use serde_json::json;
-use sp_core::{sr25519, H160};
+use sp_core::{sr25519, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill, Percent,
+	AccountId32, BuildStorage, DispatchError, Perbill, Percent,
 };
-use tangle_primitives::rewards::UserDepositWithLocks;
-use tangle_primitives::services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
-
-use core::ops::Mul;
-use std::{collections::BTreeMap, sync::Arc};
+use sp_staking::currency_to_vote::U128CurrencyToVote;
+use sp_weights::Weight;
+use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
+use tangle_primitives::{
+	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	traits::RewardsManager,
+	types::{rewards::LockMultiplier, BlockNumber},
+};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
-type Nonce = u32;
+pub type Nonce = u32;
+pub type AssetId = u128;
 
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
@@ -182,7 +188,7 @@ impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 	type UnixTime = pallet_timestamp::Pallet<Self>;
-	type CurrencyToVote = ();
+	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
@@ -211,7 +217,6 @@ impl pallet_staking::Config for Runtime {
 
 parameter_types! {
 	pub const ServicePalletAccountId: PalletId = PalletId(*b"Services");
-
 	pub const SlashRecipient: AccountId = AccountId32::new([9u8; 32]);
 }
 
@@ -259,66 +264,6 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
-}
-
-pub type AssetId = u128;
-
-pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId>
-	for MockDelegationManager
-{
-	fn get_current_round() -> tangle_primitives::types::RoundIndex {
-		Default::default()
-	}
-
-	fn is_operator(_operator: &AccountId) -> bool {
-		// don't care
-		true
-	}
-
-	fn is_operator_active(operator: &AccountId) -> bool {
-		if operator == &mock_pub_key(10) {
-			return false;
-		}
-		true
-	}
-
-	fn get_operator_stake(operator: &AccountId) -> Balance {
-		if operator == &mock_pub_key(10) {
-			Default::default()
-		} else {
-			1000
-		}
-	}
-
-	fn get_total_delegation_by_asset_id(
-		_operator: &AccountId,
-		_asset_id: &Asset<AssetId>,
-	) -> Balance {
-		Default::default()
-	}
-
-	fn get_delegators_for_operator(
-		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<AssetId>)> {
-		Default::default()
-	}
-
-	fn has_delegator_selected_blueprint(
-		_delegator: &AccountId,
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-	) -> bool {
-		// For mock implementation, always return true
-		true
-	}
-
-	fn get_user_deposit_with_locks(
-		_who: &AccountId,
-		_asset_id: Asset<AssetId>,
-	) -> Option<UserDepositWithLocks<Balance, u64>> {
-		None
-	}
 }
 
 parameter_types! {
@@ -415,7 +360,7 @@ parameter_types! {
 	pub const NativeExposureMinimum: Percent = Percent::from_percent(10);
 }
 
-impl Config for Runtime {
+impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type Currency = Balances;
@@ -450,13 +395,139 @@ impl Config for Runtime {
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
 	type NativeExposureMinimum = NativeExposureMinimum;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
-	type OperatorDelegationManager = MockDelegationManager;
+	type OperatorDelegationManager = MultiAssetDelegation;
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
+
+thread_local! {
+	static DEPOSIT_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
+	static WITHDRAWAL_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+}
+
+pub struct MockRewardsManager;
+
+impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsManager {
+	type Error = DispatchError;
+
+	fn record_deposit(
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+		lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error> {
+		DEPOSIT_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), asset, amount, lock_multiplier));
+		});
+		Ok(())
+	}
+
+	fn record_withdrawal(
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> Result<(), Self::Error> {
+		WITHDRAWAL_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), asset, amount));
+		});
+		Ok(())
+	}
+
+	fn record_service_reward(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn get_asset_deposit_cap_remaining(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(100_000_u32.into())
+	}
+
+	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(0_u32.into())
+	}
+}
+
+impl MockRewardsManager {
+	pub fn record_deposit_calls(
+	) -> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
+		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn record_withdrawal_calls() -> Vec<(AccountId, Asset<AssetId>, Balance)> {
+		WITHDRAWAL_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn clear_all() {
+		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
+		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
+	}
+}
+
+parameter_types! {
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MinOperatorBondAmount: Balance = 1_000;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const BondDuration: u32 = 28;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxDelegatorBlueprints: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxOperatorBlueprints: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxWithdrawRequests: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxUnstakeRequests: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxDelegations: u32 = 10;
+	pub const PID: PalletId = PalletId(*b"tngl/mad");
+}
+
+impl pallet_multi_asset_delegation::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
+	type ServiceManager = Services;
+	type LeaveOperatorsDelay = ConstU32<10>;
+	type OperatorBondLessDelay = ConstU32<1>;
+	type LeaveDelegatorsDelay = ConstU32<1>;
+	type DelegationBondLessDelay = ConstU32<5>;
+	type MinDelegateAmount = ConstU128<100>;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type PalletId = PID;
+	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
+	type MaxOperatorBlueprints = MaxOperatorBlueprints;
+	type MaxWithdrawRequests = MaxWithdrawRequests;
+	type MaxUnstakeRequests = MaxUnstakeRequests;
+	type MaxDelegations = MaxDelegations;
+	type EvmRunner = MockedEvmRunner;
+	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type EvmAddressMapping = PalletEVMAddressMapping;
+	type RewardsManager = MockRewardsManager;
+	type WeightInfo = ();
+}
 
 construct_runtime!(
 	pub enum Runtime
@@ -471,6 +542,7 @@ construct_runtime!(
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		MultiAssetDelegation: pallet_multi_asset_delegation,
 	}
 );
 
@@ -484,6 +556,10 @@ impl Default for ExtBuilder {
 
 pub fn mock_pub_key(id: u8) -> AccountId {
 	sr25519::Public::from_raw([id; 32]).into()
+}
+
+pub fn mock_pub_key_from_fixed_bytes(bytes: [u8; 32]) -> AccountId {
+	sr25519::Public::from_raw(bytes).into()
 }
 
 pub fn mock_address(id: u8) -> H160 {

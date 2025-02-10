@@ -276,7 +276,10 @@ impl<T: Config> Pallet<T> {
 	pub fn process_go_offline(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(operator.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
-
+		ensure!(
+			!T::ServiceManager::has_active_services(who),
+			Error::<T>::CannotGoOfflineWithActiveServices
+		);
 		operator.status = OperatorStatus::Inactive;
 		Operators::<T>::insert(who, operator);
 
