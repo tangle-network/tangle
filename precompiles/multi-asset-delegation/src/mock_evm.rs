@@ -27,7 +27,7 @@ use frame_support::{
 };
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
-use pallet_evm_precompile_staking::StakingPrecompileCall;
+use pallet_evm_precompile_staking::{StakingPrecompile, StakingPrecompileCall};
 use precompile_utils::precompile_set::{
 	AddressU64, PrecompileAt, PrecompileSetBuilder, SubcallWithMaxNesting,
 };
@@ -41,7 +41,10 @@ use tangle_primitives::services::EvmRunner;
 
 pub type Precompiles<R> = PrecompileSetBuilder<
 	R,
-	(PrecompileAt<AddressU64<1>, MultiAssetDelegationPrecompile<R>, (SubcallWithMaxNesting<2>,)>,),
+	(
+		PrecompileAt<AddressU64<1>, MultiAssetDelegationPrecompile<R>, (SubcallWithMaxNesting<2>,)>,
+		PrecompileAt<AddressU64<2>, StakingPrecompile<R>, (SubcallWithMaxNesting<2>,)>,
+	),
 >;
 
 pub type PCall = MultiAssetDelegationPrecompileCall<Runtime>;

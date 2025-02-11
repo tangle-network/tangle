@@ -262,8 +262,7 @@ pub fn distribute_rewards(amount: Balance) {
 		}
 
 		// Calculate rewards
-		let validator_reward =
-			(exposure.own as u128 * reward_per_validator) / (total_stake as u128);
+		let validator_reward = (exposure.own * reward_per_validator) / total_stake;
 		Balances::make_free_balance_be(
 			&validator,
 			Balances::free_balance(&validator) + validator_reward,
@@ -271,8 +270,7 @@ pub fn distribute_rewards(amount: Balance) {
 
 		// Distribute rewards to nominators
 		for nominator in exposure.others {
-			let nominator_reward =
-				(nominator.value as u128 * reward_per_validator) / (total_stake as u128);
+			let nominator_reward = (nominator.value * reward_per_validator) / total_stake;
 			Balances::make_free_balance_be(
 				&nominator.who,
 				Balances::free_balance(&nominator.who) + nominator_reward,

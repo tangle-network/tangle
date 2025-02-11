@@ -56,7 +56,7 @@ fn test_delegate_assets_invalid_operator() {
 					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [3, 0, 0, 0], message: Some(\"NotAnOperator\") })");
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 9, error: [3, 0, 0, 0], message: Some(\"NotAnOperator\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});
@@ -263,7 +263,7 @@ fn test_delegate_assets_insufficient_balance() {
 					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 6, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
+			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 9, error: [15, 0, 0, 0], message: Some(\"InsufficientBalance\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});

@@ -94,32 +94,30 @@ interface MultiAssetDelegation {
     /// @param operator The address of the operator.
     /// @param amount The amount to delegate.
     /// @param blueprintSelection The blueprint selection.
-    /// @custom:selector 7c2c7e0d
-    function delegateNomination(
-        bytes32 operator,
-        uint256 amount,
-        uint64[] memory blueprintSelection
-    ) external;
+    /// @custom:selector accc8f88
+    function delegateNomination(bytes32 operator, uint256 amount, uint64[] memory blueprintSelection) external;
 
     /// @dev Schedule an unstake of nominations as a delegator.
     /// @param operator The address of the operator.
     /// @param amount The amount to unstake.
-    /// @custom:selector 9c1231a4
-    function scheduleDelegatorNominationUnstake(bytes32 operator, uint256 amount) external;
+    /// @param blueprintSelection The blueprint selection.
+    /// @custom:selector fdd20008
+    function scheduleDelegatorNominationUnstake(bytes32 operator, uint256 amount, uint64[] memory blueprintSelection)
+        external;
 
     /// @dev Execute the scheduled nomination unstake as a delegator.
     /// @param operator The address of the operator.
-    /// @custom:selector 4b5a0245
+    /// @custom:selector cf2ce918
     function executeDelegatorNominationUnstake(bytes32 operator) external;
 
     /// @dev Cancel the scheduled nomination unstake as a delegator.
     /// @param operator The address of the operator.
-    /// @custom:selector 2c4c3d23
+    /// @custom:selector a9332214
     function cancelDelegatorNominationUnstake(bytes32 operator) external;
 
     /// @dev Get the delegated nomination balance of the delegator.
     /// @param who The address of the delegator.
     /// @return The delegated nomination balance of the delegator.
-    /// @custom:selector 6c8c8e0f
+    /// @custom:selector d1909653
     function delegatedNominationBalance(address who) external view returns (uint256);
 }

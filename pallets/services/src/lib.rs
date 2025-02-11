@@ -1110,7 +1110,7 @@ pub mod module {
 			// Ensure all operators are active
 			for operator in operators.iter() {
 				ensure!(
-					T::OperatorDelegationManager::is_operator_active(&operator),
+					T::OperatorDelegationManager::is_operator_active(operator),
 					Error::<T>::OperatorNotActive,
 				);
 			}

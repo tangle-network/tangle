@@ -21,6 +21,7 @@ use super::*;
 use crate::mock_evm::*;
 use core::ops::Mul;
 use ethabi::Uint;
+use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
 use frame_election_provider_support::onchain;
 use frame_election_provider_support::SequentialPhragmen;
 use frame_support::{
@@ -30,7 +31,6 @@ use frame_support::{
 	PalletId,
 };
 use pallet_evm::GasWeightMapping;
-use pallet_multi_asset_delegation::mock::ElectionBoundsOnChain;
 use pallet_session::historical as pallet_session_historical;
 use pallet_staking::ConvertCurve;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
@@ -42,6 +42,7 @@ use sp_core::{
 	sr25519::{Public as sr25519Public, Signature},
 	ConstU32, H160,
 };
+use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::testing::UintAuthorityId;
@@ -50,7 +51,7 @@ use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage, Perbill,
 };
-use sp_staking::{EraIndex, SessionIndex, StakingInterface};
+use sp_staking::{EraIndex, SessionIndex};
 use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 use tangle_primitives::traits::{RewardsManager, ServiceManager};
@@ -71,6 +72,7 @@ const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	PartialEq,
 	Ord,
 	PartialOrd,
+	Copy,
 	Clone,
 	Encode,
 	Decode,
@@ -385,7 +387,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
 	type CurrencyToVote = ();
-	type StakingInterface = MockStakingInterface;
+	type StakingInterface = Staking;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type EvmRunner = MockedEvmRunner;
@@ -441,17 +443,19 @@ pub struct MockSessionHandler;
 impl OneSessionHandler<AccountId> for MockSessionHandler {
 	type Key = UintAuthorityId;
 
-	fn on_genesis_session<'a, I: 'a>(_: I)
+	fn on_genesis_session<'a, I>(_: I)
 	where
 		I: Iterator<Item = (&'a AccountId, Self::Key)>,
 		AccountId: 'a,
+		I: 'a,
 	{
 	}
 
-	fn on_new_session<'a, I: 'a>(_: bool, _: I, _: I)
+	fn on_new_session<'a, I>(_: bool, _: I, _: I)
 	where
 		I: Iterator<Item = (&'a AccountId, Self::Key)>,
 		AccountId: 'a,
+		I: 'a,
 	{
 	}
 
@@ -485,6 +489,13 @@ impl pallet_session::Config for Runtime {
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
 	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub ElectionBoundsOnChain: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(5_000.into()).targets_count(1_250.into()).build();
+	pub ElectionBoundsMultiPhase: ElectionBounds = ElectionBoundsBuilder::default()
+		.voters_count(10_000.into()).targets_count(1_500.into()).build();
 }
 
 pub struct OnChainSeqPhragmen;
@@ -560,6 +571,12 @@ pub const USDC_ERC20: H160 = H160([0x23; 20]);
 impl ExtBuilder {
 	/// Build the test externalities for use in tests
 	pub fn build(self) -> sp_io::TestExternalities {
+		// We use default for brevity, but you can configure as desired if needed.
+		let authorities: Vec<AccountId> = vec![
+			AccountKeyring::Alice.into(),
+			AccountKeyring::Bob.into(),
+			AccountKeyring::Charlie.into(),
+		];
 		let mut t = frame_system::GenesisConfig::<Runtime>::default()
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
@@ -570,11 +587,20 @@ impl ExtBuilder {
 				.iter()
 				.chain(
 					[
+						(AccountKeyring::Alice.into(), 1_000_000),
+						(AccountKeyring::Bob.into(), 1_000_000),
+						(AccountKeyring::Charlie.into(), 1_000_000),
+						(AccountKeyring::Dave.into(), 1_000_000),
+						(AccountKeyring::Eve.into(), 1_000_000),
+						(MultiAssetDelegation::pallet_account(), 100),
+					]
+					.iter(),
+				)
+				.chain(
+					[
 						(TestAccount::Alex.into(), 1_000_000),
 						(TestAccount::Bobo.into(), 1_000_000),
 						(TestAccount::Charlie.into(), 1_000_000),
-						(MultiAssetDelegation::pallet_account(), 100), /* give pallet some ED so
-						                                                * it can receive tokens */
 					]
 					.iter(),
 				)
@@ -608,7 +634,7 @@ impl ExtBuilder {
 
 		for a in &accounts {
 			evm_accounts.insert(
-				a.clone().into(),
+				(*a).into(),
 				fp_evm::GenesisAccount {
 					code: vec![],
 					storage: Default::default(),
@@ -623,6 +649,13 @@ impl ExtBuilder {
 
 		evm_config.assimilate_storage(&mut t).unwrap();
 
+		let staking_config = pallet_staking::GenesisConfig::<Runtime> {
+			validator_count: 3,
+			invulnerables: authorities.clone(),
+			..Default::default()
+		};
+
+		staking_config.assimilate_storage(&mut t).unwrap();
 		// assets_config.assimilate_storage(&mut t).unwrap();
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
@@ -713,108 +746,5 @@ impl ExtBuilder {
 			System::set_block_number(1);
 		});
 		ext
-	}
-}
-
-pub struct MockStakingInterface;
-
-impl StakingInterface for MockStakingInterface {
-	type CurrencyToVote = ();
-	type AccountId = AccountId;
-	type Balance = Balance;
-
-	fn minimum_nominator_bond() -> Self::Balance {
-		unimplemented!()
-	}
-
-	fn minimum_validator_bond() -> Self::Balance {
-		unimplemented!()
-	}
-
-	fn stash_by_ctrl(_controller: &Self::AccountId) -> Result<Self::AccountId, DispatchError> {
-		unimplemented!()
-	}
-
-	fn bonding_duration() -> sp_staking::EraIndex {
-		unimplemented!()
-	}
-
-	fn current_era() -> sp_staking::EraIndex {
-		unimplemented!()
-	}
-
-	fn stake(_who: &Self::AccountId) -> Result<sp_staking::Stake<Self::Balance>, DispatchError> {
-		unimplemented!()
-	}
-
-	fn bond(
-		_who: &Self::AccountId,
-		_value: Self::Balance,
-		_payee: &Self::AccountId,
-	) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn nominate(
-		_who: &Self::AccountId,
-		_validators: Vec<Self::AccountId>,
-	) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn chill(_who: &Self::AccountId) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn bond_extra(_who: &Self::AccountId, _extra: Self::Balance) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn unbond(_stash: &Self::AccountId, _value: Self::Balance) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn update_payee(
-		_stash: &Self::AccountId,
-		_reward_acc: &Self::AccountId,
-	) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn withdraw_unbonded(
-		_stash: Self::AccountId,
-		_num_slashing_spans: u32,
-	) -> Result<bool, DispatchError> {
-		unimplemented!()
-	}
-
-	fn desired_validator_count() -> u32 {
-		unimplemented!()
-	}
-
-	fn election_ongoing() -> bool {
-		unimplemented!()
-	}
-
-	fn force_unstake(_who: Self::AccountId) -> sp_runtime::DispatchResult {
-		unimplemented!()
-	}
-
-	fn is_exposed_in_era(_who: &Self::AccountId, _era: &sp_staking::EraIndex) -> bool {
-		unimplemented!()
-	}
-
-	fn status(
-		_who: &Self::AccountId,
-	) -> Result<sp_staking::StakerStatus<Self::AccountId>, DispatchError> {
-		unimplemented!()
-	}
-
-	fn is_virtual_staker(_who: &Self::AccountId) -> bool {
-		unimplemented!()
-	}
-
-	fn slash_reward_fraction() -> sp_runtime::Perbill {
-		unimplemented!()
 	}
 }

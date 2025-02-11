@@ -63,7 +63,7 @@ impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pal
 	}
 
 	fn has_active_services(operator: &T::AccountId) -> bool {
-		OperatorsProfile::<T>::get(operator).map_or(false, |profile| !profile.services.is_empty())
+		OperatorsProfile::<T>::get(operator).is_ok_and(|profile| !profile.services.is_empty())
 	}
 
 	fn get_blueprints_by_operator(operator: &T::AccountId) -> Vec<BlueprintId> {

@@ -85,7 +85,7 @@ impl<T: Config> Pallet<T> {
 		// Call approval hook
 		// TODO: Update the approval hook CC @shekohex @1xstj
 		let (allowed, _weight) =
-			Self::on_approve_hook(&blueprint, blueprint_id, &preferences, request_id, 0u8.into())
+			Self::on_approve_hook(&blueprint, blueprint_id, &preferences, request_id, 0u8)
 				.map_err(|_| Error::<T>::OnApproveFailure)?;
 		ensure!(allowed, Error::<T>::ApprovalInterrupted);
 
