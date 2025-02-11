@@ -251,7 +251,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		let (_, first_slash) = &slashes[0];
 		assert_eq!(first_slash.service_id, service_id1);
 		assert_eq!(first_slash.operator, bob);
-		assert_eq!(Percent::from_percent(10).mul_floor(first_slash.own), stake_amount / 2); // 50% of exposed stake_amount
+		assert_eq!(Percent::from_percent(10).mul_floor(first_slash.own), stake_amount / 2); // 50% of stake_amount
 		assert_eq!(first_slash.others.len(), 1);
 		assert_eq!(first_slash.others[0].0, delegator);
 		assert_eq!(first_slash.others[0].2, stake_amount / 2); // 50% of delegator stake
