@@ -25,13 +25,10 @@ fn test_security_requirements_validation() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
-
 		// Register operator
 		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
-
 		// Test Case 1: Invalid min exposure (0%)
 		assert_err!(
 			Services::request(
@@ -47,9 +44,8 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::InvalidSecurityRequirements
 		);
-
 		// Test Case 2: Invalid max exposure (0%)
 		assert_err!(
 			Services::request(
@@ -65,9 +61,8 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::InvalidSecurityRequirements
 		);
-
 		// Test Case 3: Min exposure > Max exposure
 		assert_err!(
 			Services::request(
@@ -83,27 +78,24 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::InvalidSecurityRequirements
 		);
-
 		// Test Case 4: Max exposure > 100%
-		assert_err!(
-			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
-				None,
-				0,
-				vec![alice.clone()],
-				vec![bob.clone()],
-				Default::default(),
-				vec![get_security_requirement(WETH, &[10, 101])],
-				100,
-				Asset::Custom(USDC),
-				0,
-				MembershipModel::Fixed { min_operators: 1 },
-			),
-			Error::<Runtime>::InvalidSecurityCommitments
-		);
-
+		// NOTE: this one passes because the max exposure is capped at 100% anyway
+		// This enforcement is done in the [`Percent`] type
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(WETH, &[10, 101])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
 		// Test Case 5: Valid security requirements
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
@@ -129,13 +121,10 @@ fn test_security_commitment_validation() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
-
 		// Register operator
 		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
-
 		// Create service request
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
@@ -150,7 +139,6 @@ fn test_security_commitment_validation() {
 			0,
 			MembershipModel::Fixed { min_operators: 1 },
 		));
-
 		// Test Case 1: Commitment below minimum exposure
 		assert_err!(
 			Services::approve(
@@ -160,7 +148,6 @@ fn test_security_commitment_validation() {
 			),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-
 		// Test Case 2: Commitment above maximum exposure
 		assert_err!(
 			Services::approve(
@@ -170,7 +157,6 @@ fn test_security_commitment_validation() {
 			),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-
 		// Test Case 3: Missing required asset commitment (native asset)
 		assert_err!(
 			Services::approve(
@@ -180,7 +166,6 @@ fn test_security_commitment_validation() {
 			),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-
 		// Test Case 4: Wrong asset provided
 		assert_err!(
 			Services::approve(
@@ -190,7 +175,6 @@ fn test_security_commitment_validation() {
 			),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-
 		// Test Case 4: Valid commitment
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),

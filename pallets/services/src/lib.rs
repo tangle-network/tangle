@@ -404,6 +404,8 @@ pub mod module {
 		InvalidKey,
 		/// Invalid security commitments
 		InvalidSecurityCommitments,
+		/// Invalid Security Requirements
+		InvalidSecurityRequirements,
 	}
 
 	#[pallet::event]
@@ -1122,7 +1124,7 @@ pub mod module {
 						&& requirement.max_exposure_percent > Percent::zero()
 						&& requirement.min_exposure_percent <= requirement.max_exposure_percent
 						&& requirement.max_exposure_percent <= Percent::from_percent(100),
-					Error::<T>::InvalidSecurityCommitments
+					Error::<T>::InvalidSecurityRequirements,
 				);
 			}
 

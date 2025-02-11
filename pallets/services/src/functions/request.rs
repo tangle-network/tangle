@@ -54,6 +54,18 @@ impl<T: Config> Pallet<T> {
 		blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
 		// ensure we at least have one asset and all assets are unique
 		ensure!(!security_requirements.is_empty(), Error::<T>::NoAssetsProvided);
+
+		// First validate all security requirements have non-zero exposures
+		for requirement in security_requirements.iter() {
+			ensure!(
+				requirement.min_exposure_percent > Percent::zero()
+					&& requirement.max_exposure_percent > Percent::zero()
+					&& requirement.min_exposure_percent <= requirement.max_exposure_percent
+					&& requirement.max_exposure_percent <= Percent::from_percent(100),
+				Error::<T>::InvalidSecurityRequirements
+			);
+		}
+
 		ensure!(
 			security_requirements
 				.iter()

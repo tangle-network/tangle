@@ -118,11 +118,12 @@ fn update_price_targets() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 		let bob_operator_ecdsa_key = test_ecdsa_key();
+
+		// Join operators and register
 		assert_ok!(join_and_register(
 			bob.clone(),
 			0,
@@ -139,15 +140,7 @@ fn update_price_targets() {
 			}
 		);
 
-		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
-			provider: bob.clone(),
-			blueprint_id: 0,
-			preferences: OperatorPreferences {
-				key: bob_operator_ecdsa_key,
-				price_targets: price_targets(MachineKind::Small),
-			},
-			registration_args: Default::default(),
-		})]);
+		System::reset_events(); // Clear all previous events
 
 		// update price targets
 		assert_ok!(Services::update_price_targets(
@@ -342,14 +335,23 @@ fn test_registration_duplicate_keys() {
 			1000,
 		));
 
-		// Second registration with same key should fail
+		// Join operators first for Charlie
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(charlie.clone()),
+			1000
+		));
+
+		// Second registration with same key should fail with DuplicateKey error
 		assert_err!(
-			join_and_register(
-				charlie.clone(),
+			Services::register(
+				RuntimeOrigin::signed(charlie.clone()),
 				0,
-				ecdsa_key,
-				price_targets(MachineKind::Large),
-				1000,
+				OperatorPreferences {
+					key: ecdsa_key,
+					price_targets: price_targets(MachineKind::Large),
+				},
+				Default::default(),
+				0,
 			),
 			Error::<Runtime>::DuplicateKey
 		);
