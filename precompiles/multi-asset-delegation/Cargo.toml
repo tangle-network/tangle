@@ -77,7 +77,6 @@ serde_json = { workspace = true }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
 
-
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate

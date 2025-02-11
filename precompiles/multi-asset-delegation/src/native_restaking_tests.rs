@@ -37,7 +37,7 @@ fn test_delegate_nomination_through_precompile() {
 			.prepare_test(
 				delegator,
 				H160::from_low_u64_be(2),
-				SCall::nominate { targets: vec![H256::from(validator)] },
+				SCall::nominate { targets: vec![H256::from(validator.0)] },
 			)
 			.execute_returns(());
 
@@ -88,7 +88,7 @@ fn test_delegate_nomination_invalid_operator() {
                 delegator,
                 H160::from_low_u64_be(2),
                 SCall::nominate {
-                    targets: vec![H256::from(validator)],
+                    targets: vec![H256::from(validator.0)],
                 },
             )
             .execute_returns(());
@@ -142,7 +142,7 @@ fn test_delegate_nomination_insufficient_balance() {
                 delegator,
                 H160::from_low_u64_be(2),
                 SCall::nominate {
-                    targets: vec![H256::from(validator)],
+                    targets: vec![H256::from(validator.0)],
                 },
             )
             .execute_returns(());
@@ -192,7 +192,7 @@ fn test_delegate_nomination_unstake_lifecycle() {
 			.prepare_test(
 				delegator,
 				H160::from_low_u64_be(2),
-				SCall::nominate { targets: vec![H256::from(validator)] },
+				SCall::nominate { targets: vec![H256::from(validator.into())] },
 			)
 			.execute_returns(());
 

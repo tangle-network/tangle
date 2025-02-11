@@ -25,12 +25,14 @@ use frame_election_provider_support::onchain;
 use frame_election_provider_support::SequentialPhragmen;
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU64},
+	traits::{AsEnsureOriginWithArg, ConstU64, OneSessionHandler},
 	weights::Weight,
 	PalletId,
 };
 use pallet_evm::GasWeightMapping;
 use pallet_multi_asset_delegation::mock::ElectionBoundsOnChain;
+use pallet_session::historical as pallet_session_historical;
+use pallet_staking::ConvertCurve;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -42,12 +44,13 @@ use sp_core::{
 };
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::curve::PiecewiseLinear;
+use sp_runtime::testing::UintAuthorityId;
 use sp_runtime::DispatchError;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
 	AccountId32, BuildStorage, Perbill,
 };
-use sp_staking::{ConvertCurve, EraIndex, StakingInterface};
+use sp_staking::{EraIndex, SessionIndex, StakingInterface};
 use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 use tangle_primitives::traits::{RewardsManager, ServiceManager};

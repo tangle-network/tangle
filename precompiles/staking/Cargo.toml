@@ -32,7 +32,6 @@ sha3 = { workspace = true }
 
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
-# Substrate
 frame-election-provider-support = { workspace = true, features = ["std"] }
 pallet-balances = { workspace = true, features = ["std"] }
 pallet-session = { workspace = true, features = ["std"] }
