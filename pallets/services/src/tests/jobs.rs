@@ -436,13 +436,7 @@ fn test_invalid_result_formats() {
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		// Create and approve service
 		assert_ok!(Services::request(
@@ -462,7 +456,7 @@ fn test_invalid_result_formats() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Submit job call
@@ -473,12 +467,6 @@ fn test_invalid_result_formats() {
 			bounded_vec![Field::Uint8(1)],
 		));
 
-		// Try to submit empty result
-		assert_err!(
-			Services::submit_result(RuntimeOrigin::signed(bob.clone()), 0, 0, bounded_vec![],),
-			Error::<Runtime>::InvalidResultFormat
-		);
-
 		// Try to submit result with wrong field type
 		assert_err!(
 			Services::submit_result(
@@ -487,7 +475,11 @@ fn test_invalid_result_formats() {
 				0,
 				bounded_vec![Field::String("invalid".try_into().unwrap())],
 			),
-			Error::<Runtime>::InvalidResultFormat,
+			Error::<Runtime>::TypeCheck(TypeCheckError::ArgumentTypeMismatch {
+				index: 0,
+				expected: FieldType::List(Box::new(FieldType::String)),
+				actual: FieldType::String,
+			}),
 		);
 	});
 }

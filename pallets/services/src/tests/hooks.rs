@@ -16,7 +16,6 @@
 
 use super::*;
 use frame_support::assert_ok;
-use sp_runtime::Percent;
 
 #[test]
 fn hooks() {
@@ -52,13 +51,7 @@ fn hooks() {
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnBlueprintCreated()")]);
 
 		// OnRegister hook should be called
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 		assert_evm_logs(&[evm_log!(HOOKS_TEST, b"OnRegister()")]);
 
 		// OnUnregister hook should be called
@@ -128,7 +121,11 @@ fn hooks() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(WETH, 10)],
+			vec![
+				get_security_commitment(USDC, 10),
+				get_security_commitment(WETH, 10),
+				get_security_commitment(TNT, 10)
+			],
 		));
 		assert_evm_logs(&[
 			evm_log!(HOOKS_TEST, b"OnApprove()"),

@@ -398,8 +398,6 @@ pub mod module {
 		AlreadyJoined,
 		/// Caller is not an operator of the service
 		NotAnOperator,
-		/// Submitted result is empty
-		InvalidResultFormat,
 		/// Invalid slash percentage
 		InvalidSlashPercentage,
 		/// Invalid key (zero byte ECDSA key provided)
@@ -1415,8 +1413,6 @@ pub mod module {
 				.jobs
 				.get(usize::from(job_call.job))
 				.ok_or(Error::<T>::JobDefinitionNotFound)?;
-
-			ensure!(!result.is_empty(), Error::<T>::InvalidResultFormat);
 
 			let bounded_result = BoundedVec::<_, MaxFieldsOf<T>>::try_from(result.clone())
 				.map_err(|_| Error::<T>::MaxFieldsExceeded)?;
