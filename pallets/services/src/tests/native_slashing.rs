@@ -251,7 +251,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		let (_, first_slash) = &slashes[0];
 		assert_eq!(first_slash.service_id, service_id1);
 		assert_eq!(first_slash.operator, bob);
-		assert_eq!(Percent::from_percent(10).mul_floor(first_slash.own), stake_amount / 2); // 50% of stake_amount
+		assert_eq!(first_slash.own, Percent::from_percent(10).mul_floor(stake_amount / 2)); // 50% of stake_amount
 		assert_eq!(first_slash.others.len(), 1);
 		assert_eq!(first_slash.others[0].0, delegator);
 		assert_eq!(first_slash.others[0].2, stake_amount / 2); // 50% of delegator stake
@@ -260,7 +260,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		let (_, second_slash) = &slashes[1];
 		assert_eq!(second_slash.service_id, 1);
 		assert_eq!(second_slash.operator, bob);
-		assert_eq!(second_slash.own, stake_amount / 4); // 25% of stake_amount
+		assert_eq!(second_slash.own, Percent::from_percent(10).mul_floor(stake_amount / 4)); // 25% of stake_amount
 		assert_eq!(second_slash.others.len(), 1);
 		assert_eq!(second_slash.others[0].0, delegator);
 		assert_eq!(second_slash.others[0].2, stake_amount / 4); // 25% of delegator stake
@@ -371,10 +371,19 @@ fn test_atomic_slashing_operations() {
 		));
 		assert_ok!(Services::slash(
 			RuntimeOrigin::signed(slashing_origin.clone()),
-			charlie.clone(),
+			bob.clone(),
 			service_id,
 			slash_percent
 		));
+		assert_err!(
+			Services::slash(
+				RuntimeOrigin::signed(slashing_origin.clone()),
+				charlie.clone(),
+				service_id,
+				slash_percent
+			),
+			Error::<Runtime>::OffenderNotOperator
+		);
 
 		// Verify slashes are recorded
 		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 2);

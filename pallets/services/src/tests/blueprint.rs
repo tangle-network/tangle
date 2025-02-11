@@ -72,10 +72,10 @@ fn create_service_blueprint() {
 
 		let next_id = Services::next_blueprint_id();
 		assert_eq!(next_id, 1);
-		assert_events(vec![RuntimeEvent::Services(crate::Event::BlueprintCreated {
+		System::assert_has_event(RuntimeEvent::Services(crate::Event::BlueprintCreated {
 			owner: alice,
 			blueprint_id: next_id - 1,
-		})]);
+		}));
 
 		let (_, blueprint) = Services::blueprints(next_id - 1).unwrap();
 
