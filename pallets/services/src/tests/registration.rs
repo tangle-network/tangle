@@ -408,7 +408,7 @@ fn test_registration_during_active_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Verify service is active and in instances storage

@@ -86,13 +86,6 @@ fn test_mixed_native_and_regular_delegation_slash() {
 		let native_stake = 10_000;
 		let regular_stake = 5_000;
 
-		// Setup staking for native restaking
-		assert_ok!(Staking::bond(
-			RuntimeOrigin::signed(delegator.clone()),
-			native_stake,
-			RewardDestination::Staked,
-		));
-
 		// Setup regular delegation
 		create_and_mint_tokens(USDC, delegator.clone(), regular_stake);
 		assert_ok!(MultiAssetDelegation::deposit(
@@ -207,7 +200,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		let delegator = mock_pub_key(CHARLIE);

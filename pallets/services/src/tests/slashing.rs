@@ -547,7 +547,7 @@ fn test_slash_with_multiple_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service2_id,
-			vec![get_security_commitment(USDC, 10)],
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Create slashes for both services

@@ -866,13 +866,13 @@ fn test_termination_with_partial_approvals() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(USDC, 10)],
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			vec![get_security_commitment(USDC, 15)],
+			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 15)],
 		));
 
 		// Attempt to terminate service with partial approvals - should fail
@@ -932,7 +932,7 @@ fn test_operator_offline_during_active_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(USDC, 10)],
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Verify service is active
