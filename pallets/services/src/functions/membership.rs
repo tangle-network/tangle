@@ -95,7 +95,7 @@ impl<T: Config> Pallet<T> {
 				// Ensure minimum operators maintained
 				ensure!(
 					instance.operator_security_commitments.len() > min_operators as usize,
-					Error::<T>::InsufficientOperators
+					Error::<T>::TooFewOperators
 				);
 			},
 		}

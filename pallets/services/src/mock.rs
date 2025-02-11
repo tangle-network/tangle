@@ -852,29 +852,3 @@ fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
 		panic!("No events found");
 	}
 }
-
-// Checks events against the latest. A contiguous set of events must be
-// provided. They must include the most recent RuntimeEvent, but do not have to include
-// every past RuntimeEvent.
-#[track_caller]
-pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
-	let mut actual: Vec<RuntimeEvent> = System::events()
-		.iter()
-		.filter_map(|e| match e.event {
-			RuntimeEvent::Services(_) => Some(e.event.clone()),
-			_ => None,
-		})
-		.collect();
-
-	expected.reverse();
-	for evt in expected {
-		let next = actual.pop().expect("RuntimeEvent expected");
-		match (&next, &evt) {
-			(left_val, right_val) => {
-				if !(*left_val == *right_val) {
-					panic!("Events don't match\nactual: {actual:#?}\nexpected: {evt:#?}");
-				}
-			},
-		};
-	}
-}

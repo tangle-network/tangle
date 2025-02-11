@@ -386,8 +386,6 @@ pub mod module {
 		LeaveRejected,
 		/// Maximum operators reached
 		MaxOperatorsReached,
-		/// Insufficient # of operators
-		InsufficientOperators,
 		/// Can join hook failure
 		OnCanJoinFailure,
 		/// Can leave hook failure
@@ -1123,6 +1121,7 @@ pub mod module {
 			// Check that the number of operators doesn't exceed the membership model max
 			match membership_model {
 				MembershipModel::Fixed { min_operators } => {
+					ensure!(min_operators > 0, Error::<T>::TooFewOperators);
 					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
 				},
 				MembershipModel::Dynamic { min_operators, max_operators } => {

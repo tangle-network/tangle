@@ -50,25 +50,6 @@ pub fn create_and_mint_tokens(
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset_id, recipient, amount));
 }
 
-pub fn mint_tokens(
-	owner: <Runtime as frame_system::Config>::AccountId,
-	asset_id: AssetId,
-	recipient: <Runtime as frame_system::Config>::AccountId,
-	amount: Balance,
-) {
-	assert_ok!(Assets::mint(RuntimeOrigin::signed(owner), asset_id, recipient, amount));
-}
-
-pub fn run_to_block(n: u64) {
-	while System::block_number() < n {
-		Balances::on_finalize(System::block_number());
-		System::on_finalize(System::block_number());
-		System::set_block_number(System::block_number() + 1);
-		System::on_initialize(System::block_number());
-		Services::on_initialize(System::block_number());
-	}
-}
-
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MachineKind {
@@ -171,9 +152,6 @@ fn deploy() -> Deployment {
 
 	let alice = mock_pub_key(ALICE);
 	let bob = mock_pub_key(BOB);
-	let charlie = mock_pub_key(CHARLIE);
-	let dave = mock_pub_key(DAVE);
-	let eve = mock_pub_key(EVE);
 
 	assert_ok!(join_and_register(
 		bob.clone(),

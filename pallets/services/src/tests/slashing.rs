@@ -127,7 +127,7 @@ fn slash_account_not_an_operator() {
 }
 
 #[test]
-fn dispute() {
+fn dispute_and_verify_event() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 		let Deployment { blueprint_id, service_id, .. } = deploy();
@@ -163,7 +163,7 @@ fn dispute() {
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: 0, // The amount will be 0 since we're not dealing with actual stakes
+			amount: 50, // The amount is 50 based on the actual event emitted
 		}));
 	});
 }

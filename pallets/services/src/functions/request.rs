@@ -9,7 +9,7 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::traits::Zero;
+use sp_runtime::{traits::Zero, Percent};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	services::{
@@ -72,7 +72,7 @@ impl<T: Config> Pallet<T> {
 			security_requirements.push(AssetSecurityRequirement {
 				asset: Asset::Custom(Zero::zero()),
 				min_exposure_percent: T::MinimumNativeSecurityRequirement::get(),
-				max_exposure_percent: T::MinimumNativeSecurityRequirement::get(),
+				max_exposure_percent: Percent::from_percent(100),
 			});
 		}
 
