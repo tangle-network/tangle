@@ -937,6 +937,11 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			// Validate the operator preferences
 			ensure!(preferences.key != [0u8; 65], Error::<T>::InvalidKey);
+			// Check if the caller is an active operator in the delegation system
+			ensure!(
+				T::OperatorDelegationManager::is_operator_active(&caller),
+				Error::<T>::OperatorNotActive
+			);
 			// Check if operator is already registered for this blueprint
 			ensure!(
 				!Operators::<T>::contains_key(blueprint_id, &caller),

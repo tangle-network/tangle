@@ -38,7 +38,13 @@ fn register_on_blueprint() {
 			1000,
 		));
 
-		assert_events(vec![RuntimeEvent::Services(crate::Event::Registered {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::Registered {
 			provider: bob.clone(),
 			blueprint_id: 0,
 			preferences: OperatorPreferences {
@@ -46,7 +52,7 @@ fn register_on_blueprint() {
 				price_targets: price_targets(MachineKind::Large),
 			},
 			registration_args: Default::default(),
-		})]);
+		})));
 
 		// The blueprint should be added to my blueprints in my profile.
 		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
@@ -67,7 +73,7 @@ fn register_on_blueprint() {
 		// if we try to register with a non active operator, should fail
 		assert_err!(
 			Services::register(
-				RuntimeOrigin::signed(mock_pub_key(10)),
+				RuntimeOrigin::signed(mock_pub_key(100)),
 				0,
 				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
 				Default::default(),
@@ -92,10 +98,16 @@ fn pre_register_on_blueprint() {
 		let pre_registration_call = Services::pre_register(RuntimeOrigin::signed(bob.clone()), 0);
 		assert_ok!(pre_registration_call);
 
-		assert_events(vec![RuntimeEvent::Services(crate::Event::PreRegistration {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::PreRegistration {
 			operator: bob.clone(),
 			blueprint_id: 0,
-		})]);
+		})));
 	});
 }
 
@@ -178,13 +190,7 @@ fn unregister_from_blueprint() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000,));
 		assert_ok!(Services::unregister(RuntimeOrigin::signed(bob.clone()), 0));
 		assert!(!Operators::<Runtime>::contains_key(0, &bob));
 
@@ -192,10 +198,16 @@ fn unregister_from_blueprint() {
 		let profile = OperatorsProfile::<Runtime>::get(bob.clone()).unwrap();
 		assert!(!profile.blueprints.contains(&0));
 
-		assert_events(vec![RuntimeEvent::Services(crate::Event::Unregistered {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::Unregistered {
 			operator: bob,
 			blueprint_id: 0,
-		})]);
+		})));
 
 		// try to deregister when not registered
 		let charlie = mock_pub_key(CHARLIE);
