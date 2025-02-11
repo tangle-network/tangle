@@ -34,7 +34,7 @@ fn setup_vault<T: Config>() -> (T::VaultId, T::AccountId) {
 
 	// Setup reward config
 	let reward_config = RewardConfigForAssetVault {
-		apy: Percent::from_percent(10),
+		apy: Perbill::from_percent(10),
 		deposit_cap: balance,
 		incentive_cap: balance,
 		boost_multiplier: Some(150),
@@ -73,7 +73,7 @@ benchmarks! {
 	update_vault_reward_config {
 		let (vault_id, _) = setup_vault::<T>();
 		let new_config = RewardConfigForAssetVault {
-			apy: Percent::from_percent(20),
+			apy: Perbill::from_percent(20),
 			deposit_cap: BalanceOf::<T>::from(2000u32),
 			incentive_cap: BalanceOf::<T>::from(2000u32),
 			boost_multiplier: Some(200),

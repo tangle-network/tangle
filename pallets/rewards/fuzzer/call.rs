@@ -25,7 +25,7 @@
 use crate::runtime::*;
 use frame_support::pallet_prelude::*;
 use pallet_rewards::{Call as RewardsCall, Config, Error, RewardConfigForAssetVault};
-use sp_runtime::{traits::Zero, Percent};
+use sp_runtime::{traits::Zero, Perbill};
 use tangle_primitives::types::rewards::LockMultiplier;
 
 #[derive(Debug)]
@@ -126,7 +126,7 @@ impl RewardsCallGenerator {
         boost_multiplier: Option<u32>,
     ) -> RewardsCall<Runtime> {
         let config = RewardConfigForAssetVault {
-            apy: Percent::from_percent(apy.min(100)),
+            apy: Perbill::from_percent(apy.min(100)),
             deposit_cap,
             incentive_cap,
             boost_multiplier: boost_multiplier.map(|m| m.min(500)), // Cap at 5x
@@ -155,7 +155,7 @@ impl RewardsCallExecutor {
         boost_multiplier: Option<u32>,
     ) -> DispatchResultWithPostInfo {
         let config = RewardConfigForAssetVault {
-            apy: Percent::from_percent(apy.min(100)),
+            apy: Perbill::from_percent(apy.min(100)),
             deposit_cap,
             incentive_cap,
             boost_multiplier: boost_multiplier.map(|m| m.min(500)), // Cap at 5x
@@ -202,7 +202,7 @@ impl RewardsCallVerifier {
         ) {
             // Verify that config was updated by checking storage
             if let Some(config) = RewardConfigStorage::<Runtime>::get(vault_id) {
-                config.apy == Percent::from_percent(apy.min(100))
+                config.apy == Perbill::from_percent(apy.min(100))
                     && config.deposit_cap == deposit_cap
                     && config.incentive_cap == incentive_cap
                     && config.boost_multiplier == boost_multiplier.map(|m| m.min(500))

@@ -29,7 +29,7 @@
 //! ## Reward Vaults
 //!
 //! Each vault is identified by a unique `VaultId` and has its own reward configuration:
-//! - `apy`: Annual Percentage Yield for the vault
+//! - `apy`: Annual Perbillage Yield for the vault
 //! - `deposit_cap`: Maximum amount that can be deposited
 //! - `incentive_cap`: Maximum amount of incentives that can be distributed
 //! - `boost_multiplier`: Optional multiplier to boost rewards
@@ -90,7 +90,7 @@ pub mod pallet {
 		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::{traits::AccountIdConversion, Percent};
+	use sp_runtime::{traits::AccountIdConversion, Perbill};
 	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
@@ -129,6 +129,21 @@ pub mod pallet {
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The max possible apy
+		type MaxApy: Get<Perbill>;
+
+		/// The max possible deposit cap
+		type MaxDepositCap: Get<BalanceOf<Self>>;
+
+		/// The max possible incentive cap
+		type MaxIncentiveCap: Get<BalanceOf<Self>>;
+
+		/// The min possible deposit cap
+		type MinDepositCap: Get<BalanceOf<Self>>;
+
+		/// The min possible incentive cap
+		type MinIncentiveCap: Get<BalanceOf<Self>>;
 	}
 
 	#[pallet::pallet]
@@ -216,7 +231,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn decay_rate)]
 	/// Per-block decay rate in basis points (1/10000). e.g., 1 = 0.01% per block
-	pub type DecayRate<T: Config> = StorageValue<_, Percent, ValueQuery>;
+	pub type DecayRate<T: Config> = StorageValue<_, Perbill, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -224,7 +239,7 @@ pub mod pallet {
 		/// Rewards have been claimed by an account
 		RewardsClaimed { account: T::AccountId, asset: Asset<T::AssetId>, amount: BalanceOf<T> },
 		/// Event emitted when an incentive APY and cap are set for a reward vault
-		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Percent, cap: BalanceOf<T> },
+		IncentiveAPYAndCapSet { vault_id: T::VaultId, apy: sp_runtime::Perbill, cap: BalanceOf<T> },
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: BlueprintId },
 		/// Asset has been updated to reward vault
@@ -258,7 +273,7 @@ pub mod pallet {
 			total_deposit: BalanceOf<T>,
 		},
 		/// Decay configuration was updated
-		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Percent },
+		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Perbill },
 		/// The number of blocks for APY calculation has been updated
 		ApyBlocksUpdated { blocks: BlockNumberFor<T> },
 	}
@@ -305,6 +320,14 @@ pub mod pallet {
 		PotAccountNotFound,
 		/// Decay rate is too high
 		InvalidDecayRate,
+		/// Incentive cap is greater than max incentive cap
+		IncentiveCapGreaterThanMaxIncentiveCap,
+		/// Deposit cap is greater than max deposit cap
+		DepositCapGreaterThanMaxDepositCap,
+		/// Incentive cap is less than min incentive cap
+		IncentiveCapLessThanMinIncentiveCap,
+		/// Deposit cap is less than min deposit cap
+		DepositCapLessThanMinDepositCap,
 	}
 
 	#[pallet::genesis_config]
@@ -314,7 +337,7 @@ pub mod pallet {
 		/// Number of blocks after which decay starts
 		pub decay_start_period: BlockNumberFor<T>,
 		/// Per-block decay rate in basis points
-		pub decay_rate: Percent,
+		pub decay_rate: Perbill,
 	}
 
 	impl<T: Config> Default for GenesisConfig<T> {
@@ -325,7 +348,7 @@ pub mod pallet {
 				// Default to 30 days worth of blocks
 				decay_start_period: BlockNumberFor::<T>::from(432000u32),
 				// Default to 1% per block
-				decay_rate: Percent::from_percent(1),
+				decay_rate: Perbill::from_percent(1),
 			}
 		}
 	}
@@ -420,7 +443,7 @@ pub mod pallet {
 		/// * `origin` - Origin of the call, must pass `ForceOrigin` check
 		/// * `vault_id` - The ID of the vault to update
 		/// * `new_config` - The new reward configuration containing:
-		///   * `apy` - Annual Percentage Yield for the vault
+		///   * `apy` - Annual Perbillage Yield for the vault
 		///   * `deposit_cap` - Maximum amount that can be deposited
 		///   * `incentive_cap` - Maximum amount of incentives that can be distributed
 		///   * `boost_multiplier` - Optional multiplier to boost rewards
@@ -464,7 +487,7 @@ pub mod pallet {
 		/// * `origin` - Origin of the call, must pass `ForceOrigin` check
 		/// * `vault_id` - The ID of the vault to update
 		/// * `new_config` - The new reward configuration containing:
-		///   * `apy` - Annual Percentage Yield for the vault
+		///   * `apy` - Annual Perbillage Yield for the vault
 		///   * `deposit_cap` - Maximum amount that can be deposited
 		///   * `incentive_cap` - Maximum amount of incentives that can be distributed
 		///   * `boost_multiplier` - Optional multiplier to boost rewards
@@ -507,12 +530,12 @@ pub mod pallet {
 		pub fn update_decay_config(
 			origin: OriginFor<T>,
 			start_period: BlockNumberFor<T>,
-			rate: Percent,
+			rate: Perbill,
 		) -> DispatchResult {
 			T::ForceOrigin::ensure_origin(origin)?;
 
 			// Ensure rate is reasonable (max 10% decay)
-			ensure!(rate <= Percent::from_percent(10), Error::<T>::InvalidDecayRate);
+			ensure!(rate <= Perbill::from_percent(10), Error::<T>::InvalidDecayRate);
 
 			DecayStartPeriod::<T>::put(start_period);
 			DecayRate::<T>::put(rate);
