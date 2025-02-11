@@ -128,7 +128,6 @@ fn hooks() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10), get_security_commitment(WETH, 10)],
 		));
 		assert_evm_logs(&[

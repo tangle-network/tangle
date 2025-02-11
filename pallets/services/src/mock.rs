@@ -357,7 +357,7 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const NativeExposureMinimum: Percent = Percent::from_percent(10);
+	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
 }
 
 impl pallet_services::Config for Runtime {
@@ -393,7 +393,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
-	type NativeExposureMinimum = NativeExposureMinimum;
+	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MultiAssetDelegation;
 	type SlashDeferDuration = SlashDeferDuration;

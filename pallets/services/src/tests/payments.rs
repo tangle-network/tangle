@@ -194,14 +194,12 @@ fn test_payment_distribution_operators() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(20),
 			vec![get_security_commitment(USDC, 15)],
 		));
 
@@ -240,7 +238,6 @@ fn test_payment_distribution_operators() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10)],
 		));
 
@@ -281,7 +278,6 @@ fn test_payment_distribution_operators() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			2,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10)],
 		));
 
@@ -341,7 +337,6 @@ fn test_payment_multiple_asset_types() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![
 				get_security_commitment(USDC, 10),
 				get_security_commitment(WETH, 15),
@@ -388,7 +383,6 @@ fn test_payment_multiple_asset_types() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			Percent::from_percent(10),
 			vec![
 				get_security_commitment(USDC, 10),
 				get_security_commitment(WETH, 15),
@@ -437,7 +431,6 @@ fn test_payment_multiple_asset_types() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			2,
-			Percent::from_percent(10),
 			vec![
 				get_security_commitment(USDC, 10),
 				get_security_commitment(WETH, 15),

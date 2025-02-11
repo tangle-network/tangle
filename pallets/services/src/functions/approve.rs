@@ -16,19 +16,19 @@
 
 use crate::{
 	types::*, Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet,
-	ServiceRequests, StagingServicePayments, UserServices,
+	ServiceRequests, ServiceStatus, StagingServicePayments, UserServices,
 };
 use frame_support::{
 	pallet_prelude::*,
 	traits::{fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement},
 };
 use frame_system::pallet_prelude::*;
-use sp_runtime::{traits::Zero, Percent};
+use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	services::{
-		ApprovalState, Asset, AssetSecurityCommitment, Constraints, EvmAddressMapping, Service,
-		ServiceRequest, StagingServicePayment,
+		ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
+		StagingServicePayment,
 	},
 	BlueprintId,
 };
@@ -56,35 +56,16 @@ impl<T: Config> Pallet<T> {
 	pub fn do_approve(
 		operator: T::AccountId,
 		request_id: u64,
-		native_exposure_percent: Percent,
-		asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
+		security_commitments: &[AssetSecurityCommitment<T::AssetId>],
 	) -> DispatchResult {
 		// Retrieve and validate the service request
 		let mut request = Self::service_requests(request_id)?;
 
-		// Ensure asset exposures don't exceed max assets per service
+		// Validate operator commitments against service requirements
 		ensure!(
-			asset_exposures.len() <= T::MaxAssetsPerService::get() as usize,
-			Error::<T>::MaxAssetsPerServiceExceeded
+			request.validate_security_commitments(security_commitments),
+			Error::<T>::InvalidSecurityCommitments
 		);
-		// Ensure asset exposures length matches requested assets length
-		ensure!(
-			asset_exposures.len() == request.non_native_asset_security.len(),
-			Error::<T>::InvalidAssetMatching
-		);
-		// Ensure no duplicate assets in exposures
-		let mut seen_assets = sp_std::collections::btree_set::BTreeSet::new();
-		for exposure in asset_exposures.iter() {
-			ensure!(seen_assets.insert(&exposure.asset), Error::<T>::DuplicateAsset);
-		}
-
-		// Ensure all assets in request have matching exposures in same order
-		for (i, required_asset) in request.non_native_asset_security.iter().enumerate() {
-			ensure!(
-				asset_exposures[i].asset == required_asset.asset,
-				Error::<T>::InvalidAssetMatching
-			);
-		}
 
 		// Find and update operator's approval state
 		let updated = request
@@ -92,10 +73,8 @@ impl<T: Config> Pallet<T> {
 			.iter_mut()
 			.find(|(op, _)| op == &operator)
 			.map(|(_, state)| {
-				*state = ApprovalState::Approved {
-					native_exposure_percent,
-					asset_exposure: asset_exposures.clone(),
-				}
+				*state =
+					ApprovalState::Approved { security_commitments: security_commitments.to_vec() }
 			});
 		ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
@@ -103,22 +82,11 @@ impl<T: Config> Pallet<T> {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;
 		let preferences = Self::operators(blueprint_id, operator.clone())?;
 
-		// Validate operator commitments against service requirements
-		ensure!(
-			native_exposure_percent >= T::NativeExposureMinimum::get(),
-			Error::<T>::InvalidRequestInput
-		);
-		ensure!(request.validate_commitments(&asset_exposures), Error::<T>::InvalidRequestInput);
-
 		// Call approval hook
-		let (allowed, _weight) = Self::on_approve_hook(
-			&blueprint,
-			blueprint_id,
-			&preferences,
-			request_id,
-			native_exposure_percent.deconstruct(),
-		)
-		.map_err(|_| Error::<T>::OnApproveFailure)?;
+		// TODO: Update the approval hook CC @shekohex @1xstj
+		let (allowed, _weight) =
+			Self::on_approve_hook(&blueprint, blueprint_id, &preferences, request_id, 0u8.into())
+				.map_err(|_| Error::<T>::OnApproveFailure)?;
 		ensure!(allowed, Error::<T>::ApprovalInterrupted);
 
 		// Get lists of approved and pending operators
@@ -187,32 +155,22 @@ impl<T: Config> Pallet<T> {
 		let service_id = Self::next_instance_id();
 
 		// Collect operator commitments
-		let (native_exposures, non_native_exposures): (
-			Vec<(T::AccountId, Percent)>,
-			Vec<(
-				T::AccountId,
-				BoundedVec<
-					AssetSecurityCommitment<T::AssetId>,
-					// TODO: Verify this doesn't cause issues. Constraints and `T::MaxAssetsPerService` as conflicting.
-					<T::Constraints as Constraints>::MaxAssetsPerService,
-				>,
-			)>,
-		) = request
+		let operator_security_commitments = request
 			.operators_with_approval_state
 			.into_iter()
 			.filter_map(|(op, state)| match state {
-				ApprovalState::Approved { native_exposure_percent, asset_exposure } => {
+				ApprovalState::Approved { security_commitments } => {
 					// This is okay because we assert that each operators approval state contains
 					// a bounded list of asset exposures in the initial `do_approve` call.
-					let bounded_asset_exposure = BoundedVec::try_from(asset_exposure).unwrap();
-					Some(((op.clone(), native_exposure_percent), (op, bounded_asset_exposure)))
+					let security_commitments = BoundedVec::try_from(security_commitments).unwrap();
+					Some((op, security_commitments))
 				},
 				_ => None,
 			})
-			.unzip();
+			.collect::<Vec<_>>();
 
 		// Update operator profiles
-		for (operator, _) in &native_exposures {
+		for (operator, _) in &operator_security_commitments {
 			OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
 				profile
 					.as_mut()
@@ -222,9 +180,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		// Create bounded vectors for service instance
-		let native_exposures = BoundedVec::try_from(native_exposures)
-			.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
-		let non_native_exposures = BoundedVec::try_from(non_native_exposures)
+		let operator_security_commitments = BoundedVec::try_from(operator_security_commitments)
 			.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 
 		// Create the service instance
@@ -232,16 +188,16 @@ impl<T: Config> Pallet<T> {
 			id: service_id,
 			blueprint: request.blueprint,
 			owner: request.owner.clone(),
-			non_native_asset_security: non_native_exposures,
-			native_asset_security: native_exposures,
+			operator_security_commitments: operator_security_commitments.clone(),
+			security_requirements: request.security_requirements,
 			permitted_callers: request.permitted_callers.clone(),
 			ttl: request.ttl,
 			membership_model: request.membership_model,
 		};
 
-		// Update storage
 		UserServices::<T>::try_mutate(&request.owner, |service_ids| {
 			Instances::<T>::insert(service_id, service.clone());
+			ServiceStatus::<T>::insert(request.blueprint, service_id, ());
 			NextInstanceId::<T>::set(service_id.saturating_add(1));
 			service_ids
 				.try_insert(service_id)
@@ -274,7 +230,7 @@ impl<T: Config> Pallet<T> {
 			request_id,
 			service_id,
 			blueprint_id: request.blueprint,
-			assets: request.non_native_asset_security.iter().map(|a| a.asset.clone()).collect(),
+			operator_security_commitments,
 		});
 
 		Ok(())

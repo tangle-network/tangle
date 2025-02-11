@@ -1,6 +1,5 @@
 use crate::{Config, Error, Instances, Pallet};
 use frame_support::pallet_prelude::*;
-use sp_runtime::Percent;
 use sp_std::vec::Vec;
 use tangle_primitives::services::{
 	AssetSecurityCommitment, MembershipModel, OperatorPreferences, ServiceBlueprint,
@@ -14,8 +13,7 @@ impl<T: Config> Pallet<T> {
 		instance_id: u64,
 		operator: &T::AccountId,
 		preferences: &OperatorPreferences,
-		native_asset_exposure: Percent,
-		non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
+		security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 	) -> DispatchResult {
 		// Get service instance
 		let instance = Instances::<T>::get(instance_id)?;
@@ -25,13 +23,11 @@ impl<T: Config> Pallet<T> {
 			MembershipModel::Fixed { .. } => {
 				return Err(Error::<T>::DynamicMembershipNotSupported.into())
 			},
-			MembershipModel::Dynamic { min_operators, max_operators } => {
-				ensure!(min_operators > 0, Error::<T>::InvalidMinOperators);
+			MembershipModel::Dynamic { max_operators, .. } => {
 				// Check max operators if set
 				if let Some(max) = max_operators {
-					ensure!(min_operators < max, Error::<T>::InvalidMinOperators);
 					ensure!(
-						instance.native_asset_security.len() < max as usize,
+						instance.operator_security_commitments.len() < max as usize,
 						Error::<T>::MaxOperatorsReached
 					);
 				}
@@ -54,23 +50,16 @@ impl<T: Config> Pallet<T> {
 				Error::<T>::ServiceNotFound
 			})?;
 			instance
-				.native_asset_security
-				.try_push((operator.clone(), native_asset_exposure))
-				.map_err(|e| {
-					log::error!("Failed to push native asset security: {:?}", e);
-					Error::<T>::MaxOperatorsReached
-				})?;
-			instance
-				.non_native_asset_security
+				.operator_security_commitments
 				.try_push((
 					operator.clone(),
-					BoundedVec::try_from(non_native_asset_exposures.clone()).map_err(|e| {
-						log::error!("Failed to convert non-native asset exposures: {:?}", e);
+					BoundedVec::try_from(security_commitments.clone()).map_err(|e| {
+						log::error!("Failed to convert security commitments: {:?}", e);
 						Error::<T>::MaxOperatorsReached
 					})?,
 				))
 				.map_err(|e| {
-					log::error!("Failed to push non-native asset security: {:?}", e);
+					log::error!("Failed to push security commitments: {:?}", e);
 					Error::<T>::MaxOperatorsReached
 				})?;
 
@@ -105,7 +94,7 @@ impl<T: Config> Pallet<T> {
 			MembershipModel::Dynamic { min_operators, .. } => {
 				// Ensure minimum operators maintained
 				ensure!(
-					instance.native_asset_security.len() > min_operators as usize,
+					instance.operator_security_commitments.len() > min_operators as usize,
 					Error::<T>::InsufficientOperators
 				);
 			},
@@ -125,8 +114,7 @@ impl<T: Config> Pallet<T> {
 				log::error!("Service not found: {:?}", e);
 				Error::<T>::ServiceNotFound
 			})?;
-			instance.native_asset_security.retain(|(op, _)| op != operator);
-			instance.non_native_asset_security.retain(|(op, _)| op != operator);
+			instance.operator_security_commitments.retain(|(op, _)| op != operator);
 			Ok(())
 		})?;
 

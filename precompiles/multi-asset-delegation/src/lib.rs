@@ -38,6 +38,8 @@ pub mod mock;
 #[cfg(any(test, feature = "fuzzing"))]
 pub mod mock_evm;
 #[cfg(test)]
+mod native_restaking_tests;
+#[cfg(test)]
 mod tests;
 
 use tangle_primitives::types::rewards::LockMultiplier;
@@ -405,5 +407,126 @@ where
 		)?;
 
 		Ok(())
+	}
+
+	#[precompile::public("delegateNomination(bytes32,uint256,uint64[])")]
+	fn delegate_nomination(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+		amount: U256,
+		blueprint_selection: Vec<u64>,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::delegate_nomination {
+				operator,
+				amount: amount
+					.try_into()
+					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+				blueprint_selection: DelegatorBlueprintSelection::Fixed(
+					blueprint_selection.try_into().map_err(|_| {
+						RevertReason::custom("Too many blueprint ids for fixed selection")
+					})?,
+				),
+			},
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("scheduleDelegatorNominationUnstake(bytes32,uint256)")]
+	fn schedule_delegator_nomination_unstake(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+		amount: U256,
+		blueprint_selection: Vec<u64>,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::schedule_nomination_unstake {
+				operator,
+				amount: amount
+					.try_into()
+					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+				blueprint_selection: DelegatorBlueprintSelection::Fixed(
+					blueprint_selection.try_into().map_err(|_| {
+						RevertReason::custom("Too many blueprint ids for fixed selection")
+					})?,
+				),
+			},
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("executeDelegatorNominationUnstake(bytes32)")]
+	fn execute_delegator_nomination_unstake(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::execute_nomination_unstake { operator },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("cancelDelegatorNominationUnstake(bytes32)")]
+	fn cancel_delegator_nomination_unstake(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::cancel_nomination_unstake { operator },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("delegatedNominationBalance(address)")]
+	fn delegated_nomination_balance(
+		handle: &mut impl PrecompileHandle,
+		who: Address,
+	) -> EvmResult<U256> {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let who = Runtime::AddressMapping::into_account_id(who.0);
+		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+		else {
+			return Ok(U256::zero());
+		};
+		let balance = delegator.total_nomination_delegations();
+
+		Ok(balance.into())
 	}
 }

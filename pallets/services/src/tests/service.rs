@@ -71,7 +71,6 @@ fn request_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10), get_security_commitment(WETH, 10)],
 		));
 
@@ -87,7 +86,6 @@ fn request_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(20),
 			vec![get_security_commitment(USDC, 15), get_security_commitment(WETH, 15)],
 		));
 
@@ -103,9 +101,11 @@ fn request_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			Percent::from_percent(30),
 			vec![get_security_commitment(USDC, 20), get_security_commitment(WETH, 20)],
 		));
+
+		let service = Services::services(0).unwrap();
+		let operator_security_commitments = service.operator_security_commitments;
 
 		assert_events(vec![
 			RuntimeEvent::Services(crate::Event::ServiceRequestApproved {
@@ -120,7 +120,7 @@ fn request_service() {
 				request_id: 0,
 				service_id: 0,
 				blueprint_id: 0,
-				assets: vec![Asset::Custom(USDC), Asset::Custom(WETH)],
+				operator_security_commitments,
 			}),
 		]);
 
@@ -219,7 +219,6 @@ fn request_service_with_payment_asset() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![
 				get_security_commitment(TNT, 10),
 				get_security_commitment(USDC, 10),
@@ -290,7 +289,6 @@ fn request_service_with_payment_token() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![
 				get_security_commitment(TNT, 10),
 				get_security_commitment(USDC, 10),
@@ -447,7 +445,7 @@ fn reject_service_with_payment_asset() {
 }
 
 #[test]
-fn test_service_creation_max_operators() {
+fn test_service_creation_dynamic_max_operators() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
@@ -458,28 +456,27 @@ fn test_service_creation_max_operators() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Register maximum number of operators (using mock accounts)
-		let max_operators = MaxOperatorsPerService::get();
+		let max_operators = 10;
 		let mut operators = Vec::new();
 
-		for i in 0..max_operators + 1 {
+		// Create 11 operators with sequential keys
+		for i in 1..=10 {
 			let operator = mock_pub_key_from_fixed_bytes([i as u8; 32]);
-			if i < max_operators {
-				// Give operator sufficient balance to join
-				Balances::make_free_balance_be(&operator, 10_000);
-				assert_ok!(join_and_register(
-					operator.clone(),
-					0,
-					test_ecdsa_key(),
-					Default::default(),
-					1000,
-				));
-				operators.push(operator);
-			}
+			// Give operator sufficient balance to join
+			Balances::make_free_balance_be(&operator, 10_000_000);
+			assert_ok!(join_and_register(
+				operator.clone(),
+				0,
+				test_ecdsa_key(),
+				Default::default(),
+				1000,
+			));
+			operators.push(operator);
 		}
 
 		let eve = mock_pub_key(EVE);
 
-		// Try to create service with exactly max operators - should succeed
+		// Try to create service with exactly 10 operators - should succeed
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
@@ -491,15 +488,11 @@ fn test_service_creation_max_operators() {
 			100,
 			Asset::Custom(USDC),
 			0,
-			MembershipModel::Fixed { min_operators: max_operators as u32 },
+			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(10) },
 		));
 
-		// Try to create service with more than max operators - should fail
-		let extra_operator = mock_pub_key_from_fixed_bytes([
-			0x4f, 0x12, 0x9a, 0xb3, 0x7d, 0x5e, 0x82, 0xf1, 0x34, 0xc6, 0x8b, 0x90, 0x45, 0x23,
-			0xa7, 0xd9, 0x6c, 0x15, 0xb8, 0xe4, 0x2f, 0x9d, 0x71, 0x3a, 0x58, 0xc2, 0x96, 0x4b,
-			0x0e, 0x87, 0xf5, 0xd3,
-		]);
+		// Try to create service with 11 operators - should fail
+		let extra_operator = mock_pub_key_from_fixed_bytes([11u8; 32]);
 		operators.push(extra_operator);
 
 		assert_err!(
@@ -514,7 +507,7 @@ fn test_service_creation_max_operators() {
 				100,
 				Asset::Custom(USDC),
 				0,
-				MembershipModel::Fixed { min_operators: (max_operators + 1) as u32 },
+				MembershipModel::Dynamic { min_operators: 1, max_operators: Some(10) },
 			),
 			Error::<Runtime>::TooManyOperators
 		);
@@ -522,7 +515,7 @@ fn test_service_creation_max_operators() {
 }
 
 #[test]
-fn test_service_creation_min_operators() {
+fn test_service_creation_fixed_min_operators() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
@@ -634,7 +627,7 @@ fn test_service_creation_invalid_operators() {
 				0,
 				MembershipModel::Fixed { min_operators: 2 },
 			),
-			Error::<Runtime>::NotAnOperator
+			Error::<Runtime>::OperatorNotActive
 		);
 	});
 }
@@ -803,14 +796,12 @@ fn test_termination_with_partial_approvals() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(20),
 			vec![get_security_commitment(USDC, 15)],
 		));
 
@@ -824,7 +815,6 @@ fn test_termination_with_partial_approvals() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			Percent::from_percent(30),
 			vec![get_security_commitment(USDC, 20)],
 		));
 
@@ -872,7 +862,6 @@ fn test_operator_offline_during_active_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10)],
 		));
 

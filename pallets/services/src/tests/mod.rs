@@ -159,7 +159,6 @@ pub(crate) fn get_security_commitment(a: AssetId, p: u8) -> AssetSecurityCommitm
 struct Deployment {
 	blueprint_id: u64,
 	service_id: u64,
-	bob_exposed_restake_percentage: Percent,
 }
 
 /// A Helper function that creates a blueprint and service instance
@@ -202,17 +201,15 @@ fn deploy() -> Deployment {
 
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
-	let bob_exposed_restake_percentage = Percent::from_percent(10);
 	assert_ok!(Services::approve(
 		RuntimeOrigin::signed(bob.clone()),
 		service_id,
-		bob_exposed_restake_percentage,
-		vec![get_security_commitment(WETH, 10)],
+		vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 	));
 
 	assert!(Instances::<Runtime>::contains_key(service_id));
 
-	Deployment { blueprint_id, service_id, bob_exposed_restake_percentage }
+	Deployment { blueprint_id, service_id }
 }
 
 pub fn join_and_register(

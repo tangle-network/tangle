@@ -25,7 +25,6 @@ use crate::{Account, BlueprintId};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::Percent;
 use sp_std::{vec, vec::Vec};
 
 #[cfg(not(feature = "std"))]
@@ -300,7 +299,7 @@ pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId: Asset
 	pub owner: AccountId,
 	/// The assets required for this service along with their security requirements.
 	/// This defines both which assets are needed and how much security backing is required.
-	pub non_native_asset_security:
+	pub security_requirements:
 		BoundedVec<AssetSecurityRequirement<AssetId>, C::MaxAssetsPerService>,
 	/// Time-to-live for this request in blocks
 	pub ttl: BlockNumber,
@@ -320,9 +319,18 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 {
 	/// Returns true if all the operators are [ApprovalState::Approved].
 	pub fn is_approved(&self) -> bool {
-		self.operators_with_approval_state
+		let approved_count = self
+			.operators_with_approval_state
 			.iter()
-			.all(|(_, state)| matches!(state, ApprovalState::Approved { .. }))
+			.filter(|(_, state)| matches!(state, ApprovalState::Approved { .. }))
+			.count();
+
+		match self.membership_model {
+			MembershipModel::Fixed { min_operators } => approved_count >= min_operators as usize,
+			MembershipModel::Dynamic { min_operators, max_operators: _ } => {
+				approved_count >= min_operators as usize
+			},
+		}
 	}
 
 	/// Returns true if any the operators are [ApprovalState::Pending].
@@ -340,22 +348,36 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 	}
 
 	/// Validates that an operator's security commitments meet the requirements
-	pub fn validate_commitments(
+	pub fn validate_security_commitments(
 		&self,
-		asset_commitments: &[AssetSecurityCommitment<AssetId>],
+		security_commitments: &[AssetSecurityCommitment<AssetId>],
 	) -> bool
 	where
 		AssetId: PartialEq,
 	{
-		// Ensure commitments exist for all required assets
-		self.non_native_asset_security.iter().all(|req| {
-			asset_commitments.iter().any(|commit| {
-				commit.asset == req.asset
-					&& commit.exposure_percent >= req.min_exposure_percent
-					&& commit.exposure_percent <= req.max_exposure_percent
-			})
-		})
+		validate_security(&self.security_requirements, security_commitments)
 	}
+}
+
+pub fn validate_security<AssetId: AssetIdT>(
+	security_requirements: &[AssetSecurityRequirement<AssetId>],
+	asset_commitments: &[AssetSecurityCommitment<AssetId>],
+) -> bool {
+	// Validate that all security requirements are met by commitments in the same order
+	// For each requirement:
+	// - Check that the commitment at the same index has matching asset and exposure
+	// - Return false if arrays have different lengths or any requirements not met
+	if security_requirements.len() != asset_commitments.len() {
+		return false;
+	}
+
+	security_requirements.iter().enumerate().all(|(i, req)| {
+		let commit = &asset_commitments[i];
+		// Check asset matches and exposure percent is within bounds
+		commit.asset == req.asset
+			&& commit.exposure_percent >= req.min_exposure_percent
+			&& commit.exposure_percent <= req.max_exposure_percent
+	})
 }
 
 /// A staging service payment is a payment that is made for a service request
@@ -429,15 +451,27 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	pub owner: AccountId,
 	/// The assets and their security commitments from operators.
 	/// This represents the actual security backing the service.
-	pub non_native_asset_security: OperatorSecurityCommitments<AccountId, AssetId, C>,
-	/// Active operators and their native currency exposure percentages
-	pub native_asset_security: BoundedVec<(AccountId, Percent), C::MaxOperatorsPerService>,
+	pub operator_security_commitments: OperatorSecurityCommitments<AccountId, AssetId, C>,
+	/// The security requirements for the service
+	pub security_requirements:
+		BoundedVec<AssetSecurityRequirement<AssetId>, C::MaxAssetsPerService>,
 	/// Accounts permitted to call service functions
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// Time-to-live in blocks
 	pub ttl: BlockNumber,
 	/// The membership model of the service
 	pub membership_model: MembershipModel,
+}
+
+impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
+	Service<C, AccountId, BlockNumber, AssetId>
+{
+	pub fn validate_security_commitments(
+		&self,
+		security_commitments: &[AssetSecurityCommitment<AssetId>],
+	) -> bool {
+		validate_security(&self.security_requirements, security_commitments)
+	}
 }
 
 /// RPC Response for query the blueprint along with the services instances of that blueprint.

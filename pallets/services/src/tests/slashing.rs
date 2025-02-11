@@ -47,7 +47,7 @@ fn test_zero_percentage_slash() {
 fn unapplied_slash() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id } = deploy();
 		let eve = mock_pub_key(EVE);
 		let bob = mock_pub_key(BOB);
 
@@ -93,7 +93,7 @@ fn unapplied_slash() {
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage).mul_floor(
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(
 				<Runtime as Config>::OperatorDelegationManager::get_operator_stake(&bob),
 			),
 		}));
@@ -547,7 +547,6 @@ fn test_slash_with_multiple_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service2_id,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 10)],
 		));
 

@@ -207,7 +207,6 @@ fn test_native_restaking_slash_with_multiple_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
@@ -251,6 +250,27 @@ fn test_native_restaking_slash_with_multiple_services() {
 
 		// Verify both slashes are recorded
 		assert_eq!(UnappliedSlashes::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 2);
+		// Verify slash data
+		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
+		assert_eq!(slashes.len(), 2);
+
+		// First slash should be 50% from service_id1
+		let (_, first_slash) = &slashes[0];
+		assert_eq!(first_slash.service_id, service_id1);
+		assert_eq!(first_slash.operator, bob);
+		assert_eq!(first_slash.own, stake_amount / 2); // 50% of stake_amount
+		assert_eq!(first_slash.others.len(), 1);
+		assert_eq!(first_slash.others[0].0, delegator);
+		assert_eq!(first_slash.others[0].2, stake_amount / 2); // 50% of delegator stake
+
+		// Second slash should be 25% from service_id 1
+		let (_, second_slash) = &slashes[1];
+		assert_eq!(second_slash.service_id, 1);
+		assert_eq!(second_slash.operator, bob);
+		assert_eq!(second_slash.own, stake_amount / 4); // 25% of stake_amount
+		assert_eq!(second_slash.others.len(), 1);
+		assert_eq!(second_slash.others[0].0, delegator);
+		assert_eq!(second_slash.others[0].2, stake_amount / 4); // 25% of delegator stake
 
 		// Apply slashes
 		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
@@ -334,7 +354,7 @@ fn test_native_restaking_slash_with_rewards_distribution() {
 fn test_atomic_slashing_operations() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id } = deploy();
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -373,7 +393,7 @@ fn test_atomic_slashing_operations() {
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_bob_stake),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(initial_bob_stake),
 		}));
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::UnappliedSlash {
 			era: 0,
@@ -381,8 +401,7 @@ fn test_atomic_slashing_operations() {
 			operator: charlie.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage)
-				.mul_floor(initial_charlie_stake),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(initial_charlie_stake),
 		}));
 
 		// Apply slashes
@@ -398,9 +417,9 @@ fn test_atomic_slashing_operations() {
 			<Runtime as Config>::OperatorDelegationManager::get_operator_stake(&charlie);
 
 		let expected_bob_stake = initial_bob_stake
-			- (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_bob_stake);
+			- (slash_percent * Percent::from_percent(10)).mul_floor(initial_bob_stake);
 		let expected_charlie_stake = initial_charlie_stake
-			- (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_charlie_stake);
+			- (slash_percent * Percent::from_percent(10)).mul_floor(initial_charlie_stake);
 
 		assert_eq!(bob_final_stake, expected_bob_stake);
 		assert_eq!(charlie_final_stake, expected_charlie_stake);
@@ -414,15 +433,14 @@ fn test_atomic_slashing_operations() {
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_bob_stake),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(initial_bob_stake),
 		}));
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::OperatorSlashed {
 			era: 0,
 			operator: charlie.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage)
-				.mul_floor(initial_charlie_stake),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(initial_charlie_stake),
 		}));
 	});
 }
@@ -431,7 +449,7 @@ fn test_atomic_slashing_operations() {
 fn test_complete_slash_to_zero() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id } = deploy();
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -505,26 +523,25 @@ fn test_complete_slash_to_zero() {
 
 		// Verify proper events were emitted for each slash
 		let remaining_after_first = initial_bob_stake
-			- (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_bob_stake);
+			- (slash_percent * Percent::from_percent(10)).mul_floor(initial_bob_stake);
 
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::OperatorSlashed {
 			era: 0,
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_bob_stake),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(initial_bob_stake),
 		}));
 
 		let remaining_after_second = remaining_after_first
-			- (slash_percent * bob_exposed_restake_percentage).mul_floor(remaining_after_first);
+			- (slash_percent * Percent::from_percent(10)).mul_floor(remaining_after_first);
 
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::OperatorSlashed {
 			era: 0,
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage)
-				.mul_floor(remaining_after_first),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(remaining_after_first),
 		}));
 
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::OperatorSlashed {
@@ -541,7 +558,7 @@ fn test_complete_slash_to_zero() {
 fn test_slash_with_unstaking_states() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, bob_exposed_restake_percentage } = deploy();
+		let Deployment { blueprint_id, service_id } = deploy();
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
 		let dave = mock_pub_key(DAVE);
@@ -601,7 +618,7 @@ fn test_slash_with_unstaking_states() {
 		let charlie_remaining_stake =
 			<Runtime as Config>::OperatorDelegationManager::get_operator_stake(&charlie);
 		let expected_charlie_stake = initial_charlie_stake
-			- (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_charlie_stake);
+			- (slash_percent * Percent::from_percent(10)).mul_floor(initial_charlie_stake);
 		assert_eq!(charlie_remaining_stake, expected_charlie_stake);
 
 		// Verify Charlie's unstaking request is adjusted
@@ -609,7 +626,7 @@ fn test_slash_with_unstaking_states() {
 			.map(|metadata| metadata.delegator_unstake_requests)
 			.unwrap_or_default();
 		let adjusted_unstake_amount = charlie_unstake_amount
-			- (slash_percent * bob_exposed_restake_percentage).mul_floor(charlie_unstake_amount);
+			- (slash_percent * Percent::from_percent(10)).mul_floor(charlie_unstake_amount);
 		assert_eq!(
 			charlie_unstake_requests.iter().find(|r| r.operator == bob).map(|r| r.amount),
 			Some(adjusted_unstake_amount)
@@ -626,7 +643,7 @@ fn test_slash_with_unstaking_states() {
 			operator: bob.clone(),
 			blueprint_id,
 			service_id,
-			amount: (slash_percent * bob_exposed_restake_percentage).mul_floor(initial_bob_stake),
+			amount: (slash_percent * Percent::from_percent(10)).mul_floor(initial_bob_stake),
 		}));
 
 		// Verify unstaking can still be executed after slash

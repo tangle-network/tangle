@@ -54,7 +54,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 2: Invalid max exposure (0%)
@@ -72,7 +72,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 3: Min exposure > Max exposure
@@ -90,7 +90,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 4: Max exposure > 100%
@@ -108,7 +108,7 @@ fn test_security_requirements_validation() {
 				0,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 5: Valid security requirements
@@ -169,10 +169,9 @@ fn test_security_commitment_validation() {
 			Services::approve(
 				RuntimeOrigin::signed(bob.clone()),
 				0,
-				Percent::from_percent(10),
 				vec![get_security_commitment(WETH, 5)],
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 2: Commitment above maximum exposure
@@ -180,10 +179,9 @@ fn test_security_commitment_validation() {
 			Services::approve(
 				RuntimeOrigin::signed(bob.clone()),
 				0,
-				Percent::from_percent(10),
 				vec![get_security_commitment(WETH, 25)],
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 3: Missing required asset commitment
@@ -191,17 +189,15 @@ fn test_security_commitment_validation() {
 			Services::approve(
 				RuntimeOrigin::signed(bob.clone()),
 				0,
-				Percent::from_percent(10),
 				vec![get_security_commitment(USDC, 15)],
 			),
-			Error::<Runtime>::InvalidAssetMatching
+			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
 		// Test Case 4: Valid commitment
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 15)],
 		));
 	});
@@ -254,23 +250,23 @@ fn test_exposure_calculations() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 20), get_security_commitment(USDC, 20),],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 25), get_security_commitment(USDC, 15),],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 15), get_security_commitment(USDC, 20),],
 		));
+
+		let service = Instances::<Runtime>::get(0).unwrap();
+		let operator_security_commitments = service.operator_security_commitments;
 
 		// Verify service is initiated with correct exposures
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -279,7 +275,7 @@ fn test_exposure_calculations() {
 			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
-			assets: vec![Asset::Custom(WETH), Asset::Custom(USDC)],
+			operator_security_commitments,
 		})]);
 	});
 }
@@ -328,21 +324,18 @@ fn test_exposure_limits() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 50)],
 		));
 
@@ -365,14 +358,12 @@ fn test_exposure_limits() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			1,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 50)],
 		));
 
@@ -395,21 +386,19 @@ fn test_exposure_limits() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			2,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			2,
-			Percent::from_percent(10),
 			vec![get_security_commitment(USDC, 50)],
 		));
 
 		// Verify all services are active
-		assert!(Instances::<Runtime>::contains_key(0));
-		assert!(Instances::<Runtime>::contains_key(1));
-		assert!(Instances::<Runtime>::contains_key(2));
+		let service0 = Instances::<Runtime>::get(0).unwrap();
+		let service1 = Instances::<Runtime>::get(1).unwrap();
+		let service2 = Instances::<Runtime>::get(2).unwrap();
 
 		// Verify events for service initiation
 		assert_events(vec![
@@ -418,21 +407,21 @@ fn test_exposure_limits() {
 				request_id: 0,
 				service_id: 0,
 				blueprint_id: 0,
-				assets: vec![Asset::Custom(WETH)],
+				operator_security_commitments: service0.operator_security_commitments.clone(),
 			}),
 			RuntimeEvent::Services(crate::Event::ServiceInitiated {
 				owner: eve.clone(),
 				request_id: 1,
 				service_id: 1,
 				blueprint_id: 0,
-				assets: vec![Asset::Custom(WETH)],
+				operator_security_commitments: service1.operator_security_commitments.clone(),
 			}),
 			RuntimeEvent::Services(crate::Event::ServiceInitiated {
 				owner: eve.clone(),
 				request_id: 2,
 				service_id: 2,
 				blueprint_id: 0,
-				assets: vec![Asset::Custom(USDC)],
+				operator_security_commitments: service2.operator_security_commitments.clone(),
 			}),
 		]);
 	});

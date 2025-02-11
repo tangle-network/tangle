@@ -39,16 +39,21 @@ impl<T: Config> Pallet<T> {
 		// Get operator's total stake and calculate their native currency slash
 		let total_stake = T::OperatorDelegationManager::get_operator_stake(offender);
 
-		// Find operator's exposure percentage for this service
-		let operator_exposure = service
-			.native_asset_security
+		// Find operator's exposure percentage for this service and slash it
+		let offender_security_commitments = service
+			.operator_security_commitments
 			.iter()
 			.find(|(op, _)| op == offender)
-			.map(|(_, exposure)| *exposure)
+			.map(|(_, commitments)| commitments)
 			.ok_or(Error::<T>::OffenderNotOperator)?;
+		let native_security_commitment = offender_security_commitments
+			.iter()
+			.find(|c| c.asset == Asset::Custom(Zero::zero()))
+			.map(|c| c.exposure_percent)
+			.ok_or(Error::<T>::NoNativeAsset)?;
 
 		// Calculate operator's own slash in native currency
-		let exposed_stake = operator_exposure.mul_floor(total_stake);
+		let exposed_stake = native_security_commitment.mul_floor(total_stake);
 		let own_slash = slash_percent.mul_floor(exposed_stake);
 
 		// Get all delegators for this operator and filter by blueprint selection upfront
@@ -64,19 +69,11 @@ impl<T: Config> Pallet<T> {
 			})
 			.collect();
 
-		// Get the asset commitments for the offending operator
-		let offender_commitments = service
-			.non_native_asset_security
-			.iter()
-			.find(|(op, _)| op == offender)
-			.map(|(_, commitments)| commitments)
-			.ok_or(Error::<T>::OffenderNotOperator)?;
-
 		// Calculate delegator slashes per asset
 		let mut delegator_slashes = Vec::new();
 
-		// For each asset commitment of the offending operator
-		for commitment in offender_commitments {
+		// Slash each delegator for each exposed asset
+		for commitment in offender_security_commitments {
 			let asset = &commitment.asset;
 			let asset_exposure = commitment.exposure_percent;
 

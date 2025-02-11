@@ -21,6 +21,8 @@ use super::*;
 use crate::mock_evm::*;
 use core::ops::Mul;
 use ethabi::Uint;
+use frame_election_provider_support::onchain;
+use frame_election_provider_support::SequentialPhragmen;
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU64},
@@ -28,6 +30,7 @@ use frame_support::{
 	PalletId,
 };
 use pallet_evm::GasWeightMapping;
+use pallet_multi_asset_delegation::mock::ElectionBoundsOnChain;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
@@ -38,12 +41,13 @@ use sp_core::{
 	ConstU32, H160,
 };
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
+use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::DispatchError;
 use sp_runtime::{
 	traits::{IdentifyAccount, Verify},
-	AccountId32, BuildStorage,
+	AccountId32, BuildStorage, Perbill,
 };
-use sp_staking::StakingInterface;
+use sp_staking::{ConvertCurve, EraIndex, StakingInterface};
 use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 use tangle_primitives::traits::{RewardsManager, ServiceManager};
@@ -175,6 +179,9 @@ construct_runtime!(
 		Balances: pallet_balances,
 		Evm: pallet_evm,
 		Ethereum: pallet_ethereum,
+		Session: pallet_session,
+		Staking: pallet_staking,
+		Historical: pallet_session_historical,
 		Timestamp: pallet_timestamp,
 		Assets: pallet_assets,
 		MultiAssetDelegation: pallet_multi_asset_delegation,
@@ -271,6 +278,10 @@ impl ServiceManager<AccountId, Balance> for MockServiceManager {
 	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
 		// we don't care
 		Default::default()
+	}
+
+	fn has_active_services(_operator: &AccountId) -> bool {
+		false
 	}
 }
 
@@ -392,6 +403,138 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type PalletId = PID;
 	type RewardsManager = MockRewardsManager;
 	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub static MaxNominations: u32 = 16;
+	pub static HistoryDepth: u32 = 80;
+	pub static MaxUnlockingChunks: u32 = 32;
+	pub static RewardOnUnbalanceWasCalled: bool = false;
+	pub static MaxWinners: u32 = 100;
+}
+
+impl pallet_session::historical::Config for Runtime {
+	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
+	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+}
+
+pallet_staking_reward_curve::build! {
+	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
+		min_inflation: 0_025_000,
+		max_inflation: 0_100_000,
+		ideal_stake: 0_500_000,
+		falloff: 0_050_000,
+		max_piece_count: 40,
+		test_precision: 0_005_000,
+	);
+}
+
+parameter_types! {
+	pub const BondingDuration: EraIndex = 3;
+	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
+}
+
+pub struct MockSessionHandler;
+impl OneSessionHandler<AccountId> for MockSessionHandler {
+	type Key = UintAuthorityId;
+
+	fn on_genesis_session<'a, I: 'a>(_: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+		AccountId: 'a,
+	{
+	}
+
+	fn on_new_session<'a, I: 'a>(_: bool, _: I, _: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+		AccountId: 'a,
+	{
+	}
+
+	fn on_disabled(_validator_index: u32) {}
+}
+
+impl sp_runtime::BoundToRuntimeAppPublic for MockSessionHandler {
+	type Public = UintAuthorityId;
+}
+
+sp_runtime::impl_opaque_keys! {
+	pub struct MockSessionKeys {
+		pub dummy: MockSessionHandler,
+	}
+}
+
+parameter_types! {
+	pub static SessionsPerEra: SessionIndex = 3;
+	pub static SlashDeferDuration: EraIndex = 0;
+	pub static Period: BlockNumber = 5;
+	pub static Offset: BlockNumber = 0;
+}
+
+impl pallet_session::Config for Runtime {
+	type SessionManager = Staking;
+	type Keys = MockSessionKeys;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type SessionHandler = (MockSessionHandler,);
+	type RuntimeEvent = RuntimeEvent;
+	type ValidatorId = AccountId;
+	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
+	type WeightInfo = ();
+}
+
+pub struct OnChainSeqPhragmen;
+impl onchain::Config for OnChainSeqPhragmen {
+	type System = Runtime;
+	type Solver = SequentialPhragmen<AccountId, Perbill>;
+	type DataProvider = Staking;
+	type WeightInfo = ();
+	type MaxWinners = ConstU32<100>;
+	type Bounds = ElectionBoundsOnChain;
+}
+
+/// Upper limit on the number of NPOS nominations.
+const MAX_QUOTA_NOMINATIONS: u32 = 16;
+
+pub struct MockReward {}
+impl frame_support::traits::OnUnbalanced<pallet_balances::PositiveImbalance<Runtime>>
+	for MockReward
+{
+	fn on_unbalanced(_: pallet_balances::PositiveImbalance<Runtime>) {
+		RewardOnUnbalanceWasCalled::set(true);
+	}
+}
+
+impl pallet_staking::Config for Runtime {
+	type Currency = Balances;
+	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
+	type UnixTime = pallet_timestamp::Pallet<Self>;
+	type CurrencyToVote = ();
+	type RewardRemainder = ();
+	type RuntimeEvent = RuntimeEvent;
+	type Slash = ();
+	type Reward = MockReward;
+	type SessionsPerEra = SessionsPerEra;
+	type SlashDeferDuration = SlashDeferDuration;
+	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type BondingDuration = ();
+	type SessionInterface = Self;
+	type EraPayout = ConvertCurve<RewardCurve>;
+	type MaxExposurePageSize = ConstU32<64>;
+	type MaxControllersInDeprecationBatch = ConstU32<100>;
+	type NextNewSession = Session;
+	type ElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
+	type GenesisElectionProvider = Self::ElectionProvider;
+	type VoterList = pallet_staking::UseNominatorsAndValidatorsMap<Self>;
+	type TargetList = pallet_staking::UseValidatorsMap<Self>;
+	type MaxUnlockingChunks = ConstU32<32>;
+	type HistoryDepth = ConstU32<84>;
+	type EventListeners = ();
+	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
+	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
+	type WeightInfo = ();
+	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles

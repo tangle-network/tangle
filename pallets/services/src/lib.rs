@@ -207,7 +207,10 @@ pub mod module {
 
 		/// The minimum percentage of native token stake that operators must expose for slashing.
 		#[pallet::constant]
-		type NativeExposureMinimum: Get<Percent> + Default + Parameter + MaybeSerializeDeserialize;
+		type MinimumNativeSecurityRequirement: Get<Percent>
+			+ Default
+			+ Parameter
+			+ MaybeSerializeDeserialize;
 
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
@@ -335,8 +338,10 @@ pub mod module {
 		DuplicateAsset,
 		/// The maximum number of assets per service has been exceeded.
 		MaxAssetsPerServiceExceeded,
-		/// Assets don't match
-		InvalidAssetMatching,
+		/// Native asset exposure is too low
+		NativeAssetExposureTooLow,
+		/// Native asset is not found
+		NoNativeAsset,
 		/// Offender is not a registered operator.
 		OffenderNotOperator,
 		/// Offender is not an active operator.
@@ -379,8 +384,6 @@ pub mod module {
 		JoinRejected,
 		/// Cannot leave service - rejected by blueprint
 		LeaveRejected,
-		/// Invalid minimum # of operators (zero) or greater than max
-		InvalidMinOperators,
 		/// Maximum operators reached
 		MaxOperatorsReached,
 		/// Insufficient # of operators
@@ -403,6 +406,8 @@ pub mod module {
 		InvalidSlashPercentage,
 		/// Invalid key (zero byte ECDSA key provided)
 		InvalidKey,
+		/// Invalid security commitments
+		InvalidSecurityCommitments,
 	}
 
 	#[pallet::event]
@@ -464,7 +469,8 @@ pub mod module {
 			/// The list of operators that automatically approved the service.
 			approved: Vec<T::AccountId>,
 			/// The list of asset security requirements for the service.
-			asset_security: Vec<(Asset<T::AssetId>, Vec<(T::AccountId, Percent)>)>,
+			security_requirements:
+				BoundedVec<AssetSecurityRequirement<T::AssetId>, MaxAssetsPerServiceOf<T>>,
 		},
 		/// A service request has been approved.
 		ServiceRequestApproved {
@@ -499,7 +505,8 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The list of assets that are being used to secure the service.
-			assets: Vec<Asset<T::AssetId>>,
+			operator_security_commitments:
+				OperatorSecurityCommitments<T::AccountId, T::AssetId, T::Constraints>,
 		},
 
 		/// A service has been terminated.
@@ -647,6 +654,20 @@ pub mod module {
 		u64,
 		(T::AccountId, ServiceBlueprint<T::Constraints>),
 		ResultQuery<Error<T>::BlueprintNotFound>,
+	>;
+
+	/// The services for a particular blueprint and their active status.
+	/// Blueprint ID -> Service ID -> active
+	#[pallet::storage]
+	#[pallet::getter(fn service_status)]
+	pub type ServiceStatus<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		BlueprintId,
+		Identity,
+		InstanceId,
+		(),
+		ResultQuery<Error<T>::ServiceNotFound>,
 	>;
 
 	/// The operators for a specific service blueprint.
@@ -925,7 +946,6 @@ pub mod module {
 				!Operators::<T>::contains_key(blueprint_id, &caller),
 				Error::<T>::AlreadyRegistered
 			);
-
 			// Check if the key is already in use
 			for (_, prefs) in Operators::<T>::iter_prefix(blueprint_id) {
 				if prefs.key == preferences.key {
@@ -939,8 +959,9 @@ pub mod module {
 
 		/// Unregisters a service provider from a specific service blueprint.
 		///
-		/// After unregistering, the provider will no longer receive new service assignments for this blueprint.
-		/// However, they must continue servicing any active assignments until completion to avoid penalties.
+		/// Can only be called if the no services are active for the blueprint.
+		/// After unregistering, the provider will no longer receive new service
+		/// assignments for this blueprint.
 		///
 		/// # Arguments
 		///
@@ -964,6 +985,14 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let preferences = Operators::<T>::get(blueprint_id, &caller)?;
+
+			// Check for active services for this operator
+			for (service_id, _) in ServiceStatus::<T>::iter_prefix(blueprint_id) {
+				ensure!(
+					!ServiceStatus::<T>::contains_key(blueprint_id, service_id),
+					Error::<T>::NotAllowedToUnregister
+				);
+			}
 			let (allowed, _weight) =
 				Self::on_unregister_hook(&blueprint, blueprint_id, &preferences)?;
 			ensure!(allowed, Error::<T>::NotAllowedToUnregister);
@@ -1144,16 +1173,23 @@ pub mod module {
 		pub fn approve(
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
-			#[pallet::compact] native_asset_exposure: Percent,
-			non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
+			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			Self::do_approve(
-				caller,
-				request_id,
-				native_asset_exposure,
-				non_native_asset_exposures,
-			)?;
+
+			// Ensure asset security commitments don't exceed max assets per service
+			ensure!(
+				security_commitments.len() <= T::MaxAssetsPerService::get() as usize,
+				Error::<T>::MaxAssetsPerServiceExceeded
+			);
+
+			// Ensure no duplicate assets in exposures
+			let mut seen_assets = sp_std::collections::btree_set::BTreeSet::new();
+			for exposure in security_commitments.iter() {
+				ensure!(seen_assets.insert(&exposure.asset), Error::<T>::DuplicateAsset);
+			}
+
+			Self::do_approve(caller, request_id, &security_commitments)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1250,7 +1286,7 @@ pub mod module {
 
 			ensure!(allowed, Error::<T>::TerminationInterrupted);
 			// Remove the service from the operator's profile.
-			for (operator, _) in &service.native_asset_security {
+			for (operator, _) in &service.operator_security_commitments {
 				OperatorsProfile::<T>::try_mutate_exists(operator, |profile| {
 					profile
 						.as_mut()
@@ -1259,6 +1295,7 @@ pub mod module {
 				})?;
 			}
 
+			ServiceStatus::<T>::remove(blueprint_id, service_id);
 			Self::deposit_event(Event::ServiceTerminated {
 				owner: caller.clone(),
 				service_id,
@@ -1362,9 +1399,6 @@ pub mod module {
 			let service = Self::services(job_call.service_id)?;
 			let blueprint_id = service.blueprint;
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
-
-			let is_operator = service.native_asset_security.iter().any(|(v, _)| v == &caller);
-			ensure!(is_operator, DispatchError::BadOrigin);
 			let operator_preferences = Operators::<T>::get(blueprint_id, &caller)?;
 
 			let job_def = blueprint
@@ -1446,7 +1480,7 @@ pub mod module {
 
 			// Verify offender is an operator for this service
 			ensure!(
-				service.native_asset_security.iter().any(|(op, _)| op == &offender),
+				service.operator_security_commitments.iter().any(|(op, _)| op == &offender),
 				Error::<T>::OffenderNotOperator
 			);
 
@@ -1560,8 +1594,7 @@ pub mod module {
 		pub fn join_service(
 			origin: OriginFor<T>,
 			instance_id: u64,
-			native_asset_exposure: Percent,
-			non_native_asset_exposures: Vec<AssetSecurityCommitment<T::AssetId>>,
+			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResult {
 			let operator = ensure_signed(origin)?;
 
@@ -1570,8 +1603,13 @@ pub mod module {
 
 			// Check if operator is already in the set
 			ensure!(
-				!instance.native_asset_security.iter().any(|(op, _)| op == &operator),
+				!instance.operator_security_commitments.iter().any(|(op, _)| op == &operator),
 				Error::<T>::AlreadyJoined
+			);
+
+			ensure!(
+				instance.validate_security_commitments(&security_commitments),
+				Error::<T>::InvalidSecurityCommitments
 			);
 
 			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
@@ -1584,8 +1622,7 @@ pub mod module {
 				instance_id,
 				&operator,
 				&preferences,
-				native_asset_exposure,
-				non_native_asset_exposures,
+				security_commitments,
 			)?;
 
 			Ok(())

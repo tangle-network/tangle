@@ -21,10 +21,7 @@ use frame_support::{
 	traits::{Currency, ExistenceRequirement},
 };
 use sp_std::vec::Vec;
-use tangle_primitives::{
-	services::{Field, OperatorPreferences, OperatorProfile},
-	traits::MultiAssetDelegationInfo,
-};
+use tangle_primitives::services::{Field, OperatorPreferences, OperatorProfile};
 
 impl<T: Config> Pallet<T> {
 	pub fn do_register(
@@ -35,11 +32,6 @@ impl<T: Config> Pallet<T> {
 		value: BalanceOf<T>,
 	) -> DispatchResult {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;
-
-		ensure!(
-			T::OperatorDelegationManager::is_operator_active(operator),
-			Error::<T>::OperatorNotActive
-		);
 
 		blueprint
 			.type_check_registration(&registration_args)

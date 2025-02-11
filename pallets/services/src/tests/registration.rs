@@ -357,6 +357,9 @@ fn test_registration_during_active_services() {
 		let charlie = mock_pub_key(CHARLIE);
 		let eve = mock_pub_key(EVE);
 
+		// Join operators with stake for Bob
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000));
+
 		// Register Bob as an operator
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
@@ -384,13 +387,33 @@ fn test_registration_during_active_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
+		// Verify service request exists but service instance doesn't yet
+		assert!(ServiceRequests::<Runtime>::contains_key(0));
+		assert!(!Instances::<Runtime>::contains_key(0));
+		assert!(!UserServices::<Runtime>::get(eve.clone()).contains(&0));
+
 		// Approve the service request
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
+
+		// Verify service is active and in instances storage
+		// Check service instance exists
+		assert!(Instances::<Runtime>::contains_key(0));
+		// Verify service details
+		let service = Instances::<Runtime>::get(0).unwrap();
+		assert_eq!(service.owner, eve);
+		let service_operators = service
+			.operator_security_commitments
+			.iter()
+			.map(|r| r.0.clone())
+			.collect::<Vec<_>>();
+		assert_eq!(service_operators.len(), 1);
+		assert!(service_operators.contains(&bob));
+		// Verify user services mapping
+		assert!(UserServices::<Runtime>::get(eve).contains(&0));
 
 		// Try to unregister while service is active - should fail
 		assert_err!(

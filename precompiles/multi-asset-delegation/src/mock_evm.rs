@@ -27,6 +27,7 @@ use frame_support::{
 };
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
+use pallet_evm_precompile_staking::StakingPrecompileCall;
 use precompile_utils::precompile_set::{
 	AddressU64, PrecompileAt, PrecompileSetBuilder, SubcallWithMaxNesting,
 };
@@ -44,6 +45,7 @@ pub type Precompiles<R> = PrecompileSetBuilder<
 >;
 
 pub type PCall = MultiAssetDelegationPrecompileCall<Runtime>;
+pub type SCall = StakingPrecompileCall<Runtime>;
 
 parameter_types! {
 	pub const MinimumPeriod: u64 = 6000 / 2;

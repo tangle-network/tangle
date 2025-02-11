@@ -188,7 +188,6 @@ fn test_request_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
@@ -272,7 +271,6 @@ fn test_request_service_with_erc20() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
@@ -348,7 +346,6 @@ fn test_request_service_with_asset() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
@@ -417,7 +414,6 @@ fn test_terminate_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 

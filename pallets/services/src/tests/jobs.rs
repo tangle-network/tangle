@@ -77,31 +77,30 @@ fn job_calls() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
-		assert!(Instances::<Runtime>::contains_key(0));
+		let service = Instances::<Runtime>::get(0).unwrap();
+		let operator_security_commitments = service.operator_security_commitments;
+
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
-			assets: vec![Asset::Custom(WETH)],
+			operator_security_commitments,
 		})]);
 
 		// now we can call the jobs
@@ -182,31 +181,30 @@ fn job_result() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
-		assert!(Instances::<Runtime>::contains_key(0));
+		let service = Instances::<Runtime>::get(0).unwrap();
+		let operator_security_commitments = service.operator_security_commitments;
+
 		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
-			assets: vec![Asset::Custom(WETH)],
+			operator_security_commitments,
 		})]);
 
 		// now we can call the jobs
@@ -310,7 +308,6 @@ fn test_concurrent_job_execution() {
 			assert_ok!(Services::approve(
 				RuntimeOrigin::signed(operator),
 				0,
-				Percent::from_percent(10),
 				vec![get_security_commitment(WETH, 10)],
 			));
 		}
@@ -398,7 +395,6 @@ fn test_result_submission_non_operators() {
 			assert_ok!(Services::approve(
 				RuntimeOrigin::signed(operator),
 				0,
-				Percent::from_percent(10),
 				vec![get_security_commitment(WETH, 10)],
 			));
 		}
@@ -466,7 +462,6 @@ fn test_invalid_result_formats() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 
@@ -536,7 +531,6 @@ fn test_result_submission_after_termination() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			Percent::from_percent(10),
 			vec![get_security_commitment(WETH, 10)],
 		));
 

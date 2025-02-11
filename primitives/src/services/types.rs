@@ -246,10 +246,8 @@ pub enum ApprovalState<AssetId: AssetIdT> {
 	Pending,
 	/// The operator has approved the request with specific asset commitments
 	Approved {
-		/// The percentage of native currency stake to expose
-		native_exposure_percent: Percent,
 		/// Asset-specific exposure commitments
-		asset_exposure: Vec<AssetSecurityCommitment<AssetId>>,
+		security_commitments: Vec<AssetSecurityCommitment<AssetId>>,
 	},
 	/// The operator has rejected the request
 	Rejected,

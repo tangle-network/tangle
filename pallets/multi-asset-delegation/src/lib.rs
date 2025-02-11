@@ -665,6 +665,9 @@ pub mod pallet {
 
 		/// Allows an operator to go offline.
 		///
+		/// Being offline means the operator should not be able to be
+		/// requested for services.
+		///
 		/// # Permissions
 		///
 		/// * Must be signed by the operator account

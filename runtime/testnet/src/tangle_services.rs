@@ -142,7 +142,7 @@ parameter_types! {
 	pub const MaxMasterBlueprintServiceManagerVersions: u32 = u32::MAX;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const NativeExposureMinimum: Percent = Percent::from_percent(10);
+	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
 }
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
@@ -183,7 +183,7 @@ impl pallet_services::Config for Runtime {
 	type SlashDeferDuration = SlashDeferDuration;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
-	type NativeExposureMinimum = NativeExposureMinimum;
+	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]

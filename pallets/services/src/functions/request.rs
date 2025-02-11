@@ -1,6 +1,6 @@
 use crate::{
-	BalanceOf, Config, Error, Event, MaxAssetsPerServiceOf, MaxFieldsOf, MaxOperatorsPerServiceOf,
-	MaxPermittedCallersOf, NextServiceRequestId, Pallet, ServiceRequests, StagingServicePayments,
+	BalanceOf, Config, Error, Event, MaxFieldsOf, MaxOperatorsPerServiceOf, MaxPermittedCallersOf,
+	NextServiceRequestId, Pallet, ServiceRequests, StagingServicePayments,
 };
 use frame_support::{
 	pallet_prelude::*,
@@ -30,7 +30,8 @@ impl<T: Config> Pallet<T> {
 	/// * `permitted_callers` - Accounts allowed to call the service
 	/// * `operators` - List of operators that will run the service
 	/// * `request_args` - Blueprint initialization arguments
-	/// * `assets` - Required assets for the service
+	/// * `native_asset_requirement` - Native asset requirement for the service
+	/// * `security_requirements` - Non-native asset requirements for the service
 	/// * `ttl` - Time-to-live in blocks for the service request
 	/// * `payment_asset` - Asset used for payment (native, custom or ERC20)
 	/// * `value` - Payment amount for the service
@@ -42,7 +43,7 @@ impl<T: Config> Pallet<T> {
 		permitted_callers: Vec<T::AccountId>,
 		operators: Vec<T::AccountId>,
 		request_args: Vec<Field<T::Constraints, T::AccountId>>,
-		asset_security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
+		mut security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
 		ttl: BlockNumberFor<T>,
 		payment_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
@@ -52,22 +53,42 @@ impl<T: Config> Pallet<T> {
 
 		blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
 		// ensure we at least have one asset and all assets are unique
-		ensure!(!asset_security_requirements.is_empty(), Error::<T>::NoAssetsProvided);
+		ensure!(!security_requirements.is_empty(), Error::<T>::NoAssetsProvided);
 		ensure!(
-			asset_security_requirements
+			security_requirements
 				.iter()
 				.map(|req| &req.asset)
 				.collect::<sp_std::collections::btree_set::BTreeSet<_>>()
-				.len() == asset_security_requirements.len(),
+				.len() == security_requirements.len(),
 			Error::<T>::DuplicateAsset
 		);
 
-		let assets = asset_security_requirements
-			.clone()
-			.into_iter()
-			.map(|req| req.asset)
-			.collect::<Vec<_>>();
-		let bounded_requirements = BoundedVec::try_from(asset_security_requirements)
+		// Check if native asset exists in requirements
+		let has_native_asset =
+			security_requirements.iter().any(|req| req.asset == Asset::Custom(Zero::zero()));
+
+		// If native asset not found, append it with minimum requirements
+		if !has_native_asset {
+			security_requirements.push(AssetSecurityRequirement {
+				asset: Asset::Custom(Zero::zero()),
+				min_exposure_percent: T::MinimumNativeSecurityRequirement::get(),
+				max_exposure_percent: T::MinimumNativeSecurityRequirement::get(),
+			});
+		}
+
+		// Get native asset requirement for validation
+		let native_asset_requirement = security_requirements
+			.iter()
+			.find(|req| req.asset == Asset::Custom(Zero::zero()))
+			.ok_or(Error::<T>::NoNativeAsset)?;
+
+		ensure!(
+			native_asset_requirement.min_exposure_percent
+				>= T::MinimumNativeSecurityRequirement::get(),
+			Error::<T>::NativeAssetExposureTooLow
+		);
+
+		let security_requirements = BoundedVec::try_from(security_requirements)
 			.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
 
 		let mut preferences = Vec::new();
@@ -149,8 +170,6 @@ impl<T: Config> Pallet<T> {
 		let permitted_callers =
 			BoundedVec::<_, MaxPermittedCallersOf<T>>::try_from(permitted_callers)
 				.map_err(|_| Error::<T>::MaxPermittedCallersExceeded)?;
-		let asset_security = BoundedVec::<_, MaxAssetsPerServiceOf<T>>::try_from(assets.clone())
-			.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?;
 		let operators = pending_approvals
 			.iter()
 			.cloned()
@@ -164,19 +183,19 @@ impl<T: Config> Pallet<T> {
 			BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 				.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 
-		let service_request = ServiceRequest {
-			blueprint: blueprint_id,
-			owner: caller.clone(),
-			non_native_asset_security: bounded_requirements,
-			ttl,
-			args,
-			permitted_callers,
-			operators_with_approval_state,
-			membership_model,
-		};
-
-		ensure!(allowed, Error::<T>::InvalidRequestInput);
-		ServiceRequests::<T>::insert(request_id, service_request);
+		ServiceRequests::<T>::insert(
+			request_id,
+			ServiceRequest {
+				blueprint: blueprint_id,
+				owner: caller.clone(),
+				security_requirements: security_requirements.clone(),
+				ttl,
+				args,
+				permitted_callers,
+				operators_with_approval_state,
+				membership_model,
+			},
+		);
 		NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 
 		Self::deposit_event(Event::ServiceRequested {
@@ -185,7 +204,7 @@ impl<T: Config> Pallet<T> {
 			blueprint_id,
 			pending_approvals,
 			approved: Default::default(),
-			asset_security: asset_security.into_iter().map(|asset| (asset, Vec::new())).collect(),
+			security_requirements,
 		});
 
 		Ok(request_id)
