@@ -7,7 +7,9 @@ export class ClaimRewards implements Action {
     async execute(api: ApiPromise, keyring: Keyring, user: User): Promise<void> {
         try {
             console.log(`Claiming rewards for user ${user.address}...`);
-            const hash = await user.claimRewards(api);
+            // Claim rewards from the rewards pallet
+            const claimTx = api.tx.rewards.claim();
+            const hash = await claimTx.signAndSend(user.getKeyPair());
             console.log(`Rewards claimed successfully! Transaction hash: ${hash}`);
 
             // Update user balance after claiming rewards

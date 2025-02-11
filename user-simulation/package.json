@@ -14,7 +14,9 @@
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
+    "@types/ws": "^8.5.14",
     "dotenv": "^16.3.1",
+    "ws": "^8.18.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

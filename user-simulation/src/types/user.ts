@@ -41,44 +41,4 @@ export class User {
             throw error;
         }
     }
-
-    public async depositTnt(api: ApiPromise, amount: bigint): Promise<string> {
-        try {
-            // Call the deposit function in the staking pallet
-            const deposit = api.tx.multiAssetDelegation.bond(this.address, amount, 'Staked');
-            const hash = await deposit.signAndSend(this.keyPair);
-            return hash.toString();
-        } catch (error) {
-            console.error(`Deposit failed for user ${this.address}:`, error);
-            throw error;
-        }
-    }
-
-    public async delegateTnt(api: ApiPromise, validatorAddress: string, amount: bigint): Promise<string> {
-        try {
-            // First bond if not already bonded
-            const bondTx = api.tx.multiAssetDelegation.bond(this.address, amount, 'Staked');
-            await bondTx.signAndSend(this.keyPair);
-
-            // Then nominate a validator
-            const nominateTx = api.tx.staking.nominate([validatorAddress]);
-            const hash = await nominateTx.signAndSend(this.keyPair);
-            return hash.toString();
-        } catch (error) {
-            console.error(`Delegation failed for user ${this.address}:`, error);
-            throw error;
-        }
-    }
-
-    public async claimRewards(api: ApiPromise): Promise<string> {
-        try {
-            // Claim rewards from the rewards pallet
-            const claimTx = api.tx.rewards.claim();
-            const hash = await claimTx.signAndSend(this.keyPair);
-            return hash.toString();
-        } catch (error) {
-            console.error(`Claiming rewards failed for user ${this.address}:`, error);
-            throw error;
-        }
-    }
 }
