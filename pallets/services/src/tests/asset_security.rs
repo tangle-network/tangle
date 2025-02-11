@@ -31,13 +31,7 @@ fn test_security_requirements_validation() {
 		let eve = mock_pub_key(EVE);
 
 		// Register operator
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		// Test Case 1: Invalid min exposure (0%)
 		assert_err!(
@@ -141,13 +135,7 @@ fn test_security_commitment_validation() {
 		let eve = mock_pub_key(EVE);
 
 		// Register operator
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		// Create service request
 		assert_ok!(Services::request(
@@ -157,7 +145,7 @@ fn test_security_commitment_validation() {
 			vec![alice.clone()],
 			vec![bob.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20])],
+			vec![get_security_requirement(WETH, &[10, 20]),],
 			100,
 			Asset::Custom(USDC),
 			0,
@@ -184,7 +172,17 @@ fn test_security_commitment_validation() {
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
 
-		// Test Case 3: Missing required asset commitment
+		// Test Case 3: Missing required asset commitment (native asset)
+		assert_err!(
+			Services::approve(
+				RuntimeOrigin::signed(bob.clone()),
+				0,
+				vec![get_security_commitment(WETH, 15)],
+			),
+			Error::<Runtime>::InvalidSecurityCommitments
+		);
+
+		// Test Case 4: Wrong asset provided
 		assert_err!(
 			Services::approve(
 				RuntimeOrigin::signed(bob.clone()),
@@ -198,7 +196,7 @@ fn test_security_commitment_validation() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 15)],
+			vec![get_security_commitment(WETH, 15), get_security_commitment(TNT, 15)],
 		));
 	});
 }
@@ -219,13 +217,7 @@ fn test_exposure_calculations() {
 
 		// Register operators
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
-			assert_ok!(Services::register(
-				RuntimeOrigin::signed(operator.clone()),
-				0,
-				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-				Default::default(),
-				0,
-			));
+			assert_ok!(join_and_register(operator, 0, test_ecdsa_key(), Default::default(), 1000));
 		}
 
 		// Create service with multiple assets and exposure requirements
@@ -250,19 +242,31 @@ fn test_exposure_calculations() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 20), get_security_commitment(USDC, 20),],
+			vec![
+				get_security_commitment(WETH, 20),
+				get_security_commitment(USDC, 20),
+				get_security_commitment(TNT, 20)
+			],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			vec![get_security_commitment(WETH, 25), get_security_commitment(USDC, 15),],
+			vec![
+				get_security_commitment(WETH, 25),
+				get_security_commitment(USDC, 15),
+				get_security_commitment(TNT, 10),
+			],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			vec![get_security_commitment(WETH, 15), get_security_commitment(USDC, 20),],
+			vec![
+				get_security_commitment(WETH, 15),
+				get_security_commitment(USDC, 20),
+				get_security_commitment(TNT, 10),
+			],
 		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
@@ -270,13 +274,19 @@ fn test_exposure_calculations() {
 
 		// Verify service is initiated with correct exposures
 		assert!(Instances::<Runtime>::contains_key(0));
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
 			operator_security_commitments,
-		})]);
+		})));
 	});
 }
 
@@ -296,16 +306,9 @@ fn test_exposure_limits() {
 
 		// Register operators
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
-			assert_ok!(Services::register(
-				RuntimeOrigin::signed(operator.clone()),
-				0,
-				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-				Default::default(),
-				0,
-			));
+			assert_ok!(join_and_register(operator, 0, test_ecdsa_key(), Default::default(), 1000));
 		}
 
-		// Create first service with high exposure for WETH
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
@@ -320,23 +323,22 @@ fn test_exposure_limits() {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
-		// All operators commit high exposure for WETH in first service
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 50)],
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			vec![get_security_commitment(WETH, 50)],
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			vec![get_security_commitment(WETH, 50)],
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)],
 		));
 
 		// Create second service that shares the same security (overlapping exposures)
@@ -354,17 +356,16 @@ fn test_exposure_limits() {
 			MembershipModel::Fixed { min_operators: 2 },
 		));
 
-		// Operators can commit the same assets again since security can be shared
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			vec![get_security_commitment(WETH, 50)],
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			1,
-			vec![get_security_commitment(WETH, 50)],
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)],
 		));
 
 		// Create third service with different asset (USDC)
@@ -382,17 +383,16 @@ fn test_exposure_limits() {
 			MembershipModel::Fixed { min_operators: 2 },
 		));
 
-		// Operators can commit to different assets independently
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			2,
-			vec![get_security_commitment(USDC, 50)],
+			vec![get_security_commitment(USDC, 50), get_security_commitment(TNT, 50)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			2,
-			vec![get_security_commitment(USDC, 50)],
+			vec![get_security_commitment(USDC, 50), get_security_commitment(TNT, 50)],
 		));
 
 		// Verify all services are active
@@ -400,29 +400,35 @@ fn test_exposure_limits() {
 		let service1 = Instances::<Runtime>::get(1).unwrap();
 		let service2 = Instances::<Runtime>::get(2).unwrap();
 
-		// Verify events for service initiation
-		assert_events(vec![
-			RuntimeEvent::Services(crate::Event::ServiceInitiated {
-				owner: eve.clone(),
-				request_id: 0,
-				service_id: 0,
-				blueprint_id: 0,
-				operator_security_commitments: service0.operator_security_commitments.clone(),
-			}),
-			RuntimeEvent::Services(crate::Event::ServiceInitiated {
-				owner: eve.clone(),
-				request_id: 1,
-				service_id: 1,
-				blueprint_id: 0,
-				operator_security_commitments: service1.operator_security_commitments.clone(),
-			}),
-			RuntimeEvent::Services(crate::Event::ServiceInitiated {
-				owner: eve.clone(),
-				request_id: 2,
-				service_id: 2,
-				blueprint_id: 0,
-				operator_security_commitments: service2.operator_security_commitments.clone(),
-			}),
-		]);
+		// Verify events for service initiation and approvals
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::ServiceInitiated {
+			owner: eve.clone(),
+			request_id: 0,
+			service_id: 0,
+			blueprint_id: 0,
+			operator_security_commitments: service0.operator_security_commitments.clone(),
+		})));
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::ServiceInitiated {
+			owner: eve.clone(),
+			request_id: 1,
+			service_id: 1,
+			blueprint_id: 0,
+			operator_security_commitments: service1.operator_security_commitments.clone(),
+		})));
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::ServiceInitiated {
+			owner: eve.clone(),
+			request_id: 2,
+			service_id: 2,
+			blueprint_id: 0,
+			operator_security_commitments: service2.operator_security_commitments.clone(),
+		})));
 	});
 }
