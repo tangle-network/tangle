@@ -936,8 +936,6 @@ fn mad_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		let deposit_amount = U256::from(MOCK_DEPOSIT);
-
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
@@ -954,7 +952,7 @@ fn mad_rewards() {
 
 		// Mint USDC for Bob
 		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
-		let mint_call = api::tx().assets().mint(
+		let _mint_call = api::tx().assets().mint(
 			t.usdc_asset_id,
 			bob.address().to_account_id().into(),
 			mint_amount.to::<u128>(),
@@ -974,7 +972,7 @@ fn mad_rewards() {
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
-		let deposit_amount = U256::from(100_000_000u128);
+		let deposit_amount = U256::from(MOCK_DEPOSIT);
 
 		// Deposit and delegate using asset ID
 		let deposit_result = precompile

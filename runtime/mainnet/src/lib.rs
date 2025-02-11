@@ -1316,7 +1316,7 @@ parameter_types! {
 	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
 	pub const MaxDepositCap: u128 = UNIT * 100_000_000;
 	pub const MaxIncentiveCap: u128 = UNIT * 100_000_000;
-	pub const MaxApy: Percent = Percent::from_percent(20);
+	pub const MaxApy: Perbill = Perbill::from_percent(20);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
 }

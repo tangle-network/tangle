@@ -34,7 +34,7 @@ use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill, Percent,
+	AccountId32, BuildStorage, Perbill,
 };
 use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
 
@@ -239,7 +239,7 @@ parameter_types! {
 	pub RewardsPID: PalletId = PalletId(*b"PotStake");
 	pub const MaxDepositCap: u128 = EIGHTEEN_DECIMALS * 100_000_000;
 	pub const MaxIncentiveCap: u128 = EIGHTEEN_DECIMALS * 100_000;
-	pub const MaxApy: Percent = Percent::from_percent(20);
+	pub const MaxApy: Perbill = Perbill::from_percent(20);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
 }

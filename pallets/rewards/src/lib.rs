@@ -131,7 +131,7 @@ pub mod pallet {
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// The max possible apy
-		type MaxApy: Get<Percent>;
+		type MaxApy: Get<Perbill>;
 
 		/// The max possible deposit cap
 		type MaxDepositCap: Get<BalanceOf<Self>>;
