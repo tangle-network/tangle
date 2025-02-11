@@ -885,7 +885,7 @@ fn test_termination_with_partial_approvals() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			vec![get_security_commitment(USDC, 20)],
+			vec![get_security_commitment(USDC, 20), get_security_commitment(TNT, 20)],
 		));
 
 		// Now termination should succeed
