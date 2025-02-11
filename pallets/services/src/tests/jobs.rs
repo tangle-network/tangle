@@ -30,31 +30,19 @@ fn job_calls() {
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			test_ecdsa_key(),
 			Default::default(),
-			0,
+			1000
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(dave.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
@@ -77,31 +65,37 @@ fn job_calls() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
 
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
 			operator_security_commitments,
-		})]);
+		})));
 
 		// now we can call the jobs
 		let job_call_id = 0;
@@ -113,13 +107,19 @@ fn job_calls() {
 		));
 
 		assert!(JobCalls::<Runtime>::contains_key(0, job_call_id));
-		assert_events(vec![RuntimeEvent::Services(crate::Event::JobCalled {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::JobCalled {
 			caller: eve,
 			service_id: 0,
 			job: 0,
 			call_id: job_call_id,
 			args: vec![Field::Uint8(2)],
-		})]);
+		})));
 	});
 }
 
@@ -134,31 +134,19 @@ fn job_result() {
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		let charlie = mock_pub_key(CHARLIE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(charlie.clone()),
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			test_ecdsa_key(),
 			Default::default(),
-			0,
+			1000
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(dave.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
@@ -181,31 +169,37 @@ fn job_result() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
 
-		assert_events(vec![RuntimeEvent::Services(crate::Event::ServiceInitiated {
+		let events = System::events()
+			.into_iter()
+			.map(|e| e.event)
+			.filter(|e| matches!(e, RuntimeEvent::Services(_)))
+			.collect::<Vec<_>>();
+
+		assert!(events.contains(&RuntimeEvent::Services(crate::Event::ServiceInitiated {
 			owner: eve.clone(),
 			request_id: 0,
 			service_id: 0,
 			blueprint_id: 0,
 			operator_security_commitments,
-		})]);
+		})));
 
 		// now we can call the jobs
 		let keygen_job_call_id = 0;
@@ -280,12 +274,12 @@ fn test_concurrent_job_execution() {
 		let eve = mock_pub_key(EVE);
 
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
-			assert_ok!(Services::register(
-				RuntimeOrigin::signed(operator.clone()),
+			assert_ok!(join_and_register(
+				operator.clone(),
 				0,
-				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+				test_ecdsa_key(),
 				Default::default(),
-				0,
+				1000
 			));
 		}
 
@@ -308,7 +302,7 @@ fn test_concurrent_job_execution() {
 			assert_ok!(Services::approve(
 				RuntimeOrigin::signed(operator),
 				0,
-				vec![get_security_commitment(WETH, 10)],
+				vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 			));
 		}
 
@@ -367,12 +361,12 @@ fn test_result_submission_non_operators() {
 		let eve = mock_pub_key(EVE);
 
 		for operator in [bob.clone(), charlie.clone()] {
-			assert_ok!(Services::register(
-				RuntimeOrigin::signed(operator.clone()),
+			assert_ok!(join_and_register(
+				operator.clone(),
 				0,
-				OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+				test_ecdsa_key(),
 				Default::default(),
-				0,
+				1000
 			));
 		}
 
@@ -395,7 +389,7 @@ fn test_result_submission_non_operators() {
 			assert_ok!(Services::approve(
 				RuntimeOrigin::signed(operator),
 				0,
-				vec![get_security_commitment(WETH, 10)],
+				vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 			));
 		}
 
@@ -418,7 +412,7 @@ fn test_result_submission_non_operators() {
 				0,
 				bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
 			),
-			Error::<Runtime>::NotAnOperator
+			Error::<Runtime>::NotRegistered
 		);
 	});
 }
@@ -497,13 +491,7 @@ fn test_result_submission_after_termination() {
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
-			Default::default(),
-			0,
-		));
+		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
 
 		// Create and approve service
 		assert_ok!(Services::request(
@@ -523,7 +511,7 @@ fn test_result_submission_after_termination() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(WETH, 10)],
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Submit job call
