@@ -1219,6 +1219,11 @@ impl pallet_tangle_lst::Config for Runtime {
 
 parameter_types! {
 	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
+	pub const MaxDepositCap: u128 = UNIT * 1_000_000_000_000;
+	pub const MaxIncentiveCap: u128 = UNIT * 1_000_000_000_000;
+	pub const MaxApy: Perbill = Perbill::from_percent(20);
+	pub const MinDepositCap: u128 = 0;
+	pub const MinIncentiveCap: u128 = 0;
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -1229,6 +1234,11 @@ impl pallet_rewards::Config for Runtime {
 	type VaultId = u32;
 	type DelegationManager = MultiAssetDelegation;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxApy = MaxApy;
+	type MaxDepositCap = MaxDepositCap;
+	type MaxIncentiveCap = MaxIncentiveCap;
+	type MinIncentiveCap = MinIncentiveCap;
+	type MinDepositCap = MinDepositCap;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

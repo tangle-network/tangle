@@ -129,6 +129,21 @@ pub mod pallet {
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The max possible apy
+		type MaxApy: Get<Perbill>;
+
+		/// The max possible deposit cap
+		type MaxDepositCap: Get<BalanceOf<Self>>;
+
+		/// The max possible incentive cap
+		type MaxIncentiveCap: Get<BalanceOf<Self>>;
+
+		/// The min possible deposit cap
+		type MinDepositCap: Get<BalanceOf<Self>>;
+
+		/// The min possible incentive cap
+		type MinIncentiveCap: Get<BalanceOf<Self>>;
 	}
 
 	#[pallet::pallet]
@@ -305,6 +320,14 @@ pub mod pallet {
 		PotAccountNotFound,
 		/// Decay rate is too high
 		InvalidDecayRate,
+		/// Incentive cap is greater than max incentive cap
+		IncentiveCapGreaterThanMaxIncentiveCap,
+		/// Deposit cap is greater than max deposit cap
+		DepositCapGreaterThanMaxDepositCap,
+		/// Incentive cap is less than min incentive cap
+		IncentiveCapLessThanMinIncentiveCap,
+		/// Deposit cap is less than min deposit cap
+		DepositCapLessThanMinDepositCap,
 	}
 
 	#[pallet::genesis_config]

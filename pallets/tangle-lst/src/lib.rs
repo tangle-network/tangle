@@ -135,6 +135,7 @@ use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
 
 /// The log target of this pallet.
 pub const LOG_TARGET: &str = "runtime::nomination-pools";
+
 // syntactic sugar for logging.
 #[macro_export]
 macro_rules! log {
