@@ -16,7 +16,6 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_runtime::Percent;
 
 #[test]
 fn test_security_requirements_validation() {

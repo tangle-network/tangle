@@ -17,7 +17,6 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_core::{H160, U256};
-use sp_runtime::Percent;
 
 #[test]
 fn test_payment_refunds_on_failure() {
@@ -321,7 +320,6 @@ fn test_payment_multiple_asset_types() {
 			vec![
 				get_security_requirement(USDC, &[10, 20]),
 				get_security_requirement(WETH, &[15, 25]),
-				get_security_requirement(TNT, &[5, 10]),
 			],
 			100,
 			Asset::Custom(USDC),
@@ -340,7 +338,7 @@ fn test_payment_multiple_asset_types() {
 			vec![
 				get_security_commitment(USDC, 10),
 				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 5),
+				get_security_commitment(TNT, 10),
 			],
 		));
 
@@ -364,7 +362,6 @@ fn test_payment_multiple_asset_types() {
 			vec![
 				get_security_requirement(USDC, &[10, 20]),
 				get_security_requirement(WETH, &[15, 25]),
-				get_security_requirement(TNT, &[5, 10]),
 			],
 			100,
 			Asset::Erc20(USDC_ERC20),
@@ -386,7 +383,7 @@ fn test_payment_multiple_asset_types() {
 			vec![
 				get_security_commitment(USDC, 10),
 				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 5),
+				get_security_commitment(TNT, 15),
 			],
 		));
 
@@ -415,7 +412,6 @@ fn test_payment_multiple_asset_types() {
 			vec![
 				get_security_requirement(USDC, &[10, 20]),
 				get_security_requirement(WETH, &[15, 25]),
-				get_security_requirement(TNT, &[5, 10]),
 			],
 			100,
 			Asset::Custom(0),
@@ -434,7 +430,7 @@ fn test_payment_multiple_asset_types() {
 			vec![
 				get_security_commitment(USDC, 10),
 				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 5),
+				get_security_commitment(TNT, 15),
 			],
 		));
 

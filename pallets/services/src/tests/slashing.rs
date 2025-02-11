@@ -437,7 +437,7 @@ fn test_slash_with_concurrent_delegations() {
 fn test_slash_with_partial_amounts() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, .. } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let service = Services::services(service_id).unwrap();
 		let slashing_origin =

@@ -47,6 +47,29 @@ fn request_service() {
 		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
 
 		let eve = mock_pub_key(EVE);
+
+		// Native asset exposure too low should fail
+		assert_err!(
+			Services::request(
+				RuntimeOrigin::signed(eve.clone()),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone(), charlie.clone(), dave.clone()],
+				Default::default(),
+				vec![
+					get_security_requirement(USDC, &[10, 20]),
+					get_security_requirement(WETH, &[15, 25]),
+					get_security_requirement(TNT, &[5, 10]),
+				],
+				100,
+				Asset::Custom(USDC),
+				0,
+				MembershipModel::Fixed { min_operators: 1 },
+			),
+			Error::<Runtime>::NativeAssetExposureTooLow,
+		);
+
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
