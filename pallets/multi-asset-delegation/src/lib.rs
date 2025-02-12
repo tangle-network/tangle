@@ -798,13 +798,6 @@ pub mod pallet {
 			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset)
 				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
 			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
-			println!(
-				"Transferring {:?} units of asset {:?} from account {:?} to pallet account {:?}",
-				amount,
-				asset,
-				who,
-				Self::pallet_account()
-			);
 			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset });
 			Ok(())

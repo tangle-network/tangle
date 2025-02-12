@@ -254,9 +254,8 @@ fn test_slash_with_multiple_asset_types() {
 		));
 
 		// Setup USDC stake
-		let usdc_stake = 5_000;
+		let usdc_stake = 100_000;
 		mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), usdc_stake * 10u128.pow(6));
-		println!("balance: {:?}", Assets::balance(USDC, delegator.clone()));
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator.clone()),
 			Asset::Custom(USDC),
@@ -273,8 +272,8 @@ fn test_slash_with_multiple_asset_types() {
 		));
 
 		// Setup WETH stake
-		let weth_stake = 2_000;
-		mint_tokens(WETH, mock_pub_key(ALICE), delegator.clone(), weth_stake * 10u128.pow(18));
+		let weth_stake = 100_000;
+		mint_tokens(WETH, mock_pub_key(BOB), delegator.clone(), weth_stake * 10u128.pow(18));
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator.clone()),
 			Asset::Custom(WETH),
@@ -307,6 +306,7 @@ fn test_slash_with_multiple_asset_types() {
 		let unapplied_slash = UnappliedSlashes::<Runtime>::get(0, 0).unwrap();
 
 		// TODO: Verify slash is applied correctly
+		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
 	});
 }
 

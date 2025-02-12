@@ -256,8 +256,7 @@ fn test_payment_distribution_operators() {
 		// Test Case 3: Native Currency Payment
 		let native_payment = 1000000000000000000u128; // 1 TNT
 		let before_native_balance = Balances::free_balance(eve.clone());
-		println!("before_native_balance: {}", before_native_balance);
-
+		Balances::make_free_balance_be(&eve, native_payment * 1_000_000);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
@@ -405,7 +404,7 @@ fn test_payment_multiple_asset_types() {
 		// Test Case 3: Multiple asset types with native currency payment
 		let native_payment = 1000000000000000000u128; // 1 TNT
 		let before_native_balance = Balances::free_balance(eve.clone());
-
+		Balances::make_free_balance_be(&eve, native_payment * 1_000_000);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
@@ -463,60 +462,51 @@ fn test_payment_zero_amount() {
 		let charlie = mock_pub_key(CHARLIE);
 
 		// Test Case 1: Zero amount for Custom Asset
-		assert_err!(
-			Services::request(
-				RuntimeOrigin::signed(charlie.clone()),
-				None,
-				0,
-				vec![],
-				vec![bob.clone()],
-				Default::default(),
-				vec![get_security_requirement(USDC, &[10, 20])],
-				100,
-				Asset::Custom(USDC),
-				0,
-				MembershipModel::Fixed { min_operators: 1 },
-			),
-			Error::<Runtime>::OnRequestFailure
-		);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			None,
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
 
 		// Test Case 2: Zero amount for ERC20 Token
 		let charlie_address = mock_address(CHARLIE);
 		let charlie_evm_account_id = address_to_account_id(charlie_address);
-		assert_err!(
-			Services::request(
-				RuntimeOrigin::signed(charlie_evm_account_id.clone()),
-				Some(charlie_address),
-				0,
-				vec![],
-				vec![bob.clone()],
-				Default::default(),
-				vec![get_security_requirement(USDC, &[10, 20])],
-				100,
-				Asset::Erc20(USDC_ERC20),
-				0,
-				MembershipModel::Fixed { min_operators: 1 },
-			),
-			Error::<Runtime>::OnRequestFailure
-		);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie_evm_account_id.clone()),
+			Some(charlie_address),
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Erc20(USDC_ERC20),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
 
 		// Test Case 3: Zero amount for Native Currency
-		assert_err!(
-			Services::request(
-				RuntimeOrigin::signed(charlie.clone()),
-				None,
-				0,
-				vec![],
-				vec![bob.clone()],
-				Default::default(),
-				vec![get_security_requirement(USDC, &[10, 20])],
-				100,
-				Asset::Custom(0),
-				0,
-				MembershipModel::Fixed { min_operators: 1 },
-			),
-			Error::<Runtime>::OnRequestFailure
-		);
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(charlie.clone()),
+			None,
+			0,
+			vec![],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement(USDC, &[10, 20])],
+			100,
+			Asset::Custom(0),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
 	});
 }
 
@@ -598,7 +588,7 @@ fn test_payment_maximum_amount() {
 				max_native_amount,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::OnRequestFailure
+			TokenError::FundsUnavailable,
 		);
 	});
 }

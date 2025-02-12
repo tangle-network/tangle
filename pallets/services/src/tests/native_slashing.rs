@@ -86,10 +86,10 @@ fn test_mixed_native_and_regular_delegation_slash() {
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
 		let native_stake = 10_000;
-		let regular_stake = 5_000;
+		let regular_stake = 100_000;
 
 		// Setup regular delegation
-		mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), regular_stake * 10u128.pow(6));
+		mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), regular_stake * 10u128.pow(3));
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator.clone()),
 			Asset::Custom(USDC),

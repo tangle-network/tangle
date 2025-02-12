@@ -157,7 +157,6 @@ impl<T: Config> Pallet<T> {
 				asset: payment_asset.clone(),
 				amount: value,
 			};
-			println!("Inserting payment: {:?}", payment);
 			StagingServicePayments::<T>::insert(request_id, payment);
 		}
 
