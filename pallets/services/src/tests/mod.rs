@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+use std::collections::BTreeMap;
+
 pub use super::*;
 pub use crate::mock::*;
 use frame_support::assert_ok;
@@ -48,6 +50,15 @@ pub fn create_and_mint_tokens(
 ) {
 	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, recipient.clone(), false, 1));
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset_id, recipient, amount));
+}
+
+pub fn mint_tokens(
+	asset_id: AssetId,
+	creator: <Runtime as frame_system::Config>::AccountId,
+	recipient: <Runtime as frame_system::Config>::AccountId,
+	amount: Balance,
+) {
+	assert_ok!(Assets::mint(RuntimeOrigin::signed(creator.clone()), asset_id, recipient, amount));
 }
 
 #[allow(dead_code)]
@@ -140,6 +151,7 @@ pub(crate) fn get_security_commitment(a: AssetId, p: u8) -> AssetSecurityCommitm
 struct Deployment {
 	blueprint_id: u64,
 	service_id: u64,
+	security_commitments: BTreeMap<Asset<AssetId>, AssetSecurityCommitment<AssetId>>,
 }
 
 /// A Helper function that creates a blueprint and service instance
@@ -179,15 +191,21 @@ fn deploy() -> Deployment {
 
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
+	let security_commitments =
+		vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+	let security_commitment_map = security_commitments
+		.iter()
+		.map(|c| (c.asset, c.clone()))
+		.collect::<BTreeMap<_, _>>();
 	assert_ok!(Services::approve(
 		RuntimeOrigin::signed(bob.clone()),
 		service_id,
-		vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
+		security_commitments,
 	));
 
 	assert!(Instances::<Runtime>::contains_key(service_id));
 
-	Deployment { blueprint_id, service_id }
+	Deployment { blueprint_id, service_id, security_commitments: security_commitment_map }
 }
 
 pub fn join_and_register(

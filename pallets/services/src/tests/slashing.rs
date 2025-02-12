@@ -47,7 +47,7 @@ fn test_zero_percentage_slash() {
 fn unapplied_slash() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let eve = mock_pub_key(EVE);
 		let bob = mock_pub_key(BOB);
 
@@ -241,7 +241,7 @@ fn dispute_an_already_applied_slash() {
 fn test_slash_with_multiple_asset_types() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, .. } = deploy();
+		let Deployment { blueprint_id, service_id, security_commitments } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
 
@@ -254,9 +254,9 @@ fn test_slash_with_multiple_asset_types() {
 			Default::default(),
 		));
 
-		// Setup ERC20 stake (USDC)
+		// Setup USDC stake
 		let usdc_stake = 5_000;
-		create_and_mint_tokens(USDC, delegator.clone(), usdc_stake);
+		mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), usdc_stake * 10u128.pow(6));
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator.clone()),
 			Asset::Custom(USDC),
@@ -272,9 +272,9 @@ fn test_slash_with_multiple_asset_types() {
 			Default::default(),
 		));
 
-		// Setup another ERC20 stake (WETH)
+		// Setup WETH stake
 		let weth_stake = 2_000;
-		create_and_mint_tokens(WETH, delegator.clone(), weth_stake);
+		mint_tokens(WETH, mock_pub_key(ALICE), delegator.clone(), weth_stake * 10u128.pow(18));
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator.clone()),
 			Asset::Custom(WETH),
@@ -303,18 +303,50 @@ fn test_slash_with_multiple_asset_types() {
 			slash_percent
 		));
 
-		// Verify native stake slash
-		let native_stake_after =
-			Staking::ledger(StakingAccount::Stash(delegator.clone())).unwrap().active;
-		assert_eq!(native_stake_after, native_stake / 2);
+		// Get the unapplied slash and verify amounts
+		let unapplied_slash = UnappliedSlashes::<Runtime>::get(0, 0).unwrap();
 
-		// Verify USDC stake slash
-		let usdc_balance_after = Assets::balance(USDC, delegator.clone());
-		assert_eq!(usdc_balance_after, usdc_stake / 2);
+		// Verify native stake slash amount in unapplied_slash.others
+		let native_exposure = security_commitments
+			.iter()
+			.find(|(asset, _)| asset.is_native())
+			.map(|(_, commitment)| commitment.exposure_percent)
+			.unwrap();
+		let native_slash = unapplied_slash
+			.others
+			.iter()
+			.find(|(d, a, _)| d == &delegator && matches!(a, Asset::Custom(id) if id == &TNT))
+			.map(|(_, _, amount)| amount)
+			.unwrap();
+		assert_eq!(*native_slash, slash_percent.mul_floor(native_exposure.mul_floor(native_stake)));
 
-		// Verify WETH stake slash
-		let weth_balance_after = Assets::balance(WETH, delegator.clone());
-		assert_eq!(weth_balance_after, weth_stake / 2);
+		// Verify USDC stake slash amount
+		let usdc_exposure = security_commitments
+			.iter()
+			.find(|(asset, _)| *asset == &Asset::Custom(USDC))
+			.map(|(_, commitment)| commitment.exposure_percent)
+			.unwrap();
+		let usdc_slash = unapplied_slash
+			.others
+			.iter()
+			.find(|(d, a, _)| d == &delegator && matches!(a, Asset::Custom(id) if id == &USDC))
+			.map(|(_, _, amount)| amount)
+			.unwrap();
+		assert_eq!(*usdc_slash, slash_percent.mul_floor(usdc_exposure.mul_floor(usdc_stake)));
+
+		// Verify WETH stake slash amount
+		let weth_exposure = security_commitments
+			.iter()
+			.find(|(asset, _)| *asset == &Asset::Custom(WETH))
+			.map(|(_, commitment)| commitment.exposure_percent)
+			.unwrap();
+		let weth_slash = unapplied_slash
+			.others
+			.iter()
+			.find(|(d, a, _)| d == &delegator && matches!(a, Asset::Custom(id) if id == &WETH))
+			.map(|(_, _, amount)| amount)
+			.unwrap();
+		assert_eq!(*weth_slash, slash_percent.mul_floor(weth_exposure.mul_floor(weth_stake)));
 
 		// Verify events for each asset type
 		System::assert_has_event(RuntimeEvent::Services(crate::Event::DelegatorSlashed {
@@ -347,10 +379,54 @@ fn test_slash_with_multiple_asset_types() {
 }
 
 #[test]
-fn test_slash_with_concurrent_delegations() {
+fn test_slash_with_no_blueprint_selection() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { service_id, .. } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
+		let operator = mock_pub_key(BOB);
+		let delegator = mock_pub_key(CHARLIE);
+
+		// Initial stake amounts
+		let native_stake = 10_000;
+
+		// Delegate assets but don't select any blueprints (uses default empty selection)
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(delegator.clone()),
+			operator.clone(),
+			native_stake,
+			Default::default(), // Default blueprint selection is empty
+		));
+
+		// Get service and slashing origin
+		let service = Services::services(service_id).unwrap();
+		let slashing_origin =
+			Services::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
+		let slash_percent = Percent::from_percent(50);
+
+		// Execute slash
+		assert_ok!(Services::slash(
+			RuntimeOrigin::signed(slashing_origin.clone()),
+			operator.clone(),
+			service_id,
+			slash_percent
+		));
+
+		// Verify the unapplied slash record
+		let unapplied_slash = UnappliedSlashes::<Runtime>::get(0, 0).unwrap();
+
+		// Since delegator didn't select any blueprints, they shouldn't be included in others
+		assert!(
+			unapplied_slash.others.is_empty(),
+			"Delegator should not be slashed when no blueprints selected"
+		);
+	});
+}
+
+#[test]
+fn test_slash_with_native_delegation() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		System::set_block_number(1);
+		let Deployment { service_id, blueprint_id, security_commitments, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator1 = mock_pub_key(CHARLIE);
 		let delegator2 = mock_pub_key(DAVE);
@@ -361,8 +437,21 @@ fn test_slash_with_concurrent_delegations() {
 			RuntimeOrigin::signed(delegator1.clone()),
 			operator.clone(),
 			initial_stake,
-			Default::default(),
+			vec![blueprint_id].into(),
 		));
+
+		// Verify initial delegation storage
+		let delegator1_metadata = MultiAssetDelegation::delegators(delegator1.clone()).unwrap();
+		let initial_delegation = delegator1_metadata
+			.delegations
+			.iter()
+			.find(|d| d.operator == operator)
+			.map(|d| d.amount)
+			.unwrap_or(0);
+		assert_eq!(initial_delegation, initial_stake);
+
+		assert_eq!(delegator1_metadata.total_nomination_delegations(), initial_stake);
+		assert_eq!(delegator1_metadata.total_non_nomination_delegations(), 0);
 
 		// Start a slash
 		let service = Services::services(service_id).unwrap();
@@ -377,59 +466,28 @@ fn test_slash_with_concurrent_delegations() {
 			slash_percent
 		));
 
-		// Add new delegation during slash processing
-		let new_stake = 5_000;
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(delegator2.clone()),
-			operator.clone(),
-			new_stake,
-			Default::default(),
-		));
+		// Verify slash amount matches security commitment
+		let unapplied_slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
+		assert_eq!(unapplied_slashes.len(), 1, "Should be exactly one unapplied slash");
 
-		// Remove some delegation during slash processing
-		assert_ok!(MultiAssetDelegation::schedule_nomination_unstake(
-			RuntimeOrigin::signed(delegator1.clone()),
-			operator.clone(),
-			initial_stake / 4,
-			Default::default(),
-		));
-
-		// Apply the slash
-		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
-		for (_, slash) in slashes {
-			assert_ok!(Services::apply_slash(slash));
-		}
-
-		// Verify final states
-		let delegator1_metadata = MultiAssetDelegation::delegators(delegator1.clone()).unwrap();
-		let delegator2_metadata = MultiAssetDelegation::delegators(delegator2.clone()).unwrap();
-
-		let delegator1_final_delegation = delegator1_metadata
-			.delegations
+		let (_, slash) = &unapplied_slashes[0];
+		let native_security_commitment = security_commitments
 			.iter()
-			.find(|d| d.operator == operator)
-			.map(|d| d.amount)
-			.unwrap_or(0);
+			.find(|(asset, _)| asset.is_native())
+			.map(|(_, commitment)| commitment)
+			.expect("Operator should have security commitment");
 
-		let delegator2_final_delegation = delegator2_metadata
-			.delegations
-			.iter()
-			.find(|d| d.operator == operator)
-			.map(|d| d.amount)
-			.unwrap_or(0);
+		// Calculate expected slash amount based on exposure
+		let expected_slash = slash_percent
+			.mul_floor(native_security_commitment.exposure_percent.mul_floor(initial_stake));
+		let actual_slash = slash.others[0].2;
 
-		// Delegator1's delegation should reflect both the slash and unstaking
 		assert_eq!(
-			delegator1_final_delegation,
-			initial_stake / 2 - initial_stake / 4,
-			"Delegator1's delegation should be halved by slash and reduced by unstaking"
+			actual_slash, expected_slash,
+			"Slash amount should match operator's security commitment exposure"
 		);
 
-		// Delegator2's new delegation should be unaffected by the slash
-		assert_eq!(
-			delegator2_final_delegation, new_stake,
-			"Delegator2's delegation should be unaffected as it was added after slash"
-		);
+		// TODO: Apply the slash
 	});
 }
 

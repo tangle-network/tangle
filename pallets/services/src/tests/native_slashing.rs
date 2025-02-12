@@ -347,7 +347,7 @@ fn test_native_restaking_slash_with_rewards_distribution() {
 fn test_atomic_slashing_operations() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -451,7 +451,7 @@ fn test_atomic_slashing_operations() {
 fn test_complete_slash_to_zero() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -560,7 +560,7 @@ fn test_complete_slash_to_zero() {
 fn test_slash_with_unstaking_states() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id } = deploy();
+		let Deployment { blueprint_id, service_id, .. } = deploy();
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
 		let dave = mock_pub_key(DAVE);

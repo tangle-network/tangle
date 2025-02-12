@@ -611,6 +611,21 @@ pub mod module {
 			/// The address of the Master Blueprint Service Manager.
 			address: H160,
 		},
+		/// A Delegator's nominated stake has been slashed.
+		NominatedSlash {
+			/// The account that has been slashed
+			delegator: T::AccountId,
+			/// The operator associated with the slash
+			operator: T::AccountId,
+			/// The amount of the slash
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
 	}
 
 	#[pallet::pallet]

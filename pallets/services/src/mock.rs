@@ -688,8 +688,8 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	let assets_config = pallet_assets::GenesisConfig::<Runtime> {
 		assets: vec![
 			(USDC, authorities[0].clone(), true, 100_000), // 1 cent.
-			(WETH, authorities[1].clone(), true, 100),     // 100 wei.
-			(WBTC, authorities[2].clone(), true, 100),     // 100 satoshi.
+			(WETH, authorities[1].clone(), true, 100_000), // 100 wei.
+			(WBTC, authorities[2].clone(), true, 100_000), // 100 satoshi.
 		],
 		metadata: vec![
 			(USDC, Vec::from(b"USD Coin"), Vec::from(b"USDC"), 6),

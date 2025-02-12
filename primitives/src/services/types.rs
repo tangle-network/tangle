@@ -95,6 +95,18 @@ impl<AssetId: AssetIdT> Default for Asset<AssetId> {
 }
 
 impl<AssetId: AssetIdT> Asset<AssetId> {
+	pub fn is_erc20(&self) -> bool {
+		matches!(self, Asset::Erc20(_))
+	}
+
+	pub fn is_native(&self) -> bool {
+		if let Asset::Custom(asset_id) = self {
+			asset_id == &AssetId::default()
+		} else {
+			false
+		}
+	}
+
 	pub fn to_ethabi_param_type() -> ethabi::ParamType {
 		ethabi::ParamType::Tuple(vec![
 			// Kind of the Asset

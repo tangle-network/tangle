@@ -39,6 +39,21 @@ impl<MaxBlueprints: Get<u32>> Default for DelegatorBlueprintSelection<MaxBluepri
 	}
 }
 
+impl<MaxBlueprints: Get<u32>> From<Vec<BlueprintId>>
+	for DelegatorBlueprintSelection<MaxBlueprints>
+{
+	fn from(blueprints: Vec<BlueprintId>) -> Self {
+		if blueprints.is_empty() {
+			DelegatorBlueprintSelection::All
+		} else {
+			match BoundedVec::try_from(blueprints) {
+				Ok(bounded_blueprints) => DelegatorBlueprintSelection::Fixed(bounded_blueprints),
+				Err(_) => DelegatorBlueprintSelection::All,
+			}
+		}
+	}
+}
+
 /// Represents the status of a delegator.
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Default)]
 pub enum DelegatorStatus {
@@ -225,6 +240,31 @@ impl<
 		AccountId: Eq + PartialEq,
 	{
 		self.delegations.iter().filter(|&stake| stake.operator == operator).collect()
+	}
+
+	/// Calculate total delegation amount
+	pub fn total_delegation_amount(&self) -> Balance
+	where
+		Balance: Default + core::ops::AddAssign + Clone + Saturating,
+		AssetId: Eq + PartialEq,
+	{
+		self.delegations.iter().fold(Balance::default(), |acc, delegation| {
+			acc.saturating_add(delegation.amount.clone())
+		})
+	}
+
+	/// Calculate total non-nomination delegations
+	pub fn total_non_nomination_delegations(&self) -> Balance
+	where
+		Balance: Default + core::ops::AddAssign + Clone + Saturating,
+		AssetId: Eq + PartialEq,
+	{
+		self.delegations
+			.iter()
+			.filter(|d| !d.is_nomination)
+			.fold(Balance::default(), |acc, delegation| {
+				acc.saturating_add(delegation.amount.clone())
+			})
 	}
 
 	/// Calculate total nomination delegations
