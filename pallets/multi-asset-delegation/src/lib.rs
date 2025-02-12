@@ -787,8 +787,8 @@ pub mod pallet {
 					T::EvmAddressMapping::into_account_id(addr)
 				},
 				(Asset::Erc20(_), None) => return Err(Error::<T>::NotAuthorized.into()),
-				(Asset::Custom(_), Some(adress)) => {
-					let evm_account_id = T::EvmAddressMapping::into_account_id(adress);
+				(Asset::Custom(_), Some(address)) => {
+					let evm_account_id = T::EvmAddressMapping::into_account_id(address);
 					let caller = ensure_signed(origin)?;
 					ensure!(evm_account_id == caller, DispatchError::BadOrigin);
 					evm_account_id
@@ -798,6 +798,13 @@ pub mod pallet {
 			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset)
 				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
 			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
+			println!(
+				"Transferring {:?} units of asset {:?} from account {:?} to pallet account {:?}",
+				amount,
+				asset,
+				who,
+				Self::pallet_account()
+			);
 			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset });
 			Ok(())

@@ -74,7 +74,7 @@ fn native_restaking_should_work() {
 		let delegation = &metadata.delegations[0];
 		assert_eq!(delegation.operator, operator.clone());
 		assert_eq!(delegation.amount, delegate_amount);
-		assert_eq!(delegation.asset_id, Asset::Custom(TNT));
+		assert_eq!(delegation.asset, Asset::Custom(TNT));
 		// Check the locks
 		let locks = pallet_balances::Pallet::<Runtime>::locks(&who);
 		// 1 lock for the staking
@@ -137,7 +137,7 @@ fn unbond_should_fail_if_delegated_nomination() {
 		assert_eq!(delegation.operator, operator);
 		assert_eq!(delegation.amount, delegate_amount);
 		assert!(delegation.is_nomination);
-		assert_eq!(delegation.asset_id, Asset::Custom(TNT));
+		assert_eq!(delegation.asset, Asset::Custom(TNT));
 
 		// Check operator metadata
 		let operator_metadata = MultiAssetDelegation::operator_info(operator.clone()).unwrap();

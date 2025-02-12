@@ -282,7 +282,7 @@ impl<T: Config> Pallet<T> {
 					mbsm_address,
 					payment.amount,
 				)
-				.map_err(|_| Error::<T>::OnErc20TransferFailure)?;
+				.map_err(|_| Error::<T>::ERC20TransferFailed)?;
 				ensure!(success, Error::<T>::ERC20TransferFailed);
 			},
 		}

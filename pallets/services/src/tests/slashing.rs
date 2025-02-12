@@ -256,6 +256,7 @@ fn test_slash_with_multiple_asset_types() {
 		// Setup USDC stake
 		let usdc_stake = 5_000;
 		mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), usdc_stake * 10u128.pow(6));
+		println!("balance: {:?}", Assets::balance(USDC, delegator.clone()));
 		assert_ok!(MultiAssetDelegation::deposit(
 			RuntimeOrigin::signed(delegator.clone()),
 			Asset::Custom(USDC),

@@ -461,7 +461,7 @@ impl<T: Config> Pallet<T> {
 		request_args: &[Field<T::Constraints, T::AccountId>],
 		permitted_callers: &[T::AccountId],
 		ttl: BlockNumberFor<T>,
-		paymet_asset: Asset<T::AssetId>,
+		payment_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
 		native_value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -522,7 +522,7 @@ impl<T: Config> Pallet<T> {
 							.collect(),
 					),
 					Token::Uint(ethabi::Uint::from(ttl.into())),
-					paymet_asset.to_ethabi(),
+					payment_asset.to_ethabi(),
 					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
 				]),
 			],

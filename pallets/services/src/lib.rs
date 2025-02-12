@@ -362,8 +362,6 @@ pub mod module {
 		OnRequestFailure,
 		/// Register hook failure
 		OnRegisterHookFailed,
-		/// ERC20 transfer hook failure
-		OnErc20TransferFailure,
 		/// Approve service request hook failure
 		OnApproveFailure,
 		/// Reject service request hook failure

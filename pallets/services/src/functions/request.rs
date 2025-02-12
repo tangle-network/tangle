@@ -113,7 +113,6 @@ impl<T: Config> Pallet<T> {
 
 		let mut native_value = Zero::zero();
 		let request_id = Self::next_service_request_id();
-
 		if value != Zero::zero() {
 			// Payment transfer
 			let refund_to = match payment_asset.clone() {
@@ -145,7 +144,7 @@ impl<T: Config> Pallet<T> {
 					ensure!(mapped_origin == caller, DispatchError::BadOrigin);
 					let (success, _weight) =
 						Self::erc20_transfer(token, evm_origin, Self::pallet_evm_account(), value)
-							.map_err(|_| Error::<T>::OnErc20TransferFailure)?;
+							.map_err(|_| Error::<T>::ERC20TransferFailed)?;
 					ensure!(success, Error::<T>::ERC20TransferFailed);
 					Account::from(evm_origin)
 				},
@@ -158,7 +157,7 @@ impl<T: Config> Pallet<T> {
 				asset: payment_asset.clone(),
 				amount: value,
 			};
-
+			println!("Inserting payment: {:?}", payment);
 			StagingServicePayments::<T>::insert(request_id, payment);
 		}
 

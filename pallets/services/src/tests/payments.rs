@@ -17,6 +17,7 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_core::{H160, U256};
+use sp_runtime::TokenError;
 
 #[test]
 fn test_payment_refunds_on_failure() {
@@ -93,7 +94,7 @@ fn test_payment_refunds_on_failure() {
 		);
 
 		// Bob rejects the request
-		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 1));
 
 		// Verify ERC20 payment is refunded
 		assert_ok!(
@@ -109,7 +110,7 @@ fn test_payment_refunds_on_failure() {
 		// Test Case 3: Refund on native currency payment
 		let before_native_balance = Balances::free_balance(charlie.clone());
 		let native_payment = 1000000000000000000u128; // 1 TNT
-
+		Balances::make_free_balance_be(&charlie, native_payment * 100);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie.clone()),
 			None,
@@ -194,13 +195,13 @@ fn test_payment_distribution_operators() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			vec![get_security_commitment(USDC, 10)],
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
 		));
 
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			vec![get_security_commitment(USDC, 15)],
+			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 25)],
 		));
 
 		// Verify payment is transferred to MBSM
@@ -238,7 +239,7 @@ fn test_payment_distribution_operators() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			vec![get_security_commitment(USDC, 10)],
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
 		));
 
 		// Verify ERC20 payment is transferred to MBSM
@@ -255,6 +256,7 @@ fn test_payment_distribution_operators() {
 		// Test Case 3: Native Currency Payment
 		let native_payment = 1000000000000000000u128; // 1 TNT
 		let before_native_balance = Balances::free_balance(eve.clone());
+		println!("before_native_balance: {}", before_native_balance);
 
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
@@ -278,7 +280,7 @@ fn test_payment_distribution_operators() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			2,
-			vec![get_security_commitment(USDC, 10)],
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
 		));
 
 		// Verify native payment is transferred to MBSM
@@ -309,6 +311,7 @@ fn test_payment_multiple_asset_types() {
 		// Test Case 1: Multiple asset security requirements
 		let eve = mock_pub_key(EVE);
 		let payment = 5 * 10u128.pow(6); // 5 USDC
+		mint_tokens(USDC, alice.clone(), eve.clone(), payment * 10u128.pow(6));
 		let before_balance = Assets::balance(USDC, eve.clone());
 
 		assert_ok!(Services::request(
@@ -551,7 +554,7 @@ fn test_payment_maximum_amount() {
 				max_custom_amount,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::OnRequestFailure
+			TokenError::FundsUnavailable,
 		);
 
 		// Test Case 2: Maximum amount for ERC20 Token (more than balance)
@@ -576,7 +579,7 @@ fn test_payment_maximum_amount() {
 				max_erc20_amount,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::OnRequestFailure
+			Error::<Runtime>::ERC20TransferFailed
 		);
 
 		// Test Case 3: Maximum amount for Native Currency (more than balance)
@@ -635,7 +638,7 @@ fn test_payment_invalid_asset_types() {
 				payment,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::OnRequestFailure
+			TokenError::UnknownAsset,
 		);
 
 		// Test Case 2: Non-existent ERC20 Token
@@ -656,7 +659,7 @@ fn test_payment_invalid_asset_types() {
 				payment,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::OnRequestFailure
+			Error::<Runtime>::ERC20TransferFailed
 		);
 
 		// Test Case 3: Invalid ERC20 Token (not a contract)
@@ -675,7 +678,7 @@ fn test_payment_invalid_asset_types() {
 				payment,
 				MembershipModel::Fixed { min_operators: 1 },
 			),
-			Error::<Runtime>::OnRequestFailure
+			Error::<Runtime>::ERC20TransferFailed
 		);
 	});
 }

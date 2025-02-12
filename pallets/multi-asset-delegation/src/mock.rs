@@ -312,7 +312,7 @@ parameter_types! {
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
 
-	pub const SlashRecipient: AccountId = mock_pub_key(1);
+	pub const SlashRecipient: AccountId = AccountId32::new([1u8; 32]);
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
@@ -402,7 +402,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type SlashRecipient = MockSlashRecipient;
+	type SlashRecipient = SlashRecipient;
 	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
