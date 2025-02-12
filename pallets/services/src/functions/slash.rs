@@ -69,8 +69,6 @@ impl<T: Config> Pallet<T> {
 			})
 			.collect();
 
-		println!("eligible_delegators: {:#?}", eligible_delegators);
-
 		// Calculate delegator slashes per asset
 		let mut delegator_slashes = Vec::new();
 
@@ -306,9 +304,9 @@ impl<T: Config> Pallet<T> {
 	/// - The amount to slash from nominated delegation
 	/// - Any remaining unslashable amount
 	fn handle_native_asset_slash(
-		delegator: &T::AccountId,
-		operator: &T::AccountId,
-		total_slash_amount: BalanceOf<T>,
+		_delegator: &T::AccountId,
+		_operator: &T::AccountId,
+		_total_slash_amount: BalanceOf<T>,
 	) -> Result<(BalanceOf<T>, BalanceOf<T>), DispatchError> {
 		// TODO: Implement native asset slashing logic for delegators
 		//

@@ -266,33 +266,3 @@ pub fn advance_era() {
 		}
 	}
 }
-
-/// Distribute rewards to validators and their nominators
-pub fn distribute_rewards(amount: Balance) {
-	let validators = Session::validators();
-	let reward_per_validator = amount / (validators.len() as u128);
-
-	for validator in validators {
-		let exposure = Staking::eras_stakers(Staking::active_era().unwrap().index, &validator);
-		let total_stake = exposure.total;
-		if total_stake == 0 {
-			continue;
-		}
-
-		// Calculate rewards
-		let validator_reward = (exposure.own * reward_per_validator) / total_stake;
-		Balances::make_free_balance_be(
-			&validator,
-			Balances::free_balance(&validator) + validator_reward,
-		);
-
-		// Distribute rewards to nominators
-		for nominator in exposure.others {
-			let nominator_reward = (nominator.value * reward_per_validator) / total_stake;
-			Balances::make_free_balance_be(
-				&nominator.who,
-				Balances::free_balance(&nominator.who) + nominator_reward,
-			);
-		}
-	}
-}
