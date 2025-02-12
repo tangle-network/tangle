@@ -1,7 +1,5 @@
 use super::*;
-use frame_support::traits::Incrementable;
 use frame_support::traits::OnRuntimeUpgrade;
-use pallet_assets::NextAssetId;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use sp_runtime::{BoundToRuntimeAppPublic, RuntimeAppPublic, RuntimeDebug};
 
@@ -69,22 +67,5 @@ impl<T: pallet_session::Config> OnRuntimeUpgrade for MigrateSessionKeys<T> {
 	fn on_runtime_upgrade() -> Weight {
 		Session::upgrade_keys::<OldSessionKeys, _>(transform_session_keys);
 		T::DbWeight::get().reads_writes(10, 10)
-	}
-}
-
-/// Set [`NextAssetId`] to the value of `ID` if [`NextAssetId`] does not exist yet.
-pub struct SetNextAssetId<ID, T: pallet_assets::Config>(core::marker::PhantomData<(ID, T)>);
-impl<ID, T: pallet_assets::Config> OnRuntimeUpgrade for SetNextAssetId<ID, T>
-where
-	T::AssetId: Incrementable,
-	ID: Get<T::AssetId>,
-{
-	fn on_runtime_upgrade() -> frame_support::weights::Weight {
-		if !NextAssetId::<T>::exists() {
-			NextAssetId::<T>::put(ID::get());
-			T::DbWeight::get().reads_writes(1, 1)
-		} else {
-			T::DbWeight::get().reads(1)
-		}
 	}
 }
