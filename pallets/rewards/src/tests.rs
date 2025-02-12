@@ -15,7 +15,7 @@
 // along with Tangle. If not, see <http://www.gnu.org/licenses/>.
 use crate::{mock::*, types::*, AssetAction, Error, Pallet as RewardsPallet};
 use frame_support::assert_err;
-use sp_runtime::{DispatchError, Percent};
+use sp_runtime::{DispatchError, Perbill};
 use tangle_primitives::services::Asset;
 
 pub mod apy_calc;

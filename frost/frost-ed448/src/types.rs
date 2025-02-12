@@ -26,7 +26,7 @@ impl Decode for WrappedScalar {
 		let mut bytes = [0u8; 56];
 		input.read(&mut bytes)?;
 		let buffer = ScalarBytes::from_slice(&bytes);
-		Ok(WrappedScalar(Scalar::from_canonical_bytes(buffer).unwrap_or(Scalar::ZERO)))
+		WrappedScalar(Scalar::from_canonical_bytes(buffer))
 	}
 }
 
