@@ -44,15 +44,15 @@ impl<T: crate::Config>
 		Operators::<T>::get(operator).map_or(Zero::zero(), |metadata| metadata.stake)
 	}
 
-	fn get_total_delegation_by_asset_id(
+	fn get_total_delegation_by_asset(
 		operator: &T::AccountId,
-		asset_id: &Asset<T::AssetId>,
+		asset: &Asset<T::AssetId>,
 	) -> BalanceOf<T> {
 		Operators::<T>::get(operator).map_or(Zero::zero(), |metadata| {
 			metadata
 				.delegations
 				.iter()
-				.filter(|stake| &stake.asset_id == asset_id)
+				.filter(|stake| &stake.asset == asset)
 				.fold(Zero::zero(), |acc, stake| acc + stake.amount)
 		})
 	}
@@ -64,39 +64,17 @@ impl<T: crate::Config>
 			metadata
 				.delegations
 				.iter()
-				.map(|stake| (stake.delegator.clone(), stake.amount, stake.asset_id))
+				.map(|stake| (stake.delegator.clone(), stake.amount, stake.asset))
 				.collect()
 		})
 	}
 
-	fn has_delegator_selected_blueprint(
-		delegator: &T::AccountId,
-		operator: &T::AccountId,
-		blueprint_id: BlueprintId,
-	) -> bool {
-		// Get delegator metadata
-		if let Some(metadata) = Delegators::<T>::get(delegator) {
-			// Find delegation to specific operator and check its blueprint selection
-			metadata.delegations.iter().any(|delegation| {
-				delegation.operator == *operator
-					&& match &delegation.blueprint_selection {
-						DelegatorBlueprintSelection::Fixed(blueprints) => {
-							blueprints.contains(&blueprint_id)
-						},
-						DelegatorBlueprintSelection::All => true,
-					}
-			})
-		} else {
-			false
-		}
-	}
-
 	fn get_user_deposit_with_locks(
 		who: &T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 	) -> Option<UserDepositWithLocks<BalanceOf<T>, BlockNumberFor<T>>> {
 		Delegators::<T>::get(who).and_then(|metadata| {
-			metadata.deposits.get(&asset_id).map(|deposit| UserDepositWithLocks {
+			metadata.deposits.get(&asset).map(|deposit| UserDepositWithLocks {
 				unlocked_amount: deposit.amount,
 				amount_with_locks: deposit.locks.as_ref().map(|locks| locks.to_vec()),
 			})

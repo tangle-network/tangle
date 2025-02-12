@@ -284,10 +284,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		}
 	}
 
-	fn get_total_delegation_by_asset_id(
-		_operator: &AccountId,
-		_asset_id: &Asset<AssetId>,
-	) -> Balance {
+	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {
 		Default::default()
 	}
 
@@ -297,18 +294,9 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		Default::default()
 	}
 
-	fn has_delegator_selected_blueprint(
-		_delegator: &AccountId,
-		_operator: &AccountId,
-		_blueprint_id: BlueprintId,
-	) -> bool {
-		// For mock implementation, always return true
-		true
-	}
-
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<AssetId>,
+		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
 			delegation_info.borrow().deposits.get(&(who.clone(), asset_id)).cloned()

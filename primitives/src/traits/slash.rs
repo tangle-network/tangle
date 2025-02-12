@@ -20,19 +20,18 @@ use sp_runtime::DispatchError;
 
 /// Trait for managing slashing in the Tangle network.
 /// This trait provides functionality to slash operators and delegators.
-pub trait SlashManager<AccountId, Balance, AssetId> {
+pub trait SlashManager<AccountId> {
 	/// Slash an operator's stake for an offense.
 	///
 	/// # Parameters
 	/// * `unapplied_slash` - The unapplied slash record containing slash details
-	fn slash_operator(
-		unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
-	) -> Result<Weight, DispatchError>;
+	fn slash_operator(unapplied_slash: &UnappliedSlash<AccountId>)
+		-> Result<Weight, DispatchError>;
 }
 
-impl<AccountId, Balance, AssetId> SlashManager<AccountId, Balance, AssetId> for () {
+impl<AccountId> SlashManager<AccountId> for () {
 	fn slash_operator(
-		_unapplied_slash: &UnappliedSlash<AccountId, Balance, AssetId>,
+		_unapplied_slash: &UnappliedSlash<AccountId>,
 	) -> Result<Weight, DispatchError> {
 		Ok(Weight::zero())
 	}

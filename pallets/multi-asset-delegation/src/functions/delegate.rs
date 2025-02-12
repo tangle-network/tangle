@@ -74,7 +74,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The account ID of the operator to delegate to
-	/// * `asset_id` - The asset being delegated
+	/// * `asset` - The asset being delegated
 	/// * `amount` - The amount to delegate
 	/// * `blueprint_selection` - Strategy for selecting which blueprints to work with:
 	///   - Fixed: Work with specific blueprints
@@ -105,7 +105,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_delegate(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 	) -> DispatchResult {
@@ -119,7 +119,7 @@ impl<T: Config> Pallet<T> {
 
 			// Ensure enough deposited balance and update it
 			let user_deposit =
-				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
+				metadata.deposits.get_mut(&asset).ok_or(Error::<T>::InsufficientBalance)?;
 			user_deposit
 				.increase_delegated_amount(amount)
 				.map_err(|_| Error::<T>::InsufficientBalance)?;
@@ -128,7 +128,7 @@ impl<T: Config> Pallet<T> {
 			let delegation_exists = metadata
 				.delegations
 				.iter()
-				.position(|d| d.operator == operator && d.asset_id == asset_id && !d.is_nomination);
+				.position(|d| d.operator == operator && d.asset == asset && !d.is_nomination);
 
 			match delegation_exists {
 				Some(idx) => {
@@ -144,7 +144,7 @@ impl<T: Config> Pallet<T> {
 						.try_push(BondInfoDelegator {
 							operator: operator.clone(),
 							amount,
-							asset_id,
+							asset,
 							blueprint_selection,
 							is_nomination: false,
 						})
@@ -155,10 +155,10 @@ impl<T: Config> Pallet<T> {
 			}
 
 			// Update operator metadata
-			Self::update_operator_metadata(&operator, &who, asset_id, amount, true)?;
+			Self::update_operator_metadata(&operator, &who, asset, amount, true)?;
 
 			// Emit event
-			Self::deposit_event(Event::Delegated { who: who.clone(), operator, amount, asset_id });
+			Self::deposit_event(Event::Delegated { who: who.clone(), operator, amount, asset });
 
 			Ok(())
 		})
@@ -181,7 +181,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The account ID of the operator
-	/// * `asset_id` - The asset to unstake
+	/// * `asset` - The asset to unstake
 	/// * `amount` - The amount to unstake
 	///
 	/// # Errors
@@ -206,7 +206,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_schedule_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
@@ -218,14 +218,14 @@ impl<T: Config> Pallet<T> {
 			let delegation = metadata
 				.delegations
 				.iter()
-				.find(|d| d.operator == operator && d.asset_id == asset_id && !d.is_nomination)
+				.find(|d| d.operator == operator && d.asset == asset && !d.is_nomination)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
 			// Verify sufficient delegation amount considering existing unstake requests
 			let pending_unstake_amount: BalanceOf<T> = metadata
 				.delegator_unstake_requests
 				.iter()
-				.filter(|r| r.operator == operator && r.asset_id == asset_id)
+				.filter(|r| r.operator == operator && r.asset == asset)
 				.fold(Zero::zero(), |acc, r| acc.saturating_add(r.amount));
 
 			let available_amount = delegation.amount.saturating_sub(pending_unstake_amount);
@@ -235,7 +235,7 @@ impl<T: Config> Pallet<T> {
 			Self::create_unstake_request(
 				metadata,
 				operator.clone(),
-				asset_id,
+				asset,
 				amount,
 				delegation.blueprint_selection.clone(),
 				false, // is_nomination = false for regular delegations
@@ -260,7 +260,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// * `who` - The account ID of the delegator
 	/// * `operator` - The operator whose unstake request to cancel
-	/// * `asset_id` - The asset of the unstake request
+	/// * `asset` - The asset of the unstake request
 	/// * `amount` - The exact amount of the unstake request to cancel
 	///
 	/// # Errors
@@ -283,7 +283,7 @@ impl<T: Config> Pallet<T> {
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
@@ -296,7 +296,7 @@ impl<T: Config> Pallet<T> {
 				.delegator_unstake_requests
 				.iter()
 				.position(|r| {
-					r.asset_id == asset_id
+					r.asset == asset
 						&& r.amount == amount
 						&& r.operator == operator
 						&& !r.is_nomination
@@ -360,7 +360,7 @@ impl<T: Config> Pallet<T> {
 				// Sum up amounts by operator and asset
 				for &idx in &indices_to_remove {
 					if let Some(request) = metadata.delegator_unstake_requests.get(idx) {
-						let key = (request.operator.clone(), request.asset_id);
+						let key = (request.operator.clone(), request.asset);
 						let entry = event_aggregates.entry(key).or_insert(Zero::zero());
 						*entry = entry.saturating_add(request.amount);
 					}
@@ -368,10 +368,10 @@ impl<T: Config> Pallet<T> {
 
 				// Apply updates in batches
 				// 1. Update deposits
-				for (asset_id, amount) in deposit_updates {
+				for (asset, amount) in deposit_updates {
 					metadata
 						.deposits
-						.get_mut(&asset_id)
+						.get_mut(&asset)
 						.ok_or(Error::<T>::InsufficientBalance)?
 						.decrease_delegated_amount(amount)
 						.map_err(|_| Error::<T>::InsufficientBalance)?;
@@ -397,8 +397,8 @@ impl<T: Config> Pallet<T> {
 				}
 
 				// 4. Update operator metadata
-				for ((operator, asset_id), amount) in operator_updates {
-					Self::update_operator_metadata(&operator, &who, asset_id, amount, false)?;
+				for ((operator, asset), amount) in operator_updates {
+					Self::update_operator_metadata(&operator, &who, asset, amount, false)?;
 				}
 
 				// 5. Remove processed requests
@@ -411,7 +411,7 @@ impl<T: Config> Pallet<T> {
 				// Convert the aggregates map into a vector for return
 				Ok(event_aggregates
 					.into_iter()
-					.map(|((operator, asset_id), amount)| (operator, asset_id, amount))
+					.map(|((operator, asset), amount)| (operator, asset, amount))
 					.collect())
 			},
 		)
@@ -510,7 +510,7 @@ impl<T: Config> Pallet<T> {
 						.try_push(BondInfoDelegator {
 							operator: operator.clone(),
 							amount,
-							asset_id: Asset::Custom(Zero::zero()),
+							asset: Asset::Custom(Zero::zero()),
 							blueprint_selection,
 							is_nomination: true,
 						})
@@ -749,7 +749,7 @@ impl<T: Config> Pallet<T> {
 	fn update_operator_metadata(
 		operator: &T::AccountId,
 		who: &T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		is_increase: bool,
 	) -> DispatchResult {
@@ -767,7 +767,7 @@ impl<T: Config> Pallet<T> {
 				);
 
 				if let Some(existing_delegation) =
-					delegations.iter_mut().find(|d| d.delegator == *who && d.asset_id == asset_id)
+					delegations.iter_mut().find(|d| d.delegator == *who && d.asset == asset)
 				{
 					existing_delegation.amount = existing_delegation
 						.amount
@@ -775,7 +775,7 @@ impl<T: Config> Pallet<T> {
 						.ok_or(Error::<T>::OverflowRisk)?;
 				} else {
 					delegations
-						.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
+						.try_push(DelegatorBond { delegator: who.clone(), amount, asset })
 						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
 					operator_metadata.delegation_count =
 						operator_metadata.delegation_count.saturating_add(1);
@@ -783,7 +783,7 @@ impl<T: Config> Pallet<T> {
 			} else {
 				// Decreasing or removing delegation
 				if let Some(index) =
-					delegations.iter().position(|d| d.delegator == *who && d.asset_id == asset_id)
+					delegations.iter().position(|d| d.delegator == *who && d.asset == asset)
 				{
 					let delegation = &mut delegations[index];
 					ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
@@ -862,7 +862,7 @@ impl<T: Config> Pallet<T> {
 			.find(|(_, d)| d.operator == *operator && d.is_nomination)
 		{
 			ensure!(
-				delegation.asset_id == Asset::Custom(Zero::zero()),
+				delegation.asset == Asset::Custom(Zero::zero()),
 				Error::<T>::AssetNotWhitelisted
 			);
 			Ok(Some((index, delegation.amount)))
@@ -875,14 +875,14 @@ impl<T: Config> Pallet<T> {
 	fn create_unstake_request(
 		metadata: &mut DelegatorMetadataOf<T>,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 		is_nomination: bool,
 	) -> DispatchResult {
 		let unstake_request = BondLessRequest {
 			operator,
-			asset_id,
+			asset,
 			amount,
 			requested_round: Self::current_round(),
 			blueprint_selection,
@@ -914,11 +914,11 @@ impl<T: Config> Pallet<T> {
 				continue;
 			}
 
-			*deposit_updates.entry(request.asset_id).or_default() += request.amount;
+			*deposit_updates.entry(request.asset).or_default() += request.amount;
 
-			let delegation_key = (request.operator.clone(), request.asset_id);
+			let delegation_key = (request.operator.clone(), request.asset);
 			if let Some(delegation_idx) = metadata.delegations.iter().position(|d| {
-				d.operator == request.operator && d.asset_id == request.asset_id && !d.is_nomination
+				d.operator == request.operator && d.asset == request.asset && !d.is_nomination
 			}) {
 				let (_, total_unstake) = delegation_updates
 					.entry(delegation_key.clone())

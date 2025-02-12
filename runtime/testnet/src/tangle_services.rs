@@ -153,7 +153,6 @@ impl pallet_services::Config for Runtime {
 	type Currency = Balances;
 	type Fungibles = Assets;
 	type PalletId = ServicesPalletId;
-	type SlashRecipient = TreasuryAccount;
 	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;

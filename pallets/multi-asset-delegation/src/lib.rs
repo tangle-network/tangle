@@ -218,6 +218,9 @@ pub mod pallet {
 			Balance = BalanceOf<Self>,
 			CurrencyToVote = Self::CurrencyToVote,
 		>;
+
+		#[pallet::constant]
+		type SlashRecipient: Get<Self::AccountId>;
 	}
 
 	/// The pallet struct.
@@ -280,9 +283,9 @@ pub mod pallet {
 		/// An operator has gone online.
 		OperatorWentOnline { who: T::AccountId },
 		/// A deposit has been made.
-		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset_id: Asset<T::AssetId> },
+		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset: Asset<T::AssetId> },
 		/// An withdraw has been scheduled.
-		ScheduledWithdraw { who: T::AccountId, amount: BalanceOf<T>, asset_id: Asset<T::AssetId> },
+		ScheduledWithdraw { who: T::AccountId, amount: BalanceOf<T>, asset: Asset<T::AssetId> },
 		/// An withdraw has been executed.
 		ExecutedWithdraw { who: T::AccountId },
 		/// An withdraw has been cancelled.
@@ -292,13 +295,13 @@ pub mod pallet {
 			who: T::AccountId,
 			operator: T::AccountId,
 			amount: BalanceOf<T>,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 		},
 		/// A delegator unstake request has been scheduled.
 		DelegatorUnstakeScheduled {
 			who: T::AccountId,
 			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			when: RoundIndex,
 		},
@@ -306,20 +309,59 @@ pub mod pallet {
 		DelegatorUnstakeExecuted {
 			who: T::AccountId,
 			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		},
 		/// A delegator unstake request has been cancelled.
 		DelegatorUnstakeCancelled {
 			who: T::AccountId,
 			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		},
-		/// Operator has been slashed
-		OperatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
-		/// Delegator has been slashed
-		DelegatorSlashed { who: T::AccountId, amount: BalanceOf<T> },
+		/// An Operator has been slashed.
+		OperatorSlashed {
+			/// The account that has been slashed.
+			operator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
+		/// A Delegator has been slashed.
+		DelegatorSlashed {
+			/// The account that has been slashed.
+			delegator: T::AccountId,
+			/// The amount of the slash.
+			amount: BalanceOf<T>,
+			/// The asset being slashed.
+			asset: Asset<T::AssetId>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
+		/// A Delegator's nominated stake has been slashed.
+		NominatedSlash {
+			/// The account that has been slashed
+			delegator: T::AccountId,
+			/// The operator associated with the slash
+			operator: T::AccountId,
+			/// The amount of the slash
+			amount: BalanceOf<T>,
+			/// Service ID
+			service_id: u64,
+			/// Blueprint ID
+			blueprint_id: u64,
+			/// Era index
+			era: u32,
+		},
 		/// EVM execution reverted with a reason.
 		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
 		/// A nomination has been delegated
@@ -721,7 +763,7 @@ pub mod pallet {
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
-		/// * `asset_id` - ID of the asset to deposit
+		/// * `asset` - Asset on to deposit
 		/// * `amount` - Amount to deposit
 		/// * `evm_address` - Optional EVM address
 		///
@@ -733,12 +775,12 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn deposit(
 			origin: OriginFor<T>,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			evm_address: Option<H160>,
 			lock_multiplier: Option<LockMultiplier>,
 		) -> DispatchResult {
-			let who = match (asset_id, evm_address) {
+			let who = match (asset, evm_address) {
 				(Asset::Custom(_), None) => ensure_signed(origin)?,
 				(Asset::Erc20(_), Some(addr)) => {
 					ensure_pallet::<T, _>(origin)?;
@@ -753,11 +795,11 @@ pub mod pallet {
 				},
 			};
 			// ensure the caps have not been exceeded
-			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset_id)
+			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset)
 				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
 			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
-			Self::process_deposit(who.clone(), asset_id, amount, lock_multiplier)?;
-			Self::deposit_event(Event::Deposited { who, amount, asset_id });
+			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
+			Self::deposit_event(Event::Deposited { who, amount, asset });
 			Ok(())
 		}
 
@@ -770,7 +812,7 @@ pub mod pallet {
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
-		/// * `asset_id` - ID of the asset to withdraw
+		/// * `asset` - Asset on to withdraw
 		/// * `amount` - Amount to withdraw
 		///
 		/// # Errors
@@ -781,12 +823,12 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn schedule_withdraw(
 			origin: OriginFor<T>,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_withdraw(who.clone(), asset_id, amount)?;
-			Self::deposit_event(Event::ScheduledWithdraw { who, amount, asset_id });
+			Self::process_schedule_withdraw(who.clone(), asset, amount)?;
+			Self::deposit_event(Event::ScheduledWithdraw { who, amount, asset });
 			Ok(())
 		}
 
@@ -829,7 +871,7 @@ pub mod pallet {
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
-		/// * `asset_id` - ID of the asset withdrawal to cancel
+		/// * `asset` - Asset on withdrawal to cancel
 		/// * `amount` - Amount of the withdrawal to cancel
 		///
 		/// # Errors
@@ -839,11 +881,11 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn cancel_withdraw(
 			origin: OriginFor<T>,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_withdraw(who.clone(), asset_id, amount)?;
+			Self::process_cancel_withdraw(who.clone(), asset, amount)?;
 			Self::deposit_event(Event::CancelledWithdraw { who });
 			Ok(())
 		}
@@ -858,7 +900,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `operator` - Operator to delegate to
-		/// * `asset_id` - ID of asset to delegate
+		/// * `asset` - ID of asset to delegate
 		/// * `amount` - Amount to delegate
 		/// * `blueprint_selection` - Blueprint selection strategy
 		///
@@ -872,7 +914,7 @@ pub mod pallet {
 		pub fn delegate(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 		) -> DispatchResult {
@@ -880,11 +922,11 @@ pub mod pallet {
 			Self::process_delegate(
 				who.clone(),
 				operator.clone(),
-				asset_id,
+				asset,
 				amount,
 				blueprint_selection,
 			)?;
-			Self::deposit_event(Event::Delegated { who, operator, asset_id, amount });
+			Self::deposit_event(Event::Delegated { who, operator, asset, amount });
 			Ok(())
 		}
 
@@ -898,7 +940,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `operator` - Operator to unstake from
-		/// * `asset_id` - ID of asset to unstake
+		/// * `asset` - ID of asset to unstake
 		/// * `amount` - Amount to unstake
 		///
 		/// # Errors
@@ -911,20 +953,15 @@ pub mod pallet {
 		pub fn schedule_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_schedule_delegator_unstake(
-				who.clone(),
-				operator.clone(),
-				asset_id,
-				amount,
-			)?;
+			Self::process_schedule_delegator_unstake(who.clone(), operator.clone(), asset, amount)?;
 			Self::deposit_event(Event::DelegatorUnstakeScheduled {
 				who,
 				operator,
-				asset_id,
+				asset,
 				amount,
 				when: Self::current_round() + T::DelegationBondLessDelay::get(),
 			});
@@ -953,11 +990,11 @@ pub mod pallet {
 			let unstake_results = Self::process_execute_delegator_unstake(who.clone())?;
 
 			// Emit an event for each operator/asset combination that was unstaked
-			for (operator, asset_id, amount) in unstake_results {
+			for (operator, asset, amount) in unstake_results {
 				Self::deposit_event(Event::DelegatorUnstakeExecuted {
 					who: who.clone(),
 					operator,
-					asset_id,
+					asset,
 					amount,
 				});
 			}
@@ -974,7 +1011,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `operator` - Operator to cancel unstake from
-		/// * `asset_id` - ID of asset unstake to cancel
+		/// * `asset` - ID of asset unstake to cancel
 		/// * `amount` - Amount of unstake to cancel
 		///
 		/// # Errors
@@ -986,22 +1023,12 @@ pub mod pallet {
 		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
-			Self::process_cancel_delegator_unstake(
-				who.clone(),
-				operator.clone(),
-				asset_id,
-				amount,
-			)?;
-			Self::deposit_event(Event::DelegatorUnstakeCancelled {
-				who,
-				operator,
-				asset_id,
-				amount,
-			});
+			Self::process_cancel_delegator_unstake(who.clone(), operator.clone(), asset, amount)?;
+			Self::deposit_event(Event::DelegatorUnstakeCancelled { who, operator, asset, amount });
 			Ok(())
 		}
 

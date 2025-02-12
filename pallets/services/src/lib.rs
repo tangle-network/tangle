@@ -29,6 +29,7 @@ use sp_runtime::{
 	traits::{Get, Zero},
 	DispatchResult,
 };
+use tangle_primitives::traits::SlashManager;
 use tangle_primitives::{
 	services::{
 		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
@@ -91,9 +92,6 @@ pub mod module {
 		/// This account receives slashed assets upon slash event processing.
 		#[pallet::constant]
 		type PalletId: Get<PalletId>;
-
-		#[pallet::constant]
-		type SlashRecipient: Get<Self::AccountId>;
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
@@ -189,11 +187,7 @@ pub mod module {
 		>;
 
 		/// Manager for slashing that dispatches slash operations to `pallet-multi-asset-delegation`.
-		type SlashManager: tangle_primitives::traits::SlashManager<
-			Self::AccountId,
-			BalanceOf<Self>,
-			Self::AssetId,
-		>;
+		type SlashManager: tangle_primitives::traits::SlashManager<Self::AccountId>;
 
 		/// Number of eras that slashes are deferred by, after computation.
 		///
@@ -243,7 +237,7 @@ pub mod module {
 			for (index, slash) in prefix_iter {
 				// TODO: This call must be all or nothing.
 				// TODO: If fail then revert all storage changes
-				match Self::apply_slash(slash) {
+				match T::SlashManager::slash_operator(&slash) {
 					Ok(weight_used) => {
 						weight = weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
 						// Remove the slash from storage after successful application
@@ -552,12 +546,12 @@ pub mod module {
 			index: u32,
 			/// The account that has an unapplied slash.
 			operator: T::AccountId,
-			/// The amount of the slash.
-			amount: BalanceOf<T>,
 			/// Service ID
 			service_id: u64,
 			/// Blueprint ID
 			blueprint_id: u64,
+			/// Slash percent
+			slash_percent: Percent,
 			/// Era index
 			era: u32,
 		},
@@ -567,40 +561,12 @@ pub mod module {
 			index: u32,
 			/// The account that has an unapplied slash.
 			operator: T::AccountId,
-			/// The amount of the slash.
-			amount: BalanceOf<T>,
 			/// Service ID
 			service_id: u64,
 			/// Blueprint ID
 			blueprint_id: u64,
-			/// Era index
-			era: u32,
-		},
-		/// An Operator has been slashed.
-		OperatorSlashed {
-			/// The account that has been slashed.
-			operator: T::AccountId,
-			/// The amount of the slash.
-			amount: BalanceOf<T>,
-			/// Service ID
-			service_id: u64,
-			/// Blueprint ID
-			blueprint_id: u64,
-			/// Era index
-			era: u32,
-		},
-		/// A Delegator has been slashed.
-		DelegatorSlashed {
-			/// The account that has been slashed.
-			delegator: T::AccountId,
-			/// The amount of the slash.
-			amount: BalanceOf<T>,
-			/// The asset being slashed.
-			asset: Asset<T::AssetId>,
-			/// Service ID
-			service_id: u64,
-			/// Blueprint ID
-			blueprint_id: u64,
+			/// Slash percent
+			slash_percent: Percent,
 			/// Era index
 			era: u32,
 		},
@@ -610,21 +576,6 @@ pub mod module {
 			revision: u32,
 			/// The address of the Master Blueprint Service Manager.
 			address: H160,
-		},
-		/// A Delegator's nominated stake has been slashed.
-		NominatedSlash {
-			/// The account that has been slashed
-			delegator: T::AccountId,
-			/// The operator associated with the slash
-			operator: T::AccountId,
-			/// The amount of the slash
-			amount: BalanceOf<T>,
-			/// Service ID
-			service_id: u64,
-			/// Blueprint ID
-			blueprint_id: u64,
-			/// Era index
-			era: u32,
 		},
 	}
 
@@ -773,7 +724,7 @@ pub mod module {
 		u32,
 		Identity,
 		u32,
-		UnappliedSlash<T::AccountId, BalanceOf<T>, T::AssetId>,
+		UnappliedSlash<T::AccountId>,
 		ResultQuery<Error<T>::UnappliedSlashNotFound>,
 	>;
 
@@ -1293,7 +1244,7 @@ pub mod module {
 
 			// Apply all slashes
 			for (_, slash) in current_slashes.into_iter().chain(last_slashes) {
-				Self::apply_slash(slash)?;
+				T::SlashManager::slash_operator(&slash)?;
 			}
 
 			// Clean up storage
@@ -1483,7 +1434,7 @@ pub mod module {
 		/// * `origin` - The origin of the call. Must be signed by an authorized Slash Origin.
 		/// * `offender` - The account ID of the operator to be slashed.
 		/// * `service_id` - The ID of the service for which to slash the operator.
-		/// * `percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value.
+		/// * `slash_percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value.
 		///
 		/// # Errors
 		///
@@ -1495,7 +1446,7 @@ pub mod module {
 			origin: OriginFor<T>,
 			offender: T::AccountId,
 			#[pallet::compact] service_id: u64,
-			#[pallet::compact] percent: Percent,
+			#[pallet::compact] slash_percent: Percent,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
@@ -1504,7 +1455,7 @@ pub mod module {
 			ensure!(slashing_origin == caller, DispatchError::BadOrigin);
 
 			// Ensure slash percent is greater than 0
-			ensure!(!percent.is_zero(), Error::<T>::InvalidSlashPercentage);
+			ensure!(!slash_percent.is_zero(), Error::<T>::InvalidSlashPercentage);
 
 			// Verify offender is an operator for this service
 			ensure!(
@@ -1519,7 +1470,13 @@ pub mod module {
 			);
 
 			// Calculate the slash amounts for operator and delegators
-			let unapplied_slash = Self::calculate_slash(&caller, &service, &offender, percent)?;
+			let unapplied_slash = UnappliedSlash {
+				era: T::OperatorDelegationManager::get_current_round(),
+				blueprint_id: service.blueprint,
+				service_id: service.id,
+				operator: offender.clone(),
+				slash_percent,
+			};
 
 			// Store the slash for later processing
 			let index = Self::next_unapplied_slash_index();
@@ -1531,7 +1488,7 @@ pub mod module {
 				operator: offender,
 				blueprint_id: service.blueprint,
 				service_id,
-				amount: unapplied_slash.own,
+				slash_percent,
 				era: unapplied_slash.era,
 			});
 
@@ -1577,7 +1534,7 @@ pub mod module {
 				operator: unapplied_slash.operator,
 				blueprint_id: service.blueprint,
 				service_id: unapplied_slash.service_id,
-				amount: unapplied_slash.own,
+				slash_percent: unapplied_slash.slash_percent,
 				era,
 			});
 

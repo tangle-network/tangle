@@ -366,7 +366,6 @@ impl pallet_services::Config for Runtime {
 	type Currency = Balances;
 	type Fungibles = Assets;
 	type PalletId = ServicePalletAccountId;
-	type SlashRecipient = SlashRecipient;
 	type SlashManager = ();
 	type AssetId = AssetId;
 	type EvmRunner = MockedEvmRunner;
@@ -503,6 +502,7 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SlashRecipient = SlashRecipient;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;

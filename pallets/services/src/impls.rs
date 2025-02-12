@@ -102,7 +102,7 @@ impl<T: crate::Config, Balance: Default>
 		Default::default()
 	}
 
-	fn get_total_delegation_by_asset_id(_operator: &T::AccountId, _asset_id: &AssetId) -> Balance {
+	fn get_total_delegation_by_asset(_operator: &T::AccountId, _asset_id: &AssetId) -> Balance {
 		Default::default()
 	}
 
@@ -112,17 +112,9 @@ impl<T: crate::Config, Balance: Default>
 		Vec::new()
 	}
 
-	fn has_delegator_selected_blueprint(
-		_delegator: &T::AccountId,
-		_operator: &T::AccountId,
-		_blueprint_id: BlueprintId,
-	) -> bool {
-		true // For benchmarking, always return true
-	}
-
 	fn get_user_deposit_with_locks(
 		_who: &T::AccountId,
-		_asset_id: Asset<AssetId>,
+		_asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
 		None
 	}

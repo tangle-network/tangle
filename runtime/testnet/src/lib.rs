@@ -1520,6 +1520,7 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;

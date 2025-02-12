@@ -26,7 +26,7 @@ pub struct UserRestakeUpdate<Balance, AssetId: AssetIdT> {
 
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
 pub struct ServiceRewards<AssetId: AssetIdT, Balance> {
-	asset_id: Asset<AssetId>,
+	asset: Asset<AssetId>,
 	amount: Balance,
 }
 

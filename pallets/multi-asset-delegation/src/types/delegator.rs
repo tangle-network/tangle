@@ -39,6 +39,14 @@ impl<MaxBlueprints: Get<u32>> Default for DelegatorBlueprintSelection<MaxBluepri
 	}
 }
 
+impl<MaxBlueprints: Get<u32>> DelegatorBlueprintSelection<MaxBlueprints> {
+	pub fn contains(&self, blueprint_id: &BlueprintId) -> bool {
+		match self {
+			DelegatorBlueprintSelection::Fixed(blueprints) => blueprints.contains(blueprint_id),
+			DelegatorBlueprintSelection::All => true,
+		}
+	}
+}
 impl<MaxBlueprints: Get<u32>> From<Vec<BlueprintId>>
 	for DelegatorBlueprintSelection<MaxBlueprints>
 {
@@ -68,7 +76,7 @@ pub enum DelegatorStatus {
 #[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct WithdrawRequest<AssetId: Encode + Decode, Balance> {
 	/// The ID of the asset to be withdrawd.
-	pub asset_id: Asset<AssetId>,
+	pub asset: Asset<AssetId>,
 	/// The amount of the asset to be withdrawn.
 	pub amount: Balance,
 	/// The round in which the withdraw was requested.
@@ -81,7 +89,7 @@ pub struct BondLessRequest<AccountId, AssetId: Encode + Decode, Balance, MaxBlue
 	/// The account ID of the operator.
 	pub operator: AccountId,
 	/// The ID of the asset to reduce the stake of.
-	pub asset_id: Asset<AssetId>,
+	pub asset: Asset<AssetId>,
 	/// The amount by which to reduce the stake.
 	pub amount: Balance,
 	/// The round in which the stake reduction was requested.
@@ -101,7 +109,7 @@ pub struct BondInfoDelegator<AccountId, Balance, AssetId: Encode + Decode, MaxBl
 	/// The amount being delegated.
 	pub amount: Balance,
 	/// The asset being delegated.
-	pub asset_id: Asset<AssetId>,
+	pub asset: Asset<AssetId>,
 	/// The blueprint selection for this delegation.
 	pub blueprint_selection: DelegatorBlueprintSelection<MaxBlueprints>,
 	/// Whether this delegation is from nominated tokens
@@ -217,14 +225,14 @@ impl<
 	}
 
 	/// Calculates the total delegation amount for a specific asset.
-	pub fn calculate_delegation_by_asset(&self, asset_id: Asset<AssetId>) -> Balance
+	pub fn calculate_delegation_by_asset(&self, asset: Asset<AssetId>) -> Balance
 	where
 		Balance: Default + core::ops::AddAssign + Clone + CheckedAdd,
 		AssetId: Eq + PartialEq,
 	{
 		let mut total = Balance::default();
 		for stake in &self.delegations {
-			if stake.asset_id == asset_id {
+			if stake.asset == asset {
 				total = total.checked_add(&stake.amount).unwrap_or(total);
 			}
 		}

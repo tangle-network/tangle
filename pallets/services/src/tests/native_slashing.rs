@@ -68,22 +68,12 @@ fn test_basic_native_restaking_slash() {
 
 		assert_eq!(unapplied_slash.era, 0);
 		assert_eq!(unapplied_slash.operator, operator);
-		assert_eq!(unapplied_slash.reporters, vec![slashing_origin]);
+		assert_eq!(unapplied_slash.service_id, service_id);
+		assert_eq!(unapplied_slash.blueprint_id, blueprint_id);
+		assert_eq!(unapplied_slash.slash_percent, slash_percent);
 
-		// Verify operator's own slash amount
-		let operator_stake = 1000;
-		let expected_operator_slash =
-			slash_percent.mul_floor(native_exposure.mul_floor(operator_stake));
-		assert_eq!(unapplied_slash.own, expected_operator_slash);
-
-		// Verify delegator slash amount
-		let delegator_stake = stake_amount / 2;
-		let expected_delegator_slash =
-			slash_percent.mul_floor(native_exposure.mul_floor(delegator_stake));
-		assert_eq!(
-			unapplied_slash.others,
-			vec![(delegator, Asset::Custom(0u32.into()), expected_delegator_slash)]
-		);
+		// TODO: Verify final state after applying slashes
+		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
 	});
 }
 
@@ -137,18 +127,6 @@ fn test_mixed_native_and_regular_delegation_slash() {
 			slash_percent
 		));
 
-		let native_exposure = security_commitments
-			.iter()
-			.find(|(asset, _)| asset.is_native())
-			.map(|(_, commitment)| commitment.exposure_percent)
-			.unwrap();
-
-		let usdc_exposure = security_commitments
-			.iter()
-			.find(|(asset, _)| *asset == &Asset::Custom(USDC))
-			.map(|(_, commitment)| commitment.exposure_percent)
-			.unwrap();
-
 		// Verify the unapplied slash is stored correctly
 		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
 		assert_eq!(slashes.len(), 1, "Should have one unapplied slash");
@@ -156,33 +134,12 @@ fn test_mixed_native_and_regular_delegation_slash() {
 		let (_, slash) = &slashes[0];
 		assert_eq!(slash.service_id, service_id);
 		assert_eq!(slash.operator, operator);
+		assert_eq!(slash.blueprint_id, blueprint_id);
+		assert_eq!(slash.era, 0);
+		assert_eq!(slash.slash_percent, slash_percent);
 
-		// Verify native stake slash
-		let operator_stake = 1000;
-		let expected_operator_slash =
-			slash_percent.mul_floor(native_exposure.mul_floor(operator_stake));
-		assert_eq!(slash.own, expected_operator_slash);
-
-		// Verify delegator slashes
-		assert_eq!(
-			slash.others.len(),
-			2,
-			"Should have slashes for both native and USDC delegations"
-		);
-
-		// Find and verify native delegation slash
-		let native_slash = slash.others.iter().find(|(_, asset, _)| asset.is_native()).unwrap();
-		assert_eq!(native_slash.0, delegator);
-		assert_eq!(
-			native_slash.2,
-			native_exposure.mul_floor(slash_percent.mul_floor(native_stake / 2))
-		);
-
-		// Find and verify USDC delegation slash
-		let usdc_slash =
-			slash.others.iter().find(|(_, asset, _)| *asset == Asset::Custom(USDC)).unwrap();
-		assert_eq!(usdc_slash.0, delegator);
-		assert_eq!(usdc_slash.2, usdc_exposure.mul_floor(slash_percent.mul_floor(regular_stake)));
+		// TODO: Verify final state after applying slashes
+		assert_ok!(MultiAssetDelegation::slash_operator(&slash));
 	});
 }
 
@@ -300,48 +257,8 @@ fn test_native_restaking_slash_with_multiple_services() {
 		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
 		assert_eq!(slashes.len(), 2);
 
-		let native_exposure = security_commitments
-			.iter()
-			.find(|(asset, _)| asset.is_native())
-			.map(|(_, commitment)| commitment.exposure_percent)
-			.unwrap();
-
-		// First slash should be 50% from service_id1
-		let (_, first_slash) = &slashes[0];
-		assert_eq!(first_slash.service_id, service_id1);
-		assert_eq!(first_slash.operator, bob);
-		assert_eq!(
-			first_slash.own,
-			Percent::from_percent(10).mul_floor(first_slash_percent.mul_floor(stake_amount))
-		);
-		assert_eq!(first_slash.others.len(), 1);
-		assert_eq!(first_slash.others[0].0, delegator);
-		assert_eq!(
-			first_slash.others[0].2,
-			native_exposure.mul_floor(first_slash_percent.mul_floor(stake_amount))
-		);
-
-		// Second slash should be 25% from service_id 1
-		let (_, second_slash) = &slashes[1];
-		assert_eq!(second_slash.service_id, 1);
-		assert_eq!(second_slash.operator, bob);
-		assert_eq!(
-			second_slash.own,
-			Percent::from_percent(10).mul_floor(second_slash_percent.mul_floor(stake_amount))
-		);
-		assert_eq!(second_slash.others.len(), 1);
-		assert_eq!(second_slash.others[0].0, delegator);
-		assert_eq!(
-			second_slash.others[0].2,
-			native_exposure.mul_floor(second_slash_percent.mul_floor(stake_amount))
-		);
-
-		// Apply slashes
-		let slashes: Vec<_> = UnappliedSlashes::<Runtime>::iter_prefix(0).collect();
-		for (_, slash) in slashes {
-			assert_ok!(Services::apply_slash(slash));
-		}
-
-		// TODO: Verify final state after both slashes against nominated delegation (native restaking)
+		// TODO: Verify final state after applying slashes
+		assert_ok!(MultiAssetDelegation::slash_operator(&slashes[0].1));
+		assert_ok!(MultiAssetDelegation::slash_operator(&slashes[1].1));
 	});
 }

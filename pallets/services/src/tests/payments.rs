@@ -169,6 +169,7 @@ fn test_payment_distribution_operators() {
 		// Test Case 1: Custom Asset Payment (USDC)
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let eve = mock_pub_key(EVE);
+		mint_tokens(USDC, alice.clone(), eve.clone(), 1000000000000000000u128);
 		let before_balance = Assets::balance(USDC, eve.clone());
 
 		assert_ok!(Services::request(

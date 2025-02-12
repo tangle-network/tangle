@@ -4,4 +4,3 @@ pub mod membership;
 pub mod register;
 pub mod reject;
 pub mod request;
-pub mod slash;

@@ -217,7 +217,6 @@ impl pallet_staking::Config for Runtime {
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
-	pub const DummySlashRecipient: AccountId = AccountId32::new([0u8; 32]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -417,10 +416,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 		Default::default()
 	}
 
-	fn get_total_delegation_by_asset_id(
-		_operator: &AccountId,
-		_asset_id: &Asset<AssetId>,
-	) -> Balance {
+	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {
 		Default::default()
 	}
 
@@ -432,17 +428,9 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 
 	fn get_user_deposit_with_locks(
 		_who: &AccountId,
-		_asset_id: Asset<AssetId>,
+		_asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, u64>> {
 		None
-	}
-
-	fn has_delegator_selected_blueprint(
-		_delegator: &AccountId,
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-	) -> bool {
-		true
 	}
 }
 
@@ -547,7 +535,6 @@ impl pallet_services::Config for Runtime {
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PalletId = ServicesPalletId;
-	type SlashRecipient = DummySlashRecipient;
 	type SlashManager = ();
 	type EvmRunner = MockedEvmRunner;
 	type EvmAddressMapping = PalletEVMAddressMapping;

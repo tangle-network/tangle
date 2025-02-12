@@ -99,6 +99,14 @@ impl<T: Config> Pallet<T> {
 						.refund_to
 						.try_into_address()
 						.map_err(|_| Error::<T>::ExpectedEVMAddress)?;
+
+					println!(
+						"Refunding ERC20 payment: token={:?}, from={:?}, to={:?}, amount={:?}",
+						token,
+						Self::pallet_evm_account(),
+						refund_to,
+						payment.amount
+					);
 					let (success, _weight) = Self::erc20_transfer(
 						token,
 						Self::pallet_evm_account(),

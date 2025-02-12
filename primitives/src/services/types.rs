@@ -431,7 +431,7 @@ impl Default for MembershipModel {
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 #[scale_info(skip_type_params(Balance))]
-pub struct UnappliedSlash<AccountId, Balance, AssetId> {
+pub struct UnappliedSlash<AccountId> {
 	/// The era the slash was reported.
 	pub era: EraIndex,
 	/// The Blueprint Id of the service being slashed.
@@ -440,11 +440,6 @@ pub struct UnappliedSlash<AccountId, Balance, AssetId> {
 	pub service_id: u64,
 	/// The account ID of the offending operator.
 	pub operator: AccountId,
-	/// The operator's own slash in native currency
-	pub own: Balance,
-	/// All other slashed restakers and amounts per asset.
-	/// (delegator, asset, amount)
-	pub others: Vec<(AccountId, Asset<AssetId>, Balance)>,
-	/// Reporters of the offence; bounty payout recipients.
-	pub reporters: Vec<AccountId>,
+	/// The slash percentage
+	pub slash_percent: Percent,
 }

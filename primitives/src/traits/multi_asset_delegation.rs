@@ -74,13 +74,12 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// # Parameters
 	///
 	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `asset_id`: A reference to the asset identifier for which the total delegation amount is requested.
+	/// * `asset`: A reference to the asset identifier for which the total delegation amount is requested.
 	///
 	/// # Returns
 	///
 	/// The total delegation amount as a `Balance`.
-	fn get_total_delegation_by_asset_id(operator: &AccountId, asset_id: &Asset<AssetId>)
-		-> Balance;
+	fn get_total_delegation_by_asset(operator: &AccountId, asset_id: &Asset<AssetId>) -> Balance;
 
 	/// Get all delegators for a specific operator.
 	///
@@ -99,26 +98,6 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 		operator: &AccountId,
 	) -> Vec<(AccountId, Balance, Asset<AssetId>)>;
 
-	/// Check if a delegator has selected a specific blueprint for a given operator.
-	///
-	/// This method checks whether the delegator has included the specified blueprint
-	/// in their blueprint selection for their delegation to the given operator.
-	///
-	/// # Parameters
-	///
-	/// * `delegator`: A reference to the account identifier of the delegator.
-	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `blueprint_id`: The blueprint ID to check.
-	///
-	/// # Returns
-	///
-	/// `true` if the delegator has selected the blueprint for the operator, otherwise `false`.
-	fn has_delegator_selected_blueprint(
-		delegator: &AccountId,
-		operator: &AccountId,
-		blueprint_id: crate::BlueprintId,
-	) -> bool;
-
 	/// Get a user's deposit and associated locks for a specific asset.
 	///
 	/// This method retrieves information about a user's deposit for a given asset,
@@ -127,7 +106,7 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// # Parameters
 	///
 	/// * `who`: A reference to the account identifier of the user.
-	/// * `asset_id`: The asset identifier for which to get deposit information.
+	/// * `asset`: The asset identifier for which to get deposit information.
 	///
 	/// # Returns
 	///
@@ -136,6 +115,6 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// - `None` if no deposit exists for this user and asset
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<AssetId>,
+		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>>;
 }
