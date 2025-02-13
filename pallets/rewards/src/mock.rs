@@ -311,7 +311,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
-			delegation_info.borrow().deposits.get(&(who.clone(), asset_id)).cloned()
+			delegation_info.borrow().deposits.get(&(who.clone(), asset)).cloned()
 		})
 	}
 }

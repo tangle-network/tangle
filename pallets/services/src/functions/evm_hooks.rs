@@ -1229,6 +1229,12 @@ impl<T: Config> Pallet<T> {
 		];
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
+		#[cfg(test)]
+		eprintln!(
+			"Dispatching EVM call(0x{}): {}",
+			hex::encode(transfer_fn.short_signature()),
+			transfer_fn.signature()
+		);
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 500_000;
 		let info = Self::evm_call(from, erc20, U256::zero(), data, gas_limit)?;
@@ -1319,6 +1325,12 @@ impl<T: Config> Pallet<T> {
 		value: BalanceOf<T>,
 	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
+		#[cfg(test)]
+		eprintln!(
+			"Dispatching EVM call(0x{}): {}",
+			hex::encode(f.short_signature()),
+			f.signature()
+		);
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 500_000;
 		let value = value.using_encoded(U256::from_little_endian);
@@ -1343,11 +1355,22 @@ impl<T: Config> Pallet<T> {
 			Ok(info) => {
 				log::debug!(
 					target: "evm",
-					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, result: {:?}",
+					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, value: {}, result: {:?}",
 					from,
 					to,
 					hex::encode(&data),
 					gas_limit,
+					value,
+					info,
+				);
+				#[cfg(test)]
+				eprintln!(
+					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, value: {}, result: {:?}",
+					from,
+					to,
+					hex::encode(&data),
+					gas_limit,
+					value,
 					info,
 				);
 				// if we have a revert reason, emit an event
@@ -1375,10 +1398,35 @@ impl<T: Config> Pallet<T> {
 				}
 				Ok(info)
 			},
-			Err(e) => Err(DispatchErrorWithPostInfo {
-				post_info: PostDispatchInfo { actual_weight: Some(e.weight), pays_fee: Pays::Yes },
-				error: e.error.into(),
-			}),
+			Err(e) => {
+				let actual_weight = e.weight;
+				let e = e.error.into();
+				log::error!(
+					target: "evm",
+					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, error: {:?}",
+					from,
+					to,
+					hex::encode(&data),
+					gas_limit,
+					e,
+				);
+				#[cfg(test)]
+				eprintln!(
+					"Call from: {:?}, to: {:?}, data: 0x{}, gas_limit: {:?}, error: {:?}",
+					from,
+					to,
+					hex::encode(&data),
+					gas_limit,
+					e,
+				);
+				Err(DispatchErrorWithPostInfo {
+					post_info: PostDispatchInfo {
+						actual_weight: Some(actual_weight),
+						pays_fee: Pays::Yes,
+					},
+					error: e,
+				})
+			},
 		}
 	}
 

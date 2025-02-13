@@ -10,12 +10,15 @@ fn test_delegate_nomination_through_precompile() {
 	ExtBuilder::default().build().execute_with(|| {
 		let delegator = TestAccount::Alex;
 		let operator: AccountId = AccountKeyring::Alice.into();
-		let validator = Staking::invulnerables()[0];
+		let validator = Staking::invulnerables()[0].clone();
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 
 		// Setup operator
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
 
 		// Bond and nominate through staking precompile
 		Balances::make_free_balance_be(&delegator.into(), amount);
@@ -45,7 +48,7 @@ fn test_delegate_nomination_through_precompile() {
 				delegator,
 				H160::from_low_u64_be(1),
 				PCall::delegate_nomination {
-					operator: operator.into(),
+					operator: H256::from(operator.as_ref()),
 					amount: U256::from(delegate_amount),
 					blueprint_selection: Default::default(),
 				},
@@ -64,7 +67,7 @@ fn test_delegate_nomination_invalid_operator() {
 	ExtBuilder::default().build().execute_with(|| {
         let delegator = TestAccount::Alex;
         let invalid_operator: AccountId = AccountKeyring::Bob.into();
-        let validator = Staking::invulnerables()[0];
+        let validator = Staking::invulnerables()[0].clone();
         let amount = 100_000;
         let delegate_amount = amount / 2;
 
@@ -98,7 +101,7 @@ fn test_delegate_nomination_invalid_operator() {
                 delegator,
                 H160::from_low_u64_be(1),
                 PCall::delegate_nomination {
-                    operator: invalid_operator.into(),
+                    operator: H256::from(invalid_operator.as_ref()),
                     amount: U256::from(delegate_amount),
                     blueprint_selection: Default::default(),
                 },
@@ -112,13 +115,13 @@ fn test_delegate_nomination_insufficient_balance() {
 	ExtBuilder::default().build().execute_with(|| {
         let delegator = TestAccount::Alex;
         let operator: AccountId = AccountKeyring::Alice.into();
-        let validator = Staking::invulnerables()[0];
+        let validator = Staking::invulnerables()[0].clone();
         let amount = 100_000;
         let delegate_amount = amount * 2; // More than bonded
 
         // Setup operator
         assert_ok!(MultiAssetDelegation::join_operators(
-            RuntimeOrigin::signed(operator),
+            RuntimeOrigin::signed(operator.clone()),
             10_000
         ));
 
@@ -152,7 +155,7 @@ fn test_delegate_nomination_insufficient_balance() {
                 delegator,
                 H160::from_low_u64_be(1),
                 PCall::delegate_nomination {
-                    operator: operator.into(),
+                    operator: H256::from(operator.as_ref()),
                     amount: U256::from(delegate_amount),
                     blueprint_selection: Default::default(),
                 },
@@ -166,12 +169,15 @@ fn test_delegate_nomination_unstake_lifecycle() {
 	ExtBuilder::default().build().execute_with(|| {
 		let delegator = TestAccount::Alex;
 		let operator: AccountId = AccountKeyring::Alice.into();
-		let validator = Staking::invulnerables()[0];
+		let validator = Staking::invulnerables()[0].clone();
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 
 		// Setup operator
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(operator), 10_000));
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
 
 		// Bond and nominate through staking precompile
 		Balances::make_free_balance_be(&delegator.into(), amount);
@@ -198,7 +204,7 @@ fn test_delegate_nomination_unstake_lifecycle() {
 				delegator,
 				H160::from_low_u64_be(1),
 				PCall::delegate_nomination {
-					operator: operator.into(),
+					operator: H256::from(operator.as_ref()),
 					amount: U256::from(delegate_amount),
 					blueprint_selection: Default::default(),
 				},
@@ -211,7 +217,7 @@ fn test_delegate_nomination_unstake_lifecycle() {
 				delegator,
 				H160::from_low_u64_be(1),
 				PCall::schedule_delegator_nomination_unstake {
-					operator: operator.into(),
+					operator: H256::from(operator.as_ref()),
 					amount: U256::from(delegate_amount),
 					blueprint_selection: Default::default(),
 				},
@@ -220,7 +226,7 @@ fn test_delegate_nomination_unstake_lifecycle() {
 
 		// Verify unstake request exists
 		let delegator_account: AccountId = delegator.into();
-		let metadata = Delegators::<Runtime>::get(delegator_account).unwrap();
+		let metadata = Delegators::<Runtime>::get(&delegator_account).unwrap();
 		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
 
 		// Cancel unstake
@@ -228,12 +234,14 @@ fn test_delegate_nomination_unstake_lifecycle() {
 			.prepare_test(
 				delegator,
 				H160::from_low_u64_be(1),
-				PCall::cancel_delegator_nomination_unstake { operator: operator.into() },
+				PCall::cancel_delegator_nomination_unstake {
+					operator: H256::from(operator.as_ref()),
+				},
 			)
 			.execute_returns(());
 
 		// Verify unstake request was cancelled
-		let metadata = Delegators::<Runtime>::get(delegator_account).unwrap();
+		let metadata = Delegators::<Runtime>::get(&delegator_account).unwrap();
 		assert_eq!(metadata.delegator_unstake_requests.len(), 0);
 
 		// Schedule unstake again
@@ -242,7 +250,7 @@ fn test_delegate_nomination_unstake_lifecycle() {
 				delegator,
 				H160::from_low_u64_be(1),
 				PCall::schedule_delegator_nomination_unstake {
-					operator: operator.into(),
+					operator: H256::from(operator.as_ref()),
 					amount: U256::from(delegate_amount),
 					blueprint_selection: Default::default(),
 				},
@@ -257,12 +265,14 @@ fn test_delegate_nomination_unstake_lifecycle() {
 			.prepare_test(
 				delegator,
 				H160::from_low_u64_be(1),
-				PCall::execute_delegator_nomination_unstake { operator: operator.into() },
+				PCall::execute_delegator_nomination_unstake {
+					operator: H256::from(operator.as_ref()),
+				},
 			)
 			.execute_returns(());
 
 		// Verify unstake was executed
-		let metadata = Delegators::<Runtime>::get(delegator_account).unwrap();
+		let metadata = Delegators::<Runtime>::get(&delegator_account).unwrap();
 		assert_eq!(metadata.delegator_unstake_requests.len(), 0);
 		assert_eq!(metadata.total_nomination_delegations(), 0);
 	});

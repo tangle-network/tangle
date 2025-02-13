@@ -3,7 +3,7 @@ use frame_support::{assert_ok, traits::Currency};
 use pallet_multi_asset_delegation::{CurrentRound, Delegators, Operators};
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
-use sp_core::H160;
+use sp_core::{H160, H256};
 use tangle_primitives::services::Asset;
 
 // Helper function for creating and minting tokens
@@ -12,8 +12,8 @@ pub fn create_and_mint_tokens(
 	recipient: <Runtime as frame_system::Config>::AccountId,
 	amount: Balance,
 ) {
-	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, recipient, false, 1));
-	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient), asset_id, recipient, amount));
+	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, recipient.clone(), false, 1));
+	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset_id, recipient, amount));
 }
 
 #[test]
@@ -37,26 +37,32 @@ fn test_unimplemented_selector_reverts() {
 #[test]
 fn test_delegate_assets_invalid_operator() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let delegator_account: AccountId = TestAccount::Alex.into();
 
 		Balances::make_free_balance_be(&delegator_account, 500);
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, Some(TestAccount::Alex.into()), None));
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(delegator_account.clone()), 
+			Asset::Custom(1), 
+			200, 
+			Some(TestAccount::Alex.into()), 
+			None
+		));
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: sp_core::sr25519::Public::from(TestAccount::Eve).into(),
+					operator: H256::from(sp_runtime::AccountId32::from(TestAccount::Eve).as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
 					token_address: Default::default(),
 				},
 			)
-			.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 9, error: [3, 0, 0, 0], message: Some(\"NotAnOperator\") })");
+				.execute_reverts(|output| output == b"Dispatched call failed with error: Module(ModuleError { index: 9, error: [3, 0, 0, 0], message: Some(\"NotAnOperator\") })");
 
 		assert_eq!(Balances::free_balance(delegator_account), 500);
 	});
@@ -65,10 +71,10 @@ fn test_delegate_assets_invalid_operator() {
 #[test]
 fn test_deposit_assets() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let delegator_account: AccountId = TestAccount::Alex.into();
 		Balances::make_free_balance_be(&delegator_account, 500);
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
@@ -82,7 +88,7 @@ fn test_deposit_assets() {
 			)
 			.execute_returns(());
 
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account.clone()), 500 - 200); // should lose deposit
 
 		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
 	});
@@ -91,10 +97,10 @@ fn test_deposit_assets() {
 #[test]
 fn test_deposit_assets_insufficient_balance() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let delegator_account: AccountId = TestAccount::Alex.into();
 		Balances::make_free_balance_be(&delegator_account, 500);
 
-		create_and_mint_tokens(1, delegator_account, 200);
+		create_and_mint_tokens(1, delegator_account.clone(), 200);
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
@@ -110,16 +116,16 @@ fn test_deposit_assets_insufficient_balance() {
 				output == b"Dispatched call failed with error: Arithmetic(Underflow)"
 			});
 
-		assert_eq!(Assets::balance(1, delegator_account), 200); // should not lose deposit
+		assert_eq!(Assets::balance(1, &delegator_account), 200); // should not lose deposit
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_none());
+		assert!(Delegators::<Runtime>::get(&delegator_account).is_none());
 	});
 }
 
 #[test]
 fn test_deposit_assets_erc20() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let delegator_account: AccountId = TestAccount::Alex.into();
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		PrecompilesValue::get()
@@ -156,7 +162,7 @@ fn test_deposit_assets_erc20() {
 #[test]
 fn test_deposit_assets_insufficient_balance_erc20() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let delegator_account: AccountId = TestAccount::Alex.into();
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		PrecompilesValue::get()
@@ -171,7 +177,7 @@ fn test_deposit_assets_insufficient_balance_erc20() {
 				},
 			)
 			.with_subcall_handle(|_subcall| {
-				// Simulate a faild ERC20 transfer
+				// Simulate a failed ERC20 transfer
 				let mut out = SubcallOutput::succeed();
 				out.output = ethabi::encode(&[ethabi::Token::Bool(false)]).to_vec();
 				out
@@ -187,33 +193,33 @@ fn test_deposit_assets_insufficient_balance_erc20() {
 #[test]
 fn test_delegate_assets() {
 	ExtBuilder::default().build().execute_with(|| {
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let operator_account: AccountId = TestAccount::Bobo.into();
+		let delegator_account: AccountId = TestAccount::Alex.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator_account),
+			RuntimeOrigin::signed(delegator_account.clone()),
 			Asset::Custom(1),
 			200,
 			Some(TestAccount::Alex.into()),
 			None
 		));
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
@@ -222,13 +228,13 @@ fn test_delegate_assets() {
 			)
 			.execute_returns(());
 
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // no change when delegating
+		assert_eq!(Assets::balance(1, &delegator_account), 500 - 200); // no change when delegating
 		assert!(Operators::<Runtime>::get(operator_account)
 			.unwrap()
 			.delegations
 			.iter()
 			.any(|x| x.delegator == delegator_account
-				&& x.asset_id == Asset::Custom(1)
+				&& x.asset == Asset::Custom(1)
 				&& x.amount == 100));
 	});
 }
@@ -236,27 +242,27 @@ fn test_delegate_assets() {
 #[test]
 fn test_delegate_assets_insufficient_balance() {
 	ExtBuilder::default().build().execute_with(|| {
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Eve);
+		let operator_account: AccountId = TestAccount::Bobo.into();
+		let delegator_account: AccountId = TestAccount::Eve.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
-		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account), Asset::Custom(1), 200, None, None));
+		assert_ok!(MultiAssetDelegation::deposit(RuntimeOrigin::signed(delegator_account.clone()), Asset::Custom(1), 200, None, None));
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Eve,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(300),
 					blueprint_selection: Default::default(),
@@ -272,16 +278,16 @@ fn test_delegate_assets_insufficient_balance() {
 #[test]
 fn test_unstake_assets_erc20() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+		let delegator_account: AccountId = TestAccount::Alex.into();
+		let operator_account: AccountId = TestAccount::Bobo.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		PrecompilesValue::get()
@@ -311,14 +317,14 @@ fn test_unstake_assets_erc20() {
 			})
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::zero(),
 					amount: U256::from(200),
 					token_address: Address(USDC_ERC20),
@@ -327,7 +333,7 @@ fn test_unstake_assets_erc20() {
 			)
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
 
 		// Unstake
 
@@ -336,7 +342,7 @@ fn test_unstake_assets_erc20() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::schedule_delegator_unstake {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::zero(),
 					amount: U256::from(200),
 					token_address: Address(USDC_ERC20),
@@ -348,25 +354,25 @@ fn test_unstake_assets_erc20() {
 		assert!(d
 			.delegator_unstake_requests
 			.iter()
-			.any(|x| x.amount == 200 && x.asset_id == Asset::Erc20(USDC_ERC20)));
+			.any(|x| x.amount == 200 && x.asset == Asset::Erc20(USDC_ERC20)));
 	});
 }
 
 #[test]
 fn test_schedule_withdraw() {
 	ExtBuilder::default().build().execute_with(|| {
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
+		let operator_account: AccountId = TestAccount::Bobo.into();
+		let delegator_account: AccountId = TestAccount::Alex.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -381,14 +387,14 @@ fn test_schedule_withdraw() {
 			)
 			.execute_returns(());
 
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account.clone()), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
@@ -397,7 +403,7 @@ fn test_schedule_withdraw() {
 			)
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -418,16 +424,16 @@ fn test_schedule_withdraw() {
 #[test]
 fn test_execute_withdraw() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+		let delegator_account: AccountId = TestAccount::Alex.into();
+		let operator_account: AccountId = TestAccount::Bobo.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -441,14 +447,14 @@ fn test_execute_withdraw() {
 				},
 			)
 			.execute_returns(());
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account.clone()), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
@@ -457,7 +463,7 @@ fn test_execute_withdraw() {
 			)
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -471,7 +477,7 @@ fn test_execute_withdraw() {
 			)
 			.execute_returns(());
 
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
+		let metadata = MultiAssetDelegation::delegators(&delegator_account).unwrap();
 		assert!(!metadata.withdraw_requests.is_empty());
 
 		<CurrentRound<Runtime>>::put(5);
@@ -487,17 +493,17 @@ fn test_execute_withdraw() {
 #[test]
 fn test_execute_withdraw_before_due() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+		let delegator_account: AccountId = TestAccount::Alex.into();
+		let operator_account: AccountId = TestAccount::Bobo.into();
 
 		Balances::make_free_balance_be(&delegator_account, 10_000);
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -511,14 +517,14 @@ fn test_execute_withdraw_before_due() {
 				},
 			)
 			.execute_returns(());
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account.clone()), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
@@ -527,8 +533,8 @@ fn test_execute_withdraw_before_due() {
 			)
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // delegate should not change balance
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
+		assert_eq!(Assets::balance(1, delegator_account.clone()), 500 - 200); // delegate should not change balance
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -554,16 +560,16 @@ fn test_execute_withdraw_before_due() {
 #[test]
 fn test_cancel_withdraw() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+		let delegator_account: AccountId = TestAccount::Alex.into();
+		let operator_account: AccountId = TestAccount::Bobo.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -577,14 +583,14 @@ fn test_cancel_withdraw() {
 				},
 			)
 			.execute_returns(());
-		assert_eq!(Assets::balance(1, delegator_account), 500 - 200); // should lose deposit
+		assert_eq!(Assets::balance(1, delegator_account.clone()), 500 - 200); // should lose deposit
 
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::from(1),
 					amount: U256::from(100),
 					blueprint_selection: Default::default(),
@@ -593,7 +599,7 @@ fn test_cancel_withdraw() {
 			)
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(&delegator_account).is_some());
 
 		PrecompilesValue::get()
 			.prepare_test(
@@ -619,7 +625,7 @@ fn test_cancel_withdraw() {
 			)
 			.execute_returns(());
 
-		let metadata = MultiAssetDelegation::delegators(delegator_account).unwrap();
+		let metadata = MultiAssetDelegation::delegators(&delegator_account).unwrap();
 		assert!(metadata.deposits.contains_key(&Asset::Custom(1)));
 		assert!(metadata.withdraw_requests.is_empty());
 
@@ -630,16 +636,16 @@ fn test_cancel_withdraw() {
 #[test]
 fn balance_of_works() {
 	ExtBuilder::default().build().execute_with(|| {
-		let delegator_account = sp_core::sr25519::Public::from(TestAccount::Alex);
-		let operator_account = sp_core::sr25519::Public::from(TestAccount::Bobo);
+		let delegator_account: AccountId = TestAccount::Alex.into();
+		let operator_account: AccountId = TestAccount::Bobo.into();
 
 		Balances::make_free_balance_be(&operator_account, 20_000);
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(operator_account),
+			RuntimeOrigin::signed(operator_account.clone()),
 			10_000
 		));
 
-		create_and_mint_tokens(1, delegator_account, 500);
+		create_and_mint_tokens(1, delegator_account.clone(), 500);
 		Balances::make_free_balance_be(&delegator_account, 500);
 
 		// Not a delegator yet.
@@ -694,7 +700,7 @@ fn balance_of_works() {
 			})
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
 
 		// Deposit successful, now check balance
 
@@ -728,7 +734,7 @@ fn balance_of_works() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::delegate {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::zero(),
 					amount: U256::from(100),
 					token_address: Address(USDC_ERC20),
@@ -737,7 +743,7 @@ fn balance_of_works() {
 			)
 			.execute_returns(());
 
-		assert!(Delegators::<Runtime>::get(delegator_account).is_some());
+		assert!(Delegators::<Runtime>::get(delegator_account.clone()).is_some());
 		// Delegated balance should now be 100
 		// Deposit balance should be the same as before.
 		PrecompilesValue::get()
@@ -770,7 +776,7 @@ fn balance_of_works() {
 				TestAccount::Alex,
 				H160::from_low_u64_be(1),
 				PCall::schedule_delegator_unstake {
-					operator: operator_account.into(),
+					operator: H256::from(operator_account.as_ref()),
 					asset_id: U256::zero(),
 					amount: U256::from(50),
 					token_address: Address(USDC_ERC20),
@@ -778,11 +784,11 @@ fn balance_of_works() {
 			)
 			.execute_returns(());
 
-		let d = Delegators::<Runtime>::get(delegator_account).unwrap();
+		let d = Delegators::<Runtime>::get(delegator_account.clone()).unwrap();
 		assert!(d
 			.delegator_unstake_requests
 			.iter()
-			.any(|x| x.amount == 50 && x.asset_id == Asset::Erc20(USDC_ERC20)));
+			.any(|x| x.amount == 50 && x.asset == Asset::Erc20(USDC_ERC20)));
 
 		// Now check balance again
 

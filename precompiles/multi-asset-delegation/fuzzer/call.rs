@@ -103,7 +103,15 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 				Asset::Erc20(token) => (0u128, token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
-			vec![(PCall::deposit { asset_id, amount, token_address, lock_multiplier: 0 }, who)]
+			vec![(
+				PCall::deposit {
+					asset_id: asset_id.into(),
+					amount,
+					token_address,
+					lock_multiplier: 0,
+				},
+				who,
+			)]
 		},
 		_ if op == PCall::schedule_withdraw_selectors()[0] => {
 			// Schedule withdraw
@@ -357,7 +365,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			let operator_account = AccountId::from(operator.0);
-			let delegator = MultiAssetDelegation::delegators(caller).unwrap_or_default();
+			let delegator = MultiAssetDelegation::delegators(&caller).unwrap_or_default();
 			let operator_info =
 				MultiAssetDelegation::operator_info(operator_account.clone()).unwrap_or_default();
 			assert!(
