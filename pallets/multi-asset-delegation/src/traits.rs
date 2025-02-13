@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::types::{BalanceOf, DelegatorBlueprintSelection, OperatorStatus};
+use crate::types::{BalanceOf, OperatorStatus};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 use tangle_primitives::types::rewards::UserDepositWithLocks;
 use tangle_primitives::{
-	services::Asset, traits::MultiAssetDelegationInfo, BlueprintId, RoundIndex,
+	services::Asset, traits::MultiAssetDelegationInfo, RoundIndex,
 };
 
 impl<T: crate::Config>

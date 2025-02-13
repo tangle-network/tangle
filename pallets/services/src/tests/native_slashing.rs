@@ -16,7 +16,6 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use pallet_staking::RewardDestination;
 use sp_runtime::Percent;
 use sp_staking::StakingAccount;
 
@@ -139,7 +138,7 @@ fn test_mixed_native_and_regular_delegation_slash() {
 		assert_eq!(slash.slash_percent, slash_percent);
 
 		// TODO: Verify final state after applying slashes
-		assert_ok!(MultiAssetDelegation::slash_operator(&slash));
+		assert_ok!(MultiAssetDelegation::slash_operator(slash));
 	});
 }
 

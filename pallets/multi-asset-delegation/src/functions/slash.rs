@@ -24,12 +24,11 @@ use frame_support::{
 	},
 	weights::Weight,
 };
-use sp_runtime::{traits::CheckedSub, DispatchError, Percent};
+use sp_runtime::{traits::CheckedSub, DispatchError};
 use tangle_primitives::services::EvmAddressMapping;
 use tangle_primitives::{
 	services::{Asset, UnappliedSlash},
 	traits::SlashManager,
-	BlueprintId,
 };
 
 impl<T: Config> Pallet<T> {
@@ -91,7 +90,7 @@ impl<T: Config> Pallet<T> {
 		unapplied_slash: &UnappliedSlash<T::AccountId>,
 		delegator: &T::AccountId,
 	) -> Result<Weight, DispatchError> {
-		let mut weight = T::DbWeight::get().reads(1);
+		let weight = T::DbWeight::get().reads(1);
 
 		Delegators::<T>::try_mutate(delegator, |maybe_metadata| -> DispatchResult {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -101,7 +100,7 @@ impl<T: Config> Pallet<T> {
 				.delegations
 				.iter_mut()
 				.find(|d| {
-					&d.operator == &unapplied_slash.operator
+					d.operator == unapplied_slash.operator
 						&& d.blueprint_selection.contains(&unapplied_slash.blueprint_id)
 				})
 				.ok_or(Error::<T>::NoActiveDelegation)?;
@@ -120,7 +119,7 @@ impl<T: Config> Pallet<T> {
 					slash_amount,
 				)?;
 			} else {
-				Self::handle_asset_transfer(delegator, delegation.asset, slash_amount)?;
+				Self::handle_asset_transfer(delegation.asset, slash_amount)?;
 			}
 
 			Self::deposit_event(Event::DelegatorSlashed {
@@ -143,7 +142,7 @@ impl<T: Config> Pallet<T> {
 		_operator: &T::AccountId,
 		_slash_amount: BalanceOf<T>,
 	) -> Result<Weight, DispatchError> {
-		let mut weight: Weight = Weight::zero();
+		let weight: Weight = Weight::zero();
 
 		// TODO: Slash the nomination
 
@@ -152,11 +151,10 @@ impl<T: Config> Pallet<T> {
 
 	/// Apply a slash for non-native asset delegations (custom assets and ERC20)
 	fn handle_asset_transfer(
-		delegator: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		slash_amount: BalanceOf<T>,
 	) -> Result<Weight, DispatchError> {
-		let mut weight: Weight = Weight::zero();
+		let weight: Weight = Weight::zero();
 
 		match asset {
 			Asset::Custom(asset_id) => {

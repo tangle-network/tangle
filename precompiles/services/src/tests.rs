@@ -13,7 +13,7 @@ use sp_core::{ecdsa, Pair, H160, U256};
 use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager, FieldType,
-	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModel,
+	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision,
 	MembershipModelType, OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
 };
 

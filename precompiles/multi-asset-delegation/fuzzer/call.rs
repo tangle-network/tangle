@@ -365,7 +365,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			let operator_account = AccountId::from(operator.0);
-			let delegator = MultiAssetDelegation::delegators(&caller).unwrap_or_default();
+			let delegator = MultiAssetDelegation::delegators(caller.clone()).unwrap_or_default();
 			let operator_info =
 				MultiAssetDelegation::operator_info(operator_account.clone()).unwrap_or_default();
 			assert!(

@@ -17,7 +17,6 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_runtime::Percent;
-use sp_staking::StakingAccount;
 
 #[test]
 fn test_zero_percentage_slash() {
@@ -314,7 +313,7 @@ fn test_slash_with_multiple_asset_types() {
 fn test_slash_with_no_blueprint_selection() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, .. } = deploy();
+		let Deployment {  service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
 
@@ -354,7 +353,7 @@ fn test_slash_with_no_blueprint_selection() {
 fn test_slash_with_native_delegation() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { service_id, blueprint_id, security_commitments, .. } = deploy();
+		let Deployment { service_id, blueprint_id,  .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator1 = mock_pub_key(CHARLIE);
 		let delegator2 = mock_pub_key(DAVE);
@@ -538,7 +537,7 @@ fn test_slash_with_multiple_services() {
 fn test_slash_with_rewards_distribution() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, .. } = deploy();
+		let Deployment {  service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let service = Services::services(service_id).unwrap();
 		let slashing_origin =
