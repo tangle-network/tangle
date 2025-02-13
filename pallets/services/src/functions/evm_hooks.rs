@@ -6,6 +6,7 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
 use sp_core::{Get, H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
+use sp_runtime::Percent;
 use sp_std::{boxed::Box, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, BlueprintServiceManager, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, Field,
@@ -1060,6 +1061,116 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 
+	/// Hook to be called when a slash is applied.
+	///
+	/// This function is called when a slash is applied to an operator. It performs an EVM call
+	/// to the `onSlash` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `offender` - The account ID of the offender being slashed.
+	/// * `slash_percent` - The percentage to slash.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the slash is allowed and the weight of the operation.
+	pub fn on_slash_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		service_id: u64,
+		offender: &T::AccountId,
+		slash_percent: u8,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("onSlash"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("serviceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("offender"),
+						kind: ethabi::ParamType::Bytes,
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("slashPercent"),
+						kind: ethabi::ParamType::Uint(8),
+						internal_type: None,
+					},
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(service_id)),
+				Token::Bytes(offender.encode()),
+				Token::Uint(ethabi::Uint::from(slash_percent)),
+			],
+			Zero::zero(),
+		)
+	}
+
+	/// Hook to be called when a slash is unapplied.
+	///
+	/// This function is called when a slash is unapplied from an operator. It performs an EVM call
+	/// to the `onUnappliedSlash` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `service_id` - The service ID.
+	/// * `offender` - The account ID of the offender being unslashed.
+	/// * `slash_percent` - The percentage that was slashed.
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the unslash is allowed and the weight of the operation.
+	pub fn on_unapplied_slash_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		service_id: u64,
+		offender: &T::AccountId,
+		slash_percent: u8,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("onUnappliedSlash"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("serviceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("offender"),
+						kind: ethabi::ParamType::Bytes,
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("slashPercent"),
+						kind: ethabi::ParamType::Uint(8),
+						internal_type: None,
+					},
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(service_id)),
+				Token::Bytes(offender.encode()),
+				Token::Uint(ethabi::Uint::from(slash_percent)),
+			],
+			Zero::zero(),
+		)
+	}
+
 	/// Queries the slashing origin of a service.
 	///
 	/// This function performs an EVM call to the `querySlashingOrigin` function of the
@@ -1192,7 +1303,19 @@ impl<T: Config> Pallet<T> {
 		Ok((dispute_origin, weight))
 	}
 
-	/// Moves a `value` amount of tokens from the caller's account to `to`.
+	/// Transfers ERC20 tokens between accounts by calling the ERC20 contract's transfer function.
+	///
+	/// # Arguments
+	/// * `erc20` - The ERC20 contract address
+	/// * `from` - The address to transfer tokens from
+	/// * `to` - The address to transfer tokens to
+	/// * `value` - The amount of tokens to transfer
+	///
+	/// # Returns
+	/// * `Ok((bool, Weight))` - A tuple containing:
+	///   * A boolean indicating if the transfer was successful
+	///   * The weight consumed by the EVM call
+	/// * `Err(DispatchErrorWithPostInfo)` - If the EVM call fails or the ABI encoding/decoding fails
 	pub fn erc20_transfer(
 		erc20: H160,
 		from: H160,
@@ -1305,6 +1428,71 @@ impl<T: Config> Pallet<T> {
 		Ok((balance, weight))
 	}
 
+	/// Hook to notify an external contract about a slash event.
+	///
+	/// This function performs an EVM call to notify an external contract about a slash event
+	/// by calling its `onSlashEvent` function.
+	///
+	/// # Parameters
+	/// * `contract` - The address of the contract to notify
+	/// * `blueprint_id` - The ID of the blueprint
+	/// * `service_id` - The ID of the service
+	/// * `operator` - The account ID of the operator being slashed
+	/// * `slash_percent` - The percentage being slashed (0-100)
+	///
+	/// # Returns
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the notification was successful and the weight of the operation.
+	pub fn notify_slash_event(
+		contract: H160,
+		blueprint_id: u64,
+		service_id: u64,
+		operator: &T::AccountId,
+		amount: u128,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let (info, weight) = Self::dispatch_evm_call(
+			contract,
+			Function {
+				name: String::from("onSlashEvent"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("blueprintId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("serviceId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("operator"),
+						kind: ethabi::ParamType::Bytes,
+						internal_type: None,
+					},
+					ethabi::Param {
+						name: String::from("amount"),
+						kind: ethabi::ParamType::Uint(256),
+						internal_type: None,
+					},
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(service_id)),
+				Token::Bytes(operator.encode()),
+				Token::Uint(ethabi::Uint::from(U256::from(amount))),
+			],
+			Zero::zero(),
+		)?;
+
+		Ok((info.exit_reason.is_succeed(), weight))
+	}
+
 	/// Dispatches a hook to the EVM and returns if the call was successful with the used weight.
 	fn dispatch_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
@@ -1332,7 +1520,7 @@ impl<T: Config> Pallet<T> {
 			f.signature()
 		);
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 500_000;
+		let gas_limit = 2_000_000;
 		let value = value.using_encoded(U256::from_little_endian);
 		let info = Self::evm_call(Self::pallet_evm_account(), contract, value, data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);

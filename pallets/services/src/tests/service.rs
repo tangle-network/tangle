@@ -560,6 +560,15 @@ fn test_service_creation_dynamic_max_operators() {
 
 		// Try to create service with 11 operators - should fail
 		let extra_operator = mock_pub_key_from_fixed_bytes([11u8; 32]);
+		// Give extra operator sufficient balance to join
+		Balances::make_free_balance_be(&extra_operator, 10_000_000);
+		assert_ok!(join_and_register(
+			extra_operator.clone(),
+			0,
+			test_ecdsa_key(),
+			Default::default(),
+			1000,
+		));
 		operators.push(extra_operator);
 
 		assert_err!(

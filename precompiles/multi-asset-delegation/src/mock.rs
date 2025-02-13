@@ -37,11 +37,7 @@ use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sp_core::{
-	self,
-	sr25519::Public as sr25519Public,
-	ConstU32, H160,
-};
+use sp_core::{self, sr25519::Public as sr25519Public, ConstU32, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::curve::PiecewiseLinear;

@@ -13,8 +13,8 @@ use sp_core::{ecdsa, Pair, H160, U256};
 use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager, FieldType,
-	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision,
-	MembershipModelType, OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
+	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModelType,
+	OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
 };
 
 fn get_security_requirement(a: AssetId, p: &[u8; 2]) -> AssetSecurityRequirement<AssetId> {

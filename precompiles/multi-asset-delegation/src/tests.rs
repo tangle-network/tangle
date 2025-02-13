@@ -8,11 +8,7 @@ use sp_runtime::AccountId32;
 use tangle_primitives::services::Asset;
 
 // Helper function for creating and minting tokens
-pub fn create_and_mint_tokens(
-	asset_id: u128,
-	recipient: AccountId32,
-	amount: Balance,
-) {
+pub fn create_and_mint_tokens(asset_id: u128, recipient: AccountId32, amount: Balance) {
 	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, recipient.clone(), false, 1));
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset_id, recipient, amount));
 }

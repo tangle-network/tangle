@@ -271,6 +271,13 @@ fn test_payment_distribution_operators() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
+		// Bob approves
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			2,
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
+		));
+
 		// Verify native payment is held by pallet
 		assert_eq!(Balances::free_balance(Services::pallet_account()), native_payment);
 		assert_eq!(Balances::free_balance(eve.clone()), before_native_balance - native_payment);

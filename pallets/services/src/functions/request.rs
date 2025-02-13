@@ -118,6 +118,11 @@ impl<T: Config> Pallet<T> {
 			let refund_to = match payment_asset.clone() {
 				// Handle the case of native currency.
 				Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+					#[cfg(test)]
+					eprintln!(
+						"Transferring native value {:?} from {:?} to pallet account",
+						value, caller
+					);
 					T::Currency::transfer(
 						&caller,
 						&Self::pallet_account(),
