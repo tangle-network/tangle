@@ -60,7 +60,7 @@ interface Services {
     /// @dev Slash an operator for a service.
     /// @param offender The offender in SCALE-encoded format.
     /// @param service_id The service ID.
-    /// @param percent The slash percentage.
+    /// @param percent The slash percentage (0-100).
     /// @custom:selector 64a798ac
     function slash(bytes calldata offender, uint256 service_id, uint8 percent) external;
 

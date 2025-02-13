@@ -257,8 +257,12 @@ where
 		let offender: Runtime::AccountId = Decode::decode(&mut &offender_bytes[..])
 			.map_err(|_| revert("Invalid offender account id"))?;
 
-		// inside this call, we do check if the caller is authorized to slash the offender
-		let call = pallet_services::Call::<Runtime>::slash { offender, service_id, percent };
+		let call = pallet_services::Call::<Runtime>::slash {
+			offender,
+
+			service_id,
+			slash_percent: percent,
+		};
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())

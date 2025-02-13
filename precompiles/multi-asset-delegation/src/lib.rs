@@ -135,7 +135,7 @@ where
 			pallet_multi_asset_delegation::Pallet::<Runtime>::ready_withdraw_requests(&who)
 				.map_err(|_| revert("Failed to get ready withdraw requests"))?;
 
-		let erc20_transfers = snapshot.filter_map(|request| match request.asset_id {
+		let erc20_transfers = snapshot.filter_map(|request| match request.asset {
 			Asset::Erc20(token) => Some((token, request.amount)),
 			_ => None,
 		});
@@ -206,7 +206,7 @@ where
 			handle,
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::deposit {
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -241,7 +241,7 @@ where
 			handle,
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw {
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -274,7 +274,7 @@ where
 			handle,
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw {
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -311,7 +311,7 @@ where
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::delegate {
 				operator,
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -352,7 +352,7 @@ where
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::schedule_delegator_unstake {
 				operator,
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -399,7 +399,7 @@ where
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::cancel_delegator_unstake {
 				operator,
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,

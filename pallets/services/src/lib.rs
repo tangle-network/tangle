@@ -794,11 +794,9 @@ pub mod module {
 			let owner = ensure_signed(origin)?;
 			let blueprint_id = Self::next_blueprint_id();
 			// Ensure membership models are unique
-			let mut models = blueprint.supported_membership_models.clone();
-			models.sort();
-			models.dedup();
+			let models: Vec<_> = blueprint.supported_membership_models.iter().collect();
 			ensure!(
-				models.len() == blueprint.supported_membership_models.len(),
+				models.iter().all(|x| models.iter().filter(|y| x == *y).count() == 1),
 				Error::<T>::DuplicateMembershipModel
 			);
 			// Ensure the master blueprint service manager exists and if it uses

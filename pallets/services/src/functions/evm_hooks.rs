@@ -1278,7 +1278,8 @@ impl<T: Config> Pallet<T> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 		let gas_limit = 500_000;
-		let info = Self::evm_call(Self::address(), erc20, U256::zero(), data, gas_limit)?;
+		let info =
+			Self::evm_call(Self::pallet_evm_account(), erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 
 		// decode the result and return it

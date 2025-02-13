@@ -47,16 +47,13 @@ use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::curve::PiecewiseLinear;
 use sp_runtime::testing::UintAuthorityId;
 use sp_runtime::DispatchError;
-use sp_runtime::{
-	traits::{IdentifyAccount, Verify},
-	AccountId32, BuildStorage, Perbill,
-};
+use sp_runtime::{AccountId32, BuildStorage, Perbill};
 use sp_staking::{EraIndex, SessionIndex};
 use tangle_primitives::services::EvmRunner;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
 use tangle_primitives::traits::{RewardsManager, ServiceManager};
 
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+pub type AccountId = AccountId32;
 pub type Balance = u64;
 pub type BlockNumber = u64;
 
@@ -340,6 +337,9 @@ parameter_types! {
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const SlashRecipient: AccountId = AccountId32::new([9u8; 32]);
 }
 
 pub struct MockRewardsManager;
@@ -385,6 +385,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type SlashRecipient = SlashRecipient;
 	type BondDuration = BondDuration;
 	type CurrencyToVote = ();
 	type StakingInterface = Staking;

@@ -424,11 +424,11 @@ pub mod pallet {
 			let _who = T::ForceOrigin::ensure_origin(origin)?;
 
 			match action {
-				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
-				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
+				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset)?,
+				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset)?,
 			}
 
-			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset_id, action });
+			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset, action });
 
 			Ok(())
 		}
