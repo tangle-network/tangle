@@ -23,7 +23,7 @@ use sp_staking::StakingAccount;
 fn test_basic_native_restaking_slash() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { service_id, blueprint_id, security_commitments, .. } = deploy();
+		let Deployment { service_id, blueprint_id, .. } = deploy();
 
 		// Setup native restaking
 		let operator = mock_pub_key(BOB);
@@ -55,12 +55,6 @@ fn test_basic_native_restaking_slash() {
 			slash_percent
 		));
 
-		let native_exposure = security_commitments
-			.iter()
-			.find(|(asset, _)| asset.is_native())
-			.map(|(_, commitment)| commitment.exposure_percent)
-			.unwrap();
-
 		// Verify unapplied slash storage values
 		let unapplied_slash_index = Services::next_unapplied_slash_index() - 1;
 		let unapplied_slash = UnappliedSlashes::<Runtime>::get(0, unapplied_slash_index).unwrap();
@@ -80,7 +74,7 @@ fn test_basic_native_restaking_slash() {
 fn test_mixed_native_and_regular_delegation_slash() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { service_id, blueprint_id, security_commitments } = deploy();
+		let Deployment { service_id, blueprint_id, .. } = deploy();
 
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
@@ -172,7 +166,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		System::set_block_number(1);
 
 		// Deploy first service
-		let Deployment { service_id: service_id1, blueprint_id, security_commitments } = deploy();
+		let Deployment { service_id: service_id1, blueprint_id, .. } = deploy();
 
 		// Deploy second service
 		let alice = mock_pub_key(ALICE);

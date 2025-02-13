@@ -526,6 +526,13 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
+
+	// Ripemd160(keccak256("ServicesPalletEvmAccount"))
+	pub const ServicesPalletEvmAccount: H160 = H160([
+		0x09, 0xdf, 0x6a, 0x94, 0x1e, 0xe0, 0x3b, 0x1e,
+		0x63, 0x29, 0x04, 0xe3, 0x82, 0xe1, 0x08, 0x62,
+		0xfa, 0x9c, 0xc0, 0xe3
+	]);
 }
 
 impl pallet_services::Config for Runtime {
@@ -534,7 +541,7 @@ impl pallet_services::Config for Runtime {
 	type Currency = Balances;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type PalletId = ServicesPalletId;
+	type PalletEvmAccount = ServicesPalletEvmAccount;
 	type SlashManager = ();
 	type EvmRunner = MockedEvmRunner;
 	type EvmAddressMapping = PalletEVMAddressMapping;

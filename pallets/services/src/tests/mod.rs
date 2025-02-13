@@ -43,15 +43,6 @@ pub const EVE: u8 = 5;
 pub const KEYGEN_JOB_ID: u8 = 0;
 pub const SIGN_JOB_ID: u8 = 1;
 
-pub fn create_and_mint_tokens(
-	asset_id: AssetId,
-	recipient: <Runtime as frame_system::Config>::AccountId,
-	amount: Balance,
-) {
-	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset_id, recipient.clone(), false, 1));
-	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset_id, recipient, amount));
-}
-
 pub fn mint_tokens(
 	asset_id: AssetId,
 	creator: <Runtime as frame_system::Config>::AccountId,
@@ -246,23 +237,4 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 		assert_eq!(next, evt, "Events don't match");
 	}
 	assert!(actual.is_empty(), "More events than expected");
-}
-
-/// Advance to the next era, triggering the era change calculations
-pub fn advance_era() {
-	let current_era = Staking::current_era().unwrap();
-	let current_session = Session::current_index();
-	let sessions_per_era = <Runtime as pallet_staking::Config>::SessionsPerEra::get();
-
-	// Advance sessions until we reach the next era
-	for _ in 0..=sessions_per_era {
-		Session::rotate_session();
-		let new_session = Session::current_index();
-		if new_session <= current_session {
-			break;
-		}
-		if Staking::current_era().unwrap() > current_era {
-			break;
-		}
-	}
 }

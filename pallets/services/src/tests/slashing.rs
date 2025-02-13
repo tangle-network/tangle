@@ -239,7 +239,7 @@ fn dispute_an_already_applied_slash() {
 fn test_slash_with_multiple_asset_types() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { blueprint_id, service_id, security_commitments } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
 
@@ -313,7 +313,7 @@ fn test_slash_with_multiple_asset_types() {
 fn test_slash_with_no_blueprint_selection() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment {  service_id, .. } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator = mock_pub_key(CHARLIE);
 
@@ -346,6 +346,7 @@ fn test_slash_with_no_blueprint_selection() {
 		let unapplied_slash = UnappliedSlashes::<Runtime>::get(0, 0).unwrap();
 
 		// TODO: Ensure that the slash is applied correctly
+		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
 	});
 }
 
@@ -353,10 +354,9 @@ fn test_slash_with_no_blueprint_selection() {
 fn test_slash_with_native_delegation() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { service_id, blueprint_id,  .. } = deploy();
+		let Deployment { service_id, blueprint_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let delegator1 = mock_pub_key(CHARLIE);
-		let delegator2 = mock_pub_key(DAVE);
 
 		// Initial setup
 		let initial_stake = 10_000;
@@ -537,7 +537,7 @@ fn test_slash_with_multiple_services() {
 fn test_slash_with_rewards_distribution() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment {  service_id, .. } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
 		let service = Services::services(service_id).unwrap();
 		let slashing_origin =

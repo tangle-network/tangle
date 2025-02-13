@@ -5,7 +5,7 @@ use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
 use sp_core::{Get, H160, U256};
-use sp_runtime::traits::{AccountIdConversion, UniqueSaturatedInto, Zero};
+use sp_runtime::traits::{UniqueSaturatedInto, Zero};
 use sp_std::{boxed::Box, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, BlueprintServiceManager, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, Field,
@@ -21,7 +21,7 @@ use std::string::String;
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
 	pub fn pallet_account() -> T::AccountId {
-		T::PalletId::get().into_account_truncating()
+		T::EvmAddressMapping::into_account_id(T::PalletEvmAccount::get())
 	}
 
 	/// Returns the EVM account id of the pallet.
@@ -32,7 +32,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// * `T::AccountId` - The account id of the pallet.
 	pub fn pallet_evm_account() -> H160 {
-		T::EvmAddressMapping::into_address(Self::pallet_account())
+		T::PalletEvmAccount::get()
 	}
 
 	/// Get the address of the master blueprint service manager at a given revision.

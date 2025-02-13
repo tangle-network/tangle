@@ -69,7 +69,6 @@ pub mod module {
 	use frame_support::{
 		dispatch::PostDispatchInfo,
 		traits::fungibles::{Inspect, Mutate},
-		PalletId,
 	};
 	use sp_core::H160;
 	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent};
@@ -91,7 +90,7 @@ pub mod module {
 		/// PalletId used for deriving the AccountId and EVM address.
 		/// This account receives slashed assets upon slash event processing.
 		#[pallet::constant]
-		type PalletId: Get<PalletId>;
+		type PalletEvmAccount: Get<H160>;
 
 		/// A type that implements the `EvmRunner` trait for the execution of EVM
 		/// transactions.
@@ -214,11 +213,11 @@ pub mod module {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn integrity_test() {
 			// Ensure that the pallet's configuration is valid.
-			// 1. Make sure that pallet's substrate address maps correctly back to the EVM address
-			let evm_address = T::EvmAddressMapping::into_address(Self::pallet_account());
+			// 1. Make sure that pallet's evm address maps correctly back to the Substrate account
+			let evm_address = T::EvmAddressMapping::into_account_id(Self::pallet_evm_account());
 			assert_eq!(
 				evm_address,
-				Self::pallet_evm_account(),
+				Self::pallet_account(),
 				"Services: EVM address mapping is incorrect."
 			);
 		}

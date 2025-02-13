@@ -36,7 +36,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks, BlueprintId};
+use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
 
 use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
