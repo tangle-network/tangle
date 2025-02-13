@@ -19,7 +19,7 @@ use super::{
 	jobs::{type_checker, JobDefinition},
 	types::{ApprovalState, Asset, MembershipModel},
 	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BoundedString, Gadget,
-	TypeCheckError,
+	MembershipModelType, TypeCheckError,
 };
 use crate::{Account, BlueprintId};
 use educe::Educe;
@@ -140,7 +140,7 @@ pub struct ServiceBlueprint<C: Constraints> {
 	/// The gadget that will be executed for the service.
 	pub gadget: Gadget<C>,
 	/// The membership models supported by this blueprint
-	pub supported_membership_models: BoundedVec<MembershipModel, ConstU32<2>>,
+	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
 }
 
 impl<C: Constraints> ServiceBlueprint<C> {

@@ -348,6 +348,8 @@ pub mod module {
 		UnappliedSlashNotFound,
 		/// The Supplied Master Blueprint Service Manager Revision is not found.
 		MasterBlueprintServiceManagerRevisionNotFound,
+		/// Duplicate membership model
+		DuplicateMembershipModel,
 		/// Maximum number of Master Blueprint Service Manager revisions reached.
 		MaxMasterBlueprintServiceManagerVersionsExceeded,
 		/// The ERC20 transfer failed.
@@ -791,6 +793,14 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
 			let blueprint_id = Self::next_blueprint_id();
+			// Ensure membership models are unique
+			let mut models = blueprint.supported_membership_models.clone();
+			models.sort();
+			models.dedup();
+			ensure!(
+				models.len() == blueprint.supported_membership_models.len(),
+				Error::<T>::DuplicateMembershipModel
+			);
 			// Ensure the master blueprint service manager exists and if it uses
 			// latest, pin it to the latest revision.
 			match blueprint.master_manager_revision {
@@ -1098,13 +1108,24 @@ pub mod module {
 				ensure!(seen_operators.insert(operator), Error::<T>::DuplicateOperator);
 			}
 
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let supported_membership_models = blueprint.supported_membership_models;
+
 			// Check that the number of operators doesn't exceed the membership model max
 			match membership_model {
 				MembershipModel::Fixed { min_operators } => {
+					ensure!(
+						supported_membership_models.contains(&MembershipModelType::Fixed),
+						Error::<T>::UnsupportedMembershipModel
+					);
 					ensure!(min_operators > 0, Error::<T>::TooFewOperators);
 					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
 				},
 				MembershipModel::Dynamic { min_operators, max_operators } => {
+					ensure!(
+						supported_membership_models.contains(&MembershipModelType::Dynamic),
+						Error::<T>::UnsupportedMembershipModel
+					);
 					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
 					if let Some(max_ops) = max_operators {
 						ensure!(operators.len() <= max_ops as usize, Error::<T>::TooManyOperators);

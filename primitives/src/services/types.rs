@@ -413,6 +413,15 @@ pub struct OperatorProfile<C: Constraints> {
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+pub enum MembershipModelType {
+	/// Fixed set of operators defined at service creation
+	Fixed,
+	/// Operators can join/leave subject to blueprint rules
+	Dynamic,
+}
+
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub enum MembershipModel {
 	/// Fixed set of operators defined at service creation
 	Fixed { min_operators: u32 },

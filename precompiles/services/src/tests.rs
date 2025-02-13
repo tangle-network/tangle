@@ -14,7 +14,7 @@ use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager, FieldType,
 	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModel,
-	OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
+	MembershipModelType, OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
 };
 
 fn get_security_requirement(a: AssetId, p: &[u8; 2]) -> AssetSecurityRequirement<AssetId> {
@@ -94,8 +94,8 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		request_params: bounded_vec![],
 		gadget: Default::default(),
 		supported_membership_models: bounded_vec![
-			MembershipModel::Fixed { min_operators: 1 },
-			MembershipModel::Dynamic { min_operators: 1, max_operators: None },
+			MembershipModelType::Fixed,
+			MembershipModelType::Dynamic,
 		],
 	}
 }

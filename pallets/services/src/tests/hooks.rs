@@ -41,8 +41,8 @@ fn hooks() {
 			request_params: bounded_vec![],
 			gadget: Default::default(),
 			supported_membership_models: bounded_vec![
-				MembershipModel::Fixed { min_operators: 1 },
-				MembershipModel::Dynamic { min_operators: 1, max_operators: None },
+				MembershipModelType::Fixed,
+				MembershipModelType::Dynamic,
 			],
 		};
 
