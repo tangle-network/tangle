@@ -71,12 +71,15 @@ mod extra;
 
 pub mod weights;
 
-// #[cfg(feature = "runtime-benchmarks")]
-// mod benchmarking;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 pub mod functions;
 pub mod traits;
 pub mod types;
+
+/// The log target of this pallet.
+pub const LOG_TARGET: &str = "runtime::multi-asset-delegation";
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -496,10 +499,8 @@ pub mod pallet {
 		DepositExceedsCapForAsset,
 		/// Overflow from math
 		OverflowRisk,
-		/// Delegator is not a nominator
-		NotNominator,
-		/// Operator has active services and can't exit
-		CannotGoOfflineWithActiveServices,
+		/// The asset config is not found
+		AssetConfigNotFound,
 	}
 
 	/// Hooks for the pallet.
@@ -795,11 +796,12 @@ pub mod pallet {
 				},
 			};
 			// ensure the caps have not been exceeded
-			let remaning = T::RewardsManager::get_asset_deposit_cap_remaining(asset)
-				.map_err(|_| Error::<T>::DepositExceedsCapForAsset)?;
-			ensure!(amount <= remaning, Error::<T>::DepositExceedsCapForAsset);
-			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
-			Self::deposit_event(Event::Deposited { who, amount, asset });
+			let remaining = T::RewardsManager::get_asset_deposit_cap_remaining(asset_id)
+				.map_err(|_| Error::<T>::AssetConfigNotFound)?;
+			log::info!(target: crate::LOG_TARGET, "RewardsManager remaining: {:?}", remaining);
+			ensure!(amount <= remaining, Error::<T>::DepositExceedsCapForAsset);
+			Self::process_deposit(who.clone(), asset_id, amount, lock_multiplier)?;
+			Self::deposit_event(Event::Deposited { who, amount, asset_id });
 			Ok(())
 		}
 
