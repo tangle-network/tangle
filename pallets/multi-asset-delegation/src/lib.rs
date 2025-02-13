@@ -68,8 +68,8 @@ mod tests;
 
 pub mod weights;
 
-// #[cfg(feature = "runtime-benchmarks")]
-// mod benchmarking;
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 
 pub mod functions;
 pub mod traits;
