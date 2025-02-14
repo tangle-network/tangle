@@ -136,7 +136,7 @@ impl<T: Config> Pallet<T> {
 					Token::Address(mbsm),
 				];
 				let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-				let gas_limit = 300_000;
+				let gas_limit = 500_000;
 				let value = U256::zero();
 				let info = Self::evm_call(Self::address(), bsm, value, data, gas_limit)?;
 				let weight = Self::weight_from_call_info(&info);
@@ -886,7 +886,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let slashing_origin = if let Some(data) = maybe_value {
 			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let slashing_origin = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let slashing_origin = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Address(who) = slashing_origin {
 				Some(T::EvmAddressMapping::into_account_id(*who))
 			} else {
@@ -952,7 +952,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let dispute_origin = if let Some(data) = maybe_value {
 			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let slashing_origin = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let slashing_origin = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Address(who) = slashing_origin {
 				Some(T::EvmAddressMapping::into_account_id(*who))
 			} else {
@@ -1003,7 +1003,7 @@ impl<T: Config> Pallet<T> {
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
+		let gas_limit = 500_000;
 		let info = Self::evm_call(from, erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 
@@ -1011,7 +1011,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let success = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Bool(val) = success {
 				*val
 			} else {
@@ -1050,7 +1050,7 @@ impl<T: Config> Pallet<T> {
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
+		let gas_limit = 500_000;
 		let info = Self::evm_call(Self::address(), erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 
@@ -1058,7 +1058,7 @@ impl<T: Config> Pallet<T> {
 		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
 		let balance = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-			let success = result.first().ok_or_else(|| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
 			if let ethabi::Token::Uint(val) = success {
 				*val
 			} else {
@@ -1092,7 +1092,7 @@ impl<T: Config> Pallet<T> {
 	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(f.short_signature()), f.signature());
 		let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
+		let gas_limit = 500_000;
 		let value = value.using_encoded(U256::from_little_endian);
 		let info = Self::evm_call(Self::address(), contract, value, data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);

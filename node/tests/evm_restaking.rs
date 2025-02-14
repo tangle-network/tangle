@@ -189,8 +189,8 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 1_000_000 * EIGHTEEN_DECIMALS; // 1M tokens with 18 decimals
-const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 10_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u8 = 10; // 10% APY
 
 /// Setup the E2E test environment.
@@ -461,7 +461,7 @@ fn operator_join_delegator_delegate_erc20() {
 		let usdc = MockERC20::new(t.usdc, &bob_provider);
 
 		// Mint USDC for Bob
-		let mint_amount = U256::from(100_000_000u128);
+		let mint_amount = U256::from(100_000u128);
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
@@ -924,7 +924,7 @@ fn lrt_deposit_withdraw_erc20() {
 }
 
 #[test]
-fn lrt_rewards() {
+fn mad_rewards() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
@@ -936,44 +936,54 @@ fn lrt_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		let deposit = U256::from(MOCK_DEPOSIT);
-
 		// Setup a LRT Vault for Alice.
 		let lrt_address = deploy_tangle_lrt(
 			alice_provider.clone(),
-			t.weth,
+			t.usdc,
 			alice.account_id().0,
-			"Liquid Restaked Ether",
-			"lrtETH",
+			"Liquid Restaked USDC",
+			"lrtUSDC",
 		)
 		.await?;
 
 		// Bob as delegator
 		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
-		// Mint WETH for Bob
-		let weth_amount = deposit;
-		let weth = MockERC20::new(t.weth, &bob_provider);
-		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
 
-		// Approve LRT contract to spend WETH
-		let deposit_amount = weth_amount;
-		let approve_result =
-			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
-		assert!(approve_result.status());
-		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+		// Mint USDC for Bob
+		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
+		let _mint_call = api::tx().assets().mint(
+			t.usdc_asset_id,
+			bob.address().to_account_id().into(),
+			mint_amount.to::<u128>(),
+		);
 
-		// Deposit WETH to LRT
-		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
-		let deposit_result = lrt
-			.deposit(deposit_amount, bob.address())
+		// // Deposit WETH to LRT
+		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		// let deposit_result = lrt
+		// 	.deposit(deposit_amount, bob.address())
+		// 	.send()
+		// 	.await?
+		// 	.with_timeout(Some(Duration::from_secs(5)))
+		// 	.get_receipt()
+		// 	.await?;
+		// assert!(deposit_result.status());
+		// info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Delegate assets
+		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let deposit_amount = U256::from(MOCK_DEPOSIT);
+
+		// Deposit and delegate using asset ID
+		let deposit_result = precompile
+			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(deposit_amount), 0)
+			.from(bob.address())
 			.send()
 			.await?
 			.with_timeout(Some(Duration::from_secs(5)))
 			.get_receipt()
 			.await?;
 		assert!(deposit_result.status());
-		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
 
 		// Wait for one year to pass
 		wait_for_more_blocks(&t.provider, 51).await;
@@ -983,12 +993,13 @@ fn lrt_rewards() {
 
 		let rewards_addr = api::apis().rewards_api().query_user_rewards(
 			lrt_address.to_account_id(),
-			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+			Asset::Erc20((<[u8; 20]>::from(t.usdc)).into()),
 		);
+
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
 			Ok(rewards) => {
-				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
+				info!("User rewards: {} USDC", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
 			},
 			Err(e) => {

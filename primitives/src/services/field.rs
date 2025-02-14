@@ -92,9 +92,6 @@ pub enum Field<C: Constraints, AccountId> {
 	/// Represents a UTF-8 string.
 	#[codec(index = 10)]
 	String(BoundedString<C::MaxFieldsSize>),
-	/// Represents a Raw Bytes.
-	#[codec(index = 11)]
-	Bytes(BoundedVec<u8, C::MaxFieldsSize>),
 	/// Represents an array of values
 	/// Fixed Length of values.
 	#[codec(index = 12)]
@@ -136,7 +133,6 @@ impl<C: Constraints, AccountId: core::fmt::Debug> core::fmt::Debug for Field<C, 
 			Self::Uint64(arg0) => f.debug_tuple("uint64").field(arg0).finish(),
 			Self::Int64(arg0) => f.debug_tuple("int64").field(arg0).finish(),
 			Self::String(arg0) => f.debug_tuple("string").field(arg0).finish(),
-			Self::Bytes(arg0) => f.debug_tuple("bytes").field(arg0).finish(),
 			Self::Array(arg0) => f.debug_tuple("array").field(arg0).finish(),
 			Self::List(arg0) => f.debug_tuple("list").field(arg0).finish(),
 			Self::AccountId(arg0) => f.debug_tuple("account").field(arg0).finish(),
@@ -166,7 +162,6 @@ impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
 			(Self::Uint64(l0), Self::Uint64(r0)) => l0 == r0,
 			(Self::Int64(l0), Self::Int64(r0)) => l0 == r0,
 			(Self::String(l0), Self::String(r0)) => l0 == r0,
-			(Self::Bytes(l0), Self::Bytes(r0)) => l0 == r0,
 			(Self::Array(l0), Self::Array(r0)) => l0 == r0,
 			(Self::List(l0), Self::List(r0)) => l0 == r0,
 			(Self::AccountId(l0), Self::AccountId(r0)) => l0 == r0,
@@ -202,7 +197,6 @@ impl<C: Constraints, AccountId: Clone> Clone for Field<C, AccountId> {
 			Self::Uint64(arg0) => Self::Uint64(*arg0),
 			Self::Int64(arg0) => Self::Int64(*arg0),
 			Self::String(arg0) => Self::String(arg0.clone()),
-			Self::Bytes(arg0) => Self::Bytes(arg0.clone()),
 			Self::Array(arg0) => Self::Array(arg0.clone()),
 			Self::List(arg0) => Self::List(arg0.clone()),
 			Self::Struct(arg0, arg1) => Self::Struct(arg0.clone(), arg1.clone()),
@@ -228,9 +222,20 @@ impl_from! {
 	i32 => Int32,
 	u64 => Uint64,
 	i64 => Int64,
-	BoundedVec<u8, C::MaxFieldsSize> => Bytes,
-	BoundedString<C::MaxFieldsSize> => String,
-	BoundedVec<Self, C::MaxFieldsSize> => List
+	BoundedString<C::MaxFieldsSize> => String
+}
+
+// For any `T` that can be converted to `Field<C, AccountId>` and `C::MaxFieldsSize`
+// then for any `BoundedVec<T, C::MaxFieldsSize>` we can convert it to `List<Field<C, AccountId>>`
+impl<T, C, AccountId> From<BoundedVec<T, C::MaxFieldsSize>> for Field<C, AccountId>
+where
+	T: Into<Field<C, AccountId>>,
+	C: Constraints,
+{
+	fn from(val: BoundedVec<T, C::MaxFieldsSize>) -> Self {
+		let list: Vec<Field<C, AccountId>> = val.into_iter().map(Into::into).collect();
+		Self::List(BoundedVec::truncate_from(list))
+	}
 }
 
 #[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -306,7 +311,6 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 			(Self::Uint64(_), FieldType::Uint64) => true,
 			(Self::Int64(_), FieldType::Int64) => true,
 			(Self::String(_), FieldType::String) => true,
-			(Self::Bytes(_), FieldType::Bytes) => true,
 			(Self::Array(a), FieldType::Array(len, b)) => {
 				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref()))
 			},
@@ -338,7 +342,6 @@ impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
 			Field::Uint64(_) => FieldType::Uint64,
 			Field::Int64(_) => FieldType::Int64,
 			Field::String(_) => FieldType::String,
-			Field::Bytes(_) => FieldType::Bytes,
 			Field::Array(a) => FieldType::Array(
 				a.len() as u64,
 				Box::new(a.first().cloned().map(Into::into).unwrap_or(FieldType::Void)),
@@ -381,7 +384,6 @@ impl<'a, C: Constraints, AccountId: Encode + Clone> From<&'a Field<C, AccountId>
 			Field::Uint64(val) => ethabi::Token::Uint((*val).into()),
 			Field::Int64(val) => ethabi::Token::Int((*val).into()),
 			Field::String(val) => ethabi::Token::String(val.to_string()),
-			Field::Bytes(val) => ethabi::Token::FixedBytes(val.to_vec()),
 			Field::Array(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::List(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),

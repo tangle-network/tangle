@@ -5,7 +5,7 @@ use super::*;
 fn update_vault_config_non_force_origin() {
 	new_test_ext().execute_with(|| {
 		let vault_id = 1u32;
-		let apy = Percent::from_percent(10);
+		let apy = Perbill::from_percent(10);
 		let deposit_cap = 1000;
 		let boost_multiplier = Some(150);
 		let incentive_cap = 1000;
