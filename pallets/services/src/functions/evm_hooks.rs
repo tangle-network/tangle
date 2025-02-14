@@ -6,7 +6,6 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use parity_scale_codec::Encode;
 use sp_core::{Get, H160, U256};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
-use sp_runtime::Percent;
 use sp_std::{boxed::Box, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, BlueprintServiceManager, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, Field,
