@@ -40,10 +40,10 @@ fn test_delegate_assets_invalid_operator() {
 		create_and_mint_tokens(1, delegator_account.clone(), 500);
 
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator_account.clone()), 
-			Asset::Custom(1), 
-			200, 
-			Some(TestAccount::Alex.into()), 
+			RuntimeOrigin::signed(delegator_account.clone()),
+			Asset::Custom(1),
+			200,
+			Some(TestAccount::Alex.into()),
 			None
 		));
 
