@@ -161,6 +161,8 @@ runtime-benchmarks = [
     "pallet-hotfix-sufficients/runtime-benchmarks",
     # Tangle
     "pallet-services/runtime-benchmarks",
+    "pallet-rewards/runtime-benchmarks",
+    "pallet-multi-asset-delegation/runtime-benchmarks",
 ]
 
 std = [

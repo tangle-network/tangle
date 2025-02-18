@@ -45,6 +45,12 @@ pub type AccountId = AccountId32;
 pub type Balance = u128;
 type Nonce = u32;
 pub type AssetId = u128;
+
+impl From<u32> for AssetId {
+    fn from(value: u32) -> Self {
+        value as u128
+    }
+}
 pub type BlockNumber = u64;
 
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;

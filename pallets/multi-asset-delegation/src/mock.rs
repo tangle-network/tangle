@@ -59,6 +59,12 @@ pub type Nonce = u32;
 pub type AssetId = u128;
 pub type BlockNumber = BlockNumberFor<Runtime>;
 
+impl From<u32> for AssetId {
+    fn from(value: u32) -> Self {
+        value as u128
+    }
+}
+
 pub use tangle_primitives::services::Asset;
 
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]

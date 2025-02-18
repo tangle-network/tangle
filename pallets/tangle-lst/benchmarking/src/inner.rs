@@ -1,26 +1,15 @@
 //! Benchmarks for the nomination Lst coupled with the staking and bags list pallets.
 
-use alloc::{vec, vec::Vec};
+use alloc::vec::Vec;
 use frame_benchmarking::v1::{account, whitelist_account};
-use frame_election_provider_support::SortedListProvider;
-use frame_support::{
-	assert_ok, ensure,
-	traits::{
-		fungible::{Inspect, Mutate, Unbalanced},
-		tokens::Preservation,
-		Currency, Get, Imbalance,
-	},
-};
+
+use frame_support::{BoundedVec, traits::{Currency, Get}};
 use frame_system::RawOrigin as RuntimeOrigin;
 use pallet_staking::MaxNominationsOf;
-use pallet_tangle_lst::{
-	BalanceOf, BondExtra, BondedPoolInner, BondedPools, ClaimPermission, ClaimPermissions,
-	Commission, CommissionChangeRate, CommissionClaimPermission, ConfigOp, GlobalMaxCommission,
-	MaxPools, Metadata, MinCreateBond, MinJoinBond, Pallet as Lst, PoolId, PoolRoles, PoolState,
-	RewardPools, SubPoolsStorage,
-};
+use pallet_tangle_lst::{self as lst, Pallet as Lst, BondedPools, MinCreateBond, MinJoinBond, RewardPools, Metadata, MaxPools, GlobalMaxCommission};
+use lst::types::*;
 use sp_runtime::{
-	traits::{Bounded, StaticLookup, Zero},
+	traits::{Bounded, StaticLookup},
 	Perbill,
 };
 use sp_staking::{EraIndex, StakingInterface};
@@ -33,12 +22,25 @@ const USER_SEED: u32 = 0;
 const MAX_SPANS: u32 = 100;
 
 pub(crate) type VoterBagsListInstance = pallet_bags_list::Instance1;
-pub trait Config:
-	pallet_tangle_lst::Config + pallet_staking::Config + pallet_bags_list::Config<VoterBagsListInstance>
+pub trait Config: lst::Config + pallet_staking::Config
+where
+	BalanceOf<Self>: From<u32> + Into<u128>,
+	<Self as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
+	<Self as lst::Config>::Currency: Currency<Self::AccountId, Balance = BalanceOf<Self>>,
+	<Self as pallet_staking::Config>::Currency: Currency<Self::AccountId, Balance = BalanceOf<Self>>,
+	<Self as pallet_staking::Config>::CurrencyBalance: Into<u128> + From<u128>,
+	u128: From<<Self as pallet_staking::Config>::CurrencyBalance>,
+	u128: From<BalanceOf<Self>>,
 {
 }
 
-pub struct Pallet<T: Config>(Lst<T>);
+pub struct Pallet<T: Config>(Lst<T>)
+where
+	<T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
+	<T as pallet_staking::Config>::Currency: Currency<<T as frame_system::Config>::AccountId, Balance = BalanceOf<T>>,
+	<T as pallet_staking::Config>::CurrencyBalance: Into<u128>,
+	u128: From<<T as pallet_staking::Config>::CurrencyBalance>,
+	u128: From<BalanceOf<T>>;
 
 fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 	string: &'static str,
@@ -69,6 +71,7 @@ fn create_pool_account<T: pallet_tangle_lst::Config>(
 		pool_creator_lookup.clone(),
 		pool_creator_lookup,
 		Default::default(),
+		Default::default()
 	)
 	.unwrap();
 
@@ -97,9 +100,27 @@ fn vote_to_balance<T: pallet_tangle_lst::Config>(vote: u64) -> Result<BalanceOf<
 frame_benchmarking::benchmarks! {
 	where_clause {
 		where
-			T: pallet_staking::Config,
+			T: Config,
+			T::MaxIconLength: Get<u32>,
 			pallet_staking::BalanceOf<T>: From<u128>,
 			BalanceOf<T>: Into<u128>,
+			T::MaxNameLength: Get<u32>,
+			<T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
+			<T as pallet_staking::Config>::Currency: Currency<<T as frame_system::Config>::AccountId, Balance = BalanceOf<T>>,
+			<T as pallet_staking::Config>::CurrencyBalance: Into<u128>,
+			u128: From<<T as pallet_staking::Config>::CurrencyBalance>,
+			u128: From<BalanceOf<T>>,
+	}
+
+	create_pool {
+		let depositor: T::AccountId = account("depositor", 0, 0);
+		let depositor_lookup = T::Lookup::unlookup(depositor.clone());
+		let min_create_bond = MinCreateBond::<T>::get();
+		let name: Option<BoundedVec<u8, T::MaxNameLength>> = None;
+		let icon: Option<BoundedVec<u8, T::MaxIconLength>> = None;
+	}: _(RuntimeOrigin::Signed(depositor.clone()), min_create_bond, depositor_lookup.clone(), depositor_lookup.clone(), depositor_lookup, name, icon)
+	verify {
+		assert!(BondedPools::<T>::contains_key(1));
 	}
 
 	join {
@@ -267,8 +288,8 @@ frame_benchmarking::benchmarks! {
 		assert_eq!(MinJoinBond::<T>::get(), BalanceOf::<T>::max_value());
 		assert_eq!(MinCreateBond::<T>::get(), BalanceOf::<T>::max_value());
 		assert_eq!(MaxPools::<T>::get(), Some(u32::MAX));
-		assert_eq!(MaxPoolMembers::<T>::get(), Some(u32::MAX));
-		assert_eq!(MaxPoolMembersPerLst::<T>::get(), Some(u32::MAX));
+		assert!(BondedPools::<T>::contains_key(1));
+		assert!(BondedPools::<T>::contains_key(2u32));
 		assert_eq!(GlobalMaxCommission::<T>::get(), Some(Perbill::max_value()));
 	}
 
@@ -308,7 +329,7 @@ frame_benchmarking::benchmarks! {
 		whitelist_account!(depositor);
 	}:_(RuntimeOrigin::Signed(depositor.clone()), 1)
 	verify {
-		assert!(T::Staking::nominations(Lst::from(pool_account.clone())).is_none());
+		assert!(T::Staking::nominations(&pool_account.clone()).is_none());
 	}
 
 	set_commission {
