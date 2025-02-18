@@ -35,20 +35,15 @@ where
 	<Self as lst::Config>::Currency: Currency<Self::AccountId, Balance = BalanceOf<Self>>,
 	<Self as pallet_staking::Config>::Currency:
 		Currency<Self::AccountId, Balance = BalanceOf<Self>>,
-	<Self as pallet_staking::Config>::CurrencyBalance: Into<u128> + From<u128>,
-	u128: From<<Self as pallet_staking::Config>::CurrencyBalance>,
-	u128: From<BalanceOf<Self>>,
+	<Self as pallet_staking::Config>::CurrencyBalance: From<u128> + From<BalanceOf<Self>>,
+	BalanceOf<Self>: Into<<Self as pallet_staking::Config>::CurrencyBalance>,
 {
 }
 
 pub struct Pallet<T: Config>(Lst<T>)
 where
 	<T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
-	<T as pallet_staking::Config>::Currency:
-		Currency<<T as frame_system::Config>::AccountId, Balance = BalanceOf<T>>,
-	<T as pallet_staking::Config>::CurrencyBalance: Into<u128>,
-	u128: From<<T as pallet_staking::Config>::CurrencyBalance>,
-	u128: From<BalanceOf<T>>;
+	<T as lst::Config>::Currency: Currency<T::AccountId, Balance = BalanceOf<T>>;
 
 fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 	string: &'static str,

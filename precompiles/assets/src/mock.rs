@@ -285,6 +285,7 @@ impl tangle_primitives::traits::NextAssetId<u32> for Runtime {
 }
 
 impl pallet_assets::Config for Runtime {
+	type BenchmarkHelper = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
 	type AssetId = AssetId;

@@ -62,7 +62,7 @@ benchmarks! {
 	claim_rewards {
 		let (vault_id, caller) = setup_vault::<T>();
 		let deposit = BalanceOf::<T>::from(100u32);
-		let deposit_info = UserDepositWithLocks {
+		let deposit_info: UserDepositWithLocks<BalanceOf<T>, BlockNumberFor<T>> = UserDepositWithLocks {
 			unlocked_amount: deposit,
 			amount_with_locks: None,
 		};

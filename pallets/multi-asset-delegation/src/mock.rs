@@ -56,12 +56,19 @@ use std::{collections::BTreeMap, sync::Arc};
 pub type AccountId = AccountId32;
 pub type Balance = u128;
 pub type Nonce = u32;
-pub type AssetId = u128;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Encode, Decode, MaxEncodedLen, TypeInfo)]
+pub struct AssetId(u128);
 pub type BlockNumber = BlockNumberFor<Runtime>;
 
 impl From<u32> for AssetId {
 	fn from(value: u32) -> Self {
-		value as u128
+		AssetId(value.into())
+	}
+}
+
+impl From<AssetId> for u128 {
+	fn from(value: AssetId) -> Self {
+		value.0
 	}
 }
 
