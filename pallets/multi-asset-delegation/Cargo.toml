@@ -62,6 +62,8 @@ pallet-session = { workspace = true }
 pallet-staking = { workspace = true, optional = true }
 sp-staking = { workspace = true }
 frame-election-provider-support = { workspace = true, optional = true }
+pallet-proxy = { workspace = true, optional = true }
+pallet-utility = { workspace = true, optional = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
@@ -102,6 +104,8 @@ pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
 sp-staking = { workspace = true }
 frame-election-provider-support = { workspace = true }
+pallet-proxy = { workspace = true }
+pallet-utility = { workspace = true }
 
 [features]
 default = ["std"]
@@ -141,6 +145,8 @@ std = [
     "ethabi/std",
     "sp-keyring/std",
     "pallet-ethereum/std",
+    "pallet-proxy/std",
+    "pallet-utility/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
@@ -178,6 +184,8 @@ fuzzing = [
     "pallet-evm-precompile-modexp",
     "pallet-evm-precompile-sha3fips",
     "pallet-evm-precompile-simple",
+    "pallet-proxy",
+    "pallet-utility",
     "precompile-utils",
     "sp-keyring",
     "pallet-timestamp",

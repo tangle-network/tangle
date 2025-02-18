@@ -832,7 +832,7 @@ where
 		);
 		let raw_payload = SignedPayload::new(call, extra)
 			.map_err(|e| {
-				log::warn!("Unable to create signed payload: {:?}", e);
+				log::warn!("Unable to create signed payload: {e:?}");
 			})
 			.ok()?;
 		let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
@@ -1564,8 +1564,11 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = Services;
 	type LeaveOperatorsDelay = LeaveOperatorsDelay;
 	type OperatorBondLessDelay = OperatorBondLessDelay;
@@ -1574,7 +1577,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type SlashedAmountRecipient = TreasuryAccount;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
 	type RewardsManager = Rewards;

@@ -57,9 +57,12 @@ pallet-evm-precompile-ed25519 = { workspace = true, optional = true }
 pallet-evm-precompile-modexp = { workspace = true, optional = true }
 pallet-evm-precompile-sha3fips = { workspace = true, optional = true }
 pallet-evm-precompile-simple = { workspace = true, optional = true }
+pallet-evm-precompile-staking = { workspace = true, optional = true }
 pallet-session = { workspace = true, optional = true }
 pallet-staking = { workspace = true, optional = true }
+pallet-staking-reward-curve = { workspace = true, optional = true }
 sp-staking = { workspace = true, optional = true }
+sp-keyring = { workspace = true, optional = true }
 frame-election-provider-support = { workspace = true, optional = true }
 ethabi = { workspace = true, optional = true }
 
@@ -76,11 +79,14 @@ serde_json = { workspace = true }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
 
-
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate
+frame-election-provider-support = { workspace = true, features = ["std"] }
 pallet-balances = { workspace = true, features = ["std"] }
+pallet-session = { workspace = true, features = ["std"] }
+pallet-staking = { workspace = true, features = ["std"] }
+pallet-staking-reward-curve = { workspace = true }
 pallet-assets = { workspace = true, features = ["std"] }
 pallet-timestamp = { workspace = true, features = ["std"] }
 scale-info = { workspace = true, features = ["derive", "std"] }
@@ -109,13 +115,11 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
-
-pallet-session = { workspace = true }
-pallet-staking = { workspace = true }
+pallet-evm-precompile-staking = { workspace = true }
 sp-staking = { workspace = true }
-frame-election-provider-support = { workspace = true }
+sp-keyring = { workspace = true }
 
-ethabi = { workspace = true }
+ethabi = { workspace = true, features = ["serde"] }
 
 [features]
 default = ["std"]
@@ -155,7 +159,9 @@ fuzzing = [
     "pallet-evm-precompile-simple",
     "pallet-session",
     "pallet-staking",
+    "pallet-staking-reward-curve",
     "sp-staking",
+    "sp-keyring",
     "frame-election-provider-support",
 ]
 std = [
@@ -202,6 +208,7 @@ std = [
     "pallet-evm-precompile-bn128/std",
     "pallet-evm-precompile-curve25519/std",
     "pallet-evm-precompile-ed25519/std",
+    "pallet-evm-precompile-staking/std",
     "precompile-utils/std",
     "serde/std",
     "pallet-session/std",
@@ -209,4 +216,6 @@ std = [
     "sp-staking/std",
     "frame-election-provider-support/std",
     "evm-erc20-utils/std",
+    "sp-keyring/std",
+    "ethabi/std",
 ]
