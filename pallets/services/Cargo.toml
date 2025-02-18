@@ -65,11 +65,16 @@ pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
+pallet-evm-precompile-balances-erc20 = { workspace = true }
+pallet-evm-precompileset-assets-erc20 = { workspace = true }
+
 precompile-utils = { workspace = true }
 
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
+pallet-multi-asset-delegation = { workspace = true }
 sp-staking = { workspace = true }
+sp-weights = { workspace = true }
 frame-election-provider-support = { workspace = true }
 
 [features]
@@ -86,6 +91,7 @@ std = [
  "sp-std/std",
  "sp-io/std",
  "sp-staking/std",
+ "sp-weights/std",
  "tangle-primitives/std",
  "pallet-balances/std",
  "pallet-timestamp/std",

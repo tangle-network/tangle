@@ -19,7 +19,7 @@ pub mod rewards;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::{ByteArray, RuntimeDebug};
+use sp_core::RuntimeDebug;
 use sp_runtime::{generic, AccountId32, OpaqueExtrinsic};
 
 /// Block header type as expected by this runtime.
@@ -58,6 +58,15 @@ pub type RoundIndex = u32;
 
 /// Blueprint ID
 pub type BlueprintId = u64;
+
+/// Service request ID
+pub type ServiceRequestId = u64;
+
+/// Service instance ID
+pub type InstanceId = u64;
+
+/// Job call ID
+pub type JobCallId = u64;
 
 /// The address format for describing accounts.
 pub type Address = MultiAddress<AccountId, Index>;
@@ -99,16 +108,9 @@ pub enum Account<AccountId> {
 	Address(sp_core::H160),
 }
 
-impl<AccountId> Default for Account<AccountId>
-where
-	AccountId: ByteArray,
-{
+impl<AccountId> Default for Account<AccountId> {
 	fn default() -> Self {
-		// This should be good enough to make the account for any account id type.
-		let empty = [0u8; 64];
-		let account_id =
-			AccountId::from_slice(&empty[0..AccountId::LEN]).expect("never fails; qed");
-		Account::Id(account_id)
+		Account::<AccountId>::Address(sp_core::H160([0u8; 20]))
 	}
 }
 

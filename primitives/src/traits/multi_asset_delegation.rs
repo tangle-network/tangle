@@ -14,9 +14,7 @@ use sp_std::prelude::*;
 /// * `AssetId`: The type representing an asset identifier.
 /// * `Balance`: The type representing a balance or amount.
 /// * `BlockNumber`: The type representing a block number.
-pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
-	type AssetId;
-
+pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// Get the current round index.
 	///
 	/// This method returns the current round index, which may be used to track
@@ -76,15 +74,12 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 	/// # Parameters
 	///
 	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `asset_id`: A reference to the asset identifier for which the total delegation amount is requested.
+	/// * `asset`: A reference to the asset identifier for which the total delegation amount is requested.
 	///
 	/// # Returns
 	///
 	/// The total delegation amount as a `Balance`.
-	fn get_total_delegation_by_asset_id(
-		operator: &AccountId,
-		asset_id: &Asset<Self::AssetId>,
-	) -> Balance;
+	fn get_total_delegation_by_asset(operator: &AccountId, asset_id: &Asset<AssetId>) -> Balance;
 
 	/// Get all delegators for a specific operator.
 	///
@@ -101,16 +96,25 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber> {
 	/// delegator account identifier, delegation amount, and asset identifier.
 	fn get_delegators_for_operator(
 		operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)>;
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)>;
 
-	fn slash_operator(
-		operator: &AccountId,
-		blueprint_id: crate::BlueprintId,
-		percentage: sp_runtime::Percent,
-	);
-
+	/// Get a user's deposit and associated locks for a specific asset.
+	///
+	/// This method retrieves information about a user's deposit for a given asset,
+	/// including both the unlocked amount and any time-locked portions.
+	///
+	/// # Parameters
+	///
+	/// * `who`: A reference to the account identifier of the user.
+	/// * `asset`: The asset identifier for which to get deposit information.
+	///
+	/// # Returns
+	///
+	/// An `Option` containing the user's deposit information if it exists:
+	/// - `Some(UserDepositWithLocks)` containing the unlocked amount and any time-locks
+	/// - `None` if no deposit exists for this user and asset
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<Self::AssetId>,
+		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>>;
 }

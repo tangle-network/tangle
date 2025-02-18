@@ -1296,8 +1296,11 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = Services;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
@@ -1308,7 +1311,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
-	type SlashedAmountRecipient = TreasuryAccount;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
 	type MaxWithdrawRequests = MaxWithdrawRequests;

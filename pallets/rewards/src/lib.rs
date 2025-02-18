@@ -124,7 +124,7 @@ pub mod pallet {
 			Self::AccountId,
 			BalanceOf<Self>,
 			BlockNumberFor<Self>,
-			AssetId = Self::AssetId,
+			Self::AssetId,
 		>;
 
 		/// The origin that can manage reward assets
@@ -243,11 +243,7 @@ pub mod pallet {
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: BlueprintId },
 		/// Asset has been updated to reward vault
-		AssetUpdatedInVault {
-			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
-			action: AssetAction,
-		},
+		AssetUpdatedInVault { vault_id: T::VaultId, asset: Asset<T::AssetId>, action: AssetAction },
 		/// Vault reward config updated
 		VaultRewardConfigUpdated {
 			vault_id: T::VaultId,
@@ -410,7 +406,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `vault_id` - ID of the vault
-		/// * `asset_id` - ID of the asset
+		/// * `asset` - ID of the asset
 		/// * `action` - Action to perform (Add/Remove)
 		///
 		/// # Errors
@@ -422,17 +418,17 @@ pub mod pallet {
 		pub fn manage_asset_reward_vault(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			action: AssetAction,
 		) -> DispatchResult {
 			let _who = T::ForceOrigin::ensure_origin(origin)?;
 
 			match action {
-				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
-				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
+				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset)?,
+				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset)?,
 			}
 
-			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset_id, action });
+			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset, action });
 
 			Ok(())
 		}
