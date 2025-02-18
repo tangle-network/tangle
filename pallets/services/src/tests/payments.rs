@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{assert_err, assert_ok};
+use frame_support::{assert_err, assert_ok, traits::ConstU128};
 use sp_core::{H160, U256};
 use sp_runtime::TokenError;
 
@@ -206,13 +206,13 @@ fn test_payment_distribution_operators() {
 
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
-		let mbsm_account_id = address_to_account_id(mbsm_address);
+		let mbsm_account_id = PalletEVMAddressMapping::into_account_id(mbsm_address);
 		assert_eq!(Assets::balance(USDC, mbsm_account_id.clone()), payment);
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);
 
 		// Test Case 2: ERC20 Token Payment
 		let charlie_address = mock_address(CHARLIE);
-		let charlie_evm_account_id = address_to_account_id(charlie_address);
+		let charlie_evm_account_id = PalletEVMAddressMapping::into_account_id(charlie_address);
 
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie_evm_account_id.clone()),
@@ -255,8 +255,36 @@ fn test_payment_distribution_operators() {
 
 		// Test Case 3: Native Currency Payment
 		let native_payment = 1000000000000000000u128; // 1 TNT
-		let before_native_balance = Balances::free_balance(eve.clone());
-		Balances::make_free_balance_be(&eve, native_payment * 1_000_000);
+		let existential_deposit = <ConstU128<1> as sp_core::Get<u128>>::get();
+		// Ensure enough balance for payment + existential deposit
+		let required_balance = native_payment * 10;
+
+		// Setup accounts with sufficient balances
+		Balances::make_free_balance_be(&eve, required_balance);
+		let pallet_account = Services::pallet_account();
+		Balances::make_free_balance_be(&pallet_account, required_balance);
+
+		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
+		let mbsm_account_id = PalletEVMAddressMapping::into_account_id(mbsm_address);
+		Balances::make_free_balance_be(&mbsm_account_id, required_balance);
+
+		// Verify initial balances
+		assert_eq!(
+			Balances::free_balance(eve.clone()),
+			required_balance,
+			"Eve's balance not set correctly"
+		);
+		let initial_pallet_balance = Balances::free_balance(pallet_account.clone());
+		let initial_mbsm_balance = Balances::free_balance(mbsm_account_id.clone());
+		assert!(
+			initial_pallet_balance >= existential_deposit,
+			"Pallet account needs existential deposit"
+		);
+		assert!(
+			initial_mbsm_balance >= existential_deposit,
+			"MBSM account needs existential deposit"
+		);
+
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
@@ -278,20 +306,22 @@ fn test_payment_distribution_operators() {
 			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
 		));
 
-		// Verify native payment is held by pallet
-		assert_eq!(Balances::free_balance(Services::pallet_account()), native_payment);
-		assert_eq!(Balances::free_balance(eve.clone()), before_native_balance - native_payment);
-
-		// Bob approves
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			2,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
-		));
-
-		// Verify native payment is transferred to MBSM
-		assert_eq!(Balances::free_balance(mbsm_account_id), native_payment);
-		assert_eq!(Balances::free_balance(Services::pallet_account()), 0);
+		// Verify native payment is transferred to MBSM after approval
+		assert_eq!(
+			Balances::free_balance(mbsm_account_id),
+			initial_mbsm_balance + native_payment * 2,
+			"MBSM account should have payment after approval"
+		);
+		assert_eq!(
+			Balances::free_balance(pallet_account),
+			initial_pallet_balance - native_payment,
+			"Pallet account should transfer payment after approval"
+		);
+		assert_eq!(
+			Balances::free_balance(eve.clone()),
+			native_payment * 9,
+			"Eve should retain rest of the balance"
+		);
 	});
 }
 

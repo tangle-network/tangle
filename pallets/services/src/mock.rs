@@ -87,14 +87,14 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ExistentialDeposit = ConstU128<1>;
 	type AccountStore = System;
-	type MaxLocks = ();
+	type MaxLocks = ConstU32<50>;
 	type MaxReserves = ConstU32<50>;
 	type ReserveIdentifier = ();
 	type WeightInfo = ();
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type RuntimeFreezeReason = ();
-	type FreezeIdentifier = ();
-	type MaxFreezes = ();
+	type RuntimeFreezeReason = RuntimeHoldReason;
+	type FreezeIdentifier = [u8; 8];
+	type MaxFreezes = ConstU32<50>;
 }
 
 parameter_types! {
@@ -246,7 +246,9 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 	}
 
 	fn into_address(account_id: AccountId) -> H160 {
-		H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
+		// Convert AccountId to H160 by taking first 20 bytes
+		let bytes: &[u8] = account_id.as_ref();
+		H160::from_slice(&bytes[0..20])
 	}
 }
 
@@ -603,7 +605,12 @@ pub const WBTC: AssetId = 3;
 pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
+	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
+	// Add pallet account and MBSM account with sufficient balance
+	let pallet_account = Services::pallet_account();
+	let mbsm_account_id = PalletEVMAddressMapping::into_account_id(MBSM);
+	balances.push((pallet_account, 20_000_u128));
+	balances.push((mbsm_account_id, 20_000_u128));
 	pallet_balances::GenesisConfig::<Runtime> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
