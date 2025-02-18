@@ -13,6 +13,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "account-util"
+version = "1.2.8"
+dependencies = [
+ "frame-support 37.0.1",
+ "pallet-airdrop-claims",
+ "pallet-vesting 37.0.0",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "addchain"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

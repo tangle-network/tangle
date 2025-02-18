@@ -1,5 +1,5 @@
-use super::*;
-use frame_support::traits::OnRuntimeUpgrade;
+use crate::{AccountId, Babe, Grandpa, KeyTypeId, OpaqueKeys, Session, SessionKeys};
+use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use sp_runtime::{BoundToRuntimeAppPublic, RuntimeAppPublic, RuntimeDebug};
 
