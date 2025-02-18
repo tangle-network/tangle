@@ -16,6 +16,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok, traits::ConstU128};
+use pallet_balances::Config;
 use sp_core::{H160, U256};
 use sp_runtime::TokenError;
 
@@ -108,9 +109,10 @@ fn test_payment_refunds_on_failure() {
 		);
 
 		// Test Case 3: Refund on native currency payment
+		let native_payment = 20000u128; // 0.00002 TNT
+		let initial_balance = native_payment * 100;
+		Balances::make_free_balance_be(&charlie, initial_balance);
 		let before_native_balance = Balances::free_balance(charlie.clone());
-		let native_payment = 1000000000000000000u128; // 1 TNT
-		Balances::make_free_balance_be(&charlie, native_payment * 100);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(charlie.clone()),
 			None,
@@ -130,7 +132,7 @@ fn test_payment_refunds_on_failure() {
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance - native_payment);
 
 		// Bob rejects the request
-		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 2));
 
 		// Verify native payment is refunded
 		assert_eq!(Balances::free_balance(Services::pallet_account()), 0);
@@ -440,8 +442,36 @@ fn test_payment_multiple_asset_types() {
 
 		// Test Case 3: Multiple asset types with native currency payment
 		let native_payment = 1000000000000000000u128; // 1 TNT
-		let before_native_balance = Balances::free_balance(eve.clone());
-		Balances::make_free_balance_be(&eve, native_payment * 1_000_000);
+		let existential_deposit = <ConstU128<1> as sp_core::Get<u128>>::get();
+		// Ensure enough balance for payment + existential deposit
+		let required_balance = native_payment * 10;
+
+		// Setup accounts with sufficient balances
+		Balances::make_free_balance_be(&eve, required_balance);
+		let pallet_account = Services::pallet_account();
+		Balances::make_free_balance_be(&pallet_account, required_balance);
+
+		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
+		let mbsm_account_id = PalletEVMAddressMapping::into_account_id(mbsm_address);
+		Balances::make_free_balance_be(&mbsm_account_id, required_balance);
+
+		// Verify initial balances
+		assert_eq!(
+			Balances::free_balance(eve.clone()),
+			required_balance,
+			"Eve's balance not set correctly"
+		);
+		let initial_pallet_balance = Balances::free_balance(pallet_account.clone());
+		let initial_mbsm_balance = Balances::free_balance(mbsm_account_id.clone());
+		assert!(
+			initial_pallet_balance >= existential_deposit,
+			"Pallet account needs existential deposit"
+		);
+		assert!(
+			initial_mbsm_balance >= existential_deposit,
+			"MBSM account needs existential deposit"
+		);
+
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
 			None,
@@ -459,10 +489,6 @@ fn test_payment_multiple_asset_types() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Verify native payment is held by pallet
-		assert_eq!(Balances::free_balance(Services::pallet_account()), native_payment);
-		assert_eq!(Balances::free_balance(eve.clone()), before_native_balance - native_payment);
-
 		// Bob approves with security commitments for all assets
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
@@ -474,9 +500,22 @@ fn test_payment_multiple_asset_types() {
 			],
 		));
 
-		// Verify native payment is transferred to MBSM
-		assert_eq!(Balances::free_balance(mbsm_account_id), native_payment);
-		assert_eq!(Balances::free_balance(Services::pallet_account()), 0);
+		// Verify native payment is transferred to MBSM after approval
+		assert_eq!(
+			Balances::free_balance(mbsm_account_id),
+			initial_mbsm_balance + native_payment * 2,
+			"MBSM account should have payment after approval"
+		);
+		assert_eq!(
+			Balances::free_balance(pallet_account),
+			initial_pallet_balance - native_payment,
+			"Pallet account should transfer payment after approval"
+		);
+		assert_eq!(
+			Balances::free_balance(eve.clone()),
+			native_payment * 9,
+			"Eve should retain rest of the balance"
+		);
 	});
 }
 

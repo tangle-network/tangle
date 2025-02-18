@@ -70,6 +70,7 @@ impl<T: Config> Pallet<T> {
 		if let Some(payment) = Self::service_payment(request_id) {
 			match payment.asset {
 				Asset::Custom(asset_id) if asset_id == Zero::zero() => {
+					// For native currency, we expect an AccountId
 					let refund_to = payment
 						.refund_to
 						.try_into_account_id()
