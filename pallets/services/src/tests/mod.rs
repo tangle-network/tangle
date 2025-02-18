@@ -142,6 +142,7 @@ pub(crate) fn get_security_commitment(a: AssetId, p: u8) -> AssetSecurityCommitm
 struct Deployment {
 	blueprint_id: u64,
 	service_id: u64,
+	#[allow(dead_code)]
 	security_commitments: BTreeMap<Asset<AssetId>, AssetSecurityCommitment<AssetId>>,
 }
 

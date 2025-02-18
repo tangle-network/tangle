@@ -16,7 +16,6 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok, traits::ConstU128};
-use pallet_balances::Config;
 use sp_core::{H160, U256};
 use sp_runtime::TokenError;
 
