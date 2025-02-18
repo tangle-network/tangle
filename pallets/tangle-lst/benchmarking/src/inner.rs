@@ -3,11 +3,17 @@
 use alloc::vec::Vec;
 use frame_benchmarking::v1::{account, whitelist_account};
 
-use frame_support::{BoundedVec, traits::{Currency, Get}};
+use frame_support::{
+	traits::{Currency, Get},
+	BoundedVec,
+};
 use frame_system::RawOrigin as RuntimeOrigin;
-use pallet_staking::MaxNominationsOf;
-use pallet_tangle_lst::{self as lst, Pallet as Lst, BondedPools, MinCreateBond, MinJoinBond, RewardPools, Metadata, MaxPools, GlobalMaxCommission};
 use lst::types::*;
+use pallet_staking::MaxNominationsOf;
+use pallet_tangle_lst::{
+	self as lst, BondedPools, GlobalMaxCommission, MaxPools, Metadata, MinCreateBond, MinJoinBond,
+	Pallet as Lst, RewardPools,
+};
 use sp_runtime::{
 	traits::{Bounded, StaticLookup},
 	Perbill,
@@ -27,7 +33,8 @@ where
 	BalanceOf<Self>: From<u32> + Into<u128>,
 	<Self as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
 	<Self as lst::Config>::Currency: Currency<Self::AccountId, Balance = BalanceOf<Self>>,
-	<Self as pallet_staking::Config>::Currency: Currency<Self::AccountId, Balance = BalanceOf<Self>>,
+	<Self as pallet_staking::Config>::Currency:
+		Currency<Self::AccountId, Balance = BalanceOf<Self>>,
 	<Self as pallet_staking::Config>::CurrencyBalance: Into<u128> + From<u128>,
 	u128: From<<Self as pallet_staking::Config>::CurrencyBalance>,
 	u128: From<BalanceOf<Self>>,
@@ -37,7 +44,8 @@ where
 pub struct Pallet<T: Config>(Lst<T>)
 where
 	<T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
-	<T as pallet_staking::Config>::Currency: Currency<<T as frame_system::Config>::AccountId, Balance = BalanceOf<T>>,
+	<T as pallet_staking::Config>::Currency:
+		Currency<<T as frame_system::Config>::AccountId, Balance = BalanceOf<T>>,
 	<T as pallet_staking::Config>::CurrencyBalance: Into<u128>,
 	u128: From<<T as pallet_staking::Config>::CurrencyBalance>,
 	u128: From<BalanceOf<T>>;
@@ -71,7 +79,7 @@ fn create_pool_account<T: pallet_tangle_lst::Config>(
 		pool_creator_lookup.clone(),
 		pool_creator_lookup,
 		Default::default(),
-		Default::default()
+		Default::default(),
 	)
 	.unwrap();
 

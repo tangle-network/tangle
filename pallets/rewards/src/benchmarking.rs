@@ -14,16 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::{types::*, Pallet, Call, Config};
-use crate::pallet::{UserServiceReward, UserClaimedReward};
-use frame_benchmarking::{account, benchmarks, whitelisted_caller, impl_benchmark_test_suite, BenchmarkError};
+use crate::pallet::{UserClaimedReward, UserServiceReward};
+use crate::{types::*, Call, Config, Pallet};
+use frame_benchmarking::{
+	account, benchmarks, impl_benchmark_test_suite, whitelisted_caller, BenchmarkError,
+};
 use frame_support::traits::{Currency, EnsureOrigin};
-use frame_system::{RawOrigin, pallet_prelude::BlockNumberFor};
+use frame_system::{pallet_prelude::BlockNumberFor, RawOrigin};
 use sp_runtime::Perbill;
-use tangle_primitives::rewards::UserDepositWithLocks;
-use tangle_primitives::services::Asset;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::prelude::*;
+use tangle_primitives::rewards::UserDepositWithLocks;
+use tangle_primitives::services::Asset;
 
 const SEED: u32 = 0;
 
@@ -132,15 +134,15 @@ benchmarks! {
 		let mut configs: BTreeMap<u32, RewardConfigForAssetVault<BalanceOf<T>>> = BTreeMap::new();
 let asset_id: u32 = 1u32;
 configs.insert(asset_id, RewardConfigForAssetVault {
-    apy: rate,
-    incentive_cap: 0u32.into(),
-    deposit_cap: 0u32.into(),
-    boost_multiplier: None,
+	apy: rate,
+	incentive_cap: 0u32.into(),
+	deposit_cap: 0u32.into(),
+	boost_multiplier: None,
 });
 
 let decay_config = RewardConfig {
-    configs,
-    whitelisted_blueprint_ids: vec![],
+	configs,
+	whitelisted_blueprint_ids: vec![],
 };
 		assert_eq!(decay_config.configs.get(&asset_id).unwrap().apy, rate);
 	}

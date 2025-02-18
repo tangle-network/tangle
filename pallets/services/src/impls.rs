@@ -2,11 +2,13 @@ use super::*;
 use crate::types::BalanceOf;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use sp_runtime::Percent;
 use sp_std::vec;
 #[cfg(feature = "std")]
 use std::vec::Vec;
-use sp_runtime::Percent;
-use tangle_primitives::{services::Constraints, rewards::UserDepositWithLocks, traits::ServiceManager, BlueprintId};
+use tangle_primitives::{
+	rewards::UserDepositWithLocks, services::Constraints, traits::ServiceManager, BlueprintId,
+};
 
 impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxFields = T::MaxFields;
@@ -81,24 +83,24 @@ pub struct BenchmarkingOperatorDelegationManager<T: crate::Config, Balance: Defa
 #[cfg(feature = "runtime-benchmarks")]
 impl<T: crate::Config, Balance: Default, AssetId>
 	tangle_primitives::traits::MultiAssetDelegationInfo<T::AccountId, Balance, BlockNumberFor<T>>
-	for BenchmarkingOperatorDelegationManager<T, Balance, AssetId> {
+	for BenchmarkingOperatorDelegationManager<T, Balance, AssetId>
+{
+	fn get_delegators_for_operator(
+		_operator: &T::AccountId,
+	) -> Vec<(T::AccountId, Balance, tangle_primitives::services::Asset<AssetId>)> {
+		Vec::new()
+	}
 
-    fn get_delegators_for_operator(
-        _operator: &T::AccountId
-    ) -> Vec<(T::AccountId, Balance, tangle_primitives::services::Asset<AssetId>)> {
-        Vec::new()
-    }
+	fn slash_operator(_operator: &T::AccountId, _amount: u64, _slash_rate: Percent) {
+		// No-op for benchmarking
+	}
 
-    fn slash_operator(_operator: &T::AccountId, _amount: u64, _slash_rate: Percent) {
-        // No-op for benchmarking
-    }
-
-    fn get_user_deposit_with_locks(
-        _user: &T::AccountId,
-        _asset: tangle_primitives::services::Asset<AssetId>
-    ) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
-        None
-    }
+	fn get_user_deposit_with_locks(
+		_user: &T::AccountId,
+		_asset: tangle_primitives::services::Asset<AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
+		None
+	}
 
 	type AssetId = AssetId;
 

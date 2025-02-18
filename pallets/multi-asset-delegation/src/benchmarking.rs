@@ -16,31 +16,31 @@
 use super::*;
 use crate::{types::*, Pallet as MultiAssetDelegation};
 use frame_benchmarking::{account, benchmarks, whitelisted_caller};
+use frame_support::traits::{Currency, Get};
+use frame_support::BoundedVec;
+use frame_system::RawOrigin;
 use sp_core::H160;
 use sp_std::vec;
 use tangle_primitives::rewards::LockMultiplier;
-use frame_support::BoundedVec;
-use frame_support::traits::{Currency, Get};
-use frame_system::RawOrigin;
-use tangle_primitives::{BlueprintId, services::Asset};
+use tangle_primitives::{services::Asset, BlueprintId};
 
 const SEED: u32 = 0;
 fn native_asset_id<T: Config>() -> T::AssetId
 where
-    T::AssetId: From<u32>,
+	T::AssetId: From<u32>,
 {
-    0u32.into()
+	0u32.into()
 }
 
 fn foreign_asset_id<T: Config>() -> T::AssetId
 where
-    T::AssetId: From<u32>,
+	T::AssetId: From<u32>,
 {
-    1u32.into()
+	1u32.into()
 }
 
 fn blueprint_id<T: Config>() -> BlueprintId {
-    1u64
+	1u64
 }
 
 benchmarks! {
