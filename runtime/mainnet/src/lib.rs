@@ -1502,7 +1502,10 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	(migrations::MigrateSessionKeys<Runtime>,),
+	(
+		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
+		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
+	),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
