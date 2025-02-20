@@ -153,7 +153,7 @@ parameter_types! {
 	/// )
 	pub const GasLimitPovSizeRatio: u64 = 4;
 	pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
-	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<_>::new();
+	pub PrecompilesValue: TanglePrecompiles<Runtime> = TanglePrecompiles::<Runtime>::new();
 	pub SuicideQuickClearLimit: u32 = 0;
 }
 

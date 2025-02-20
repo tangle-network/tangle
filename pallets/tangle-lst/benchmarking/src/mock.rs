@@ -167,6 +167,7 @@ parameter_types! {
 }
 
 impl pallet_tangle_lst::Config for Runtime {
+	type MaxIconLength = ConstU32<1024>;
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type Currency = Balances;

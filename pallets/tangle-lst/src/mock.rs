@@ -302,6 +302,7 @@ impl pallet_lst::Config for Runtime {
 }
 
 impl pallet_assets::Config for Runtime {
+	type BenchmarkHelper = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
 	type AssetId = AssetId;

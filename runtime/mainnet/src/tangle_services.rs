@@ -197,6 +197,6 @@ impl pallet_services::Config for Runtime {
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]
 	type OperatorDelegationManager =
-		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance, AssetId>;
+		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
 	type WeightInfo = ();
 }

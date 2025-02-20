@@ -37,11 +37,18 @@ use pallet_multi_asset_delegation::{
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use rand::{seq::SliceRandom, Rng};
+use sp_runtime::sp_application_crypto::sp_core::U256;
 use sp_runtime::traits::Scale;
 use sp_runtime::DispatchResult;
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
+
+impl From<AssetId> for U256 {
+	fn from(asset_id: AssetId) -> Self {
+		U256::from(asset_id as u128)
+	}
+}
 
 type PCall = MADPrecompileCall<Runtime>;
 
@@ -100,7 +107,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			fund_account(&mut rng, &who);
 			let (asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id, Default::default()),
-				Asset::Erc20(token) => (0u128, token.into()),
+				Asset::Erc20(token) => (Default::default(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
 			vec![(
@@ -119,7 +126,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			fund_account(&mut rng, &who);
 			let (asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
+				Asset::Erc20(token) => (Default::default().into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
 			vec![(PCall::schedule_withdraw { asset_id, token_address, amount }, who)]
@@ -136,7 +143,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			fund_account(&mut rng, &who);
 			let (asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
+				Asset::Erc20(token) => (Default::default().into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
 			vec![(PCall::cancel_withdraw { asset_id, amount, token_address }, who)]
@@ -148,7 +155,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			let (_, operator) = random_signed_origin(&mut rng);
 			let (asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
+				Asset::Erc20(token) => (Default::default().into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
 			let blueprint_selection = {
@@ -174,7 +181,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			let (_, operator) = random_signed_origin(&mut rng);
 			let (asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
+				Asset::Erc20(token) => (Default::default().into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
 			join_operators(&mut rng, &operator).unwrap();
@@ -201,7 +208,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			let (_, operator) = random_signed_origin(&mut rng);
 			let (asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id.into(), Default::default()),
-				Asset::Erc20(token) => (0.into(), token.into()),
+				Asset::Erc20(token) => (Default::default().into(), token.into()),
 			};
 			let amount = random_ed_multiple(&mut rng).into();
 			join_operators(&mut rng, &operator).unwrap();

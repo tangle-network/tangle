@@ -6,6 +6,7 @@ use sp_core::{ecdsa, H160};
 use sp_runtime::KeyTypeId;
 use sp_std::vec;
 use tangle_primitives::services::*;
+use k256::{ecdsa::{SigningKey, VerifyingKey}, elliptic_curve::sec1::ToEncodedPoint};
 
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 
@@ -23,7 +24,7 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 }
 
 fn operator_preferences<T: Config>() -> OperatorPreferences {
-	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() }
+	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default(), constraints: Default::default() }
 }
 
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
