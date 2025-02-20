@@ -34,7 +34,7 @@ parameter_types! {
 	// The hyperbridge parachain on Polkadot
 	pub const Coprocessor: Option<StateMachine> = Some(StateMachine::Polkadot(3367));
 	 // The host state machine of this pallet, your state machine id goes here
-	pub const HostStateMachine: StateMachine = StateMachine::Polkadot(2030); // polkadot
+	pub const HostStateMachine: StateMachine = StateMachine::Substrate(5845u32.to_be_bytes());
 }
 
 impl pallet_ismp::Config for Runtime {
