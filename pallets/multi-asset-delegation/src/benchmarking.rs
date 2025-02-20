@@ -197,7 +197,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), asset, amount)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		let withdraw = delegator.withdraw_requests.iter().find(|r| r.asset_id == asset).unwrap();
+		let withdraw = delegator.withdraw_requests.iter().find(|r| r.asset == asset).unwrap();
 		assert_eq!(withdraw.amount, amount);
 	}
 
@@ -223,7 +223,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), evm_address)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		assert!(!delegator.withdraw_requests.iter().any(|r| r.asset_id == asset));
+		assert!(!delegator.withdraw_requests.iter().any(|r| r.asset == asset));
 	}
 
 	cancel_withdraw {
@@ -245,7 +245,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), asset, amount)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		assert!(!delegator.withdraw_requests.iter().any(|r| r.asset_id == asset));
+		assert!(!delegator.withdraw_requests.iter().any(|r| r.asset == asset));
 	}
 
 	delegate {
@@ -269,7 +269,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, amount, blueprint_selection)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		let delegation = delegator.delegations.iter().find(|d| d.operator == operator && d.asset_id == asset).unwrap();
+		let delegation = delegator.delegations.iter().find(|d| d.operator == operator && d.asset == asset).unwrap();
 		assert_eq!(delegation.amount, amount);
 	}
 
@@ -301,7 +301,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, amount)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		let request = delegator.delegator_unstake_requests.iter().find(|r| r.operator == operator && r.asset_id == asset).unwrap();
+		let request = delegator.delegator_unstake_requests.iter().find(|r| r.operator == operator && r.asset == asset).unwrap();
 		assert_eq!(request.amount, amount);
 	}
 
@@ -341,7 +341,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		assert!(!delegator.delegator_unstake_requests.iter().any(|r| r.operator == operator && r.asset_id == asset));
+		assert!(!delegator.delegator_unstake_requests.iter().any(|r| r.operator == operator && r.asset == asset));
 	}
 
 	cancel_delegator_unstake {
@@ -378,7 +378,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, amount)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
-		assert!(!delegator.delegator_unstake_requests.iter().any(|r| r.operator == operator && r.asset_id == asset));
+		assert!(!delegator.delegator_unstake_requests.iter().any(|r| r.operator == operator && r.asset == asset));
 	}
 
 	add_blueprint_id {

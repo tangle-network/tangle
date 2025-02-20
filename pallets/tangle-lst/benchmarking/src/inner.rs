@@ -30,20 +30,25 @@ const MAX_SPANS: u32 = 100;
 pub(crate) type VoterBagsListInstance = pallet_bags_list::Instance1;
 pub trait Config: lst::Config + pallet_staking::Config
 where
-	BalanceOf<Self>: From<u32> + Into<u128>,
 	<Self as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
-	<Self as lst::Config>::Currency: Currency<Self::AccountId, Balance = BalanceOf<Self>>,
-	<Self as pallet_staking::Config>::Currency:
-		Currency<Self::AccountId, Balance = BalanceOf<Self>>,
-	<Self as pallet_staking::Config>::CurrencyBalance: From<u128> + From<BalanceOf<Self>>,
-	BalanceOf<Self>: Into<<Self as pallet_staking::Config>::CurrencyBalance>,
+	<Self as lst::Config>::Currency: Currency<Self::AccountId>,
+	<Self as pallet_staking::Config>::Currency: Currency<Self::AccountId>,
+	<Self as pallet_staking::Config>::CurrencyBalance: From<u32> + Into<u128> + From<u128>,
+	<<Self as lst::Config>::Currency as Currency<Self::AccountId>>::Balance: From<u32> + Into<u128> + From<u128>,
+	<Self as pallet_staking::Config>::CurrencyBalance: From<<<Self as lst::Config>::Currency as Currency<Self::AccountId>>::Balance>,
+	<<Self as lst::Config>::Currency as Currency<Self::AccountId>>::Balance: From<<Self as pallet_staking::Config>::CurrencyBalance>,
 {
 }
 
-pub struct Pallet<T: Config>(Lst<T>)
+pub struct Pallet<T: Config + pallet_staking::Config>(Lst<T>)
 where
-	<T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
-	<T as lst::Config>::Currency: Currency<T::AccountId, Balance = BalanceOf<T>>;
+    <T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
+    <T as lst::Config>::Currency: Currency<T::AccountId>,
+    <T as pallet_staking::Config>::Currency: Currency<T::AccountId>,
+    <T as pallet_staking::Config>::CurrencyBalance: From<u32> + Into<u128> + From<u128>,
+    <<T as lst::Config>::Currency as Currency<T::AccountId>>::Balance: From<u32> + Into<u128> + From<u128>,
+    <T as pallet_staking::Config>::CurrencyBalance: From<<<T as lst::Config>::Currency as Currency<T::AccountId>>::Balance>,
+    <<T as lst::Config>::Currency as Currency<T::AccountId>>::Balance: From<<T as pallet_staking::Config>::CurrencyBalance>;
 
 fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 	string: &'static str,
@@ -105,17 +110,16 @@ frame_benchmarking::benchmarks! {
 		where
 			T: Config,
 			T::MaxIconLength: Get<u32>,
-			pallet_staking::BalanceOf<T>: From<u128>,
-			BalanceOf<T>: Into<u128>,
 			T::MaxNameLength: Get<u32>,
 			<T as frame_system::Config>::AccountId: From<[u8; 32]> + From<u32>,
-			<T as pallet_staking::Config>::Currency: Currency<<T as frame_system::Config>::AccountId, Balance = BalanceOf<T>>,
-			<T as pallet_staking::Config>::CurrencyBalance: Into<u128>,
-			u128: From<<T as pallet_staking::Config>::CurrencyBalance>,
-			u128: From<BalanceOf<T>>,
+			<T as pallet_staking::Config>::Currency: Currency<<T as frame_system::Config>::AccountId>,
+			<T as pallet_staking::Config>::CurrencyBalance: From<u32> + Into<u128> + From<u128>,
+			<<T as lst::Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance: From<u32> + Into<u128> + From<u128>,
+			<T as pallet_staking::Config>::CurrencyBalance: From<<<T as lst::Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance>,
+			<<T as lst::Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance: From<<T as pallet_staking::Config>::CurrencyBalance>,
 	}
 
-	create_pool {
+	create {
 		let depositor: T::AccountId = account("depositor", 0, 0);
 		let depositor_lookup = T::Lookup::unlookup(depositor.clone());
 		let min_create_bond = MinCreateBond::<T>::get();
@@ -187,45 +191,7 @@ frame_benchmarking::benchmarks! {
 		assert_eq!(pallet_staking::Ledger::<T>::get(pool_account).unwrap().unlocking.len(), 0);
 	}
 
-	create {
-		let min_create_bond = Lst::<T>::depositor_min_bond();
-		let depositor: T::AccountId = account("depositor", USER_SEED, 0);
-		let depositor_lookup = T::Lookup::unlookup(depositor.clone());
 
-		// Give the depositor some balance to bond
-		// it needs to transfer min balance to reward account as well so give additional min balance.
-		CurrencyOf::<T>::make_free_balance_be(&depositor, min_create_bond + CurrencyOf::<T>::minimum_balance() * 2u32.into());
-		// Make sure no Lst exist at a pre-condition for our verify checks
-		assert_eq!(RewardPools::<T>::count(), 0);
-		assert_eq!(BondedPools::<T>::count(), 0);
-
-		whitelist_account!(depositor);
-	}: _(
-			RuntimeOrigin::Signed(depositor.clone()),
-			min_create_bond,
-			depositor_lookup.clone(),
-			depositor_lookup.clone(),
-			depositor_lookup,
-			Default::default()
-		)
-	verify {
-		assert_eq!(RewardPools::<T>::count(), 1);
-		assert_eq!(BondedPools::<T>::count(), 1);
-		let (_, new_pool) = BondedPools::<T>::iter().next().unwrap();
-		assert_eq!(
-			new_pool,
-			BondedPoolInner {
-				commission: Commission::default(),
-				roles: PoolRoles {
-					depositor: depositor.clone(),
-					root: Some(depositor.clone()),
-					nominator: Some(depositor.clone()),
-					bouncer: Some(depositor.clone()),
-				},
-				state: PoolState::Open,
-				metadata: Default::default(),
-			}
-		);
 	}
 
 	nominate {

@@ -1,7 +1,12 @@
 use super::*;
 use crate::types::BalanceOf;
 use sp_std::{vec, vec::Vec};
-use tangle_primitives::{services::Constraints, traits::ServiceManager, BlueprintId};
+use tangle_primitives::{
+	rewards::UserDepositWithLocks,
+	services::{Asset, Constraints},
+	traits::ServiceManager,
+	BlueprintId,
+};
 
 impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxFields = T::MaxFields;
@@ -102,19 +107,22 @@ impl<T: crate::Config, Balance: Default>
 		Default::default()
 	}
 
-	fn get_total_delegation_by_asset(_operator: &T::AccountId, _asset_id: &AssetId) -> Balance {
+	fn get_total_delegation_by_asset(
+		_operator: &T::AccountId,
+		_asset: &Asset<T::AssetId>,
+	) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &T::AccountId,
-	) -> Vec<(T::AccountId, Balance, Asset<AssetId>)> {
+	) -> Vec<(T::AccountId, Balance, Asset<T::AssetId>)> {
 		Vec::new()
 	}
 
 	fn get_user_deposit_with_locks(
 		_who: &T::AccountId,
-		_asset: Asset<AssetId>,
+		_asset: Asset<T::AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
 		None
 	}
