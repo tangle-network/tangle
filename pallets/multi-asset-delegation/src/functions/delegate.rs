@@ -13,121 +13,152 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use super::*;
-use crate::{types::*, Pallet};
+
+use crate::{types::*, Config, Delegators, Error, Event, Operators, Pallet};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
-	traits::{fungibles::Mutate, tokens::Preservation, Get},
+	traits::{Get, LockIdentifier, LockableCurrency, WithdrawReasons},
 };
 use sp_runtime::{
-	traits::{CheckedAdd, CheckedSub, Zero},
-	DispatchError, Percent,
+	traits::{CheckedAdd, Saturating, Zero},
+	DispatchError,
 };
-use sp_std::vec::Vec;
-use tangle_primitives::{
-	services::{Asset, EvmAddressMapping},
-	BlueprintId,
-};
+use sp_staking::StakingInterface;
+use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
+use tangle_primitives::{services::Asset, traits::MultiAssetDelegationInfo, RoundIndex};
+
+pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
+
+type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
+
+type DelegationResult<T> = Vec<(AccountIdOf<T>, Asset<<T as Config>::AssetId>, BalanceOf<T>)>;
+type BondLessRequestResult<T> = Result<
+	BondLessRequest<
+		AccountIdOf<T>,
+		<T as Config>::AssetId,
+		BalanceOf<T>,
+		<T as Config>::MaxDelegatorBlueprints,
+	>,
+	DispatchError,
+>;
+type DelegatorBondInfo<T> = BondInfoDelegator<
+	AccountIdOf<T>,
+	BalanceOf<T>,
+	<T as Config>::AssetId,
+	<T as Config>::MaxDelegatorBlueprints,
+>;
+type DepositUpdates<T> = BTreeMap<Asset<<T as Config>::AssetId>, BalanceOf<T>>;
+type DelegationUpdates<T> =
+	BTreeMap<(AccountIdOf<T>, Asset<<T as Config>::AssetId>), (usize, BalanceOf<T>)>;
+type OperatorUpdates<T> = BTreeMap<(AccountIdOf<T>, Asset<<T as Config>::AssetId>), BalanceOf<T>>;
+type AggregateResult<T> =
+	Result<(DepositUpdates<T>, DelegationUpdates<T>, OperatorUpdates<T>, Vec<usize>), Error<T>>;
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.
-	/// Creates a new delegation for the delegator and updates their status to active, the deposit
-	/// of the delegator is moved to delegation.
+	///
+	/// This function handles both creating new delegations and increasing existing ones.
+	/// It updates three main pieces of state:
+	/// 1. The delegator's deposit record (marking funds as delegated)
+	/// 2. The delegator's delegation list
+	/// 3. The operator's delegation records
+	///
+	/// # Performance Considerations
+	///
+	/// - Single storage read for operator verification
+	/// - Single storage write for delegation update
+	/// - Bounded by MaxDelegations for new delegations
+	///
 	/// # Arguments
 	///
-	/// * `who` - The account ID of the delegator.
-	/// * `operator` - The account ID of the operator.
-	/// * `asset_id` - The ID of the asset to be delegated.
-	/// * `amount` - The amount to be delegated.
+	/// * `who` - The account ID of the delegator
+	/// * `operator` - The account ID of the operator to delegate to
+	/// * `asset` - The asset being delegated
+	/// * `amount` - The amount to delegate
+	/// * `blueprint_selection` - Strategy for selecting which blueprints to work with:
+	///   - Fixed: Work with specific blueprints
+	///   - All: Work with all available blueprints
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator does not have enough deposited balance,
-	/// or if the operator is not found.
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NotAnOperator` - Target account is not an operator
+	/// * `InsufficientBalance` - Not enough deposited balance
+	/// * `MaxDelegationsExceeded` - Would exceed maximum allowed delegations
+	/// * `OverflowRisk` - Arithmetic overflow during calculations
+	/// * `OperatorNotActive` - Operator is not in active status
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// // Delegate 100 tokens to operator with Fixed blueprint selection
+	/// let blueprint_ids = vec![1, 2, 3];
+	/// process_delegate(
+	///     delegator,
+	///     operator,
+	///     Asset::Custom(token_id),
+	///     100,
+	///     DelegatorBlueprintSelection::Fixed(blueprint_ids)
+	/// )?;
+	/// ```
 	pub fn process_delegate(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
 	) -> DispatchResult {
+		// Verify operator exists and is active
+		ensure!(Self::is_operator(&operator), Error::<T>::NotAnOperator);
+		ensure!(Self::is_operator_active(&operator), Error::<T>::NotActiveOperator);
+		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
+
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure enough deposited balance
+			// Ensure enough deposited balance and update it
 			let user_deposit =
-				metadata.deposits.get_mut(&asset_id).ok_or(Error::<T>::InsufficientBalance)?;
-
-			// update the user deposit
+				metadata.deposits.get_mut(&asset).ok_or(Error::<T>::InsufficientBalance)?;
 			user_deposit
 				.increase_delegated_amount(amount)
 				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
-			// Check if the delegation exists and update it, otherwise create a new delegation
-			if let Some(delegation) = metadata
+			// Find existing delegation or create new one
+			let delegation_exists = metadata
 				.delegations
-				.iter_mut()
-				.find(|d| d.operator == operator && d.asset_id == asset_id)
-			{
-				delegation.amount =
-					delegation.amount.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
-			} else {
-				// Create the new delegation
-				let new_delegation = BondInfoDelegator {
-					operator: operator.clone(),
-					amount,
-					asset_id,
-					blueprint_selection,
-				};
+				.iter()
+				.position(|d| d.operator == operator && d.asset == asset && !d.is_nomination);
 
-				// Create a mutable copy of delegations
-				let mut delegations = metadata.delegations.clone();
-				delegations
-					.try_push(new_delegation)
-					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
-				metadata.delegations = delegations;
-
-				// Update the status
-				metadata.status = DelegatorStatus::Active;
-			}
-
-			// Update the operator's metadata
-			if let Some(mut operator_metadata) = Operators::<T>::get(&operator) {
-				// Check if the operator has capacity for more delegations
-				ensure!(
-					operator_metadata.delegation_count < T::MaxDelegations::get(),
-					Error::<T>::MaxDelegationsExceeded
-				);
-
-				// Create and push the new delegation bond
-				let delegation = DelegatorBond { delegator: who.clone(), amount, asset_id };
-
-				let mut delegations = operator_metadata.delegations.clone();
-
-				// Check if delegation already exists
-				if let Some(existing_delegation) =
-					delegations.iter_mut().find(|d| d.delegator == who && d.asset_id == asset_id)
-				{
-					existing_delegation.amount = existing_delegation
-						.amount
-						.checked_add(&amount)
-						.ok_or(Error::<T>::OverflowRisk)?;
-				} else {
-					delegations
-						.try_push(delegation)
+			match delegation_exists {
+				Some(idx) => {
+					// Update existing delegation
+					let delegation = &mut metadata.delegations[idx];
+					delegation.amount =
+						delegation.amount.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
+				},
+				None => {
+					// Create new delegation
+					metadata
+						.delegations
+						.try_push(BondInfoDelegator {
+							operator: operator.clone(),
+							amount,
+							asset,
+							blueprint_selection,
+							is_nomination: false,
+						})
 						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
-					operator_metadata.delegation_count =
-						operator_metadata.delegation_count.saturating_add(1);
-				}
 
-				operator_metadata.delegations = delegations;
-
-				// Update storage
-				Operators::<T>::insert(&operator, operator_metadata);
-			} else {
-				return Err(Error::<T>::NotAnOperator.into());
+					metadata.status = DelegatorStatus::Active;
+				},
 			}
+
+			// Update operator metadata
+			Self::update_operator_metadata(&operator, &who, asset, amount, true)?;
+
+			// Emit event
+			Self::deposit_event(Event::Delegated { who: who.clone(), operator, amount, asset });
 
 			Ok(())
 		})
@@ -135,146 +166,80 @@ impl<T: Config> Pallet<T> {
 
 	/// Schedules a stake reduction for a delegator.
 	///
+	/// Creates an unstake request that can be executed after the delegation bond less delay period.
+	/// The actual unstaking occurs when `execute_delegator_unstake` is called after the delay.
+	/// Multiple unstake requests for the same delegation are allowed, but each must be within
+	/// the available delegated amount.
+	///
+	/// # Performance Considerations
+	///
+	/// - Single storage read for delegation verification
+	/// - Single storage write for request creation
+	/// - Bounded by MaxUnstakeRequests
+	///
 	/// # Arguments
 	///
-	/// * `who` - The account ID of the delegator.
-	/// * `operator` - The account ID of the operator.
-	/// * `asset_id` - The ID of the asset to be reduced.
-	/// * `amount` - The amount to be reduced.
+	/// * `who` - The account ID of the delegator
+	/// * `operator` - The account ID of the operator
+	/// * `asset` - The asset to unstake
+	/// * `amount` - The amount to unstake
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no active delegation,
-	/// or if the unstake amount is greater than the current delegation amount.
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NoActiveDelegation` - No active delegation found for operator and asset
+	/// * `InsufficientBalance` - Trying to unstake more than delegated
+	/// * `MaxUnstakeRequestsExceeded` - Too many pending unstake requests
+	/// * `InvalidAmount` - Attempting to unstake zero tokens
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// // Schedule unstaking of 50 tokens from operator
+	/// process_schedule_delegator_unstake(
+	///     delegator,
+	///     operator,
+	///     Asset::Custom(token_id),
+	///     50
+	/// )?;
+	/// ```
 	pub fn process_schedule_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
+		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
+
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
-			// Ensure the delegator has an active delegation with the operator for the given asset
-			let delegation_index = metadata
+			// Find and validate delegation in a single pass
+			let delegation = metadata
 				.delegations
 				.iter()
-				.position(|d| d.operator == operator && d.asset_id == asset_id)
+				.find(|d| d.operator == operator && d.asset == asset && !d.is_nomination)
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 
-			// Get the delegation and clone necessary data
-			let blueprint_selection =
-				metadata.delegations[delegation_index].blueprint_selection.clone();
-			let delegation = &mut metadata.delegations[delegation_index];
-			ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
-
-			delegation.amount =
-				delegation.amount.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
-
-			// Create the unstake request
-			let current_round = Self::current_round();
-			let mut unstake_requests = metadata.delegator_unstake_requests.clone();
-			unstake_requests
-				.try_push(BondLessRequest {
-					operator: operator.clone(),
-					asset_id,
-					amount,
-					requested_round: current_round,
-					blueprint_selection,
-				})
-				.map_err(|_| Error::<T>::MaxUnstakeRequestsExceeded)?;
-			metadata.delegator_unstake_requests = unstake_requests;
-
-			// Remove the delegation if the remaining amount is zero
-			if delegation.amount.is_zero() {
-				metadata.delegations.remove(delegation_index);
-			}
-
-			// Update the operator's metadata
-			Operators::<T>::try_mutate(&operator, |maybe_operator_metadata| -> DispatchResult {
-				let operator_metadata =
-					maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
-
-				// Ensure the operator has a matching delegation
-				let operator_delegation_index = operator_metadata
-					.delegations
-					.iter()
-					.position(|d| d.delegator == who && d.asset_id == asset_id)
-					.ok_or(Error::<T>::NoActiveDelegation)?;
-
-				let operator_delegation =
-					&mut operator_metadata.delegations[operator_delegation_index];
-
-				// Reduce the amount in the operator's delegation
-				ensure!(operator_delegation.amount >= amount, Error::<T>::InsufficientBalance);
-				operator_delegation.amount = operator_delegation
-					.amount
-					.checked_sub(&amount)
-					.ok_or(Error::<T>::InsufficientBalance)?;
-
-				// Remove the delegation if the remaining amount is zero
-				if operator_delegation.amount.is_zero() {
-					operator_metadata.delegations.remove(operator_delegation_index);
-					operator_metadata.delegation_count = operator_metadata
-						.delegation_count
-						.checked_sub(1u32)
-						.ok_or(Error::<T>::InsufficientBalance)?;
-				}
-
-				Ok(())
-			})?;
-
-			Ok(())
-		})
-	}
-
-	/// Executes scheduled stake reductions for a delegator.
-	///
-	/// # Arguments
-	///
-	/// * `who` - The account ID of the delegator.
-	///
-	/// # Errors
-	///
-	/// Returns an error if the delegator has no unstake requests or if none of the unstake requests
-	/// are ready.
-	pub fn process_execute_delegator_unstake(who: T::AccountId) -> DispatchResult {
-		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
-			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
-
-			// Ensure there are outstanding unstake requests
-			ensure!(!metadata.delegator_unstake_requests.is_empty(), Error::<T>::NoBondLessRequest);
-
-			let current_round = Self::current_round();
-			let delay = T::DelegationBondLessDelay::get();
-
-			// First, collect all ready requests and process them
-			let ready_requests: Vec<_> = metadata
+			// Verify sufficient delegation amount considering existing unstake requests
+			let pending_unstake_amount: BalanceOf<T> = metadata
 				.delegator_unstake_requests
 				.iter()
-				.filter(|request| current_round >= delay + request.requested_round)
-				.cloned()
-				.collect();
+				.filter(|r| r.operator == operator && r.asset == asset)
+				.fold(Zero::zero(), |acc, r| acc.saturating_add(r.amount));
 
-			// If no requests are ready, return an error
-			ensure!(!ready_requests.is_empty(), Error::<T>::BondLessNotReady);
+			let available_amount = delegation.amount.saturating_sub(pending_unstake_amount);
+			ensure!(available_amount >= amount, Error::<T>::InsufficientBalance);
 
-			// Process each ready request
-			for request in ready_requests.iter() {
-				let deposit_record = metadata
-					.deposits
-					.get_mut(&request.asset_id)
-					.ok_or(Error::<T>::InsufficientBalance)?;
-
-				deposit_record
-					.decrease_delegated_amount(request.amount)
-					.map_err(|_| Error::<T>::InsufficientBalance)?;
-			}
-
-			// Remove the processed requests
-			metadata
-				.delegator_unstake_requests
-				.retain(|request| current_round < delay + request.requested_round);
+			// Create the unstake request
+			Self::create_unstake_request(
+				metadata,
+				operator.clone(),
+				asset,
+				amount,
+				delegation.blueprint_selection.clone(),
+				false, // is_nomination = false for regular delegations
+			)?;
 
 			Ok(())
 		})
@@ -282,22 +247,47 @@ impl<T: Config> Pallet<T> {
 
 	/// Cancels a scheduled stake reduction for a delegator.
 	///
+	/// This function removes a pending unstake request without modifying any actual delegations.
+	/// It performs a simple lookup and removal of the matching request.
+	///
+	/// # Performance Considerations
+	///
+	/// - Single storage read for request verification
+	/// - Single storage write for request removal
+	/// - O(n) search through unstake requests
+	///
 	/// # Arguments
 	///
-	/// * `who` - The account ID of the delegator.
-	/// * `asset_id` - The ID of the asset for which to cancel the unstake request.
-	/// * `amount` - The amount of the unstake request to cancel.
+	/// * `who` - The account ID of the delegator
+	/// * `operator` - The operator whose unstake request to cancel
+	/// * `asset` - The asset of the unstake request
+	/// * `amount` - The exact amount of the unstake request to cancel
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator has no matching unstake request or if there is no active
-	/// delegation.
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NoBondLessRequest` - No matching unstake request found
+	/// * `InvalidAmount` - Amount specified is zero
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// // Cancel an unstake request for 50 tokens
+	/// process_cancel_delegator_unstake(
+	///     delegator,
+	///     operator,
+	///     Asset::Custom(token_id),
+	///     50
+	/// )?;
+	/// ```
 	pub fn process_cancel_delegator_unstake(
 		who: T::AccountId,
 		operator: T::AccountId,
-		asset_id: Asset<T::AssetId>,
+		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
+		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
+
 		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
 
@@ -306,152 +296,642 @@ impl<T: Config> Pallet<T> {
 				.delegator_unstake_requests
 				.iter()
 				.position(|r| {
-					r.asset_id == asset_id && r.amount == amount && r.operator == operator
+					r.asset == asset
+						&& r.amount == amount
+						&& r.operator == operator
+						&& !r.is_nomination
 				})
 				.ok_or(Error::<T>::NoBondLessRequest)?;
 
-			let unstake_request = metadata.delegator_unstake_requests.remove(request_index);
-
-			// Update the operator's metadata
-			Operators::<T>::try_mutate(
-				&unstake_request.operator,
-				|maybe_operator_metadata| -> DispatchResult {
-					let operator_metadata =
-						maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
-
-					// Find the matching delegation and increase its amount, or insert a new
-					// delegation if not found
-					let mut delegations = operator_metadata.delegations.clone();
-					if let Some(delegation) = delegations
-						.iter_mut()
-						.find(|d| d.asset_id == asset_id && d.delegator == who.clone())
-					{
-						delegation.amount = delegation
-							.amount
-							.checked_add(&amount)
-							.ok_or(Error::<T>::OverflowRisk)?;
-					} else {
-						delegations
-							.try_push(DelegatorBond { delegator: who.clone(), amount, asset_id })
-							.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
-
-						// Increase the delegation count only when a new delegation is added
-						operator_metadata.delegation_count = operator_metadata
-							.delegation_count
-							.checked_add(1)
-							.ok_or(Error::<T>::OverflowRisk)?;
-					}
-					operator_metadata.delegations = delegations;
-
-					Ok(())
-				},
-			)?;
-
-			// Update the delegator's metadata
-			let mut delegations = metadata.delegations.clone();
-
-			// If a similar delegation exists, increase the amount
-			if let Some(delegation) = delegations.iter_mut().find(|d| {
-				d.operator == unstake_request.operator && d.asset_id == unstake_request.asset_id
-			}) {
-				delegation.amount = delegation
-					.amount
-					.checked_add(&unstake_request.amount)
-					.ok_or(Error::<T>::OverflowRisk)?;
-			} else {
-				// Create a new delegation
-				delegations
-					.try_push(BondInfoDelegator {
-						operator: unstake_request.operator.clone(),
-						amount: unstake_request.amount,
-						asset_id: unstake_request.asset_id,
-						blueprint_selection: unstake_request.blueprint_selection,
-					})
-					.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
-			}
-			metadata.delegations = delegations;
+			// Remove the request and emit event
+			metadata.delegator_unstake_requests.remove(request_index);
 
 			Ok(())
 		})
 	}
 
-	/// Slashes a delegator's stake.
+	/// Executes all ready unstake requests for a delegator.
+	///
+	/// This function processes multiple unstake requests in a batched manner for efficiency:
+	/// 1. Aggregates all ready requests by asset and operator to minimize storage operations
+	/// 2. Updates deposits, delegations, and operator metadata in batches
+	/// 3. Removes zero-amount delegations and processed requests
+	///
+	/// # Performance Considerations
+	///
+	/// - Uses batch processing to minimize storage reads/writes
+	/// - Aggregates updates by asset and operator
+	/// - Removes items in reverse order to avoid unnecessary shifting
 	///
 	/// # Arguments
 	///
-	/// * `delegator` - The account ID of the delegator.
-	/// * `operator` - The account ID of the operator.
-	/// * `blueprint_id` - The ID of the blueprint.
-	/// * `percentage` - The percentage of the stake to slash.
+	/// * `who` - The account ID of the delegator
 	///
 	/// # Errors
 	///
-	/// Returns an error if the delegator is not found, or if the delegation is not active.
-	pub fn slash_delegator(
-		delegator: &T::AccountId,
-		operator: &T::AccountId,
-		blueprint_id: BlueprintId,
-		percentage: Percent,
-	) -> Result<(), DispatchError> {
-		Delegators::<T>::try_mutate(delegator, |maybe_metadata| {
-			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NoBondLessRequest` - No unstake requests exist
+	/// * `BondLessNotReady` - No requests are ready for execution
+	/// * `NoActiveDelegation` - Referenced delegation not found
+	/// * `InsufficientBalance` - Insufficient balance for unstaking
+	pub fn process_execute_delegator_unstake(
+		who: T::AccountId,
+	) -> Result<DelegationResult<T>, DispatchError> {
+		Delegators::<T>::try_mutate(
+			&who,
+			|maybe_metadata| -> Result<DelegationResult<T>, DispatchError> {
+				let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+				ensure!(
+					!metadata.delegator_unstake_requests.is_empty(),
+					Error::<T>::NoBondLessRequest
+				);
 
-			let delegation = metadata
+				let current_round = Self::current_round();
+				let delay = T::DelegationBondLessDelay::get();
+
+				// Aggregate all updates from ready requests
+				let (deposit_updates, delegation_updates, operator_updates, indices_to_remove) =
+					Self::aggregate_unstake_requests(metadata, current_round, delay)?;
+
+				// Create a map to aggregate amounts by operator and asset
+				let mut event_aggregates =
+					BTreeMap::<(T::AccountId, Asset<T::AssetId>), BalanceOf<T>>::new();
+
+				// Sum up amounts by operator and asset
+				for &idx in &indices_to_remove {
+					if let Some(request) = metadata.delegator_unstake_requests.get(idx) {
+						let key = (request.operator.clone(), request.asset);
+						let entry = event_aggregates.entry(key).or_insert(Zero::zero());
+						*entry = entry.saturating_add(request.amount);
+					}
+				}
+
+				// Apply updates in batches
+				// 1. Update deposits
+				for (asset, amount) in deposit_updates {
+					metadata
+						.deposits
+						.get_mut(&asset)
+						.ok_or(Error::<T>::InsufficientBalance)?
+						.decrease_delegated_amount(amount)
+						.map_err(|_| Error::<T>::InsufficientBalance)?;
+				}
+
+				// 2. Update delegations
+				let mut delegations_to_remove = Vec::new();
+				for ((_, _), (idx, amount)) in delegation_updates {
+					let delegation =
+						metadata.delegations.get_mut(idx).ok_or(Error::<T>::NoActiveDelegation)?;
+					ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
+
+					delegation.amount = delegation.amount.saturating_sub(amount);
+					if delegation.amount.is_zero() {
+						delegations_to_remove.push(idx);
+					}
+				}
+
+				// 3. Remove zero-amount delegations
+				delegations_to_remove.sort_unstable_by(|a, b| b.cmp(a));
+				for idx in delegations_to_remove {
+					metadata.delegations.remove(idx);
+				}
+
+				// 4. Update operator metadata
+				for ((operator, asset), amount) in operator_updates {
+					Self::update_operator_metadata(&operator, &who, asset, amount, false)?;
+				}
+
+				// 5. Remove processed requests
+				let mut indices = indices_to_remove;
+				indices.sort_unstable_by(|a, b| b.cmp(a));
+				for idx in indices {
+					metadata.delegator_unstake_requests.remove(idx);
+				}
+
+				// Convert the aggregates map into a vector for return
+				Ok(event_aggregates
+					.into_iter()
+					.map(|((operator, asset), amount)| (operator, asset, amount))
+					.collect())
+			},
+		)
+	}
+
+	/// Processes the delegation of nominated tokens to an operator.
+	///
+	/// This function allows delegators to utilize their nominated (staked) tokens in the delegation system.
+	/// It differs from regular delegation in that:
+	/// 1. It uses nominated tokens instead of deposited assets
+	/// 2. It maintains a lock on the nominated tokens
+	/// 3. It tracks total nomination delegations to prevent over-delegation
+	///
+	/// # Performance Considerations
+	///
+	/// - External call to staking system for verification
+	/// - Single storage read for delegation lookup
+	/// - Single storage write for delegation update
+	/// - Additional storage write for token locking
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator
+	/// * `operator` - The operator to delegate to
+	/// * `amount` - The amount of nominated tokens to delegate
+	/// * `blueprint_selection` - Strategy for selecting which blueprints to work with
+	///
+	/// # Errors
+	///
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NotNominator` - Account has no nominated tokens
+	/// * `InsufficientBalance` - Not enough nominated tokens available
+	/// * `MaxDelegationsExceeded` - Would exceed maximum allowed delegations
+	/// * `OverflowRisk` - Arithmetic overflow during calculations
+	/// * `InvalidAmount` - Amount specified is zero
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// // Delegate 1000 nominated tokens to operator
+	/// process_delegate_nominations(
+	///     delegator,
+	///     operator,
+	///     1000,
+	///     DelegatorBlueprintSelection::All
+	/// )?;
+	/// ```
+	pub(crate) fn process_delegate_nominations(
+		who: T::AccountId,
+		operator: T::AccountId,
+		amount: BalanceOf<T>,
+		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+	) -> DispatchResult {
+		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
+		ensure!(Self::is_operator(&operator), Error::<T>::NotAnOperator);
+		ensure!(Self::is_operator_active(&operator), Error::<T>::NotActiveOperator);
+
+		// Verify nomination amount in the staking system
+		let nominated_amount = Self::verify_nomination_amount(&who, amount)?;
+
+		Delegators::<T>::try_mutate(&who, |maybe_metadata| -> DispatchResult {
+			let metadata = maybe_metadata.get_or_insert_with(Default::default);
+
+			// Calculate new total after this delegation
+			let current_total = metadata.total_nomination_delegations();
+			let new_total = current_total.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
+
+			// Ensure total delegations don't exceed nominated amount
+			ensure!(new_total <= nominated_amount, Error::<T>::InsufficientBalance);
+
+			// Find existing nomination delegation or create new one
+			let delegation_exists = metadata
 				.delegations
-				.iter_mut()
-				.find(|d| &d.operator == operator)
-				.ok_or(Error::<T>::NoActiveDelegation)?;
+				.iter()
+				.position(|d| d.operator == operator && d.is_nomination);
 
-			// Check delegation type and blueprint_id
-			match &delegation.blueprint_selection {
-				DelegatorBlueprintSelection::Fixed(blueprints) => {
-					// For fixed delegation, ensure the blueprint_id is in the list
-					ensure!(blueprints.contains(&blueprint_id), Error::<T>::BlueprintNotSelected);
-				},
-				DelegatorBlueprintSelection::All => {
-					// For "All" type, no need to check blueprint_id
-				},
-			}
+			match delegation_exists {
+				Some(idx) => {
+					// Update existing delegation
+					let delegation = &mut metadata.delegations[idx];
+					let new_amount =
+						delegation.amount.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
 
-			// Calculate and apply slash
-			let slash_amount = percentage.mul_floor(delegation.amount);
-			delegation.amount = delegation
-				.amount
-				.checked_sub(&slash_amount)
-				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
-
-			match delegation.asset_id {
-				Asset::Custom(asset_id) => {
-					// Transfer slashed amount to the treasury
-					let _ = T::Fungibles::transfer(
-						asset_id,
-						&Self::pallet_account(),
-						&T::SlashedAmountRecipient::get(),
-						slash_amount,
-						Preservation::Expendable,
+					delegation.amount = new_amount;
+					T::Currency::set_lock(
+						DELEGATION_LOCK_ID,
+						&who,
+						new_amount,
+						WithdrawReasons::TRANSFER,
 					);
 				},
-				Asset::Erc20(address) => {
-					let slashed_amount_recipient_evm =
-						T::EvmAddressMapping::into_address(T::SlashedAmountRecipient::get());
-					let (success, _weight) = Self::erc20_transfer(
-						address,
-						&Self::pallet_evm_account(),
-						slashed_amount_recipient_evm,
-						slash_amount,
-					)
-					.map_err(|_| Error::<T>::ERC20TransferFailed)?;
-					ensure!(success, Error::<T>::ERC20TransferFailed);
+				None => {
+					// Create new delegation
+					metadata
+						.delegations
+						.try_push(BondInfoDelegator {
+							operator: operator.clone(),
+							amount,
+							asset: Asset::Custom(Zero::zero()),
+							blueprint_selection,
+							is_nomination: true,
+						})
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+
+					T::Currency::set_lock(
+						DELEGATION_LOCK_ID,
+						&who,
+						amount,
+						WithdrawReasons::TRANSFER,
+					);
 				},
 			}
 
-			// emit event
-			Self::deposit_event(Event::DelegatorSlashed {
-				who: delegator.clone(),
-				amount: slash_amount,
+			// Update operator metadata
+			Self::update_operator_metadata(
+				&operator,
+				&who,
+				Asset::Custom(Zero::zero()),
+				amount,
+				true, // is_increase = true for delegation
+			)?;
+
+			// Emit event
+			Self::deposit_event(Event::NominationDelegated {
+				who: who.clone(),
+				operator: operator.clone(),
+				amount,
 			});
 
 			Ok(())
+		})?;
+
+		Ok(())
+	}
+
+	/// Schedules an unstake request for nomination delegations.
+	///
+	/// Similar to regular unstaking but specifically for nominated tokens. This function:
+	/// 1. Verifies the nomination delegation exists
+	/// 2. Checks if there's enough balance to unstake
+	/// 3. Creates an unstake request that can be executed after the delay period
+	///
+	/// # Performance Considerations
+	///
+	/// - Single storage read for delegation verification
+	/// - Single storage write for request creation
+	/// - O(n) search through delegations
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator
+	/// * `operator` - The operator to unstake from
+	/// * `amount` - The amount of nominated tokens to unstake
+	/// * `blueprint_selection` - The blueprint selection to use after unstaking
+	///
+	/// # Errors
+	///
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NoActiveDelegation` - No active nomination delegation found
+	/// * `InsufficientBalance` - Trying to unstake more than delegated
+	/// * `MaxUnstakeRequestsExceeded` - Too many pending unstake requests
+	/// * `InvalidAmount` - Amount specified is zero
+	/// * `AssetNotWhitelisted` - Invalid asset type for nominations
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// // Schedule unstaking of 500 nominated tokens
+	/// process_schedule_delegator_nomination_unstake(
+	///     &delegator,
+	///     operator,
+	///     500,
+	///     DelegatorBlueprintSelection::All
+	/// )?;
+	/// ```
+	pub fn process_schedule_delegator_nomination_unstake(
+		who: &T::AccountId,
+		operator: T::AccountId,
+		amount: BalanceOf<T>,
+		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+	) -> Result<RoundIndex, DispatchError> {
+		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
+		ensure!(Self::is_operator(&operator), Error::<T>::NotAnOperator);
+
+		Delegators::<T>::try_mutate(who, |maybe_metadata| -> Result<RoundIndex, DispatchError> {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			// Find the nomination delegation and verify amount
+			let (_, current_amount) =
+				Self::find_nomination_delegation(&metadata.delegations, &operator)?
+					.ok_or(Error::<T>::NoActiveDelegation)?;
+
+			// Calculate total pending unstakes
+			let pending_unstake_amount: BalanceOf<T> = metadata
+				.delegator_unstake_requests
+				.iter()
+				.filter(|r| r.operator == operator && r.is_nomination)
+				.fold(Zero::zero(), |acc, r| acc.saturating_add(r.amount));
+
+			let available_amount = current_amount.saturating_sub(pending_unstake_amount);
+			ensure!(available_amount >= amount, Error::<T>::InsufficientBalance);
+
+			// Create the unstake request
+			Self::create_unstake_request(
+				metadata,
+				operator.clone(),
+				Asset::Custom(Zero::zero()),
+				amount,
+				blueprint_selection,
+				true, // is_nomination = true for nomination delegations
+			)?;
+
+			let when = Self::current_round() + T::DelegationBondLessDelay::get();
+			Ok(when)
 		})
+	}
+
+	/// Cancels a scheduled unstake request for nomination delegations.
+	///
+	/// Similar to regular unstake cancellation but specifically for nominated tokens.
+	/// This function removes a pending unstake request without modifying any actual delegations.
+	///
+	/// # Performance Considerations
+	///
+	/// - Single storage read for request verification
+	/// - Single storage write for request removal
+	/// - O(n) search through unstake requests
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the delegator
+	/// * `operator` - The operator whose unstake request to cancel
+	///
+	/// # Errors
+	///
+	/// * `NotDelegator` - Account is not a delegator
+	/// * `NoBondLessRequest` - No matching unstake request found
+	///
+	/// # Example
+	///
+	/// ```ignore
+	/// // Cancel nomination unstake request from operator
+	/// process_cancel_delegator_nomination_unstake(
+	///     &delegator,
+	///     operator
+	/// )?;
+	/// ```
+	pub(crate) fn process_cancel_delegator_nomination_unstake(
+		who: &T::AccountId,
+		operator: T::AccountId,
+	) -> BondLessRequestResult<T> {
+		Delegators::<T>::try_mutate(who, |maybe_metadata| -> BondLessRequestResult<T> {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			// Find and remove the unstake request
+			let request_index = metadata
+				.delegator_unstake_requests
+				.iter()
+				.position(|r| r.operator == operator && r.is_nomination)
+				.ok_or(Error::<T>::NoBondLessRequest)?;
+
+			// Remove the request
+			let request = metadata.delegator_unstake_requests.remove(request_index);
+
+			Ok(request.clone())
+		})
+	}
+
+	/// Execute an unstake request for nomination delegations
+	pub fn process_execute_delegator_nomination_unstake(
+		who: &T::AccountId,
+		operator: T::AccountId,
+	) -> Result<BalanceOf<T>, DispatchError> {
+		Delegators::<T>::try_mutate(who, |maybe_metadata| -> Result<BalanceOf<T>, DispatchError> {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			// Find and validate the unstake request
+			let (request_index, request) = metadata
+				.delegator_unstake_requests
+				.iter()
+				.enumerate()
+				.find(|(_, r)| r.operator == operator && r.is_nomination)
+				.ok_or(Error::<T>::NoBondLessRequest)?;
+
+			let delay = T::DelegationBondLessDelay::get();
+			ensure!(
+				request.requested_round + delay <= Self::current_round(),
+				Error::<T>::BondLessNotReady
+			);
+
+			// Store the amount before removing the request
+			let unstake_amount = request.amount;
+			// Find the nomination delegation
+			let (delegation_index, current_amount) =
+				Self::find_nomination_delegation(&metadata.delegations, &operator)?
+					.ok_or(Error::<T>::NoActiveDelegation)?;
+
+			// Verify the unstake amount is still valid
+			ensure!(current_amount >= unstake_amount, Error::<T>::InsufficientBalance);
+
+			// Update the delegation
+			let delegation = &mut metadata.delegations[delegation_index];
+			delegation.amount = delegation.amount.saturating_sub(unstake_amount);
+
+			// Update operator metadata during execution
+			Self::update_operator_metadata(
+				&operator,
+				who,
+				Asset::Custom(Zero::zero()),
+				unstake_amount,
+				false, // is_increase = false for unstaking
+			)?;
+
+			// Remove the unstake request
+			metadata.delegator_unstake_requests.remove(request_index);
+
+			// Set the lock to the new amount or remove it if zero
+			if delegation.amount.is_zero() {
+				T::Currency::remove_lock(DELEGATION_LOCK_ID, who);
+				metadata.delegations.remove(delegation_index);
+			} else {
+				T::Currency::set_lock(
+					DELEGATION_LOCK_ID,
+					who,
+					delegation.amount,
+					WithdrawReasons::TRANSFER,
+				);
+			}
+
+			Ok(unstake_amount)
+		})
+	}
+
+	/// Helper function to update operator metadata for a delegation change
+	fn update_operator_metadata(
+		operator: &T::AccountId,
+		who: &T::AccountId,
+		asset: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
+		is_increase: bool,
+	) -> DispatchResult {
+		Operators::<T>::try_mutate(operator, |maybe_operator_metadata| -> DispatchResult {
+			let operator_metadata =
+				maybe_operator_metadata.as_mut().ok_or(Error::<T>::NotAnOperator)?;
+
+			let mut delegations = operator_metadata.delegations.clone();
+
+			if is_increase {
+				// Adding or increasing delegation
+				ensure!(
+					operator_metadata.delegation_count < T::MaxDelegations::get(),
+					Error::<T>::MaxDelegationsExceeded
+				);
+
+				if let Some(existing_delegation) =
+					delegations.iter_mut().find(|d| d.delegator == *who && d.asset == asset)
+				{
+					existing_delegation.amount = existing_delegation
+						.amount
+						.checked_add(&amount)
+						.ok_or(Error::<T>::OverflowRisk)?;
+				} else {
+					delegations
+						.try_push(DelegatorBond { delegator: who.clone(), amount, asset })
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+					operator_metadata.delegation_count =
+						operator_metadata.delegation_count.saturating_add(1);
+				}
+			} else {
+				// Decreasing or removing delegation
+				if let Some(index) =
+					delegations.iter().position(|d| d.delegator == *who && d.asset == asset)
+				{
+					let delegation = &mut delegations[index];
+					ensure!(delegation.amount >= amount, Error::<T>::InsufficientBalance);
+
+					delegation.amount = delegation.amount.saturating_sub(amount);
+					if delegation.amount.is_zero() {
+						delegations.remove(index);
+						operator_metadata.delegation_count = operator_metadata
+							.delegation_count
+							.checked_sub(1)
+							.ok_or(Error::<T>::InsufficientBalance)?;
+					}
+				}
+			}
+
+			operator_metadata.delegations = delegations;
+			Ok(())
+		})
+	}
+
+	/// Checks if an account can unbond a specified amount of tokens.
+	///
+	/// This function verifies whether unbonding a certain amount would leave sufficient
+	/// tokens to cover existing nomination delegations. It:
+	/// 1. Checks if the account is a nominator
+	/// 2. Calculates remaining stake after unbonding
+	/// 3. Verifies nominated delegations can still be covered
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account to check
+	/// * `amount` - The amount to potentially unbond
+	///
+	/// # Returns
+	///
+	/// * `true` if unbonding is allowed
+	/// * `false` if unbonding would leave insufficient stake for delegations
+	pub fn can_unbound(who: &T::AccountId, amount: BalanceOf<T>) -> bool {
+		let Ok(stake) = T::StakingInterface::stake(who) else {
+			// not a nominator
+			return true;
+		};
+		// Simulate the unbound operation
+		let remaining_stake = stake.active.saturating_sub(amount);
+		let delegator = Self::delegators(who).unwrap_or_default();
+		let nominated_amount =
+			delegator.delegations.iter().fold(BalanceOf::<T>::zero(), |acc, d| {
+				if d.is_nomination {
+					acc.saturating_add(d.amount)
+				} else {
+					acc
+				}
+			});
+		let restake_amount = remaining_stake.saturating_sub(nominated_amount);
+		!restake_amount.is_zero()
+	}
+
+	/// Helper function to verify and get nomination amount
+	fn verify_nomination_amount(
+		who: &T::AccountId,
+		required_amount: BalanceOf<T>,
+	) -> Result<BalanceOf<T>, Error<T>> {
+		let stake = T::StakingInterface::stake(who).map_err(|_| Error::<T>::NotNominator)?;
+		ensure!(stake.total >= required_amount, Error::<T>::InsufficientBalance);
+		Ok(stake.active)
+	}
+
+	/// Helper function to find and validate a nomination delegation
+	fn find_nomination_delegation(
+		delegations: &[DelegatorBondInfo<T>],
+		operator: &T::AccountId,
+	) -> Result<Option<(usize, BalanceOf<T>)>, Error<T>> {
+		if let Some((index, delegation)) = delegations
+			.iter()
+			.enumerate()
+			.find(|(_, d)| d.operator == *operator && d.is_nomination)
+		{
+			ensure!(
+				delegation.asset == Asset::Custom(Zero::zero()),
+				Error::<T>::AssetNotWhitelisted
+			);
+			Ok(Some((index, delegation.amount)))
+		} else {
+			Ok(None)
+		}
+	}
+
+	/// Helper function to create an unstake request
+	fn create_unstake_request(
+		metadata: &mut DelegatorMetadataOf<T>,
+		operator: T::AccountId,
+		asset: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
+		blueprint_selection: DelegatorBlueprintSelection<T::MaxDelegatorBlueprints>,
+		is_nomination: bool,
+	) -> DispatchResult {
+		let unstake_request = BondLessRequest {
+			operator,
+			asset,
+			amount,
+			requested_round: Self::current_round(),
+			blueprint_selection,
+			is_nomination,
+		};
+
+		metadata
+			.delegator_unstake_requests
+			.try_push(unstake_request)
+			.map_err(|_| Error::<T>::MaxUnstakeRequestsExceeded)?;
+
+		Ok(())
+	}
+
+	/// Helper function to process a batch of unstake requests
+	/// Returns aggregated updates for deposits, delegations, and operators
+	fn aggregate_unstake_requests(
+		metadata: &DelegatorMetadataOf<T>,
+		current_round: RoundIndex,
+		delay: RoundIndex,
+	) -> AggregateResult<T> {
+		let mut indices_to_remove = Vec::new();
+		let mut delegation_updates = BTreeMap::new();
+		let mut deposit_updates = BTreeMap::new();
+		let mut operator_updates = BTreeMap::new();
+
+		for (idx, request) in metadata.delegator_unstake_requests.iter().enumerate() {
+			if current_round < delay + request.requested_round {
+				continue;
+			}
+
+			*deposit_updates.entry(request.asset).or_default() += request.amount;
+
+			let delegation_key = (request.operator.clone(), request.asset);
+			if let Some(delegation_idx) = metadata.delegations.iter().position(|d| {
+				d.operator == request.operator && d.asset == request.asset && !d.is_nomination
+			}) {
+				let (_, total_unstake) = delegation_updates
+					.entry(delegation_key.clone())
+					.or_insert((delegation_idx, BalanceOf::<T>::zero()));
+				*total_unstake += request.amount;
+			} else {
+				return Err(Error::<T>::NoActiveDelegation);
+			}
+
+			*operator_updates.entry(delegation_key).or_default() += request.amount;
+			indices_to_remove.push(idx);
+		}
+		ensure!(!indices_to_remove.is_empty(), Error::<T>::BondLessNotReady);
+		Ok((deposit_updates, delegation_updates, operator_updates, indices_to_remove))
 	}
 }

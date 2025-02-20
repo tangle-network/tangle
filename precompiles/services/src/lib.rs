@@ -12,7 +12,7 @@ use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{
-	Asset, Field, OperatorPreferences, PriceTargets, ServiceBlueprint,
+	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
 };
 
 #[cfg(test)]
@@ -74,76 +74,15 @@ where
 		Ok(())
 	}
 
-	/// Register as an operator for a specific blueprint.
-	#[precompile::public("registerOperator(uint256,bytes,bytes)")]
-	#[precompile::payable]
-	fn register_operator(
-		handle: &mut impl PrecompileHandle,
-		blueprint_id: U256,
-		preferences: UnboundedBytes,
-		registration_args: UnboundedBytes,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		// msg.value
-		let value = handle.context().apparent_value;
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-		let preferences: Vec<u8> = preferences.into();
-		let registration_args: Vec<u8> = registration_args.into();
-		let preferences: OperatorPreferences = Decode::decode(&mut &preferences[..])
-			.map_err(|_| revert("Invalid preferences data"))?;
-
-		let registration_args: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
-			if registration_args.is_empty() {
-				Vec::new()
-			} else {
-				Decode::decode(&mut &registration_args[..])
-					.map_err(|_| revert("Invalid registration arguments"))?
-			};
-		let value_bytes = {
-			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
-			value.to_little_endian(&mut value_bytes);
-			value_bytes
-		};
-		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
-			.map_err(|_| revert("Value is not a valid balance"))?;
-		let call = pallet_services::Call::<Runtime>::register {
-			blueprint_id,
-			preferences,
-			registration_args,
-			value,
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Unregister as an operator from a blueprint.
-	#[precompile::public("unregisterOperator(uint256)")]
-	fn unregister_operator(handle: &mut impl PrecompileHandle, blueprint_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-
-		let call = pallet_services::Call::<Runtime>::unregister { blueprint_id };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	/// Request a new service.
 	#[precompile::public(
-		"requestService(uint256,uint256[],bytes,bytes,bytes,uint256,uint256,address,uint256)"
+		"requestService(uint256,bytes[],bytes,bytes,bytes,uint256,uint256,address,uint256,uint32,uint32)"
 	)]
 	#[precompile::payable]
 	fn request_service(
 		handle: &mut impl PrecompileHandle,
 		blueprint_id: U256,
-		assets: Vec<U256>,
+		asset_security_requirements: Vec<UnboundedBytes>,
 		permitted_callers_data: UnboundedBytes,
 		service_providers_data: UnboundedBytes,
 		request_args_data: UnboundedBytes,
@@ -151,12 +90,16 @@ where
 		payment_asset_id: U256,
 		payment_token_address: Address,
 		amount: U256,
+		min_operators: u32,
+		max_operators: u32,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let msg_sender = handle.context().caller;
 		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
 
 		let blueprint_id: u64 = blueprint_id.as_u64();
+		let asset_security_requirements_data: Vec<Vec<u8>> =
+			asset_security_requirements.into_iter().map(|x| x.into()).collect();
 		let permitted_callers_data: Vec<u8> = permitted_callers_data.into();
 		let service_providers_data: Vec<u8> = service_providers_data.into();
 		let request_args_data: Vec<u8> = request_args_data.into();
@@ -173,8 +116,12 @@ where
 			Decode::decode(&mut &request_args_data[..])
 				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
 
-		let assets: Vec<Runtime::AssetId> =
-			assets.into_iter().map(|asset| asset.as_u32().into()).collect();
+		let asset_security_requirements: Vec<AssetSecurityRequirement<Runtime::AssetId>> =
+			asset_security_requirements_data
+				.into_iter()
+				.map(|req| Decode::decode(&mut &req[..]))
+				.collect::<Result<_, _>>()
+				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
 
 		let value_bytes = {
 			let value = handle.context().apparent_value;
@@ -223,16 +170,25 @@ where
 			},
 		};
 
+		let membership_model = if max_operators == 0 {
+			MembershipModel::Fixed { min_operators }
+		} else if max_operators == u32::MAX {
+			MembershipModel::Dynamic { min_operators, max_operators: None }
+		} else {
+			MembershipModel::Dynamic { min_operators, max_operators: Some(max_operators) }
+		};
+
 		let call = pallet_services::Call::<Runtime>::request {
 			evm_origin: Some(msg_sender),
 			blueprint_id,
 			permitted_callers,
 			operators,
 			ttl,
-			assets,
+			asset_security_requirements,
 			request_args,
 			payment_asset,
 			value: amount,
+			membership_model,
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
@@ -249,39 +205,6 @@ where
 		let service_id: u64 = service_id.as_u64();
 
 		let call = pallet_services::Call::<Runtime>::terminate { service_id };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Approve a request.
-	#[precompile::public("approve(uint256,uint8)")]
-	fn approve(
-		handle: &mut impl PrecompileHandle,
-		request_id: U256,
-		restaking_percent: u8,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let request_id: u64 = request_id.as_u64();
-		let restaking_percent: Percent = Percent::from_percent(restaking_percent);
-
-		let call = pallet_services::Call::<Runtime>::approve { request_id, restaking_percent };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Reject a service request.
-	#[precompile::public("reject(uint256)")]
-	fn reject(handle: &mut impl PrecompileHandle, request_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let request_id: u64 = request_id.as_u64();
-
-		let call = pallet_services::Call::<Runtime>::reject { request_id };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -312,34 +235,6 @@ where
 		Ok(())
 	}
 
-	/// Submit the result for a job call.
-	#[precompile::public("submitResult(uint256,uint256,bytes)")]
-	fn submit_result(
-		handle: &mut impl PrecompileHandle,
-		service_id: U256,
-		call_id: U256,
-		result_data: UnboundedBytes,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let service_id: u64 = service_id.as_u64();
-		let call_id: u64 = call_id.as_u64();
-		let result: Vec<u8> = result_data.into();
-
-		let decoded_result: Vec<Field<Runtime::Constraints, Runtime::AccountId>> =
-			Decode::decode(&mut &result[..]).map_err(|_| revert("Invalid job result data"))?;
-
-		let call = pallet_services::Call::<Runtime>::submit_result {
-			service_id,
-			call_id,
-			result: decoded_result,
-		};
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
 	/// Slash an operator (offender) for a service id with a given percent of their exposed stake
 	/// for that service.
 	///
@@ -362,8 +257,12 @@ where
 		let offender: Runtime::AccountId = Decode::decode(&mut &offender_bytes[..])
 			.map_err(|_| revert("Invalid offender account id"))?;
 
-		// inside this call, we do check if the caller is authorized to slash the offender
-		let call = pallet_services::Call::<Runtime>::slash { offender, service_id, percent };
+		let call = pallet_services::Call::<Runtime>::slash {
+			offender,
+
+			service_id,
+			slash_percent: percent,
+		};
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())
@@ -380,52 +279,6 @@ where
 
 		// inside this call, we do check if the caller is authorized to dispute the slash
 		let call = pallet_services::Call::<Runtime>::dispute { era, index };
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Update price targets for a blueprint.
-	#[precompile::public("updatePriceTargets(uint256,uint256[])")]
-	fn update_price_targets(
-		handle: &mut impl PrecompileHandle,
-		blueprint_id: U256,
-		price_targets: Vec<U256>,
-	) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-
-		// Convert price targets into the correct struct
-		let price_targets = {
-			let mut targets = price_targets.into_iter();
-			PriceTargets {
-				cpu: targets.next().map_or(0, |v| v.as_u64()),
-				mem: targets.next().map_or(0, |v| v.as_u64()),
-				storage_hdd: targets.next().map_or(0, |v| v.as_u64()),
-				storage_ssd: targets.next().map_or(0, |v| v.as_u64()),
-				storage_nvme: targets.next().map_or(0, |v| v.as_u64()),
-			}
-		};
-
-		let call =
-			pallet_services::Call::<Runtime>::update_price_targets { blueprint_id, price_targets };
-
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
-
-		Ok(())
-	}
-
-	/// Pre-register as an operator for a specific blueprint.
-	#[precompile::public("preRegister(uint256)")]
-	fn pre_register(handle: &mut impl PrecompileHandle, blueprint_id: U256) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-
-		let blueprint_id: u64 = blueprint_id.as_u64();
-		let call = pallet_services::Call::<Runtime>::pre_register { blueprint_id };
-
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
 		Ok(())

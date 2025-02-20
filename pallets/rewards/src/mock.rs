@@ -269,11 +269,9 @@ pub struct MockDelegationData {
 }
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId>
 	for MockDelegationManager
 {
-	type AssetId = AssetId;
-
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
@@ -298,32 +296,22 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		}
 	}
 
-	fn get_total_delegation_by_asset_id(
-		_operator: &AccountId,
-		_asset_id: &Asset<Self::AssetId>,
-	) -> Balance {
+	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)> {
 		Default::default()
-	}
-
-	fn slash_operator(
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-		_perbillage: sp_runtime::Percent,
-	) {
 	}
 
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<Self::AssetId>,
+		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
-			delegation_info.borrow().deposits.get(&(who.clone(), asset_id)).cloned()
+			delegation_info.borrow().deposits.get(&(who.clone(), asset)).cloned()
 		})
 	}
 }
@@ -334,15 +322,19 @@ parameter_types! {
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
-	pub SlashedAmountRecipient : AccountId = AccountKeyring::Alice.into();
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxOperatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxWithdrawRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxUnstakeRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
 }

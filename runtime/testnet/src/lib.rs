@@ -33,6 +33,7 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 };
+use frame_support::ord_parameter_types;
 use frame_support::{
 	derive_impl,
 	genesis_builder_helper::{build_state, get_preset},
@@ -43,6 +44,7 @@ use frame_support::{
 	weights::ConstantMultiplier,
 };
 use frame_system::EnsureSigned;
+use frame_system::EnsureSignedBy;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_evm::GasWeightMapping;
@@ -66,6 +68,7 @@ use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata, H160, H256, U256};
 use sp_genesis_builder::PresetId;
+use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	create_runtime_str,
 	curve::PiecewiseLinear,
@@ -829,7 +832,7 @@ where
 		);
 		let raw_payload = SignedPayload::new(call, extra)
 			.map_err(|e| {
-				log::warn!("Unable to create signed payload: {:?}", e);
+				log::warn!("Unable to create signed payload: {e:?}");
 			})
 			.ok()?;
 		let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
@@ -1208,7 +1211,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type MaxMetadataLen = MaxMetadataLen;
 	// we use the same number of allowed unlocking chunks as with staking.
 	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
-	type Fungibles = Assets;
+	type Fungibles = PoolAssets; // Pool assets not general
 	type AssetId = AssetId;
 	type PoolId = AssetId;
 	type MaxNameLength = ConstU32<50>;
@@ -1250,7 +1253,10 @@ construct_runtime!(
 		Sudo: pallet_sudo = 3,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip = 4,
 
-		Assets: pallet_assets = 5,
+		// General purpose assets pallet instance
+		Assets: pallet_assets::<Instance1> = 5,
+		// LST pool tokens pallet instance
+		PoolAssets: pallet_assets::<Instance2> = 54,
 		Balances: pallet_balances = 6,
 		TransactionPayment: pallet_transaction_payment = 7,
 
@@ -1366,15 +1372,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	(
-		migrations::MigrateSessionKeys<Runtime>,
-		// AssetId limits
-		// 0 - 1000 (reserved for future use)
-		// 1000 - 50000 (reserved for LST pools)
-		// 50000 - 1000000 (reserved for native assets)
-		// set user start at 50_000, everything below is reserved for system use
-		migrations::SetNextAssetId<ConstU128<50_000>, Runtime>,
-	),
+	(migrations::MigrateSessionKeys<Runtime>,),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
@@ -1452,17 +1450,53 @@ pub type AssetId = u32;
 
 impl tangle_primitives::traits::NextAssetId<AssetId> for Runtime {
 	fn next_asset_id() -> Option<AssetId> {
-		pallet_assets::NextAssetId::<Runtime>::get()
+		pallet_assets::NextAssetId::<Runtime, GeneralAssetsInstance>::get()
 	}
 }
 
-impl pallet_assets::Config for Runtime {
+// General purpose assets configuration
+pub type GeneralAssetsInstance = pallet_assets::Instance1;
+impl pallet_assets::Config<GeneralAssetsInstance> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;
 	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
 	type Currency = Balances;
+	// Anyone can create asset
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type AssetAccountDeposit = AssetAccountDeposit;
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = AssetsStringLimit;
+	type RemoveItemsLimit = ConstU32<1000>;
+	type Freezer = ();
+	type Extra = ();
+	type CallbackHandle = ();
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
+}
+
+ord_parameter_types! {
+	pub const LstPalletOrigin: sp_runtime::AccountId32 =
+		AccountIdConversion::<sp_runtime::AccountId32>::into_account_truncating(&LstPalletId::get());
+}
+
+// LST pool tokens configuration
+// pallet-lst and root can create pool tokens
+pub type LstPoolAssetsInstance = pallet_assets::Instance2;
+impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Balance = Balance;
+	type AssetId = AssetId;
+	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
+	type Currency = Balances;
+	// only lst pallet can create pool tokens
+	type CreateOrigin =
+		AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type AssetDeposit = AssetDeposit;
 	type AssetAccountDeposit = AssetAccountDeposit;
@@ -1530,8 +1564,11 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = Services;
 	type LeaveOperatorsDelay = LeaveOperatorsDelay;
 	type OperatorBondLessDelay = OperatorBondLessDelay;
@@ -1540,7 +1577,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type SlashedAmountRecipient = TreasuryAccount;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
 	type RewardsManager = Rewards;
