@@ -12,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+use crate::GeneralAssetsInstance;
 use frame_support::parameter_types;
 use pallet_evm_precompile_balances_erc20::{Erc20BalancesPrecompile, Erc20Metadata};
 use pallet_evm_precompile_batch::BatchPrecompile;
@@ -122,7 +124,7 @@ pub type TanglePrecompilesAt<R> = (
 		(
 			SubcallWithMaxNesting<2>,
 			// Batch is the only precompile allowed to call Batch.
-			CallableByPrecompile<OnlyFrom<AddressU64<2056>>>,
+			CallableByPrecompile<OnlyFrom<AddressU64<2052>>>,
 		),
 	>,
 	PrecompileAt<
@@ -222,7 +224,7 @@ pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 		// Prefixed precompile sets (XC20)
 		PrecompileSetStartingWith<
 			ForeignAssetPrefix,
-			Erc20AssetsPrecompileSet<R>,
+			Erc20AssetsPrecompileSet<R, GeneralAssetsInstance>,
 			CallableByContract,
 		>,
 	),

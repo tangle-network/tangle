@@ -402,6 +402,10 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			T::MoveClaimOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
+			if old == new {
+				return Ok(().into());
+			}
+
 			Claims::<T>::take(&old).map(|c| Claims::<T>::insert(&new, c));
 			Vesting::<T>::take(&old).map(|c| Vesting::<T>::insert(&new, c));
 			Signing::<T>::take(&old).map(|c| Signing::<T>::insert(&new, c));

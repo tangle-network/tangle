@@ -2375,6 +2375,7 @@ declare module '@polkadot/api-base/types/submittable' {
        * * [`DispatchError::BadOrigin`] - Caller is not Root
        **/
       setConfigs: AugmentedSubmittable<(minJoinBond: PalletTangleLstConfigOpU128 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, minCreateBond: PalletTangleLstConfigOpU128 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, maxPools: PalletTangleLstConfigOpU32 | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array, globalMaxCommission: PalletTangleLstConfigOpPerbill | { Noop: any } | { Set: any } | { Remove: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstConfigOpPerbill]>;
+      setLastPoolId: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
       /**
        * Updates the metadata for a given pool.
        * 
@@ -3529,6 +3530,39 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       claimRewards: AugmentedSubmittable<(asset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesAsset]>;
       /**
+       * Claim rewards for another account
+       * 
+       * The dispatch origin must be signed.
+       * 
+       * Parameters:
+       * - `who`: The account to claim rewards for
+       * - `asset`: The asset to claim rewards for
+       * 
+       * Emits `RewardsClaimed` event when successful.
+       **/
+      claimRewardsOther: AugmentedSubmittable<(who: AccountId32 | string | Uint8Array, asset: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32, TanglePrimitivesServicesAsset]>;
+      /**
+       * Creates a new reward configuration for a specific vault.
+       * 
+       * # Arguments
+       * * `origin` - Origin of the call, must pass `ForceOrigin` check
+       * * `vault_id` - The ID of the vault to update
+       * * `new_config` - The new reward configuration containing:
+       * * `apy` - Annual Percentage Yield for the vault
+       * * `deposit_cap` - Maximum amount that can be deposited
+       * * `incentive_cap` - Maximum amount of incentives that can be distributed
+       * * `boost_multiplier` - Optional multiplier to boost rewards
+       * 
+       * # Events
+       * * `VaultRewardConfigUpdated` - Emitted when vault reward config is updated
+       * 
+       * # Errors
+       * * `BadOrigin` - If caller is not authorized through `ForceOrigin`
+       * * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
+       * * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
+       **/
+      createRewardVault: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, newConfig: PalletRewardsRewardConfigForAssetVault | { apy?: any; incentiveCap?: any; depositCap?: any; boostMultiplier?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletRewardsRewardConfigForAssetVault]>;
+      /**
        * Manage asset id to vault rewards.
        * 
        * # Permissions
@@ -3549,6 +3583,14 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       manageAssetRewardVault: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, assetId: TanglePrimitivesServicesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, TanglePrimitivesServicesAsset, PalletRewardsAssetAction]>;
       /**
+       * Update the number of blocks used for APY calculation
+       **/
+      updateApyBlocks: AugmentedSubmittable<(blocks: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
+      /**
+       * Update the decay configuration
+       **/
+      updateDecayConfig: AugmentedSubmittable<(startPeriod: u64 | AnyNumber | Uint8Array, rate: Percent | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, Percent]>;
+      /**
        * Updates the reward configuration for a specific vault.
        * 
        * # Arguments
@@ -3565,6 +3607,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Errors
        * * `BadOrigin` - If caller is not authorized through `ForceOrigin`
+       * * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
+       * * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
        **/
       updateVaultRewardConfig: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, newConfig: PalletRewardsRewardConfigForAssetVault | { apy?: any; incentiveCap?: any; depositCap?: any; boostMultiplier?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, PalletRewardsRewardConfigForAssetVault]>;
       /**

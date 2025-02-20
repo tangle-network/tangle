@@ -17,8 +17,7 @@ use crate::Config;
 use frame_support::traits::Currency;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::Percent;
-use sp_runtime::RuntimeDebug;
+use sp_runtime::{Perbill, RuntimeDebug};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 pub type BalanceOf<T> =
@@ -27,8 +26,8 @@ pub type BalanceOf<T> =
 /// Configuration for rewards associated with a specific asset.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
 pub struct RewardConfigForAssetVault<Balance> {
-	// The annual percentage yield (APY) for the asset, represented as a Percent
-	pub apy: Percent,
+	// The annual Perbillage yield (APY) for the asset, represented as a Perbill
+	pub apy: Perbill,
 	// The minimum amount required before the asset can be rewarded.
 	pub incentive_cap: Balance,
 	// The maximum amount of asset that can be deposited.
@@ -51,4 +50,10 @@ pub struct RewardConfig<VaultId, Balance> {
 pub enum AssetAction {
 	Add,
 	Remove,
+}
+
+/// Type for subaccounts
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub enum SubaccountType {
+	RewardPot,
 }

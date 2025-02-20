@@ -38,10 +38,10 @@ where
 	Balance: Default + core::ops::AddAssign + Copy + CheckedAdd,
 {
 	/// Calculates the total stake for a specific asset ID from all delegations.
-	pub fn get_stake_by_asset_id(&self, asset_id: Asset<AssetId>) -> Balance {
+	pub fn get_stake_by_asset_id(&self, asset: Asset<AssetId>) -> Balance {
 		let mut total_stake = Balance::default();
 		for stake in &self.delegations {
-			if stake.asset_id == asset_id {
+			if stake.asset == asset {
 				total_stake = total_stake.checked_add(&stake.amount).unwrap_or(total_stake);
 			}
 		}
@@ -53,7 +53,7 @@ where
 		let mut stake_by_asset: BTreeMap<Asset<AssetId>, Balance> = BTreeMap::new();
 
 		for stake in &self.delegations {
-			let entry = stake_by_asset.entry(stake.asset_id).or_default();
+			let entry = stake_by_asset.entry(stake.asset).or_default();
 			*entry = entry.checked_add(&stake.amount).unwrap_or(*entry);
 		}
 
@@ -136,5 +136,5 @@ pub struct DelegatorBond<AccountId, Balance, AssetId: Encode + Decode> {
 	/// The amount bonded.
 	pub amount: Balance,
 	/// The ID of the bonded asset.
-	pub asset_id: Asset<AssetId>,
+	pub asset: Asset<AssetId>,
 }

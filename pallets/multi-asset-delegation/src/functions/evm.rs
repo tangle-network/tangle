@@ -1,5 +1,20 @@
-use super::*;
-use crate::types::BalanceOf;
+// This file is part of Tangle.
+// Copyright (C) 2022-2024 Tangle Foundation.
+//
+// Tangle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tangle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
+
+use crate::{types::*, Config, Error, Event, Pallet};
 use ethabi::{Function, StateMutability, Token};
 use frame_support::{
 	dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo},
@@ -51,7 +66,7 @@ impl<T: Config> Pallet<T> {
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
+		let gas_limit = 500_000;
 		let call_result = Self::evm_call(*from, erc20, U256::zero(), data, gas_limit);
 		let info = match call_result {
 			Ok(info) => info,
@@ -105,7 +120,7 @@ impl<T: Config> Pallet<T> {
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
-		let gas_limit = 300_000;
+		let gas_limit = 500_000;
 		let info =
 			Self::evm_call(Self::pallet_evm_account(), erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);

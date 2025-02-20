@@ -36,8 +36,7 @@ use sp_runtime::{
 	traits::{ConvertInto, IdentityLookup},
 	AccountId32, BuildStorage, Perbill,
 };
-use tangle_primitives::services::Asset;
-use tangle_primitives::types::rewards::UserDepositWithLocks;
+use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
 
 use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
@@ -47,6 +46,8 @@ pub type Balance = u128;
 type Nonce = u32;
 pub type AssetId = u128;
 pub type BlockNumber = u64;
+
+const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
@@ -236,6 +237,11 @@ impl pallet_assets::Config for Runtime {
 
 parameter_types! {
 	pub RewardsPID: PalletId = PalletId(*b"PotStake");
+	pub const MaxDepositCap: u128 = EIGHTEEN_DECIMALS * 100_000_000;
+	pub const MaxIncentiveCap: u128 = EIGHTEEN_DECIMALS * 100_000;
+	pub const MaxApy: Perbill = Perbill::from_percent(20);
+	pub const MinDepositCap: u128 = 0;
+	pub const MinIncentiveCap: u128 = 0;
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -246,6 +252,11 @@ impl pallet_rewards::Config for Runtime {
 	type VaultId = u32;
 	type DelegationManager = MockDelegationManager;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxApy = MaxApy;
+	type MaxDepositCap = MaxDepositCap;
+	type MaxIncentiveCap = MaxIncentiveCap;
+	type MinIncentiveCap = MinIncentiveCap;
+	type MinDepositCap = MinDepositCap;
 }
 
 thread_local! {
@@ -258,11 +269,9 @@ pub struct MockDelegationData {
 }
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId>
 	for MockDelegationManager
 {
-	type AssetId = AssetId;
-
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
@@ -287,32 +296,22 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		}
 	}
 
-	fn get_total_delegation_by_asset_id(
-		_operator: &AccountId,
-		_asset_id: &Asset<Self::AssetId>,
-	) -> Balance {
+	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)> {
 		Default::default()
-	}
-
-	fn slash_operator(
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-		_percentage: sp_runtime::Percent,
-	) {
 	}
 
 	fn get_user_deposit_with_locks(
 		who: &AccountId,
-		asset_id: Asset<Self::AssetId>,
+		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>> {
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
-			delegation_info.borrow().deposits.get(&(who.clone(), asset_id)).cloned()
+			delegation_info.borrow().deposits.get(&(who.clone(), asset)).cloned()
 		})
 	}
 }
@@ -323,15 +322,19 @@ parameter_types! {
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
-	pub SlashedAmountRecipient : AccountId = AccountKeyring::Alice.into();
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxOperatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxWithdrawRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxUnstakeRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
 }
@@ -433,7 +436,12 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.register_extension(KeystoreExt(Arc::new(MemoryKeystore::new()) as KeystorePtr));
-	ext.execute_with(|| System::set_block_number(1));
+	ext.execute_with(|| {
+		System::set_block_number(1);
+		// Set total issuance for reward calculations
+		let total_issuance = 1_000_000_000_000_000_000_000_000u128; // 1M tokens with 18 decimals
+		<pallet_balances::TotalIssuance<Runtime>>::put(total_issuance);
+	});
 	ext
 }
 

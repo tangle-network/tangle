@@ -14,21 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-/// Functions for the pallet.
-use super::*;
-use crate::{types::*, Pallet};
+use crate::{types::*, Config, Error, Operators, Pallet};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
-	traits::{Currency, ExistenceRequirement, Get, ReservableCurrency},
+	traits::{Get, ReservableCurrency},
 	BoundedVec,
 };
 use sp_runtime::{
 	traits::{CheckedAdd, CheckedSub},
-	DispatchError, Percent,
+	DispatchError,
 };
 use tangle_primitives::traits::ServiceManager;
-use tangle_primitives::BlueprintId;
 
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.
@@ -279,7 +276,10 @@ impl<T: Config> Pallet<T> {
 	pub fn process_go_offline(who: &T::AccountId) -> Result<(), DispatchError> {
 		let mut operator = Operators::<T>::get(who).ok_or(Error::<T>::NotAnOperator)?;
 		ensure!(operator.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
-
+		ensure!(
+			!T::ServiceManager::has_active_services(who),
+			Error::<T>::CannotGoOfflineWithActiveServices
+		);
 		operator.status = OperatorStatus::Inactive;
 		Operators::<T>::insert(who, operator);
 
@@ -303,44 +303,5 @@ impl<T: Config> Pallet<T> {
 		Operators::<T>::insert(who, operator);
 
 		Ok(())
-	}
-
-	pub fn slash_operator(
-		operator: &T::AccountId,
-		blueprint_id: BlueprintId,
-		percentage: Percent,
-	) -> Result<(), DispatchError> {
-		Operators::<T>::try_mutate(operator, |maybe_operator| {
-			let operator_data = maybe_operator.as_mut().ok_or(Error::<T>::NotAnOperator)?;
-			ensure!(operator_data.status == OperatorStatus::Active, Error::<T>::NotActiveOperator);
-
-			// Slash operator stake
-			let amount = percentage.mul_floor(operator_data.stake);
-			operator_data.stake = operator_data
-				.stake
-				.checked_sub(&amount)
-				.ok_or(Error::<T>::InsufficientStakeRemaining)?;
-
-			// Slash each delegator
-			for delegator in operator_data.delegations.iter() {
-				// Ignore errors from individual delegator slashing
-				let _ =
-					Self::slash_delegator(&delegator.delegator, operator, blueprint_id, percentage);
-			}
-
-			// transfer the slashed amount to the treasury
-			T::Currency::unreserve(operator, amount);
-			let _ = T::Currency::transfer(
-				operator,
-				&T::SlashedAmountRecipient::get(),
-				amount,
-				ExistenceRequirement::AllowDeath,
-			);
-
-			// emit event
-			Self::deposit_event(Event::OperatorSlashed { who: operator.clone(), amount });
-
-			Ok(())
-		})
 	}
 }

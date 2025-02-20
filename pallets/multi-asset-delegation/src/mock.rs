@@ -38,15 +38,19 @@ use serde_json::json;
 use sp_core::{sr25519, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
-use sp_runtime::DispatchError;
 use sp_runtime::{
+	generic,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
-	AccountId32, BoundToRuntimeAppPublic, BuildStorage, Perbill,
+	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
 };
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
-use tangle_primitives::traits::RewardsManager;
-use tangle_primitives::types::rewards::LockMultiplier;
+use sp_staking::currency_to_vote::U128CurrencyToVote;
+use std::cell::RefCell;
+use tangle_primitives::{
+	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	traits::RewardsManager,
+	types::rewards::LockMultiplier,
+};
 
 use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
@@ -197,7 +201,7 @@ impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
 	type CurrencyBalance = <Self as pallet_balances::Config>::Balance;
 	type UnixTime = pallet_timestamp::Pallet<Self>;
-	type CurrencyToVote = ();
+	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
@@ -295,6 +299,10 @@ impl tangle_primitives::traits::ServiceManager<AccountId, Balance> for MockServi
 	fn get_blueprints_by_operator(_account: &AccountId) -> Vec<u64> {
 		unimplemented!(); // we don't care
 	}
+
+	fn has_active_services(_operator: &AccountId) -> bool {
+		false
+	}
 }
 
 parameter_types! {
@@ -303,17 +311,31 @@ parameter_types! {
 	pub const MinOperatorBondAmount: u64 = 10_000;
 	pub const BondDuration: u32 = 10;
 	pub PID: PalletId = PalletId(*b"PotStake");
-	pub SlashedAmountRecipient : AccountId = AccountKeyring::Alice.into();
+
+	pub const SlashRecipient: AccountId = AccountId32::new([1u8; 32]);
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxOperatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxWithdrawRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxUnstakeRequests: u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
+}
+
+type DepositCall = (AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>);
+type WithdrawalCall = (AccountId, Asset<AssetId>, Balance);
+
+thread_local! {
+	static DEPOSIT_CALLS: RefCell<Vec<DepositCall>> = RefCell::new(Vec::new());
+	static WITHDRAWAL_CALLS: RefCell<Vec<WithdrawalCall>> = RefCell::new(Vec::new());
 }
 
 pub struct MockRewardsManager;
@@ -322,19 +344,25 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 	type Error = DispatchError;
 
 	fn record_deposit(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-		_amount: Balance,
-		_lock_multiplier: Option<LockMultiplier>,
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+		lock_multiplier: Option<LockMultiplier>,
 	) -> Result<(), Self::Error> {
+		DEPOSIT_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), asset, amount, lock_multiplier));
+		});
 		Ok(())
 	}
 
 	fn record_withdrawal(
-		_account_id: &AccountId,
-		_asset: Asset<AssetId>,
-		_amount: Balance,
+		account_id: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
 	) -> Result<(), Self::Error> {
+		WITHDRAWAL_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), asset, amount));
+		});
 		Ok(())
 	}
 
@@ -355,11 +383,29 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 	}
 }
 
+impl MockRewardsManager {
+	pub fn record_deposit_calls() -> Vec<DepositCall> {
+		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn record_withdrawal_calls() -> Vec<WithdrawalCall> {
+		WITHDRAWAL_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn clear_all() {
+		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
+		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
+	}
+}
+
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
+	type SlashRecipient = SlashRecipient;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = MockServiceManager;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
@@ -375,7 +421,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MaxWithdrawRequests = MaxWithdrawRequests;
 	type MaxUnstakeRequests = MaxUnstakeRequests;
 	type MaxDelegations = MaxDelegations;
-	type SlashedAmountRecipient = SlashedAmountRecipient;
 	type EvmRunner = MockedEvmRunner;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
 	type EvmAddressMapping = PalletEVMAddressMapping;
@@ -383,7 +428,82 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type WeightInfo = ();
 }
 
-type Block = frame_system::mocking::MockBlock<Runtime>;
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+#[derive(
+	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
+)]
+pub enum ProxyType {
+	/// All calls can be proxied. This is the trivial/most permissive filter.
+	Any = 0,
+	/// Only extrinsics related to governance (democracy and collectives).
+	Governance = 1,
+	/// Allow to veto an announced proxy call.
+	CancelProxy = 2,
+	/// Allow extrinsic related to Balances.
+	Balances = 3,
+	/// Allow extrinsic related to Staking.
+	Staking = 4,
+}
+
+impl Default for ProxyType {
+	fn default() -> Self {
+		Self::Any
+	}
+}
+
+impl frame_support::traits::InstanceFilter<RuntimeCall> for ProxyType {
+	fn filter(&self, c: &RuntimeCall) -> bool {
+		match self {
+			ProxyType::Any => true,
+			ProxyType::Governance => false,
+			ProxyType::CancelProxy => false,
+			ProxyType::Balances => matches!(c, RuntimeCall::Balances(..)),
+			ProxyType::Staking => matches!(c, RuntimeCall::Staking(..)),
+		}
+	}
+	fn is_superset(&self, o: &Self) -> bool {
+		match (self, o) {
+			(x, y) if x == y => true,
+			(ProxyType::Any, _) => true,
+			(_, ProxyType::Any) => false,
+			_ => false,
+		}
+	}
+}
+
+impl pallet_proxy::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type Currency = Balances;
+	type ProxyType = ProxyType;
+	type ProxyDepositBase = ConstU128<1>;
+	type ProxyDepositFactor = ConstU128<1>;
+	type MaxProxies = ConstU32<32>;
+	type WeightInfo = ();
+	type MaxPending = ConstU32<32>;
+	type CallHasher = sp_runtime::traits::BlakeTwo256;
+	type AnnouncementDepositBase = ConstU128<1>;
+	type AnnouncementDepositFactor = ConstU128<1>;
+}
+
+impl pallet_utility::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type RuntimeCall = RuntimeCall;
+	type PalletsOrigin = OriginCaller;
+	type WeightInfo = ();
+}
+
+/// An unchecked extrinsic type to be used in tests.
+pub type MockUncheckedExtrinsic = generic::UncheckedExtrinsic<
+	AccountId,
+	RuntimeCall,
+	u32,
+	extra::CheckNominatedRestaked<Runtime>,
+>;
+
+/// An implementation of `sp_runtime::traits::Block` to be used in tests.
+type Block =
+	generic::Block<generic::Header<u64, sp_runtime::traits::BlakeTwo256>, MockUncheckedExtrinsic>;
 
 construct_runtime!(
 	pub enum Runtime
@@ -398,6 +518,8 @@ construct_runtime!(
 		Session: pallet_session,
 		Staking: pallet_staking,
 		Historical: pallet_session_historical,
+		Proxy: pallet_proxy,
+		Utility: pallet_utility,
 	}
 );
 
@@ -421,19 +543,16 @@ pub fn account_id_to_address(account_id: AccountId) -> H160 {
 	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 }
 
-// pub fn address_to_account_id(address: H160) -> AccountId {
-// 	use pallet_evm::AddressMapping;
-// 	<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
-// }
-
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	new_test_ext_raw_authorities()
+	let ext = new_test_ext_raw_authorities();
+	MockRewardsManager::clear_all();
+	ext
 }
 
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
-// pub const USDC: AssetId = 1;
-// pub const WETH: AssetId = 2;
-// pub const WBTC: AssetId = 3;
 pub const VDOT: AssetId = 4;
 
 // This function basically just builds a genesis storage key/value store according to
@@ -490,6 +609,14 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
 	evm_config.assimilate_storage(&mut t).unwrap();
+
+	let staking_config = pallet_staking::GenesisConfig::<Runtime> {
+		validator_count: 3,
+		invulnerables: authorities.clone(),
+		..Default::default()
+	};
+
+	staking_config.assimilate_storage(&mut t).unwrap();
 
 	// assets_config.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
@@ -598,36 +725,3 @@ macro_rules! evm_log {
 		}
 	};
 }
-
-// /// Asserts that the EVM logs are as expected.
-// #[track_caller]
-// pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
-// 	assert_evm_events_contains(expected.iter().cloned().collect())
-// }
-
-// /// Asserts that the EVM events are as expected.
-// #[track_caller]
-// fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
-// 	let actual: Vec<fp_evm::Log> = System::events()
-// 		.iter()
-// 		.filter_map(|e| match e.event {
-// 			RuntimeEvent::EVM(pallet_evm::Event::Log { ref log }) => Some(log.clone()),
-// 			_ => None,
-// 		})
-// 		.collect();
-
-// 	// Check if `expected` is a subset of `actual`
-// 	let mut any_matcher = false;
-// 	for evt in expected {
-// 		if !actual.contains(&evt) {
-// 			panic!("Events don't match\nactual: {actual:?}\nexpected: {evt:?}");
-// 		} else {
-// 			any_matcher = true;
-// 		}
-// 	}
-
-// 	// At least one event should be present
-// 	if !any_matcher {
-// 		panic!("No events found");
-// 	}
-// }

@@ -14,18 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::AssetLookupRewardVaults;
-use crate::BalanceOf;
-use crate::Error;
-use crate::RewardConfigStorage;
-use crate::TotalRewardVaultScore;
-use crate::UserServiceReward;
-use crate::{Config, Pallet};
+use crate::{
+	AssetLookupRewardVaults, BalanceOf, Config, Error, Event, Pallet, RewardConfigStorage,
+	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward, UserServiceReward,
+};
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::traits::Saturating;
-use sp_runtime::DispatchError;
-use tangle_primitives::types::rewards::LockMultiplier;
-use tangle_primitives::{services::Asset, traits::rewards::RewardsManager};
+use sp_runtime::{traits::Saturating, DispatchError};
+use tangle_primitives::{
+	services::Asset, traits::rewards::RewardsManager, types::rewards::LockMultiplier,
+};
 
 impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumberFor<T>>
 	for Pallet<T>
@@ -33,17 +30,54 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 	type Error = DispatchError;
 
 	fn record_deposit(
-		_account_id: &T::AccountId,
+		account_id: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
-		_lock_multiplier: Option<LockMultiplier>,
+		lock_multiplier: Option<LockMultiplier>,
 	) -> Result<(), Self::Error> {
 		// find the vault for the asset id
 		// if the asset is not in a reward vault, do nothing
 		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset) {
+			// Update the reward vault deposit
+			let deposit = TotalRewardVaultDeposit::<T>::get(vault_id).saturating_add(amount);
+			TotalRewardVaultDeposit::<T>::insert(vault_id, deposit);
+
+			// emit event
+			Self::deposit_event(Event::TotalDepositUpdated {
+				vault_id,
+				asset,
+				total_deposit: deposit,
+			});
+
 			// Update the reward vault score
-			let score = TotalRewardVaultScore::<T>::get(vault_id).saturating_add(amount);
-			TotalRewardVaultScore::<T>::insert(vault_id, score);
+			let score = if let Some(lock_multiplier) = lock_multiplier {
+				amount.saturating_mul(lock_multiplier.value().into())
+			} else {
+				amount
+			};
+
+			let new_score = TotalRewardVaultScore::<T>::get(vault_id).saturating_add(score);
+			TotalRewardVaultScore::<T>::insert(vault_id, new_score);
+
+			// emit event
+			Self::deposit_event(Event::TotalScoreUpdated {
+				vault_id,
+				total_score: new_score,
+				asset,
+				lock_multiplier,
+			});
+
+			// If this user has never claimed rewards, create an entry
+			// this will give us a starting point for reward claim
+			if !UserClaimedReward::<T>::contains_key(account_id, vault_id) {
+				let current_block = frame_system::Pallet::<T>::block_number();
+				let default_balance: BalanceOf<T> = 0_u32.into();
+				UserClaimedReward::<T>::insert(
+					account_id,
+					vault_id,
+					(current_block, default_balance),
+				);
+			}
 		}
 		Ok(())
 	}
@@ -56,6 +90,17 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		// find the vault for the asset id
 		// if the asset is not in a reward vault, do nothing
 		if let Some(vault_id) = AssetLookupRewardVaults::<T>::get(asset) {
+			// Update the reward vault deposit
+			let deposit = TotalRewardVaultDeposit::<T>::get(vault_id).saturating_sub(amount);
+			TotalRewardVaultDeposit::<T>::insert(vault_id, deposit);
+
+			// emit event
+			Self::deposit_event(Event::TotalDepositUpdated {
+				vault_id,
+				asset,
+				total_deposit: deposit,
+			});
+
 			// Update the reward vault score
 			let score = TotalRewardVaultScore::<T>::get(vault_id).saturating_sub(amount);
 			TotalRewardVaultScore::<T>::insert(vault_id, score);
