@@ -16,7 +16,7 @@ dependencies = [
 name = "account-util"
 version = "1.2.8"
 dependencies = [
- "frame-support 37.0.1",
+ "frame-support 37.1.0",
  "pallet-airdrop-claims",
  "pallet-vesting 37.0.0",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -1477,7 +1477,7 @@ checksum = "d0324df9ce91a9840632e865dd3272bd20162023856f1b189b7ae58afa5c6b61"
 dependencies = [
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcmp-queue",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "pallet-assets 40.0.0",
@@ -1494,8 +1494,8 @@ dependencies = [
  "sp-runtime 39.0.5",
  "staging-parachain-info",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "substrate-wasm-builder 24.0.1",
 ]
 
@@ -1505,7 +1505,7 @@ version = "0.18.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c540587f89a03003946b14decef4fcadb083edc4e62f968de245b82e5402e923"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "impl-trait-for-tuples",
  "log",
@@ -1518,8 +1518,8 @@ dependencies = [
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "substrate-wasm-builder 24.0.1",
 ]
 
@@ -2290,7 +2290,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c31b53c53d627e2da38f8910807944bf3121e154b5c0ac9e122995af9dfb13ed"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "pallet-message-queue",
  "parity-scale-codec",
@@ -2342,8 +2342,8 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-tracing 17.0.1",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -2723,6 +2723,15 @@ dependencies = [
  "crypto-common",
  "inout",
  "zeroize",
+]
+
+[[package]]
+name = "ckb-merkle-mountain-range"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56ccb671c5921be8a84686e6212ca184cb1d7c51cadcdbfcbd1cc3f042f5dfb8"
+dependencies = [
+ "cfg-if",
 ]
 
 [[package]]
@@ -3344,7 +3353,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97263a8e758d201ebe81db7cea7b278b4fb869c11442f77acef70138ac1a252f"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-benchmarking 38.0.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
@@ -3364,7 +3373,7 @@ checksum = "546403ee1185f4051a74cc9c9d76e82c63cac3fb68e1bf29f61efb5604c96488"
 dependencies = [
  "bytes",
  "cumulus-pallet-parachain-system-proc-macro",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "cumulus-primitives-parachain-inherent",
  "cumulus-primitives-proof-size-hostfunction",
  "environmental",
@@ -3389,7 +3398,7 @@ dependencies = [
  "sp-trie 37.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-version 37.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
  "trie-db",
 ]
 
@@ -3441,7 +3450,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e49231f6cd8274438b078305dc8ce44c54c0d3f4a28e902589bcbaa53d954608"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "parity-scale-codec",
@@ -3459,7 +3468,7 @@ checksum = "6f788bdac9474795ea13ba791b55798fb664b2e3da8c3a7385b480c9af4e6539"
 dependencies = [
  "bounded-collections",
  "bp-xcm-bridge-hub-router",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-benchmarking 38.0.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
@@ -3473,8 +3482,8 @@ dependencies = [
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -3484,7 +3493,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f47128f797359951723e2d106a80e592d007bb7446c299958cdbafb1489ddbf0"
 dependencies = [
  "cumulus-pallet-xcm",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "parity-scale-codec",
@@ -3501,10 +3510,26 @@ checksum = "11e7825bcf3cc6c962a5b9b9f47e02dc381109e521d0bc00cad785c65da18471"
 dependencies = [
  "parity-scale-codec",
  "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-primitives 15.0.0",
+ "polkadot-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-aura 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
+]
+
+[[package]]
+name = "cumulus-primitives-core"
+version = "0.15.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
+dependencies = [
+ "parity-scale-codec",
+ "polkadot-core-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "polkadot-parachain-primitives 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "polkadot-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "scale-info",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "staging-xcm 14.1.0",
 ]
 
 [[package]]
@@ -3531,7 +3556,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "842a694901e04a62d88995418dec35c22f7dba2b34d32d2b8de37d6b92f973ff"
 dependencies = [
  "async-trait",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "parity-scale-codec",
  "scale-info",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3556,7 +3581,7 @@ version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fc49dfec0ba3438afad73787736cc0dba88d15b5855881f12a4d8b812a72927"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "cumulus-primitives-proof-size-hostfunction",
  "docify",
  "frame-support 38.2.0",
@@ -3573,7 +3598,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33cffb8f010f39ac36b31d38994b8f9d9256d9b5e495d96b4ec59d3e30852d53"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "sp-inherents 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-timestamp 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -3584,7 +3609,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bdcf4d46dd93f1e6d5dd6d379133566a44042ba6476d04bdcbdb4981c622ae4"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "log",
  "pallet-asset-conversion",
@@ -3592,8 +3617,8 @@ dependencies = [
  "polkadot-runtime-common",
  "sp-runtime 39.0.5",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -3602,7 +3627,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e570e41c3f05a8143ebff967bbb0c7dcaaa6f0bebd8639b9418b8005b13eda03"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "parity-scale-codec",
  "polkadot-primitives 16.0.0",
  "sp-runtime 39.0.5",
@@ -4963,7 +4988,7 @@ dependencies = [
 [[package]]
 name = "fc-api"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "async-trait",
  "fp-storage",
@@ -4975,7 +5000,7 @@ dependencies = [
 [[package]]
 name = "fc-cli"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "clap",
  "ethereum-types",
@@ -4993,7 +5018,7 @@ dependencies = [
 [[package]]
 name = "fc-consensus"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "async-trait",
  "fp-consensus",
@@ -5009,7 +5034,7 @@ dependencies = [
 [[package]]
 name = "fc-db"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "async-trait",
  "ethereum",
@@ -5039,7 +5064,7 @@ dependencies = [
 [[package]]
 name = "fc-mapping-sync"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fc-db",
  "fc-storage",
@@ -5062,7 +5087,7 @@ dependencies = [
 [[package]]
 name = "fc-rpc"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -5116,7 +5141,7 @@ dependencies = [
 [[package]]
 name = "fc-rpc-core"
 version = "1.1.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -5131,7 +5156,7 @@ dependencies = [
 [[package]]
 name = "fc-storage"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -5353,6 +5378,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "fortuples"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87630a8087e9cac4b7edfb6ee5e250ddca9112b57b6b17d8f5107375a3a8eace"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "forwarded-header-value"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5365,7 +5401,7 @@ dependencies = [
 [[package]]
 name = "fp-account"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "hex",
  "impl-serde 0.4.0",
@@ -5384,7 +5420,7 @@ dependencies = [
 [[package]]
 name = "fp-consensus"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "parity-scale-codec",
@@ -5395,7 +5431,7 @@ dependencies = [
 [[package]]
 name = "fp-dynamic-fee"
 version = "1.0.0"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "async-trait",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -5405,7 +5441,7 @@ dependencies = [
 [[package]]
 name = "fp-ethereum"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -5417,7 +5453,7 @@ dependencies = [
 [[package]]
 name = "fp-evm"
 version = "3.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "evm",
  "frame-support 37.1.0",
@@ -5432,7 +5468,7 @@ dependencies = [
 [[package]]
 name = "fp-rpc"
 version = "3.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -5448,7 +5484,7 @@ dependencies = [
 [[package]]
 name = "fp-self-contained"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "frame-support 37.1.0",
  "parity-scale-codec",
@@ -5460,7 +5496,7 @@ dependencies = [
 [[package]]
 name = "fp-storage"
 version = "2.0.0"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "parity-scale-codec",
  "serde",
@@ -6584,6 +6620,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "grandpa-verifier"
+version = "0.1.1"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "anyhow",
+ "derive_more 0.99.19",
+ "finality-grandpa",
+ "frame-support 37.1.0",
+ "grandpa-verifier-primitives",
+ "parity-scale-codec",
+ "serde",
+ "sp-consensus-grandpa 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-storage 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "substrate-state-machine",
+]
+
+[[package]]
+name = "grandpa-verifier-primitives"
+version = "0.1.1"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "anyhow",
+ "finality-grandpa",
+ "frame-support 37.1.0",
+ "ismp",
+ "log",
+ "parity-scale-codec",
+ "sp-consensus-grandpa 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-storage 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+]
+
+[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7477,6 +7555,48 @@ name = "is_terminal_polyfill"
 version = "1.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
+
+[[package]]
+name = "ismp"
+version = "0.2.2"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "anyhow",
+ "derive_more 1.0.0",
+ "displaydoc",
+ "hex",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "scale-info",
+ "serde",
+ "serde-hex-utils",
+ "thiserror 2.0.11",
+]
+
+[[package]]
+name = "ismp-grandpa"
+version = "1.15.3"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "ckb-merkle-mountain-range",
+ "cumulus-primitives-core 0.15.0",
+ "finality-grandpa",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "grandpa-verifier",
+ "grandpa-verifier-primitives",
+ "ismp",
+ "pallet-ismp",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "scale-info",
+ "sp-consensus-aura 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "substrate-state-machine",
+]
 
 [[package]]
 name = "itertools"
@@ -9410,7 +9530,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 3.2.0",
+ "proc-macro-crate 1.1.3",
  "proc-macro2",
  "quote",
  "syn 2.0.98",
@@ -9838,7 +9958,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery",
+ "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
 ]
 
@@ -9993,7 +10113,7 @@ dependencies = [
 [[package]]
 name = "pallet-base-fee"
 version = "1.0.0"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
  "frame-support 37.1.0",
@@ -10323,7 +10443,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
  "wasm-instrument",
  "wasmi",
 ]
@@ -10359,8 +10479,8 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-tracing 17.0.1",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "xcm-simulator",
 ]
 
@@ -10493,7 +10613,7 @@ dependencies = [
 [[package]]
 name = "pallet-dynamic-fee"
 version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-dynamic-fee",
  "fp-evm",
@@ -10617,7 +10737,7 @@ dependencies = [
 [[package]]
 name = "pallet-ethereum"
 version = "4.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -10639,7 +10759,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm"
 version = "6.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "environmental",
  "evm",
@@ -10662,7 +10782,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-chain-id"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "frame-support 37.1.0",
  "frame-system 37.1.0",
@@ -10723,7 +10843,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-blake2"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
 ]
@@ -10731,7 +10851,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-bn128"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -10766,7 +10886,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-curve25519"
 version = "1.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "curve25519-dalek",
  "fp-evm",
@@ -10801,7 +10921,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-dispatch"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
  "frame-support 37.1.0",
@@ -10813,7 +10933,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-ed25519"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "ed25519-dalek",
  "fp-evm",
@@ -10822,7 +10942,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-modexp"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
  "num",
@@ -11043,7 +11163,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
  "tiny-keccak",
@@ -11052,7 +11172,7 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-simple"
 version = "2.0.0-dev"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "fp-evm",
  "ripemd",
@@ -11414,7 +11534,7 @@ dependencies = [
 [[package]]
 name = "pallet-hotfix-sufficients"
 version = "1.0.0"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "frame-benchmarking 37.0.0",
  "frame-support 37.1.0",
@@ -11424,6 +11544,22 @@ dependencies = [
  "scale-info",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
+]
+
+[[package]]
+name = "pallet-hyperbridge"
+version = "1.15.3"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "anyhow",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "ismp",
+ "pallet-ismp",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "scale-info",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
 ]
 
 [[package]]
@@ -11559,6 +11695,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-ismp"
+version = "1.15.3"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "anyhow",
+ "fortuples",
+ "frame-benchmarking 37.0.0",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "ismp",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-mmr-primitives 34.0.0",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+]
+
+[[package]]
+name = "pallet-ismp-runtime-api"
+version = "1.15.3"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "ismp",
+ "pallet-ismp",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "serde",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-mmr-primitives 34.0.0",
+]
+
+[[package]]
 name = "pallet-lottery"
 version = "38.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11661,7 +11834,7 @@ dependencies = [
  "scale-info",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-mmr-primitives",
+ "sp-mmr-primitives 34.1.0",
  "sp-runtime 39.0.5",
 ]
 
@@ -12188,7 +12361,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
 ]
 
 [[package]]
@@ -12236,8 +12409,8 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-tracing 17.0.1",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "xcm-simulator",
 ]
 
@@ -13161,8 +13334,8 @@ dependencies = [
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "tracing",
  "xcm-runtime-apis",
 ]
@@ -13182,8 +13355,8 @@ dependencies = [
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -13205,8 +13378,8 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -13226,7 +13399,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
 ]
 
 [[package]]
@@ -13235,7 +13408,7 @@ version = "18.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9460a69f409be27c62161d8b4d36ffc32735d09a4f9097f9c789db0cca7196c"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "cumulus-primitives-utility",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
@@ -13256,7 +13429,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "staging-parachain-info",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
  "substrate-wasm-builder 24.0.1",
 ]
 
@@ -13268,7 +13441,7 @@ checksum = "287d2db0a2d19466caa579a69f021bfdc6fa352f382c8395dade58d1d0c6adfe"
 dependencies = [
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcmp-queue",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "cumulus-primitives-parachain-inherent",
  "cumulus-test-relay-sproof-builder",
  "frame-support 38.2.0",
@@ -13287,7 +13460,7 @@ dependencies = [
  "sp-tracing 17.0.1",
  "staging-parachain-info",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
  "substrate-wasm-builder 24.0.1",
 ]
 
@@ -13828,7 +14001,7 @@ dependencies = [
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery",
+ "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-slots 0.40.1",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-inherents 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -13836,6 +14009,32 @@ dependencies = [
  "sp-keystore 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "sp-staking 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "polkadot-primitives"
+version = "15.0.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#39e71bd58f282508db334a424ca6c2997d94acf5"
+dependencies = [
+ "bitvec",
+ "hex-literal 0.4.1",
+ "log",
+ "parity-scale-codec",
+ "polkadot-core-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "polkadot-parachain-primitives 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "scale-info",
+ "serde",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-application-crypto 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-arithmetic 26.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-authority-discovery 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-consensus-slots 0.40.0",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-inherents 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-keystore 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
 ]
 
 [[package]]
@@ -13855,7 +14054,7 @@ dependencies = [
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery",
+ "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-slots 0.40.1",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-inherents 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -13910,8 +14109,8 @@ dependencies = [
  "sp-session 36.0.0",
  "sp-staking 36.0.0",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "static_assertions",
 ]
 
@@ -13974,7 +14173,7 @@ dependencies = [
  "sp-staking 36.0.0",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -14009,7 +14208,7 @@ dependencies = [
  "cumulus-pallet-xcmp-queue",
  "cumulus-ping",
  "cumulus-primitives-aura",
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "cumulus-primitives-parachain-inherent",
  "cumulus-primitives-proof-size-hostfunction",
  "cumulus-primitives-storage-weight-reclaim",
@@ -14160,7 +14359,7 @@ dependencies = [
  "sp-api-proc-macro 20.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery",
+ "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-block-builder 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-aura 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-babe 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -14181,7 +14380,7 @@ dependencies = [
  "sp-keystore 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-metadata-ir 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-mixnet 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-mmr-primitives",
+ "sp-mmr-primitives 34.1.0",
  "sp-npos-elections 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-offchain 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
@@ -14202,8 +14401,8 @@ dependencies = [
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-parachain-info",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
  "substrate-bip39 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "testnet-parachains-constants",
  "xcm-runtime-apis",
@@ -14483,7 +14682,7 @@ dependencies = [
 [[package]]
 name = "precompile-utils"
 version = "0.1.0"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "derive_more 0.99.19",
  "environmental",
@@ -14512,7 +14711,7 @@ dependencies = [
 [[package]]
 name = "precompile-utils-macro"
 version = "0.1.0"
-source = "git+https://github.com/paritytech/frontier.git?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
+source = "git+https://github.com/polkadot-evm/frontier?branch=stable2407#2e219e17a526125da003e64ef22ec037917083fa"
 dependencies = [
  "case",
  "num_enum",
@@ -14845,7 +15044,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22505a5c94da8e3b7c2996394d1c933236c4d743e81a410bcca4e6989fc066a4"
 dependencies = [
  "bytes",
- "heck 0.5.0",
+ "heck 0.4.1",
  "itertools 0.12.1",
  "log",
  "multimap 0.10.0",
@@ -15483,7 +15682,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
 ]
 
 [[package]]
@@ -17619,6 +17818,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-hex-utils"
+version = "0.1.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "anyhow",
+ "hex",
+ "serde",
+]
+
+[[package]]
 name = "serde_bytes"
 version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -18126,7 +18335,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
 ]
 
 [[package]]
@@ -18268,7 +18477,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -18325,7 +18534,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -18345,7 +18554,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -18361,8 +18570,8 @@ dependencies = [
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -18394,7 +18603,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "staging-parachain-info",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -18603,6 +18812,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp-authority-discovery"
+version = "34.0.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-application-crypto 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+]
+
+[[package]]
 name = "sp-block-builder"
 version = "34.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -18743,7 +18964,7 @@ dependencies = [
  "sp-crypto-hashing 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-keystore 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-mmr-primitives",
+ "sp-mmr-primitives 34.1.0",
  "sp-runtime 39.0.5",
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "strum 0.26.3",
@@ -19251,6 +19472,23 @@ dependencies = [
  "scale-info",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-application-crypto 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+]
+
+[[package]]
+name = "sp-mmr-primitives"
+version = "34.0.0"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#39e71bd58f282508db334a424ca6c2997d94acf5"
+dependencies = [
+ "log",
+ "parity-scale-codec",
+ "polkadot-ckb-merkle-mountain-range",
+ "scale-info",
+ "serde",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-debug-derive 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -20123,7 +20361,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d28266dfddbfff721d70ad2f873380845b569adfab32f257cf97d9cedd894b68"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "parity-scale-codec",
@@ -20171,27 +20409,6 @@ dependencies = [
 
 [[package]]
 name = "staging-xcm-builder"
-version = "16.0.3"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
-dependencies = [
- "frame-support 37.1.0",
- "frame-system 37.1.0",
- "impl-trait-for-tuples",
- "log",
- "pallet-transaction-payment 37.0.1",
- "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "scale-info",
- "sp-arithmetic 26.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
- "sp-weights 31.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "staging-xcm 14.1.0",
- "staging-xcm-executor 16.0.0",
-]
-
-[[package]]
-name = "staging-xcm-builder"
 version = "17.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6f7a92cfaec55a5ed0f9cbbb9076aa8ec0aff1ba90b9804cc5c8f2369fde59c"
@@ -20210,27 +20427,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
-]
-
-[[package]]
-name = "staging-xcm-executor"
-version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
-dependencies = [
- "environmental",
- "frame-benchmarking 37.0.0",
- "frame-support 37.1.0",
- "impl-trait-for-tuples",
- "parity-scale-codec",
- "scale-info",
- "sp-arithmetic 26.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
- "sp-weights 31.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "staging-xcm 14.1.0",
- "tracing",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -20509,6 +20706,25 @@ dependencies = [
  "prometheus",
  "thiserror 1.0.69",
  "tokio",
+]
+
+[[package]]
+name = "substrate-state-machine"
+version = "1.15.3"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+dependencies = [
+ "frame-support 37.1.0",
+ "hash-db",
+ "ismp",
+ "pallet-ismp",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "scale-info",
+ "serde",
+ "sp-consensus-aura 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-consensus-babe 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
 ]
 
 [[package]]
@@ -21170,6 +21386,7 @@ dependencies = [
 name = "tangle-testnet-runtime"
 version = "1.2.8"
 dependencies = [
+ "anyhow",
  "evm-tracer",
  "fixed",
  "fp-evm",
@@ -21185,6 +21402,8 @@ dependencies = [
  "frame-system-rpc-runtime-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "hex",
  "hex-literal 0.4.1",
+ "ismp",
+ "ismp-grandpa",
  "log",
  "num_enum",
  "pallet-airdrop-claims",
@@ -21232,10 +21451,13 @@ dependencies = [
  "pallet-evm-precompileset-assets-erc20",
  "pallet-grandpa 37.0.0",
  "pallet-hotfix-sufficients",
+ "pallet-hyperbridge",
  "pallet-identity 37.0.0",
  "pallet-im-online 36.0.0",
  "pallet-indices 37.0.0",
  "pallet-insecure-randomness-collective-flip 25.0.0",
+ "pallet-ismp",
+ "pallet-ismp-runtime-api",
  "pallet-multi-asset-delegation",
  "pallet-multisig 37.0.0",
  "pallet-nomination-pools 36.0.0",
@@ -21261,7 +21483,6 @@ dependencies = [
  "pallet-utility 37.0.1",
  "pallet-vesting 37.0.0",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "precompile-utils",
  "primitive-types 0.12.2",
  "rpc-primitives-debug",
@@ -21275,6 +21496,7 @@ dependencies = [
  "sp-genesis-builder 0.15.0",
  "sp-inherents 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-mmr-primitives 34.0.0",
  "sp-offchain 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
  "sp-session 35.0.0",
@@ -21283,9 +21505,6 @@ dependencies = [
  "sp-storage 21.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-transaction-pool 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-version 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "staging-xcm 14.1.0",
- "staging-xcm-builder 16.0.3",
- "staging-xcm-executor 16.0.0",
  "static_assertions",
  "substrate-wasm-builder 24.0.0",
  "tangle-crypto-primitives",
@@ -21360,7 +21579,7 @@ version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94bceae6f7c89d47daff6c7e05f712551a01379f61b07d494661941144878589"
 dependencies = [
- "cumulus-primitives-core",
+ "cumulus-primitives-core 0.16.0",
  "frame-support 38.2.0",
  "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rococo-runtime-constants",
@@ -22806,7 +23025,7 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
+ "staging-xcm-builder",
 ]
 
 [[package]]
@@ -23314,7 +23533,7 @@ dependencies = [
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-executor",
 ]
 
 [[package]]
@@ -23336,8 +23555,8 @@ dependencies = [
  "sp-runtime 39.0.5",
  "sp-std 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "staging-xcm 14.2.0",
- "staging-xcm-builder 17.0.3",
- "staging-xcm-executor 17.0.1",
+ "staging-xcm-builder",
+ "staging-xcm-executor",
 ]
 
 [[package]]
