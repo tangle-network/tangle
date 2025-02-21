@@ -117,7 +117,7 @@ frame_benchmarking::benchmarks! {
 		Lst::<T>::join(RuntimeOrigin::Signed(member_id.clone()).into(), min_join_bond, 1)
 			.unwrap();
 		let member_id_lookup = T::Lookup::unlookup(member_id.clone());
-	}: _(RuntimeOrigin::Signed(member_id.clone()), member_id_lookup, 1_u32.into(), 100_u32.into())
+	}: _(RuntimeOrigin::Signed(member_id.clone()), member_id_lookup, 1_u32, 100_u32.into())
 
 	pool_withdraw_unbonded {
 		let s in 0 .. MAX_SPANS;
@@ -135,7 +135,7 @@ frame_benchmarking::benchmarks! {
 		assert_eq!(CurrencyOf::<T>::free_balance(&joiner), min_join_bond);
 
 		// Unbond the new member
-		Lst::<T>::fully_unbond(RuntimeOrigin::Signed(joiner.clone()).into(), joiner.clone(), 1_u32.into()).unwrap();
+		Lst::<T>::fully_unbond(RuntimeOrigin::Signed(joiner.clone()).into(), joiner.clone(), 1_u32).unwrap();
 
 		// Sanity check that unbond worked
 		assert_eq!(pallet_staking::Ledger::<T>::get(&pool_account).unwrap().unlocking.len(), 1);
@@ -212,7 +212,7 @@ frame_benchmarking::benchmarks! {
 		whitelist_account!(depositor);
 	}:_(RuntimeOrigin::Signed(depositor), 1, metadata.clone())
 	verify {
-		assert_eq!(Metadata::<T>::get(&1), metadata);
+		assert_eq!(Metadata::<T>::get(1), metadata);
 	}
 
 	set_configs {
@@ -272,20 +272,20 @@ frame_benchmarking::benchmarks! {
 		// Create a pool - do not set a commission yet.
 		let (depositor, pool_account) = create_pool_account::<T>(0, Lst::<T>::depositor_min_bond() * 2u32.into(), None);
 		// set a max commission
-		Lst::<T>::set_commission_max(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32.into(), Perbill::from_percent(50)).unwrap();
+		Lst::<T>::set_commission_max(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32, Perbill::from_percent(50)).unwrap();
 		// set a change rate
-		Lst::<T>::set_commission_change_rate(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32.into(), CommissionChangeRate {
+		Lst::<T>::set_commission_change_rate(RuntimeOrigin::Signed(depositor.clone()).into(), 1u32, CommissionChangeRate {
 			max_increase: Perbill::from_percent(20),
 			min_delay: 0u32.into(),
 		}).unwrap();
 		// set a claim permission to an account.
 		Lst::<T>::set_commission_claim_permission(
 			RuntimeOrigin::Signed(depositor.clone()).into(),
-			1u32.into(),
+			1u32,
 			Some(CommissionClaimPermission::Account(depositor.clone()))
 		).unwrap();
 
-	}:_(RuntimeOrigin::Signed(depositor.clone()), 1u32.into(), Some((Perbill::from_percent(20), depositor.clone())))
+	}:_(RuntimeOrigin::Signed(depositor.clone()), 1u32, Some((Perbill::from_percent(20), depositor.clone())))
 	verify {
 		assert_eq!(BondedPools::<T>::get(1).unwrap().commission, Commission {
 			current: Some((Perbill::from_percent(20), depositor.clone())),

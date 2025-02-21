@@ -12513,7 +12513,6 @@ dependencies = [
  "pallet-timestamp 36.0.1",
  "parity-scale-codec",
  "precompile-utils",
- "rand",
  "scale-info",
  "serde",
  "serde_json",

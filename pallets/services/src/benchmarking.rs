@@ -10,8 +10,8 @@ use sp_runtime::Percent;
 use sp_core::Pair;
 use scale_info::prelude::boxed::Box;
 use frame_support::BoundedVec;
-pub type AssetId = u128;
 
+pub type AssetId = u32;
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
@@ -34,9 +34,9 @@ pub(crate) fn get_security_commitment<T: Config>(a: T::AssetId, p: u8) -> AssetS
 }
 
 pub(crate) fn test_ecdsa_key() -> [u8; 65] {
-	use sp_core::Pair;
-	use rand::rngs::OsRng;
-	let ecdsa_key = sp_core::ecdsa::Pair::generate_with(&mut OsRng);
+	let seed = b"benchmarking_deterministic_key_seed_123";
+	let ecdsa_key = sp_core::ecdsa::Pair::from_seed_slice(seed)
+		.expect("Should be able to create key from seed");
 	let secret = k256::ecdsa::SigningKey::from_slice(&ecdsa_key.seed())
 		.expect("Should be able to create a secret key from a seed");
 	let verifying_key = k256::ecdsa::VerifyingKey::from(secret);
@@ -87,7 +87,7 @@ benchmarks! {
 
 	where_clause {
 		where
-			T::AssetId: From<u128>,
+			T::AssetId: From<u32>,
 	}
 
 	create_blueprint {

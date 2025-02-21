@@ -39,7 +39,7 @@ where
 	1u128.into()
 }
 
-fn blueprint_id<T: Config>() -> BlueprintId {
+fn blueprint_id() -> BlueprintId {
 	1u64
 }
 
@@ -253,7 +253,7 @@ benchmarks! {
 		let operator: T::AccountId = account("operator", 1, SEED);
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
-		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64.into()]).unwrap());
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -278,7 +278,7 @@ benchmarks! {
 		let operator: T::AccountId = account("operator", 1, SEED);
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
-		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64.into()]).unwrap());
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -310,7 +310,7 @@ benchmarks! {
 		let operator: T::AccountId = account("operator", 1, SEED);
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
-		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64.into()]).unwrap());
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -349,7 +349,7 @@ benchmarks! {
 		let operator: T::AccountId = account("operator", 1, SEED);
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
-		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64.into()]).unwrap());
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -387,7 +387,7 @@ benchmarks! {
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![]).unwrap());
-		let blueprint_id: BlueprintId = 1u64.into();
+		let blueprint_id: BlueprintId = 1u64;
 
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -420,7 +420,7 @@ benchmarks! {
 		let operator: T::AccountId = account("operator", 1, SEED);
 		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
-		let blueprint_id: BlueprintId = 1u64.into();
+		let blueprint_id: BlueprintId = 1u64;
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![blueprint_id]).unwrap());
 
 		MultiAssetDelegation::<T>::deposit(

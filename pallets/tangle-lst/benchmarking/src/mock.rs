@@ -8,14 +8,14 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::RawOrigin;
-use pallet_tangle_lst::{BondedPools, Config, Event, LastPoolId, PoolId, PoolState};
+use pallet_tangle_lst::{BondedPools, LastPoolId, PoolId, PoolState};
 use sp_core::U256;
 use sp_runtime::{
 	traits::{ConstU128, ConstU32, ConstU64, Convert, Zero},
-	BuildStorage, DispatchError, DispatchResult, FixedU128, Perbill,
+	BuildStorage, DispatchResult, FixedU128, Perbill,
 };
 use sp_runtime_interface::sp_tracing;
-use sp_staking::{EraIndex, OnStakingUpdate, Stake};
+use sp_staking::EraIndex;
 use sp_std::collections::btree_map::BTreeMap;
 
 pub type BlockNumber = u64;
