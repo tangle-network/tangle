@@ -35,7 +35,8 @@ pub(crate) fn get_security_commitment<T: Config>(a: T::AssetId, p: u8) -> AssetS
 
 pub(crate) fn test_ecdsa_key() -> [u8; 65] {
 	use sp_core::Pair;
-	let (ecdsa_key, _) = sp_core::ecdsa::Pair::generate();
+	use rand::rngs::OsRng;
+	let ecdsa_key = sp_core::ecdsa::Pair::generate_with(&mut OsRng);
 	let secret = k256::ecdsa::SigningKey::from_slice(&ecdsa_key.seed())
 		.expect("Should be able to create a secret key from a seed");
 	let verifying_key = k256::ecdsa::VerifyingKey::from(secret);
