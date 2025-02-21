@@ -394,6 +394,28 @@ dependencies = [
 
 [[package]]
 name = "alloy-primitives"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccb3ead547f4532bc8af961649942f0b9c16ee9226e26caa3f38420651cc0bf4"
+dependencies = [
+ "alloy-rlp",
+ "bytes",
+ "cfg-if",
+ "const-hex",
+ "derive_more 0.99.19",
+ "hex-literal 0.4.1",
+ "itoa",
+ "k256",
+ "keccak-asm",
+ "proptest",
+ "rand",
+ "ruint",
+ "serde",
+ "tiny-keccak",
+]
+
+[[package]]
+name = "alloy-primitives"
 version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "478bedf4d24e71ea48428d1bc278553bd7c6ae07c30ca063beb0b09fe58a9e74"
@@ -673,16 +695,48 @@ dependencies = [
 
 [[package]]
 name = "alloy-sol-macro"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b40397ddcdcc266f59f959770f601ce1280e699a91fc1862f29cef91707cd09"
+dependencies = [
+ "alloy-sol-macro-expander 0.7.7",
+ "alloy-sol-macro-input 0.7.7",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+]
+
+[[package]]
+name = "alloy-sol-macro"
 version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2708e27f58d747423ae21d31b7a6625159bd8d867470ddd0256f396a68efa11"
 dependencies = [
- "alloy-sol-macro-expander",
- "alloy-sol-macro-input",
+ "alloy-sol-macro-expander 0.8.21",
+ "alloy-sol-macro-input 0.8.21",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn 2.0.98",
+]
+
+[[package]]
+name = "alloy-sol-macro-expander"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "867a5469d61480fea08c7333ffeca52d5b621f5ca2e44f271b117ec1fc9a0525"
+dependencies = [
+ "alloy-sol-macro-input 0.7.7",
+ "const-hex",
+ "heck 0.5.0",
+ "indexmap 2.7.1",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+ "syn-solidity 0.7.7",
+ "tiny-keccak",
 ]
 
 [[package]]
@@ -692,7 +746,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6b7984d7e085dec382d2c5ef022b533fcdb1fe6129200af30ebf5afddb6a361"
 dependencies = [
  "alloy-json-abi",
- "alloy-sol-macro-input",
+ "alloy-sol-macro-input 0.8.21",
  "const-hex",
  "heck 0.5.0",
  "indexmap 2.7.1",
@@ -702,6 +756,21 @@ dependencies = [
  "syn 2.0.98",
  "syn-solidity 0.8.21",
  "tiny-keccak",
+]
+
+[[package]]
+name = "alloy-sol-macro-input"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e482dc33a32b6fadbc0f599adea520bd3aaa585c141a80b404d0a3e3fa72528"
+dependencies = [
+ "const-hex",
+ "dunce",
+ "heck 0.5.0",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+ "syn-solidity 0.7.7",
 ]
 
 [[package]]
@@ -741,6 +810,17 @@ dependencies = [
  "alloy-sol-macro 0.4.2",
  "const-hex",
  "serde",
+]
+
+[[package]]
+name = "alloy-sol-types"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a91ca40fa20793ae9c3841b83e74569d1cc9af29a2f5237314fd3452d51e38c7"
+dependencies = [
+ "alloy-primitives 0.7.7",
+ "alloy-sol-macro 0.7.7",
+ "const-hex",
 ]
 
 [[package]]
@@ -4433,7 +4513,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33d852cb9b869c2a9b3df2f71a3074817f01e1844f839a144f5fcef059a4eb5d"
 dependencies = [
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -7531,7 +7611,7 @@ checksum = "e19b23d53f35ce9f56aebc7d1bb4e6ac1e9c0db7ac85c8d1760c04379edced37"
 dependencies = [
  "hermit-abi 0.4.0",
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -13046,6 +13126,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-token-gateway"
+version = "15.2.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
+dependencies = [
+ "alloy-primitives 0.7.7",
+ "alloy-sol-macro 0.7.7",
+ "alloy-sol-types 0.7.7",
+ "anyhow",
+ "frame-benchmarking 37.0.0",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "ismp",
+ "log",
+ "pallet-hyperbridge",
+ "pallet-ismp",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "scale-info",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "token-gateway-primitives",
+]
+
+[[package]]
 name = "pallet-transaction-payment"
 version = "37.0.1"
 source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
@@ -15917,7 +16022,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -19396,7 +19501,7 @@ dependencies = [
 [[package]]
 name = "sp-mmr-primitives"
 version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#39e71bd58f282508db334a424ca6c2997d94acf5"
+source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -20948,6 +21053,18 @@ dependencies = [
 
 [[package]]
 name = "syn-solidity"
+version = "0.7.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c837dc8852cb7074e46b444afb81783140dab12c58867b49fb3898fbafedf7ea"
+dependencies = [
+ "paste",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+]
+
+[[package]]
+name = "syn-solidity"
 version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c2de690018098e367beeb793991c7d4dc7270f42c9d2ac4ccc876c1368ca430"
@@ -21395,6 +21512,7 @@ dependencies = [
  "pallet-tangle-lst",
  "pallet-tangle-lst-benchmarking",
  "pallet-timestamp 36.0.1",
+ "pallet-token-gateway",
  "pallet-transaction-payment 37.0.1",
  "pallet-transaction-payment-rpc-runtime-api 37.0.0",
  "pallet-treasury 36.0.1",
@@ -21453,7 +21571,7 @@ dependencies = [
  "getrandom 0.3.1",
  "once_cell",
  "rustix 0.38.44",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -21707,6 +21825,28 @@ name = "tinyvec_macros"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
+name = "token-gateway-primitives"
+version = "15.0.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
+dependencies = [
+ "alloy-primitives 0.7.7",
+ "alloy-sol-macro 0.7.7",
+ "alloy-sol-types 0.7.7",
+ "anyhow",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "ismp",
+ "log",
+ "pallet-ismp",
+ "parity-scale-codec",
+ "primitive-types 0.12.2",
+ "scale-info",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+]
 
 [[package]]
 name = "tokio"
@@ -22997,7 +23137,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

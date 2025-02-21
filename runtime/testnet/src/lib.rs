@@ -29,6 +29,7 @@ pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
+pub mod weights;
 
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -58,7 +59,6 @@ use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use pallet_ismp::offchain::{Leaf, Proof, ProofKeys};
 use pallet_multi_asset_delegation::RoundChangeSessionManager;
 use pallet_services_rpc_runtime_api::BlockNumberOf;
 use pallet_session::historical::{self as pallet_session_historical, NoteHistoricalRoot};
@@ -1321,7 +1321,7 @@ construct_runtime!(
 		Ismp: pallet_ismp = 55,
 		IsmpGrandpa: ismp_grandpa = 56,
 		Hyperbridge: pallet_hyperbridge = 57,
-
+		TokenGateway: pallet_token_gateway = 58,
 	}
 );
 

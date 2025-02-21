@@ -17,7 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::{Balances, EnsureRootOrHalfCouncil, Ismp, Runtime, RuntimeEvent, Timestamp};
+use crate::{
+	AccountId, Assets, Balances, EnsureRoot, EnsureRootOrHalfCouncil, Get, Ismp, Runtime,
+	RuntimeEvent, Timestamp, Treasury, H160,
+};
+use ::pallet_token_gateway::types::EvmToSubstrate;
 use frame_support::parameter_types;
 use ismp::{host::StateMachine, module::IsmpModule, router::IsmpRouter};
 use sp_std::boxed::Box;
@@ -52,15 +56,15 @@ impl pallet_ismp::Config for Runtime {
 	// Co-processor
 	type Coprocessor = Coprocessor;
 	// A tuple of types implementing the ConsensusClient interface, which defines all consensus algorithms supported by this protocol deployment
-	type ConsensusClients = (ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
+	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type WeightProvider = ();
 	type OffchainDB = ();
 }
 
-impl ismp_grandpa::Config for Runtime {
+impl ::ismp_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IsmpHost = pallet_ismp::Pallet<Runtime>;
-	type WeightInfo = ();
+	type WeightInfo = crate::weights::ismp_grandpa::WeightInfo<Runtime>;
 }
 
 #[derive(Default)]
@@ -75,4 +79,49 @@ impl IsmpRouter for Router {
 			_ => Err(ismp::Error::ModuleNotFound(id))?,
 		}
 	}
+}
+
+pub struct EvmToSubstrateFactory;
+
+impl EvmToSubstrate<Runtime> for EvmToSubstrateFactory {
+	fn convert(addr: H160) -> AccountId {
+		let mut account = [0u8; 32];
+		account[12..].copy_from_slice(&addr.0);
+		account.into()
+	}
+}
+
+/// Should provide an account that is funded and can be used to pay for asset creation
+pub struct AssetAdmin;
+impl Get<AccountId> for AssetAdmin {
+	fn get() -> AccountId {
+		Treasury::account_id()
+	}
+}
+
+parameter_types! {
+	// A constant that should represent the native asset id, this id must be unique to the native currency
+	pub const NativeAssetId: u32 = 0;
+	// Set the correct decimals for the native currency
+	pub const Decimals: u8 = 18;
+}
+
+impl ::pallet_token_gateway::Config for Runtime {
+	// configure the runtime event
+	type RuntimeEvent = RuntimeEvent;
+	// Configured as Pallet Ismp
+	type Dispatcher = pallet_hyperbridge::Pallet<Runtime>;
+	// Configured as Pallet Assets
+	type Assets = Assets;
+	// Configured as Pallet balances
+	type NativeCurrency = Balances;
+	// AssetAdmin account
+	type AssetAdmin = AssetAdmin;
+	// The Native asset Id
+	type NativeAssetId = NativeAssetId;
+	// The precision of the native asset
+	type Decimals = Decimals;
+	type EvmToSubstrate = EvmToSubstrateFactory;
+	type WeightInfo = crate::weights::pallet_token_gateway::SubstrateWeight<Runtime>;
+	type CreateOrigin = EnsureRoot<AccountId>;
 }

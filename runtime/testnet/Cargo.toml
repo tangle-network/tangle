@@ -150,6 +150,7 @@ rpc-primitives-txpool = { workspace = true }
 pallet-ismp = { workspace = true, features = ["unsigned"] }
 pallet-ismp-runtime-api = { workspace = true }
 pallet-hyperbridge = { workspace = true }
+pallet-token-gateway = { workspace = true }
 sp-mmr-primitives = { workspace = true }
 ismp = { workspace = true }
 ismp-grandpa = { workspace = true  }
@@ -313,6 +314,7 @@ std = [
     # Hyperbridge
     "pallet-hyperbridge/std",
     "pallet-ismp/std",
+    "pallet-token-gateway/std",
     "ismp/std",
     "ismp-grandpa/std",
     "pallet-ismp-runtime-api/std",
