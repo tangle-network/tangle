@@ -27,9 +27,8 @@ type CurrencyOf<T> = <T as pallet_tangle_lst::Config>::Currency;
 const USER_SEED: u32 = 0;
 const MAX_SPANS: u32 = 100;
 
-pub(crate) type VoterBagsListInstance = pallet_bags_list::Instance1;
 pub trait Config:
-	pallet_tangle_lst::Config + pallet_staking::Config + pallet_bags_list::Config<VoterBagsListInstance>
+	pallet_tangle_lst::Config + pallet_staking::Config + pallet_bags_list::Config
 {
 }
 
@@ -88,8 +87,8 @@ frame_benchmarking::benchmarks! {
 	where_clause {
 		where
 			T: pallet_staking::Config,
-			pallet_staking::BalanceOf<T>: From<u128>,
-			BalanceOf<T>: Into<u128>,
+			pallet_staking::BalanceOf<T>: From<u32>,
+			BalanceOf<T>: From<u32>,
 	}
 
 	join {

@@ -29,26 +29,31 @@ use tangle_primitives::services::Asset;
 
 const SEED: u32 = 0;
 
-fn setup_vault<T: Config>() -> (T::VaultId, T::AccountId) {
+fn setup_vault<T: Config>() -> (T::VaultId, T::AccountId)
+where
+	<T as pallet::Config>::AssetId: From<u32>,
+{
 	let vault_id = Default::default();
 	let caller: T::AccountId = account("caller", 0, SEED);
 	let balance = BalanceOf::<T>::from(1000u32);
 	T::Currency::make_free_balance_be(&caller, balance);
 
-	// Setup reward config
+	// Setup reward config with boost_multiplier = 1 (100%)
 	let reward_config = RewardConfigForAssetVault {
 		apy: Perbill::from_percent(10),
 		deposit_cap: balance,
 		incentive_cap: balance,
-		boost_multiplier: Some(150),
+		boost_multiplier: Some(1),
 	};
 	RewardConfigStorage::<T>::insert(vault_id, reward_config);
 
 	// Setup reward vault with native asset
-	let asset = Asset::Custom(T::AssetId::default());
+	let asset_one = Asset::Custom(1_u32.into());
+	let asset_two = Asset::Custom(2_u32.into());
 	let mut assets = Vec::new();
-	assets.push(asset);
-	RewardVaults::<T>::insert(vault_id, assets);
+	assets.push(asset_one);
+	assets.push(asset_two);
+	RewardVaults::<T>::insert(vault_id, assets.clone());
 
 	(vault_id, caller)
 }
@@ -57,8 +62,9 @@ benchmarks! {
 	where_clause {
 		where
 			T::ForceOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
-			T::AssetId: From<u128>,
+			T::AssetId: From<u32>,
 	}
+
 	claim_rewards {
 		let (vault_id, caller) = setup_vault::<T>();
 		let deposit = BalanceOf::<T>::from(100u32);
@@ -66,8 +72,8 @@ benchmarks! {
 			unlocked_amount: deposit,
 			amount_with_locks: None,
 		};
-		let asset = Asset::Custom(T::AssetId::default());
-		UserServiceReward::<T>::insert(caller.clone(), Asset::Custom(T::AssetId::default()), deposit);
+		let asset = Asset::Custom(1_u32.into());
+		UserServiceReward::<T>::insert(caller.clone(), asset, deposit);
 	}: _(RawOrigin::Signed(caller.clone()), asset)
 	verify {
 		assert!(UserClaimedReward::<T>::contains_key(&caller, vault_id));
@@ -79,7 +85,7 @@ benchmarks! {
 			apy: Perbill::from_percent(20),
 			deposit_cap: BalanceOf::<T>::from(2000u32),
 			incentive_cap: BalanceOf::<T>::from(2000u32),
-			boost_multiplier: Some(200),
+			boost_multiplier: Some(1),
 		};
 		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 	}: _<T::RuntimeOrigin>(origin, vault_id, new_config.clone())
@@ -91,7 +97,7 @@ benchmarks! {
 		let (vault_id, who) = setup_vault::<T>();
 		let caller: T::AccountId = whitelisted_caller();
 		let deposit = BalanceOf::<T>::from(100u32);
-		let asset = Asset::Custom(T::AssetId::default());
+		let asset = Asset::Custom(1_u32.into());
 	}: _(RawOrigin::Signed(caller.clone()), who.clone(), asset)
 	verify {
 		// Verify that rewards were claimed for the target account
@@ -100,9 +106,19 @@ benchmarks! {
 
 	manage_asset_reward_vault {
 		let (vault_id, _) = setup_vault::<T>();
-		let asset = Asset::Custom(T::AssetId::default());
+		// Use a different asset than the one already in vault
+		let asset = Asset::Custom(T::AssetId::from(20u32.into()));
 		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 		let action = AssetAction::Add;
+
+		// Setup reward config for the new asset
+		let reward_config = RewardConfigForAssetVault {
+			apy: Perbill::from_percent(10),
+			deposit_cap: BalanceOf::<T>::from(1000u32),
+			incentive_cap: BalanceOf::<T>::from(1000u32),
+			boost_multiplier: Some(1),
+		};
+		RewardConfigStorage::<T>::insert(vault_id, reward_config);
 	}: _<T::RuntimeOrigin>(origin, vault_id, asset, action)
 	verify {
 		// Verify that the asset was added to the vault
@@ -115,7 +131,7 @@ benchmarks! {
 			apy: Perbill::from_percent(10),
 			deposit_cap: BalanceOf::<T>::from(1000u32),
 			incentive_cap: BalanceOf::<T>::from(1000u32),
-			boost_multiplier: Some(150),
+			boost_multiplier: Some(1), // Must be 1
 		};
 		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 	}: _<T::RuntimeOrigin>(origin, vault_id, new_config.clone())
@@ -132,13 +148,13 @@ benchmarks! {
 	verify {
 		// Verify that the decay config was updated
 		let mut configs: BTreeMap<u32, RewardConfigForAssetVault<BalanceOf<T>>> = BTreeMap::new();
-let asset_id: u32 = 1u32;
-configs.insert(asset_id, RewardConfigForAssetVault {
-	apy: rate,
-	incentive_cap: 0u32.into(),
-	deposit_cap: 0u32.into(),
-	boost_multiplier: None,
-});
+		let asset_id: u32 = 1u32;
+		configs.insert(asset_id, RewardConfigForAssetVault {
+			apy: rate,
+			incentive_cap: 0u32.into(),
+			deposit_cap: 0u32.into(),
+			boost_multiplier: None,
+		});
 
 let decay_config = RewardConfig {
 	configs,
