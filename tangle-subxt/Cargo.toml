@@ -1,6 +1,6 @@
 [package]
 name = "tangle-subxt"
-version = "0.11.0"
+version = "0.12.0"
 description = "Rust bindings and interface to interact with Tangle Network using subxt"
 authors = { workspace = true }
 edition = { workspace = true }
