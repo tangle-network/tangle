@@ -58,53 +58,8 @@ use std::{collections::BTreeMap, sync::Arc};
 pub type AccountId = AccountId32;
 pub type Balance = u128;
 pub type Nonce = u32;
-#[derive(
-	Debug,
-	Clone,
-	Copy,
-	PartialEq,
-	Eq,
-	Encode,
-	Decode,
-	MaxEncodedLen,
-	TypeInfo,
-	serde::Serialize,
-	serde::Deserialize,
-	Default,
-	Ord,
-	PartialOrd,
-)]
-pub struct AssetId(u128);
-
-impl std::ops::Add for AssetId {
-	type Output = Self;
-
-	fn add(self, rhs: Self) -> Self::Output {
-		Self(self.0 + rhs.0)
-	}
-}
-
-impl sp_runtime::traits::Zero for AssetId {
-	fn zero() -> Self {
-		Self(0)
-	}
-	fn is_zero(&self) -> bool {
-		self.0 == 0
-	}
-}
+pub type AssetId = u128;
 pub type BlockNumber = BlockNumberFor<Runtime>;
-
-impl From<u32> for AssetId {
-	fn from(value: u32) -> Self {
-		AssetId(value.into())
-	}
-}
-
-impl From<AssetId> for u128 {
-	fn from(value: AssetId) -> Self {
-		value.0
-	}
-}
 
 pub use tangle_primitives::services::Asset;
 
@@ -303,7 +258,6 @@ impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
 }
 
 impl pallet_assets::Config for Runtime {
-	type BenchmarkHelper = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
 	type AssetId = AssetId;
@@ -595,11 +549,11 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	ext
 }
 
-pub const TNT: AssetId = AssetId(0);
-pub const USDC: AssetId = AssetId(1);
-pub const WETH: AssetId = AssetId(2);
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
-pub const VDOT: AssetId = AssetId(4);
+pub const VDOT: AssetId = 4;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.

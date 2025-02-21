@@ -235,7 +235,6 @@ impl pallet_balances::Config for Runtime {
 }
 
 impl pallet_assets::Config for Runtime {
-	type BenchmarkHelper = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u64;
 	type AssetId = AssetId;
@@ -254,6 +253,8 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
 }
 
 pub struct MockServiceManager;

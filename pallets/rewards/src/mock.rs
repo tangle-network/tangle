@@ -44,20 +44,8 @@ use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 pub type AccountId = AccountId32;
 pub type Balance = u128;
 type Nonce = u32;
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Encode, Decode, MaxEncodedLen, TypeInfo)]
-pub struct AssetId(u128);
+type AssetId = u128;
 
-impl From<u32> for AssetId {
-	fn from(value: u32) -> Self {
-		AssetId(value.into())
-	}
-}
-
-impl From<AssetId> for u128 {
-	fn from(value: AssetId) -> Self {
-		value.0
-	}
-}
 pub type BlockNumber = u64;
 
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
@@ -246,6 +234,8 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
 }
 
 parameter_types! {

@@ -302,7 +302,6 @@ impl pallet_lst::Config for Runtime {
 }
 
 impl pallet_assets::Config for Runtime {
-	type BenchmarkHelper = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
 	type AssetId = AssetId;
@@ -321,6 +320,8 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
 }
 
 type Block = frame_system::mocking::MockBlock<Runtime>;

@@ -37,18 +37,12 @@ use pallet_multi_asset_delegation::{
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
 use rand::{seq::SliceRandom, Rng};
-use sp_runtime::sp_application_crypto::sp_core::U256;
+use sp_core::U256;
 use sp_runtime::traits::Scale;
 use sp_runtime::DispatchResult;
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
-
-impl From<AssetId> for U256 {
-	fn from(asset_id: AssetId) -> Self {
-		U256::from(asset_id as u128)
-	}
-}
 
 type PCall = MADPrecompileCall<Runtime>;
 
@@ -75,7 +69,7 @@ fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
 		let evm_address = rng.gen::<[u8; 20]>().into();
 		Asset::Erc20(evm_address)
 	} else {
-		Asset::Custom(asset)
+		Asset::Custom(AssetId(asset))
 	}
 }
 
@@ -112,7 +106,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			let amount = random_ed_multiple(&mut rng).into();
 			vec![(
 				PCall::deposit {
-					asset_id: asset_id.into(),
+					asset_id: 0,
 					amount,
 					token_address,
 					lock_multiplier: 0,
