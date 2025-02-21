@@ -89,6 +89,8 @@ parameter_types! {
 	pub static ExistentialDeposit: Balance = 5;
 }
 
+impl crate::Config for Runtime {}
+
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = frame_support::traits::ConstU32<1024>;
 	type MaxReserves = ();
@@ -118,6 +120,7 @@ pallet_staking_reward_curve::build! {
 parameter_types! {
 	pub const RewardCurve: &'static sp_runtime::curve::PiecewiseLinear<'static> = &I_NPOS;
 }
+
 #[derive_impl(pallet_staking::config_preludes::TestDefaultConfig)]
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
@@ -319,7 +322,8 @@ impl ExtBuilder {
 				900,
 				901,
 				902,
-				Default::default()
+				Default::default(),
+				None
 			));
 			assert_ok!(Lst::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
 			let last_pool = LastPoolId::<Runtime>::get();

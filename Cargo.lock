@@ -21253,6 +21253,7 @@ dependencies = [
  "pallet-staking-reward-curve",
  "pallet-sudo 37.0.0",
  "pallet-tangle-lst",
+ "pallet-tangle-lst-benchmarking",
  "pallet-timestamp 36.0.1",
  "pallet-transaction-payment 37.0.1",
  "pallet-transaction-payment-rpc-runtime-api 37.0.0",

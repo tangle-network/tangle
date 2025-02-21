@@ -4,23 +4,18 @@ use alloc::{vec, vec::Vec};
 use frame_benchmarking::v1::{account, whitelist_account};
 use frame_election_provider_support::SortedListProvider;
 use frame_support::{
-	assert_ok, ensure,
-	traits::{
-		fungible::{Inspect, Mutate, Unbalanced},
-		tokens::Preservation,
-		Currency, Get, Imbalance,
-	},
+	traits::{Currency, Get},
+	BoundedVec,
 };
 use frame_system::RawOrigin as RuntimeOrigin;
 use pallet_staking::MaxNominationsOf;
 use pallet_tangle_lst::{
-	BalanceOf, BondExtra, BondedPoolInner, BondedPools, ClaimPermission, ClaimPermissions,
-	Commission, CommissionChangeRate, CommissionClaimPermission, ConfigOp, GlobalMaxCommission,
-	MaxPools, Metadata, MinCreateBond, MinJoinBond, Pallet as Lst, PoolId, PoolRoles, PoolState,
-	RewardPools, SubPoolsStorage,
+	BalanceOf, BondedPools, Commission, CommissionChangeRate, CommissionClaimPermission, ConfigOp,
+	GlobalMaxCommission, MaxPools, Metadata, MinCreateBond, MinJoinBond, Pallet as Lst,
+	RewardPools,
 };
 use sp_runtime::{
-	traits::{Bounded, StaticLookup, Zero},
+	traits::{Bounded, StaticLookup},
 	Perbill,
 };
 use sp_staking::{EraIndex, StakingInterface};
@@ -55,12 +50,16 @@ fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 fn create_pool_account<T: pallet_tangle_lst::Config>(
 	n: u32,
 	balance: BalanceOf<T>,
-	commission: Option<Perbill>,
+	commission: Option<(Perbill, T::AccountId)>,
 ) -> (T::AccountId, T::AccountId) {
 	let ed = CurrencyOf::<T>::minimum_balance();
 	let pool_creator: T::AccountId =
 		create_funded_user_with_balance::<T>("pool_creator", n, ed + balance * 2u32.into());
 	let pool_creator_lookup = T::Lookup::unlookup(pool_creator.clone());
+
+	// Create BoundedVec for name and icon
+	let name: BoundedVec<u8, T::MaxNameLength> = vec![].try_into().unwrap();
+	let icon: BoundedVec<u8, T::MaxIconLength> = vec![].try_into().unwrap();
 
 	Lst::<T>::create(
 		RuntimeOrigin::Signed(pool_creator.clone()).into(),
@@ -68,20 +67,10 @@ fn create_pool_account<T: pallet_tangle_lst::Config>(
 		pool_creator_lookup.clone(),
 		pool_creator_lookup.clone(),
 		pool_creator_lookup,
-		Default::default(),
-		None
+		Some(name),
+		Some(icon),
 	)
 	.unwrap();
-
-	if let Some(c) = commission {
-		let pool_id = pallet_tangle_lst::LastPoolId::<T>::get();
-		Lst::<T>::set_commission(
-			RuntimeOrigin::Signed(pool_creator.clone()).into(),
-			pool_id,
-			Some((c, pool_creator.clone())),
-		)
-		.expect("pool just created, commission can be set by root; qed");
-	}
 
 	let pool_account = pallet_tangle_lst::BondedPools::<T>::iter()
 		.find(|(_, bonded_pool)| bonded_pool.roles.depositor == pool_creator)
@@ -183,6 +172,7 @@ frame_benchmarking::benchmarks! {
 			depositor_lookup.clone(),
 			depositor_lookup.clone(),
 			depositor_lookup,
+			Default::default(),
 			Default::default()
 		)
 	verify {
@@ -231,15 +221,11 @@ frame_benchmarking::benchmarks! {
 		ConfigOp::Set(BalanceOf::<T>::max_value()),
 		ConfigOp::Set(BalanceOf::<T>::max_value()),
 		ConfigOp::Set(u32::MAX),
-		ConfigOp::Set(u32::MAX),
-		ConfigOp::Set(u32::MAX),
 		ConfigOp::Set(Perbill::max_value())
 	) verify {
 		assert_eq!(MinJoinBond::<T>::get(), BalanceOf::<T>::max_value());
 		assert_eq!(MinCreateBond::<T>::get(), BalanceOf::<T>::max_value());
 		assert_eq!(MaxPools::<T>::get(), Some(u32::MAX));
-		assert_eq!(MaxPoolMembers::<T>::get(), Some(u32::MAX));
-		assert_eq!(MaxPoolMembersPerLst::<T>::get(), Some(u32::MAX));
 		assert_eq!(GlobalMaxCommission::<T>::get(), Some(Perbill::max_value()));
 	}
 
@@ -271,15 +257,15 @@ frame_benchmarking::benchmarks! {
 
 		// Nominate with the pool.
 		 let validators: Vec<_> = (0..MaxNominationsOf::<T>::get())
-			.map(|i| account("stash", USER_SEED, i))
+			.map(|i| account::<T::AccountId>("stash", USER_SEED, i))
 			.collect();
 
-		assert!(T::Staking::nominations(Lst::from(pool_account.clone())).is_some());
+		assert!(T::Staking::nominations(&pool_account.clone()).is_some());
 
 		whitelist_account!(depositor);
 	}:_(RuntimeOrigin::Signed(depositor.clone()), 1)
 	verify {
-		assert!(T::Staking::nominations(Lst::from(pool_account.clone())).is_none());
+		assert!(T::Staking::nominations(&pool_account.clone()).is_none());
 	}
 
 	set_commission {
