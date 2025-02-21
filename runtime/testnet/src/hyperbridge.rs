@@ -60,6 +60,7 @@ impl pallet_ismp::Config for Runtime {
 impl ismp_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IsmpHost = pallet_ismp::Pallet<Runtime>;
+	type WeightInfo = ();
 }
 
 #[derive(Default)]

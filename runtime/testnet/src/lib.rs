@@ -2284,45 +2284,30 @@ impl_runtime_apis! {
 			pallet_ismp::Pallet::<Runtime>::challenge_period(state_machine_id)
 		}
 
-		/// Generate a proof for the provided leaf indices
-		fn generate_proof(
-			keys: ProofKeys
-		) -> Result<(Vec<Leaf>, Proof<<Block as BlockT>::Hash>), sp_mmr_primitives::Error> {
-			pallet_ismp::Pallet::<Runtime>::generate_proof(keys)
-		}
-
-		/// Fetch all ISMP events in the block, should only be called from runtime-api.
 		fn block_events() -> Vec<::ismp::events::Event> {
 			pallet_ismp::Pallet::<Runtime>::block_events()
 		}
 
-		/// Fetch all ISMP events and their extrinsic metadata, should only be called from runtime-api.
 		fn block_events_with_metadata() -> Vec<(::ismp::events::Event, Option<u32>)> {
 			pallet_ismp::Pallet::<Runtime>::block_events_with_metadata()
 		}
 
-		/// Return the scale encoded consensus state
 		fn consensus_state(id: ConsensusClientId) -> Option<Vec<u8>> {
 			pallet_ismp::Pallet::<Runtime>::consensus_states(id)
 		}
 
-		/// Return the timestamp this client was last updated in seconds
 		fn state_machine_update_time(height: StateMachineHeight) -> Option<u64> {
 			pallet_ismp::Pallet::<Runtime>::state_machine_update_time(height)
 		}
 
-		/// Return the latest height of the state machine
 		fn latest_state_machine_height(id: StateMachineId) -> Option<u64> {
 			pallet_ismp::Pallet::<Runtime>::latest_state_machine_height(id)
 		}
 
-
-		/// Get actual requests
 		fn requests(commitments: Vec<H256>) -> Vec<Request> {
 			pallet_ismp::Pallet::<Runtime>::requests(commitments)
 		}
 
-		/// Get actual requests
 		fn responses(commitments: Vec<H256>) -> Vec<Response> {
 			pallet_ismp::Pallet::<Runtime>::responses(commitments)
 		}
