@@ -260,6 +260,7 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	type WeightInfo = ();
 }
 
 thread_local! {
