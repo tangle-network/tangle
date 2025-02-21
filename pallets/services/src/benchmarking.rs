@@ -1,15 +1,15 @@
 use crate::{Call, Config, Pallet};
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
+use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use parity_scale_codec::Decode;
+use scale_info::prelude::boxed::Box;
+use sp_core::Pair;
 use sp_core::{ecdsa, H160};
 use sp_runtime::KeyTypeId;
+use sp_runtime::Percent;
 use sp_std::vec;
 use tangle_primitives::services::*;
-use sp_runtime::Percent;
-use sp_core::Pair;
-use scale_info::prelude::boxed::Box;
-use frame_support::BoundedVec;
 
 pub type AssetId = u32;
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
@@ -29,7 +29,10 @@ pub(crate) fn get_security_requirement<T: Config>(
 	}
 }
 
-pub(crate) fn get_security_commitment<T: Config>(a: T::AssetId, p: u8) -> AssetSecurityCommitment<T::AssetId> {
+pub(crate) fn get_security_commitment<T: Config>(
+	a: T::AssetId,
+	p: u8,
+) -> AssetSecurityCommitment<T::AssetId> {
 	AssetSecurityCommitment { asset: Asset::Custom(a), exposure_percent: Percent::from_percent(p) }
 }
 
@@ -66,20 +69,20 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
-				params: vec![
-					FieldType::Uint64,
-					FieldType::List(Box::new(FieldType::Uint8))
-				].try_into().unwrap(),
+				params: vec![FieldType::Uint64, FieldType::List(Box::new(FieldType::Uint8))]
+					.try_into()
+					.unwrap(),
 				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
 			},
-		].try_into().unwrap(),
+		]
+		.try_into()
+		.unwrap(),
 		registration_params: Default::default(),
 		request_params: Default::default(),
 		gadget: Default::default(),
-		supported_membership_models: vec![
-			MembershipModelType::Fixed,
-			MembershipModelType::Dynamic,
-		].try_into().unwrap(),
+		supported_membership_models: vec![MembershipModelType::Fixed, MembershipModelType::Dynamic]
+			.try_into()
+			.unwrap(),
 	}
 }
 

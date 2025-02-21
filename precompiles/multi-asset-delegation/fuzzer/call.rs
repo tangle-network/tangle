@@ -63,7 +63,6 @@ fn random_ed_multiple<R: Rng>(rng: &mut R) -> Balance {
 }
 
 fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
-	let asset = rng.gen_range(1..u128::MAX);
 	let is_evm = rng.gen_bool(0.5);
 	if is_evm {
 		let evm_address = rng.gen::<[u8; 20]>().into();
@@ -99,7 +98,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			// Deposit
 			let who = random_address(&mut rng);
 			fund_account(&mut rng, &who);
-			let (asset_id, token_address) = match random_asset(&mut rng) {
+			let (_asset_id, token_address) = match random_asset(&mut rng) {
 				Asset::Custom(id) => (id, Default::default()),
 				Asset::Erc20(token) => (Default::default(), token.into()),
 			};

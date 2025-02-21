@@ -1,13 +1,12 @@
 use super::*;
 use crate::types::BalanceOf;
 use sp_std::{vec, vec::Vec};
-use tangle_primitives::{
-	services::Constraints,
-	traits::ServiceManager,
-	BlueprintId,
-};
-use tangle_primitives::services::Asset;
+use tangle_primitives::{services::Constraints, traits::ServiceManager, BlueprintId};
+
+#[cfg(feature = "runtime-benchmarks")]
 use tangle_primitives::rewards::UserDepositWithLocks;
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::services::Asset;
 
 impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxFields = T::MaxFields;
