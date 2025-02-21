@@ -57,7 +57,7 @@ benchmarks! {
 	where_clause {
 		where
 			T::ForceOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
-			T::AssetId: From<u32>,
+			T::AssetId: From<u128>,
 	}
 	claim_rewards {
 		let (vault_id, caller) = setup_vault::<T>();

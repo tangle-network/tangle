@@ -27,16 +27,16 @@ use tangle_primitives::{services::Asset, BlueprintId};
 const SEED: u32 = 0;
 fn native_asset_id<T: Config>() -> T::AssetId
 where
-	T::AssetId: From<u32>,
+	T::AssetId: From<u128>,
 {
-	0u32.into()
+	0u128.into()
 }
 
 fn foreign_asset_id<T: Config>() -> T::AssetId
 where
-	T::AssetId: From<u32>,
+	T::AssetId: From<u128>,
 {
-	1u32.into()
+	1u128.into()
 }
 
 fn blueprint_id<T: Config>() -> BlueprintId {
@@ -46,7 +46,7 @@ fn blueprint_id<T: Config>() -> BlueprintId {
 benchmarks! {
 	where_clause {
 		where
-			T::AssetId: From<u32>,
+			T::AssetId: From<u128>,
 	}
 	join_operators {
 
