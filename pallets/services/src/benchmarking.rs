@@ -347,7 +347,6 @@ benchmarks! {
 			vec![Field::Uint8(2)].try_into().unwrap()
 		)
 
-
 	submit_result {
 		use sp_core::ByteArray;
 
@@ -401,6 +400,124 @@ benchmarks! {
 			keygen_job_call_id,
 			vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())].try_into().unwrap()
 		)
+
+	// Slash an operator's stake for a service
+	slash {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create a service instance for bob
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+	}: _(RawOrigin::Signed(alice.clone()), bob.clone(), 0, Percent::from_percent(50))
+
+	// Dispute a scheduled slash
+	dispute {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create a service instance and slash bob
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+		let _= Pallet::<T>::slash(RawOrigin::Signed(alice.clone()).into(), bob.clone(), 0, Percent::from_percent(50));
+
+	}: _(RawOrigin::Signed(alice.clone()), 0, 0)
+
+	// Update master blueprint service manager
+	update_master_blueprint_service_manager {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+	}: _(RawOrigin::Root, H160::zero())
+
+	// Join a service as an operator
+	join_service {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create a service instance
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+	}: _(RawOrigin::Signed(charlie.clone()), 0, vec![get_security_commitment::<T>(USDC.into(), 10)])
+
+	// Leave a service as an operator
+	leave_service {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create a service instance
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+	}: _(RawOrigin::Signed(bob.clone()), 0)
 
 }
 

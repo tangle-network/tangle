@@ -70,6 +70,7 @@ mod tests;
 mod extra;
 
 pub mod weights;
+use weights::WeightInfo;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -85,6 +86,7 @@ pub const LOG_TARGET: &str = "runtime::multi-asset-delegation";
 pub mod pallet {
 	use super::functions::*;
 	use crate::types::{delegator::DelegatorBlueprintSelection, *};
+	use crate::weights::WeightInfo;
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
@@ -209,9 +211,6 @@ pub mod pallet {
 			BlockNumberFor<Self>,
 		>;
 
-		/// A type representing the weights required by the dispatchables of this pallet.
-		type WeightInfo: crate::weights::WeightInfo;
-
 		/// Currency to vote conversion
 		type CurrencyToVote: sp_staking::currency_to_vote::CurrencyToVote<BalanceOf<Self>>;
 
@@ -224,6 +223,9 @@ pub mod pallet {
 
 		#[pallet::constant]
 		type SlashRecipient: Get<Self::AccountId>;
+
+		/// A type representing the weights required by the dispatchables of this pallet.
+		type WeightInfo: crate::WeightInfo;
 	}
 
 	/// The pallet struct.
@@ -530,7 +532,7 @@ pub mod pallet {
 		/// * [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking
 		/// * [`Error::StakeOverflow`] - Bond amount would overflow stake tracking
 		#[pallet::call_index(0)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::join_operators())]
 		pub fn join_operators(origin: OriginFor<T>, bond_amount: BalanceOf<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::handle_deposit_and_create_operator(who.clone(), bond_amount)?;
@@ -553,7 +555,7 @@ pub mod pallet {
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
 		/// * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
 		#[pallet::call_index(1)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::schedule_leave_operators())]
 		pub fn schedule_leave_operators(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_leave_operator(&who)?;
@@ -576,7 +578,7 @@ pub mod pallet {
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
 		/// * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
 		#[pallet::call_index(2)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::cancel_leave_operators())]
 		pub fn cancel_leave_operators(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_leave_operator(&who)?;
@@ -600,7 +602,7 @@ pub mod pallet {
 		/// * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
 		/// * [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet
 		#[pallet::call_index(3)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::execute_leave_operators())]
 		pub fn execute_leave_operators(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_execute_leave_operators(&who)?;
@@ -624,7 +626,7 @@ pub mod pallet {
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
 		/// * [`Error::StakeOverflow`] - Additional bond would overflow stake tracking
 		#[pallet::call_index(4)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::operator_bond_more())]
 		pub fn operator_bond_more(
 			origin: OriginFor<T>,
 			additional_bond: BalanceOf<T>,
@@ -652,7 +654,7 @@ pub mod pallet {
 		/// * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
 		/// * [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake
 		#[pallet::call_index(5)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::schedule_operator_unstake())]
 		pub fn schedule_operator_unstake(
 			origin: OriginFor<T>,
 			unstake_amount: BalanceOf<T>,
@@ -679,7 +681,7 @@ pub mod pallet {
 		/// * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
 		/// * [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet
 		#[pallet::call_index(6)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::execute_operator_unstake())]
 		pub fn execute_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_execute_operator_unstake(&who)?;
@@ -702,7 +704,7 @@ pub mod pallet {
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
 		/// * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
 		#[pallet::call_index(7)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::cancel_operator_unstake())]
 		pub fn cancel_operator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_operator_unstake(&who)?;
@@ -728,7 +730,7 @@ pub mod pallet {
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
 		/// * [`Error::AlreadyOffline`] - Operator is already offline
 		#[pallet::call_index(8)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::go_offline())]
 		pub fn go_offline(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_go_offline(&who)?;
@@ -751,7 +753,7 @@ pub mod pallet {
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
 		/// * [`Error::AlreadyOnline`] - Operator is already online
 		#[pallet::call_index(9)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::go_online())]
 		pub fn go_online(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_go_online(&who)?;
@@ -777,7 +779,7 @@ pub mod pallet {
 		/// * [`Error::DepositOverflow`] - Deposit would overflow tracking
 		/// * [`Error::InvalidAsset`] - Asset is not supported
 		#[pallet::call_index(10)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::deposit())]
 		pub fn deposit(
 			origin: OriginFor<T>,
 			asset: Asset<T::AssetId>,
@@ -826,7 +828,7 @@ pub mod pallet {
 		/// * [`Error::InsufficientBalance`] - Insufficient balance to withdraw
 		/// * [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists
 		#[pallet::call_index(11)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::schedule_withdraw())]
 		pub fn schedule_withdraw(
 			origin: OriginFor<T>,
 			asset: Asset<T::AssetId>,
@@ -854,7 +856,7 @@ pub mod pallet {
 		/// * [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists
 		/// * [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed
 		#[pallet::call_index(12)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::execute_withdraw())]
 		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResult {
 			let who = match evm_address {
 				Some(addr) => {
@@ -884,7 +886,7 @@ pub mod pallet {
 		///
 		/// * [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists
 		#[pallet::call_index(13)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::cancel_withdraw())]
 		pub fn cancel_withdraw(
 			origin: OriginFor<T>,
 			asset: Asset<T::AssetId>,
@@ -916,7 +918,7 @@ pub mod pallet {
 		/// * [`Error::InsufficientBalance`] - Insufficient balance to delegate
 		/// * [`Error::MaxDelegationsExceeded`] - Would exceed max delegations
 		#[pallet::call_index(14)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::delegate())]
 		pub fn delegate(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -955,7 +957,7 @@ pub mod pallet {
 		/// * [`Error::InsufficientDelegation`] - Insufficient delegation to unstake
 		/// * [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists
 		#[pallet::call_index(15)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::schedule_delegator_unstake())]
 		pub fn schedule_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -990,7 +992,7 @@ pub mod pallet {
 		/// * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
 		/// * [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed
 		#[pallet::call_index(16)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::execute_delegator_unstake())]
 		pub fn execute_delegator_unstake(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let unstake_results = Self::process_execute_delegator_unstake(who.clone())?;
@@ -1025,7 +1027,7 @@ pub mod pallet {
 		/// * [`Error::NotDelegator`] - Account is not a delegator
 		/// * [`Error::NoUnstakeRequestExists`] - No pending unstake request exists
 		#[pallet::call_index(17)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::cancel_delegator_unstake())]
 		pub fn cancel_delegator_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -1054,7 +1056,7 @@ pub mod pallet {
 		/// * `OverflowRisk` - Arithmetic overflow during calculations
 		/// * `InvalidAmount` - Amount specified is zero
 		#[pallet::call_index(18)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::delegate_nomination())]
 		pub fn delegate_nomination(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -1087,7 +1089,7 @@ pub mod pallet {
 		/// * `MaxUnstakeRequestsExceeded` - Too many pending unstake requests
 		/// * `InvalidAmount` - Amount specified is zero
 		#[pallet::call_index(19)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::schedule_nomination_unstake())]
 		pub fn schedule_nomination_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -1123,7 +1125,7 @@ pub mod pallet {
 		/// * `NoActiveDelegation` - No active nomination delegation found
 		/// * `InsufficientBalance` - Insufficient balance for unstaking
 		#[pallet::call_index(20)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::execute_nomination_unstake())]
 		pub fn execute_nomination_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -1149,7 +1151,7 @@ pub mod pallet {
 		/// * `NotDelegator` - Account is not a delegator
 		/// * `NoBondLessRequest` - No matching unstake request found
 		#[pallet::call_index(21)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::cancel_nomination_unstake())]
 		pub fn cancel_nomination_unstake(
 			origin: OriginFor<T>,
 			operator: T::AccountId,
@@ -1183,7 +1185,7 @@ pub mod pallet {
 		/// * [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints
 		/// * [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode
 		#[pallet::call_index(22)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::add_blueprint_id())]
 		pub fn add_blueprint_id(origin: OriginFor<T>, blueprint_id: BlueprintId) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			let mut metadata = Self::delegators(&who).ok_or(Error::<T>::NotDelegator)?;
@@ -1220,7 +1222,7 @@ pub mod pallet {
 		/// * [`Error::BlueprintIdNotFound`] - Blueprint ID not found
 		/// * [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode
 		#[pallet::call_index(23)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(T::WeightInfo::remove_blueprint_id())]
 		pub fn remove_blueprint_id(
 			origin: OriginFor<T>,
 			blueprint_id: BlueprintId,

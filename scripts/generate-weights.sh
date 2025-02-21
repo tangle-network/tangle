@@ -5,19 +5,16 @@ set -e
 
 # Hardcoded benchmark parameters
 steps=10
-repeat=10
+repeat=2
 
-# List of pallets to benchmark
-pallets=(
-  pallet_multi_asset_delegation
-  pallet_tangle_lst
-  pallet_services
-  pallet_rewards
-)
+# List of pallets and their corresponding folder names
+pallets=(pallet_multi_asset_delegation pallet_tangle_lst pallet_services pallet_rewards)
+folders=(multi-asset-delegation tangle-lst services rewards)
 
 # Generate weights for testnet runtime
-echo "[testnet] Generating weights with steps: 10, repeat: 10"
-for pallet in "${pallets[@]}"; do
+echo "[testnet] Generating weights with steps: $steps, repeat: $repeat"
+for i in "${!pallets[@]}"; do
+  pallet=${pallets[$i]}
   echo "[testnet] Benchmarking $pallet"
   
   ./target/release/tangle benchmark pallet \
@@ -29,24 +26,7 @@ for pallet in "${pallets[@]}"; do
     --steps="$steps" \
     --repeat="$repeat" \
     --template=./.maintain/frame-weights-template.hbs \
-    --output="./runtime/testnet/src/weights/${pallet/pallet_/}.rs"
-done
-
-# Generate weights for mainnet runtime
-echo "[mainnet] Generating weights with steps: 10, repeat: 10"
-for pallet in "${pallets[@]}"; do
-  echo "[mainnet] Benchmarking $pallet"
-  
-  ./target/release/tangle benchmark pallet \
-    --chain=dev \
-    --execution=wasm \
-    --wasm-execution=compiled \
-    --pallet="$pallet" \
-    --extrinsic='*' \
-    --steps="$steps" \
-    --repeat="$repeat" \
-    --template=./.maintain/frame-weights-template.hbs \
-    --output="./runtime/mainnet/src/weights/${pallet/pallet_/}.rs"
+    --output="./pallets/${folders[$i]}/src/weights.rs"
 done
 
 echo "Weight generation complete!"

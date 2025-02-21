@@ -25,6 +25,8 @@ use tangle_primitives::rewards::LockMultiplier;
 use tangle_primitives::{services::Asset, BlueprintId};
 
 const SEED: u32 = 0;
+const INITIAL_BALANCE: u32 = 1_000_000;
+
 fn native_asset_id<T: Config>() -> T::AssetId
 where
 	T::AssetId: From<u32>,
@@ -43,14 +45,48 @@ fn blueprint_id() -> BlueprintId {
 	1u64
 }
 
+fn setup_benchmark<T: Config>() -> Result<T::AccountId, &'static str>
+where
+	T::AssetId: From<u32>,
+{
+	let caller: T::AccountId = whitelisted_caller();
+	let balance = T::Currency::minimum_balance() * INITIAL_BALANCE.into();
+
+	// Fund account
+	T::Currency::make_free_balance_be(&caller, balance);
+
+	// Setup asset config for native token
+	let native_id = native_asset_id::<T>();
+	let native_config = AssetConfig {
+		min_join_bond: T::Currency::minimum_balance(),
+		min_delegate_bond: T::Currency::minimum_balance(),
+		lock_multiplier: LockMultiplier::get(),
+		max_commission: 100u32.into(),
+		min_commission: 0u32.into(),
+	};
+	AssetConfigs::<T>::insert(native_id, native_config);
+
+	// Setup asset config for foreign token
+	let foreign_id = foreign_asset_id::<T>();
+	let foreign_config = AssetConfig {
+		min_join_bond: T::Currency::minimum_balance(),
+		min_delegate_bond: T::Currency::minimum_balance(),
+		lock_multiplier: LockMultiplier::get(),
+		max_commission: 100u32.into(),
+		min_commission: 0u32.into(),
+	};
+	AssetConfigs::<T>::insert(foreign_id, foreign_config);
+
+	Ok(caller)
+}
+
 benchmarks! {
 	where_clause {
 		where
 			T::AssetId: From<u32>,
 	}
 	join_operators {
-
-		let caller: T::AccountId = whitelisted_caller();
+		let caller = setup_benchmark::<T>()?;
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 	}: _(RawOrigin::Signed(caller.clone()), bond_amount)
 	verify {
@@ -58,8 +94,7 @@ benchmarks! {
 	}
 
 	schedule_leave_operators {
-
-		let caller: T::AccountId = whitelisted_caller();
+		let caller = setup_benchmark::<T>()?;
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
@@ -72,8 +107,7 @@ benchmarks! {
 	}
 
 	cancel_leave_operators {
-
-		let caller: T::AccountId = whitelisted_caller();
+		let caller = setup_benchmark::<T>()?;
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 		MultiAssetDelegation::<T>::schedule_leave_operators(RawOrigin::Signed(caller.clone()).into())?;
@@ -84,8 +118,7 @@ benchmarks! {
 	}
 
 	execute_leave_operators {
-
-		let caller: T::AccountId = whitelisted_caller();
+		let caller = setup_benchmark::<T>()?;
 		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 		MultiAssetDelegation::<T>::schedule_leave_operators(RawOrigin::Signed(caller.clone()).into())?;

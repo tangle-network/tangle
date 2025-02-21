@@ -4,27 +4,20 @@
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 42.0.0
 //! DATE: 2024-10-03, STEPS: `50`, REPEAT: `50`, LOW RANGE: `[]`, HIGH RANGE: `[]`
 //! WORST CASE MAP SIZE: `1000000`
-//! HOSTNAME: `workstation`, CPU: `AMD Ryzen 9 5950X 16-Core Processor`
+
 //! WASM-EXECUTION: `Compiled`, CHAIN: `Some("benchmark")`, DB CACHE: `1024`
 
 // Executed Command:
 // target/release/tangle
 // benchmark
-// pallet
-// --chain
-// benchmark
-// --pallet
-// pallet_services
-// --extrinsic
-// *
-// --steps
-// 50
-// --repeat
-// 50
-// --output
-// ./pallets/services/src/weights.rs
-// --template
-// ./.maintain/frame-weights-template.hbs
+// --chain=dev
+// --steps=10
+// --repeat=2
+// --pallet=services
+// --extrinsic=*
+// --execution=wasm
+// --wasm-execution=compiled
+// --heap-pages=4096
 
 #![cfg_attr(rustfmt, rustfmt_skip)]
 #![allow(unused_parens)]
@@ -36,11 +29,15 @@ use core::marker::PhantomData;
 
 /// Weight functions needed for `pallet_services`.
 pub trait WeightInfo {
+	fn slash() -> Weight;
+	fn dispute() -> Weight;
+	fn update_master_blueprint_service_manager() -> Weight;
+	fn join_service() -> Weight;
+	fn leave_service() -> Weight;
 	fn create_blueprint() -> Weight;
 	fn pre_register() -> Weight;
 	fn register() -> Weight;
 	fn unregister() -> Weight;
-	fn update_approval_preference() -> Weight;
 	fn update_price_targets() -> Weight;
 	fn request() -> Weight;
 	fn approve() -> Weight;
@@ -53,6 +50,67 @@ pub trait WeightInfo {
 /// Weights for `pallet_services` using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
+	/// Storage: `Services::Instances` (r:1 w:0)
+	/// Proof: `Services::Instances` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	/// Storage: `Services::UnappliedSlashes` (r:0 w:1)
+	/// Proof: `Services::UnappliedSlashes` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn slash() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	/// Storage: `Services::UnappliedSlashes` (r:1 w:1)
+	/// Proof: `Services::UnappliedSlashes` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn dispute() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	/// Storage: `Services::MasterBlueprintServiceManager` (r:1 w:1)
+	/// Proof: `Services::MasterBlueprintServiceManager` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	fn update_master_blueprint_service_manager() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	/// Storage: `Services::Instances` (r:1 w:1)
+	/// Proof: `Services::Instances` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	/// Storage: `Services::OperatorsProfile` (r:1 w:1)
+	/// Proof: `Services::OperatorsProfile` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn join_service() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(T::DbWeight::get().reads(2_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+	/// Storage: `Services::Instances` (r:1 w:1)
+	/// Proof: `Services::Instances` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	/// Storage: `Services::OperatorsProfile` (r:1 w:1)
+	/// Proof: `Services::OperatorsProfile` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn leave_service() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(T::DbWeight::get().reads(2_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
 	/// Storage: `Services::NextBlueprintId` (r:1 w:1)
 	/// Proof: `Services::NextBlueprintId` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	/// Storage: `Services::Blueprints` (r:0 w:1)
@@ -110,19 +168,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		Weight::from_parts(18_770_000, 3791)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(2_u64))
-	}
-	/// Storage: `Services::Blueprints` (r:1 w:0)
-	/// Proof: `Services::Blueprints` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// Storage: `Services::Operators` (r:1 w:1)
-	/// Proof: `Services::Operators` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	fn update_approval_preference() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `342`
-		//  Estimated: `3807`
-		// Minimum execution time: 14_351_000 picoseconds.
-		Weight::from_parts(14_810_000, 3807)
-			.saturating_add(T::DbWeight::get().reads(2_u64))
-			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	/// Storage: `Services::Blueprints` (r:1 w:0)
 	/// Proof: `Services::Blueprints` (`max_values`: None, `max_size`: None, mode: `Measured`)
@@ -259,6 +304,67 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 
 // For backwards compatibility and tests.
 impl WeightInfo for () {
+		/// Storage: `Services::Instances` (r:1 w:0)
+	/// Proof: `Services::Instances` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	/// Storage: `Services::UnappliedSlashes` (r:0 w:1)
+	/// Proof: `Services::UnappliedSlashes` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn slash() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	/// Storage: `Services::UnappliedSlashes` (r:1 w:1)
+	/// Proof: `Services::UnappliedSlashes` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn dispute() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	/// Storage: `Services::MasterBlueprintServiceManager` (r:1 w:1)
+	/// Proof: `Services::MasterBlueprintServiceManager` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+	fn update_master_blueprint_service_manager() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	/// Storage: `Services::Instances` (r:1 w:1)
+	/// Proof: `Services::Instances` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	/// Storage: `Services::OperatorsProfile` (r:1 w:1)
+	/// Proof: `Services::OperatorsProfile` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn join_service() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(RocksDbWeight::get().reads(2_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+	/// Storage: `Services::Instances` (r:1 w:1)
+	/// Proof: `Services::Instances` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	/// Storage: `Services::OperatorsProfile` (r:1 w:1)
+	/// Proof: `Services::OperatorsProfile` (`max_values`: None, `max_size`: None, mode: `Measured`)
+	fn leave_service() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `76`
+		//  Estimated: `1561`
+		// Minimum execution time: 12_650_000 picoseconds.
+		Weight::from_parts(12_950_000, 1561)
+			.saturating_add(RocksDbWeight::get().reads(2_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
 	/// Storage: `Services::NextBlueprintId` (r:1 w:1)
 	/// Proof: `Services::NextBlueprintId` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	/// Storage: `Services::Blueprints` (r:0 w:1)
@@ -316,19 +422,6 @@ impl WeightInfo for () {
 		Weight::from_parts(18_770_000, 3791)
 			.saturating_add(RocksDbWeight::get().reads(3_u64))
 			.saturating_add(RocksDbWeight::get().writes(2_u64))
-	}
-	/// Storage: `Services::Blueprints` (r:1 w:0)
-	/// Proof: `Services::Blueprints` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	/// Storage: `Services::Operators` (r:1 w:1)
-	/// Proof: `Services::Operators` (`max_values`: None, `max_size`: None, mode: `Measured`)
-	fn update_approval_preference() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `342`
-		//  Estimated: `3807`
-		// Minimum execution time: 14_351_000 picoseconds.
-		Weight::from_parts(14_810_000, 3807)
-			.saturating_add(RocksDbWeight::get().reads(2_u64))
-			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 	/// Storage: `Services::Blueprints` (r:1 w:0)
 	/// Proof: `Services::Blueprints` (`max_values`: None, `max_size`: None, mode: `Measured`)
