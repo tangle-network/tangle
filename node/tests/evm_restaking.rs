@@ -191,7 +191,7 @@ async fn deploy_tangle_lrt(
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_DEPOSIT: u128 = 10_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_APY: u8 = 10; // 10% APY
+const MOCK_APY: u32 = 10; // 10% APY
 
 /// Setup the E2E test environment.
 #[track_caller]
@@ -296,7 +296,7 @@ where
 					vault_id,
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
-							apy: api::runtime_types::sp_arithmetic::per_things::Percent(MOCK_APY),
+							apy: api::runtime_types::sp_arithmetic::per_things::Perbill(MOCK_APY),
 							deposit_cap: MOCK_DEPOSIT_CAP,
 							incentive_cap: 1,
 							boost_multiplier: Some(1),
