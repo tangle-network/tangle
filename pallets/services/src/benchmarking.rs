@@ -8,9 +8,8 @@ use sp_std::vec;
 use tangle_primitives::services::*;
 use sp_runtime::Percent;
 use sp_core::Pair;
-use sp_runtime::bounded_vec;
-use crate::ConstraintsOf;
-
+use scale_info::prelude::boxed::Box;
+use frame_support::BoundedVec;
 pub type AssetId = u128;
 
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
@@ -19,10 +18,10 @@ pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
 pub const WBTC: AssetId = 3;
 
-pub(crate) fn get_security_requirement(
-	a: AssetId,
+pub(crate) fn get_security_requirement<T: Config>(
+	a: T::AssetId,
 	p: &[u8; 2],
-) -> AssetSecurityRequirement<AssetId> {
+) -> AssetSecurityRequirement<<T as Config>::AssetId> {
 	AssetSecurityRequirement {
 		asset: Asset::Custom(a),
 		min_exposure_percent: Percent::from_percent(p[0]),
@@ -30,7 +29,12 @@ pub(crate) fn get_security_requirement(
 	}
 }
 
+pub(crate) fn get_security_commitment<T: Config>(a: T::AssetId, p: u8) -> AssetSecurityCommitment<T::AssetId> {
+	AssetSecurityCommitment { asset: Asset::Custom(a), exposure_percent: Percent::from_percent(p) }
+}
+
 pub(crate) fn test_ecdsa_key() -> [u8; 65] {
+	use sp_core::Pair;
 	let (ecdsa_key, _) = sp_core::ecdsa::Pair::generate();
 	let secret = k256::ecdsa::SigningKey::from_slice(&ecdsa_key.seed())
 		.expect("Should be able to create a secret key from a seed");
@@ -53,28 +57,28 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
 		manager: BlueprintServiceManager::Evm(CGGMP21_BLUEPRINT),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
-		jobs: bounded_vec![
+		jobs: vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
-				params: bounded_vec![FieldType::Uint8],
-				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				params: vec![FieldType::Uint8].try_into().unwrap(),
+				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
-				params: bounded_vec![
+				params: vec![
 					FieldType::Uint64,
 					FieldType::List(Box::new(FieldType::Uint8))
-				],
-				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				].try_into().unwrap(),
+				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
 			},
-		],
-		registration_params: bounded_vec![],
-		request_params: bounded_vec![],
+		].try_into().unwrap(),
+		registration_params: Default::default(),
+		request_params: Default::default(),
 		gadget: Default::default(),
-		supported_membership_models: bounded_vec![
+		supported_membership_models: vec![
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
-		],
+		].try_into().unwrap(),
 	}
 }
 
@@ -82,7 +86,7 @@ benchmarks! {
 
 	where_clause {
 		where
-			AssetId: From<u128>,
+			T::AssetId: From<u128>,
 	}
 
 	create_blueprint {
@@ -156,18 +160,19 @@ benchmarks! {
 		let _= Pallet::<T>::register(RawOrigin::Signed(eve.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 	}: _(
+		RawOrigin::Signed(bob.clone()),
 		None,
 		0,
 		vec![alice.clone()],
 		vec![bob.clone(), charlie.clone(), dave.clone()],
 		Default::default(),
 		vec![
-			get_security_requirement(USDC, &[10, 20]),
-			get_security_requirement(WETH, &[10, 20])
+			get_security_requirement::<T>(USDC.into(), &[10, 20]),
+			get_security_requirement::<T>(WETH.into(), &[10, 20])
 		],
-		100,
-		Asset::Custom(USDC),
-		0,
+		100_u32.into(),
+		Asset::Custom(USDC.into()),
+		0_u32.into(),
 		MembershipModel::Fixed { min_operators: 3 }
 		)
 
@@ -195,23 +200,26 @@ benchmarks! {
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::signed(eve.clone()),
+			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
-				get_security_requirement(USDC, &[10, 20]),
-				get_security_requirement(WETH, &[10, 20])
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20])
 			],
-			100,
-			Asset::Custom(USDC),
-			0,
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
 		);
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0, Percent::from_percent(25))
+	}: _(RawOrigin::Signed(charlie.clone()), 0, vec![
+		get_security_commitment::<T>(USDC.into(), 10),
+		get_security_commitment::<T>(WETH.into(), 10),
+	])
 
 
 	reject {
@@ -237,19 +245,19 @@ benchmarks! {
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::signed(eve.clone()),
+			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
-				get_security_requirement(USDC, &[10, 20]),
-				get_security_requirement(WETH, &[10, 20])
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20])
 			],
-			100,
-			Asset::Custom(USDC),
-			0,
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
 		);
 
@@ -274,19 +282,19 @@ benchmarks! {
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::signed(eve.clone()),
+			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
-				get_security_requirement(USDC, &[10, 20]),
-				get_security_requirement(WETH, &[10, 20])
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20])
 			],
-			100,
-			Asset::Custom(USDC),
-			0,
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
 		);
 
@@ -312,19 +320,19 @@ benchmarks! {
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::signed(eve.clone()),
+			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
-				get_security_requirement(USDC, &[10, 20]),
-				get_security_requirement(WETH, &[10, 20])
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20])
 			],
-			100,
-			Asset::Custom(USDC),
-			0,
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
 		);
 
@@ -337,6 +345,8 @@ benchmarks! {
 
 
 	submit_result {
+		use sp_core::ByteArray;
+
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
@@ -354,19 +364,19 @@ benchmarks! {
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::signed(eve.clone()),
+			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
-				get_security_requirement(USDC, &[10, 20]),
-				get_security_requirement(WETH, &[10, 20])
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20])
 			],
-			100,
-			Asset::Custom(USDC),
-			0,
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
 		);
 
@@ -385,7 +395,7 @@ benchmarks! {
 			RawOrigin::Signed(bob.clone()),
 			0,
 			keygen_job_call_id,
-			vec![Field::Bytes(dkg.0.to_vec().try_into().unwrap())].try_into().unwrap()
+			vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())].try_into().unwrap()
 		)
 
 }
