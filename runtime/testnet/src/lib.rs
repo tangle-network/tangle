@@ -1591,22 +1591,22 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub use pallet_tangle_lst_benchmarking::Pallet as LstBench;
-impl pallet_tangle_lst_benchmarking::Config for Runtime {}
-
 #[cfg(feature = "runtime-benchmarks")]
 #[macro_use]
 extern crate frame_benchmarking;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
+	pub use pallet_tangle_lst_benchmarking::Pallet as LstBench;
+	impl pallet_tangle_lst_benchmarking::Config for crate::Runtime {}
+
 	define_benchmarks!(
 		[frame_benchmarking, BaselineBench::<Runtime>]
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
 		[pallet_services, Services]
-		[pallet_tangle_lst_benchmarking, LstBench::<Runtime>]
+		[pallet_tangle_lst_benchmarking, crate::benches::LstBench::<Runtime>]
 		[pallet_multi_asset_delegation, MultiAssetDelegation]
 		[pallet_rewards, Rewards]
 	);
