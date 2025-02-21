@@ -1477,7 +1477,7 @@ checksum = "d0324df9ce91a9840632e865dd3272bd20162023856f1b189b7ae58afa5c6b61"
 dependencies = [
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcmp-queue",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "pallet-assets 40.0.0",
@@ -1505,7 +1505,7 @@ version = "0.18.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c540587f89a03003946b14decef4fcadb083edc4e62f968de245b82e5402e923"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "impl-trait-for-tuples",
  "log",
@@ -2290,7 +2290,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c31b53c53d627e2da38f8910807944bf3121e154b5c0ac9e122995af9dfb13ed"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "pallet-message-queue",
  "parity-scale-codec",
@@ -3353,7 +3353,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97263a8e758d201ebe81db7cea7b278b4fb869c11442f77acef70138ac1a252f"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-benchmarking 38.0.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
@@ -3373,7 +3373,7 @@ checksum = "546403ee1185f4051a74cc9c9d76e82c63cac3fb68e1bf29f61efb5604c96488"
 dependencies = [
  "bytes",
  "cumulus-pallet-parachain-system-proc-macro",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "cumulus-primitives-parachain-inherent",
  "cumulus-primitives-proof-size-hostfunction",
  "environmental",
@@ -3384,7 +3384,7 @@ dependencies = [
  "log",
  "pallet-message-queue",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-parachain-primitives",
  "polkadot-runtime-common",
  "polkadot-runtime-parachains",
  "scale-info",
@@ -3450,7 +3450,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e49231f6cd8274438b078305dc8ce44c54c0d3f4a28e902589bcbaa53d954608"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "parity-scale-codec",
@@ -3468,7 +3468,7 @@ checksum = "6f788bdac9474795ea13ba791b55798fb664b2e3da8c3a7385b480c9af4e6539"
 dependencies = [
  "bounded-collections",
  "bp-xcm-bridge-hub-router",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-benchmarking 38.0.0",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
@@ -3493,7 +3493,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f47128f797359951723e2d106a80e592d007bb7446c299958cdbafb1489ddbf0"
 dependencies = [
  "cumulus-pallet-xcm",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "parity-scale-codec",
@@ -3509,27 +3509,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "11e7825bcf3cc6c962a5b9b9f47e02dc381109e521d0bc00cad785c65da18471"
 dependencies = [
  "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-primitives 15.0.0",
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-aura 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
-]
-
-[[package]]
-name = "cumulus-primitives-core"
-version = "0.15.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
-dependencies = [
- "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "polkadot-parachain-primitives 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "polkadot-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "scale-info",
- "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
- "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "staging-xcm 14.1.0",
 ]
 
 [[package]]
@@ -3539,8 +3523,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c6b5221a4a3097f2ebef66c84c1e6d7a0b8ec7e63f2bd5ae04c1e6d3fc7514e"
 dependencies = [
  "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
  "polkadot-primitives 16.0.0",
  "scale-info",
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3556,7 +3540,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "842a694901e04a62d88995418dec35c22f7dba2b34d32d2b8de37d6b92f973ff"
 dependencies = [
  "async-trait",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "parity-scale-codec",
  "scale-info",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3581,7 +3565,7 @@ version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6fc49dfec0ba3438afad73787736cc0dba88d15b5855881f12a4d8b812a72927"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "cumulus-primitives-proof-size-hostfunction",
  "docify",
  "frame-support 38.2.0",
@@ -3598,7 +3582,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33cffb8f010f39ac36b31d38994b8f9d9256d9b5e495d96b4ec59d3e30852d53"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "sp-inherents 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-timestamp 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -3609,7 +3593,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bdcf4d46dd93f1e6d5dd6d379133566a44042ba6476d04bdcbdb4981c622ae4"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "log",
  "pallet-asset-conversion",
@@ -3627,7 +3611,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e570e41c3f05a8143ebff967bbb0c7dcaaa6f0bebd8639b9418b8005b13eda03"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "parity-scale-codec",
  "polkadot-primitives 16.0.0",
  "sp-runtime 39.0.5",
@@ -6621,8 +6605,8 @@ dependencies = [
 
 [[package]]
 name = "grandpa-verifier"
-version = "0.1.1"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "0.1.2"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "anyhow",
  "derive_more 0.99.19",
@@ -6643,8 +6627,8 @@ dependencies = [
 
 [[package]]
 name = "grandpa-verifier-primitives"
-version = "0.1.1"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "0.1.2"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "anyhow",
  "finality-grandpa",
@@ -7559,7 +7543,7 @@ checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
 [[package]]
 name = "ismp"
 version = "0.2.2"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "anyhow",
  "derive_more 1.0.0",
@@ -7575,11 +7559,11 @@ dependencies = [
 
 [[package]]
 name = "ismp-grandpa"
-version = "1.15.3"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "15.0.1"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
+ "anyhow",
  "ckb-merkle-mountain-range",
- "cumulus-primitives-core 0.15.0",
  "finality-grandpa",
  "frame-support 37.1.0",
  "frame-system 37.1.0",
@@ -7594,6 +7578,7 @@ dependencies = [
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-trie 37.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "substrate-state-machine",
 ]
@@ -9958,7 +9943,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-authority-discovery",
  "sp-runtime 39.0.5",
 ]
 
@@ -10468,7 +10453,7 @@ dependencies = [
  "pallet-utility 38.0.0",
  "pallet-xcm",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-parachain-primitives",
  "polkadot-primitives 16.0.0",
  "polkadot-runtime-parachains",
  "scale-info",
@@ -11548,8 +11533,8 @@ dependencies = [
 
 [[package]]
 name = "pallet-hyperbridge"
-version = "1.15.3"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "15.0.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "anyhow",
  "frame-support 37.1.0",
@@ -11696,8 +11681,8 @@ dependencies = [
 
 [[package]]
 name = "pallet-ismp"
-version = "1.15.3"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "15.1.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "anyhow",
  "fortuples",
@@ -11719,8 +11704,8 @@ dependencies = [
 
 [[package]]
 name = "pallet-ismp-runtime-api"
-version = "1.15.3"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "15.0.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "ismp",
  "pallet-ismp",
@@ -11728,7 +11713,6 @@ dependencies = [
  "primitive-types 0.12.2",
  "serde",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-mmr-primitives 34.0.0",
 ]
 
 [[package]]
@@ -12398,7 +12382,7 @@ dependencies = [
  "pallet-utility 38.0.0",
  "pallet-xcm",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-parachain-primitives",
  "polkadot-primitives 16.0.0",
  "polkadot-runtime-parachains",
  "scale-info",
@@ -13408,7 +13392,7 @@ version = "18.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9460a69f409be27c62161d8b4d36ffc32735d09a4f9097f9c789db0cca7196c"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "cumulus-primitives-utility",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
@@ -13441,7 +13425,7 @@ checksum = "287d2db0a2d19466caa579a69f021bfdc6fa352f382c8395dade58d1d0c6adfe"
 dependencies = [
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcmp-queue",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "cumulus-primitives-parachain-inherent",
  "cumulus-test-relay-sproof-builder",
  "frame-support 38.2.0",
@@ -13452,7 +13436,7 @@ dependencies = [
  "pallet-timestamp 37.0.0",
  "pallet-xcm",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-parachain-primitives",
  "sp-consensus-aura 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -13941,17 +13925,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "polkadot-core-primitives"
-version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
-dependencies = [
- "parity-scale-codec",
- "scale-info",
- "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
-]
-
-[[package]]
 name = "polkadot-parachain-primitives"
 version = "14.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13960,28 +13933,12 @@ dependencies = [
  "bounded-collections",
  "derive_more 0.99.19",
  "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
  "scale-info",
  "serde",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "sp-weights 31.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "polkadot-parachain-primitives"
-version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
-dependencies = [
- "bounded-collections",
- "derive_more 0.99.19",
- "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "scale-info",
- "serde",
- "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
- "sp-weights 31.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
 ]
 
 [[package]]
@@ -13994,14 +13951,14 @@ dependencies = [
  "hex-literal 0.4.1",
  "log",
  "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
  "scale-info",
  "serde",
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-authority-discovery",
  "sp-consensus-slots 0.40.1",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-inherents 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -14009,32 +13966,6 @@ dependencies = [
  "sp-keystore 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
  "sp-staking 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "polkadot-primitives"
-version = "15.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#39e71bd58f282508db334a424ca6c2997d94acf5"
-dependencies = [
- "bitvec",
- "hex-literal 0.4.1",
- "log",
- "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "polkadot-parachain-primitives 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "scale-info",
- "serde",
- "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-application-crypto 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-arithmetic 26.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-authority-discovery 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-consensus-slots 0.40.0",
- "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-inherents 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-keystore 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
- "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
 ]
 
 [[package]]
@@ -14047,14 +13978,14 @@ dependencies = [
  "hex-literal 0.4.1",
  "log",
  "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
  "scale-info",
  "serde",
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-authority-discovery",
  "sp-consensus-slots 0.40.1",
  "sp-core 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-inherents 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -14153,8 +14084,8 @@ dependencies = [
  "pallet-timestamp 37.0.0",
  "pallet-vesting 38.0.0",
  "parity-scale-codec",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
  "polkadot-primitives 16.0.0",
  "polkadot-runtime-metrics",
  "rand",
@@ -14208,7 +14139,7 @@ dependencies = [
  "cumulus-pallet-xcmp-queue",
  "cumulus-ping",
  "cumulus-primitives-aura",
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "cumulus-primitives-parachain-inherent",
  "cumulus-primitives-proof-size-hostfunction",
  "cumulus-primitives-storage-weight-reclaim",
@@ -14331,8 +14262,8 @@ dependencies = [
  "pallet-xcm-bridge-hub-router",
  "parachains-common",
  "parachains-runtimes-test-utils",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
  "polkadot-primitives 16.0.0",
  "polkadot-runtime-common",
  "polkadot-runtime-metrics",
@@ -14359,7 +14290,7 @@ dependencies = [
  "sp-api-proc-macro 20.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp-authority-discovery 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-authority-discovery",
  "sp-block-builder 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-aura 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-consensus-babe 0.40.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -17820,7 +17751,7 @@ dependencies = [
 [[package]]
 name = "serde-hex-utils"
 version = "0.1.0"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "anyhow",
  "hex",
@@ -18325,7 +18256,7 @@ dependencies = [
  "frame-system 38.0.0",
  "hex-literal 0.4.1",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-parachain-primitives",
  "scale-info",
  "serde",
  "snowbridge-beacon-primitives",
@@ -18809,18 +18740,6 @@ dependencies = [
  "sp-api 34.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-application-crypto 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 39.0.5",
-]
-
-[[package]]
-name = "sp-authority-discovery"
-version = "34.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk?branch=stable2407#7642d6b5dea6dd7871ef8bbfcb9d48ba8a8b0f77"
-dependencies = [
- "parity-scale-codec",
- "scale-info",
- "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-application-crypto 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-runtime 39.0.3",
 ]
 
 [[package]]
@@ -20361,7 +20280,7 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d28266dfddbfff721d70ad2f873380845b569adfab32f257cf97d9cedd894b68"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
  "frame-system 38.0.0",
  "parity-scale-codec",
@@ -20420,7 +20339,7 @@ dependencies = [
  "pallet-asset-conversion",
  "pallet-transaction-payment 38.0.2",
  "parity-scale-codec",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-parachain-primitives",
  "scale-info",
  "sp-arithmetic 26.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-io 38.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -20710,8 +20629,8 @@ dependencies = [
 
 [[package]]
 name = "substrate-state-machine"
-version = "1.15.3"
-source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407#a89682f739022dd67dda3858f72e6745135d758e"
+version = "15.0.0"
+source = "git+https://github.com/polytope-labs/hyperbridge?branch=polkadot-stable2407-1#4c58d522274dadcf4b1fbe8a931d1ebf15df26b8"
 dependencies = [
  "frame-support 37.1.0",
  "hash-db",
@@ -21579,9 +21498,9 @@ version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94bceae6f7c89d47daff6c7e05f712551a01379f61b07d494661941144878589"
 dependencies = [
- "cumulus-primitives-core 0.16.0",
+ "cumulus-primitives-core",
  "frame-support 38.2.0",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
  "rococo-runtime-constants",
  "smallvec",
  "sp-runtime 39.0.5",
@@ -23546,8 +23465,8 @@ dependencies = [
  "frame-system 38.0.0",
  "parity-scale-codec",
  "paste",
- "polkadot-core-primitives 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "polkadot-parachain-primitives 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "polkadot-core-primitives",
+ "polkadot-parachain-primitives",
  "polkadot-primitives 16.0.0",
  "polkadot-runtime-parachains",
  "scale-info",
