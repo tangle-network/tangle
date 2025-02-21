@@ -6,12 +6,13 @@ pub mod api {
 	mod root_mod {
 		pub use super::*;
 	}
-	pub static PALLETS: [&str; 44usize] = [
+	pub static PALLETS: [&str; 45usize] = [
 		"System",
 		"Timestamp",
 		"Sudo",
 		"RandomnessCollectiveFlip",
 		"Assets",
+		"PoolAssets",
 		"Balances",
 		"TransactionPayment",
 		"Authorship",
@@ -3160,6 +3161,9 @@ pub mod api {
 		pub fn assets(&self) -> assets::constants::ConstantsApi {
 			assets::constants::ConstantsApi
 		}
+		pub fn pool_assets(&self) -> pool_assets::constants::ConstantsApi {
+			pool_assets::constants::ConstantsApi
+		}
 		pub fn balances(&self) -> balances::constants::ConstantsApi {
 			balances::constants::ConstantsApi
 		}
@@ -3262,6 +3266,9 @@ pub mod api {
 		}
 		pub fn assets(&self) -> assets::storage::StorageApi {
 			assets::storage::StorageApi
+		}
+		pub fn pool_assets(&self) -> pool_assets::storage::StorageApi {
+			pool_assets::storage::StorageApi
 		}
 		pub fn balances(&self) -> balances::storage::StorageApi {
 			balances::storage::StorageApi
@@ -3391,6 +3398,9 @@ pub mod api {
 		pub fn assets(&self) -> assets::calls::TransactionApi {
 			assets::calls::TransactionApi
 		}
+		pub fn pool_assets(&self) -> pool_assets::calls::TransactionApi {
+			pool_assets::calls::TransactionApi
+		}
 		pub fn balances(&self) -> balances::calls::TransactionApi {
 			balances::calls::TransactionApi
 		}
@@ -3505,9 +3515,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				70u8, 245u8, 22u8, 12u8, 33u8, 18u8, 237u8, 72u8, 123u8, 114u8, 209u8, 218u8, 48u8,
-				44u8, 3u8, 116u8, 184u8, 122u8, 101u8, 167u8, 74u8, 115u8, 245u8, 73u8, 80u8,
-				171u8, 244u8, 142u8, 185u8, 44u8, 237u8, 228u8,
+				77u8, 162u8, 60u8, 135u8, 245u8, 51u8, 219u8, 50u8, 241u8, 242u8, 173u8, 68u8,
+				241u8, 129u8, 252u8, 198u8, 249u8, 143u8, 197u8, 143u8, 15u8, 70u8, 110u8, 223u8,
+				35u8, 12u8, 231u8, 7u8, 220u8, 101u8, 211u8, 227u8,
 			]
 	}
 	pub mod system {
@@ -4643,10 +4653,9 @@ pub mod api {
 						"Events",
 						(),
 						[
-							91u8, 54u8, 233u8, 137u8, 244u8, 222u8, 38u8, 20u8, 142u8, 134u8,
-							149u8, 159u8, 68u8, 103u8, 189u8, 102u8, 109u8, 151u8, 102u8, 126u8,
-							210u8, 121u8, 203u8, 178u8, 188u8, 203u8, 99u8, 81u8, 151u8, 101u8,
-							161u8, 243u8,
+							74u8, 80u8, 172u8, 196u8, 202u8, 155u8, 46u8, 76u8, 32u8, 48u8, 106u8,
+							183u8, 235u8, 37u8, 210u8, 227u8, 184u8, 223u8, 228u8, 220u8, 25u8,
+							92u8, 110u8, 46u8, 235u8, 1u8, 251u8, 96u8, 253u8, 180u8, 195u8, 180u8,
 						],
 					)
 				}
@@ -5303,9 +5312,10 @@ pub mod api {
 						"sudo",
 						types::Sudo { call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							9u8, 97u8, 236u8, 106u8, 2u8, 175u8, 20u8, 197u8, 142u8, 65u8, 159u8,
-							112u8, 218u8, 87u8, 69u8, 215u8, 226u8, 41u8, 158u8, 33u8, 64u8, 28u8,
-							133u8, 0u8, 227u8, 176u8, 187u8, 146u8, 170u8, 207u8, 75u8, 135u8,
+							79u8, 9u8, 239u8, 255u8, 196u8, 164u8, 177u8, 218u8, 125u8, 66u8,
+							160u8, 160u8, 166u8, 135u8, 171u8, 128u8, 244u8, 144u8, 109u8, 31u8,
+							52u8, 78u8, 244u8, 178u8, 107u8, 253u8, 185u8, 11u8, 95u8, 182u8,
+							107u8, 0u8,
 						],
 					)
 				}
@@ -5327,10 +5337,9 @@ pub mod api {
 							weight,
 						},
 						[
-							199u8, 131u8, 110u8, 5u8, 128u8, 180u8, 133u8, 182u8, 89u8, 28u8,
-							214u8, 40u8, 144u8, 69u8, 204u8, 170u8, 212u8, 118u8, 250u8, 100u8,
-							249u8, 210u8, 1u8, 162u8, 81u8, 6u8, 99u8, 144u8, 23u8, 213u8, 137u8,
-							241u8,
+							187u8, 106u8, 81u8, 91u8, 8u8, 47u8, 201u8, 102u8, 111u8, 45u8, 166u8,
+							9u8, 107u8, 196u8, 134u8, 186u8, 139u8, 143u8, 245u8, 212u8, 247u8,
+							8u8, 159u8, 97u8, 181u8, 54u8, 106u8, 30u8, 254u8, 1u8, 94u8, 158u8,
 						],
 					)
 				}
@@ -5366,9 +5375,10 @@ pub mod api {
 						"sudo_as",
 						types::SudoAs { who, call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							132u8, 223u8, 191u8, 55u8, 96u8, 32u8, 254u8, 93u8, 188u8, 92u8, 105u8,
-							120u8, 155u8, 117u8, 131u8, 67u8, 208u8, 118u8, 86u8, 103u8, 52u8,
-							74u8, 52u8, 15u8, 229u8, 37u8, 55u8, 113u8, 240u8, 175u8, 187u8, 230u8,
+							247u8, 49u8, 190u8, 73u8, 50u8, 122u8, 214u8, 249u8, 199u8, 49u8,
+							162u8, 215u8, 65u8, 15u8, 21u8, 126u8, 162u8, 120u8, 175u8, 254u8,
+							126u8, 192u8, 236u8, 33u8, 130u8, 222u8, 211u8, 218u8, 85u8, 38u8,
+							37u8, 220u8,
 						],
 					)
 				}
@@ -9239,6 +9249,3679 @@ pub mod api {
 				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
 					::subxt_core::constants::address::StaticAddress::new_static(
 						"Assets",
+						"StringLimit",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+			}
+		}
+	}
+	pub mod pool_assets {
+		use super::root_mod;
+		use super::runtime_types;
+		#[doc = "The `Error` enum of this pallet."]
+		pub type Error = runtime_types::pallet_assets::pallet::Error;
+		#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+		pub type Call = runtime_types::pallet_assets::pallet::Call;
+		pub mod calls {
+			use super::root_mod;
+			use super::runtime_types;
+			type DispatchError = runtime_types::sp_runtime::DispatchError;
+			pub mod types {
+				use super::runtime_types;
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Issue a new class of fungible assets from a public origin."]
+				#[doc = ""]
+				#[doc = "This new asset class has no assets initially and its owner is the origin."]
+				#[doc = ""]
+				#[doc = "The origin must conform to the configured `CreateOrigin` and have sufficient funds free."]
+				#[doc = ""]
+				#[doc = "Funds of sender are reserved by `AssetDeposit`."]
+				#[doc = ""]
+				#[doc = "Parameters:"]
+				#[doc = "- `id`: The identifier of the new asset. This must not be currently in use to identify"]
+				#[doc = "an existing asset. If [`NextAssetId`] is set, then this must be equal to it."]
+				#[doc = "- `admin`: The admin of this class of assets. The admin is the initial address of each"]
+				#[doc = "member of the asset class's admin team."]
+				#[doc = "- `min_balance`: The minimum balance of this new asset that any single account must"]
+				#[doc = "have. If an account's balance is reduced below this, then it collapses to zero."]
+				#[doc = ""]
+				#[doc = "Emits `Created` event when successful."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct Create {
+					#[codec(compact)]
+					pub id: create::Id,
+					pub admin: create::Admin,
+					pub min_balance: create::MinBalance,
+				}
+				pub mod create {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Admin = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type MinBalance = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Create {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "create";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Issue a new class of fungible assets from a privileged origin."]
+				#[doc = ""]
+				#[doc = "This new asset class has no assets initially."]
+				#[doc = ""]
+				#[doc = "The origin must conform to `ForceOrigin`."]
+				#[doc = ""]
+				#[doc = "Unlike `create`, no funds are reserved."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the new asset. This must not be currently in use to identify"]
+				#[doc = "an existing asset. If [`NextAssetId`] is set, then this must be equal to it."]
+				#[doc = "- `owner`: The owner of this class of assets. The owner has full superuser permissions"]
+				#[doc = "over this asset, but may later change and configure the permissions using"]
+				#[doc = "`transfer_ownership` and `set_team`."]
+				#[doc = "- `min_balance`: The minimum balance of this new asset that any single account must"]
+				#[doc = "have. If an account's balance is reduced below this, then it collapses to zero."]
+				#[doc = ""]
+				#[doc = "Emits `ForceCreated` event when successful."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ForceCreate {
+					#[codec(compact)]
+					pub id: force_create::Id,
+					pub owner: force_create::Owner,
+					pub is_sufficient: force_create::IsSufficient,
+					#[codec(compact)]
+					pub min_balance: force_create::MinBalance,
+				}
+				pub mod force_create {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Owner = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type IsSufficient = ::core::primitive::bool;
+					pub type MinBalance = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ForceCreate {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "force_create";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Start the process of destroying a fungible asset class."]
+				#[doc = ""]
+				#[doc = "`start_destroy` is the first in a series of extrinsics that should be called, to allow"]
+				#[doc = "destruction of an asset class."]
+				#[doc = ""]
+				#[doc = "The origin must conform to `ForceOrigin` or must be `Signed` by the asset's `owner`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "The asset class must be frozen before calling `start_destroy`."]
+				pub struct StartDestroy {
+					#[codec(compact)]
+					pub id: start_destroy::Id,
+				}
+				pub mod start_destroy {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for StartDestroy {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "start_destroy";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Destroy all accounts associated with a given asset."]
+				#[doc = ""]
+				#[doc = "`destroy_accounts` should only be called after `start_destroy` has been called, and the"]
+				#[doc = "asset is in a `Destroying` state."]
+				#[doc = ""]
+				#[doc = "Due to weight restrictions, this function may need to be called multiple times to fully"]
+				#[doc = "destroy all accounts. It will destroy `RemoveItemsLimit` accounts at a time."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "Each call emits the `Event::DestroyedAccounts` event."]
+				pub struct DestroyAccounts {
+					#[codec(compact)]
+					pub id: destroy_accounts::Id,
+				}
+				pub mod destroy_accounts {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for DestroyAccounts {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "destroy_accounts";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Destroy all approvals associated with a given asset up to the max (T::RemoveItemsLimit)."]
+				#[doc = ""]
+				#[doc = "`destroy_approvals` should only be called after `start_destroy` has been called, and the"]
+				#[doc = "asset is in a `Destroying` state."]
+				#[doc = ""]
+				#[doc = "Due to weight restrictions, this function may need to be called multiple times to fully"]
+				#[doc = "destroy all approvals. It will destroy `RemoveItemsLimit` approvals at a time."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "Each call emits the `Event::DestroyedApprovals` event."]
+				pub struct DestroyApprovals {
+					#[codec(compact)]
+					pub id: destroy_approvals::Id,
+				}
+				pub mod destroy_approvals {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for DestroyApprovals {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "destroy_approvals";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Complete destroying asset and unreserve currency."]
+				#[doc = ""]
+				#[doc = "`finish_destroy` should only be called after `start_destroy` has been called, and the"]
+				#[doc = "asset is in a `Destroying` state. All accounts or approvals should be destroyed before"]
+				#[doc = "hand."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "Each successful call emits the `Event::Destroyed` event."]
+				pub struct FinishDestroy {
+					#[codec(compact)]
+					pub id: finish_destroy::Id,
+				}
+				pub mod finish_destroy {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for FinishDestroy {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "finish_destroy";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Mint assets of a particular class."]
+				#[doc = ""]
+				#[doc = "The origin must be Signed and the sender must be the Issuer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount minted."]
+				#[doc = "- `beneficiary`: The account to be credited with the minted assets."]
+				#[doc = "- `amount`: The amount of the asset to be minted."]
+				#[doc = ""]
+				#[doc = "Emits `Issued` event when successful."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existing balance of `beneficiary`; Account pre-existence of `beneficiary`."]
+				pub struct Mint {
+					#[codec(compact)]
+					pub id: mint::Id,
+					pub beneficiary: mint::Beneficiary,
+					#[codec(compact)]
+					pub amount: mint::Amount,
+				}
+				pub mod mint {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Beneficiary = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Mint {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "mint";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Reduce the balance of `who` by as much as possible up to `amount` assets of `id`."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Manager of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Bails with `NoAccount` if the `who` is already dead."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount burned."]
+				#[doc = "- `who`: The account to be debited from."]
+				#[doc = "- `amount`: The maximum amount by which `who`'s balance should be reduced."]
+				#[doc = ""]
+				#[doc = "Emits `Burned` with the actual amount burned. If this takes the balance to below the"]
+				#[doc = "minimum for the asset, then the amount burned is increased to take it to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Post-existence of `who`; Pre & post Zombie-status of `who`."]
+				pub struct Burn {
+					#[codec(compact)]
+					pub id: burn::Id,
+					pub who: burn::Who,
+					#[codec(compact)]
+					pub amount: burn::Amount,
+				}
+				pub mod burn {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Who = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Burn {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "burn";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Move some assets from the sender account to another."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount transferred."]
+				#[doc = "- `target`: The account to be credited."]
+				#[doc = "- `amount`: The amount by which the sender's balance of assets should be reduced and"]
+				#[doc = "`target`'s balance increased. The amount actually transferred may be slightly greater in"]
+				#[doc = "the case that the transfer would otherwise take the sender balance above zero but below"]
+				#[doc = "the minimum balance. Must be greater than zero."]
+				#[doc = ""]
+				#[doc = "Emits `Transferred` with the actual amount transferred. If this takes the source balance"]
+				#[doc = "to below the minimum for the asset, then the amount transferred is increased to take it"]
+				#[doc = "to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existence of `target`; Post-existence of sender; Account pre-existence of"]
+				#[doc = "`target`."]
+				pub struct Transfer {
+					#[codec(compact)]
+					pub id: transfer::Id,
+					pub target: transfer::Target,
+					#[codec(compact)]
+					pub amount: transfer::Amount,
+				}
+				pub mod transfer {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Target = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Transfer {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "transfer";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Move some assets from the sender account to another, keeping the sender account alive."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount transferred."]
+				#[doc = "- `target`: The account to be credited."]
+				#[doc = "- `amount`: The amount by which the sender's balance of assets should be reduced and"]
+				#[doc = "`target`'s balance increased. The amount actually transferred may be slightly greater in"]
+				#[doc = "the case that the transfer would otherwise take the sender balance above zero but below"]
+				#[doc = "the minimum balance. Must be greater than zero."]
+				#[doc = ""]
+				#[doc = "Emits `Transferred` with the actual amount transferred. If this takes the source balance"]
+				#[doc = "to below the minimum for the asset, then the amount transferred is increased to take it"]
+				#[doc = "to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existence of `target`; Post-existence of sender; Account pre-existence of"]
+				#[doc = "`target`."]
+				pub struct TransferKeepAlive {
+					#[codec(compact)]
+					pub id: transfer_keep_alive::Id,
+					pub target: transfer_keep_alive::Target,
+					#[codec(compact)]
+					pub amount: transfer_keep_alive::Amount,
+				}
+				pub mod transfer_keep_alive {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Target = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for TransferKeepAlive {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "transfer_keep_alive";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Move some assets from one account to another."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Admin of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount transferred."]
+				#[doc = "- `source`: The account to be debited."]
+				#[doc = "- `dest`: The account to be credited."]
+				#[doc = "- `amount`: The amount by which the `source`'s balance of assets should be reduced and"]
+				#[doc = "`dest`'s balance increased. The amount actually transferred may be slightly greater in"]
+				#[doc = "the case that the transfer would otherwise take the `source` balance above zero but"]
+				#[doc = "below the minimum balance. Must be greater than zero."]
+				#[doc = ""]
+				#[doc = "Emits `Transferred` with the actual amount transferred. If this takes the source balance"]
+				#[doc = "to below the minimum for the asset, then the amount transferred is increased to take it"]
+				#[doc = "to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existence of `dest`; Post-existence of `source`; Account pre-existence of"]
+				#[doc = "`dest`."]
+				pub struct ForceTransfer {
+					#[codec(compact)]
+					pub id: force_transfer::Id,
+					pub source: force_transfer::Source,
+					pub dest: force_transfer::Dest,
+					#[codec(compact)]
+					pub amount: force_transfer::Amount,
+				}
+				pub mod force_transfer {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Source = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Dest = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ForceTransfer {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "force_transfer";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Disallow further unprivileged transfers of an asset `id` from an account `who`. `who`"]
+				#[doc = "must already exist as an entry in `Account`s of the asset. If you want to freeze an"]
+				#[doc = "account that does not have an entry, use `touch_other` first."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Freezer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = "- `who`: The account to be frozen."]
+				#[doc = ""]
+				#[doc = "Emits `Frozen`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct Freeze {
+					#[codec(compact)]
+					pub id: freeze::Id,
+					pub who: freeze::Who,
+				}
+				pub mod freeze {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Who = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Freeze {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "freeze";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Allow unprivileged transfers to and from an account again."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Admin of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = "- `who`: The account to be unfrozen."]
+				#[doc = ""]
+				#[doc = "Emits `Thawed`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct Thaw {
+					#[codec(compact)]
+					pub id: thaw::Id,
+					pub who: thaw::Who,
+				}
+				pub mod thaw {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Who = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Thaw {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "thaw";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Disallow further unprivileged transfers for the asset class."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Freezer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = ""]
+				#[doc = "Emits `Frozen`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct FreezeAsset {
+					#[codec(compact)]
+					pub id: freeze_asset::Id,
+				}
+				pub mod freeze_asset {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for FreezeAsset {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "freeze_asset";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Allow unprivileged transfers for the asset again."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Admin of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be thawed."]
+				#[doc = ""]
+				#[doc = "Emits `Thawed`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ThawAsset {
+					#[codec(compact)]
+					pub id: thaw_asset::Id,
+				}
+				pub mod thaw_asset {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ThawAsset {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "thaw_asset";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Change the Owner of an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `owner`: The new Owner of this asset."]
+				#[doc = ""]
+				#[doc = "Emits `OwnerChanged`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct TransferOwnership {
+					#[codec(compact)]
+					pub id: transfer_ownership::Id,
+					pub owner: transfer_ownership::Owner,
+				}
+				pub mod transfer_ownership {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Owner = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for TransferOwnership {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "transfer_ownership";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Change the Issuer, Admin and Freezer of an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = "- `issuer`: The new Issuer of this asset."]
+				#[doc = "- `admin`: The new Admin of this asset."]
+				#[doc = "- `freezer`: The new Freezer of this asset."]
+				#[doc = ""]
+				#[doc = "Emits `TeamChanged`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct SetTeam {
+					#[codec(compact)]
+					pub id: set_team::Id,
+					pub issuer: set_team::Issuer,
+					pub admin: set_team::Admin,
+					pub freezer: set_team::Freezer,
+				}
+				pub mod set_team {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Issuer = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Admin = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Freezer = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for SetTeam {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "set_team";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Set the metadata for an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Funds of sender are reserved according to the formula:"]
+				#[doc = "`MetadataDepositBase + MetadataDepositPerByte * (name.len + symbol.len)` taking into"]
+				#[doc = "account any already reserved funds."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to update."]
+				#[doc = "- `name`: The user friendly name of this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `symbol`: The exchange symbol for this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `decimals`: The number of decimals this asset uses to represent one unit."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataSet`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct SetMetadata {
+					#[codec(compact)]
+					pub id: set_metadata::Id,
+					pub name: set_metadata::Name,
+					pub symbol: set_metadata::Symbol,
+					pub decimals: set_metadata::Decimals,
+				}
+				pub mod set_metadata {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Name = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+					pub type Symbol = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+					pub type Decimals = ::core::primitive::u8;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for SetMetadata {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "set_metadata";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Clear the metadata for an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Any deposit is freed for the asset owner."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to clear."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataCleared`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ClearMetadata {
+					#[codec(compact)]
+					pub id: clear_metadata::Id,
+				}
+				pub mod clear_metadata {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ClearMetadata {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "clear_metadata";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Force the metadata for an asset to some value."]
+				#[doc = ""]
+				#[doc = "Origin must be ForceOrigin."]
+				#[doc = ""]
+				#[doc = "Any deposit is left alone."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to update."]
+				#[doc = "- `name`: The user friendly name of this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `symbol`: The exchange symbol for this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `decimals`: The number of decimals this asset uses to represent one unit."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataSet`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(N + S)` where N and S are the length of the name and symbol respectively."]
+				pub struct ForceSetMetadata {
+					#[codec(compact)]
+					pub id: force_set_metadata::Id,
+					pub name: force_set_metadata::Name,
+					pub symbol: force_set_metadata::Symbol,
+					pub decimals: force_set_metadata::Decimals,
+					pub is_frozen: force_set_metadata::IsFrozen,
+				}
+				pub mod force_set_metadata {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Name = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+					pub type Symbol = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+					pub type Decimals = ::core::primitive::u8;
+					pub type IsFrozen = ::core::primitive::bool;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ForceSetMetadata {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "force_set_metadata";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Clear the metadata for an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be ForceOrigin."]
+				#[doc = ""]
+				#[doc = "Any deposit is returned."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to clear."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataCleared`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ForceClearMetadata {
+					#[codec(compact)]
+					pub id: force_clear_metadata::Id,
+				}
+				pub mod force_clear_metadata {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ForceClearMetadata {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "force_clear_metadata";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Alter the attributes of a given asset."]
+				#[doc = ""]
+				#[doc = "Origin must be `ForceOrigin`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `owner`: The new Owner of this asset."]
+				#[doc = "- `issuer`: The new Issuer of this asset."]
+				#[doc = "- `admin`: The new Admin of this asset."]
+				#[doc = "- `freezer`: The new Freezer of this asset."]
+				#[doc = "- `min_balance`: The minimum balance of this new asset that any single account must"]
+				#[doc = "have. If an account's balance is reduced below this, then it collapses to zero."]
+				#[doc = "- `is_sufficient`: Whether a non-zero balance of this asset is deposit of sufficient"]
+				#[doc = "value to account for the state bloat associated with its balance storage. If set to"]
+				#[doc = "`true`, then non-zero balances may be stored without a `consumer` reference (and thus"]
+				#[doc = "an ED in the Balances pallet or whatever else is used to control user-account state"]
+				#[doc = "growth)."]
+				#[doc = "- `is_frozen`: Whether this asset class is frozen except for permissioned/admin"]
+				#[doc = "instructions."]
+				#[doc = ""]
+				#[doc = "Emits `AssetStatusChanged` with the identity of the asset."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ForceAssetStatus {
+					#[codec(compact)]
+					pub id: force_asset_status::Id,
+					pub owner: force_asset_status::Owner,
+					pub issuer: force_asset_status::Issuer,
+					pub admin: force_asset_status::Admin,
+					pub freezer: force_asset_status::Freezer,
+					#[codec(compact)]
+					pub min_balance: force_asset_status::MinBalance,
+					pub is_sufficient: force_asset_status::IsSufficient,
+					pub is_frozen: force_asset_status::IsFrozen,
+				}
+				pub mod force_asset_status {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Owner = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Issuer = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Admin = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Freezer = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type MinBalance = ::core::primitive::u128;
+					pub type IsSufficient = ::core::primitive::bool;
+					pub type IsFrozen = ::core::primitive::bool;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ForceAssetStatus {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "force_asset_status";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Approve an amount of asset for transfer by a delegated third-party account."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed."]
+				#[doc = ""]
+				#[doc = "Ensures that `ApprovalDeposit` worth of `Currency` is reserved from signing account"]
+				#[doc = "for the purpose of holding the approval. If some non-zero amount of assets is already"]
+				#[doc = "approved from signing account to `delegate`, then it is topped up or unreserved to"]
+				#[doc = "meet the right value."]
+				#[doc = ""]
+				#[doc = "NOTE: The signing account does not need to own `amount` of assets at the point of"]
+				#[doc = "making this call."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `delegate`: The account to delegate permission to transfer asset."]
+				#[doc = "- `amount`: The amount of asset that may be transferred by `delegate`. If there is"]
+				#[doc = "already an approval in place, then this acts additively."]
+				#[doc = ""]
+				#[doc = "Emits `ApprovedTransfer` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ApproveTransfer {
+					#[codec(compact)]
+					pub id: approve_transfer::Id,
+					pub delegate: approve_transfer::Delegate,
+					#[codec(compact)]
+					pub amount: approve_transfer::Amount,
+				}
+				pub mod approve_transfer {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Delegate = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ApproveTransfer {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "approve_transfer";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Cancel all of some asset approved for delegated transfer by a third-party account."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and there must be an approval in place between signer and"]
+				#[doc = "`delegate`."]
+				#[doc = ""]
+				#[doc = "Unreserves any deposit previously reserved by `approve_transfer` for the approval."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `delegate`: The account delegated permission to transfer asset."]
+				#[doc = ""]
+				#[doc = "Emits `ApprovalCancelled` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct CancelApproval {
+					#[codec(compact)]
+					pub id: cancel_approval::Id,
+					pub delegate: cancel_approval::Delegate,
+				}
+				pub mod cancel_approval {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Delegate = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for CancelApproval {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "cancel_approval";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Cancel all of some asset approved for delegated transfer by a third-party account."]
+				#[doc = ""]
+				#[doc = "Origin must be either ForceOrigin or Signed origin with the signer being the Admin"]
+				#[doc = "account of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Unreserves any deposit previously reserved by `approve_transfer` for the approval."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `delegate`: The account delegated permission to transfer asset."]
+				#[doc = ""]
+				#[doc = "Emits `ApprovalCancelled` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct ForceCancelApproval {
+					#[codec(compact)]
+					pub id: force_cancel_approval::Id,
+					pub owner: force_cancel_approval::Owner,
+					pub delegate: force_cancel_approval::Delegate,
+				}
+				pub mod force_cancel_approval {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Owner = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Delegate = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for ForceCancelApproval {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "force_cancel_approval";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Transfer some asset balance from a previously delegated account to some third-party"]
+				#[doc = "account."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and there must be an approval in place by the `owner` to the"]
+				#[doc = "signer."]
+				#[doc = ""]
+				#[doc = "If the entire amount approved for transfer is transferred, then any deposit previously"]
+				#[doc = "reserved by `approve_transfer` is unreserved."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `owner`: The account which previously approved for a transfer of at least `amount` and"]
+				#[doc = "from which the asset balance will be withdrawn."]
+				#[doc = "- `destination`: The account to which the asset balance of `amount` will be transferred."]
+				#[doc = "- `amount`: The amount of assets to transfer."]
+				#[doc = ""]
+				#[doc = "Emits `TransferredApproved` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct TransferApproved {
+					#[codec(compact)]
+					pub id: transfer_approved::Id,
+					pub owner: transfer_approved::Owner,
+					pub destination: transfer_approved::Destination,
+					#[codec(compact)]
+					pub amount: transfer_approved::Amount,
+				}
+				pub mod transfer_approved {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Owner = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Destination = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+					pub type Amount = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for TransferApproved {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "transfer_approved";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Create an asset account for non-provider assets."]
+				#[doc = ""]
+				#[doc = "A deposit will be taken from the signer account."]
+				#[doc = ""]
+				#[doc = "- `origin`: Must be Signed; the signer account must have sufficient funds for a deposit"]
+				#[doc = "  to be taken."]
+				#[doc = "- `id`: The identifier of the asset for the account to be created."]
+				#[doc = ""]
+				#[doc = "Emits `Touched` event when successful."]
+				pub struct Touch {
+					#[codec(compact)]
+					pub id: touch::Id,
+				}
+				pub mod touch {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Touch {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "touch";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Return the deposit (if any) of an asset account or a consumer reference (if any) of an"]
+				#[doc = "account."]
+				#[doc = ""]
+				#[doc = "The origin must be Signed."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset for which the caller would like the deposit"]
+				#[doc = "  refunded."]
+				#[doc = "- `allow_burn`: If `true` then assets may be destroyed in order to complete the refund."]
+				#[doc = ""]
+				#[doc = "Emits `Refunded` event when successful."]
+				pub struct Refund {
+					#[codec(compact)]
+					pub id: refund::Id,
+					pub allow_burn: refund::AllowBurn,
+				}
+				pub mod refund {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type AllowBurn = ::core::primitive::bool;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Refund {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "refund";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Sets the minimum balance of an asset."]
+				#[doc = ""]
+				#[doc = "Only works if there aren't any accounts that are holding the asset or if"]
+				#[doc = "the new value of `min_balance` is less than the old one."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender has to be the Owner of the"]
+				#[doc = "asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `min_balance`: The new value of `min_balance`."]
+				#[doc = ""]
+				#[doc = "Emits `AssetMinBalanceChanged` event when successful."]
+				pub struct SetMinBalance {
+					#[codec(compact)]
+					pub id: set_min_balance::Id,
+					pub min_balance: set_min_balance::MinBalance,
+				}
+				pub mod set_min_balance {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type MinBalance = ::core::primitive::u128;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for SetMinBalance {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "set_min_balance";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Create an asset account for `who`."]
+				#[doc = ""]
+				#[doc = "A deposit will be taken from the signer account."]
+				#[doc = ""]
+				#[doc = "- `origin`: Must be Signed by `Freezer` or `Admin` of the asset `id`; the signer account"]
+				#[doc = "  must have sufficient funds for a deposit to be taken."]
+				#[doc = "- `id`: The identifier of the asset for the account to be created."]
+				#[doc = "- `who`: The account to be created."]
+				#[doc = ""]
+				#[doc = "Emits `Touched` event when successful."]
+				pub struct TouchOther {
+					#[codec(compact)]
+					pub id: touch_other::Id,
+					pub who: touch_other::Who,
+				}
+				pub mod touch_other {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Who = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for TouchOther {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "touch_other";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Return the deposit (if any) of a target asset account. Useful if you are the depositor."]
+				#[doc = ""]
+				#[doc = "The origin must be Signed and either the account owner, depositor, or asset `Admin`. In"]
+				#[doc = "order to burn a non-zero balance of the asset, the caller must be the account and should"]
+				#[doc = "use `refund`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset for the account holding a deposit."]
+				#[doc = "- `who`: The account to refund."]
+				#[doc = ""]
+				#[doc = "Emits `Refunded` event when successful."]
+				pub struct RefundOther {
+					#[codec(compact)]
+					pub id: refund_other::Id,
+					pub who: refund_other::Who,
+				}
+				pub mod refund_other {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Who = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for RefundOther {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "refund_other";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Disallow further unprivileged transfers of an asset `id` to and from an account `who`."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Freezer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the account's asset."]
+				#[doc = "- `who`: The account to be unblocked."]
+				#[doc = ""]
+				#[doc = "Emits `Blocked`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub struct Block {
+					#[codec(compact)]
+					pub id: block::Id,
+					pub who: block::Who,
+				}
+				pub mod block {
+					use super::runtime_types;
+					pub type Id = ::core::primitive::u128;
+					pub type Who = ::subxt_core::utils::MultiAddress<
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u32,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for Block {
+					const PALLET: &'static str = "PoolAssets";
+					const CALL: &'static str = "block";
+				}
+			}
+			pub struct TransactionApi;
+			impl TransactionApi {
+				#[doc = "Issue a new class of fungible assets from a public origin."]
+				#[doc = ""]
+				#[doc = "This new asset class has no assets initially and its owner is the origin."]
+				#[doc = ""]
+				#[doc = "The origin must conform to the configured `CreateOrigin` and have sufficient funds free."]
+				#[doc = ""]
+				#[doc = "Funds of sender are reserved by `AssetDeposit`."]
+				#[doc = ""]
+				#[doc = "Parameters:"]
+				#[doc = "- `id`: The identifier of the new asset. This must not be currently in use to identify"]
+				#[doc = "an existing asset. If [`NextAssetId`] is set, then this must be equal to it."]
+				#[doc = "- `admin`: The admin of this class of assets. The admin is the initial address of each"]
+				#[doc = "member of the asset class's admin team."]
+				#[doc = "- `min_balance`: The minimum balance of this new asset that any single account must"]
+				#[doc = "have. If an account's balance is reduced below this, then it collapses to zero."]
+				#[doc = ""]
+				#[doc = "Emits `Created` event when successful."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn create(
+					&self,
+					id: types::create::Id,
+					admin: types::create::Admin,
+					min_balance: types::create::MinBalance,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Create> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"create",
+						types::Create { id, admin, min_balance },
+						[
+							208u8, 49u8, 18u8, 129u8, 207u8, 238u8, 192u8, 47u8, 139u8, 86u8, 78u8,
+							41u8, 244u8, 56u8, 244u8, 63u8, 191u8, 157u8, 97u8, 199u8, 89u8, 243u8,
+							146u8, 188u8, 103u8, 20u8, 244u8, 207u8, 177u8, 114u8, 180u8, 186u8,
+						],
+					)
+				}
+				#[doc = "Issue a new class of fungible assets from a privileged origin."]
+				#[doc = ""]
+				#[doc = "This new asset class has no assets initially."]
+				#[doc = ""]
+				#[doc = "The origin must conform to `ForceOrigin`."]
+				#[doc = ""]
+				#[doc = "Unlike `create`, no funds are reserved."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the new asset. This must not be currently in use to identify"]
+				#[doc = "an existing asset. If [`NextAssetId`] is set, then this must be equal to it."]
+				#[doc = "- `owner`: The owner of this class of assets. The owner has full superuser permissions"]
+				#[doc = "over this asset, but may later change and configure the permissions using"]
+				#[doc = "`transfer_ownership` and `set_team`."]
+				#[doc = "- `min_balance`: The minimum balance of this new asset that any single account must"]
+				#[doc = "have. If an account's balance is reduced below this, then it collapses to zero."]
+				#[doc = ""]
+				#[doc = "Emits `ForceCreated` event when successful."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn force_create(
+					&self,
+					id: types::force_create::Id,
+					owner: types::force_create::Owner,
+					is_sufficient: types::force_create::IsSufficient,
+					min_balance: types::force_create::MinBalance,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceCreate> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"force_create",
+						types::ForceCreate { id, owner, is_sufficient, min_balance },
+						[
+							166u8, 39u8, 43u8, 6u8, 142u8, 204u8, 19u8, 177u8, 213u8, 77u8, 153u8,
+							14u8, 160u8, 23u8, 77u8, 79u8, 30u8, 126u8, 107u8, 92u8, 216u8, 244u8,
+							195u8, 178u8, 8u8, 247u8, 63u8, 116u8, 205u8, 189u8, 148u8, 27u8,
+						],
+					)
+				}
+				#[doc = "Start the process of destroying a fungible asset class."]
+				#[doc = ""]
+				#[doc = "`start_destroy` is the first in a series of extrinsics that should be called, to allow"]
+				#[doc = "destruction of an asset class."]
+				#[doc = ""]
+				#[doc = "The origin must conform to `ForceOrigin` or must be `Signed` by the asset's `owner`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "The asset class must be frozen before calling `start_destroy`."]
+				pub fn start_destroy(
+					&self,
+					id: types::start_destroy::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::StartDestroy> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"start_destroy",
+						types::StartDestroy { id },
+						[
+							36u8, 72u8, 6u8, 145u8, 192u8, 32u8, 10u8, 242u8, 40u8, 2u8, 163u8,
+							102u8, 214u8, 89u8, 25u8, 174u8, 20u8, 151u8, 224u8, 238u8, 117u8,
+							94u8, 174u8, 58u8, 77u8, 73u8, 19u8, 15u8, 232u8, 60u8, 150u8, 1u8,
+						],
+					)
+				}
+				#[doc = "Destroy all accounts associated with a given asset."]
+				#[doc = ""]
+				#[doc = "`destroy_accounts` should only be called after `start_destroy` has been called, and the"]
+				#[doc = "asset is in a `Destroying` state."]
+				#[doc = ""]
+				#[doc = "Due to weight restrictions, this function may need to be called multiple times to fully"]
+				#[doc = "destroy all accounts. It will destroy `RemoveItemsLimit` accounts at a time."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "Each call emits the `Event::DestroyedAccounts` event."]
+				pub fn destroy_accounts(
+					&self,
+					id: types::destroy_accounts::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::DestroyAccounts> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"destroy_accounts",
+						types::DestroyAccounts { id },
+						[
+							195u8, 7u8, 198u8, 206u8, 127u8, 210u8, 166u8, 3u8, 39u8, 199u8, 24u8,
+							142u8, 239u8, 117u8, 217u8, 110u8, 125u8, 75u8, 89u8, 240u8, 180u8,
+							96u8, 72u8, 136u8, 36u8, 10u8, 34u8, 196u8, 112u8, 131u8, 238u8, 121u8,
+						],
+					)
+				}
+				#[doc = "Destroy all approvals associated with a given asset up to the max (T::RemoveItemsLimit)."]
+				#[doc = ""]
+				#[doc = "`destroy_approvals` should only be called after `start_destroy` has been called, and the"]
+				#[doc = "asset is in a `Destroying` state."]
+				#[doc = ""]
+				#[doc = "Due to weight restrictions, this function may need to be called multiple times to fully"]
+				#[doc = "destroy all approvals. It will destroy `RemoveItemsLimit` approvals at a time."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "Each call emits the `Event::DestroyedApprovals` event."]
+				pub fn destroy_approvals(
+					&self,
+					id: types::destroy_approvals::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::DestroyApprovals> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"destroy_approvals",
+						types::DestroyApprovals { id },
+						[
+							215u8, 174u8, 117u8, 99u8, 201u8, 118u8, 171u8, 136u8, 37u8, 121u8,
+							209u8, 53u8, 154u8, 45u8, 28u8, 201u8, 186u8, 120u8, 4u8, 63u8, 142u8,
+							222u8, 92u8, 245u8, 149u8, 219u8, 91u8, 186u8, 224u8, 173u8, 186u8,
+							236u8,
+						],
+					)
+				}
+				#[doc = "Complete destroying asset and unreserve currency."]
+				#[doc = ""]
+				#[doc = "`finish_destroy` should only be called after `start_destroy` has been called, and the"]
+				#[doc = "asset is in a `Destroying` state. All accounts or approvals should be destroyed before"]
+				#[doc = "hand."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be destroyed. This must identify an existing"]
+				#[doc = "  asset."]
+				#[doc = ""]
+				#[doc = "Each successful call emits the `Event::Destroyed` event."]
+				pub fn finish_destroy(
+					&self,
+					id: types::finish_destroy::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::FinishDestroy> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"finish_destroy",
+						types::FinishDestroy { id },
+						[
+							235u8, 198u8, 160u8, 5u8, 223u8, 83u8, 17u8, 160u8, 183u8, 81u8, 61u8,
+							171u8, 23u8, 98u8, 39u8, 234u8, 65u8, 197u8, 193u8, 39u8, 175u8, 142u8,
+							138u8, 169u8, 148u8, 136u8, 152u8, 75u8, 21u8, 33u8, 159u8, 221u8,
+						],
+					)
+				}
+				#[doc = "Mint assets of a particular class."]
+				#[doc = ""]
+				#[doc = "The origin must be Signed and the sender must be the Issuer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount minted."]
+				#[doc = "- `beneficiary`: The account to be credited with the minted assets."]
+				#[doc = "- `amount`: The amount of the asset to be minted."]
+				#[doc = ""]
+				#[doc = "Emits `Issued` event when successful."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existing balance of `beneficiary`; Account pre-existence of `beneficiary`."]
+				pub fn mint(
+					&self,
+					id: types::mint::Id,
+					beneficiary: types::mint::Beneficiary,
+					amount: types::mint::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Mint> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"mint",
+						types::Mint { id, beneficiary, amount },
+						[
+							46u8, 234u8, 142u8, 134u8, 167u8, 112u8, 159u8, 124u8, 4u8, 75u8,
+							219u8, 78u8, 18u8, 244u8, 150u8, 105u8, 185u8, 83u8, 222u8, 119u8,
+							16u8, 82u8, 138u8, 202u8, 252u8, 48u8, 72u8, 251u8, 10u8, 66u8, 133u8,
+							52u8,
+						],
+					)
+				}
+				#[doc = "Reduce the balance of `who` by as much as possible up to `amount` assets of `id`."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Manager of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Bails with `NoAccount` if the `who` is already dead."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount burned."]
+				#[doc = "- `who`: The account to be debited from."]
+				#[doc = "- `amount`: The maximum amount by which `who`'s balance should be reduced."]
+				#[doc = ""]
+				#[doc = "Emits `Burned` with the actual amount burned. If this takes the balance to below the"]
+				#[doc = "minimum for the asset, then the amount burned is increased to take it to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Post-existence of `who`; Pre & post Zombie-status of `who`."]
+				pub fn burn(
+					&self,
+					id: types::burn::Id,
+					who: types::burn::Who,
+					amount: types::burn::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Burn> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"burn",
+						types::Burn { id, who, amount },
+						[
+							129u8, 19u8, 207u8, 124u8, 135u8, 51u8, 197u8, 213u8, 122u8, 16u8,
+							116u8, 137u8, 156u8, 96u8, 190u8, 147u8, 124u8, 37u8, 211u8, 68u8,
+							219u8, 251u8, 119u8, 131u8, 5u8, 232u8, 214u8, 76u8, 112u8, 74u8, 64u8,
+							185u8,
+						],
+					)
+				}
+				#[doc = "Move some assets from the sender account to another."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount transferred."]
+				#[doc = "- `target`: The account to be credited."]
+				#[doc = "- `amount`: The amount by which the sender's balance of assets should be reduced and"]
+				#[doc = "`target`'s balance increased. The amount actually transferred may be slightly greater in"]
+				#[doc = "the case that the transfer would otherwise take the sender balance above zero but below"]
+				#[doc = "the minimum balance. Must be greater than zero."]
+				#[doc = ""]
+				#[doc = "Emits `Transferred` with the actual amount transferred. If this takes the source balance"]
+				#[doc = "to below the minimum for the asset, then the amount transferred is increased to take it"]
+				#[doc = "to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existence of `target`; Post-existence of sender; Account pre-existence of"]
+				#[doc = "`target`."]
+				pub fn transfer(
+					&self,
+					id: types::transfer::Id,
+					target: types::transfer::Target,
+					amount: types::transfer::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Transfer> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"transfer",
+						types::Transfer { id, target, amount },
+						[
+							87u8, 155u8, 32u8, 28u8, 113u8, 163u8, 192u8, 167u8, 135u8, 34u8, 50u8,
+							57u8, 23u8, 219u8, 136u8, 196u8, 190u8, 139u8, 19u8, 132u8, 155u8,
+							235u8, 242u8, 181u8, 201u8, 208u8, 145u8, 199u8, 29u8, 210u8, 102u8,
+							150u8,
+						],
+					)
+				}
+				#[doc = "Move some assets from the sender account to another, keeping the sender account alive."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount transferred."]
+				#[doc = "- `target`: The account to be credited."]
+				#[doc = "- `amount`: The amount by which the sender's balance of assets should be reduced and"]
+				#[doc = "`target`'s balance increased. The amount actually transferred may be slightly greater in"]
+				#[doc = "the case that the transfer would otherwise take the sender balance above zero but below"]
+				#[doc = "the minimum balance. Must be greater than zero."]
+				#[doc = ""]
+				#[doc = "Emits `Transferred` with the actual amount transferred. If this takes the source balance"]
+				#[doc = "to below the minimum for the asset, then the amount transferred is increased to take it"]
+				#[doc = "to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existence of `target`; Post-existence of sender; Account pre-existence of"]
+				#[doc = "`target`."]
+				pub fn transfer_keep_alive(
+					&self,
+					id: types::transfer_keep_alive::Id,
+					target: types::transfer_keep_alive::Target,
+					amount: types::transfer_keep_alive::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::TransferKeepAlive> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"transfer_keep_alive",
+						types::TransferKeepAlive { id, target, amount },
+						[
+							123u8, 131u8, 176u8, 147u8, 52u8, 2u8, 105u8, 141u8, 206u8, 216u8,
+							43u8, 169u8, 150u8, 131u8, 146u8, 210u8, 37u8, 133u8, 221u8, 155u8,
+							74u8, 127u8, 166u8, 131u8, 122u8, 28u8, 255u8, 224u8, 4u8, 125u8, 43u8,
+							116u8,
+						],
+					)
+				}
+				#[doc = "Move some assets from one account to another."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Admin of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to have some amount transferred."]
+				#[doc = "- `source`: The account to be debited."]
+				#[doc = "- `dest`: The account to be credited."]
+				#[doc = "- `amount`: The amount by which the `source`'s balance of assets should be reduced and"]
+				#[doc = "`dest`'s balance increased. The amount actually transferred may be slightly greater in"]
+				#[doc = "the case that the transfer would otherwise take the `source` balance above zero but"]
+				#[doc = "below the minimum balance. Must be greater than zero."]
+				#[doc = ""]
+				#[doc = "Emits `Transferred` with the actual amount transferred. If this takes the source balance"]
+				#[doc = "to below the minimum for the asset, then the amount transferred is increased to take it"]
+				#[doc = "to zero."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				#[doc = "Modes: Pre-existence of `dest`; Post-existence of `source`; Account pre-existence of"]
+				#[doc = "`dest`."]
+				pub fn force_transfer(
+					&self,
+					id: types::force_transfer::Id,
+					source: types::force_transfer::Source,
+					dest: types::force_transfer::Dest,
+					amount: types::force_transfer::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceTransfer> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"force_transfer",
+						types::ForceTransfer { id, source, dest, amount },
+						[
+							135u8, 220u8, 220u8, 70u8, 132u8, 5u8, 91u8, 192u8, 37u8, 49u8, 170u8,
+							1u8, 32u8, 63u8, 91u8, 80u8, 67u8, 230u8, 40u8, 112u8, 217u8, 68u8,
+							116u8, 74u8, 158u8, 236u8, 88u8, 99u8, 216u8, 237u8, 30u8, 134u8,
+						],
+					)
+				}
+				#[doc = "Disallow further unprivileged transfers of an asset `id` from an account `who`. `who`"]
+				#[doc = "must already exist as an entry in `Account`s of the asset. If you want to freeze an"]
+				#[doc = "account that does not have an entry, use `touch_other` first."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Freezer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = "- `who`: The account to be frozen."]
+				#[doc = ""]
+				#[doc = "Emits `Frozen`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn freeze(
+					&self,
+					id: types::freeze::Id,
+					who: types::freeze::Who,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Freeze> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"freeze",
+						types::Freeze { id, who },
+						[
+							117u8, 116u8, 226u8, 111u8, 184u8, 196u8, 32u8, 82u8, 10u8, 236u8,
+							98u8, 146u8, 228u8, 41u8, 200u8, 80u8, 36u8, 215u8, 52u8, 154u8, 99u8,
+							186u8, 73u8, 188u8, 2u8, 88u8, 106u8, 198u8, 101u8, 9u8, 103u8, 153u8,
+						],
+					)
+				}
+				#[doc = "Allow unprivileged transfers to and from an account again."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Admin of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = "- `who`: The account to be unfrozen."]
+				#[doc = ""]
+				#[doc = "Emits `Thawed`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn thaw(
+					&self,
+					id: types::thaw::Id,
+					who: types::thaw::Who,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Thaw> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"thaw",
+						types::Thaw { id, who },
+						[
+							1u8, 176u8, 121u8, 9u8, 44u8, 113u8, 75u8, 15u8, 167u8, 36u8, 121u8,
+							144u8, 151u8, 238u8, 64u8, 48u8, 195u8, 119u8, 230u8, 187u8, 5u8, 43u8,
+							14u8, 37u8, 183u8, 20u8, 225u8, 225u8, 173u8, 238u8, 236u8, 80u8,
+						],
+					)
+				}
+				#[doc = "Disallow further unprivileged transfers for the asset class."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Freezer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = ""]
+				#[doc = "Emits `Frozen`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn freeze_asset(
+					&self,
+					id: types::freeze_asset::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::FreezeAsset> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"freeze_asset",
+						types::FreezeAsset { id },
+						[
+							189u8, 253u8, 85u8, 111u8, 106u8, 34u8, 124u8, 108u8, 39u8, 240u8,
+							26u8, 83u8, 0u8, 110u8, 218u8, 93u8, 216u8, 82u8, 14u8, 5u8, 241u8,
+							172u8, 15u8, 250u8, 220u8, 101u8, 196u8, 18u8, 214u8, 208u8, 149u8,
+							148u8,
+						],
+					)
+				}
+				#[doc = "Allow unprivileged transfers for the asset again."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Admin of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be thawed."]
+				#[doc = ""]
+				#[doc = "Emits `Thawed`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn thaw_asset(
+					&self,
+					id: types::thaw_asset::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ThawAsset> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"thaw_asset",
+						types::ThawAsset { id },
+						[
+							15u8, 56u8, 25u8, 188u8, 111u8, 220u8, 108u8, 41u8, 232u8, 254u8, 58u8,
+							202u8, 249u8, 240u8, 2u8, 45u8, 128u8, 89u8, 116u8, 120u8, 24u8, 99u8,
+							88u8, 99u8, 97u8, 254u8, 166u8, 174u8, 103u8, 23u8, 42u8, 74u8,
+						],
+					)
+				}
+				#[doc = "Change the Owner of an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `owner`: The new Owner of this asset."]
+				#[doc = ""]
+				#[doc = "Emits `OwnerChanged`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn transfer_ownership(
+					&self,
+					id: types::transfer_ownership::Id,
+					owner: types::transfer_ownership::Owner,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::TransferOwnership> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"transfer_ownership",
+						types::TransferOwnership { id, owner },
+						[
+							135u8, 103u8, 234u8, 191u8, 90u8, 8u8, 74u8, 85u8, 16u8, 219u8, 36u8,
+							169u8, 20u8, 182u8, 36u8, 41u8, 90u8, 185u8, 108u8, 39u8, 172u8, 145u8,
+							38u8, 33u8, 99u8, 228u8, 249u8, 172u8, 243u8, 116u8, 150u8, 183u8,
+						],
+					)
+				}
+				#[doc = "Change the Issuer, Admin and Freezer of an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to be frozen."]
+				#[doc = "- `issuer`: The new Issuer of this asset."]
+				#[doc = "- `admin`: The new Admin of this asset."]
+				#[doc = "- `freezer`: The new Freezer of this asset."]
+				#[doc = ""]
+				#[doc = "Emits `TeamChanged`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn set_team(
+					&self,
+					id: types::set_team::Id,
+					issuer: types::set_team::Issuer,
+					admin: types::set_team::Admin,
+					freezer: types::set_team::Freezer,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::SetTeam> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"set_team",
+						types::SetTeam { id, issuer, admin, freezer },
+						[
+							10u8, 155u8, 117u8, 95u8, 203u8, 165u8, 234u8, 175u8, 85u8, 78u8,
+							231u8, 0u8, 195u8, 76u8, 141u8, 167u8, 186u8, 243u8, 186u8, 207u8,
+							190u8, 74u8, 134u8, 95u8, 212u8, 0u8, 111u8, 59u8, 113u8, 220u8, 131u8,
+							251u8,
+						],
+					)
+				}
+				#[doc = "Set the metadata for an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Funds of sender are reserved according to the formula:"]
+				#[doc = "`MetadataDepositBase + MetadataDepositPerByte * (name.len + symbol.len)` taking into"]
+				#[doc = "account any already reserved funds."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to update."]
+				#[doc = "- `name`: The user friendly name of this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `symbol`: The exchange symbol for this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `decimals`: The number of decimals this asset uses to represent one unit."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataSet`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn set_metadata(
+					&self,
+					id: types::set_metadata::Id,
+					name: types::set_metadata::Name,
+					symbol: types::set_metadata::Symbol,
+					decimals: types::set_metadata::Decimals,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::SetMetadata> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"set_metadata",
+						types::SetMetadata { id, name, symbol, decimals },
+						[
+							53u8, 40u8, 19u8, 104u8, 202u8, 184u8, 183u8, 250u8, 2u8, 60u8, 232u8,
+							140u8, 159u8, 97u8, 246u8, 139u8, 230u8, 111u8, 186u8, 159u8, 170u8,
+							192u8, 205u8, 186u8, 96u8, 25u8, 89u8, 75u8, 230u8, 247u8, 181u8,
+							211u8,
+						],
+					)
+				}
+				#[doc = "Clear the metadata for an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Owner of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Any deposit is freed for the asset owner."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to clear."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataCleared`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn clear_metadata(
+					&self,
+					id: types::clear_metadata::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ClearMetadata> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"clear_metadata",
+						types::ClearMetadata { id },
+						[
+							137u8, 235u8, 66u8, 91u8, 5u8, 130u8, 150u8, 242u8, 209u8, 166u8, 32u8,
+							157u8, 49u8, 158u8, 49u8, 199u8, 209u8, 107u8, 21u8, 125u8, 222u8,
+							19u8, 41u8, 120u8, 207u8, 168u8, 5u8, 177u8, 171u8, 9u8, 176u8, 238u8,
+						],
+					)
+				}
+				#[doc = "Force the metadata for an asset to some value."]
+				#[doc = ""]
+				#[doc = "Origin must be ForceOrigin."]
+				#[doc = ""]
+				#[doc = "Any deposit is left alone."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to update."]
+				#[doc = "- `name`: The user friendly name of this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `symbol`: The exchange symbol for this asset. Limited in length by `StringLimit`."]
+				#[doc = "- `decimals`: The number of decimals this asset uses to represent one unit."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataSet`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(N + S)` where N and S are the length of the name and symbol respectively."]
+				pub fn force_set_metadata(
+					&self,
+					id: types::force_set_metadata::Id,
+					name: types::force_set_metadata::Name,
+					symbol: types::force_set_metadata::Symbol,
+					decimals: types::force_set_metadata::Decimals,
+					is_frozen: types::force_set_metadata::IsFrozen,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceSetMetadata> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"force_set_metadata",
+						types::ForceSetMetadata { id, name, symbol, decimals, is_frozen },
+						[
+							177u8, 45u8, 247u8, 110u8, 214u8, 132u8, 130u8, 86u8, 46u8, 201u8,
+							169u8, 19u8, 46u8, 89u8, 227u8, 114u8, 195u8, 46u8, 135u8, 216u8,
+							202u8, 78u8, 182u8, 114u8, 126u8, 71u8, 34u8, 13u8, 48u8, 19u8, 99u8,
+							192u8,
+						],
+					)
+				}
+				#[doc = "Clear the metadata for an asset."]
+				#[doc = ""]
+				#[doc = "Origin must be ForceOrigin."]
+				#[doc = ""]
+				#[doc = "Any deposit is returned."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset to clear."]
+				#[doc = ""]
+				#[doc = "Emits `MetadataCleared`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn force_clear_metadata(
+					&self,
+					id: types::force_clear_metadata::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceClearMetadata> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"force_clear_metadata",
+						types::ForceClearMetadata { id },
+						[
+							214u8, 13u8, 163u8, 168u8, 249u8, 152u8, 53u8, 201u8, 218u8, 161u8,
+							23u8, 187u8, 48u8, 132u8, 66u8, 172u8, 118u8, 76u8, 229u8, 139u8,
+							234u8, 64u8, 28u8, 86u8, 91u8, 155u8, 38u8, 136u8, 141u8, 136u8, 43u8,
+							150u8,
+						],
+					)
+				}
+				#[doc = "Alter the attributes of a given asset."]
+				#[doc = ""]
+				#[doc = "Origin must be `ForceOrigin`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `owner`: The new Owner of this asset."]
+				#[doc = "- `issuer`: The new Issuer of this asset."]
+				#[doc = "- `admin`: The new Admin of this asset."]
+				#[doc = "- `freezer`: The new Freezer of this asset."]
+				#[doc = "- `min_balance`: The minimum balance of this new asset that any single account must"]
+				#[doc = "have. If an account's balance is reduced below this, then it collapses to zero."]
+				#[doc = "- `is_sufficient`: Whether a non-zero balance of this asset is deposit of sufficient"]
+				#[doc = "value to account for the state bloat associated with its balance storage. If set to"]
+				#[doc = "`true`, then non-zero balances may be stored without a `consumer` reference (and thus"]
+				#[doc = "an ED in the Balances pallet or whatever else is used to control user-account state"]
+				#[doc = "growth)."]
+				#[doc = "- `is_frozen`: Whether this asset class is frozen except for permissioned/admin"]
+				#[doc = "instructions."]
+				#[doc = ""]
+				#[doc = "Emits `AssetStatusChanged` with the identity of the asset."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn force_asset_status(
+					&self,
+					id: types::force_asset_status::Id,
+					owner: types::force_asset_status::Owner,
+					issuer: types::force_asset_status::Issuer,
+					admin: types::force_asset_status::Admin,
+					freezer: types::force_asset_status::Freezer,
+					min_balance: types::force_asset_status::MinBalance,
+					is_sufficient: types::force_asset_status::IsSufficient,
+					is_frozen: types::force_asset_status::IsFrozen,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceAssetStatus> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"force_asset_status",
+						types::ForceAssetStatus {
+							id,
+							owner,
+							issuer,
+							admin,
+							freezer,
+							min_balance,
+							is_sufficient,
+							is_frozen,
+						},
+						[
+							105u8, 154u8, 150u8, 105u8, 18u8, 84u8, 154u8, 171u8, 188u8, 113u8,
+							52u8, 125u8, 8u8, 238u8, 196u8, 145u8, 163u8, 231u8, 12u8, 49u8, 143u8,
+							99u8, 99u8, 25u8, 36u8, 123u8, 201u8, 23u8, 3u8, 53u8, 203u8, 171u8,
+						],
+					)
+				}
+				#[doc = "Approve an amount of asset for transfer by a delegated third-party account."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed."]
+				#[doc = ""]
+				#[doc = "Ensures that `ApprovalDeposit` worth of `Currency` is reserved from signing account"]
+				#[doc = "for the purpose of holding the approval. If some non-zero amount of assets is already"]
+				#[doc = "approved from signing account to `delegate`, then it is topped up or unreserved to"]
+				#[doc = "meet the right value."]
+				#[doc = ""]
+				#[doc = "NOTE: The signing account does not need to own `amount` of assets at the point of"]
+				#[doc = "making this call."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `delegate`: The account to delegate permission to transfer asset."]
+				#[doc = "- `amount`: The amount of asset that may be transferred by `delegate`. If there is"]
+				#[doc = "already an approval in place, then this acts additively."]
+				#[doc = ""]
+				#[doc = "Emits `ApprovedTransfer` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn approve_transfer(
+					&self,
+					id: types::approve_transfer::Id,
+					delegate: types::approve_transfer::Delegate,
+					amount: types::approve_transfer::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ApproveTransfer> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"approve_transfer",
+						types::ApproveTransfer { id, delegate, amount },
+						[
+							154u8, 68u8, 127u8, 59u8, 59u8, 72u8, 179u8, 103u8, 72u8, 240u8, 44u8,
+							43u8, 153u8, 140u8, 109u8, 1u8, 255u8, 155u8, 52u8, 19u8, 45u8, 212u8,
+							65u8, 66u8, 3u8, 49u8, 144u8, 23u8, 19u8, 175u8, 115u8, 230u8,
+						],
+					)
+				}
+				#[doc = "Cancel all of some asset approved for delegated transfer by a third-party account."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and there must be an approval in place between signer and"]
+				#[doc = "`delegate`."]
+				#[doc = ""]
+				#[doc = "Unreserves any deposit previously reserved by `approve_transfer` for the approval."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `delegate`: The account delegated permission to transfer asset."]
+				#[doc = ""]
+				#[doc = "Emits `ApprovalCancelled` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn cancel_approval(
+					&self,
+					id: types::cancel_approval::Id,
+					delegate: types::cancel_approval::Delegate,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::CancelApproval> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"cancel_approval",
+						types::CancelApproval { id, delegate },
+						[
+							152u8, 186u8, 35u8, 86u8, 186u8, 3u8, 238u8, 219u8, 202u8, 29u8, 222u8,
+							220u8, 117u8, 131u8, 49u8, 224u8, 155u8, 248u8, 60u8, 17u8, 142u8,
+							72u8, 50u8, 92u8, 69u8, 152u8, 24u8, 210u8, 157u8, 145u8, 238u8, 135u8,
+						],
+					)
+				}
+				#[doc = "Cancel all of some asset approved for delegated transfer by a third-party account."]
+				#[doc = ""]
+				#[doc = "Origin must be either ForceOrigin or Signed origin with the signer being the Admin"]
+				#[doc = "account of the asset `id`."]
+				#[doc = ""]
+				#[doc = "Unreserves any deposit previously reserved by `approve_transfer` for the approval."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `delegate`: The account delegated permission to transfer asset."]
+				#[doc = ""]
+				#[doc = "Emits `ApprovalCancelled` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn force_cancel_approval(
+					&self,
+					id: types::force_cancel_approval::Id,
+					owner: types::force_cancel_approval::Owner,
+					delegate: types::force_cancel_approval::Delegate,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::ForceCancelApproval> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"force_cancel_approval",
+						types::ForceCancelApproval { id, owner, delegate },
+						[
+							214u8, 56u8, 202u8, 108u8, 210u8, 190u8, 111u8, 254u8, 108u8, 85u8,
+							77u8, 111u8, 229u8, 129u8, 85u8, 197u8, 186u8, 58u8, 217u8, 174u8,
+							76u8, 244u8, 188u8, 124u8, 42u8, 149u8, 128u8, 190u8, 194u8, 209u8,
+							51u8, 204u8,
+						],
+					)
+				}
+				#[doc = "Transfer some asset balance from a previously delegated account to some third-party"]
+				#[doc = "account."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and there must be an approval in place by the `owner` to the"]
+				#[doc = "signer."]
+				#[doc = ""]
+				#[doc = "If the entire amount approved for transfer is transferred, then any deposit previously"]
+				#[doc = "reserved by `approve_transfer` is unreserved."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `owner`: The account which previously approved for a transfer of at least `amount` and"]
+				#[doc = "from which the asset balance will be withdrawn."]
+				#[doc = "- `destination`: The account to which the asset balance of `amount` will be transferred."]
+				#[doc = "- `amount`: The amount of assets to transfer."]
+				#[doc = ""]
+				#[doc = "Emits `TransferredApproved` on success."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn transfer_approved(
+					&self,
+					id: types::transfer_approved::Id,
+					owner: types::transfer_approved::Owner,
+					destination: types::transfer_approved::Destination,
+					amount: types::transfer_approved::Amount,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::TransferApproved> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"transfer_approved",
+						types::TransferApproved { id, owner, destination, amount },
+						[
+							134u8, 20u8, 68u8, 106u8, 55u8, 127u8, 236u8, 253u8, 9u8, 247u8, 251u8,
+							230u8, 164u8, 225u8, 15u8, 180u8, 96u8, 82u8, 182u8, 232u8, 239u8, 2u8,
+							33u8, 244u8, 112u8, 26u8, 30u8, 242u8, 85u8, 249u8, 114u8, 75u8,
+						],
+					)
+				}
+				#[doc = "Create an asset account for non-provider assets."]
+				#[doc = ""]
+				#[doc = "A deposit will be taken from the signer account."]
+				#[doc = ""]
+				#[doc = "- `origin`: Must be Signed; the signer account must have sufficient funds for a deposit"]
+				#[doc = "  to be taken."]
+				#[doc = "- `id`: The identifier of the asset for the account to be created."]
+				#[doc = ""]
+				#[doc = "Emits `Touched` event when successful."]
+				pub fn touch(
+					&self,
+					id: types::touch::Id,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Touch> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"touch",
+						types::Touch { id },
+						[
+							93u8, 110u8, 255u8, 67u8, 63u8, 27u8, 179u8, 188u8, 189u8, 16u8, 207u8,
+							50u8, 23u8, 89u8, 125u8, 220u8, 81u8, 173u8, 33u8, 242u8, 231u8, 211u8,
+							212u8, 33u8, 135u8, 239u8, 198u8, 58u8, 24u8, 205u8, 236u8, 178u8,
+						],
+					)
+				}
+				#[doc = "Return the deposit (if any) of an asset account or a consumer reference (if any) of an"]
+				#[doc = "account."]
+				#[doc = ""]
+				#[doc = "The origin must be Signed."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset for which the caller would like the deposit"]
+				#[doc = "  refunded."]
+				#[doc = "- `allow_burn`: If `true` then assets may be destroyed in order to complete the refund."]
+				#[doc = ""]
+				#[doc = "Emits `Refunded` event when successful."]
+				pub fn refund(
+					&self,
+					id: types::refund::Id,
+					allow_burn: types::refund::AllowBurn,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Refund> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"refund",
+						types::Refund { id, allow_burn },
+						[
+							212u8, 171u8, 194u8, 110u8, 144u8, 125u8, 9u8, 224u8, 173u8, 44u8,
+							146u8, 30u8, 7u8, 51u8, 82u8, 239u8, 18u8, 170u8, 66u8, 201u8, 148u8,
+							189u8, 210u8, 218u8, 98u8, 166u8, 128u8, 77u8, 136u8, 151u8, 114u8,
+							237u8,
+						],
+					)
+				}
+				#[doc = "Sets the minimum balance of an asset."]
+				#[doc = ""]
+				#[doc = "Only works if there aren't any accounts that are holding the asset or if"]
+				#[doc = "the new value of `min_balance` is less than the old one."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender has to be the Owner of the"]
+				#[doc = "asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset."]
+				#[doc = "- `min_balance`: The new value of `min_balance`."]
+				#[doc = ""]
+				#[doc = "Emits `AssetMinBalanceChanged` event when successful."]
+				pub fn set_min_balance(
+					&self,
+					id: types::set_min_balance::Id,
+					min_balance: types::set_min_balance::MinBalance,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::SetMinBalance> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"set_min_balance",
+						types::SetMinBalance { id, min_balance },
+						[
+							237u8, 126u8, 65u8, 131u8, 29u8, 64u8, 78u8, 86u8, 151u8, 18u8, 248u8,
+							45u8, 25u8, 48u8, 219u8, 17u8, 211u8, 81u8, 53u8, 5u8, 17u8, 214u8,
+							86u8, 143u8, 79u8, 200u8, 88u8, 147u8, 150u8, 103u8, 228u8, 253u8,
+						],
+					)
+				}
+				#[doc = "Create an asset account for `who`."]
+				#[doc = ""]
+				#[doc = "A deposit will be taken from the signer account."]
+				#[doc = ""]
+				#[doc = "- `origin`: Must be Signed by `Freezer` or `Admin` of the asset `id`; the signer account"]
+				#[doc = "  must have sufficient funds for a deposit to be taken."]
+				#[doc = "- `id`: The identifier of the asset for the account to be created."]
+				#[doc = "- `who`: The account to be created."]
+				#[doc = ""]
+				#[doc = "Emits `Touched` event when successful."]
+				pub fn touch_other(
+					&self,
+					id: types::touch_other::Id,
+					who: types::touch_other::Who,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::TouchOther> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"touch_other",
+						types::TouchOther { id, who },
+						[
+							4u8, 90u8, 49u8, 84u8, 204u8, 249u8, 79u8, 140u8, 98u8, 103u8, 221u8,
+							158u8, 98u8, 9u8, 117u8, 221u8, 19u8, 166u8, 39u8, 229u8, 70u8, 130u8,
+							219u8, 150u8, 190u8, 239u8, 140u8, 36u8, 207u8, 86u8, 172u8, 220u8,
+						],
+					)
+				}
+				#[doc = "Return the deposit (if any) of a target asset account. Useful if you are the depositor."]
+				#[doc = ""]
+				#[doc = "The origin must be Signed and either the account owner, depositor, or asset `Admin`. In"]
+				#[doc = "order to burn a non-zero balance of the asset, the caller must be the account and should"]
+				#[doc = "use `refund`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the asset for the account holding a deposit."]
+				#[doc = "- `who`: The account to refund."]
+				#[doc = ""]
+				#[doc = "Emits `Refunded` event when successful."]
+				pub fn refund_other(
+					&self,
+					id: types::refund_other::Id,
+					who: types::refund_other::Who,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::RefundOther> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"refund_other",
+						types::RefundOther { id, who },
+						[
+							241u8, 92u8, 111u8, 163u8, 37u8, 185u8, 60u8, 48u8, 174u8, 96u8, 122u8,
+							142u8, 159u8, 84u8, 96u8, 169u8, 149u8, 52u8, 206u8, 25u8, 85u8, 173u8,
+							131u8, 148u8, 40u8, 215u8, 157u8, 161u8, 128u8, 181u8, 50u8, 175u8,
+						],
+					)
+				}
+				#[doc = "Disallow further unprivileged transfers of an asset `id` to and from an account `who`."]
+				#[doc = ""]
+				#[doc = "Origin must be Signed and the sender should be the Freezer of the asset `id`."]
+				#[doc = ""]
+				#[doc = "- `id`: The identifier of the account's asset."]
+				#[doc = "- `who`: The account to be unblocked."]
+				#[doc = ""]
+				#[doc = "Emits `Blocked`."]
+				#[doc = ""]
+				#[doc = "Weight: `O(1)`"]
+				pub fn block(
+					&self,
+					id: types::block::Id,
+					who: types::block::Who,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::Block> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"PoolAssets",
+						"block",
+						types::Block { id, who },
+						[
+							92u8, 59u8, 111u8, 18u8, 78u8, 136u8, 38u8, 69u8, 217u8, 56u8, 115u8,
+							167u8, 145u8, 241u8, 131u8, 202u8, 132u8, 55u8, 196u8, 54u8, 109u8,
+							57u8, 175u8, 184u8, 70u8, 159u8, 19u8, 105u8, 57u8, 92u8, 237u8, 34u8,
+						],
+					)
+				}
+			}
+		}
+		#[doc = "The `Event` enum of this pallet"]
+		pub type Event = runtime_types::pallet_assets::pallet::Event;
+		pub mod events {
+			use super::runtime_types;
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some asset class was created."]
+			pub struct Created {
+				pub asset_id: created::AssetId,
+				pub creator: created::Creator,
+				pub owner: created::Owner,
+			}
+			pub mod created {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Creator = ::subxt_core::utils::AccountId32;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for Created {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Created";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some assets were issued."]
+			pub struct Issued {
+				pub asset_id: issued::AssetId,
+				pub owner: issued::Owner,
+				pub amount: issued::Amount,
+			}
+			pub mod issued {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for Issued {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Issued";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some assets were transferred."]
+			pub struct Transferred {
+				pub asset_id: transferred::AssetId,
+				pub from: transferred::From,
+				pub to: transferred::To,
+				pub amount: transferred::Amount,
+			}
+			pub mod transferred {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type From = ::subxt_core::utils::AccountId32;
+				pub type To = ::subxt_core::utils::AccountId32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for Transferred {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Transferred";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some assets were destroyed."]
+			pub struct Burned {
+				pub asset_id: burned::AssetId,
+				pub owner: burned::Owner,
+				pub balance: burned::Balance,
+			}
+			pub mod burned {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+				pub type Balance = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for Burned {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Burned";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "The management team changed."]
+			pub struct TeamChanged {
+				pub asset_id: team_changed::AssetId,
+				pub issuer: team_changed::Issuer,
+				pub admin: team_changed::Admin,
+				pub freezer: team_changed::Freezer,
+			}
+			pub mod team_changed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Issuer = ::subxt_core::utils::AccountId32;
+				pub type Admin = ::subxt_core::utils::AccountId32;
+				pub type Freezer = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for TeamChanged {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "TeamChanged";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "The owner changed."]
+			pub struct OwnerChanged {
+				pub asset_id: owner_changed::AssetId,
+				pub owner: owner_changed::Owner,
+			}
+			pub mod owner_changed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for OwnerChanged {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "OwnerChanged";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some account `who` was frozen."]
+			pub struct Frozen {
+				pub asset_id: frozen::AssetId,
+				pub who: frozen::Who,
+			}
+			pub mod frozen {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Who = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for Frozen {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Frozen";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some account `who` was thawed."]
+			pub struct Thawed {
+				pub asset_id: thawed::AssetId,
+				pub who: thawed::Who,
+			}
+			pub mod thawed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Who = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for Thawed {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Thawed";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some asset `asset_id` was frozen."]
+			pub struct AssetFrozen {
+				pub asset_id: asset_frozen::AssetId,
+			}
+			pub mod asset_frozen {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for AssetFrozen {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "AssetFrozen";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some asset `asset_id` was thawed."]
+			pub struct AssetThawed {
+				pub asset_id: asset_thawed::AssetId,
+			}
+			pub mod asset_thawed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for AssetThawed {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "AssetThawed";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Accounts were destroyed for given asset."]
+			pub struct AccountsDestroyed {
+				pub asset_id: accounts_destroyed::AssetId,
+				pub accounts_destroyed: accounts_destroyed::AccountsDestroyed,
+				pub accounts_remaining: accounts_destroyed::AccountsRemaining,
+			}
+			pub mod accounts_destroyed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type AccountsDestroyed = ::core::primitive::u32;
+				pub type AccountsRemaining = ::core::primitive::u32;
+			}
+			impl ::subxt_core::events::StaticEvent for AccountsDestroyed {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "AccountsDestroyed";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Approvals were destroyed for given asset."]
+			pub struct ApprovalsDestroyed {
+				pub asset_id: approvals_destroyed::AssetId,
+				pub approvals_destroyed: approvals_destroyed::ApprovalsDestroyed,
+				pub approvals_remaining: approvals_destroyed::ApprovalsRemaining,
+			}
+			pub mod approvals_destroyed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type ApprovalsDestroyed = ::core::primitive::u32;
+				pub type ApprovalsRemaining = ::core::primitive::u32;
+			}
+			impl ::subxt_core::events::StaticEvent for ApprovalsDestroyed {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "ApprovalsDestroyed";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "An asset class is in the process of being destroyed."]
+			pub struct DestructionStarted {
+				pub asset_id: destruction_started::AssetId,
+			}
+			pub mod destruction_started {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for DestructionStarted {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "DestructionStarted";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "An asset class was destroyed."]
+			pub struct Destroyed {
+				pub asset_id: destroyed::AssetId,
+			}
+			pub mod destroyed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for Destroyed {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Destroyed";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some asset class was force-created."]
+			pub struct ForceCreated {
+				pub asset_id: force_created::AssetId,
+				pub owner: force_created::Owner,
+			}
+			pub mod force_created {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for ForceCreated {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "ForceCreated";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "New metadata has been set for an asset."]
+			pub struct MetadataSet {
+				pub asset_id: metadata_set::AssetId,
+				pub name: metadata_set::Name,
+				pub symbol: metadata_set::Symbol,
+				pub decimals: metadata_set::Decimals,
+				pub is_frozen: metadata_set::IsFrozen,
+			}
+			pub mod metadata_set {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Name = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+				pub type Symbol = ::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+				pub type Decimals = ::core::primitive::u8;
+				pub type IsFrozen = ::core::primitive::bool;
+			}
+			impl ::subxt_core::events::StaticEvent for MetadataSet {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "MetadataSet";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Metadata has been cleared for an asset."]
+			pub struct MetadataCleared {
+				pub asset_id: metadata_cleared::AssetId,
+			}
+			pub mod metadata_cleared {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for MetadataCleared {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "MetadataCleared";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "(Additional) funds have been approved for transfer to a destination account."]
+			pub struct ApprovedTransfer {
+				pub asset_id: approved_transfer::AssetId,
+				pub source: approved_transfer::Source,
+				pub delegate: approved_transfer::Delegate,
+				pub amount: approved_transfer::Amount,
+			}
+			pub mod approved_transfer {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Source = ::subxt_core::utils::AccountId32;
+				pub type Delegate = ::subxt_core::utils::AccountId32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for ApprovedTransfer {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "ApprovedTransfer";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "An approval for account `delegate` was cancelled by `owner`."]
+			pub struct ApprovalCancelled {
+				pub asset_id: approval_cancelled::AssetId,
+				pub owner: approval_cancelled::Owner,
+				pub delegate: approval_cancelled::Delegate,
+			}
+			pub mod approval_cancelled {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+				pub type Delegate = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for ApprovalCancelled {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "ApprovalCancelled";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "An `amount` was transferred in its entirety from `owner` to `destination` by"]
+			#[doc = "the approved `delegate`."]
+			pub struct TransferredApproved {
+				pub asset_id: transferred_approved::AssetId,
+				pub owner: transferred_approved::Owner,
+				pub delegate: transferred_approved::Delegate,
+				pub destination: transferred_approved::Destination,
+				pub amount: transferred_approved::Amount,
+			}
+			pub mod transferred_approved {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Owner = ::subxt_core::utils::AccountId32;
+				pub type Delegate = ::subxt_core::utils::AccountId32;
+				pub type Destination = ::subxt_core::utils::AccountId32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for TransferredApproved {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "TransferredApproved";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "An asset has had its attributes changed by the `Force` origin."]
+			pub struct AssetStatusChanged {
+				pub asset_id: asset_status_changed::AssetId,
+			}
+			pub mod asset_status_changed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for AssetStatusChanged {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "AssetStatusChanged";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "The min_balance of an asset has been updated by the asset owner."]
+			pub struct AssetMinBalanceChanged {
+				pub asset_id: asset_min_balance_changed::AssetId,
+				pub new_min_balance: asset_min_balance_changed::NewMinBalance,
+			}
+			pub mod asset_min_balance_changed {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type NewMinBalance = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for AssetMinBalanceChanged {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "AssetMinBalanceChanged";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some account `who` was created with a deposit from `depositor`."]
+			pub struct Touched {
+				pub asset_id: touched::AssetId,
+				pub who: touched::Who,
+				pub depositor: touched::Depositor,
+			}
+			pub mod touched {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Who = ::subxt_core::utils::AccountId32;
+				pub type Depositor = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for Touched {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Touched";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some account `who` was blocked."]
+			pub struct Blocked {
+				pub asset_id: blocked::AssetId,
+				pub who: blocked::Who,
+			}
+			pub mod blocked {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Who = ::subxt_core::utils::AccountId32;
+			}
+			impl ::subxt_core::events::StaticEvent for Blocked {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Blocked";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some assets were deposited (e.g. for transaction fees)."]
+			pub struct Deposited {
+				pub asset_id: deposited::AssetId,
+				pub who: deposited::Who,
+				pub amount: deposited::Amount,
+			}
+			pub mod deposited {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Who = ::subxt_core::utils::AccountId32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for Deposited {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Deposited";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Some assets were withdrawn from the account (e.g. for transaction fees)."]
+			pub struct Withdrawn {
+				pub asset_id: withdrawn::AssetId,
+				pub who: withdrawn::Who,
+				pub amount: withdrawn::Amount,
+			}
+			pub mod withdrawn {
+				use super::runtime_types;
+				pub type AssetId = ::core::primitive::u128;
+				pub type Who = ::subxt_core::utils::AccountId32;
+				pub type Amount = ::core::primitive::u128;
+			}
+			impl ::subxt_core::events::StaticEvent for Withdrawn {
+				const PALLET: &'static str = "PoolAssets";
+				const EVENT: &'static str = "Withdrawn";
+			}
+		}
+		pub mod storage {
+			use super::runtime_types;
+			pub mod types {
+				use super::runtime_types;
+				pub mod asset {
+					use super::runtime_types;
+					pub type Asset = runtime_types::pallet_assets::types::AssetDetails<
+						::core::primitive::u128,
+						::subxt_core::utils::AccountId32,
+						::core::primitive::u128,
+					>;
+					pub type Param0 = ::core::primitive::u128;
+				}
+				pub mod account {
+					use super::runtime_types;
+					pub type Account = runtime_types::pallet_assets::types::AssetAccount<
+						::core::primitive::u128,
+						::core::primitive::u128,
+						(),
+						::subxt_core::utils::AccountId32,
+					>;
+					pub type Param0 = ::core::primitive::u128;
+					pub type Param1 = ::subxt_core::utils::AccountId32;
+				}
+				pub mod approvals {
+					use super::runtime_types;
+					pub type Approvals = runtime_types::pallet_assets::types::Approval<
+						::core::primitive::u128,
+						::core::primitive::u128,
+					>;
+					pub type Param0 = ::core::primitive::u128;
+					pub type Param1 = ::subxt_core::utils::AccountId32;
+					pub type Param2 = ::subxt_core::utils::AccountId32;
+				}
+				pub mod metadata {
+					use super::runtime_types;
+					pub type Metadata = runtime_types::pallet_assets::types::AssetMetadata<
+						::core::primitive::u128,
+						runtime_types::bounded_collections::bounded_vec::BoundedVec<
+							::core::primitive::u8,
+						>,
+					>;
+					pub type Param0 = ::core::primitive::u128;
+				}
+				pub mod next_asset_id {
+					use super::runtime_types;
+					pub type NextAssetId = ::core::primitive::u128;
+				}
+			}
+			pub struct StorageApi;
+			impl StorageApi {
+				#[doc = " Details of an asset."]
+				pub fn asset_iter(
+					&self,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(),
+					types::asset::Asset,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Asset",
+						(),
+						[
+							184u8, 117u8, 212u8, 54u8, 227u8, 128u8, 105u8, 48u8, 129u8, 209u8,
+							93u8, 65u8, 239u8, 81u8, 138u8, 169u8, 70u8, 73u8, 193u8, 150u8, 58u8,
+							232u8, 103u8, 171u8, 200u8, 131u8, 19u8, 81u8, 197u8, 69u8, 242u8,
+							19u8,
+						],
+					)
+				}
+				#[doc = " Details of an asset."]
+				pub fn asset(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::asset::Param0>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					::subxt_core::storage::address::StaticStorageKey<types::asset::Param0>,
+					types::asset::Asset,
+					::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Asset",
+						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+						[
+							184u8, 117u8, 212u8, 54u8, 227u8, 128u8, 105u8, 48u8, 129u8, 209u8,
+							93u8, 65u8, 239u8, 81u8, 138u8, 169u8, 70u8, 73u8, 193u8, 150u8, 58u8,
+							232u8, 103u8, 171u8, 200u8, 131u8, 19u8, 81u8, 197u8, 69u8, 242u8,
+							19u8,
+						],
+					)
+				}
+				#[doc = " The holdings of a specific account for a specific asset."]
+				pub fn account_iter(
+					&self,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(),
+					types::account::Account,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Account",
+						(),
+						[
+							193u8, 248u8, 7u8, 31u8, 182u8, 62u8, 151u8, 45u8, 186u8, 167u8, 187u8,
+							86u8, 254u8, 71u8, 30u8, 36u8, 169u8, 145u8, 195u8, 93u8, 76u8, 108u8,
+							179u8, 129u8, 178u8, 9u8, 253u8, 27u8, 165u8, 16u8, 248u8, 254u8,
+						],
+					)
+				}
+				#[doc = " The holdings of a specific account for a specific asset."]
+				pub fn account_iter1(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::account::Param0>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					::subxt_core::storage::address::StaticStorageKey<types::account::Param0>,
+					types::account::Account,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Account",
+						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+						[
+							193u8, 248u8, 7u8, 31u8, 182u8, 62u8, 151u8, 45u8, 186u8, 167u8, 187u8,
+							86u8, 254u8, 71u8, 30u8, 36u8, 169u8, 145u8, 195u8, 93u8, 76u8, 108u8,
+							179u8, 129u8, 178u8, 9u8, 253u8, 27u8, 165u8, 16u8, 248u8, 254u8,
+						],
+					)
+				}
+				#[doc = " The holdings of a specific account for a specific asset."]
+				pub fn account(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::account::Param0>,
+					_1: impl ::core::borrow::Borrow<types::account::Param1>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(
+						::subxt_core::storage::address::StaticStorageKey<types::account::Param0>,
+						::subxt_core::storage::address::StaticStorageKey<types::account::Param1>,
+					),
+					types::account::Account,
+					::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Account",
+						(
+							::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+							::subxt_core::storage::address::StaticStorageKey::new(_1.borrow()),
+						),
+						[
+							193u8, 248u8, 7u8, 31u8, 182u8, 62u8, 151u8, 45u8, 186u8, 167u8, 187u8,
+							86u8, 254u8, 71u8, 30u8, 36u8, 169u8, 145u8, 195u8, 93u8, 76u8, 108u8,
+							179u8, 129u8, 178u8, 9u8, 253u8, 27u8, 165u8, 16u8, 248u8, 254u8,
+						],
+					)
+				}
+				#[doc = " Approved balance transfers. First balance is the amount approved for transfer. Second"]
+				#[doc = " is the amount of `T::Currency` reserved for storing this."]
+				#[doc = " First key is the asset ID, second key is the owner and third key is the delegate."]
+				pub fn approvals_iter(
+					&self,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(),
+					types::approvals::Approvals,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Approvals",
+						(),
+						[
+							88u8, 12u8, 250u8, 89u8, 74u8, 8u8, 18u8, 23u8, 160u8, 172u8, 27u8,
+							182u8, 30u8, 140u8, 109u8, 106u8, 158u8, 104u8, 53u8, 86u8, 112u8,
+							252u8, 195u8, 113u8, 69u8, 121u8, 239u8, 54u8, 242u8, 51u8, 181u8,
+							176u8,
+						],
+					)
+				}
+				#[doc = " Approved balance transfers. First balance is the amount approved for transfer. Second"]
+				#[doc = " is the amount of `T::Currency` reserved for storing this."]
+				#[doc = " First key is the asset ID, second key is the owner and third key is the delegate."]
+				pub fn approvals_iter1(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::approvals::Param0>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					::subxt_core::storage::address::StaticStorageKey<types::approvals::Param0>,
+					types::approvals::Approvals,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Approvals",
+						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+						[
+							88u8, 12u8, 250u8, 89u8, 74u8, 8u8, 18u8, 23u8, 160u8, 172u8, 27u8,
+							182u8, 30u8, 140u8, 109u8, 106u8, 158u8, 104u8, 53u8, 86u8, 112u8,
+							252u8, 195u8, 113u8, 69u8, 121u8, 239u8, 54u8, 242u8, 51u8, 181u8,
+							176u8,
+						],
+					)
+				}
+				#[doc = " Approved balance transfers. First balance is the amount approved for transfer. Second"]
+				#[doc = " is the amount of `T::Currency` reserved for storing this."]
+				#[doc = " First key is the asset ID, second key is the owner and third key is the delegate."]
+				pub fn approvals_iter2(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::approvals::Param0>,
+					_1: impl ::core::borrow::Borrow<types::approvals::Param1>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(
+						::subxt_core::storage::address::StaticStorageKey<types::approvals::Param0>,
+						::subxt_core::storage::address::StaticStorageKey<types::approvals::Param1>,
+					),
+					types::approvals::Approvals,
+					(),
+					(),
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Approvals",
+						(
+							::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+							::subxt_core::storage::address::StaticStorageKey::new(_1.borrow()),
+						),
+						[
+							88u8, 12u8, 250u8, 89u8, 74u8, 8u8, 18u8, 23u8, 160u8, 172u8, 27u8,
+							182u8, 30u8, 140u8, 109u8, 106u8, 158u8, 104u8, 53u8, 86u8, 112u8,
+							252u8, 195u8, 113u8, 69u8, 121u8, 239u8, 54u8, 242u8, 51u8, 181u8,
+							176u8,
+						],
+					)
+				}
+				#[doc = " Approved balance transfers. First balance is the amount approved for transfer. Second"]
+				#[doc = " is the amount of `T::Currency` reserved for storing this."]
+				#[doc = " First key is the asset ID, second key is the owner and third key is the delegate."]
+				pub fn approvals(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::approvals::Param0>,
+					_1: impl ::core::borrow::Borrow<types::approvals::Param1>,
+					_2: impl ::core::borrow::Borrow<types::approvals::Param2>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(
+						::subxt_core::storage::address::StaticStorageKey<types::approvals::Param0>,
+						::subxt_core::storage::address::StaticStorageKey<types::approvals::Param1>,
+						::subxt_core::storage::address::StaticStorageKey<types::approvals::Param2>,
+					),
+					types::approvals::Approvals,
+					::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Approvals",
+						(
+							::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+							::subxt_core::storage::address::StaticStorageKey::new(_1.borrow()),
+							::subxt_core::storage::address::StaticStorageKey::new(_2.borrow()),
+						),
+						[
+							88u8, 12u8, 250u8, 89u8, 74u8, 8u8, 18u8, 23u8, 160u8, 172u8, 27u8,
+							182u8, 30u8, 140u8, 109u8, 106u8, 158u8, 104u8, 53u8, 86u8, 112u8,
+							252u8, 195u8, 113u8, 69u8, 121u8, 239u8, 54u8, 242u8, 51u8, 181u8,
+							176u8,
+						],
+					)
+				}
+				#[doc = " Metadata of an asset."]
+				pub fn metadata_iter(
+					&self,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(),
+					types::metadata::Metadata,
+					(),
+					::subxt_core::utils::Yes,
+					::subxt_core::utils::Yes,
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Metadata",
+						(),
+						[
+							9u8, 154u8, 67u8, 209u8, 73u8, 219u8, 203u8, 105u8, 197u8, 101u8,
+							174u8, 94u8, 37u8, 239u8, 121u8, 52u8, 186u8, 127u8, 29u8, 182u8, 32u8,
+							21u8, 49u8, 140u8, 135u8, 144u8, 231u8, 73u8, 33u8, 158u8, 27u8, 241u8,
+						],
+					)
+				}
+				#[doc = " Metadata of an asset."]
+				pub fn metadata(
+					&self,
+					_0: impl ::core::borrow::Borrow<types::metadata::Param0>,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					::subxt_core::storage::address::StaticStorageKey<types::metadata::Param0>,
+					types::metadata::Metadata,
+					::subxt_core::utils::Yes,
+					::subxt_core::utils::Yes,
+					(),
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"Metadata",
+						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
+						[
+							9u8, 154u8, 67u8, 209u8, 73u8, 219u8, 203u8, 105u8, 197u8, 101u8,
+							174u8, 94u8, 37u8, 239u8, 121u8, 52u8, 186u8, 127u8, 29u8, 182u8, 32u8,
+							21u8, 49u8, 140u8, 135u8, 144u8, 231u8, 73u8, 33u8, 158u8, 27u8, 241u8,
+						],
+					)
+				}
+				#[doc = " The asset ID enforced for the next asset creation, if any present. Otherwise, this storage"]
+				#[doc = " item has no effect."]
+				#[doc = ""]
+				#[doc = " This can be useful for setting up constraints for IDs of the new assets. For example, by"]
+				#[doc = " providing an initial [`NextAssetId`] and using the [`crate::AutoIncAssetId`] callback, an"]
+				#[doc = " auto-increment model can be applied to all new asset IDs."]
+				#[doc = ""]
+				#[doc = " The initial next asset ID can be set using the [`GenesisConfig`] or the"]
+				#[doc = " [SetNextAssetId](`migration::next_asset_id::SetNextAssetId`) migration."]
+				pub fn next_asset_id(
+					&self,
+				) -> ::subxt_core::storage::address::StaticAddress<
+					(),
+					types::next_asset_id::NextAssetId,
+					::subxt_core::utils::Yes,
+					(),
+					(),
+				> {
+					::subxt_core::storage::address::StaticAddress::new_static(
+						"PoolAssets",
+						"NextAssetId",
+						(),
+						[
+							153u8, 224u8, 246u8, 219u8, 165u8, 1u8, 83u8, 64u8, 55u8, 54u8, 89u8,
+							6u8, 24u8, 50u8, 62u8, 114u8, 164u8, 157u8, 105u8, 150u8, 218u8, 100u8,
+							15u8, 161u8, 33u8, 43u8, 27u8, 217u8, 212u8, 111u8, 11u8, 104u8,
+						],
+					)
+				}
+			}
+		}
+		pub mod constants {
+			use super::runtime_types;
+			pub struct ConstantsApi;
+			impl ConstantsApi {
+				#[doc = " Max number of items to destroy per `destroy_accounts` and `destroy_approvals` call."]
+				#[doc = ""]
+				#[doc = " Must be configured to result in a weight that makes each call fit in a block."]
+				pub fn remove_items_limit(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
+						"RemoveItemsLimit",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " The basic amount of funds that must be reserved for an asset."]
+				pub fn asset_deposit(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u128> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
+						"AssetDeposit",
+						[
+							84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+							27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+							136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+						],
+					)
+				}
+				#[doc = " The amount of funds that must be reserved for a non-provider asset account to be"]
+				#[doc = " maintained."]
+				pub fn asset_account_deposit(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u128> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
+						"AssetAccountDeposit",
+						[
+							84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+							27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+							136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+						],
+					)
+				}
+				#[doc = " The basic amount of funds that must be reserved when adding metadata to your asset."]
+				pub fn metadata_deposit_base(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u128> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
+						"MetadataDepositBase",
+						[
+							84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+							27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+							136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+						],
+					)
+				}
+				#[doc = " The additional funds that must be reserved for the number of bytes you store in your"]
+				#[doc = " metadata."]
+				pub fn metadata_deposit_per_byte(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u128> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
+						"MetadataDepositPerByte",
+						[
+							84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+							27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+							136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+						],
+					)
+				}
+				#[doc = " The amount of funds that must be reserved when creating a new approval."]
+				pub fn approval_deposit(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u128> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
+						"ApprovalDeposit",
+						[
+							84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+							27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+							136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
+						],
+					)
+				}
+				#[doc = " The maximum length of a name or symbol stored on-chain."]
+				pub fn string_limit(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"PoolAssets",
 						"StringLimit",
 						[
 							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
@@ -15774,10 +19457,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							20u8, 205u8, 37u8, 232u8, 157u8, 68u8, 167u8, 180u8, 123u8, 172u8,
-							53u8, 163u8, 23u8, 234u8, 223u8, 124u8, 216u8, 17u8, 150u8, 220u8,
-							115u8, 69u8, 2u8, 223u8, 183u8, 238u8, 34u8, 226u8, 218u8, 1u8, 102u8,
-							142u8,
+							13u8, 34u8, 195u8, 2u8, 141u8, 218u8, 199u8, 69u8, 134u8, 69u8, 209u8,
+							96u8, 208u8, 209u8, 251u8, 106u8, 61u8, 175u8, 34u8, 173u8, 73u8,
+							144u8, 92u8, 145u8, 55u8, 250u8, 112u8, 191u8, 175u8, 180u8, 171u8,
+							108u8,
 						],
 					)
 				}
@@ -15810,9 +19493,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							62u8, 135u8, 191u8, 84u8, 57u8, 106u8, 107u8, 243u8, 43u8, 47u8, 137u8,
-							37u8, 41u8, 180u8, 128u8, 235u8, 192u8, 122u8, 206u8, 88u8, 10u8, 10u8,
-							231u8, 145u8, 206u8, 69u8, 147u8, 169u8, 103u8, 144u8, 153u8, 167u8,
+							78u8, 191u8, 20u8, 57u8, 77u8, 58u8, 124u8, 153u8, 58u8, 118u8, 255u8,
+							75u8, 227u8, 203u8, 79u8, 14u8, 120u8, 212u8, 32u8, 92u8, 119u8, 17u8,
+							114u8, 58u8, 1u8, 167u8, 90u8, 201u8, 28u8, 36u8, 87u8, 222u8,
 						],
 					)
 				}
@@ -16201,9 +19884,10 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							118u8, 58u8, 81u8, 186u8, 92u8, 43u8, 186u8, 132u8, 78u8, 0u8, 78u8,
-							177u8, 5u8, 175u8, 199u8, 9u8, 118u8, 53u8, 5u8, 220u8, 206u8, 223u8,
-							185u8, 183u8, 159u8, 181u8, 217u8, 153u8, 73u8, 63u8, 3u8, 55u8,
+							72u8, 152u8, 119u8, 51u8, 169u8, 246u8, 187u8, 128u8, 81u8, 95u8,
+							228u8, 194u8, 90u8, 137u8, 123u8, 123u8, 11u8, 138u8, 29u8, 182u8,
+							37u8, 123u8, 228u8, 253u8, 49u8, 67u8, 73u8, 151u8, 140u8, 234u8,
+							159u8, 99u8,
 						],
 					)
 				}
@@ -16223,9 +19907,10 @@ pub mod api {
 						"ProposalOf",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							118u8, 58u8, 81u8, 186u8, 92u8, 43u8, 186u8, 132u8, 78u8, 0u8, 78u8,
-							177u8, 5u8, 175u8, 199u8, 9u8, 118u8, 53u8, 5u8, 220u8, 206u8, 223u8,
-							185u8, 183u8, 159u8, 181u8, 217u8, 153u8, 73u8, 63u8, 3u8, 55u8,
+							72u8, 152u8, 119u8, 51u8, 169u8, 246u8, 187u8, 128u8, 81u8, 95u8,
+							228u8, 194u8, 90u8, 137u8, 123u8, 123u8, 11u8, 138u8, 29u8, 182u8,
+							37u8, 123u8, 228u8, 253u8, 49u8, 67u8, 73u8, 151u8, 140u8, 234u8,
+							159u8, 99u8,
 						],
 					)
 				}
@@ -31818,9 +35503,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							239u8, 200u8, 156u8, 45u8, 223u8, 6u8, 13u8, 135u8, 54u8, 89u8, 217u8,
-							250u8, 43u8, 156u8, 39u8, 82u8, 14u8, 103u8, 195u8, 145u8, 213u8, 69u8,
-							254u8, 129u8, 49u8, 205u8, 35u8, 69u8, 170u8, 46u8, 168u8, 10u8,
+							17u8, 162u8, 27u8, 2u8, 145u8, 133u8, 192u8, 183u8, 140u8, 47u8, 91u8,
+							87u8, 212u8, 114u8, 104u8, 176u8, 204u8, 110u8, 160u8, 215u8, 198u8,
+							246u8, 49u8, 78u8, 117u8, 111u8, 80u8, 231u8, 250u8, 230u8, 122u8,
+							56u8,
 						],
 					)
 				}
@@ -31862,9 +35548,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							218u8, 234u8, 49u8, 229u8, 251u8, 169u8, 42u8, 39u8, 182u8, 160u8,
-							23u8, 20u8, 60u8, 67u8, 144u8, 148u8, 179u8, 221u8, 42u8, 12u8, 3u8,
-							85u8, 139u8, 240u8, 68u8, 140u8, 90u8, 108u8, 86u8, 123u8, 89u8, 148u8,
+							100u8, 165u8, 36u8, 253u8, 9u8, 82u8, 118u8, 249u8, 234u8, 138u8, 37u8,
+							147u8, 215u8, 234u8, 6u8, 90u8, 169u8, 201u8, 111u8, 229u8, 5u8, 111u8,
+							48u8, 160u8, 115u8, 251u8, 231u8, 86u8, 226u8, 139u8, 88u8, 55u8,
 						],
 					)
 				}
@@ -31902,10 +35588,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							15u8, 18u8, 103u8, 111u8, 90u8, 114u8, 56u8, 181u8, 138u8, 133u8, 94u8,
-							46u8, 238u8, 69u8, 197u8, 181u8, 86u8, 108u8, 122u8, 212u8, 156u8,
-							40u8, 231u8, 198u8, 171u8, 58u8, 208u8, 203u8, 240u8, 250u8, 193u8,
-							246u8,
+							210u8, 23u8, 253u8, 157u8, 182u8, 31u8, 113u8, 95u8, 72u8, 164u8,
+							236u8, 103u8, 138u8, 92u8, 237u8, 126u8, 91u8, 39u8, 228u8, 23u8, 81u8,
+							110u8, 178u8, 122u8, 0u8, 47u8, 203u8, 249u8, 241u8, 175u8, 100u8,
+							93u8,
 						],
 					)
 				}
@@ -31929,10 +35615,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							158u8, 114u8, 222u8, 129u8, 246u8, 8u8, 44u8, 76u8, 187u8, 31u8, 253u8,
-							58u8, 51u8, 55u8, 191u8, 246u8, 217u8, 149u8, 187u8, 151u8, 230u8,
-							30u8, 31u8, 116u8, 212u8, 178u8, 197u8, 47u8, 22u8, 119u8, 240u8,
-							240u8,
+							245u8, 243u8, 21u8, 184u8, 234u8, 254u8, 176u8, 109u8, 78u8, 104u8,
+							56u8, 185u8, 189u8, 204u8, 105u8, 187u8, 218u8, 209u8, 32u8, 147u8,
+							40u8, 168u8, 18u8, 57u8, 195u8, 37u8, 45u8, 209u8, 132u8, 136u8, 162u8,
+							174u8,
 						],
 					)
 				}
@@ -36648,10 +40334,10 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							9u8, 44u8, 233u8, 165u8, 201u8, 154u8, 52u8, 224u8, 227u8, 185u8,
-							223u8, 65u8, 156u8, 70u8, 235u8, 105u8, 212u8, 240u8, 224u8, 56u8,
-							223u8, 28u8, 37u8, 39u8, 183u8, 28u8, 188u8, 239u8, 71u8, 25u8, 251u8,
-							58u8,
+							114u8, 25u8, 206u8, 165u8, 202u8, 20u8, 103u8, 118u8, 230u8, 229u8,
+							46u8, 87u8, 179u8, 195u8, 224u8, 230u8, 59u8, 249u8, 133u8, 68u8, 78u8,
+							57u8, 232u8, 197u8, 250u8, 213u8, 124u8, 150u8, 202u8, 189u8, 97u8,
+							191u8,
 						],
 					)
 				}
@@ -36681,9 +40367,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							129u8, 16u8, 192u8, 221u8, 162u8, 229u8, 249u8, 212u8, 227u8, 149u8,
-							169u8, 63u8, 193u8, 25u8, 67u8, 75u8, 4u8, 67u8, 52u8, 231u8, 154u8,
-							11u8, 132u8, 20u8, 143u8, 70u8, 127u8, 46u8, 95u8, 99u8, 153u8, 61u8,
+							70u8, 97u8, 171u8, 116u8, 192u8, 16u8, 148u8, 172u8, 102u8, 151u8,
+							211u8, 15u8, 108u8, 8u8, 11u8, 250u8, 189u8, 246u8, 149u8, 19u8, 223u8,
+							122u8, 159u8, 44u8, 74u8, 129u8, 99u8, 83u8, 20u8, 174u8, 178u8, 110u8,
 						],
 					)
 				}
@@ -36709,10 +40395,10 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							93u8, 30u8, 30u8, 191u8, 183u8, 236u8, 216u8, 229u8, 98u8, 238u8,
-							245u8, 210u8, 157u8, 105u8, 109u8, 86u8, 253u8, 152u8, 149u8, 113u8,
-							82u8, 49u8, 94u8, 91u8, 255u8, 166u8, 107u8, 24u8, 122u8, 252u8, 41u8,
-							236u8,
+							212u8, 178u8, 213u8, 112u8, 82u8, 73u8, 146u8, 212u8, 128u8, 119u8,
+							34u8, 122u8, 18u8, 71u8, 46u8, 176u8, 133u8, 196u8, 213u8, 71u8, 99u8,
+							196u8, 192u8, 135u8, 162u8, 213u8, 192u8, 114u8, 181u8, 10u8, 209u8,
+							29u8,
 						],
 					)
 				}
@@ -36735,9 +40421,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							46u8, 46u8, 176u8, 42u8, 24u8, 50u8, 190u8, 132u8, 227u8, 66u8, 100u8,
-							226u8, 44u8, 20u8, 24u8, 82u8, 80u8, 132u8, 160u8, 234u8, 27u8, 205u8,
-							135u8, 3u8, 147u8, 47u8, 167u8, 86u8, 173u8, 231u8, 249u8, 164u8,
+							202u8, 68u8, 44u8, 252u8, 238u8, 82u8, 133u8, 233u8, 122u8, 28u8,
+							102u8, 166u8, 193u8, 96u8, 28u8, 82u8, 175u8, 138u8, 223u8, 100u8,
+							161u8, 85u8, 125u8, 244u8, 228u8, 239u8, 122u8, 211u8, 161u8, 32u8,
+							14u8, 207u8,
 						],
 					)
 				}
@@ -36763,10 +40450,9 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							182u8, 115u8, 96u8, 170u8, 250u8, 150u8, 70u8, 253u8, 219u8, 151u8,
-							177u8, 183u8, 166u8, 84u8, 73u8, 207u8, 153u8, 92u8, 231u8, 140u8,
-							238u8, 206u8, 18u8, 144u8, 41u8, 106u8, 72u8, 34u8, 154u8, 58u8, 50u8,
-							181u8,
+							223u8, 20u8, 95u8, 66u8, 54u8, 184u8, 48u8, 234u8, 211u8, 146u8, 124u8,
+							209u8, 44u8, 255u8, 73u8, 173u8, 123u8, 118u8, 130u8, 40u8, 95u8, 32u8,
+							13u8, 53u8, 115u8, 18u8, 229u8, 90u8, 102u8, 57u8, 221u8, 239u8,
 						],
 					)
 				}
@@ -36789,10 +40475,10 @@ pub mod api {
 							weight,
 						},
 						[
-							174u8, 3u8, 74u8, 180u8, 100u8, 115u8, 83u8, 100u8, 137u8, 232u8,
-							230u8, 142u8, 117u8, 127u8, 101u8, 166u8, 248u8, 168u8, 78u8, 53u8,
-							183u8, 187u8, 106u8, 29u8, 84u8, 79u8, 48u8, 66u8, 34u8, 126u8, 215u8,
-							14u8,
+							103u8, 130u8, 255u8, 205u8, 105u8, 14u8, 124u8, 56u8, 207u8, 80u8,
+							91u8, 17u8, 185u8, 207u8, 126u8, 221u8, 126u8, 102u8, 204u8, 33u8,
+							137u8, 234u8, 66u8, 154u8, 100u8, 183u8, 54u8, 221u8, 215u8, 135u8,
+							156u8, 76u8,
 						],
 					)
 				}
@@ -37243,9 +40929,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							70u8, 81u8, 93u8, 107u8, 197u8, 156u8, 218u8, 126u8, 230u8, 88u8, 11u8,
-							34u8, 64u8, 125u8, 129u8, 146u8, 160u8, 181u8, 39u8, 99u8, 122u8,
-							176u8, 62u8, 152u8, 17u8, 80u8, 109u8, 15u8, 189u8, 240u8, 206u8, 7u8,
+							139u8, 102u8, 188u8, 53u8, 232u8, 78u8, 13u8, 194u8, 22u8, 198u8,
+							114u8, 180u8, 96u8, 83u8, 2u8, 19u8, 235u8, 221u8, 124u8, 120u8, 126u8,
+							83u8, 20u8, 139u8, 118u8, 146u8, 171u8, 12u8, 103u8, 140u8, 118u8,
+							113u8,
 						],
 					)
 				}
@@ -37307,9 +40994,10 @@ pub mod api {
 							max_weight,
 						},
 						[
-							70u8, 22u8, 128u8, 90u8, 123u8, 136u8, 254u8, 109u8, 91u8, 106u8,
-							247u8, 25u8, 46u8, 216u8, 94u8, 14u8, 113u8, 27u8, 149u8, 79u8, 160u8,
-							86u8, 93u8, 101u8, 117u8, 173u8, 120u8, 198u8, 84u8, 5u8, 113u8, 226u8,
+							130u8, 200u8, 64u8, 221u8, 197u8, 168u8, 35u8, 194u8, 203u8, 240u8,
+							50u8, 1u8, 156u8, 33u8, 191u8, 153u8, 82u8, 69u8, 119u8, 150u8, 174u8,
+							253u8, 22u8, 211u8, 33u8, 170u8, 196u8, 129u8, 201u8, 164u8, 243u8,
+							132u8,
 						],
 					)
 				}
@@ -40268,9 +43956,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							71u8, 246u8, 119u8, 107u8, 243u8, 233u8, 66u8, 82u8, 24u8, 50u8, 174u8,
-							163u8, 8u8, 15u8, 126u8, 87u8, 65u8, 72u8, 107u8, 72u8, 25u8, 215u8,
-							172u8, 45u8, 14u8, 122u8, 213u8, 62u8, 50u8, 178u8, 89u8, 126u8,
+							98u8, 173u8, 25u8, 176u8, 118u8, 245u8, 175u8, 71u8, 103u8, 216u8,
+							47u8, 38u8, 237u8, 151u8, 59u8, 238u8, 166u8, 250u8, 251u8, 139u8,
+							243u8, 191u8, 207u8, 96u8, 6u8, 61u8, 112u8, 23u8, 123u8, 215u8, 14u8,
+							239u8,
 						],
 					)
 				}
@@ -40526,10 +44215,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							189u8, 159u8, 197u8, 125u8, 196u8, 86u8, 40u8, 14u8, 108u8, 147u8,
-							131u8, 170u8, 239u8, 110u8, 166u8, 60u8, 245u8, 196u8, 198u8, 177u8,
-							88u8, 212u8, 149u8, 243u8, 178u8, 169u8, 42u8, 133u8, 226u8, 229u8,
-							74u8, 204u8,
+							20u8, 131u8, 67u8, 57u8, 20u8, 46u8, 155u8, 204u8, 122u8, 145u8, 73u8,
+							126u8, 13u8, 129u8, 141u8, 35u8, 90u8, 228u8, 68u8, 231u8, 229u8, 36u8,
+							154u8, 240u8, 106u8, 43u8, 153u8, 138u8, 5u8, 188u8, 58u8, 114u8,
 						],
 					)
 				}
@@ -49734,7 +53422,7 @@ pub mod api {
 				#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
 				#[doc = "* `vault_id` - The ID of the vault to update"]
 				#[doc = "* `new_config` - The new reward configuration containing:"]
-				#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+				#[doc = "  * `apy` - Annual Perbillage Yield for the vault"]
 				#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
 				#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
 				#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
@@ -49782,7 +53470,7 @@ pub mod api {
 				#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
 				#[doc = "* `vault_id` - The ID of the vault to update"]
 				#[doc = "* `new_config` - The new reward configuration containing:"]
-				#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+				#[doc = "  * `apy` - Annual Perbillage Yield for the vault"]
 				#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
 				#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
 				#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
@@ -49832,7 +53520,7 @@ pub mod api {
 				pub mod update_decay_config {
 					use super::runtime_types;
 					pub type StartPeriod = ::core::primitive::u64;
-					pub type Rate = runtime_types::sp_arithmetic::per_things::Percent;
+					pub type Rate = runtime_types::sp_arithmetic::per_things::Perbill;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for UpdateDecayConfig {
 					const PALLET: &'static str = "Rewards";
@@ -49950,7 +53638,7 @@ pub mod api {
 				#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
 				#[doc = "* `vault_id` - The ID of the vault to update"]
 				#[doc = "* `new_config` - The new reward configuration containing:"]
-				#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+				#[doc = "  * `apy` - Annual Perbillage Yield for the vault"]
 				#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
 				#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
 				#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
@@ -49972,10 +53660,9 @@ pub mod api {
 						"create_reward_vault",
 						types::CreateRewardVault { vault_id, new_config },
 						[
-							206u8, 217u8, 216u8, 5u8, 223u8, 44u8, 252u8, 24u8, 136u8, 248u8,
-							168u8, 118u8, 162u8, 199u8, 236u8, 58u8, 79u8, 160u8, 243u8, 243u8,
-							57u8, 32u8, 90u8, 140u8, 141u8, 211u8, 148u8, 56u8, 106u8, 15u8, 14u8,
-							14u8,
+							1u8, 23u8, 16u8, 60u8, 148u8, 74u8, 20u8, 137u8, 92u8, 83u8, 75u8,
+							72u8, 95u8, 115u8, 185u8, 227u8, 7u8, 106u8, 180u8, 67u8, 213u8, 72u8,
+							23u8, 72u8, 196u8, 70u8, 75u8, 98u8, 29u8, 58u8, 103u8, 63u8,
 						],
 					)
 				}
@@ -49985,7 +53672,7 @@ pub mod api {
 				#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
 				#[doc = "* `vault_id` - The ID of the vault to update"]
 				#[doc = "* `new_config` - The new reward configuration containing:"]
-				#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+				#[doc = "  * `apy` - Annual Perbillage Yield for the vault"]
 				#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
 				#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
 				#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
@@ -50007,10 +53694,9 @@ pub mod api {
 						"update_vault_reward_config",
 						types::UpdateVaultRewardConfig { vault_id, new_config },
 						[
-							229u8, 142u8, 118u8, 205u8, 140u8, 240u8, 239u8, 11u8, 235u8, 52u8,
-							134u8, 178u8, 160u8, 171u8, 223u8, 51u8, 185u8, 34u8, 90u8, 54u8,
-							199u8, 219u8, 39u8, 58u8, 70u8, 249u8, 155u8, 58u8, 67u8, 220u8, 125u8,
-							132u8,
+							159u8, 220u8, 49u8, 15u8, 80u8, 235u8, 109u8, 168u8, 65u8, 1u8, 209u8,
+							232u8, 242u8, 165u8, 46u8, 253u8, 85u8, 166u8, 246u8, 71u8, 0u8, 214u8,
+							117u8, 149u8, 194u8, 175u8, 133u8, 3u8, 155u8, 128u8, 125u8, 195u8,
 						],
 					)
 				}
@@ -50025,10 +53711,9 @@ pub mod api {
 						"update_decay_config",
 						types::UpdateDecayConfig { start_period, rate },
 						[
-							140u8, 236u8, 230u8, 237u8, 112u8, 250u8, 18u8, 251u8, 46u8, 121u8,
-							43u8, 143u8, 185u8, 170u8, 120u8, 174u8, 134u8, 82u8, 249u8, 173u8,
-							254u8, 113u8, 237u8, 104u8, 159u8, 66u8, 228u8, 111u8, 91u8, 11u8,
-							146u8, 177u8,
+							55u8, 242u8, 91u8, 49u8, 32u8, 54u8, 156u8, 96u8, 26u8, 70u8, 189u8,
+							186u8, 30u8, 148u8, 187u8, 217u8, 235u8, 47u8, 137u8, 212u8, 33u8,
+							34u8, 217u8, 50u8, 187u8, 189u8, 48u8, 237u8, 170u8, 215u8, 91u8, 44u8,
 						],
 					)
 				}
@@ -50108,7 +53793,7 @@ pub mod api {
 			pub mod incentive_apy_and_cap_set {
 				use super::runtime_types;
 				pub type VaultId = ::core::primitive::u32;
-				pub type Apy = runtime_types::sp_arithmetic::per_things::Percent;
+				pub type Apy = runtime_types::sp_arithmetic::per_things::Perbill;
 				pub type Cap = ::core::primitive::u128;
 			}
 			impl ::subxt_core::events::StaticEvent for IncentiveAPYAndCapSet {
@@ -50324,7 +54009,7 @@ pub mod api {
 			pub mod decay_config_updated {
 				use super::runtime_types;
 				pub type StartPeriod = ::core::primitive::u64;
-				pub type Rate = runtime_types::sp_arithmetic::per_things::Percent;
+				pub type Rate = runtime_types::sp_arithmetic::per_things::Perbill;
 			}
 			impl ::subxt_core::events::StaticEvent for DecayConfigUpdated {
 				const PALLET: &'static str = "Rewards";
@@ -50420,7 +54105,7 @@ pub mod api {
 				}
 				pub mod decay_rate {
 					use super::runtime_types;
-					pub type DecayRate = runtime_types::sp_arithmetic::per_things::Percent;
+					pub type DecayRate = runtime_types::sp_arithmetic::per_things::Perbill;
 				}
 			}
 			pub struct StorageApi;
@@ -50784,9 +54469,10 @@ pub mod api {
 						"RewardConfigStorage",
 						(),
 						[
-							85u8, 116u8, 237u8, 245u8, 144u8, 61u8, 218u8, 181u8, 11u8, 129u8,
-							196u8, 245u8, 46u8, 142u8, 68u8, 87u8, 87u8, 120u8, 122u8, 111u8, 59u8,
-							219u8, 226u8, 166u8, 9u8, 21u8, 235u8, 215u8, 165u8, 191u8, 14u8, 64u8,
+							167u8, 13u8, 248u8, 73u8, 101u8, 33u8, 39u8, 129u8, 241u8, 211u8,
+							177u8, 159u8, 73u8, 133u8, 168u8, 168u8, 249u8, 121u8, 83u8, 168u8,
+							124u8, 215u8, 31u8, 197u8, 62u8, 13u8, 213u8, 16u8, 15u8, 142u8, 71u8,
+							190u8,
 						],
 					)
 				}
@@ -50808,9 +54494,10 @@ pub mod api {
 						"RewardConfigStorage",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							85u8, 116u8, 237u8, 245u8, 144u8, 61u8, 218u8, 181u8, 11u8, 129u8,
-							196u8, 245u8, 46u8, 142u8, 68u8, 87u8, 87u8, 120u8, 122u8, 111u8, 59u8,
-							219u8, 226u8, 166u8, 9u8, 21u8, 235u8, 215u8, 165u8, 191u8, 14u8, 64u8,
+							167u8, 13u8, 248u8, 73u8, 101u8, 33u8, 39u8, 129u8, 241u8, 211u8,
+							177u8, 159u8, 73u8, 133u8, 168u8, 168u8, 249u8, 121u8, 83u8, 168u8,
+							124u8, 215u8, 31u8, 197u8, 62u8, 13u8, 213u8, 16u8, 15u8, 142u8, 71u8,
+							190u8,
 						],
 					)
 				}
@@ -50917,9 +54604,10 @@ pub mod api {
 						"DecayRate",
 						(),
 						[
-							210u8, 127u8, 222u8, 215u8, 161u8, 70u8, 11u8, 27u8, 111u8, 118u8,
-							56u8, 16u8, 25u8, 169u8, 134u8, 193u8, 175u8, 87u8, 169u8, 205u8, 55u8,
-							100u8, 57u8, 47u8, 245u8, 87u8, 26u8, 227u8, 165u8, 10u8, 143u8, 116u8,
+							5u8, 116u8, 51u8, 176u8, 82u8, 107u8, 221u8, 189u8, 34u8, 234u8, 219u8,
+							165u8, 106u8, 189u8, 225u8, 31u8, 195u8, 30u8, 87u8, 132u8, 140u8,
+							152u8, 77u8, 212u8, 252u8, 253u8, 153u8, 128u8, 21u8, 232u8, 74u8,
+							159u8,
 						],
 					)
 				}
@@ -58923,6 +62611,9 @@ pub mod api {
 					#[codec(index = 51)]
 					#[doc = "Overflow from math"]
 					OverflowRisk,
+					#[codec(index = 52)]
+					#[doc = "The asset config is not found"]
+					AssetConfigNotFound,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -61342,7 +65033,7 @@ pub mod api {
 					#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
 					#[doc = "* `vault_id` - The ID of the vault to update"]
 					#[doc = "* `new_config` - The new reward configuration containing:"]
-					#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+					#[doc = "  * `apy` - Annual Perbillage Yield for the vault"]
 					#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
 					#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
 					#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
@@ -61367,7 +65058,7 @@ pub mod api {
 					#[doc = "* `origin` - Origin of the call, must pass `ForceOrigin` check"]
 					#[doc = "* `vault_id` - The ID of the vault to update"]
 					#[doc = "* `new_config` - The new reward configuration containing:"]
-					#[doc = "  * `apy` - Annual Percentage Yield for the vault"]
+					#[doc = "  * `apy` - Annual Perbillage Yield for the vault"]
 					#[doc = "  * `deposit_cap` - Maximum amount that can be deposited"]
 					#[doc = "  * `incentive_cap` - Maximum amount of incentives that can be distributed"]
 					#[doc = "  * `boost_multiplier` - Optional multiplier to boost rewards"]
@@ -61389,7 +65080,7 @@ pub mod api {
 					#[doc = "Update the decay configuration"]
 					update_decay_config {
 						start_period: ::core::primitive::u64,
-						rate: runtime_types::sp_arithmetic::per_things::Percent,
+						rate: runtime_types::sp_arithmetic::per_things::Perbill,
 					},
 					#[codec(index = 7)]
 					#[doc = "Update the number of blocks used for APY calculation"]
@@ -61471,6 +65162,18 @@ pub mod api {
 					#[codec(index = 19)]
 					#[doc = "Decay rate is too high"]
 					InvalidDecayRate,
+					#[codec(index = 20)]
+					#[doc = "Incentive cap is greater than max incentive cap"]
+					IncentiveCapGreaterThanMaxIncentiveCap,
+					#[codec(index = 21)]
+					#[doc = "Deposit cap is greater than max deposit cap"]
+					DepositCapGreaterThanMaxDepositCap,
+					#[codec(index = 22)]
+					#[doc = "Incentive cap is less than min incentive cap"]
+					IncentiveCapLessThanMinIncentiveCap,
+					#[codec(index = 23)]
+					#[doc = "Deposit cap is less than min deposit cap"]
+					DepositCapLessThanMinDepositCap,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -61501,7 +65204,7 @@ pub mod api {
 					#[doc = "Event emitted when an incentive APY and cap are set for a reward vault"]
 					IncentiveAPYAndCapSet {
 						vault_id: ::core::primitive::u32,
-						apy: runtime_types::sp_arithmetic::per_things::Percent,
+						apy: runtime_types::sp_arithmetic::per_things::Perbill,
 						cap: ::core::primitive::u128,
 					},
 					#[codec(index = 2)]
@@ -61558,7 +65261,7 @@ pub mod api {
 					#[doc = "Decay configuration was updated"]
 					DecayConfigUpdated {
 						start_period: ::core::primitive::u64,
-						rate: runtime_types::sp_arithmetic::per_things::Percent,
+						rate: runtime_types::sp_arithmetic::per_things::Perbill,
 					},
 					#[codec(index = 9)]
 					#[doc = "The number of blocks for APY calculation has been updated"]
@@ -61602,7 +65305,7 @@ pub mod api {
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				pub struct RewardConfigForAssetVault<_0> {
-					pub apy: runtime_types::sp_arithmetic::per_things::Percent,
+					pub apy: runtime_types::sp_arithmetic::per_things::Perbill,
 					pub incentive_cap: _0,
 					pub deposit_cap: _0,
 					pub boost_multiplier: ::core::option::Option<::core::primitive::u32>,
@@ -68642,6 +72345,8 @@ pub mod api {
 				Sudo(runtime_types::pallet_sudo::pallet::Call),
 				#[codec(index = 5)]
 				Assets(runtime_types::pallet_assets::pallet::Call),
+				#[codec(index = 54)]
+				PoolAssets(runtime_types::pallet_assets::pallet::Call),
 				#[codec(index = 6)]
 				Balances(runtime_types::pallet_balances::pallet::Call),
 				#[codec(index = 9)]
@@ -68734,6 +72439,8 @@ pub mod api {
 				Sudo(runtime_types::pallet_sudo::pallet::Error),
 				#[codec(index = 5)]
 				Assets(runtime_types::pallet_assets::pallet::Error),
+				#[codec(index = 54)]
+				PoolAssets(runtime_types::pallet_assets::pallet::Error),
 				#[codec(index = 6)]
 				Balances(runtime_types::pallet_balances::pallet::Error),
 				#[codec(index = 9)]
@@ -68822,6 +72529,8 @@ pub mod api {
 				Sudo(runtime_types::pallet_sudo::pallet::Event),
 				#[codec(index = 5)]
 				Assets(runtime_types::pallet_assets::pallet::Event),
+				#[codec(index = 54)]
+				PoolAssets(runtime_types::pallet_assets::pallet::Event),
 				#[codec(index = 6)]
 				Balances(runtime_types::pallet_balances::pallet::Event),
 				#[codec(index = 7)]
