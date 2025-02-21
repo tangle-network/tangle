@@ -62,7 +62,7 @@ jobs:
       - name: Run test suite
         run: cargo nextest run --workspace --exclude tangle --profile ci
 
-  benchmark:
+  benchmarks:
     env:
       CARGO_TERM_COLOR: always
 

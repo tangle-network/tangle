@@ -27,24 +27,6 @@ use tangle_primitives::{services::Asset, BlueprintId};
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;
 
-fn native_asset_id<T: Config>() -> T::AssetId
-where
-	T::AssetId: From<u32>,
-{
-	0u32.into()
-}
-
-fn foreign_asset_id<T: Config>() -> T::AssetId
-where
-	T::AssetId: From<u32>,
-{
-	1u32.into()
-}
-
-fn blueprint_id() -> BlueprintId {
-	1u64
-}
-
 fn setup_benchmark<T: Config>() -> Result<T::AccountId, &'static str>
 where
 	T::AssetId: From<u32>,
@@ -54,29 +36,6 @@ where
 
 	// Fund account
 	T::Currency::make_free_balance_be(&caller, balance);
-
-	// Setup asset config for native token
-	let native_id = native_asset_id::<T>();
-	let native_config = AssetConfig {
-		min_join_bond: T::Currency::minimum_balance(),
-		min_delegate_bond: T::Currency::minimum_balance(),
-		lock_multiplier: LockMultiplier::get(),
-		max_commission: 100u32.into(),
-		min_commission: 0u32.into(),
-	};
-	AssetConfigs::<T>::insert(native_id, native_config);
-
-	// Setup asset config for foreign token
-	let foreign_id = foreign_asset_id::<T>();
-	let foreign_config = AssetConfig {
-		min_join_bond: T::Currency::minimum_balance(),
-		min_delegate_bond: T::Currency::minimum_balance(),
-		lock_multiplier: LockMultiplier::get(),
-		max_commission: 100u32.into(),
-		min_commission: 0u32.into(),
-	};
-	AssetConfigs::<T>::insert(foreign_id, foreign_config);
-
 	Ok(caller)
 }
 
