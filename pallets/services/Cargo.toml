@@ -24,11 +24,11 @@ ethabi = { workspace = true }
 itertools = { workspace = true, features = ["use_alloc"] }
 serde = { workspace = true, features = ["derive"], optional = true }
 hex = { workspace = true, features = ["alloc"] }
+k256 = { workspace = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
 hex = { workspace = true }
-k256 = { workspace = true }
 num_enum = { workspace = true }
 hex-literal = { workspace = true }
 libsecp256k1 = { workspace = true }
@@ -112,7 +112,7 @@ std = [
  "pallet-evm/std",
  "pallet-evm-chain-id/std",
  "pallet-assets/std",
-
+ "k256/std",
  "pallet-evm-precompile-modexp/std",
  "pallet-evm-precompile-sha3fips/std",
  "pallet-evm-precompile-simple/std",

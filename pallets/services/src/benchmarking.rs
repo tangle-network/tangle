@@ -6,15 +6,35 @@ use sp_core::{ecdsa, H160};
 use sp_runtime::KeyTypeId;
 use sp_std::vec;
 use tangle_primitives::services::*;
-use k256::{ecdsa::{SigningKey, VerifyingKey}, elliptic_curve::sec1::ToEncodedPoint};
+use sp_runtime::Percent;
+use sp_core::Pair;
+use sp_runtime::bounded_vec;
+use crate::ConstraintsOf;
+
+pub type AssetId = u128;
 
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
+pub const TNT: AssetId = 0;
+pub const USDC: AssetId = 1;
+pub const WETH: AssetId = 2;
+pub const WBTC: AssetId = 3;
 
-fn test_ecdsa_key() -> [u8; 65] {
-	let (ecdsa_key, _) = ecdsa::Pair::generate();
-	let secret = SigningKey::from_slice(&ecdsa_key.seed())
+pub(crate) fn get_security_requirement(
+	a: AssetId,
+	p: &[u8; 2],
+) -> AssetSecurityRequirement<AssetId> {
+	AssetSecurityRequirement {
+		asset: Asset::Custom(a),
+		min_exposure_percent: Percent::from_percent(p[0]),
+		max_exposure_percent: Percent::from_percent(p[1]),
+	}
+}
+
+pub(crate) fn test_ecdsa_key() -> [u8; 65] {
+	let (ecdsa_key, _) = sp_core::ecdsa::Pair::generate();
+	let secret = k256::ecdsa::SigningKey::from_slice(&ecdsa_key.seed())
 		.expect("Should be able to create a secret key from a seed");
-	let verifying_key = VerifyingKey::from(secret);
+	let verifying_key = k256::ecdsa::VerifyingKey::from(secret);
 	let public_key = verifying_key.to_encoded_point(false);
 	public_key.to_bytes().to_vec().try_into().unwrap()
 }
@@ -24,37 +44,46 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 }
 
 fn operator_preferences<T: Config>() -> OperatorPreferences {
-	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default(), constraints: Default::default() }
+	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() }
 }
 
-fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
+fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints> {
+	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
-		jobs: vec![
+		manager: BlueprintServiceManager::Evm(CGGMP21_BLUEPRINT),
+		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
+		jobs: bounded_vec![
 			JobDefinition {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
-				params: vec![FieldType::Uint8].try_into().unwrap(),
-				result: vec![FieldType::Bytes].try_into().unwrap(),
-				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
+				params: bounded_vec![FieldType::Uint8],
+				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
-				params: vec![FieldType::Uint64, FieldType::Bytes].try_into().unwrap(),
-				result: vec![FieldType::Bytes].try_into().unwrap(),
-				verifier: JobResultVerifier::Evm(CGGMP21_BLUEPRINT),
+				params: bounded_vec![
+					FieldType::Uint64,
+					FieldType::List(Box::new(FieldType::Uint8))
+				],
+				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
 			},
-		]
-		.try_into()
-		.unwrap(),
-		registration_hook: ServiceRegistrationHook::Evm(CGGMP21_BLUEPRINT),
-		registration_params: vec![].try_into().unwrap(),
-		request_hook: ServiceRequestHook::Evm(CGGMP21_BLUEPRINT),
-		request_params: vec![].try_into().unwrap(),
+		],
+		registration_params: bounded_vec![],
+		request_params: bounded_vec![],
 		gadget: Default::default(),
+		supported_membership_models: bounded_vec![
+			MembershipModelType::Fixed,
+			MembershipModelType::Dynamic,
+		],
 	}
 }
 
 benchmarks! {
+
+	where_clause {
+		where
+			AssetId: From<u128>,
+	}
 
 	create_blueprint {
 		let alice = mock_account_id::<T>(1u8);
@@ -79,7 +108,7 @@ benchmarks! {
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preference, Default::default())
+	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preference, Default::default(), 0_u32.into())
 
 
 	unregister {
@@ -90,7 +119,7 @@ benchmarks! {
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
 
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 	}: _(RawOrigin::Signed(bob.clone()), 0)
 
@@ -103,7 +132,7 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 		let price_targets = Default::default();
 
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 	}: _(RawOrigin::Signed(bob.clone()), 0, price_targets)
 
@@ -115,24 +144,31 @@ benchmarks! {
 
 		let operator_preference = operator_preferences::<T>();
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(eve.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(eve.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 	}: _(
-			RawOrigin::Signed(eve.clone()),
-			0,
-			vec![alice.clone()],
-			vec![bob.clone(), charlie.clone(), dave.clone()],
-			100u32.into(),
-			Default::default()
+		None,
+		0,
+		vec![alice.clone()],
+		vec![bob.clone(), charlie.clone(), dave.clone()],
+		Default::default(),
+		vec![
+			get_security_requirement(USDC, &[10, 20]),
+			get_security_requirement(WETH, &[10, 20])
+		],
+		100,
+		Asset::Custom(USDC),
+		0,
+		MembershipModel::Fixed { min_operators: 3 }
 		)
 
 	approve {
@@ -147,23 +183,32 @@ benchmarks! {
 			RawOrigin::Signed(bob.clone()).into(),
 			0,
 			operator_preference,
-			Default::default()
+			Default::default(),
+			0_u32.into()
 		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::Signed(eve.clone()).into(),
+			RawOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
-			100u32.into(),
-			Default::default()
+			Default::default(),
+			vec![
+				get_security_requirement(USDC, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
 		);
 
 	}: _(RawOrigin::Signed(charlie.clone()), 0, Percent::from_percent(25))
@@ -180,23 +225,32 @@ benchmarks! {
 			RawOrigin::Signed(bob.clone()).into(),
 			0,
 			operator_preference,
-			Default::default()
+			Default::default(),
+			0_u32.into()
 		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::Signed(eve.clone()).into(),
+			RawOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
-			100u32.into(),
-			Default::default()
+			Default::default(),
+			vec![
+				get_security_requirement(USDC, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
 		);
 
 	}: _(RawOrigin::Signed(charlie.clone()), 0)
@@ -210,22 +264,30 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::Signed(eve.clone()).into(),
+			RawOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
-			100u32.into(),
-			Default::default()
+			Default::default(),
+			vec![
+				get_security_requirement(USDC, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
 		);
 
 	}: _(RawOrigin::Signed(eve.clone()),0)
@@ -240,22 +302,30 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::Signed(eve.clone()).into(),
+			RawOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
-			100u32.into(),
-			Default::default()
+			Default::default(),
+			vec![
+				get_security_requirement(USDC, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
 		);
 
 	}: _(
@@ -274,22 +344,30 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default());
+		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
-			RawOrigin::Signed(eve.clone()).into(),
+			RawOrigin::signed(eve.clone()),
+			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
-			100u32.into(),
-			Default::default()
+			Default::default(),
+			vec![
+				get_security_requirement(USDC, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 3 },
 		);
 
 		let _= Pallet::<T>::call(
