@@ -19,11 +19,11 @@
 
 use crate::{
 	AccountId, Assets, Balances, EnsureRoot, EnsureRootOrHalfCouncil, Get, Ismp, Runtime,
-	RuntimeEvent, Timestamp, Treasury, H160,
+	RuntimeEvent, Timestamp, TokenGateway, Treasury, H160,
 };
-use ::pallet_token_gateway::types::EvmToSubstrate;
 use frame_support::parameter_types;
 use ismp::{host::StateMachine, module::IsmpModule, router::IsmpRouter};
+use pallet_token_gateway::types::EvmToSubstrate;
 use sp_std::boxed::Box;
 use sp_std::vec::Vec;
 use tangle_primitives::Balance;
@@ -76,6 +76,7 @@ impl IsmpRouter for Router {
 			pallet_hyperbridge::PALLET_HYPERBRIDGE_ID => {
 				Ok(Box::new(pallet_hyperbridge::Pallet::<Runtime>::default()))
 			},
+			id if TokenGateway::is_token_gateway(id) => Ok(Box::new(TokenGateway::default())),
 			_ => Err(ismp::Error::ModuleNotFound(id))?,
 		}
 	}
