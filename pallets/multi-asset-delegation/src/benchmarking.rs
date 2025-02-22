@@ -27,6 +27,17 @@ use tangle_primitives::{services::Asset, BlueprintId};
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;
 
+fn native_asset_id<T: Config>() -> T::AssetId
+where
+	T::AssetId: From<u32>,
+{
+	0u32.into()
+}
+
+fn blueprint_id() -> BlueprintId {
+	1u64
+}
+
 fn setup_benchmark<T: Config>() -> Result<T::AccountId, &'static str>
 where
 	T::AssetId: From<u32>,
