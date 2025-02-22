@@ -75,7 +75,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u128>,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	#[precompile::public("balanceOf(address,uint256,address)")]
@@ -92,7 +92,7 @@ where
 		else {
 			return Ok(U256::zero());
 		};
-		let asset = match (asset_id.as_u128(), token_address.0 .0) {
+		let asset = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => Asset::Erc20(erc20_token.into()),
 			(other_asset_id, _) => Asset::Custom(other_asset_id.into()),
 		};
@@ -114,7 +114,7 @@ where
 		else {
 			return Ok(U256::zero());
 		};
-		let asset = match (asset_id.as_u128(), token_address.0 .0) {
+		let asset = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => Asset::Erc20(erc20_token.into()),
 			(other_asset_id, _) => Asset::Custom(other_asset_id.into()),
 		};
@@ -168,7 +168,7 @@ where
 
 		let caller = handle.context().caller;
 
-		let (who, deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (who, deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				let who = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
 				let pallet_address =
@@ -230,7 +230,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -263,7 +263,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -299,7 +299,7 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -340,7 +340,7 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -387,7 +387,7 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
