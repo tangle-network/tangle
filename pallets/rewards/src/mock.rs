@@ -44,7 +44,8 @@ use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 pub type AccountId = AccountId32;
 pub type Balance = u128;
 type Nonce = u32;
-pub type AssetId = u128;
+type AssetId = u128;
+
 pub type BlockNumber = u64;
 
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
@@ -233,6 +234,8 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
 }
 
 parameter_types! {
@@ -257,6 +260,7 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	type WeightInfo = ();
 }
 
 thread_local! {

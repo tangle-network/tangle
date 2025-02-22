@@ -1375,6 +1375,7 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1572,11 +1573,18 @@ extern crate frame_benchmarking;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
+	pub use pallet_tangle_lst_benchmarking::Pallet as LstBench;
+	impl pallet_tangle_lst_benchmarking::Config for crate::Runtime {}
+
 	define_benchmarks!(
 		[frame_benchmarking, BaselineBench::<Runtime>]
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
+		[pallet_services, Services]
+		[pallet_tangle_lst_benchmarking, crate::benches::LstBench::<Runtime>]
+		[pallet_multi_asset_delegation, MultiAssetDelegation]
+		[pallet_rewards, Rewards]
 	);
 }
 

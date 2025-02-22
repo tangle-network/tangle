@@ -181,9 +181,11 @@ runtime-benchmarks = [
     "pallet-airdrop-claims/runtime-benchmarks",
     "pallet-multi-asset-delegation/runtime-benchmarks",
     "pallet-tangle-lst-benchmarking/runtime-benchmarks",
+    "pallet-rewards/runtime-benchmarks"
 
     # Hyperbridge
     "pallet-ismp/runtime-benchmarks",
+
 ]
 default = ["std", "with-rocksdb-weights", "evm-tracing"]
 local-testing = []
