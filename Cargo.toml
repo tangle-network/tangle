@@ -389,7 +389,6 @@ pallet-ismp-runtime-api     = { git = "https://github.com/polytope-labs/hyperbri
 ismp-grandpa 				= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
 ismp                        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
 pallet-hyperbridge          = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-sp-mmr-primitives           = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 anyhow                      = { version = "1.0.93", default-features = false }
 
 # Subxt

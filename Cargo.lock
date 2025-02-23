@@ -21536,7 +21536,6 @@ dependencies = [
  "sp-genesis-builder 0.15.0",
  "sp-inherents 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-io 38.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "sp-mmr-primitives 34.0.0",
  "sp-offchain 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
  "sp-session 35.0.0",
