@@ -25,7 +25,7 @@ mod common;
 
 use common::*;
 use tangle_subxt::tangle_testnet_runtime::api::runtime_types::pallet_multi_asset_delegation::types::operator::DelegatorBond;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::Asset;
+use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::types::Asset;
 
 sol! {
 	#[allow(clippy::too_many_arguments)]
@@ -191,7 +191,7 @@ async fn deploy_tangle_lrt(
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_DEPOSIT: u128 = 10_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_APY: u8 = 10; // 10% APY
+const MOCK_APY: u32 = 10; // 10% APY
 
 /// Setup the E2E test environment.
 #[track_caller]
@@ -296,7 +296,7 @@ where
 					vault_id,
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
-							apy: api::runtime_types::sp_arithmetic::per_things::Percent(MOCK_APY),
+							apy: api::runtime_types::sp_arithmetic::per_things::Perbill(MOCK_APY),
 							deposit_cap: MOCK_DEPOSIT_CAP,
 							incentive_cap: 1,
 							boost_multiplier: Some(1),
@@ -333,7 +333,7 @@ where
 				.sudo(api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
 					api::runtime_types::pallet_rewards::pallet::Call::manage_asset_reward_vault {
 						vault_id,
-						asset_id: x,
+						asset: x,
 						action: api::runtime_types::pallet_rewards::types::AssetAction::Add,
 					},
 				))
@@ -506,7 +506,7 @@ fn operator_join_delegator_delegate_erc20() {
 			Some(DelegatorBond {
 				delegator: bob.address().to_account_id(),
 				amount: delegate_amount.to::<u128>(),
-				asset_id: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
+				asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
 				__ignore: std::marker::PhantomData
 			})
 		);
@@ -601,7 +601,7 @@ fn operator_join_delegator_delegate_asset_id() {
 			Some(DelegatorBond {
 				delegator: bob.address().to_account_id(),
 				amount: delegate_amount,
-				asset_id: Asset::Custom(t.usdc_asset_id),
+				asset: Asset::Custom(t.usdc_asset_id),
 				__ignore: std::marker::PhantomData
 			})
 		);
@@ -841,7 +841,7 @@ fn lrt_deposit_withdraw_erc20() {
 			Some(DelegatorBond {
 				delegator: lrt_address.to_account_id(),
 				amount: deposit_amount.to::<u128>(),
-				asset_id: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+				asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
 				__ignore: std::marker::PhantomData
 			})
 		);

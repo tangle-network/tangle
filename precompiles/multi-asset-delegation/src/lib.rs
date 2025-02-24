@@ -38,6 +38,8 @@ pub mod mock;
 #[cfg(any(test, feature = "fuzzing"))]
 pub mod mock_evm;
 #[cfg(test)]
+mod native_restaking_tests;
+#[cfg(test)]
 mod tests;
 
 use tangle_primitives::types::rewards::LockMultiplier;
@@ -73,7 +75,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u128>,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
 	Runtime::AccountId: From<WrappedAccountId32>,
 {
 	#[precompile::public("balanceOf(address,uint256,address)")]
@@ -90,7 +92,7 @@ where
 		else {
 			return Ok(U256::zero());
 		};
-		let asset = match (asset_id.as_u128(), token_address.0 .0) {
+		let asset = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => Asset::Erc20(erc20_token.into()),
 			(other_asset_id, _) => Asset::Custom(other_asset_id.into()),
 		};
@@ -112,7 +114,7 @@ where
 		else {
 			return Ok(U256::zero());
 		};
-		let asset = match (asset_id.as_u128(), token_address.0 .0) {
+		let asset = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => Asset::Erc20(erc20_token.into()),
 			(other_asset_id, _) => Asset::Custom(other_asset_id.into()),
 		};
@@ -133,7 +135,7 @@ where
 			pallet_multi_asset_delegation::Pallet::<Runtime>::ready_withdraw_requests(&who)
 				.map_err(|_| revert("Failed to get ready withdraw requests"))?;
 
-		let erc20_transfers = snapshot.filter_map(|request| match request.asset_id {
+		let erc20_transfers = snapshot.filter_map(|request| match request.asset {
 			Asset::Erc20(token) => Some((token, request.amount)),
 			_ => None,
 		});
@@ -166,7 +168,7 @@ where
 
 		let caller = handle.context().caller;
 
-		let (who, deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (who, deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				let who = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
 				let pallet_address =
@@ -204,7 +206,7 @@ where
 			handle,
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::deposit {
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -228,7 +230,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -239,7 +241,7 @@ where
 			handle,
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw {
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -261,7 +263,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -272,7 +274,7 @@ where
 			handle,
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw {
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -297,7 +299,7 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -309,7 +311,7 @@ where
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::delegate {
 				operator,
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -338,7 +340,7 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -350,7 +352,7 @@ where
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::schedule_delegator_unstake {
 				operator,
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -385,7 +387,7 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
-		let (deposit_asset, amount) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), amount)
 			},
@@ -397,7 +399,7 @@ where
 			Some(who).into(),
 			pallet_multi_asset_delegation::Call::<Runtime>::cancel_delegator_unstake {
 				operator,
-				asset_id: deposit_asset,
+				asset: deposit_asset,
 				amount: amount
 					.try_into()
 					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
@@ -405,5 +407,134 @@ where
 		)?;
 
 		Ok(())
+	}
+
+	#[precompile::public("delegateNomination(bytes32,uint256,uint64[])")]
+	fn delegate_nomination(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+		amount: U256,
+		blueprint_selection: Vec<u64>,
+	) -> EvmResult {
+		// Record both read and write costs since we'll be modifying state
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		// Validate amount before dispatching
+		let amount: BalanceOf<Runtime> =
+			amount.try_into().map_err(|_| RevertReason::value_is_too_large("amount"))?;
+
+		// Convert blueprint selection
+		let blueprint_selection = DelegatorBlueprintSelection::Fixed(
+			blueprint_selection
+				.try_into()
+				.map_err(|_| RevertReason::custom("Too many blueprint ids for fixed selection"))?,
+		);
+
+		// Dispatch the call
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::delegate_nomination {
+				operator,
+				amount,
+				blueprint_selection,
+			},
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("scheduleDelegatorNominationUnstake(bytes32,uint256,uint64[])")]
+	fn schedule_delegator_nomination_unstake(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+		amount: U256,
+		blueprint_selection: Vec<u64>,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::schedule_nomination_unstake {
+				operator,
+				amount: amount
+					.try_into()
+					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+				blueprint_selection: DelegatorBlueprintSelection::Fixed(
+					blueprint_selection.try_into().map_err(|_| {
+						RevertReason::custom("Too many blueprint ids for fixed selection")
+					})?,
+				),
+			},
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("executeDelegatorNominationUnstake(bytes32)")]
+	fn execute_delegator_nomination_unstake(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::execute_nomination_unstake { operator },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("cancelDelegatorNominationUnstake(bytes32)")]
+	fn cancel_delegator_nomination_unstake(
+		handle: &mut impl PrecompileHandle,
+		operator: H256,
+	) -> EvmResult {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let caller = handle.context().caller;
+		let who = Runtime::AddressMapping::into_account_id(caller);
+		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
+
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who).into(),
+			pallet_multi_asset_delegation::Call::<Runtime>::cancel_nomination_unstake { operator },
+		)?;
+
+		Ok(())
+	}
+
+	#[precompile::public("delegatedNominationBalance(address)")]
+	fn delegated_nomination_balance(
+		handle: &mut impl PrecompileHandle,
+		who: Address,
+	) -> EvmResult<U256> {
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+
+		let who = Runtime::AddressMapping::into_account_id(who.0);
+		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+		else {
+			return Ok(U256::zero());
+		};
+		let balance = delegator.total_nomination_delegations();
+
+		Ok(balance.into())
 	}
 }

@@ -83,6 +83,7 @@ pallet-utility = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-vesting = { workspace = true }
 pallet-tangle-lst = { workspace = true }
+pallet-tangle-lst-benchmarking = { workspace = true }
 
 # Tangle dependencies
 pallet-airdrop-claims = { workspace = true }
@@ -161,6 +162,9 @@ runtime-benchmarks = [
     "pallet-hotfix-sufficients/runtime-benchmarks",
     # Tangle
     "pallet-services/runtime-benchmarks",
+    "pallet-rewards/runtime-benchmarks",
+    "pallet-multi-asset-delegation/runtime-benchmarks",
+    "pallet-tangle-lst-benchmarking/runtime-benchmarks",
 ]
 
 std = [
@@ -234,6 +238,7 @@ std = [
     "pallet-services-rpc-runtime-api/std",
     "pallet-rewards-rpc-runtime-api/std",
     "pallet-rewards/std",
+    "pallet-tangle-lst-benchmarking/std",
 
     # Frontier
     "fp-rpc/std",
@@ -279,6 +284,28 @@ std = [
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
     "pallet-evm-precompile-multi-asset-delegation/std",
+]
+
+try-runtime = [
+    "frame-support/try-runtime",
+    "frame-executive/try-runtime",
+    "frame-system/try-runtime",
+    "pallet-balances/try-runtime",
+    "pallet-grandpa/try-runtime",
+    "pallet-timestamp/try-runtime",
+    "pallet-vesting/try-runtime",
+    "pallet-assets/try-runtime",
+    "pallet-collective/try-runtime",
+    "pallet-tx-pause/try-runtime",
+    "pallet-staking/try-runtime",
+    "sp-runtime/try-runtime",
+
+    # Frontier
+    "pallet-ethereum/try-runtime",
+    "pallet-evm/try-runtime",
+    "pallet-hotfix-sufficients/try-runtime",
+    # Tangle
+    "pallet-services/try-runtime",
 ]
 
 integration-tests = ["tangle-primitives/integration-tests"]

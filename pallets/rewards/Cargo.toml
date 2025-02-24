@@ -26,6 +26,7 @@ fp-evm = { workspace = true }
 itertools = { workspace = true, features = ["use_alloc"] }
 serde = { workspace = true, features = ["derive"], optional = true }
 hex = { workspace = true, features = ["alloc"] }
+pallet-multi-asset-delegation = { workspace = true, default-features = false, optional = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
@@ -111,7 +112,8 @@ std = [
   "fp-storage/std",
   "ethabi/std",
   "sp-keyring/std",
-  "pallet-ethereum/std"
+  "pallet-ethereum/std",
+  "pallet-multi-asset-delegation?/std",
 ]
 try-runtime = ["frame-support/try-runtime"]
 runtime-benchmarks = [
@@ -120,4 +122,5 @@ runtime-benchmarks = [
   "frame-system/runtime-benchmarks",
   "sp-runtime/runtime-benchmarks",
   "pallet-balances/runtime-benchmarks",
+  "pallet-multi-asset-delegation/runtime-benchmarks"
 ]

@@ -24,11 +24,11 @@ ethabi = { workspace = true }
 itertools = { workspace = true, features = ["use_alloc"] }
 serde = { workspace = true, features = ["derive"], optional = true }
 hex = { workspace = true, features = ["alloc"] }
+k256 = { workspace = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-codec"] }
 hex = { workspace = true }
-k256 = { workspace = true }
 num_enum = { workspace = true }
 hex-literal = { workspace = true }
 libsecp256k1 = { workspace = true }
@@ -65,11 +65,16 @@ pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
+pallet-evm-precompile-balances-erc20 = { workspace = true }
+pallet-evm-precompileset-assets-erc20 = { workspace = true }
+
 precompile-utils = { workspace = true }
 
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
+pallet-multi-asset-delegation = { workspace = true }
 sp-staking = { workspace = true }
+sp-weights = { workspace = true }
 frame-election-provider-support = { workspace = true }
 
 [features]
@@ -86,6 +91,7 @@ std = [
  "sp-std/std",
  "sp-io/std",
  "sp-staking/std",
+ "sp-weights/std",
  "tangle-primitives/std",
  "pallet-balances/std",
  "pallet-timestamp/std",
@@ -106,7 +112,7 @@ std = [
  "pallet-evm/std",
  "pallet-evm-chain-id/std",
  "pallet-assets/std",
-
+ "k256/std",
  "pallet-evm-precompile-modexp/std",
  "pallet-evm-precompile-sha3fips/std",
  "pallet-evm-precompile-simple/std",
