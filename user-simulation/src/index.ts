@@ -9,6 +9,7 @@ import { GenerateChildUsers } from './actions/generateChildUsers';
 import { DepositTnt } from './actions/depositTnt';
 import { DelegateTnt } from './actions/delegateTnt';
 import { ClaimRewards } from './actions/claimRewards';
+import { TransferAssets } from './actions/transferAssets';
 
 dotenv.config();
 
@@ -155,16 +156,26 @@ async function main() {
                     demandOption: true
                 }
             })
-            .command('depositTnt', 'Deposit TNT tokens for staking', {
+            .command('depositTnt', 'Deposit tokens for staking', {
+                assetId: {
+                    description: 'Asset ID to deposit',
+                    type: 'number',
+                    demandOption: true
+                },
                 amount: {
-                    description: 'Amount of TNT to deposit',
+                    description: 'Amount to deposit',
                     type: 'string',
                     demandOption: true
                 }
             })
-            .command('delegateTnt', 'Delegate TNT tokens to a validator', {
+            .command('delegateTnt', 'Delegate tokens to a validator', {
+                assetId: {
+                    description: 'Asset ID to delegate',
+                    type: 'number',
+                    demandOption: true
+                },
                 amount: {
-                    description: 'Amount of TNT to delegate',
+                    description: 'Amount to delegate',
                     type: 'string',
                     demandOption: true
                 },
@@ -175,6 +186,23 @@ async function main() {
                 }
             })
             .command('claimRewards', 'Claim staking rewards')
+            .command('transferAssets', 'Transfer assets to all child users', {
+                assetId: {
+                    description: 'Asset ID to transfer',
+                    type: 'number',
+                    demandOption: true
+                },
+                seedPhrase: {
+                    description: 'Seed phrase of the source account',
+                    type: 'string',
+                    demandOption: true
+                },
+                amount: {
+                    description: 'Amount to transfer to each user',
+                    type: 'string',
+                    demandOption: true
+                }
+            })
             .help()
             .alias('help', 'h')
             .parseAsync();
@@ -190,25 +218,37 @@ async function main() {
                 break;
             }
             case 'depositTnt': {
+                const assetId = args.assetId as number;
                 const amount = args.amount as string;
-                if (typeof amount === 'string') {
+                if (typeof assetId === 'number' && typeof amount === 'string') {
                     const action = new DepositTnt();
-                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, BigInt(amount));
+                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, assetId, BigInt(amount));
                 }
                 break;
             }
             case 'delegateTnt': {
+                const assetId = args.assetId as number;
                 const amount = args.amount as string;
                 const validator = args.validator as string;
-                if (typeof amount === 'string' && typeof validator === 'string') {
+                if (typeof assetId === 'number' && typeof amount === 'string' && typeof validator === 'string') {
                     const action = new DelegateTnt();
-                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, BigInt(amount), validator);
+                    await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser, assetId, BigInt(amount), validator);
                 }
                 break;
             }
             case 'claimRewards': {
                 const action = new ClaimRewards();
                 await action.execute(simulation.getApi(), simulation.getKeyring(), baseUser);
+                break;
+            }
+            case 'transferAssets': {
+                const assetId = args.assetId as number;
+                const seedPhrase = args.seedPhrase as string;
+                const amount = args.amount as string;
+                if (typeof assetId === 'number' && typeof seedPhrase === 'string' && typeof amount === 'string') {
+                    const action = new TransferAssets();
+                    await action.execute(simulation.getApi(), simulation.getKeyring(), assetId, seedPhrase, BigInt(amount));
+                }
                 break;
             }
             default: {

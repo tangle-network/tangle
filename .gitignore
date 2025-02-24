@@ -45,3 +45,4 @@ scripts/edg-balances-new.json
 hfuzz_*/
 
 **/.yarn
+user-simulation/generated_users.txt
