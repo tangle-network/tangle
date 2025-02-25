@@ -46,3 +46,4 @@ hfuzz_*/
 
 **/.yarn
 user-simulation/generated_users.txt
+user-simulation/dist/

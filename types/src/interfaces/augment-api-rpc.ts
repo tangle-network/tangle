@@ -29,7 +29,7 @@ import type { AccountId, BlockNumber, H160, H256, H64, Hash, Header, Index, Just
 import type { MigrationStatusResult, ReadProof, RuntimeVersion, TraceBlockResponse } from '@polkadot/types/interfaces/state';
 import type { ApplyExtrinsicResult, ChainProperties, ChainType, Health, NetworkState, NodeRole, PeerInfo, SyncState } from '@polkadot/types/interfaces/system';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
-import type { RpcServicesWithBlueprint } from '@webb-tools/tangle-substrate-types/services';
+import type { RpcServicesWithBlueprint } from '@tangle-network/tangle-substrate-types/services';
 
 export type __AugmentedRpc = AugmentedRpc<() => unknown>;
 
