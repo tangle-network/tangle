@@ -1,11 +1,12 @@
 use super::*;
 use crate::types::BalanceOf;
-#[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
-use sp_std::vec;
-#[cfg(feature = "std")]
-use std::vec::Vec;
+use sp_std::{vec, vec::Vec};
 use tangle_primitives::{services::Constraints, traits::ServiceManager, BlueprintId};
+
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::rewards::UserDepositWithLocks;
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::services::Asset;
 
 impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxFields = T::MaxFields;
@@ -66,6 +67,10 @@ impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pal
 			.map_or(true, |profile| profile.services.is_empty() && profile.blueprints.is_empty())
 	}
 
+	fn has_active_services(operator: &T::AccountId) -> bool {
+		OperatorsProfile::<T>::get(operator).is_ok_and(|profile| !profile.services.is_empty())
+	}
+
 	fn get_blueprints_by_operator(operator: &T::AccountId) -> Vec<BlueprintId> {
 		OperatorsProfile::<T>::get(operator)
 			.map_or(vec![], |profile| profile.blueprints.into_iter().collect())
@@ -73,17 +78,19 @@ impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pal
 }
 
 #[cfg(feature = "runtime-benchmarks")]
-pub struct BenchmarkingOperatorDelegationManager<T: crate::Config, Balance: Default, AssetId>(
-	core::marker::PhantomData<(T, Balance, AssetId)>,
+pub struct BenchmarkingOperatorDelegationManager<T: crate::Config, Balance: Default>(
+	core::marker::PhantomData<(T, Balance)>,
 );
 
 #[cfg(feature = "runtime-benchmarks")]
-impl<T: crate::Config, Balance: Default, AssetId>
-	tangle_primitives::traits::MultiAssetDelegationInfo<T::AccountId, Balance>
-	for BenchmarkingOperatorDelegationManager<T, Balance, AssetId>
+impl<T: crate::Config, Balance: Default>
+	tangle_primitives::traits::MultiAssetDelegationInfo<
+		T::AccountId,
+		Balance,
+		BlockNumberFor<T>,
+		T::AssetId,
+	> for BenchmarkingOperatorDelegationManager<T, Balance>
 {
-	type AssetId = AssetId;
-
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
@@ -100,10 +107,23 @@ impl<T: crate::Config, Balance: Default, AssetId>
 		Default::default()
 	}
 
-	fn get_total_delegation_by_asset_id(
+	fn get_total_delegation_by_asset(
 		_operator: &T::AccountId,
-		_asset_id: &Self::AssetId,
+		_asset: &Asset<T::AssetId>,
 	) -> Balance {
 		Default::default()
+	}
+
+	fn get_delegators_for_operator(
+		_operator: &T::AccountId,
+	) -> Vec<(T::AccountId, Balance, Asset<T::AssetId>)> {
+		Vec::new()
+	}
+
+	fn get_user_deposit_with_locks(
+		_who: &T::AccountId,
+		_asset: Asset<T::AssetId>,
+	) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
+		None
 	}
 }

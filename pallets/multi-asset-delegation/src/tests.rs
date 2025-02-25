@@ -18,6 +18,7 @@ use crate::{mock::*, tests::RuntimeEvent};
 
 pub mod delegate;
 pub mod deposit;
+pub mod native_restaking;
 pub mod operator;
 pub mod session_manager;
 

@@ -26,6 +26,7 @@ use frame_support::{
 	pallet_prelude::{Hooks, Weight},
 	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, OneSessionHandler},
+	PalletId,
 };
 use frame_system::EnsureRoot;
 use mock_evm::MockedEvmRunner;
@@ -215,7 +216,7 @@ impl pallet_staking::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
+	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -251,7 +252,7 @@ impl pallet_assets::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = u128;
 	type AssetId = AssetId;
-	type AssetIdParameter = u32;
+	type AssetIdParameter = u128;
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -266,6 +267,8 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkHelper = ();
 }
 
 const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
@@ -389,14 +392,12 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 	}
 }
 
-pub type AssetId = u32;
+pub type AssetId = u128;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64>
+impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId>
 	for MockDelegationManager
 {
-	type AssetId = AssetId;
-
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
 	}
@@ -417,29 +418,19 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 		Default::default()
 	}
 
-	fn get_total_delegation_by_asset_id(
-		_operator: &AccountId,
-		_asset_id: &Asset<Self::AssetId>,
-	) -> Balance {
+	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {
 		Default::default()
 	}
 
 	fn get_delegators_for_operator(
 		_operator: &AccountId,
-	) -> Vec<(AccountId, Balance, Asset<Self::AssetId>)> {
+	) -> Vec<(AccountId, Balance, Asset<AssetId>)> {
 		Default::default()
-	}
-
-	fn slash_operator(
-		_operator: &AccountId,
-		_blueprint_id: tangle_primitives::BlueprintId,
-		_percentage: sp_runtime::Percent,
-	) {
 	}
 
 	fn get_user_deposit_with_locks(
 		_who: &AccountId,
-		_asset_id: Asset<Self::AssetId>,
+		_asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, u64>> {
 		None
 	}
@@ -533,6 +524,17 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const SlashDeferDuration: u32 = 7;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
+
+	// Ripemd160(keccak256("ServicesPalletEvmAccount"))
+	pub const ServicesPalletEvmAccount: H160 = H160([
+		0x09, 0xdf, 0x6a, 0x94, 0x1e, 0xe0, 0x3b, 0x1e,
+		0x63, 0x29, 0x04, 0xe3, 0x82, 0xe1, 0x08, 0x62,
+		0xfa, 0x9c, 0xc0, 0xe3
+	]);
 }
 
 impl pallet_services::Config for Runtime {
@@ -541,7 +543,8 @@ impl pallet_services::Config for Runtime {
 	type Currency = Balances;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type PalletEVMAddress = ServicesEVMAddress;
+	type PalletEvmAccount = ServicesPalletEvmAccount;
+	type SlashManager = ();
 	type EvmRunner = MockedEvmRunner;
 	type EvmAddressMapping = PalletEVMAddressMapping;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
@@ -566,6 +569,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
+	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MockDelegationManager;
 	type SlashDeferDuration = SlashDeferDuration;
@@ -603,6 +607,7 @@ pub const MBSM: H160 = H160([0x12; 20]);
 pub const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const USDC_ERC20: H160 = H160([0x23; 20]);
 
+#[allow(dead_code)]
 pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
@@ -747,7 +752,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		<Staking as Hooks<u64>>::on_initialize(1);
 
 		let call = <Runtime as pallet_services::Config>::EvmRunner::call(
-			Services::address(),
+			Services::pallet_evm_account(),
 			USDC_ERC20,
 			serde_json::from_value::<ethabi::Function>(json!({
 				"name": "initialize",
@@ -788,7 +793,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		// Mint
 		for a in authorities {
 			let call = <Runtime as pallet_services::Config>::EvmRunner::call(
-				Services::address(),
+				Services::pallet_evm_account(),
 				USDC_ERC20,
 				serde_json::from_value::<ethabi::Function>(json!({
 					"name": "mint",

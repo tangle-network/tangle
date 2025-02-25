@@ -167,7 +167,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1208, // v1.2.8
+	spec_version: 1209, // v1.2.9
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1296,8 +1296,11 @@ parameter_types! {
 impl pallet_multi_asset_delegation::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
+	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type BondDuration = BondDuration;
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
 	type ServiceManager = Services;
 	type LeaveOperatorsDelay = ConstU32<10>;
 	type OperatorBondLessDelay = ConstU32<1>;
@@ -1308,7 +1311,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type PalletId = PID;
-	type SlashedAmountRecipient = TreasuryAccount;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
 	type MaxWithdrawRequests = MaxWithdrawRequests;
@@ -1373,6 +1375,7 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1570,11 +1573,18 @@ extern crate frame_benchmarking;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
+	pub use pallet_tangle_lst_benchmarking::Pallet as LstBench;
+	impl pallet_tangle_lst_benchmarking::Config for crate::Runtime {}
+
 	define_benchmarks!(
 		[frame_benchmarking, BaselineBench::<Runtime>]
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
+		[pallet_services, Services]
+		[pallet_tangle_lst_benchmarking, crate::benches::LstBench::<Runtime>]
+		[pallet_multi_asset_delegation, MultiAssetDelegation]
+		[pallet_rewards, Rewards]
 	);
 }
 

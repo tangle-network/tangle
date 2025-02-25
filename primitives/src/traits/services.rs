@@ -58,4 +58,18 @@ pub trait ServiceManager<AccountId, Balance> {
 	///
 	/// `true` if the operator can exit, otherwise `false`.
 	fn can_exit(operator: &AccountId) -> bool;
+
+	/// Check if the operator has any active services.
+	///
+	/// This method determines whether the specified operator has any active services
+	/// currently running.
+	///
+	/// # Parameters
+	///
+	/// * `operator`: A reference to the account identifier of the operator.
+	///
+	/// # Returns
+	///
+	/// `true` if the operator has active services, otherwise `false`.
+	fn has_active_services(operator: &AccountId) -> bool;
 }
