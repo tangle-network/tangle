@@ -131,9 +131,6 @@ where
 			let value = value.unwrap_or(U256::zero());
 			let call_data = call_data.unwrap_or(vec![]);
 
-			let sub_context =
-				Context { caller: handle.context().caller, address, apparent_value: value };
-
 			let transfer = if value.is_zero() {
 				None
 			} else {
@@ -197,8 +194,12 @@ where
 				},
 			};
 
+			// Execute the subcall with the provided gas limit
+			// Create a sub_context that matches the parent context's caller
+			// This ensures that state changes from the subcall are properly committed
+			let context = handle.context().clone();
 			let (reason, output) =
-				handle.call(address, transfer, call_data, Some(forwarded_gas), false, &sub_context);
+				handle.call(address, transfer, call_data, Some(forwarded_gas), false, &context);
 
 			// Logs
 			// We reserved enough gas so this should not OOG.
