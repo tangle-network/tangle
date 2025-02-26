@@ -1030,6 +1030,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AssetAlreadyInVault: AugmentedError<ApiType>;
       /**
+       * The asset config is not found
+       **/
+      AssetConfigNotFound: AugmentedError<ApiType>;
+      /**
        * The asset ID is not found
        **/
       AssetNotFound: AugmentedError<ApiType>;
@@ -1074,6 +1078,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CannotExit: AugmentedError<ApiType>;
       /**
+       * Cannot go offline with active services
+       **/
+      CannotGoOfflineWithActiveServices: AugmentedError<ApiType>;
+      /**
        * Cap cannot be zero
        **/
       CapCannotBeZero: AugmentedError<ApiType>;
@@ -1113,6 +1121,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Underflow while reducing stake
        **/
       InsufficientStakeRemaining: AugmentedError<ApiType>;
+      /**
+       * Amount is invalid
+       **/
+      InvalidAmount: AugmentedError<ApiType>;
       /**
        * Leaving round not reached
        **/
@@ -1178,6 +1190,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotLeavingOperator: AugmentedError<ApiType>;
       /**
+       * Not a nominator (for native restaking & delegation)
+       **/
+      NotNominator: AugmentedError<ApiType>;
+      /**
        * The operator is not offline.
        **/
       NotOfflineOperator: AugmentedError<ApiType>;
@@ -1188,7 +1204,7 @@ declare module '@polkadot/api-base/types/errors' {
       /**
        * No withdraw requests found
        **/
-      NowithdrawRequests: AugmentedError<ApiType>;
+      NoWithdrawRequests: AugmentedError<ApiType>;
       /**
        * Overflow from math
        **/
@@ -1442,6 +1458,99 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    poolAssets: {
+      /**
+       * The asset-account already exists.
+       **/
+      AlreadyExists: AugmentedError<ApiType>;
+      /**
+       * The asset is not live, and likely being destroyed.
+       **/
+      AssetNotLive: AugmentedError<ApiType>;
+      /**
+       * The asset ID must be equal to the [`NextAssetId`].
+       **/
+      BadAssetId: AugmentedError<ApiType>;
+      /**
+       * Invalid metadata given.
+       **/
+      BadMetadata: AugmentedError<ApiType>;
+      /**
+       * Invalid witness data given.
+       **/
+      BadWitness: AugmentedError<ApiType>;
+      /**
+       * Account balance must be greater than or equal to the transfer amount.
+       **/
+      BalanceLow: AugmentedError<ApiType>;
+      /**
+       * Callback action resulted in error
+       **/
+      CallbackFailed: AugmentedError<ApiType>;
+      /**
+       * The origin account is frozen.
+       **/
+      Frozen: AugmentedError<ApiType>;
+      /**
+       * The asset status is not the expected status.
+       **/
+      IncorrectStatus: AugmentedError<ApiType>;
+      /**
+       * The asset ID is already taken.
+       **/
+      InUse: AugmentedError<ApiType>;
+      /**
+       * The asset is a live asset and is actively being used. Usually emit for operations such
+       * as `start_destroy` which require the asset to be in a destroying state.
+       **/
+      LiveAsset: AugmentedError<ApiType>;
+      /**
+       * Minimum balance should be non-zero.
+       **/
+      MinBalanceZero: AugmentedError<ApiType>;
+      /**
+       * The account to alter does not exist.
+       **/
+      NoAccount: AugmentedError<ApiType>;
+      /**
+       * The asset-account doesn't have an associated deposit.
+       **/
+      NoDeposit: AugmentedError<ApiType>;
+      /**
+       * The signing account has no permission to do the operation.
+       **/
+      NoPermission: AugmentedError<ApiType>;
+      /**
+       * The asset should be frozen before the given operation.
+       **/
+      NotFrozen: AugmentedError<ApiType>;
+      /**
+       * No approval exists that would allow the transfer.
+       **/
+      Unapproved: AugmentedError<ApiType>;
+      /**
+       * Unable to increment the consumer reference counters on the account. Either no provider
+       * reference exists to allow a non-zero balance of a non-self-sufficient asset, or one
+       * fewer then the maximum number of consumers has been reached.
+       **/
+      UnavailableConsumer: AugmentedError<ApiType>;
+      /**
+       * The given asset ID is unknown.
+       **/
+      Unknown: AugmentedError<ApiType>;
+      /**
+       * The operation would result in funds being burned.
+       **/
+      WouldBurn: AugmentedError<ApiType>;
+      /**
+       * The source account would not survive the transfer and it needs to stay alive.
+       **/
+      WouldDie: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     preimage: {
       /**
        * Preimage has already been noted on-chain.
@@ -1556,6 +1665,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       CannotCalculateRewardPerBlock: AugmentedError<ApiType>;
       /**
+       * Deposit cap is greater than max deposit cap
+       **/
+      DepositCapGreaterThanMaxDepositCap: AugmentedError<ApiType>;
+      /**
+       * Deposit cap is less than min deposit cap
+       **/
+      DepositCapLessThanMinDepositCap: AugmentedError<ApiType>;
+      /**
        * Error returned when trying to add a blueprint ID that already exists.
        **/
       DuplicateBlueprintId: AugmentedError<ApiType>;
@@ -1563,6 +1680,14 @@ declare module '@polkadot/api-base/types/errors' {
        * Incentive cap is greater than deposit cap
        **/
       IncentiveCapGreaterThanDepositCap: AugmentedError<ApiType>;
+      /**
+       * Incentive cap is greater than max incentive cap
+       **/
+      IncentiveCapGreaterThanMaxIncentiveCap: AugmentedError<ApiType>;
+      /**
+       * Incentive cap is less than min incentive cap
+       **/
+      IncentiveCapLessThanMinIncentiveCap: AugmentedError<ApiType>;
       /**
        * Insufficient rewards balance in pallet account
        **/
@@ -1636,6 +1761,10 @@ declare module '@polkadot/api-base/types/errors' {
     };
     services: {
       /**
+       * Operator is a member or has already joined the service
+       **/
+      AlreadyJoined: AugmentedError<ApiType>;
+      /**
        * The caller is already registered as a operator.
        **/
       AlreadyRegistered: AugmentedError<ApiType>;
@@ -1655,6 +1784,26 @@ declare module '@polkadot/api-base/types/errors' {
        * The service blueprint was not found.
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
+      /**
+       * Duplicate assets provided
+       **/
+      DuplicateAsset: AugmentedError<ApiType>;
+      /**
+       * The caller is registering with a key that is already registered
+       **/
+      DuplicateKey: AugmentedError<ApiType>;
+      /**
+       * Duplicate membership model
+       **/
+      DuplicateMembershipModel: AugmentedError<ApiType>;
+      /**
+       * Duplicate operator registration.
+       **/
+      DuplicateOperator: AugmentedError<ApiType>;
+      /**
+       * Service does not support dynamic membership
+       **/
+      DynamicMembershipNotSupported: AugmentedError<ApiType>;
       /**
        * The ERC20 transfer failed.
        **/
@@ -1684,6 +1833,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidJobResult: AugmentedError<ApiType>;
       /**
+       * Invalid key (zero byte ECDSA key provided)
+       **/
+      InvalidKey: AugmentedError<ApiType>;
+      /**
        * The caller does not have the requirements to be a operator.
        **/
       InvalidRegistrationInput: AugmentedError<ApiType>;
@@ -1691,6 +1844,18 @@ declare module '@polkadot/api-base/types/errors' {
        * The caller does not have the requirements to request a service.
        **/
       InvalidRequestInput: AugmentedError<ApiType>;
+      /**
+       * Invalid security commitments
+       **/
+      InvalidSecurityCommitments: AugmentedError<ApiType>;
+      /**
+       * Invalid Security Requirements
+       **/
+      InvalidSecurityRequirements: AugmentedError<ApiType>;
+      /**
+       * Invalid slash percentage
+       **/
+      InvalidSlashPercentage: AugmentedError<ApiType>;
       /**
        * The result of the job call was not found.
        **/
@@ -1702,6 +1867,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       JobDefinitionNotFound: AugmentedError<ApiType>;
       /**
+       * Cannot join service - rejected by blueprint
+       **/
+      JoinRejected: AugmentedError<ApiType>;
+      /**
+       * Cannot leave service - rejected by blueprint
+       **/
+      LeaveRejected: AugmentedError<ApiType>;
+      /**
        * The Supplied Master Blueprint Service Manager Revision is not found.
        **/
       MasterBlueprintServiceManagerRevisionNotFound: AugmentedError<ApiType>;
@@ -1709,6 +1882,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The maximum number of assets per service has been exceeded.
        **/
       MaxAssetsPerServiceExceeded: AugmentedError<ApiType>;
+      /**
+       * Maximum number of blueprints registered by the operator reached.
+       **/
+      MaxBlueprintsPerOperatorExceeded: AugmentedError<ApiType>;
       /**
        * The maximum number of fields per request has been exceeded.
        **/
@@ -1718,6 +1895,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       MaxMasterBlueprintServiceManagerVersionsExceeded: AugmentedError<ApiType>;
       /**
+       * Maximum operators reached
+       **/
+      MaxOperatorsReached: AugmentedError<ApiType>;
+      /**
        * The maximum number of permitted callers per service has been exceeded.
        **/
       MaxPermittedCallersExceeded: AugmentedError<ApiType>;
@@ -1726,9 +1907,9 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       MaxServiceProvidersExceeded: AugmentedError<ApiType>;
       /**
-       * Maximum number of services per Provider reached.
+       * Maximum number of services per operator reached.
        **/
-      MaxServicesPerProviderExceeded: AugmentedError<ApiType>;
+      MaxServicesPerOperatorExceeded: AugmentedError<ApiType>;
       /**
        * The maximum number of services per user has been exceeded.
        **/
@@ -1738,6 +1919,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       MissingEVMOrigin: AugmentedError<ApiType>;
       /**
+       * Native asset exposure is too low
+       **/
+      NativeAssetExposureTooLow: AugmentedError<ApiType>;
+      /**
        * No assets provided for the service, at least one asset is required.
        **/
       NoAssetsProvided: AugmentedError<ApiType>;
@@ -1745,6 +1930,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The Service Blueprint did not return a dispute origin for this service.
        **/
       NoDisputeOrigin: AugmentedError<ApiType>;
+      /**
+       * Native asset is not found
+       **/
+      NoNativeAsset: AugmentedError<ApiType>;
       /**
        * The Service Blueprint did not return a slashing origin for this service.
        **/
@@ -1758,6 +1947,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotAllowedToUpdatePriceTargets: AugmentedError<ApiType>;
       /**
+       * Caller is not an operator of the service
+       **/
+      NotAnOperator: AugmentedError<ApiType>;
+      /**
        * The caller is not registered as a operator.
        **/
       NotRegistered: AugmentedError<ApiType>;
@@ -1769,6 +1962,42 @@ declare module '@polkadot/api-base/types/errors' {
        * Offender is not a registered operator.
        **/
       OffenderNotOperator: AugmentedError<ApiType>;
+      /**
+       * Approve service request hook failure
+       **/
+      OnApproveFailure: AugmentedError<ApiType>;
+      /**
+       * Can join hook failure
+       **/
+      OnCanJoinFailure: AugmentedError<ApiType>;
+      /**
+       * Can leave hook failure
+       **/
+      OnCanLeaveFailure: AugmentedError<ApiType>;
+      /**
+       * Operator join hook failure
+       **/
+      OnOperatorJoinFailure: AugmentedError<ApiType>;
+      /**
+       * Operator leave hook failure
+       **/
+      OnOperatorLeaveFailure: AugmentedError<ApiType>;
+      /**
+       * Register hook failure
+       **/
+      OnRegisterHookFailed: AugmentedError<ApiType>;
+      /**
+       * Reject service request hook failure
+       **/
+      OnRejectFailure: AugmentedError<ApiType>;
+      /**
+       * Request hook failure
+       **/
+      OnRequestFailure: AugmentedError<ApiType>;
+      /**
+       * Service init hook
+       **/
+      OnServiceInitHook: AugmentedError<ApiType>;
       /**
        * The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
        **/
@@ -1802,6 +2031,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       TerminationInterrupted: AugmentedError<ApiType>;
       /**
+       * Too few operators provided for the service's membership model
+       **/
+      TooFewOperators: AugmentedError<ApiType>;
+      /**
+       * Too many operators provided for the service's membership model
+       **/
+      TooManyOperators: AugmentedError<ApiType>;
+      /**
        * An error occurred while type checking the provided input input.
        **/
       TypeCheck: AugmentedError<ApiType>;
@@ -1809,6 +2046,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The Unapplied Slash are not found.
        **/
       UnappliedSlashNotFound: AugmentedError<ApiType>;
+      /**
+       * Membership model not supported by blueprint
+       **/
+      UnsupportedMembershipModel: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
