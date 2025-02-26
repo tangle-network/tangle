@@ -14,7 +14,7 @@ dependencies = [
 
 [[package]]
 name = "account-util"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "frame-support 37.1.0",
  "pallet-airdrop-claims",
@@ -6067,7 +6067,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "ed448-goldilocks-plus",
  "parity-scale-codec",
@@ -6094,7 +6094,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "p384",
  "parity-scale-codec",
@@ -6148,7 +6148,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1-tr"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "k256",
  "parity-scale-codec",
@@ -9616,7 +9616,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "frame-benchmarking 37.0.0",
  "frame-support 37.1.0",
@@ -11668,7 +11668,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -12268,7 +12268,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -12327,7 +12327,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-rewards-rpc-runtime-api",
@@ -12340,7 +12340,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc-runtime-api"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "parity-scale-codec",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -12469,7 +12469,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -12530,7 +12530,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-services-rpc-runtime-api",
@@ -12543,7 +12543,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "parity-scale-codec",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -20907,7 +20907,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "alloy",
  "anyhow",
@@ -21003,7 +21003,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -21012,7 +21012,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -21043,7 +21043,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -21171,7 +21171,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "evm-tracer",
  "fixed",
@@ -21375,7 +21375,7 @@ dependencies = [
 
 [[package]]
 name = "tg-frost-core"
-version = "1.2.9"
+version = "1.2.10"
 dependencies = [
  "byteorder",
  "const-crc32-nostd",
