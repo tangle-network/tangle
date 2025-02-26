@@ -233,6 +233,20 @@ impl_from! {
 	BoundedString<C::MaxFieldsSize> => String
 }
 
+// For any `T` that can be converted to `Field<C, AccountId>` and `C::MaxFieldsSize`
+// then for any `BoundedVec<T, C::MaxFieldsSize>` we can convert it to `List<Field<C, AccountId>>`
+impl<T, C, AccountId: Clone> From<BoundedVec<T, C::MaxFieldsSize>> for Field<C, AccountId>
+where
+	T: Into<Field<C, AccountId>>,
+	C: Constraints,
+{
+	fn from(val: BoundedVec<T, C::MaxFieldsSize>) -> Self {
+		let list: Vec<Field<C, AccountId>> = val.into_iter().map(Into::into).collect();
+		let ty = list.first().map(FieldType::from).unwrap_or(FieldType::Void);
+		Self::List(ty, BoundedVec::truncate_from(list))
+	}
+}
+
 #[derive(Default, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum FieldType {
@@ -305,11 +319,11 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 			(Self::Uint64(_), FieldType::Uint64) => true,
 			(Self::Int64(_), FieldType::Int64) => true,
 			(Self::String(_), FieldType::String) => true,
-			(Self::Array(lty, a), rty @ FieldType::Array(len, b)) => {
-				lty == rty && a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref()))
+			(Self::Array(lty, a), FieldType::Array(len, rty)) => {
+				lty == &**rty && a.len() == *len as usize && a.iter().all(|f| f.eq(rty.as_ref()))
 			},
-			(Self::List(lty, a), rty @ FieldType::List(b)) => {
-				lty == rty && a.iter().all(|f| f.eq(b.as_ref()))
+			(Self::List(lty, a), FieldType::List(rty)) => {
+				lty == &**rty && a.iter().all(|f| f.eq(rty.as_ref()))
 			},
 			(Self::AccountId(_), FieldType::AccountId) => true,
 			(Self::Struct(_, fields_a), FieldType::Struct(fields_b)) => {
@@ -355,6 +369,12 @@ impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
 					.expect("Field count should not exceed MaxFieldsSize"),
 			),
 		}
+	}
+}
+
+impl<'a, C: Constraints, AccountId: Clone> From<&'a Field<C, AccountId>> for FieldType {
+	fn from(val: &'a Field<C, AccountId>) -> Self {
+		val.clone().into()
 	}
 }
 
