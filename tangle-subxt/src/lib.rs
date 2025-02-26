@@ -23,3 +23,6 @@ pub use subxt_signer;
 // pub mod tangle_mainnet_runtime;
 #[cfg_attr(rustfmt, rustfmt::skip)]
 pub mod tangle_testnet_runtime;
+
+mod field_ext;
+pub use field_ext::*;
