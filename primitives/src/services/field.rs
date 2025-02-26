@@ -59,9 +59,9 @@ pub type StructFieldItem<C, M, AccountId> = (BoundedString<M>, Box<Field<C, Acco
 	serde(bound(serialize = "AccountId: Serialize", deserialize = "AccountId: Deserialize<'de>"))
 )]
 pub enum Field<C: Constraints, AccountId> {
-	/// Represents a field of null value.
+	/// Represents an optional field value
 	#[codec(index = 0)]
-	None,
+	Optional(FieldType, Option<Box<Field<C, AccountId>>>),
 	/// Represents a boolean.
 	#[codec(index = 1)]
 	Bool(bool),
@@ -95,10 +95,10 @@ pub enum Field<C: Constraints, AccountId> {
 	/// Represents an array of values
 	/// Fixed Length of values.
 	#[codec(index = 12)]
-	Array(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
+	Array(FieldType, BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
 	/// Represents a list of values
 	#[codec(index = 13)]
-	List(BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
+	List(FieldType, BoundedVec<Field<C, AccountId>, C::MaxFieldsSize>),
 	/// Represents a named struct
 	///
 	/// The struct is represented as a list of fields, where each field is a tuple of a name and a
@@ -122,7 +122,10 @@ impl<C: Constraints, AccountId: core::fmt::Debug> core::fmt::Debug for Field<C, 
 		f: &mut scale_info::prelude::fmt::Formatter<'_>,
 	) -> scale_info::prelude::fmt::Result {
 		match self {
-			Self::None => write!(f, "nil"),
+			Self::Optional(_ty, opt) => match opt {
+				Some(val) => write!(f, "{:?}", &**val),
+				None => write!(f, "nil"),
+			},
 			Self::Bool(arg0) => f.debug_tuple("bool").field(arg0).finish(),
 			Self::Uint8(arg0) => f.debug_tuple("uint8").field(arg0).finish(),
 			Self::Int8(arg0) => f.debug_tuple("int8").field(arg0).finish(),
@@ -133,8 +136,8 @@ impl<C: Constraints, AccountId: core::fmt::Debug> core::fmt::Debug for Field<C, 
 			Self::Uint64(arg0) => f.debug_tuple("uint64").field(arg0).finish(),
 			Self::Int64(arg0) => f.debug_tuple("int64").field(arg0).finish(),
 			Self::String(arg0) => f.debug_tuple("string").field(arg0).finish(),
-			Self::Array(arg0) => f.debug_tuple("array").field(arg0).finish(),
-			Self::List(arg0) => f.debug_tuple("list").field(arg0).finish(),
+			Self::Array(ty, arg0) => f.debug_tuple("array").field(ty).field(arg0).finish(),
+			Self::List(ty, arg0) => f.debug_tuple("list").field(ty).field(arg0).finish(),
 			Self::AccountId(arg0) => f.debug_tuple("account").field(arg0).finish(),
 			Self::Struct(name, fields) => {
 				let mut debug_struct = f.debug_struct(&format!("struct({})", name));
@@ -162,8 +165,8 @@ impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
 			(Self::Uint64(l0), Self::Uint64(r0)) => l0 == r0,
 			(Self::Int64(l0), Self::Int64(r0)) => l0 == r0,
 			(Self::String(l0), Self::String(r0)) => l0 == r0,
-			(Self::Array(l0), Self::Array(r0)) => l0 == r0,
-			(Self::List(l0), Self::List(r0)) => l0 == r0,
+			(Self::Array(lty, l0), Self::Array(rty, r0)) => lty == rty && l0 == r0,
+			(Self::List(lty, l0), Self::List(rty, r0)) => lty == rty && l0 == r0,
 			(Self::AccountId(l0), Self::AccountId(r0)) => l0 == r0,
 			(Self::Struct(l_name, l_fields), Self::Struct(r_name, r_fields)) => {
 				if l_name != r_name || l_fields.len() != r_fields.len() {
@@ -178,6 +181,11 @@ impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
 				}
 				true
 			},
+			(Self::Optional(_lty, lopt), Self::Optional(_rty, ropt)) => match (lopt, ropt) {
+				(Some(l), Some(r)) => l == r,
+				(None, None) => true,
+				_ => false,
+			},
 			_ => core::mem::discriminant(self) == core::mem::discriminant(other),
 		}
 	}
@@ -186,7 +194,7 @@ impl<C: Constraints, AccountId: PartialEq> PartialEq for Field<C, AccountId> {
 impl<C: Constraints, AccountId: Clone> Clone for Field<C, AccountId> {
 	fn clone(&self) -> Self {
 		match self {
-			Self::None => Self::None,
+			Self::Optional(ty, opt) => Self::Optional(ty.clone(), opt.clone()),
 			Self::Bool(arg0) => Self::Bool(*arg0),
 			Self::Uint8(arg0) => Self::Uint8(*arg0),
 			Self::Int8(arg0) => Self::Int8(*arg0),
@@ -197,8 +205,8 @@ impl<C: Constraints, AccountId: Clone> Clone for Field<C, AccountId> {
 			Self::Uint64(arg0) => Self::Uint64(*arg0),
 			Self::Int64(arg0) => Self::Int64(*arg0),
 			Self::String(arg0) => Self::String(arg0.clone()),
-			Self::Array(arg0) => Self::Array(arg0.clone()),
-			Self::List(arg0) => Self::List(arg0.clone()),
+			Self::Array(ty, arg0) => Self::Array(ty.clone(), arg0.clone()),
+			Self::List(ty, arg0) => Self::List(ty.clone(), arg0.clone()),
 			Self::Struct(arg0, arg1) => Self::Struct(arg0.clone(), arg1.clone()),
 			Self::AccountId(arg0) => Self::AccountId(arg0.clone()),
 		}
@@ -227,14 +235,15 @@ impl_from! {
 
 // For any `T` that can be converted to `Field<C, AccountId>` and `C::MaxFieldsSize`
 // then for any `BoundedVec<T, C::MaxFieldsSize>` we can convert it to `List<Field<C, AccountId>>`
-impl<T, C, AccountId> From<BoundedVec<T, C::MaxFieldsSize>> for Field<C, AccountId>
+impl<T, C, AccountId: Clone> From<BoundedVec<T, C::MaxFieldsSize>> for Field<C, AccountId>
 where
 	T: Into<Field<C, AccountId>>,
 	C: Constraints,
 {
 	fn from(val: BoundedVec<T, C::MaxFieldsSize>) -> Self {
 		let list: Vec<Field<C, AccountId>> = val.into_iter().map(Into::into).collect();
-		Self::List(BoundedVec::truncate_from(list))
+		let ty = list.first().map(FieldType::from).unwrap_or(FieldType::Void);
+		Self::List(ty, BoundedVec::truncate_from(list))
 	}
 }
 
@@ -287,7 +296,7 @@ pub enum FieldType {
 	/// A Struct of items of type [`FieldType`].
 	/// A limit of 32 fields is set for the struct.
 	#[codec(index = 15)]
-	Struct(Box<FieldType>, BoundedVec<(Box<FieldType>, Box<FieldType>), ConstU32<32>>),
+	Struct(BoundedVec<Box<FieldType>, ConstU32<32>>),
 	// NOTE: Special types starts from 100
 	/// A special type for AccountId
 	#[codec(index = 100)]
@@ -297,7 +306,9 @@ pub enum FieldType {
 impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
-			(_, FieldType::Optional(ty)) => matches!(self, Self::None) || self == &**ty,
+			(_, FieldType::Optional(ty)) => {
+				matches!(self, Self::Optional(_, None)) || self == &**ty
+			},
 			(Self::Bool(_), FieldType::Bool) => true,
 			(Self::Uint8(_), FieldType::Uint8) => true,
 			(Self::Int8(_), FieldType::Int8) => true,
@@ -308,17 +319,19 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 			(Self::Uint64(_), FieldType::Uint64) => true,
 			(Self::Int64(_), FieldType::Int64) => true,
 			(Self::String(_), FieldType::String) => true,
-			(Self::Array(a), FieldType::Array(len, b)) => {
-				a.len() == *len as usize && a.iter().all(|f| f.eq(b.as_ref()))
+			(Self::Array(lty, a), FieldType::Array(len, rty)) => {
+				lty == &**rty && a.len() == *len as usize && a.iter().all(|f| f.eq(rty.as_ref()))
 			},
-			(Self::List(a), FieldType::List(b)) => a.iter().all(|f| f.eq(b.as_ref())),
+			(Self::List(lty, a), FieldType::List(rty)) => {
+				lty == &**rty && a.iter().all(|f| f.eq(rty.as_ref()))
+			},
 			(Self::AccountId(_), FieldType::AccountId) => true,
-			(Self::Struct(_, fields_a), FieldType::Struct(_, fields_b)) => {
+			(Self::Struct(_, fields_a), FieldType::Struct(fields_b)) => {
 				fields_a.into_iter().len() == fields_b.into_iter().len()
 					&& fields_a
 						.into_iter()
 						.zip(fields_b)
-						.all(|((_, v_a), (_, v_b))| v_a.as_ref().eq(v_b))
+						.all(|((_, v_a), v_b)| v_a.as_ref().eq(v_b))
 			},
 			_ => false,
 		}
@@ -328,7 +341,7 @@ impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
 	fn from(val: Field<C, AccountId>) -> Self {
 		match val {
-			Field::None => FieldType::Optional(Box::new(FieldType::Void)),
+			Field::Optional(ty, _) => ty,
 			Field::Bool(_) => FieldType::Bool,
 			Field::Uint8(_) => FieldType::Uint8,
 			Field::Int8(_) => FieldType::Int8,
@@ -339,24 +352,18 @@ impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
 			Field::Uint64(_) => FieldType::Uint64,
 			Field::Int64(_) => FieldType::Int64,
 			Field::String(_) => FieldType::String,
-			Field::Array(a) => FieldType::Array(
+			Field::Array(_ty, a) => FieldType::Array(
 				a.len() as u64,
 				Box::new(a.first().cloned().map(Into::into).unwrap_or(FieldType::Void)),
 			),
-			Field::List(a) => FieldType::List(Box::new(
+			Field::List(_ty, a) => FieldType::List(Box::new(
 				a.first().cloned().map(Into::into).unwrap_or(FieldType::Void),
 			)),
 			Field::AccountId(_) => FieldType::AccountId,
 			Field::Struct(_, fields) => FieldType::Struct(
-				Box::new(FieldType::String),
 				fields
 					.iter()
-					.map(|(_, field_value)| {
-						(
-							Box::new(FieldType::String),
-							Box::new(FieldType::from(field_value.as_ref().clone())),
-						)
-					})
+					.map(|(_, field_value)| Box::new(FieldType::from(field_value.as_ref().clone())))
 					.collect::<Vec<_>>()
 					.try_into()
 					.expect("Field count should not exceed MaxFieldsSize"),
@@ -365,12 +372,21 @@ impl<C: Constraints, AccountId: Clone> From<Field<C, AccountId>> for FieldType {
 	}
 }
 
+impl<'a, C: Constraints, AccountId: Clone> From<&'a Field<C, AccountId>> for FieldType {
+	fn from(val: &'a Field<C, AccountId>) -> Self {
+		val.clone().into()
+	}
+}
+
 impl<'a, C: Constraints, AccountId: Encode + Clone> From<&'a Field<C, AccountId>>
 	for ethabi::Token
 {
 	fn from(value: &'a Field<C, AccountId>) -> Self {
 		match value {
-			Field::None => ethabi::Token::Tuple(Vec::new()),
+			Field::Optional(_ty, opt) => match opt {
+				Some(val) => ethabi::Token::from(&**val),
+				None => ethabi::Token::Tuple(Vec::new()),
+			},
 			Field::Bool(val) => ethabi::Token::Bool(*val),
 			Field::Uint8(val) => ethabi::Token::Uint((*val).into()),
 			Field::Int8(val) => ethabi::Token::Int((*val).into()),
@@ -381,8 +397,8 @@ impl<'a, C: Constraints, AccountId: Encode + Clone> From<&'a Field<C, AccountId>
 			Field::Uint64(val) => ethabi::Token::Uint((*val).into()),
 			Field::Int64(val) => ethabi::Token::Int((*val).into()),
 			Field::String(val) => ethabi::Token::String(val.to_string()),
-			Field::Array(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
-			Field::List(val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::Array(_, val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::List(_, val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),
 			Field::Struct(_, fields) => ethabi::Token::Array(
 				fields

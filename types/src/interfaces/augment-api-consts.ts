@@ -8,7 +8,7 @@ import '@polkadot/api-base/types/consts';
 import type { ApiTypes, AugmentedConst } from '@polkadot/api-base/types';
 import type { Bytes, Option, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { Codec } from '@polkadot/types-codec/types';
-import type { H160, Perbill, Permill } from '@polkadot/types/interfaces/runtime';
+import type { AccountId32, H160, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import type { FrameSupportPalletId, FrameSystemLimitsBlockLength, FrameSystemLimitsBlockWeights, SpVersionRuntimeVersion, SpWeightsRuntimeDbWeight, SpWeightsWeightV2Weight } from '@polkadot/types/lookup';
 
 export type __AugmentedConst<ApiType extends ApiTypes> = AugmentedConst<ApiType>;
@@ -619,6 +619,7 @@ declare module '@polkadot/api-base/types/consts' {
        * The pallet's account ID.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      slashRecipient: AccountId32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -673,6 +674,44 @@ declare module '@polkadot/api-base/types/consts' {
        * The nomination pool's pallet id.
        **/
       palletId: FrameSupportPalletId & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    poolAssets: {
+      /**
+       * The amount of funds that must be reserved when creating a new approval.
+       **/
+      approvalDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The amount of funds that must be reserved for a non-provider asset account to be
+       * maintained.
+       **/
+      assetAccountDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The basic amount of funds that must be reserved for an asset.
+       **/
+      assetDeposit: u128 & AugmentedConst<ApiType>;
+      /**
+       * The basic amount of funds that must be reserved when adding metadata to your asset.
+       **/
+      metadataDepositBase: u128 & AugmentedConst<ApiType>;
+      /**
+       * The additional funds that must be reserved for the number of bytes you store in your
+       * metadata.
+       **/
+      metadataDepositPerByte: u128 & AugmentedConst<ApiType>;
+      /**
+       * Max number of items to destroy per `destroy_accounts` and `destroy_approvals` call.
+       * 
+       * Must be configured to result in a weight that makes each call fit in a block.
+       **/
+      removeItemsLimit: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum length of a name or symbol stored on-chain.
+       **/
+      stringLimit: u32 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/
@@ -825,9 +864,14 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxSourcesPerGadget: u32 & AugmentedConst<ApiType>;
       /**
-       * `Pallet` EVM Address.
+       * The minimum percentage of native token stake that operators must expose for slashing.
        **/
-      palletEVMAddress: H160 & AugmentedConst<ApiType>;
+      minimumNativeSecurityRequirement: Percent & AugmentedConst<ApiType>;
+      /**
+       * PalletId used for deriving the AccountId and EVM address.
+       * This account receives slashed assets upon slash event processing.
+       **/
+      palletEvmAccount: H160 & AugmentedConst<ApiType>;
       /**
        * Number of eras that slashes are deferred by, after computation.
        * 
