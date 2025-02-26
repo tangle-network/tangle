@@ -192,7 +192,7 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-pub const MAXIMUM_BLOCK_LENGTH: u32 = (15 * 1024 * 1024 / 2);
+pub const MAXIMUM_BLOCK_LENGTH: u32 = 8 * 1024 * 1024;
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
