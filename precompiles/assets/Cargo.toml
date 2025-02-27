@@ -61,3 +61,8 @@ std = [
 	"sp-std/std",
 	"tangle-primitives/std",
 ]
+runtime-benchmarks = [
+    "pallet-assets/runtime-benchmarks",
+    "pallet-balances/runtime-benchmarks",
+    "pallet-evm/runtime-benchmarks",
+]

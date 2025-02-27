@@ -76,6 +76,8 @@ pub mod types;
 pub use types::*;
 pub mod functions;
 pub mod impls;
+pub mod weights;
+pub use weights::*;
 
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
@@ -124,7 +126,7 @@ pub mod pallet {
 			Self::AccountId,
 			BalanceOf<Self>,
 			BlockNumberFor<Self>,
-			AssetId = Self::AssetId,
+			Self::AssetId,
 		>;
 
 		/// The origin that can manage reward assets
@@ -144,6 +146,9 @@ pub mod pallet {
 
 		/// The min possible incentive cap
 		type MinIncentiveCap: Get<BalanceOf<Self>>;
+
+		/// Weight information for the pallet
+		type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::pallet]
@@ -243,11 +248,7 @@ pub mod pallet {
 		/// Event emitted when a blueprint is whitelisted for rewards
 		BlueprintWhitelisted { blueprint_id: BlueprintId },
 		/// Asset has been updated to reward vault
-		AssetUpdatedInVault {
-			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
-			action: AssetAction,
-		},
+		AssetUpdatedInVault { vault_id: T::VaultId, asset: Asset<T::AssetId>, action: AssetAction },
 		/// Vault reward config updated
 		VaultRewardConfigUpdated {
 			vault_id: T::VaultId,
@@ -366,7 +367,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Claim rewards for a specific asset and reward type
 		#[pallet::call_index(1)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(<T as Config>::WeightInfo::claim_rewards())]
 		pub fn claim_rewards(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
@@ -386,7 +387,7 @@ pub mod pallet {
 		///
 		/// Emits `RewardsClaimed` event when successful.
 		#[pallet::call_index(2)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(<T as Config>::WeightInfo::claim_rewards_other())]
 		pub fn claim_rewards_other(
 			origin: OriginFor<T>,
 			who: T::AccountId,
@@ -410,7 +411,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `vault_id` - ID of the vault
-		/// * `asset_id` - ID of the asset
+		/// * `asset` - ID of the asset
 		/// * `action` - Action to perform (Add/Remove)
 		///
 		/// # Errors
@@ -418,21 +419,21 @@ pub mod pallet {
 		/// * [`Error::AssetAlreadyInVault`] - Asset already exists in vault
 		/// * [`Error::AssetNotInVault`] - Asset does not exist in vault
 		#[pallet::call_index(3)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(<T as Config>::WeightInfo::manage_asset_reward_vault())]
 		pub fn manage_asset_reward_vault(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
-			asset_id: Asset<T::AssetId>,
+			asset: Asset<T::AssetId>,
 			action: AssetAction,
 		) -> DispatchResult {
 			let _who = T::ForceOrigin::ensure_origin(origin)?;
 
 			match action {
-				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset_id)?,
-				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset_id)?,
+				AssetAction::Add => Self::add_asset_to_vault(&vault_id, &asset)?,
+				AssetAction::Remove => Self::remove_asset_from_vault(&vault_id, &asset)?,
 			}
 
-			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset_id, action });
+			Self::deposit_event(Event::AssetUpdatedInVault { vault_id, asset, action });
 
 			Ok(())
 		}
@@ -456,7 +457,7 @@ pub mod pallet {
 		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
 		#[pallet::call_index(4)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(<T as Config>::WeightInfo::create_reward_vault())]
 		pub fn create_reward_vault(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
@@ -500,7 +501,7 @@ pub mod pallet {
 		/// * `IncentiveCapGreaterThanDepositCap` - If incentive cap is greater than deposit cap
 		/// * `BoostMultiplierMustBeOne` - If boost multiplier is not 1
 		#[pallet::call_index(5)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		#[pallet::weight(<T as Config>::WeightInfo::update_vault_reward_config())]
 		pub fn update_vault_reward_config(
 			origin: OriginFor<T>,
 			vault_id: T::VaultId,
@@ -526,7 +527,7 @@ pub mod pallet {
 
 		/// Update the decay configuration
 		#[pallet::call_index(6)]
-		#[pallet::weight(T::DbWeight::get().writes(2))]
+		#[pallet::weight(<T as Config>::WeightInfo::update_decay_config())]
 		pub fn update_decay_config(
 			origin: OriginFor<T>,
 			start_period: BlockNumberFor<T>,
@@ -546,7 +547,7 @@ pub mod pallet {
 
 		/// Update the number of blocks used for APY calculation
 		#[pallet::call_index(7)]
-		#[pallet::weight(T::DbWeight::get().writes(1))]
+		#[pallet::weight(<T as Config>::WeightInfo::update_apy_blocks())]
 		pub fn update_apy_blocks(
 			origin: OriginFor<T>,
 			blocks: BlockNumberFor<T>,

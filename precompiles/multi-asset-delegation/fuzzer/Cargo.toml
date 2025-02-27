@@ -18,7 +18,7 @@ honggfuzz = { workspace = true }
 
 pallet-multi-asset-delegation = { workspace = true, features = ["fuzzing"], default-features = true }
 pallet-evm-precompile-multi-asset-delegation = { features = ["fuzzing"], workspace = true, default-features = true }
-
+sp-core = { workspace = true }
 frame-system = { workspace = true, default-features = true }
 frame-support = { workspace = true, default-features = true }
 

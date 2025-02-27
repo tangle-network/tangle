@@ -8,14 +8,14 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::RawOrigin;
-use pallet_tangle_lst::{BondedPools, Config, Event, LastPoolId, PoolId, PoolState};
+use pallet_tangle_lst::{BondedPools, LastPoolId, PoolId, PoolState};
 use sp_core::U256;
 use sp_runtime::{
 	traits::{ConstU128, ConstU32, ConstU64, Convert, Zero},
-	BuildStorage, DispatchError, DispatchResult, FixedU128, Perbill,
+	BuildStorage, DispatchResult, FixedU128, Perbill,
 };
 use sp_runtime_interface::sp_tracing;
-use sp_staking::{EraIndex, OnStakingUpdate, Stake};
+use sp_staking::EraIndex;
 use sp_std::collections::btree_map::BTreeMap;
 
 pub type BlockNumber = u64;
@@ -89,6 +89,8 @@ parameter_types! {
 	pub static ExistentialDeposit: Balance = 5;
 }
 
+impl crate::Config for Runtime {}
+
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = frame_support::traits::ConstU32<1024>;
 	type MaxReserves = ();
@@ -118,6 +120,7 @@ pallet_staking_reward_curve::build! {
 parameter_types! {
 	pub const RewardCurve: &'static sp_runtime::curve::PiecewiseLinear<'static> = &I_NPOS;
 }
+
 #[derive_impl(pallet_staking::config_preludes::TestDefaultConfig)]
 impl pallet_staking::Config for Runtime {
 	type Currency = Balances;
@@ -137,7 +140,7 @@ parameter_types! {
 	pub static BagThresholds: &'static [VoteWeight] = &[10, 20, 30, 40, 50, 60, 1_000, 2_000, 10_000];
 }
 
-impl pallet_bags_list::Config<VoterBagsListInstance> for Runtime {
+impl pallet_bags_list::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type BagThresholds = BagThresholds;
@@ -167,6 +170,7 @@ parameter_types! {
 }
 
 impl pallet_tangle_lst::Config for Runtime {
+	type MaxIconLength = ConstU32<1024>;
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type Currency = Balances;
@@ -217,7 +221,7 @@ frame_support::construct_runtime!(
 		Timestamp: pallet_timestamp,
 		Balances: pallet_balances,
 		Staking: pallet_staking,
-		VoterList: pallet_bags_list::<Instance1>,
+		VoterList: pallet_bags_list,
 		Assets: pallet_assets,
 		Lst: pallet_tangle_lst,
 	}
@@ -318,7 +322,8 @@ impl ExtBuilder {
 				900,
 				901,
 				902,
-				Default::default()
+				Default::default(),
+				None
 			));
 			assert_ok!(Lst::set_metadata(RuntimeOrigin::signed(900), 1, vec![1, 1]));
 			let last_pool = LastPoolId::<Runtime>::get();
