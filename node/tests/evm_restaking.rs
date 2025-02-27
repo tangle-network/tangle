@@ -196,8 +196,8 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_DEPOSIT: u128 = 10_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 100_000_0000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u32 = 10; // 10% APY
 
 /// Setup the E2E test environment.
@@ -1069,6 +1069,7 @@ fn mad_rewards() {
 			.tx()
 			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
 			.await?;
+
 		while let Some(Ok(s)) = result.next().await {
 			if let TxStatus::InBestBlock(b) = s {
 				let evs = match b.wait_for_success().await {
