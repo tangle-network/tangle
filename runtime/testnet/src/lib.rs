@@ -43,7 +43,6 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use frame_system::EnsureSigned;
 use frame_system::EnsureSignedBy;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
@@ -1211,7 +1210,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type MaxMetadataLen = MaxMetadataLen;
 	// we use the same number of allowed unlocking chunks as with staking.
 	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
-	type Fungibles = PoolAssets; // Pool assets not general
+	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;
 	type MaxNameLength = ConstU32<50>;
@@ -1460,7 +1459,7 @@ ord_parameter_types! {
 
 // General purpose assets configuration
 pub type LstPoolAssetsInstance = pallet_assets::Instance1;
-impl pallet_assets::Config<GeneralAssetsInstance> for Runtime {
+impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
 	type AssetId = AssetId;
@@ -1468,7 +1467,7 @@ impl pallet_assets::Config<GeneralAssetsInstance> for Runtime {
 	type Currency = Balances;
 	// only lst pallet can create pool tokens
 	type CreateOrigin =
-	AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
+		AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
 	type AssetDeposit = AssetDeposit;
 	type AssetAccountDeposit = AssetAccountDeposit;

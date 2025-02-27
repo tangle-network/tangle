@@ -42,7 +42,6 @@ use frame_support::{
 	},
 	weights::ConstantMultiplier,
 };
-use frame_system::EnsureSigned;
 use frame_system::EnsureSignedBy;
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_evm::GasWeightMapping;
@@ -1211,46 +1210,19 @@ pub type AssetId = u128;
 #[cfg(feature = "runtime-benchmarks")]
 pub type AssetId = u32;
 
-impl tangle_primitives::traits::NextAssetId<AssetId> for Runtime {
-	fn next_asset_id() -> Option<AssetId> {
-		pallet_assets::NextAssetId::<Runtime, GeneralAssetsInstance>::get()
-	}
-}
-
-// General purpose assets configuration
-pub type GeneralAssetsInstance = pallet_assets::Instance1;
-impl pallet_assets::Config<GeneralAssetsInstance> for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Balance = Balance;
-	type AssetId = AssetId;
-	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
-	type Currency = Balances;
-	// Anyone can create asset
-	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
-	type AssetDeposit = AssetDeposit;
-	type AssetAccountDeposit = AssetAccountDeposit;
-	type MetadataDepositBase = MetadataDepositBase;
-	type MetadataDepositPerByte = MetadataDepositPerByte;
-	type ApprovalDeposit = ApprovalDeposit;
-	type StringLimit = AssetsStringLimit;
-	type RemoveItemsLimit = ConstU32<1000>;
-	type Freezer = ();
-	type Extra = ();
-	type CallbackHandle = ();
-	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
-	#[cfg(feature = "runtime-benchmarks")]
-	type BenchmarkHelper = ();
-}
+// impl tangle_primitives::traits::NextAssetId<AssetId> for Runtime {
+// 	fn next_asset_id() -> Option<AssetId> {
+// 		pallet_assets::NextAssetId::<Runtime, GeneralAssetsInstance>::get()
+// 	}
+// }
 
 ord_parameter_types! {
 	pub const LstPalletOrigin: sp_runtime::AccountId32 =
 		AccountIdConversion::<sp_runtime::AccountId32>::into_account_truncating(&LstPalletId::get());
 }
 
-// LST pool tokens configuration
-// pallet-lst and root can create pool tokens
-pub type LstPoolAssetsInstance = pallet_assets::Instance2;
+// General purpose assets configuration
+pub type LstPoolAssetsInstance = pallet_assets::Instance1;
 impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Balance = Balance;
@@ -1346,7 +1318,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type MaxUnbonding = <Self as pallet_staking::Config>::MaxUnlockingChunks;
 	type MaxNameLength = ConstU32<50>;
 	type MaxIconLength = ConstU32<500>;
-	type Fungibles = PoolAssets;
+	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -1437,8 +1409,6 @@ construct_runtime!(
 		// ZkSaaS: pallet_zksaas = 43,
 		// General purpose assets pallet instance
 		Assets: pallet_assets::<Instance1> = 44,
-		// LST pool tokens pallet instance
-		PoolAssets: pallet_assets::<Instance2> = 48,
 		MultiAssetDelegation: pallet_multi_asset_delegation = 45,
 		Services: pallet_services = 46,
 		Rewards: pallet_rewards = 47,

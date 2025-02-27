@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-use crate::GeneralAssetsInstance;
+use crate::LstPoolAssetsInstance;
 use frame_support::parameter_types;
 use pallet_evm_precompile_balances_erc20::{Erc20BalancesPrecompile, Erc20Metadata};
 use pallet_evm_precompile_batch::BatchPrecompile;
@@ -224,7 +224,7 @@ pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 		// Prefixed precompile sets (XC20)
 		PrecompileSetStartingWith<
 			ForeignAssetPrefix,
-			Erc20AssetsPrecompileSet<R, GeneralAssetsInstance>,
+			Erc20AssetsPrecompileSet<R, LstPoolAssetsInstance>,
 			CallableByContract,
 		>,
 	),
