@@ -4,28 +4,27 @@
 //! testing both ERC20 and Asset ID based delegations. The tests verify operator joining,
 //! asset delegation, and the correct state updates in the system.
 
-use core::future::Future;
-use core::ops::Div;
-use core::time::Duration;
+use core::{future::Future, ops::Div, time::Duration};
 
-use alloy::primitives::utils::*;
-use alloy::primitives::*;
-use alloy::providers::Provider;
-use alloy::sol;
+use alloy::{
+	primitives::{utils::*, *},
+	providers::Provider,
+	sol,
+};
 use anyhow::bail;
 use sp_runtime::traits::AccountIdConversion;
 use sp_tracing::{error, info};
 use tangle_primitives::time::SECONDS_PER_BLOCK;
 use tangle_runtime::PalletId;
-use tangle_subxt::subxt;
-use tangle_subxt::subxt::tx::TxStatus;
-use tangle_subxt::tangle_testnet_runtime::api;
+use tangle_subxt::{subxt, subxt::tx::TxStatus, tangle_testnet_runtime::api};
 
 mod common;
 
 use common::*;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::pallet_multi_asset_delegation::types::operator::DelegatorBond;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::types::Asset;
+use tangle_subxt::tangle_testnet_runtime::api::runtime_types::{
+	pallet_multi_asset_delegation::types::operator::DelegatorBond,
+	tangle_primitives::services::types::Asset,
+};
 
 sol! {
 	#[allow(clippy::too_many_arguments)]
@@ -1056,6 +1055,7 @@ fn mad_rewards() {
 
 		// Mint USDC for Bob
 		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
+		let deposit_amount = U256::from(MOCK_DEPOSIT);
 		let mint_call = api::tx().assets().mint(
 			t.usdc_asset_id,
 			bob.address().to_account_id().into(),
@@ -1086,20 +1086,29 @@ fn mad_rewards() {
 			}
 		}
 
-		// Delegate assets
-		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
-		let deposit_amount = U256::from(MOCK_DEPOSIT);
-
-		// Deposit and delegate using asset ID
-		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(deposit_amount), 0)
-			.from(bob.address())
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
+		let deposit_call = api::tx().multi_asset_delegation().deposit(
+			Asset::Custom(t.usdc_asset_id),
+			MOCK_DEPOSIT,
+			None,
+			None,
+		);
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&deposit_call, &bob.substrate_signer())
 			.await?;
-		assert!(deposit_result.status());
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let _evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				break;
+			}
+		}
 
 		// Wait for one year to pass
 		wait_for_more_blocks(&t.provider, 51).await;
@@ -1107,10 +1116,9 @@ fn mad_rewards() {
 		let apy = cfg.apy;
 		info!("APY: {}%", apy.0);
 
-		let rewards_addr = api::apis().rewards_api().query_user_rewards(
-			lrt_address.to_account_id(),
-			Asset::Erc20((<[u8; 20]>::from(t.usdc)).into()),
-		);
+		let rewards_addr = api::apis()
+			.rewards_api()
+			.query_user_rewards(bob.account_id(), Asset::Custom(t.usdc_asset_id).into());
 
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
