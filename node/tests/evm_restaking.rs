@@ -1056,23 +1056,34 @@ fn mad_rewards() {
 
 		// Mint USDC for Bob
 		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
-		let _mint_call = api::tx().assets().mint(
+		let mint_call = api::tx().assets().mint(
 			t.usdc_asset_id,
 			bob.address().to_account_id().into(),
 			mint_amount.to::<u128>(),
 		);
 
-		// // Deposit WETH to LRT
-		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
-		// let deposit_result = lrt
-		// 	.deposit(deposit_amount, bob.address())
-		// 	.send()
-		// 	.await?
-		// 	.with_timeout(Some(Duration::from_secs(5)))
-		// 	.get_receipt()
-		// 	.await?;
-		// assert!(deposit_result.status());
-		// info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+		info!("Minting {mint_amount} USDC for Bob");
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
+			.await?;
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::assets::events::Issued>()?
+					.expect("Issued event to be emitted");
+				info!("Minted {mint_amount} USDC for Bob");
+				break;
+			}
+		}
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
