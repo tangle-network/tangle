@@ -36,7 +36,7 @@ impl pallet_hyperbridge::Config for Runtime {
 
 parameter_types! {
 	// The hyperbridge parachain on Polkadot
-	pub const Coprocessor: Option<StateMachine> = Some(StateMachine::Polkadot(3367));
+	pub const Coprocessor: Option<StateMachine> = Some(StateMachine::Kusama(4009));
 	 // The host state machine of this pallet, your state machine id goes here
 	pub const HostStateMachine: StateMachine = StateMachine::Substrate(*b"TNGL");
 }
