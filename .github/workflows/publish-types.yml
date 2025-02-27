@@ -9,8 +9,8 @@ on:
     branches:
       - main
     paths:
-      - 'types/src/interfaces/**'
-      - 'types/src/index.ts'
+      - "types/src/interfaces/**"
+      - "types/src/index.ts"
 
 permissions:
   contents: write
@@ -25,10 +25,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Enable corepack
+        run: |
+          corepack enable
+
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
+          cache: "yarn"
 
       # Configure SSH with private SSH key
       - name: Attach SSH key
@@ -46,7 +51,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install npm dependencies
+      - name: Install dependencies
         run: |
           cd types
           yarn install
