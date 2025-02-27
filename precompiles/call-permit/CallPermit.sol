@@ -2,7 +2,7 @@
 pragma solidity >=0.8.3;
 
 /// @dev The CallPermit contract's address.
-address constant CALL_PERMIT_ADDRESS = 0x000000000000000000000000000000000000080a;
+address constant CALL_PERMIT_ADDRESS = 0x0000000000000000000000000000000000000805;
 
 /// @dev The CallPermit contract's instance.
 CallPermit constant CALL_PERMIT_CONTRACT = CallPermit(CALL_PERMIT_ADDRESS);
@@ -12,7 +12,7 @@ CallPermit constant CALL_PERMIT_CONTRACT = CallPermit(CALL_PERMIT_ADDRESS);
 /// @title Call Permit Interface
 /// @dev The interface aims to be a general-purpose tool to perform gas-less transactions. It uses the EIP-712 standard,
 /// and signed messages can be dispatched by another network participant with a transaction
-/// @custom:address 0x000000000000000000000000000000000000080a
+/// @custom:address 0x0000000000000000000000000000000000000805
 interface CallPermit {
     /// @dev Dispatch a call on the behalf of an other user with a EIP712 permit.
     /// Will revert if the permit is not valid or if the dispatched call reverts or errors (such as

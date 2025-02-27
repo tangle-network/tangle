@@ -2,7 +2,7 @@
 pragma solidity >=0.8.3;
 
 /// @dev The Preimage contract's address.
-address constant PREIMAGE_ADDRESS = 0x0000000000000000000000000000000000000813;
+address constant PREIMAGE_ADDRESS = 0x0000000000000000000000000000000000000806;
 
 /// @dev The Preimage contract's instance.
 Preimage constant PREIMAGE_CONTRACT = Preimage(PREIMAGE_ADDRESS);
@@ -11,7 +11,7 @@ Preimage constant PREIMAGE_CONTRACT = Preimage(PREIMAGE_ADDRESS);
 /// @author Originally built by Moonbeam Team
 /// @title Pallet Preimage Interface
 /// @title The interface through which solidity contracts will interact with the Preimage pallet
-/// @custom:address 0x0000000000000000000000000000000000000813
+/// @custom:address 0x0000000000000000000000000000000000000806
 interface Preimage {
     /// @dev Register a Preimage on-chain.
     /// @custom:selector cb00f603

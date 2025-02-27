@@ -2,17 +2,16 @@
 pragma solidity >=0.8.3;
 
 /// @dev The Batch contract's address.
-address constant BATCH_ADDRESS = 0x0000000000000000000000000000000000000808;
+address constant BATCH_ADDRESS = 0x0000000000000000000000000000000000000804;
 
 /// @dev The Batch contract's instance.
 Batch constant BATCH_CONTRACT = Batch(BATCH_ADDRESS);
 
-/// @author Tangle Network
-/// @author Originally built by Moonbeam Team
+/// @author The Moonbeam Team
 /// @title Batch precompile
 /// @dev Allows to perform multiple calls throught one call to the precompile.
 /// Can be used by EOA to do multiple calls in a single transaction.
-/// @custom:address 0x0000000000000000000000000000000000000808
+/// @custom:address 0x0000000000000000000000000000000000000804
 interface Batch {
     /// @dev Batch multiple calls into a single transaction.
     /// All calls are performed from the address calling this precompile.
