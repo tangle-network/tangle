@@ -4,8 +4,8 @@
     "baseUrl": ".",
     "declaration": true,
     "paths": {
-      "@webb-tools/tangle-substrate-types": ["./src/interfaces/index.ts"],
-      "@webb-tools/tangle-substrate-types/*": ["./src/interfaces/*"]
+      "@tangle-network/tangle-substrate-types": ["./src/interfaces/index.ts"],
+      "@tangle-network/tangle-substrate-types/*": ["./src/interfaces/*"]
     },
     "outDir": "build",
     "composite": true,
