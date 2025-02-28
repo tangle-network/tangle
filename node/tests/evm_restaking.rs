@@ -195,7 +195,7 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 100_000_0000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 1_000_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u32 = 10; // 10% APY
 
@@ -1030,7 +1030,6 @@ fn lrt_deposit_withdraw_erc20() {
 fn mad_rewards() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
@@ -1039,23 +1038,11 @@ fn mad_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		// Setup a LRT Vault for Alice.
-		let lrt_address = deploy_tangle_lrt(
-			alice_provider.clone(),
-			t.usdc,
-			alice.account_id().0,
-			"Liquid Restaked USDC",
-			"lrtUSDC",
-		)
-		.await?;
-
 		// Bob as delegator
 		let bob = TestAccount::Bob;
-		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 
 		// Mint USDC for Bob
 		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
-		let deposit_amount = U256::from(MOCK_DEPOSIT);
 		let mint_call = api::tx().assets().mint(
 			t.usdc_asset_id,
 			bob.address().to_account_id().into(),
@@ -1118,7 +1105,7 @@ fn mad_rewards() {
 
 		let rewards_addr = api::apis()
 			.rewards_api()
-			.query_user_rewards(bob.account_id(), Asset::Custom(t.usdc_asset_id).into());
+			.query_user_rewards(bob.account_id(), Asset::Custom(t.usdc_asset_id));
 
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
