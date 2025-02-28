@@ -23,11 +23,13 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 mod filters;
 pub mod frontier_evm;
+pub mod hyperbridge;
 pub mod impls;
 pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
+pub mod weights;
 
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -45,6 +47,11 @@ use frame_support::{
 };
 use frame_system::EnsureSignedBy;
 use frontier_evm::DefaultBaseFeePerGas;
+use ismp::{
+	consensus::{ConsensusClientId, StateMachineHeight, StateMachineId},
+	host::StateMachine,
+	router::{Request, Response},
+};
 use pallet_election_provider_multi_phase::{GeometricDepositBase, SolutionAccuracyOf};
 use pallet_evm::GasWeightMapping;
 use pallet_grandpa::{
@@ -184,7 +191,7 @@ pub fn native_version() -> NativeVersion {
 	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
 }
 
-pub const MAXIMUM_BLOCK_LENGTH: u32 = 5 * 1024 * 1024;
+pub const MAXIMUM_BLOCK_LENGTH: u32 = 8 * 1024 * 1024;
 
 parameter_types! {
 	pub const Version: RuntimeVersion = VERSION;
@@ -1309,6 +1316,10 @@ construct_runtime!(
 		Lst: pallet_tangle_lst = 52,
 		Rewards: pallet_rewards = 53,
 
+		Ismp: pallet_ismp = 55,
+		IsmpGrandpa: ismp_grandpa = 56,
+		Hyperbridge: pallet_hyperbridge = 57,
+		TokenGateway: pallet_token_gateway = 58,
 	}
 );
 
@@ -2237,6 +2248,44 @@ impl_runtime_apis! {
 
 		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
 			vec![]
+		}
+	}
+
+	impl pallet_ismp_runtime_api::IsmpRuntimeApi<Block, <Block as BlockT>::Hash> for Runtime {
+		fn host_state_machine() -> StateMachine {
+			<Runtime as pallet_ismp::Config>::HostStateMachine::get()
+		}
+
+		fn challenge_period(state_machine_id: StateMachineId) -> Option<u64> {
+			pallet_ismp::Pallet::<Runtime>::challenge_period(state_machine_id)
+		}
+
+		fn block_events() -> Vec<::ismp::events::Event> {
+			pallet_ismp::Pallet::<Runtime>::block_events()
+		}
+
+		fn block_events_with_metadata() -> Vec<(::ismp::events::Event, Option<u32>)> {
+			pallet_ismp::Pallet::<Runtime>::block_events_with_metadata()
+		}
+
+		fn consensus_state(id: ConsensusClientId) -> Option<Vec<u8>> {
+			pallet_ismp::Pallet::<Runtime>::consensus_states(id)
+		}
+
+		fn state_machine_update_time(height: StateMachineHeight) -> Option<u64> {
+			pallet_ismp::Pallet::<Runtime>::state_machine_update_time(height)
+		}
+
+		fn latest_state_machine_height(id: StateMachineId) -> Option<u64> {
+			pallet_ismp::Pallet::<Runtime>::latest_state_machine_height(id)
+		}
+
+		fn requests(commitments: Vec<H256>) -> Vec<Request> {
+			pallet_ismp::Pallet::<Runtime>::requests(commitments)
+		}
+
+		fn responses(commitments: Vec<H256>) -> Vec<Response> {
+			pallet_ismp::Pallet::<Runtime>::responses(commitments)
 		}
 	}
 
