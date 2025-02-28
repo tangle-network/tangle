@@ -709,6 +709,12 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    hyperbridge: {
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     identity: {
       /**
        * Account ID is already named.
@@ -854,6 +860,32 @@ declare module '@polkadot/api-base/types/errors' {
        * The index is permanent and may not be freed/changed.
        **/
       Permanent: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    ismp: {
+      /**
+       * Couldn't update challenge period
+       **/
+      ChallengePeriodUpdateFailed: AugmentedError<ApiType>;
+      /**
+       * Encountered an error while creating the consensus client.
+       **/
+      ConsensusClientCreationFailed: AugmentedError<ApiType>;
+      /**
+       * Invalid ISMP message
+       **/
+      InvalidMessage: AugmentedError<ApiType>;
+      /**
+       * Requested message was not found
+       **/
+      MessageNotFound: AugmentedError<ApiType>;
+      /**
+       * Couldn't update unbonding period
+       **/
+      UnbondingPeriodUpdateFailed: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -1453,99 +1485,6 @@ declare module '@polkadot/api-base/types/errors' {
        * A sub pool does not exist.
        **/
       SubPoolsNotFound: AugmentedError<ApiType>;
-      /**
-       * Generic error
-       **/
-      [key: string]: AugmentedError<ApiType>;
-    };
-    poolAssets: {
-      /**
-       * The asset-account already exists.
-       **/
-      AlreadyExists: AugmentedError<ApiType>;
-      /**
-       * The asset is not live, and likely being destroyed.
-       **/
-      AssetNotLive: AugmentedError<ApiType>;
-      /**
-       * The asset ID must be equal to the [`NextAssetId`].
-       **/
-      BadAssetId: AugmentedError<ApiType>;
-      /**
-       * Invalid metadata given.
-       **/
-      BadMetadata: AugmentedError<ApiType>;
-      /**
-       * Invalid witness data given.
-       **/
-      BadWitness: AugmentedError<ApiType>;
-      /**
-       * Account balance must be greater than or equal to the transfer amount.
-       **/
-      BalanceLow: AugmentedError<ApiType>;
-      /**
-       * Callback action resulted in error
-       **/
-      CallbackFailed: AugmentedError<ApiType>;
-      /**
-       * The origin account is frozen.
-       **/
-      Frozen: AugmentedError<ApiType>;
-      /**
-       * The asset status is not the expected status.
-       **/
-      IncorrectStatus: AugmentedError<ApiType>;
-      /**
-       * The asset ID is already taken.
-       **/
-      InUse: AugmentedError<ApiType>;
-      /**
-       * The asset is a live asset and is actively being used. Usually emit for operations such
-       * as `start_destroy` which require the asset to be in a destroying state.
-       **/
-      LiveAsset: AugmentedError<ApiType>;
-      /**
-       * Minimum balance should be non-zero.
-       **/
-      MinBalanceZero: AugmentedError<ApiType>;
-      /**
-       * The account to alter does not exist.
-       **/
-      NoAccount: AugmentedError<ApiType>;
-      /**
-       * The asset-account doesn't have an associated deposit.
-       **/
-      NoDeposit: AugmentedError<ApiType>;
-      /**
-       * The signing account has no permission to do the operation.
-       **/
-      NoPermission: AugmentedError<ApiType>;
-      /**
-       * The asset should be frozen before the given operation.
-       **/
-      NotFrozen: AugmentedError<ApiType>;
-      /**
-       * No approval exists that would allow the transfer.
-       **/
-      Unapproved: AugmentedError<ApiType>;
-      /**
-       * Unable to increment the consumer reference counters on the account. Either no provider
-       * reference exists to allow a non-zero balance of a non-self-sufficient asset, or one
-       * fewer then the maximum number of consumers has been reached.
-       **/
-      UnavailableConsumer: AugmentedError<ApiType>;
-      /**
-       * The given asset ID is unknown.
-       **/
-      Unknown: AugmentedError<ApiType>;
-      /**
-       * The operation would result in funds being burned.
-       **/
-      WouldBurn: AugmentedError<ApiType>;
-      /**
-       * The source account would not survive the transfer and it needs to stay alive.
-       **/
-      WouldDie: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
@@ -2266,6 +2205,48 @@ declare module '@polkadot/api-base/types/errors' {
        * The submitted code is not authorized.
        **/
       Unauthorized: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
+    tokenGateway: {
+      /**
+       * Asset Id creation failed
+       **/
+      AssetCreationError: AugmentedError<ApiType>;
+      /**
+       * Asset decimals not found
+       **/
+      AssetDecimalsNotFound: AugmentedError<ApiType>;
+      /**
+       * Error while teleporting asset
+       **/
+      AssetTeleportError: AugmentedError<ApiType>;
+      /**
+       * Coprocessor was not configured in the runtime
+       **/
+      CoprocessorNotConfigured: AugmentedError<ApiType>;
+      /**
+       * Asset or update Dispatch Error
+       **/
+      DispatchError: AugmentedError<ApiType>;
+      /**
+       * Only root or asset owner can update asset
+       **/
+      NotAssetOwner: AugmentedError<ApiType>;
+      /**
+       * Protocol Params have not been initialized
+       **/
+      NotInitialized: AugmentedError<ApiType>;
+      /**
+       * Unknown Asset
+       **/
+      UnknownAsset: AugmentedError<ApiType>;
+      /**
+       * A asset that has not been registered
+       **/
+      UnregisteredAsset: AugmentedError<ApiType>;
       /**
        * Generic error
        **/

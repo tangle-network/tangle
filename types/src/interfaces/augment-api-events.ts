@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletImOnlineSr25519AppSr25519Public, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -572,6 +572,24 @@ declare module '@polkadot/api-base/types/events' {
        **/
       [key: string]: AugmentedEvent<ApiType>;
     };
+    hyperbridge: {
+      /**
+       * Hyperbridge governance has now updated it's host params on this chain.
+       **/
+      HostParamsUpdated: AugmentedEvent<ApiType, [old: PalletHyperbridgeVersionedHostParams, new_: PalletHyperbridgeVersionedHostParams], { old: PalletHyperbridgeVersionedHostParams, new_: PalletHyperbridgeVersionedHostParams }>;
+      /**
+       * Hyperbridge has withdrawn it's protocol revenue
+       **/
+      ProtocolRevenueWithdrawn: AugmentedEvent<ApiType, [amount: u128, account: AccountId32], { amount: u128, account: AccountId32 }>;
+      /**
+       * A relayer has withdrawn some fees
+       **/
+      RelayerFeeWithdrawn: AugmentedEvent<ApiType, [amount: u128, account: AccountId32], { amount: u128, account: AccountId32 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
     identity: {
       /**
        * A username authority was added.
@@ -679,6 +697,78 @@ declare module '@polkadot/api-base/types/events' {
        * A account index has been frozen to its current account ID.
        **/
       IndexFrozen: AugmentedEvent<ApiType, [index: u32, who: AccountId32], { index: u32, who: AccountId32 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    ismp: {
+      /**
+       * Indicates that a consensus client has been created
+       **/
+      ConsensusClientCreated: AugmentedEvent<ApiType, [consensusClientId: U8aFixed], { consensusClientId: U8aFixed }>;
+      /**
+       * Indicates that a consensus client has been created
+       **/
+      ConsensusClientFrozen: AugmentedEvent<ApiType, [consensusClientId: U8aFixed], { consensusClientId: U8aFixed }>;
+      /**
+       * Some errors handling some ismp messages
+       **/
+      Errors: AugmentedEvent<ApiType, [errors: Vec<PalletIsmpErrorsHandlingError>], { errors: Vec<PalletIsmpErrorsHandlingError> }>;
+      /**
+       * Get Response Handled
+       **/
+      GetRequestHandled: AugmentedEvent<ApiType, [IsmpEventsRequestResponseHandled]>;
+      /**
+       * Get request timeout handled
+       **/
+      GetRequestTimeoutHandled: AugmentedEvent<ApiType, [IsmpEventsTimeoutHandled]>;
+      /**
+       * Post Request Handled
+       **/
+      PostRequestHandled: AugmentedEvent<ApiType, [IsmpEventsRequestResponseHandled]>;
+      /**
+       * Post request timeout handled
+       **/
+      PostRequestTimeoutHandled: AugmentedEvent<ApiType, [IsmpEventsTimeoutHandled]>;
+      /**
+       * Post Response Handled
+       **/
+      PostResponseHandled: AugmentedEvent<ApiType, [IsmpEventsRequestResponseHandled]>;
+      /**
+       * Post response timeout handled
+       **/
+      PostResponseTimeoutHandled: AugmentedEvent<ApiType, [IsmpEventsTimeoutHandled]>;
+      /**
+       * An Outgoing Request has been deposited
+       **/
+      Request: AugmentedEvent<ApiType, [destChain: IsmpHostStateMachine, sourceChain: IsmpHostStateMachine, requestNonce: u64, commitment: H256], { destChain: IsmpHostStateMachine, sourceChain: IsmpHostStateMachine, requestNonce: u64, commitment: H256 }>;
+      /**
+       * An Outgoing Response has been deposited
+       **/
+      Response: AugmentedEvent<ApiType, [destChain: IsmpHostStateMachine, sourceChain: IsmpHostStateMachine, requestNonce: u64, commitment: H256, reqCommitment: H256], { destChain: IsmpHostStateMachine, sourceChain: IsmpHostStateMachine, requestNonce: u64, commitment: H256, reqCommitment: H256 }>;
+      /**
+       * Emitted when a state commitment is vetoed by a fisherman
+       **/
+      StateCommitmentVetoed: AugmentedEvent<ApiType, [height: IsmpConsensusStateMachineHeight, fisherman: Bytes], { height: IsmpConsensusStateMachineHeight, fisherman: Bytes }>;
+      /**
+       * Emitted when a state machine is successfully updated to a new height
+       **/
+      StateMachineUpdated: AugmentedEvent<ApiType, [stateMachineId: IsmpConsensusStateMachineId, latestHeight: u64], { stateMachineId: IsmpConsensusStateMachineId, latestHeight: u64 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    ismpGrandpa: {
+      /**
+       * State machines have been added to whitelist
+       **/
+      StateMachineAdded: AugmentedEvent<ApiType, [stateMachines: Vec<IsmpHostStateMachine>], { stateMachines: Vec<IsmpHostStateMachine> }>;
+      /**
+       * State machines have been removed from the whitelist
+       **/
+      StateMachineRemoved: AugmentedEvent<ApiType, [stateMachines: Vec<IsmpHostStateMachine>], { stateMachines: Vec<IsmpHostStateMachine> }>;
       /**
        * Generic event
        **/
@@ -1019,117 +1109,6 @@ declare module '@polkadot/api-base/types/events' {
        * \[kind, timeslot\].
        **/
       Offence: AugmentedEvent<ApiType, [kind: U8aFixed, timeslot: Bytes], { kind: U8aFixed, timeslot: Bytes }>;
-      /**
-       * Generic event
-       **/
-      [key: string]: AugmentedEvent<ApiType>;
-    };
-    poolAssets: {
-      /**
-       * Accounts were destroyed for given asset.
-       **/
-      AccountsDestroyed: AugmentedEvent<ApiType, [assetId: u128, accountsDestroyed: u32, accountsRemaining: u32], { assetId: u128, accountsDestroyed: u32, accountsRemaining: u32 }>;
-      /**
-       * An approval for account `delegate` was cancelled by `owner`.
-       **/
-      ApprovalCancelled: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32, delegate: AccountId32], { assetId: u128, owner: AccountId32, delegate: AccountId32 }>;
-      /**
-       * Approvals were destroyed for given asset.
-       **/
-      ApprovalsDestroyed: AugmentedEvent<ApiType, [assetId: u128, approvalsDestroyed: u32, approvalsRemaining: u32], { assetId: u128, approvalsDestroyed: u32, approvalsRemaining: u32 }>;
-      /**
-       * (Additional) funds have been approved for transfer to a destination account.
-       **/
-      ApprovedTransfer: AugmentedEvent<ApiType, [assetId: u128, source: AccountId32, delegate: AccountId32, amount: u128], { assetId: u128, source: AccountId32, delegate: AccountId32, amount: u128 }>;
-      /**
-       * Some asset `asset_id` was frozen.
-       **/
-      AssetFrozen: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
-      /**
-       * The min_balance of an asset has been updated by the asset owner.
-       **/
-      AssetMinBalanceChanged: AugmentedEvent<ApiType, [assetId: u128, newMinBalance: u128], { assetId: u128, newMinBalance: u128 }>;
-      /**
-       * An asset has had its attributes changed by the `Force` origin.
-       **/
-      AssetStatusChanged: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
-      /**
-       * Some asset `asset_id` was thawed.
-       **/
-      AssetThawed: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
-      /**
-       * Some account `who` was blocked.
-       **/
-      Blocked: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32], { assetId: u128, who: AccountId32 }>;
-      /**
-       * Some assets were destroyed.
-       **/
-      Burned: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32, balance: u128], { assetId: u128, owner: AccountId32, balance: u128 }>;
-      /**
-       * Some asset class was created.
-       **/
-      Created: AugmentedEvent<ApiType, [assetId: u128, creator: AccountId32, owner: AccountId32], { assetId: u128, creator: AccountId32, owner: AccountId32 }>;
-      /**
-       * Some assets were deposited (e.g. for transaction fees).
-       **/
-      Deposited: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32, amount: u128], { assetId: u128, who: AccountId32, amount: u128 }>;
-      /**
-       * An asset class was destroyed.
-       **/
-      Destroyed: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
-      /**
-       * An asset class is in the process of being destroyed.
-       **/
-      DestructionStarted: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
-      /**
-       * Some asset class was force-created.
-       **/
-      ForceCreated: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32], { assetId: u128, owner: AccountId32 }>;
-      /**
-       * Some account `who` was frozen.
-       **/
-      Frozen: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32], { assetId: u128, who: AccountId32 }>;
-      /**
-       * Some assets were issued.
-       **/
-      Issued: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32, amount: u128], { assetId: u128, owner: AccountId32, amount: u128 }>;
-      /**
-       * Metadata has been cleared for an asset.
-       **/
-      MetadataCleared: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
-      /**
-       * New metadata has been set for an asset.
-       **/
-      MetadataSet: AugmentedEvent<ApiType, [assetId: u128, name: Bytes, symbol_: Bytes, decimals: u8, isFrozen: bool], { assetId: u128, name: Bytes, symbol: Bytes, decimals: u8, isFrozen: bool }>;
-      /**
-       * The owner changed.
-       **/
-      OwnerChanged: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32], { assetId: u128, owner: AccountId32 }>;
-      /**
-       * The management team changed.
-       **/
-      TeamChanged: AugmentedEvent<ApiType, [assetId: u128, issuer: AccountId32, admin: AccountId32, freezer: AccountId32], { assetId: u128, issuer: AccountId32, admin: AccountId32, freezer: AccountId32 }>;
-      /**
-       * Some account `who` was thawed.
-       **/
-      Thawed: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32], { assetId: u128, who: AccountId32 }>;
-      /**
-       * Some account `who` was created with a deposit from `depositor`.
-       **/
-      Touched: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32, depositor: AccountId32], { assetId: u128, who: AccountId32, depositor: AccountId32 }>;
-      /**
-       * Some assets were transferred.
-       **/
-      Transferred: AugmentedEvent<ApiType, [assetId: u128, from: AccountId32, to: AccountId32, amount: u128], { assetId: u128, from: AccountId32, to: AccountId32, amount: u128 }>;
-      /**
-       * An `amount` was transferred in its entirety from `owner` to `destination` by
-       * the approved `delegate`.
-       **/
-      TransferredApproved: AugmentedEvent<ApiType, [assetId: u128, owner: AccountId32, delegate: AccountId32, destination: AccountId32, amount: u128], { assetId: u128, owner: AccountId32, delegate: AccountId32, destination: AccountId32, amount: u128 }>;
-      /**
-       * Some assets were withdrawn from the account (e.g. for transaction fees).
-       **/
-      Withdrawn: AugmentedEvent<ApiType, [assetId: u128, who: AccountId32, amount: u128], { assetId: u128, who: AccountId32, amount: u128 }>;
       /**
        * Generic event
        **/
@@ -1486,6 +1465,28 @@ declare module '@polkadot/api-base/types/events' {
        * An upgrade was authorized.
        **/
       UpgradeAuthorized: AugmentedEvent<ApiType, [codeHash: H256, checkVersion: bool], { codeHash: H256, checkVersion: bool }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    tokenGateway: {
+      /**
+       * An asset has been received and transferred to the beneficiary's account
+       **/
+      AssetReceived: AugmentedEvent<ApiType, [beneficiary: AccountId32, amount: u128, source: IsmpHostStateMachine], { beneficiary: AccountId32, amount: u128, source: IsmpHostStateMachine }>;
+      /**
+       * An asset has been refunded and transferred to the beneficiary's account
+       **/
+      AssetRefunded: AugmentedEvent<ApiType, [beneficiary: AccountId32, amount: u128, source: IsmpHostStateMachine], { beneficiary: AccountId32, amount: u128, source: IsmpHostStateMachine }>;
+      /**
+       * An asset has been teleported
+       **/
+      AssetTeleported: AugmentedEvent<ApiType, [from: AccountId32, to: H256, amount: u128, dest: IsmpHostStateMachine, commitment: H256], { from: AccountId32, to: H256, amount: u128, dest: IsmpHostStateMachine, commitment: H256 }>;
+      /**
+       * ERC6160 asset creation request dispatched to hyperbridge
+       **/
+      ERC6160AssetRegistrationDispatched: AugmentedEvent<ApiType, [commitment: H256], { commitment: H256 }>;
       /**
        * Generic event
        **/
