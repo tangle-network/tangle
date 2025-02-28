@@ -1,26 +1,25 @@
-// This file is part of Tangle.
-// Copyright (C) 2022-2024 Tangle Foundation.
-//
-// This file is part of pallet-evm-precompile-batch package, originally developed by Purestake
-// Inc. Pallet-evm-precompile-batch package used in Tangle Network in terms of GPLv3.
+// Copyright 2019-2025 PureStake Inc.
+// This file is part of Moonbeam.
 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Moonbeam is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// Moonbeam is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with Moonbeam.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Precompile to interact with pallet_balances instances using the ERC20 interface standard.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use fp_evm::{Context, ExitError, ExitReason, Log, PrecompileFailure, PrecompileHandle, Transfer};
+use evm::{ExitError, ExitReason};
+use fp_evm::{Context, Log, PrecompileFailure, PrecompileHandle, Transfer};
 use frame_support::traits::ConstU32;
 use precompile_utils::{evm::costs::call_cost, prelude::*};
 use sp_core::{H160, U256};
@@ -58,7 +57,7 @@ pub fn log_subcall_failed(address: impl Into<H160>, index: usize) -> Log {
 #[derive(Debug, Clone)]
 pub struct BatchPrecompile<Runtime>(PhantomData<Runtime>);
 
-// No funds are transferred to the precompile address.
+// No funds are transfered to the precompile address.
 // Transfers will directly be made on the behalf of the user by the precompile.
 #[precompile_utils::precompile]
 impl<Runtime> BatchPrecompile<Runtime>
@@ -149,7 +148,9 @@ where
 				(None, Mode::BatchAll) => {
 					return Err(PrecompileFailure::Error { exit_status: ExitError::OutOfGas })
 				},
-				(None, _) => return Ok(()),
+				(None, _) => {
+					return Ok(());
+				},
 			};
 
 			// Cost of the call itself that the batch precompile must pay.
@@ -223,7 +224,7 @@ where
 					return Err(PrecompileFailure::Fatal { exit_status })
 				},
 
-				// BatchAll : Reverts and errors are immediately forwarded.
+				// BatchAll : Reverts and errors are immediatly forwarded.
 				(Mode::BatchAll, ExitReason::Revert(exit_status)) => {
 					return Err(PrecompileFailure::Revert { exit_status, output })
 				},

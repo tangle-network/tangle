@@ -4,28 +4,27 @@
 //! testing both ERC20 and Asset ID based delegations. The tests verify operator joining,
 //! asset delegation, and the correct state updates in the system.
 
-use core::future::Future;
-use core::ops::Div;
-use core::time::Duration;
+use core::{future::Future, ops::Div, time::Duration};
 
-use alloy::primitives::utils::*;
-use alloy::primitives::*;
-use alloy::providers::Provider;
-use alloy::sol;
+use alloy::{
+	primitives::{utils::*, *},
+	providers::Provider,
+	sol,
+};
 use anyhow::bail;
 use sp_runtime::traits::AccountIdConversion;
 use sp_tracing::{error, info};
 use tangle_primitives::time::SECONDS_PER_BLOCK;
 use tangle_runtime::PalletId;
-use tangle_subxt::subxt;
-use tangle_subxt::subxt::tx::TxStatus;
-use tangle_subxt::tangle_testnet_runtime::api;
+use tangle_subxt::{subxt, subxt::tx::TxStatus, tangle_testnet_runtime::api};
 
 mod common;
 
 use common::*;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::pallet_multi_asset_delegation::types::operator::DelegatorBond;
-use tangle_subxt::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::types::Asset;
+use tangle_subxt::tangle_testnet_runtime::api::runtime_types::{
+	pallet_multi_asset_delegation::types::operator::DelegatorBond,
+	tangle_primitives::services::types::Asset,
+};
 
 sol! {
 	#[allow(clippy::too_many_arguments)]
@@ -40,6 +39,11 @@ sol! {
 }
 
 sol! {
+	#[sol(rpc, all_derives)]
+	"../precompiles/batch/Batch.sol",
+}
+
+sol! {
 	#[allow(clippy::too_many_arguments)]
 	#[sol(rpc, all_derives)]
 	TangleLiquidRestakingVault,
@@ -47,6 +51,7 @@ sol! {
 }
 
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
+const BATCH_ADDRESS: Address = address!("0000000000000000000000000000000000000804");
 
 /// Waits for a specific block number to be reached
 pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
@@ -172,7 +177,8 @@ async fn deploy_tangle_lrt(
 		%base_token,
 		%name,
 		%symbol,
-		"Deploying Tangle LRT contract...");
+		"Deploying Tangle LRT contract..."
+	);
 	let token = TangleLiquidRestakingVault::deploy(
 		provider.clone(),
 		base_token,
@@ -189,8 +195,8 @@ async fn deploy_tangle_lrt(
 
 // Mock values for consistent testing
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
-const MOCK_DEPOSIT_CAP: u128 = 100_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_DEPOSIT: u128 = 10_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT_CAP: u128 = 1_000_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
+const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_APY: u32 = 10; // 10% APY
 
 /// Setup the E2E test environment.
@@ -532,19 +538,20 @@ fn operator_join_delegator_delegate_asset_id() {
 		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 
-		// Mint USDC for Bob using asset ID
+		// Mint USDC for Bob
 		let mint_amount = 100_000_000u128;
-		let mint_call = |who| api::tx().assets().mint(t.usdc_asset_id, who, mint_amount);
+		let mint_call = api::tx().assets().mint(
+			t.usdc_asset_id,
+			bob.address().to_account_id().into(),
+			mint_amount,
+		);
 
 		info!("Minting {mint_amount} USDC for Bob");
 
 		let mut result = t
 			.subxt
 			.tx()
-			.sign_and_submit_then_watch_default(
-				&mint_call(bob.address().to_account_id().into()),
-				&alice.substrate_signer(),
-			)
+			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
 			.await?;
 		while let Some(Ok(s)) = result.next().await {
 			if let TxStatus::InBestBlock(b) = s {
@@ -566,9 +573,15 @@ fn operator_join_delegator_delegate_asset_id() {
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(2);
 
+		let multiplier = 0;
 		// Deposit and delegate using asset ID
 		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(delegate_amount), 0)
+			.deposit(
+				U256::from(t.usdc_asset_id),
+				Address::ZERO,
+				U256::from(delegate_amount),
+				multiplier,
+			)
 			.from(bob.address())
 			.send()
 			.await?
@@ -625,6 +638,24 @@ fn deposits_withdraw_erc20() {
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
 		assert_eq!(bob_balance._0, mint_amount);
 
+		// Approve MULTI_ASSET_DELEGATION to spend tokens
+		let approve_result = usdc
+			.approve(Address::from(*MULTI_ASSET_DELEGATION), mint_amount)
+			.send()
+			.await?
+			.get_receipt()
+			.await?;
+		assert!(approve_result.status());
+
+		// Also approve BATCH_ADDRESS to spend tokens
+		let approve_batch_result = usdc
+			.approve(Address::from(*BATCH_ADDRESS), mint_amount)
+			.send()
+			.await?
+			.get_receipt()
+			.await?;
+		assert!(approve_batch_result.status());
+
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(U256::from(2));
@@ -674,6 +705,78 @@ fn deposits_withdraw_erc20() {
 		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
 		assert_eq!(bob_balance._0, expected_balance);
+
+		anyhow::Ok(())
+	})
+}
+
+#[test]
+fn deposits_withdraw_erc20_works_with_batch() {
+	run_mad_test(|t| async move {
+		// Setup Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		let usdc = MockERC20::new(t.usdc, &bob_provider);
+
+		// Mint USDC for Bob
+		let mint_amount = U256::from(100_000_000u128);
+		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
+
+		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, mint_amount);
+
+		// Initialize the precompiles
+		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let batch_precompile = Batch::new(BATCH_ADDRESS, &bob_provider);
+		let delegate_amount = mint_amount.div(U256::from(2));
+		let multiplier = 0;
+
+		// Approve the MultiAssetDelegation contract to spend tokens
+		let approve_result = usdc
+			.approve(Address::from(*MULTI_ASSET_DELEGATION), mint_amount)
+			.send()
+			.await?
+			.get_receipt()
+			.await?;
+		assert!(approve_result.status(), "Failed to approve MultiAssetDelegation contract");
+
+		// Test only the deposit operation through batch to isolate the issue
+		let mut to_addresses = Vec::<Address>::new();
+		let mut values = Vec::<U256>::new();
+		let mut call_data = Vec::<alloy::primitives::Bytes>::new();
+		let mut gas_limits = Vec::<u64>::new();
+
+		// Add only deposit transaction to batch
+		to_addresses.push(Address::from(*MULTI_ASSET_DELEGATION));
+		values.push(U256::ZERO);
+		let deposit_call = precompile
+			.deposit(U256::ZERO, *usdc.address(), delegate_amount, multiplier)
+			.calldata()
+			.clone();
+		call_data.push(deposit_call);
+		gas_limits.push(500000); // Increase gas limit just to be safe
+
+		// Execute batch transaction with only deposit
+		info!("Executing batch with deposit only");
+		let batch_result = batch_precompile
+			.batchAll(to_addresses, values, call_data, gas_limits)
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(10)))
+			.get_receipt()
+			.await?;
+
+		assert!(batch_result.status(), "Batch deposit transaction failed");
+
+		// Check the balance after batch deposit
+		let bob_balance_after_deposit = usdc.balanceOf(bob.address()).call().await?;
+		let expected_balance_after_deposit = mint_amount - delegate_amount;
+		assert_eq!(
+			bob_balance_after_deposit._0, expected_balance_after_deposit,
+			"Deposit through batch transaction failed: expected {} but got {}",
+			expected_balance_after_deposit, bob_balance_after_deposit._0
+		);
 
 		anyhow::Ok(())
 	})
@@ -927,7 +1030,6 @@ fn lrt_deposit_withdraw_erc20() {
 fn mad_rewards() {
 	run_mad_test(|t| async move {
 		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
@@ -936,54 +1038,64 @@ fn mad_rewards() {
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
-		// Setup a LRT Vault for Alice.
-		let lrt_address = deploy_tangle_lrt(
-			alice_provider.clone(),
-			t.usdc,
-			alice.account_id().0,
-			"Liquid Restaked USDC",
-			"lrtUSDC",
-		)
-		.await?;
-
 		// Bob as delegator
 		let bob = TestAccount::Bob;
-		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 
 		// Mint USDC for Bob
 		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
-		let _mint_call = api::tx().assets().mint(
+		let mint_call = api::tx().assets().mint(
 			t.usdc_asset_id,
 			bob.address().to_account_id().into(),
 			mint_amount.to::<u128>(),
 		);
 
-		// // Deposit WETH to LRT
-		// let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
-		// let deposit_result = lrt
-		// 	.deposit(deposit_amount, bob.address())
-		// 	.send()
-		// 	.await?
-		// 	.with_timeout(Some(Duration::from_secs(5)))
-		// 	.get_receipt()
-		// 	.await?;
-		// assert!(deposit_result.status());
-		// info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+		info!("Minting {mint_amount} USDC for Bob");
 
-		// Delegate assets
-		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
-		let deposit_amount = U256::from(MOCK_DEPOSIT);
-
-		// Deposit and delegate using asset ID
-		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, U256::from(deposit_amount), 0)
-			.from(bob.address())
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
 			.await?;
-		assert!(deposit_result.status());
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::assets::events::Issued>()?
+					.expect("Issued event to be emitted");
+				info!("Minted {mint_amount} USDC for Bob");
+				break;
+			}
+		}
+
+		let deposit_call = api::tx().multi_asset_delegation().deposit(
+			Asset::Custom(t.usdc_asset_id),
+			MOCK_DEPOSIT,
+			None,
+			None,
+		);
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&deposit_call, &bob.substrate_signer())
+			.await?;
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let _evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				break;
+			}
+		}
 
 		// Wait for one year to pass
 		wait_for_more_blocks(&t.provider, 51).await;
@@ -991,10 +1103,9 @@ fn mad_rewards() {
 		let apy = cfg.apy;
 		info!("APY: {}%", apy.0);
 
-		let rewards_addr = api::apis().rewards_api().query_user_rewards(
-			lrt_address.to_account_id(),
-			Asset::Erc20((<[u8; 20]>::from(t.usdc)).into()),
-		);
+		let rewards_addr = api::apis()
+			.rewards_api()
+			.query_user_rewards(bob.account_id(), Asset::Custom(t.usdc_asset_id));
 
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {

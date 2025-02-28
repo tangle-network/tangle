@@ -804,7 +804,6 @@ pub mod pallet {
 			// ensure the caps have not been exceeded
 			let remaining = T::RewardsManager::get_asset_deposit_cap_remaining(asset)
 				.map_err(|_| Error::<T>::AssetConfigNotFound)?;
-			log::info!(target: crate::LOG_TARGET, "RewardsManager remaining: {:?}", remaining);
 			ensure!(amount <= remaining, Error::<T>::DepositExceedsCapForAsset);
 			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset });
