@@ -271,48 +271,48 @@ sp-state-machine = { git = "https://github.com/paritytech/polkadot-sdk", branch 
 sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2407", default-features = false }
 
 # Frontier Client
-fc-cli = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fc-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
-fc-db = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fc-mapping-sync = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fc-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fc-rpc-core = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
-fc-storage = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
-fc-api = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
+fc-cli = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fc-consensus = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407" }
+fc-db = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fc-mapping-sync = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fc-rpc = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fc-rpc-core = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407" }
+fc-storage = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407" }
+fc-api = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
 
 # Frontier Primitive
-fp-account = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
+fp-account = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false, features = [
     "serde",
 ] }
-fp-consensus = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fp-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fp-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fp-evm = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
+fp-consensus = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fp-dynamic-fee = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fp-ethereum = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fp-evm = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false, features = [
     "serde",
 ] }
-fp-rpc = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-fp-self-contained = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false, features = [
+fp-rpc = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+fp-self-contained = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false, features = [
     "serde",
 ] }
-fp-storage = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
+fp-storage = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
 
 # Frontier FRAME
-pallet-base-fee = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-dynamic-fee = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-ethereum = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-chain-id = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-blake2 = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-bn128 = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-curve25519 = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-dispatch = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-ed25519 = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-modexp = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-sha3fips = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-precompile-simple = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-pallet-evm-test-vector-support = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407" }
-pallet-hotfix-sufficients = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
-precompile-utils = { git = "https://github.com/paritytech/frontier.git", branch = "stable2407", default-features = false }
+pallet-base-fee = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-dynamic-fee = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-ethereum = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-chain-id = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-blake2 = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-bn128 = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-curve25519 = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-dispatch = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-ed25519 = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-modexp = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-sha3fips = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-precompile-simple = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+pallet-evm-test-vector-support = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407" }
+pallet-hotfix-sufficients = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
+precompile-utils = { git = "https://github.com/polkadot-evm/frontier", branch = "stable2407", default-features = false }
 
 # Local precompiles
 evm-erc20-utils = { path = "precompiles/erc20-utils", default-features = false }
@@ -375,11 +375,21 @@ rpc-trace = { path = "client/rpc/trace" }
 rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "evm-tracer", default-features = false }
 
-# Polkadot XCM
-xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
-polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk.git", branch = "stable2407", default-features = false }
+# Hyperbridge EVM necessary dependencies
+alloy-sol-macro       = "0.7.7"
+alloy-sol-types       = { version = "0.7.7", default-features = false }
+alloy-primitives      = { version = "0.7.7", default-features = false, features = ["rlp"] }
+
+# Hyperbridge
+token-gateway-primitives    = { path = "pallets/token-gateway/primitives" }
+pallet-token-gateway        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+pallet-ismp                 = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+pallet-ismp-rpc             = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1" }
+pallet-ismp-runtime-api     = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+ismp-grandpa 				= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+ismp                        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+pallet-hyperbridge          = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+anyhow                      = { version = "1.0.93", default-features = false }
 
 # Subxt
 subxt = { version = "0.39.0", default-features = false }
