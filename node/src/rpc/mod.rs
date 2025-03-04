@@ -22,10 +22,13 @@ use sc_client_api::{
 	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
 };
+use sc_client_api::{BlockBackend, ProofProvider};
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
 };
+use pallet_ismp_rpc::{IsmpApiServer, IsmpRpcHandler};
+use sp_core::H256;
 use sc_rpc::SubscriptionTaskExecutor;
 use sc_rpc_api::DenyUnsafe;
 use sc_service::TransactionPool;
@@ -87,6 +90,8 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	pub select_chain: SC,
 	/// GRANDPA specific dependencies.
 	pub grandpa: GrandpaDeps<B>,
+	/// Backend
+	pub backend: Arc<B>,
 }
 
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
@@ -113,7 +118,7 @@ pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
 	>,
 ) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
-	C: CallApiAt<Block> + ProvideRuntimeApi<Block>,
+	C: CallApiAt<Block> + ProvideRuntimeApi<Block> + ProofProvider<Block> + BlockBackend<Block>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: sp_block_builder::BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
@@ -134,6 +139,7 @@ where
 		+ HeaderMetadata<Block, Error = BlockChainError>
 		+ StorageProvider<Block, BE>,
 	BE: Backend<Block> + 'static,
+	C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
@@ -150,7 +156,7 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
+	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa, backend } = deps;
 
 	let GrandpaDeps {
 		shared_voter_state,
@@ -164,6 +170,7 @@ where
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
+	io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
 
 	if let Some(babe) = babe {
 		let BabeDeps { babe_worker_handle, keystore } = babe;
@@ -221,6 +228,7 @@ where
 		+ HeaderMetadata<Block, Error = BlockChainError>
 		+ StorageProvider<Block, BE>,
 	BE: Backend<Block> + 'static,
+	C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
@@ -235,7 +243,7 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa } = deps;
+	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa, backend } = deps;
 
 	if let Some(babe) = babe {
 		let BabeDeps { babe_worker_handle, keystore } = babe;
@@ -255,6 +263,7 @@ where
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
+	io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
 
 	io.merge(
 		Grandpa::new(

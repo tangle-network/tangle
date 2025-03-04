@@ -524,6 +524,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 						subscription_executor: subscription_task_executor.clone(),
 						finality_provider: finality_proof_provider.clone(),
 					},
+					backend: backend.clone().clone(),
 				};
 
 				crate::rpc::create_full(
