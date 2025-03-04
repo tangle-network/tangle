@@ -508,6 +508,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			Some(shared_authority_set.clone()),
 		);
 
+		let backend_clone = backend.clone();
 		Box::new(
 			move |deny_unsafe, subscription_task_executor: sc_rpc::SubscriptionTaskExecutor| {
 				let deps = crate::rpc::FullDeps {
@@ -524,7 +525,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 						subscription_executor: subscription_task_executor.clone(),
 						finality_provider: finality_proof_provider.clone(),
 					},
-					backend: backend.clone().clone(),
+					backend: backend_clone.clone(),
 				};
 
 				crate::rpc::create_full(
