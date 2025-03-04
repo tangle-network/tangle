@@ -679,44 +679,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
-    poolAssets: {
-      /**
-       * The amount of funds that must be reserved when creating a new approval.
-       **/
-      approvalDeposit: u128 & AugmentedConst<ApiType>;
-      /**
-       * The amount of funds that must be reserved for a non-provider asset account to be
-       * maintained.
-       **/
-      assetAccountDeposit: u128 & AugmentedConst<ApiType>;
-      /**
-       * The basic amount of funds that must be reserved for an asset.
-       **/
-      assetDeposit: u128 & AugmentedConst<ApiType>;
-      /**
-       * The basic amount of funds that must be reserved when adding metadata to your asset.
-       **/
-      metadataDepositBase: u128 & AugmentedConst<ApiType>;
-      /**
-       * The additional funds that must be reserved for the number of bytes you store in your
-       * metadata.
-       **/
-      metadataDepositPerByte: u128 & AugmentedConst<ApiType>;
-      /**
-       * Max number of items to destroy per `destroy_accounts` and `destroy_approvals` call.
-       * 
-       * Must be configured to result in a weight that makes each call fit in a block.
-       **/
-      removeItemsLimit: u32 & AugmentedConst<ApiType>;
-      /**
-       * The maximum length of a name or symbol stored on-chain.
-       **/
-      stringLimit: u32 & AugmentedConst<ApiType>;
-      /**
-       * Generic const
-       **/
-      [key: string]: Codec;
-    };
     proxy: {
       /**
        * The base amount of currency needed to reserve for creating an announcement.
@@ -999,6 +961,16 @@ declare module '@polkadot/api-base/types/consts' {
        * period on default settings.
        **/
       minimumPeriod: u64 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
+    tokenGateway: {
+      /**
+       * The decimals of the native currency
+       **/
+      decimals: u8 & AugmentedConst<ApiType>;
       /**
        * Generic const
        **/

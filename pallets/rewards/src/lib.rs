@@ -78,6 +78,7 @@ pub mod functions;
 pub mod impls;
 pub mod weights;
 pub use weights::*;
+pub mod migrations;
 
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;

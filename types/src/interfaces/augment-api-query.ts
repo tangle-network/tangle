@@ -7,10 +7,10 @@ import '@polkadot/api-base/types/storage';
 
 import type { ApiTypes, AugmentedQuery, QueryableStorageEntry } from '@polkadot/api-base/types';
 import type { Data } from '@polkadot/types';
-import type { BTreeSet, Bytes, Null, Option, U256, U8aFixed, Vec, bool, u128, u32, u64 } from '@polkadot/types-codec';
+import type { BTreeSet, Bytes, Null, Option, U256, U8aFixed, Vec, bool, u128, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSupportTokensMiscIdAmountRuntimeFreezeReason, FrameSupportTokensMiscIdAmountRuntimeHoldReason, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAssetsApproval, PalletAssetsAssetAccount, PalletAssetsAssetDetails, PalletAssetsAssetMetadata, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletIdentityAuthorityProperties, PalletIdentityRegistrarInfo, PalletIdentityRegistration, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationDelegatorDelegatorMetadata, PalletMultiAssetDelegationOperatorOperatorMetadata, PalletMultiAssetDelegationOperatorOperatorSnapshot, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageOldRequestStatus, PalletPreimageRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletRewardsRewardConfigForAssetVault, PalletSchedulerRetryConfig, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTangleLstBondedPoolBondedPoolInner, PalletTangleLstClaimPermission, PalletTangleLstPoolsPoolMember, PalletTangleLstSubPools, PalletTangleLstSubPoolsRewardPool, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusBabeDigestsPreDigest, SpConsensusGrandpaAppPublic, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingExposure, SpStakingExposurePage, SpStakingOffenceOffenceDetails, SpStakingPagedExposureMetadata, TanglePrimitivesServicesJobsJobCall, TanglePrimitivesServicesJobsJobCallResult, TanglePrimitivesServicesService, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesServiceServiceRequest, TanglePrimitivesServicesServiceStagingServicePayment, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesOperatorProfile, TanglePrimitivesServicesTypesUnappliedSlash, TangleTestnetRuntimeOpaqueSessionKeys } from '@polkadot/types/lookup';
+import type { EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSupportTokensMiscIdAmountRuntimeFreezeReason, FrameSupportTokensMiscIdAmountRuntimeHoldReason, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, IsmpConsensusStateCommitment, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpHostStateMachine, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAssetsApproval, PalletAssetsAssetAccount, PalletAssetsAssetDetails, PalletAssetsAssetMetadata, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletHyperbridgeVersionedHostParams, PalletIdentityAuthorityProperties, PalletIdentityRegistrarInfo, PalletIdentityRegistration, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationDelegatorDelegatorMetadata, PalletMultiAssetDelegationOperatorOperatorMetadata, PalletMultiAssetDelegationOperatorOperatorSnapshot, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageOldRequestStatus, PalletPreimageRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletRewardsRewardConfigForAssetVault, PalletSchedulerRetryConfig, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTangleLstBondedPoolBondedPoolInner, PalletTangleLstClaimPermission, PalletTangleLstPoolsPoolMember, PalletTangleLstSubPools, PalletTangleLstSubPoolsRewardPool, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusBabeDigestsPreDigest, SpConsensusGrandpaAppPublic, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingExposure, SpStakingExposurePage, SpStakingOffenceOffenceDetails, SpStakingPagedExposureMetadata, TanglePrimitivesServicesJobsJobCall, TanglePrimitivesServicesJobsJobCallResult, TanglePrimitivesServicesService, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesServiceServiceRequest, TanglePrimitivesServicesServiceStagingServicePayment, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesOperatorProfile, TanglePrimitivesServicesTypesUnappliedSlash, TangleTestnetRuntimeOpaqueSessionKeys } from '@polkadot/types/lookup';
 import type { Observable } from '@polkadot/types/types';
 
 export type __AugmentedQuery<ApiType extends ApiTypes> = AugmentedQuery<ApiType, () => unknown>;
@@ -674,6 +674,16 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
     };
+    hyperbridge: {
+      /**
+       * The host parameters of the pallet-hyperbridge.
+       **/
+      hostParams: AugmentedQuery<ApiType, () => Observable<PalletHyperbridgeVersionedHostParams>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
     identity: {
       /**
        * Reverse lookup from `username` to the `AccountId` that has registered it. The value should
@@ -766,6 +776,75 @@ declare module '@polkadot/api-base/types/storage' {
        * The lookup from index to account.
        **/
       accounts: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<ITuple<[AccountId32, u128, bool]>>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    ismp: {
+      /**
+       * A mapping of state machine Ids to their challenge periods
+       **/
+      challengePeriod: AugmentedQuery<ApiType, (arg: IsmpConsensusStateMachineId | { stateId?: any; consensusStateId?: any } | string | Uint8Array) => Observable<Option<u64>>, [IsmpConsensusStateMachineId]> & QueryableStorageEntry<ApiType, [IsmpConsensusStateMachineId]>;
+      /**
+       * The child trie root of messages
+       **/
+      childTrieRoot: AugmentedQuery<ApiType, () => Observable<H256>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Holds the timestamp at which a consensus client was recently updated.
+       * Used in ensuring that the configured challenge period elapses.
+       **/
+      consensusClientUpdateTime: AugmentedQuery<ApiType, (arg: U8aFixed | string | Uint8Array) => Observable<Option<u64>>, [U8aFixed]> & QueryableStorageEntry<ApiType, [U8aFixed]>;
+      /**
+       * A mapping of consensus state identifier to it's associated consensus client identifier
+       **/
+      consensusStateClient: AugmentedQuery<ApiType, (arg: U8aFixed | string | Uint8Array) => Observable<Option<U8aFixed>>, [U8aFixed]> & QueryableStorageEntry<ApiType, [U8aFixed]>;
+      /**
+       * Holds a map of consensus state identifiers to their consensus state.
+       **/
+      consensusStates: AugmentedQuery<ApiType, (arg: U8aFixed | string | Uint8Array) => Observable<Option<Bytes>>, [U8aFixed]> & QueryableStorageEntry<ApiType, [U8aFixed]>;
+      /**
+       * Holds a map of consensus clients frozen due to byzantine
+       * behaviour
+       **/
+      frozenConsensusClients: AugmentedQuery<ApiType, (arg: U8aFixed | string | Uint8Array) => Observable<bool>, [U8aFixed]> & QueryableStorageEntry<ApiType, [U8aFixed]>;
+      /**
+       * The latest verified height for a state machine
+       **/
+      latestStateMachineHeight: AugmentedQuery<ApiType, (arg: IsmpConsensusStateMachineId | { stateId?: any; consensusStateId?: any } | string | Uint8Array) => Observable<Option<u64>>, [IsmpConsensusStateMachineId]> & QueryableStorageEntry<ApiType, [IsmpConsensusStateMachineId]>;
+      /**
+       * Latest nonce for messages sent from this chain
+       **/
+      nonce: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Tracks requests that have been responded to
+       * The key is the request commitment
+       **/
+      responded: AugmentedQuery<ApiType, (arg: H256 | string | Uint8Array) => Observable<bool>, [H256]> & QueryableStorageEntry<ApiType, [H256]>;
+      /**
+       * Holds a map of state machine heights to their verified state commitments. These state
+       * commitments end up here after they are successfully verified by a `ConsensusClient`
+       **/
+      stateCommitments: AugmentedQuery<ApiType, (arg: IsmpConsensusStateMachineHeight | { id?: any; height?: any } | string | Uint8Array) => Observable<Option<IsmpConsensusStateCommitment>>, [IsmpConsensusStateMachineHeight]> & QueryableStorageEntry<ApiType, [IsmpConsensusStateMachineHeight]>;
+      /**
+       * Holds the timestamp at which a state machine height was updated.
+       * Used in ensuring that the configured challenge period elapses.
+       **/
+      stateMachineUpdateTime: AugmentedQuery<ApiType, (arg: IsmpConsensusStateMachineHeight | { id?: any; height?: any } | string | Uint8Array) => Observable<Option<u64>>, [IsmpConsensusStateMachineHeight]> & QueryableStorageEntry<ApiType, [IsmpConsensusStateMachineHeight]>;
+      /**
+       * A mapping of consensus state identifiers to their unbonding periods
+       **/
+      unbondingPeriod: AugmentedQuery<ApiType, (arg: U8aFixed | string | Uint8Array) => Observable<Option<u64>>, [U8aFixed]> & QueryableStorageEntry<ApiType, [U8aFixed]>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    ismpGrandpa: {
+      /**
+       * Registered state machines for the grandpa consensus client
+       **/
+      supportedStateMachines: AugmentedQuery<ApiType, (arg: IsmpHostStateMachine | { Evm: any } | { Polkadot: any } | { Kusama: any } | { Substrate: any } | { Tendermint: any } | string | Uint8Array) => Observable<Option<u64>>, [IsmpHostStateMachine]> & QueryableStorageEntry<ApiType, [IsmpHostStateMachine]>;
       /**
        * Generic query
        **/
@@ -1026,42 +1105,6 @@ declare module '@polkadot/api-base/types/storage' {
        * The primary structure that holds all offence records keyed by report identifiers.
        **/
       reports: AugmentedQuery<ApiType, (arg: H256 | string | Uint8Array) => Observable<Option<SpStakingOffenceOffenceDetails>>, [H256]> & QueryableStorageEntry<ApiType, [H256]>;
-      /**
-       * Generic query
-       **/
-      [key: string]: QueryableStorageEntry<ApiType>;
-    };
-    poolAssets: {
-      /**
-       * The holdings of a specific account for a specific asset.
-       **/
-      account: AugmentedQuery<ApiType, (arg1: u128 | AnyNumber | Uint8Array, arg2: AccountId32 | string | Uint8Array) => Observable<Option<PalletAssetsAssetAccount>>, [u128, AccountId32]> & QueryableStorageEntry<ApiType, [u128, AccountId32]>;
-      /**
-       * Approved balance transfers. First balance is the amount approved for transfer. Second
-       * is the amount of `T::Currency` reserved for storing this.
-       * First key is the asset ID, second key is the owner and third key is the delegate.
-       **/
-      approvals: AugmentedQuery<ApiType, (arg1: u128 | AnyNumber | Uint8Array, arg2: AccountId32 | string | Uint8Array, arg3: AccountId32 | string | Uint8Array) => Observable<Option<PalletAssetsApproval>>, [u128, AccountId32, AccountId32]> & QueryableStorageEntry<ApiType, [u128, AccountId32, AccountId32]>;
-      /**
-       * Details of an asset.
-       **/
-      asset: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<PalletAssetsAssetDetails>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
-      /**
-       * Metadata of an asset.
-       **/
-      metadata: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<PalletAssetsAssetMetadata>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
-      /**
-       * The asset ID enforced for the next asset creation, if any present. Otherwise, this storage
-       * item has no effect.
-       * 
-       * This can be useful for setting up constraints for IDs of the new assets. For example, by
-       * providing an initial [`NextAssetId`] and using the [`crate::AutoIncAssetId`] callback, an
-       * auto-increment model can be applied to all new asset IDs.
-       * 
-       * The initial next asset ID can be set using the [`GenesisConfig`] or the
-       * [SetNextAssetId](`migration::next_asset_id::SetNextAssetId`) migration.
-       **/
-      nextAssetId: AugmentedQuery<ApiType, () => Observable<Option<u128>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * Generic query
        **/
@@ -1723,6 +1766,34 @@ declare module '@polkadot/api-base/types/storage' {
        * The current time for the current block.
        **/
       now: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
+       * Generic query
+       **/
+      [key: string]: QueryableStorageEntry<ApiType>;
+    };
+    tokenGateway: {
+      /**
+       * Assets supported by this instance of token gateway
+       * A map of the token gateway asset id to the local asset id
+       **/
+      localAssets: AugmentedQuery<ApiType, (arg: H256 | string | Uint8Array) => Observable<Option<u128>>, [H256]> & QueryableStorageEntry<ApiType, [H256]>;
+      /**
+       * Assets that originate from this chain
+       **/
+      nativeAssets: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<bool>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      /**
+       * The decimals used by the EVM counterpart of this asset
+       **/
+      precisions: AugmentedQuery<ApiType, (arg1: u128 | AnyNumber | Uint8Array, arg2: IsmpHostStateMachine | { Evm: any } | { Polkadot: any } | { Kusama: any } | { Substrate: any } | { Tendermint: any } | string | Uint8Array) => Observable<Option<u8>>, [u128, IsmpHostStateMachine]> & QueryableStorageEntry<ApiType, [u128, IsmpHostStateMachine]>;
+      /**
+       * Assets supported by this instance of token gateway
+       * A map of the local asset id to the token gateway asset id
+       **/
+      supportedAssets: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<H256>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
+      /**
+       * The token gateway adresses on different chains
+       **/
+      tokenGatewayAddresses: AugmentedQuery<ApiType, (arg: IsmpHostStateMachine | { Evm: any } | { Polkadot: any } | { Kusama: any } | { Substrate: any } | { Tendermint: any } | string | Uint8Array) => Observable<Option<Bytes>>, [IsmpHostStateMachine]> & QueryableStorageEntry<ApiType, [IsmpHostStateMachine]>;
       /**
        * Generic query
        **/
