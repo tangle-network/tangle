@@ -214,7 +214,7 @@ pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
 	>,
 ) -> Result<RpcModule<()>, Box<dyn std::error::Error + Send + Sync>>
 where
-	C: CallApiAt<Block> + ProvideRuntimeApi<Block>,
+	C: CallApiAt<Block> + ProvideRuntimeApi<Block> + ProofProvider<Block> + BlockBackend<Block>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: sp_block_builder::BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
@@ -228,7 +228,7 @@ where
 		+ HeaderMetadata<Block, Error = BlockChainError>
 		+ StorageProvider<Block, BE>,
 	BE: Backend<Block> + 'static,
-	C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
+	// C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
 	P: TransactionPool<Block = Block> + 'static,
 	A: ChainApi<Block = Block> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
@@ -243,6 +243,8 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
+
+	#[allow(unused_variables)]
 	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa, backend } = deps;
 
 	if let Some(babe) = babe {
@@ -263,7 +265,7 @@ where
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
-	io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
+	//io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
 
 	io.merge(
 		Grandpa::new(

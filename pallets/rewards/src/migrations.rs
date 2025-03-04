@@ -44,7 +44,7 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 		for (vault_id, old_config) in iter {
 			// Read operation
 			weight = weight.saturating_add(T::DbWeight::get().reads(1_u64));
-			let new_apy = Perbill::from_percent(old_config.apy.deconstruct() as u32);
+			let new_apy = Perbill::from_percent(old_config.apy.deconstruct());
 
 			// Create new config with converted APY
 			let new_config = RewardConfigForAssetVault {
@@ -55,7 +55,7 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 			};
 
 			// Update the storage with the new config
-			RewardConfigStorage::<T>::insert(&vault_id, new_config);
+			RewardConfigStorage::<T>::insert(vault_id, new_config);
 
 			// Write operation
 			weight = weight.saturating_add(T::DbWeight::get().writes(1_u64));
