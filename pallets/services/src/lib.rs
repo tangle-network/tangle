@@ -236,15 +236,20 @@ pub mod module {
 			for (index, slash) in prefix_iter {
 				// TODO: This call must be all or nothing.
 				// TODO: If fail then revert all storage changes
-				match T::SlashManager::slash_operator(&slash) {
-					Ok(weight_used) => {
-						weight = weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
-						// Remove the slash from storage after successful application
-						UnappliedSlashes::<T>::remove(process_era, index);
-					},
-					Err(_) => {
-						log::error!("Failed to apply slash for index: {:?}", index);
-					},
+				if Self::slashing_enabled() {
+					frame_support::storage::with_transaction(|| {
+						match T::SlashManager::slash_operator(&slash) {
+							Ok(weight_used) => {
+								weight =
+									weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
+								// Remove the slash from storage after successful application
+								UnappliedSlashes::<T>::remove(process_era, index);
+							},
+							Err(_) => {
+								log::error!("Failed to apply slash for index: {:?}", index);
+							},
+						}
+					})
 				}
 			}
 			weight
@@ -581,8 +586,12 @@ pub mod module {
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
-	// Counters
+	/// Slashing is enabled.
+	#[pallet::storage]
+	#[pallet::getter(fn slashing_enabled)]
+	pub type SlashingEnabled<T> = StorageValue<_, bool, ValueQuery>;
 
+	// Counters
 	/// The next free ID for a service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn next_blueprint_id)]
