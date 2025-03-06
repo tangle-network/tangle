@@ -1,15 +1,15 @@
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
+use sp_runtime::traits::StaticLookup;
 use sp_runtime::{
 	traits::{Convert, EnsureDiv, Header, Zero},
 	Percent, Saturating,
 };
-use sp_runtime::traits::StaticLookup;
 
+use crate::RuntimeOrigin;
+use frame_system::RawOrigin;
 use sp_std::vec::Vec;
 use tangle_primitives::Balance;
-use frame_system::RawOrigin;
-use crate::RuntimeOrigin;
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 
@@ -50,52 +50,75 @@ pub const TEAM_ACCOUNT_VESTING_UPDATE: ([u8; 32], Balance) = (
 /// Migration to update team members' allocations who left project.
 pub struct UpdateTeamMemberAllocation<T>(sp_std::marker::PhantomData<T>);
 
-pub type BalanceOf<T> =
+pub type StakingBalanceOf<T> =
 	<<T as pallet_staking::Config>::Currency as frame_support::traits::Currency<
 		<T as frame_system::Config>::AccountId,
 	>>::Balance;
 
+pub type VestingBalanceOf<T> =
+	<<T as pallet_vesting::Config>::Currency as frame_support::traits::Currency<
+		<T as frame_system::Config>::AccountId,
+	>>::Balance;
+
+pub type BalanceOf<T> = <T as pallet_balances::Config>::Balance;
+
 pub type BlockNumberOf<T> =
 	<<<T as frame_system::Config>::Block as sp_runtime::traits::Block>::Header as Header>::Number;
 
-impl<T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Config + pallet_staking::Config> OnRuntimeUpgrade
+impl<T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Config> OnRuntimeUpgrade
 	for UpdateTeamMemberAllocation<T>
-	where T: frame_system::Config<RuntimeOrigin = RuntimeOrigin>
+where
+	T: frame_system::Config<RuntimeOrigin = RuntimeOrigin>,
 {
 	fn on_runtime_upgrade() -> Weight {
 		let mut reads = 0u64;
 		let mut writes = 0u64;
 
 		// Remove staking records from team accounts
-		for (account, amount) in TEAM_ACCOUNTS.iter() {
+		for (account, _) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE.iter() {
 			let account_id: T::AccountId =
 				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
 			let controller =
-				pallet_staking::Bonded::<T>::get(account_id).expect("Controller not found");
-			let ledger = pallet_staking::Ledger::<T>::get(controller).expect("Ledger not found");
-			let nominations =
-				pallet_staking::Nominators::<T>::get(account_id).expect("Nominations not found");
-			let _ =
-				pallet_staking::Pallet::<T>::force_unstake(T::RuntimeOrigin::from(RawOrigin::Root), controller, 100)
-					.unwrap();
+				pallet_staking::Bonded::<T>::get(account_id.clone()).expect("Controller not found");
+			let ledger =
+				pallet_staking::Ledger::<T>::get(controller.clone()).expect("Ledger not found");
+			let nominations = pallet_staking::Nominators::<T>::get(account_id.clone())
+				.expect("Nominations not found");
+			let _ = pallet_staking::Pallet::<T>::force_unstake(
+				T::RuntimeOrigin::from(RawOrigin::Root),
+				controller,
+				100,
+			)
+			.unwrap();
 		}
 
 		// Send back balance from team member account with no vesting change
 		let team_account_id: T::AccountId =
 			T::AccountId::decode(&mut TEAM_ACCOUNT.as_ref()).expect("Invalid account ID");
-		let source_account_id: T::AccountId = T::AccountId::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].0.as_ref())
-			.expect("Invalid source account ID");
+		let source_account_id: T::AccountId =
+			T::AccountId::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].0.as_ref())
+				.expect("Invalid source account ID");
+		let amount: T::Balance =
+			T::Balance::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].1.encode().as_ref())
+				.expect("Invalid amount");
 		pallet_balances::Pallet::<T>::force_transfer(
 			T::RuntimeOrigin::from(RawOrigin::Root),
 			T::Lookup::unlookup(source_account_id),
 			T::Lookup::unlookup(team_account_id.clone()),
-			TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].1.into(),
-		).expect("Failed to transfer balance");
+			BalanceOf::<T>::from(amount),
+		)
+		.expect("Failed to transfer balance");
 
 		// Update vesting record and balance from team account with vesting change
-		update_account_vesting(
-			&TEAM_ACCOUNT_VESTING_UPDATE.0,
-			TEAM_ACCOUNT_VESTING_UPDATE.1,
+		let vesting_amount: VestingBalanceOf<T> =
+			VestingBalanceOf::<T>::decode(&mut TEAM_ACCOUNT_VESTING_UPDATE.1.encode().as_ref())
+				.expect("Invalid vesting amount");
+		let vesting_account_id: T::AccountId =
+			T::AccountId::decode(&mut TEAM_ACCOUNT_VESTING_UPDATE.0.as_ref())
+				.expect("Invalid vesting account ID");
+		update_account_vesting::<T>(
+			&vesting_account_id,
+			vesting_amount,
 			&team_account_id,
 			&mut reads,
 			&mut writes,
@@ -136,10 +159,12 @@ fn verify_updated<T: pallet_staking::Config + pallet_balances::Config>(
 	Ok(())
 }
 
-// Update investor vesting schedules
-fn update_account_vesting<T: pallet_vesting::Config + pallet_balances::Config + pallet_staking::Config>(
+// Update account vesting schedule
+fn update_account_vesting<
+	T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Config,
+>(
 	account_id: &T::AccountId,
-	amount_to_change_to: BalanceOf<T>,
+	amount_to_change_to: VestingBalanceOf<T>,
 	team_account_id: &T::AccountId,
 	reads: &mut u64,
 	writes: &mut u64,
@@ -161,19 +186,23 @@ fn update_vesting_schedule<
 	T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Config,
 >(
 	account_id: &T::AccountId,
-	amount_to_change_to: BalanceOf<T>,
+	amount_to_change_to: VestingBalanceOf<T>,
 	team_account_id: &T::AccountId,
-	schedules: Vec<VestingInfo<BalanceOf<T>, BlockNumberOf<T>>>,
+	schedules: Vec<VestingInfo<VestingBalanceOf<T>, BlockNumberOf<T>>>,
 ) {
 	// Calculate total vested amount
 	let total_vested = schedules
 		.iter()
 		.map(|schedule| schedule.locked())
-		.fold(Zero::zero(), |acc: BalanceOf<T>, val: BalanceOf<T>| acc.saturating_add(val));
+		.fold(Zero::zero(), |acc: VestingBalanceOf<T>, val: VestingBalanceOf<T>| {
+			acc.saturating_add(val)
+		});
 
 	// Calculate the difference between the amount to change to and the total vested amount
 	// Send the difference back to team account
-	let difference = amount_to_change_to.saturating_sub(total_vested);
+	let difference: T::Balance =
+		T::Balance::decode(&mut amount_to_change_to.saturating_sub(total_vested).encode().as_ref())
+			.expect("Invalid account ID");
 
 	if total_vested.is_zero() {
 		return;
@@ -193,7 +222,7 @@ fn update_vesting_schedule<
 		.unwrap();
 
 	let mut bounded_new_schedules: BoundedVec<
-		VestingInfo<BalanceOf<T>, BlockNumberOf<T>>,
+		VestingInfo<VestingBalanceOf<T>, BlockNumberOf<T>>,
 		MaxVestingSchedulesGet<T>,
 	> = BoundedVec::new();
 
@@ -210,9 +239,9 @@ fn update_vesting_schedule<
 	// Send the difference back to team account
 	pallet_balances::Pallet::<T>::force_transfer(
 		T::RuntimeOrigin::from(RawOrigin::Root),
-		account_id.into(),
-		team_account_id.into(),
-		difference,
+		T::Lookup::unlookup(account_id.clone()),
+		T::Lookup::unlookup(team_account_id.clone()),
+		BalanceOf::<T>::from(difference),
 	);
 }
 
@@ -231,7 +260,9 @@ fn verify_updated_schedule<T: pallet_vesting::Config>(
 	let total_vested = schedules
 		.iter()
 		.map(|schedule| schedule.locked())
-		.fold(Zero::zero(), |acc: BalanceOf<T>, val: BalanceOf<T>| acc.saturating_add(val));
+		.fold(Zero::zero(), |acc: VestingBalanceOf<T>, val: VestingBalanceOf<T>| {
+			acc.saturating_add(val)
+		});
 	let original_amount = TEAM_ACCOUNT_VESTING_UPDATE.1;
 	let double_amount = original_amount.saturating_mul(2);
 	ensure!(

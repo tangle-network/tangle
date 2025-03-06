@@ -1,10 +1,5 @@
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
-use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
-use sp_runtime::{
-	traits::{Convert, EnsureDiv, Header, Zero},
-	Percent, Saturating,
-};
-use sp_std::vec::Vec;
+use sp_runtime::traits::Header;
 
 /// Migration to ensure slashing is not enabled
 pub struct EnsureSlashingNotEnabled<T>(sp_std::marker::PhantomData<T>);
@@ -14,8 +9,8 @@ pub type BlockNumberOf<T> =
 
 impl<T: pallet_services::Config> OnRuntimeUpgrade for EnsureSlashingNotEnabled<T> {
 	fn on_runtime_upgrade() -> Weight {
-		let mut reads = 0u64;
-		let mut writes = 1u64;
+		let reads = 0u64;
+		let writes = 1u64;
 
 		pallet_services::SlashingEnabled::<T>::put(false);
 
