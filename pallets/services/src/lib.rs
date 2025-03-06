@@ -22,6 +22,7 @@
 extern crate alloc;
 use frame_support::{
 	pallet_prelude::*,
+	storage::TransactionOutcome,
 	traits::{Currency, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
@@ -237,19 +238,24 @@ pub mod module {
 				// TODO: This call must be all or nothing.
 				// TODO: If fail then revert all storage changes
 				if Self::slashing_enabled() {
-					frame_support::storage::with_transaction(|| {
-						match T::SlashManager::slash_operator(&slash) {
-							Ok(weight_used) => {
-								weight =
-									weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
-								// Remove the slash from storage after successful application
-								UnappliedSlashes::<T>::remove(process_era, index);
-							},
-							Err(_) => {
-								log::error!("Failed to apply slash for index: {:?}", index);
-							},
-						}
-					})
+					let _ = frame_support::storage::with_transaction(
+						|| -> TransactionOutcome<Result<_, DispatchError>> {
+							let res = T::SlashManager::slash_operator(&slash);
+							match &res {
+								Ok(weight_used) => {
+									weight =
+										weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
+									// Remove the slash from storage after successful application
+									UnappliedSlashes::<T>::remove(process_era, index);
+									TransactionOutcome::Commit(Ok(res))
+								},
+								Err(_) => {
+									log::error!("Failed to apply slash for index: {:?}", index);
+									TransactionOutcome::Rollback(Ok(res))
+								},
+							}
+						},
+					);
 				}
 			}
 			weight
