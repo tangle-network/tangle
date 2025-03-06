@@ -1,14 +1,13 @@
+use crate::RuntimeOrigin;
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
+use frame_system::RawOrigin;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::traits::StaticLookup;
 use sp_runtime::{
 	traits::{Convert, EnsureDiv, Header, Zero},
 	Percent, Saturating,
 };
-
-use crate::RuntimeOrigin;
-use frame_system::RawOrigin;
-use sp_std::vec::Vec;
+use sp_std::{vec, vec::Vec};
 use tangle_primitives::Balance;
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
@@ -26,7 +25,7 @@ pub const TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE: [([u8; 32], Balance); 2] = [
 			76, 227, 164, 218, 58, 124, 28, 230, 95, 126, 222, 255, 134, 77, 195, 221, 66, 232,
 			244, 126, 236, 194, 114, 109, 153, 160, 168, 1, 36, 105, 130, 23,
 		],
-		114383561650000000000000,
+		114383561650000000000000, // Amount to unstake and send back to team
 	),
 	// TB
 	(
@@ -34,7 +33,7 @@ pub const TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE: [([u8; 32], Balance); 2] = [
 			140, 62, 57, 135, 164, 41, 178, 70, 246, 25, 233, 31, 140, 164, 85, 53, 161, 191, 95,
 			135, 14, 199, 197, 207, 246, 169, 16, 169, 148, 151, 139, 65,
 		],
-		121947842700000000000000,
+		121947842700000000000000, // Amount to unstake and send back to team
 	),
 ];
 
@@ -74,8 +73,11 @@ where
 		let mut reads = 0u64;
 		let mut writes = 0u64;
 
+		let nominated_validators: Vec<(T::AccountId, StakingBalanceOf<T>, Vec<T::AccountId>)> =
+			vec![];
+
 		// Remove staking records from team accounts
-		for (account, _) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE.iter() {
+		for (account, amount) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE.iter() {
 			let account_id: T::AccountId =
 				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
 			let controller =
@@ -84,6 +86,15 @@ where
 				pallet_staking::Ledger::<T>::get(controller.clone()).expect("Ledger not found");
 			let nominations = pallet_staking::Nominators::<T>::get(account_id.clone())
 				.expect("Nominations not found");
+
+			let amount_encoded: StakingBalanceOf<T> =
+				StakingBalanceOf::<T>::decode(&mut amount.encode().as_ref())
+					.expect("Invalid amount");
+			nominated_validators.push((
+				account_id,
+				ledger.active - amount_encoded,
+				nominations.targets.iter().map(|target| target.clone()).collect(),
+			));
 			let _ = pallet_staking::Pallet::<T>::force_unstake(
 				T::RuntimeOrigin::from(RawOrigin::Root),
 				controller,
@@ -123,6 +134,23 @@ where
 			&mut reads,
 			&mut writes,
 		);
+
+		// Nominate the same validators as before
+		for (account_id, amount, targets) in nominated_validators {
+			// Bond the stash accounts
+			let controller =
+				pallet_staking::Bonded::<T>::get(account_id.clone()).expect("Controller not found");
+			let _ = pallet_staking::Pallet::<T>::bond(
+				T::RuntimeOrigin::from(RawOrigin::Root),
+				amount,
+				pallet_staking::RewardDestination::Staked,
+			)
+			.unwrap();
+			pallet_staking::Pallet::<T>::nominate(
+				T::RuntimeOrigin::from(RawOrigin::Signed(account_id)),
+				targets.iter().map(|target| T::Lookup::unlookup(target.clone())).collect(),
+			);
+		}
 
 		T::DbWeight::get().reads_writes(reads, writes)
 	}
