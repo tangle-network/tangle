@@ -18,6 +18,7 @@ use crate::{
 	types::{delegator::*, DelegatorMetadata},
 	Config, Delegators,
 };
+use frame_support::storage::unhashed;
 use frame_support::traits::Currency;
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
 use frame_system;
@@ -126,7 +127,14 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 			weight = weight.saturating_add(T::DbWeight::get().reads(1_u64));
 
 			// Get the raw bytes of the metadata
-			let raw_metadata = Delegators::<T>::hashed_key_for(&account_id);
+			let raw_key = Delegators::<T>::hashed_key_for(&account_id);
+			let raw_value = match unhashed::get_raw(&raw_key) {
+				Some(bytes) => bytes,
+				None => {
+					log::warn!("No raw metadata found for account: {:?}", account_id);
+					continue;
+				},
+			};
 
 			// Try to decode using our old metadata format
 			let old_metadata = match OldDelegatorMetadata::<
@@ -139,7 +147,7 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 				T::MaxDelegatorBlueprints,
 				BlockNumberFor<T>,
 				<T as Config>::MaxDelegations,
-			>::decode(&mut &raw_metadata[..]) {
+			>::decode(&mut &raw_value[..]) {
 				Ok(metadata) => metadata,
 				Err(e) => {
 					log::error!("Failed to decode delegator metadata for account {:?}: {:?}", account_id, e);
