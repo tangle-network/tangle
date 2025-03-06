@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{Config, DelegatorMetadata, Delegators};
+use crate::{Config, DelegatorMetadata, Delegators, types::delegator::*};
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
 use sp_runtime::{Perbill, Percent};
+use sp_std::collections::btree_map::BTreeMap;
 use sp_std::marker::PhantomData;
 
 /// Migration to convert APY from percentage to Perbill in `RewardConfigForAssetVault`
@@ -103,6 +104,52 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 			weight = weight.saturating_add(T::DbWeight::get().reads(1_u64));
 
 			// Convert old metadata to new metadata
+			let new_metadata = DelegatorMetadata::<
+				T::AccountId,
+				T::Balance,
+				T::AssetId,
+				T::MaxWithdrawRequests,
+				T::MaxDelegations,
+				T::MaxUnstakeRequests,
+				T::MaxBlueprints,
+				T::BlockNumber,
+				T::MaxLocks,
+			> {
+				deposits: metadata.deposits,
+				withdraw_requests: metadata.withdraw_requests
+					.into_iter()
+					.map(|req| WithdrawRequest {
+						asset: req.asset_id,
+						amount: req.amount,
+						requested_round: req.requested_round,
+					})
+					.collect::<BoundedVec<_, _>>(),
+				delegations: metadata.delegations
+					.into_iter()
+					.map(|delegation| BondInfoDelegator {
+						operator: delegation.operator,
+						amount: delegation.amount,
+						asset: delegation.asset_id,
+						blueprint_selection: delegation.blueprint_selection,
+						is_nomination: false, // Default to false for migrated delegations
+					})
+					.collect::<BoundedVec<_, _>>(),
+				delegator_unstake_requests: metadata.delegator_unstake_requests
+					.into_iter()
+					.map(|req| BondLessRequest {
+						operator: req.operator,
+						asset: req.asset_id,
+						amount: req.amount,
+						requested_round: req.requested_round,
+						blueprint_selection: req.blueprint_selection,
+						is_nomination: false, // Default to false for migrated requests
+					})
+					.collect::<BoundedVec<_, _>>(),
+				status: metadata.status,
+			};
+
+			// Update the storage with the new metadata
+			Delegators::<T>::insert(account, new_metadata);
 
 			// Write operation
 			weight = weight.saturating_add(T::DbWeight::get().writes(1_u64));
@@ -111,7 +158,7 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 		}
 
 		log::info!(
-			"PercentageToPerbillMigration: Migrated {} reward configurations",
+			"PercentageToPerbillMigration: Migrated {} delegator metadata entries",
 			migrated_count
 		);
 
@@ -121,7 +168,7 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
 		// Count how many entries we have pre-migration
-		let count = RewardConfigStorage::<T>::iter().count() as u32;
+		let count = Delegators::<T>::iter().count() as u32;
 		Ok(count.encode())
 	}
 
