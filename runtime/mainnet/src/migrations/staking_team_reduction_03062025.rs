@@ -4,11 +4,12 @@ use sp_runtime::{
 	traits::{Convert, EnsureDiv, Header, Zero},
 	Percent, Saturating,
 };
+use sp_runtime::traits::StaticLookup;
+
 use sp_std::vec::Vec;
 use tangle_primitives::Balance;
-
+use frame_system::RawOrigin;
 use crate::RuntimeOrigin;
-
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
 
@@ -57,8 +58,9 @@ pub type BalanceOf<T> =
 pub type BlockNumberOf<T> =
 	<<<T as frame_system::Config>::Block as sp_runtime::traits::Block>::Header as Header>::Number;
 
-impl<T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Config> OnRuntimeUpgrade
+impl<T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Config + pallet_staking::Config> OnRuntimeUpgrade
 	for UpdateTeamMemberAllocation<T>
+	where T: frame_system::Config<RuntimeOrigin = RuntimeOrigin>
 {
 	fn on_runtime_upgrade() -> Weight {
 		let mut reads = 0u64;
@@ -74,19 +76,21 @@ impl<T: pallet_staking::Config + pallet_vesting::Config + pallet_balances::Confi
 			let nominations =
 				pallet_staking::Nominators::<T>::get(account_id).expect("Nominations not found");
 			let _ =
-				pallet_staking::Pallet::<T>::force_unstake(RuntimeOrigin::root(), controller, 100)
+				pallet_staking::Pallet::<T>::force_unstake(T::RuntimeOrigin::from(RawOrigin::Root), controller, 100)
 					.unwrap();
 		}
 
 		// Send back balance from team member account with no vesting change
 		let team_account_id: T::AccountId =
 			T::AccountId::decode(&mut TEAM_ACCOUNT.as_ref()).expect("Invalid account ID");
+		let source_account_id: T::AccountId = T::AccountId::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].0.as_ref())
+			.expect("Invalid source account ID");
 		pallet_balances::Pallet::<T>::force_transfer(
-			RuntimeOrigin::root(),
-			TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1][0],
-			team_account_id,
-			TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1][1],
-		);
+			T::RuntimeOrigin::from(RawOrigin::Root),
+			T::Lookup::unlookup(source_account_id),
+			T::Lookup::unlookup(team_account_id.clone()),
+			TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].1.into(),
+		).expect("Failed to transfer balance");
 
 		// Update vesting record and balance from team account with vesting change
 		update_account_vesting(
@@ -133,7 +137,7 @@ fn verify_updated<T: pallet_staking::Config + pallet_balances::Config>(
 }
 
 // Update investor vesting schedules
-fn update_account_vesting<T: pallet_vesting::Config + pallet_balances::Config>(
+fn update_account_vesting<T: pallet_vesting::Config + pallet_balances::Config + pallet_staking::Config>(
 	account_id: &T::AccountId,
 	amount_to_change_to: BalanceOf<T>,
 	team_account_id: &T::AccountId,
@@ -205,7 +209,7 @@ fn update_vesting_schedule<
 
 	// Send the difference back to team account
 	pallet_balances::Pallet::<T>::force_transfer(
-		RuntimeOrigin::root().into(),
+		T::RuntimeOrigin::from(RawOrigin::Root),
 		account_id.into(),
 		team_account_id.into(),
 		difference,
