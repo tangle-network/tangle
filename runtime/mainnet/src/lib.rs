@@ -1476,6 +1476,7 @@ pub type Executive = frame_executive::Executive<
 	(
 		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
 		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
+		migrations::slashing_enabled_03062025::EnsureSlashingNotEnabled<Runtime>,
 	),
 >;
 
