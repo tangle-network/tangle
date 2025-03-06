@@ -178,7 +178,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1215, // v1.2.15
+	spec_version: 1216, // v1.2.16
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1381,7 +1381,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	pallet_rewards::migrations::PercentageToPerbillMigration<Runtime>,
+	pallet_multi_asset_delegation::migrations::DelegatorMetadataMigration<Runtime>,
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {

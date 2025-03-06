@@ -76,9 +76,9 @@ use weights::WeightInfo;
 mod benchmarking;
 
 pub mod functions;
+pub mod migrations;
 pub mod traits;
 pub mod types;
-pub mod migrations;
 
 /// The log target of this pallet.
 pub const LOG_TARGET: &str = "runtime::multi-asset-delegation";
