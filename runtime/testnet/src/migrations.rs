@@ -69,3 +69,16 @@ impl<T: pallet_session::Config> OnRuntimeUpgrade for MigrateSessionKeys<T> {
 		T::DbWeight::get().reads_writes(10, 10)
 	}
 }
+
+/// Runtime upgrade for removing the next asset id.
+///
+/// This struct implements the `OnRuntimeUpgrade` trait and removes the next asset id from the
+/// storage. It reads and writes to the database as needed.
+pub struct RemoveNextAssetId<T, I>(sp_std::marker::PhantomData<T>, sp_std::marker::PhantomData<I>);
+
+impl<T: pallet_assets::Config<I>, I: 'static> OnRuntimeUpgrade for RemoveNextAssetId<T, I> {
+	fn on_runtime_upgrade() -> Weight {
+		pallet_assets::NextAssetId::<T, I>::set(None);
+		T::DbWeight::get().reads_writes(1, 1)
+	}
+}

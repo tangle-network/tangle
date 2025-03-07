@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.2.10"
+version = "1.2.15"
 authors = ["Tangle Foundation."]
 edition = "2021"
 license = "Unlicense"
@@ -48,6 +48,7 @@ members = [
     "precompiles/assets",
     "precompiles/vesting",
     "precompiles/staking",
+    "precompiles/rewards",
     "tangle-subxt",
     "evm-tracer",
 ]
@@ -334,6 +335,7 @@ pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-s
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-tangle-lst = { path = "precompiles/tangle-lst", default-features = false }
+pallet-evm-precompile-rewards = { path = "precompiles/rewards", default-features = false }
 
 # Precompiles utils
 postcard = { version = "1", default-features = false }

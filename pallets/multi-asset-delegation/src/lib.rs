@@ -76,6 +76,7 @@ use weights::WeightInfo;
 mod benchmarking;
 
 pub mod functions;
+pub mod migrations;
 pub mod traits;
 pub mod types;
 
