@@ -11,6 +11,7 @@ use sp_std::{vec, vec::Vec};
 use tangle_primitives::Balance;
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
+use sp_staking::StakingInterface;
 
 pub const TEAM_ACCOUNT: [u8; 32] = [
 	142, 28, 43, 221, 218, 185, 87, 61, 140, 176, 148, 219, 255, 186, 36, 162, 178, 194, 27, 126,
@@ -73,17 +74,21 @@ where
 		let mut reads = 0u64;
 		let mut writes = 0u64;
 
-		let nominated_validators: Vec<(T::AccountId, StakingBalanceOf<T>, Vec<T::AccountId>)> =
-			vec![];
+		#[allow(clippy::type_complexity)]
+		let mut nominated_validators: Vec<(
+			T::AccountId,
+			StakingBalanceOf<T>,
+			Vec<T::AccountId>,
+		)> = vec![];
 
 		// Remove staking records from team accounts
 		for (account, amount) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE.iter() {
 			let account_id: T::AccountId =
 				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
-			let controller =
+			let _controller =
 				pallet_staking::Bonded::<T>::get(account_id.clone()).expect("Controller not found");
 			let ledger =
-				pallet_staking::Ledger::<T>::get(controller.clone()).expect("Ledger not found");
+				pallet_staking::Ledger::<T>::get(_controller.clone()).expect("Ledger not found");
 			let nominations = pallet_staking::Nominators::<T>::get(account_id.clone())
 				.expect("Nominations not found");
 
@@ -93,11 +98,11 @@ where
 			nominated_validators.push((
 				account_id,
 				ledger.active - amount_encoded,
-				nominations.targets.iter().map(|target| target.clone()).collect(),
+				nominations.targets.iter().cloned().collect(),
 			));
-			let _ = pallet_staking::Pallet::<T>::force_unstake(
+			pallet_staking::Pallet::<T>::force_unstake(
 				T::RuntimeOrigin::from(RawOrigin::Root),
-				controller,
+				_controller,
 				100,
 			)
 			.unwrap();
@@ -138,17 +143,16 @@ where
 		// Nominate the same validators as before
 		for (account_id, amount, targets) in nominated_validators {
 			// Bond the stash accounts
-			let controller =
-				pallet_staking::Bonded::<T>::get(account_id.clone()).expect("Controller not found");
-			let _ = pallet_staking::Pallet::<T>::bond(
+			pallet_staking::Pallet::<T>::bond(
 				T::RuntimeOrigin::from(RawOrigin::Root),
 				amount,
 				pallet_staking::RewardDestination::Staked,
 			)
 			.unwrap();
-			pallet_staking::Pallet::<T>::nominate(
-				T::RuntimeOrigin::from(RawOrigin::Signed(account_id)),
-				targets.iter().map(|target| T::Lookup::unlookup(target.clone())).collect(),
+
+			let _ = <pallet_staking::Pallet<T> as StakingInterface>::nominate(
+				&account_id,
+				targets.clone(),
 			);
 		}
 
@@ -265,7 +269,7 @@ fn update_vesting_schedule<
 	Vesting::<T>::insert(account_id, bounded_new_schedules);
 
 	// Send the difference back to team account
-	pallet_balances::Pallet::<T>::force_transfer(
+	let _ = pallet_balances::Pallet::<T>::force_transfer(
 		T::RuntimeOrigin::from(RawOrigin::Root),
 		T::Lookup::unlookup(account_id.clone()),
 		T::Lookup::unlookup(team_account_id.clone()),
