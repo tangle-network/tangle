@@ -214,3 +214,7 @@ std = [
     "sp-staking/std",
     "frame-election-provider-support/std",
 ]
+runtime-benchmarks = [
+    "pallet-multi-asset-delegation/runtime-benchmarks",
+    "pallet-assets/runtime-benchmarks",
+]

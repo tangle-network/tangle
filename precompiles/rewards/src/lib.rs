@@ -39,7 +39,6 @@ where
 	<Runtime as frame_system::Config>::RuntimeCall:
 		Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
-	<Runtime as pallet_rewards::Config>::AssetId: From<u128>,
 	Runtime::RuntimeCall: From<pallet_rewards::Call<Runtime>>,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
 {
@@ -54,7 +53,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (asset, _) = match (asset_id.as_u128(), token_address.0 .0) {
+		let (asset, _) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] => {
 				(Asset::Erc20(erc20_token.into()), U256::zero())
 			},
