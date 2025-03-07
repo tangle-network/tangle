@@ -23,7 +23,7 @@ fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 
 tangle-primitives = { workspace = true }
-
+pallet-rewards = { workspace = true }
 derive_more = { workspace = true, features = ["full"], optional = true }
 hex-literal = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }

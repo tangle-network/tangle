@@ -14,23 +14,19 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-
-use core::marker::PhantomData;
-use frame_support::traits::Currency;
-use fp_evm::{PrecompileHandle, PrecompileOutput};
-use pallet_evm::Precompile;
+use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
+use sp_runtime::traits::Dispatchable;
+use pallet_evm::AddressMapping;
+use fp_evm::PrecompileHandle;
 use pallet_rewards::Config;
 use precompile_utils::{
 	prelude::*,
 	solidity::{
-		codec::{Address, BoundedVec},
-		modifier::FunctionModifier,
-		revert::InjectBacktrace,
+		codec::Address,
 	},
 };
 use sp_core::{H160, U256};
-use sp_runtime::traits::StaticLookup;
-use sp_std::{marker::PhantomData, prelude::*};
+use sp_std::marker::PhantomData;
 use tangle_primitives::services::Asset;
 
 /// Solidity selector of the Transfer log, which is the Keccak of the Log signature.
@@ -42,8 +38,12 @@ pub struct RewardsPrecompile<Runtime>(PhantomData<Runtime>);
 #[precompile_utils::precompile]
 impl<Runtime> RewardsPrecompile<Runtime>
 where
-	Runtime: Config + pallet_evm::Config,
+	Runtime: Config + pallet_evm::Config + pallet_rewards::Config,
 	Runtime::AccountId: From<H160> + Into<H160>,
+	<Runtime as frame_system::Config>::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+	<Runtime as frame_system::Config>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	<Runtime as pallet_rewards::Config>::AssetId: From<u128>,
+	Runtime::RuntimeCall: From<pallet_rewards::Call<Runtime>>,
 {
 	#[precompile::public("claimRewards(uint256,address)")]
 	fn claim_rewards(

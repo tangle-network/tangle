@@ -39,6 +39,7 @@ use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
+use pallet_evm_precompile_rewards::RewardsPrecompile;
 
 use frame_support::parameter_types;
 use precompile_utils::precompile_set::*;
@@ -225,7 +226,13 @@ pub type TanglePrecompilesAt<R> = (
 		TangleLstPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	PrecompileAt<
+		AddressU64<2085>,
+		RewardsPrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
 );
+
 pub type TanglePrecompiles<R> = PrecompileSetBuilder<
 	R,
 	(
