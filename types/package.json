@@ -31,7 +31,7 @@
 		"url": "https://github.com/tangle-network/tangle/issues"
 	},
 	"scripts": {
-		"build": "bunchee",
+		"build": "node scripts/build.mjs",
 		"build:interfaces": "yarn build:interfaces:defs && yarn build:interfaces:chain",
 		"build:interfaces:defs": "tsx node_modules/.bin/polkadot-types-from-defs --input ./src/interfaces --package @tangle-network/tangle-substrate-types --endpoint ws://127.0.0.1:9944",
 		"build:interfaces:chain": "tsx node_modules/.bin/polkadot-types-from-chain --output ./src/interfaces --package @tangle-network/tangle-substrate-types --endpoint ws://127.0.0.1:9944",

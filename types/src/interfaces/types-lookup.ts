@@ -5136,8 +5136,8 @@ declare module '@polkadot/types/lookup' {
 
   /** @name IsmpRouterGetResponse (504) */
   interface IsmpRouterGetResponse extends Struct {
-    readonly get: IsmpRouterGetRequest;
-    readonly values: Vec<IsmpRouterStorageValue>;
+    readonly getRequest: IsmpRouterGetRequest;
+    readonly getValues: Vec<IsmpRouterStorageValue>;
   }
 
   /** @name IsmpRouterStorageValue (506) */
