@@ -22,6 +22,7 @@
 extern crate alloc;
 use frame_support::{
 	pallet_prelude::*,
+	storage::TransactionOutcome,
 	traits::{Currency, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
@@ -236,15 +237,25 @@ pub mod module {
 			for (index, slash) in prefix_iter {
 				// TODO: This call must be all or nothing.
 				// TODO: If fail then revert all storage changes
-				match T::SlashManager::slash_operator(&slash) {
-					Ok(weight_used) => {
-						weight = weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
-						// Remove the slash from storage after successful application
-						UnappliedSlashes::<T>::remove(process_era, index);
-					},
-					Err(_) => {
-						log::error!("Failed to apply slash for index: {:?}", index);
-					},
+				if Self::slashing_enabled() {
+					let _ = frame_support::storage::with_transaction(
+						|| -> TransactionOutcome<Result<_, DispatchError>> {
+							let res = T::SlashManager::slash_operator(&slash);
+							match &res {
+								Ok(weight_used) => {
+									weight =
+										weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
+									// Remove the slash from storage after successful application
+									UnappliedSlashes::<T>::remove(process_era, index);
+									TransactionOutcome::Commit(Ok(res))
+								},
+								Err(_) => {
+									log::error!("Failed to apply slash for index: {:?}", index);
+									TransactionOutcome::Rollback(Ok(res))
+								},
+							}
+						},
+					);
 				}
 			}
 			weight
@@ -581,8 +592,12 @@ pub mod module {
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
-	// Counters
+	/// Slashing is enabled.
+	#[pallet::storage]
+	#[pallet::getter(fn slashing_enabled)]
+	pub type SlashingEnabled<T> = StorageValue<_, bool, ValueQuery>;
 
+	// Counters
 	/// The next free ID for a service blueprint.
 	#[pallet::storage]
 	#[pallet::getter(fn next_blueprint_id)]

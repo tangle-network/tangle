@@ -1,2 +1,4 @@
 pub mod investor_team_vesting_migration_11302024;
 pub mod session_key_migrations_08062024;
+pub mod slashing_enabled_03062025;
+pub mod staking_team_reduction_03062025;
