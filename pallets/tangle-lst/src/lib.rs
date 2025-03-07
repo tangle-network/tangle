@@ -107,6 +107,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::Codec;
+use frame_support::traits::fungibles::metadata::Mutate;
 use frame_support::{
 	defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
@@ -130,7 +131,6 @@ use sp_runtime::{
 	},
 	FixedPointNumber, Perbill,
 };
-use frame_support::traits::fungibles::metadata::Mutate;
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
 
@@ -1751,10 +1751,10 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::PoolTokenCreationFailed
 		);
 
-		let admin_account : T::AccountId = T::PalletId::get().into_account_truncating();
+		let admin_account: T::AccountId = T::PalletId::get().into_account_truncating();
 		T::Fungibles::create(pool_id.into(), admin_account.clone(), false, 1_u32.into())?;
 		let name_vec = name.clone().map_or_else(Vec::new, |n| n.to_vec());
-		T::Fungibles::set(pool_id.into(), &admin_account, name_vec.clone(), name_vec, 18)?;
+		let _ = T::Fungibles::set(pool_id.into(), &admin_account, name_vec.clone(), name_vec, 18);
 
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(
