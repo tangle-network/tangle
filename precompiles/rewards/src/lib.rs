@@ -19,7 +19,7 @@ use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
 use pallet_evm::AddressMapping;
 use pallet_rewards::Config;
 use precompile_utils::{prelude::*, solidity::codec::Address};
-use sp_core::{H160, U256};
+use sp_core::U256;
 use sp_runtime::traits::Dispatchable;
 use sp_std::marker::PhantomData;
 use tangle_primitives::services::Asset;
