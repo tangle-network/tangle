@@ -1,9 +1,9 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, u64 } from '@polkadot/types-codec';
+import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
-import type { AccountId32, H160 } from '@polkadot/types/interfaces/runtime';
+import type { AccountId32, H160, Percent } from '@polkadot/types/interfaces/runtime';
 
 /** @name Architecture */
 export interface Architecture extends Enum {
@@ -18,6 +18,28 @@ export interface Architecture extends Enum {
   readonly isRiscV: boolean;
   readonly isRiscV64: boolean;
   readonly type: 'Wasm' | 'Wasm64' | 'Wasi' | 'Wasi64' | 'Amd' | 'Amd64' | 'Arm' | 'Arm64' | 'RiscV' | 'RiscV64';
+}
+
+/** @name Asset */
+export interface Asset extends Enum {
+  readonly isCustom: boolean;
+  readonly asCustom: u128;
+  readonly isErc20: boolean;
+  readonly asErc20: H160;
+  readonly type: 'Custom' | 'Erc20';
+}
+
+/** @name AssetSecurityCommitment */
+export interface AssetSecurityCommitment extends Struct {
+  readonly asset: Asset;
+  readonly exposurePercent: Percent;
+}
+
+/** @name AssetSecurityRequirement */
+export interface AssetSecurityRequirement extends Struct {
+  readonly asset: Asset;
+  readonly minExposurePercent: Percent;
+  readonly maxExposurePercent: Percent;
 }
 
 /** @name ContainerGadget */
@@ -38,7 +60,6 @@ export interface FieldFieldType extends Enum {
   readonly isUint64: boolean;
   readonly isInt64: boolean;
   readonly isText: boolean;
-  readonly isBytes: boolean;
   readonly isOptional: boolean;
   readonly asOptional: FieldFieldType;
   readonly isArray: boolean;
@@ -46,9 +67,9 @@ export interface FieldFieldType extends Enum {
   readonly isList: boolean;
   readonly asList: FieldFieldType;
   readonly isStruct: boolean;
-  readonly asStruct: ITuple<[FieldFieldType, Vec<ITuple<[FieldFieldType, FieldFieldType]>>]>;
+  readonly asStruct: Vec<FieldFieldType>;
   readonly isAccountId: boolean;
-  readonly type: 'Void' | 'Bool' | 'Uint8' | 'Int8' | 'Uint16' | 'Int16' | 'Uint32' | 'Int32' | 'Uint64' | 'Int64' | 'Text' | 'Bytes' | 'Optional' | 'Array' | 'List' | 'Struct' | 'AccountId';
+  readonly type: 'Void' | 'Bool' | 'Uint8' | 'Int8' | 'Uint16' | 'Int16' | 'Uint32' | 'Int32' | 'Uint64' | 'Int64' | 'Text' | 'Optional' | 'Array' | 'List' | 'Struct' | 'AccountId';
 }
 
 /** @name Gadget */
@@ -108,7 +129,6 @@ export interface JobDefinition extends Struct {
   readonly metadata: JobMetadata;
   readonly params: Vec<FieldFieldType>;
   readonly result: Vec<FieldFieldType>;
-  readonly verifier: JobResultVerifier;
 }
 
 /** @name JobMetadata */
@@ -117,12 +137,33 @@ export interface JobMetadata extends Struct {
   readonly description: Option<Bytes>;
 }
 
-/** @name JobResultVerifier */
-export interface JobResultVerifier extends Enum {
-  readonly isNone: boolean;
-  readonly isEvm: boolean;
-  readonly asEvm: H160;
-  readonly type: 'None' | 'Evm';
+/** @name MasterBlueprintServiceManagerRevision */
+export interface MasterBlueprintServiceManagerRevision extends Enum {
+  readonly isLatest: boolean;
+  readonly isSpecific: boolean;
+  readonly asSpecific: u32;
+  readonly type: 'Latest' | 'Specific';
+}
+
+/** @name MembershipModel */
+export interface MembershipModel extends Enum {
+  readonly isFixed: boolean;
+  readonly asFixed: {
+    readonly minOperators: u32;
+  } & Struct;
+  readonly isDynamic: boolean;
+  readonly asDynamic: {
+    readonly minOperators: u32;
+    readonly maxOperators: Option<u32>;
+  } & Struct;
+  readonly type: 'Fixed' | 'Dynamic';
+}
+
+/** @name MembershipModelType */
+export interface MembershipModelType extends Enum {
+  readonly isFixed: boolean;
+  readonly isDynamic: boolean;
+  readonly type: 'Fixed' | 'Dynamic';
 }
 
 /** @name NativeGadget */
@@ -152,20 +193,30 @@ export interface Service extends Struct {
   readonly id: u64;
   readonly blueprint: u64;
   readonly owner: AccountId32;
+  readonly operatorSecurityCommitments: Vec<ITuple<[AccountId32, Vec<AssetSecurityCommitment>]>>;
+  readonly securityRequirements: Vec<AssetSecurityRequirement>;
   readonly permittedCallers: Vec<AccountId32>;
-  readonly operators: Vec<AccountId32>;
   readonly ttl: u64;
+  readonly membershipModel: MembershipModel;
 }
 
 /** @name ServiceBlueprint */
 export interface ServiceBlueprint extends Struct {
   readonly metadata: ServiceMetadata;
   readonly jobs: Vec<JobDefinition>;
-  readonly registrationHook: ServiceRegistrationHook;
   readonly registrationParams: Vec<FieldFieldType>;
-  readonly requestHook: ServiceRequestHook;
   readonly requestParams: Vec<FieldFieldType>;
+  readonly manager: ServiceBlueprintServiceManager;
+  readonly masterManagerRevision: MasterBlueprintServiceManagerRevision;
   readonly gadget: Gadget;
+  readonly supportedMembershipModels: Vec<MembershipModelType>;
+}
+
+/** @name ServiceBlueprintServiceManager */
+export interface ServiceBlueprintServiceManager extends Enum {
+  readonly isEvm: boolean;
+  readonly asEvm: H160;
+  readonly type: 'Evm';
 }
 
 /** @name ServiceMetadata */
