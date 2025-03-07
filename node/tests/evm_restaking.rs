@@ -1079,11 +1079,13 @@ fn mad_rewards() {
 			None,
 			None,
 		);
+
 		let mut result = t
 			.subxt
 			.tx()
 			.sign_and_submit_then_watch_default(&deposit_call, &bob.substrate_signer())
 			.await?;
+
 		while let Some(Ok(s)) = result.next().await {
 			if let TxStatus::InBestBlock(b) = s {
 				let _evs = match b.wait_for_success().await {

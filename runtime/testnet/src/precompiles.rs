@@ -27,6 +27,7 @@ use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
+use pallet_evm_precompile_rewards::RewardsPrecompile;
 use pallet_evm_precompile_services::ServicesPrecompile;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
@@ -39,7 +40,6 @@ use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
-use pallet_evm_precompile_rewards::RewardsPrecompile;
 
 use frame_support::parameter_types;
 use precompile_utils::precompile_set::*;

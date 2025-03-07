@@ -14,18 +14,13 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
-use sp_runtime::traits::Dispatchable;
-use pallet_evm::AddressMapping;
 use fp_evm::PrecompileHandle;
+use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
+use pallet_evm::AddressMapping;
 use pallet_rewards::Config;
-use precompile_utils::{
-	prelude::*,
-	solidity::{
-		codec::Address,
-	},
-};
+use precompile_utils::{prelude::*, solidity::codec::Address};
 use sp_core::{H160, U256};
+use sp_runtime::traits::Dispatchable;
 use sp_std::marker::PhantomData;
 use tangle_primitives::services::Asset;
 
@@ -35,15 +30,18 @@ pub const SELECTOR_LOG_REWARDS_CLAIMED: [u8; 32] = keccak256!("RewardsClaimed(ad
 /// A precompile to wrap the functionality from pallet-rewards.
 pub struct RewardsPrecompile<Runtime>(PhantomData<Runtime>);
 
+type AssetIdOf<Runtime> = <Runtime as pallet_rewards::Config>::AssetId;
+
 #[precompile_utils::precompile]
 impl<Runtime> RewardsPrecompile<Runtime>
 where
 	Runtime: Config + pallet_evm::Config + pallet_rewards::Config,
-	Runtime::AccountId: From<H160> + Into<H160>,
-	<Runtime as frame_system::Config>::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime as frame_system::Config>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	<Runtime as frame_system::Config>::RuntimeCall:
+		Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	<Runtime as pallet_rewards::Config>::AssetId: From<u128>,
 	Runtime::RuntimeCall: From<pallet_rewards::Call<Runtime>>,
+	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
 {
 	#[precompile::public("claimRewards(uint256,address)")]
 	fn claim_rewards(
