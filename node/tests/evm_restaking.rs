@@ -302,7 +302,9 @@ where
 					vault_id,
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
-							apy: api::runtime_types::sp_arithmetic::per_things::Perbill(MOCK_APY),
+							apy: api::runtime_types::sp_arithmetic::per_things::Perbill(
+								MOCK_APY * 10000000,
+							), // convert percent to perbill
 							deposit_cap: MOCK_DEPOSIT_CAP,
 							incentive_cap: 1,
 							boost_multiplier: Some(1),
@@ -521,107 +523,107 @@ fn operator_join_delegator_delegate_erc20() {
 	});
 }
 
-#[test]
-fn operator_join_delegator_delegate_asset_id() {
-	run_mad_test(|t| async move {
-		let alice = TestAccount::Alice;
-		// Join operators
-		let tnt = U256::from(100_000u128);
-		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
+// #[test]
+// fn operator_join_delegator_delegate_asset_id() {
+// 	run_mad_test(|t| async move {
+// 		let alice = TestAccount::Alice;
+// 		// Join operators
+// 		let tnt = U256::from(100_000u128);
+// 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
-		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
-		assert!(maybe_operator.is_some());
-		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
+// 		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
+// 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+// 		assert!(maybe_operator.is_some());
+// 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
 
-		// Setup Bob as delegator
-		let bob = TestAccount::Bob;
-		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+// 		// Setup Bob as delegator
+// 		let bob = TestAccount::Bob;
+// 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 
-		// Mint USDC for Bob
-		let mint_amount = 100_000_000u128;
-		let mint_call = api::tx().assets().mint(
-			t.usdc_asset_id,
-			bob.address().to_account_id().into(),
-			mint_amount,
-		);
+// 		// Mint USDC for Bob
+// 		let mint_amount = 100_000_000u128;
+// 		let mint_call = api::tx().assets().mint(
+// 			t.usdc_asset_id,
+// 			bob.address().to_account_id().into(),
+// 			mint_amount,
+// 		);
 
-		info!("Minting {mint_amount} USDC for Bob");
+// 		info!("Minting {mint_amount} USDC for Bob");
 
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
-			.await?;
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				evs.find_first::<api::assets::events::Issued>()?
-					.expect("Issued event to be emitted");
-				info!("Minted {mint_amount} USDC for Bob");
-				break;
-			}
-		}
+// 		let mut result = t
+// 			.subxt
+// 			.tx()
+// 			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
+// 			.await?;
+// 		while let Some(Ok(s)) = result.next().await {
+// 			if let TxStatus::InBestBlock(b) = s {
+// 				let evs = match b.wait_for_success().await {
+// 					Ok(evs) => evs,
+// 					Err(e) => {
+// 						error!("Error: {:?}", e);
+// 						break;
+// 					},
+// 				};
+// 				evs.find_first::<api::assets::events::Issued>()?
+// 					.expect("Issued event to be emitted");
+// 				info!("Minted {mint_amount} USDC for Bob");
+// 				break;
+// 			}
+// 		}
 
-		// Delegate assets
-		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
-		let delegate_amount = mint_amount.div(2);
+// 		// Delegate assets
+// 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+// 		let delegate_amount = mint_amount.div(2);
 
-		let multiplier = 0;
-		// Deposit and delegate using asset ID
-		let deposit_result = precompile
-			.deposit(
-				U256::from(t.usdc_asset_id),
-				Address::ZERO,
-				U256::from(delegate_amount),
-				multiplier,
-			)
-			.from(bob.address())
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
-			.await?;
-		assert!(deposit_result.status());
+// 		let multiplier = 0;
+// 		// Deposit and delegate using asset ID
+// 		let deposit_result = precompile
+// 			.deposit(
+// 				U256::from(t.usdc_asset_id),
+// 				Address::ZERO,
+// 				U256::from(delegate_amount),
+// 				multiplier,
+// 			)
+// 			.from(bob.address())
+// 			.send()
+// 			.await?
+// 			.with_timeout(Some(Duration::from_secs(5)))
+// 			.get_receipt()
+// 			.await?;
+// 		assert!(deposit_result.status());
 
-		let delegate_result = precompile
-			.delegate(
-				alice.account_id().0.into(),
-				U256::from(t.usdc_asset_id),
-				Address::ZERO,
-				U256::from(delegate_amount),
-				vec![],
-			)
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
-			.await?;
-		assert!(delegate_result.status());
+// 		let delegate_result = precompile
+// 			.delegate(
+// 				alice.account_id().0.into(),
+// 				U256::from(t.usdc_asset_id),
+// 				Address::ZERO,
+// 				U256::from(delegate_amount),
+// 				vec![],
+// 			)
+// 			.send()
+// 			.await?
+// 			.with_timeout(Some(Duration::from_secs(5)))
+// 			.get_receipt()
+// 			.await?;
+// 		assert!(delegate_result.status());
 
-		// Verify state
-		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
-		assert!(maybe_operator.is_some());
-		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
-		assert_eq!(
-			maybe_operator.map(|p| p.delegations.0[0].clone()),
-			Some(DelegatorBond {
-				delegator: bob.address().to_account_id(),
-				amount: delegate_amount,
-				asset: Asset::Custom(t.usdc_asset_id),
-				__ignore: std::marker::PhantomData
-			})
-		);
+// 		// Verify state
+// 		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+// 		assert!(maybe_operator.is_some());
+// 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
+// 		assert_eq!(
+// 			maybe_operator.map(|p| p.delegations.0[0].clone()),
+// 			Some(DelegatorBond {
+// 				delegator: bob.address().to_account_id(),
+// 				amount: delegate_amount,
+// 				asset: Asset::Custom(t.usdc_asset_id),
+// 				__ignore: std::marker::PhantomData
+// 			})
+// 		);
 
-		anyhow::Ok(())
-	});
-}
+// 		anyhow::Ok(())
+// 	});
+// }
 
 #[test]
 fn deposits_withdraw_erc20() {
@@ -782,98 +784,99 @@ fn deposits_withdraw_erc20_works_with_batch() {
 	})
 }
 
-#[test]
-fn deposits_withdraw_asset_id() {
-	run_mad_test(|t| async move {
-		let alice = TestAccount::Alice;
-		// Setup Bob as delegator
-		let bob = TestAccount::Bob;
-		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+// This test is no longer relavant since we cannot mint asset-ids
+// #[test]
+// fn deposits_withdraw_asset_id() {
+// 	run_mad_test(|t| async move {
+// 		let alice = TestAccount::Alice;
+// 		// Setup Bob as delegator
+// 		let bob = TestAccount::Bob;
+// 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 
-		// Mint USDC for Bob
-		let mint_amount = U256::from(100_000_000u128);
-		let mint_call = api::tx().assets().mint(
-			t.usdc_asset_id,
-			bob.address().to_account_id().into(),
-			mint_amount.to::<u128>(),
-		);
+// 		// Mint USDC for Bob
+// 		let mint_amount = U256::from(100_000_000u128);
+// 		let mint_call = api::tx().assets().mint(
+// 			t.usdc_asset_id,
+// 			bob.address().to_account_id().into(),
+// 			mint_amount.to::<u128>(),
+// 		);
 
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
-			.await?;
+// 		let mut result = t
+// 			.subxt
+// 			.tx()
+// 			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
+// 			.await?;
 
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				evs.find_first::<api::assets::events::Issued>()?
-					.expect("Issued event to be emitted");
-				break;
-			}
-		}
+// 		while let Some(Ok(s)) = result.next().await {
+// 			if let TxStatus::InBestBlock(b) = s {
+// 				let evs = match b.wait_for_success().await {
+// 					Ok(evs) => evs,
+// 					Err(e) => {
+// 						error!("Error: {:?}", e);
+// 						break;
+// 					},
+// 				};
+// 				evs.find_first::<api::assets::events::Issued>()?
+// 					.expect("Issued event to be emitted");
+// 				break;
+// 			}
+// 		}
 
-		// Delegate assets
-		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
-		let delegate_amount = mint_amount.div(U256::from(2));
+// 		// Delegate assets
+// 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+// 		let delegate_amount = mint_amount.div(U256::from(2));
 
-		let multiplier = 0;
-		// Deposit and delegate
-		let deposit_result = precompile
-			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, delegate_amount, multiplier)
-			.from(bob.address())
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
-			.await?;
-		assert!(deposit_result.status());
+// 		let multiplier = 0;
+// 		// Deposit and delegate
+// 		let deposit_result = precompile
+// 			.deposit(U256::from(t.usdc_asset_id), Address::ZERO, delegate_amount, multiplier)
+// 			.from(bob.address())
+// 			.send()
+// 			.await?
+// 			.with_timeout(Some(Duration::from_secs(5)))
+// 			.get_receipt()
+// 			.await?;
+// 		assert!(deposit_result.status());
 
-		let withdraw_amount = delegate_amount.div(U256::from(2));
-		// Schedule a withdrawal
-		let sch_withdraw_result = precompile
-			.scheduleWithdraw(U256::from(t.usdc_asset_id), Address::ZERO, withdraw_amount)
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
-			.await?;
-		assert!(sch_withdraw_result.status());
+// 		let withdraw_amount = delegate_amount.div(U256::from(2));
+// 		// Schedule a withdrawal
+// 		let sch_withdraw_result = precompile
+// 			.scheduleWithdraw(U256::from(t.usdc_asset_id), Address::ZERO, withdraw_amount)
+// 			.send()
+// 			.await?
+// 			.with_timeout(Some(Duration::from_secs(5)))
+// 			.get_receipt()
+// 			.await?;
+// 		assert!(sch_withdraw_result.status());
 
-		// Wait for two new sessions to happen
-		let session_index = wait_for_next_session(&t.subxt).await?;
-		info!("New session started: {}", session_index);
+// 		// Wait for two new sessions to happen
+// 		let session_index = wait_for_next_session(&t.subxt).await?;
+// 		info!("New session started: {}", session_index);
 
-		// Execute the withdrawal
-		let exec_withdraw_result = precompile
-			.executeWithdraw()
-			.send()
-			.await?
-			.with_timeout(Some(Duration::from_secs(5)))
-			.get_receipt()
-			.await?;
+// 		// Execute the withdrawal
+// 		let exec_withdraw_result = precompile
+// 			.executeWithdraw()
+// 			.send()
+// 			.await?
+// 			.with_timeout(Some(Duration::from_secs(5)))
+// 			.get_receipt()
+// 			.await?;
 
-		assert!(exec_withdraw_result.status());
+// 		assert!(exec_withdraw_result.status());
 
-		// Bob deposited `delegate_amount` and withdrew `withdraw_amount`
-		// `delegate_amount` is 1/2 of the minted amount
-		// `withdraw_amount` is 1/2 of the deposited amount
-		// So, Bob should have `mint_amount - delegate_amount + withdraw_amount` USDC
-		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
-		let balance_call =
-			api::storage().assets().account(t.usdc_asset_id, bob.address().to_account_id());
-		let bob_balance = t.subxt.storage().at_latest().await?.fetch(&balance_call).await?;
-		assert_eq!(bob_balance.map(|b| b.balance), Some(expected_balance.to::<u128>()));
+// 		// Bob deposited `delegate_amount` and withdrew `withdraw_amount`
+// 		// `delegate_amount` is 1/2 of the minted amount
+// 		// `withdraw_amount` is 1/2 of the deposited amount
+// 		// So, Bob should have `mint_amount - delegate_amount + withdraw_amount` USDC
+// 		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
+// 		let balance_call =
+// 			api::storage().assets().account(t.usdc_asset_id, bob.address().to_account_id());
+// 		let bob_balance = t.subxt.storage().at_latest().await?.fetch(&balance_call).await?;
+// 		assert_eq!(bob_balance.map(|b| b.balance), Some(expected_balance.to::<u128>()));
 
-		anyhow::Ok(())
-	})
-}
+// 		anyhow::Ok(())
+// 	})
+// }
 
 #[test]
 fn lrt_deposit_withdraw_erc20() {
@@ -1029,73 +1032,75 @@ fn lrt_deposit_withdraw_erc20() {
 #[test]
 fn mad_rewards() {
 	run_mad_test(|t| async move {
+		let vault_id = 0;
+		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
+		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
+
 		let alice = TestAccount::Alice;
 		// Join operators
 		let tnt = U256::from(100_000u128);
 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
 
-		let vault_id = 0;
-		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
-		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
+		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+		assert!(maybe_operator.is_some());
+		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
 
-		// Bob as delegator
+		// Setup Bob as delegator
 		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		let usdc = MockERC20::new(t.usdc, &bob_provider);
 
 		// Mint USDC for Bob
-		let mint_amount = U256::from(MOCK_DEPOSIT * 100);
-		let mint_call = api::tx().assets().mint(
-			t.usdc_asset_id,
-			bob.address().to_account_id().into(),
-			mint_amount.to::<u128>(),
-		);
+		let mint_amount = U256::from(MOCK_DEPOSIT);
+		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
-		info!("Minting {mint_amount} USDC for Bob");
+		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, mint_amount);
 
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(&mint_call, &alice.substrate_signer())
+		// Delegate assets
+		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
+		let delegate_amount = mint_amount.div(U256::from(2));
+
+		// Deposit and delegate
+		let deposit_result = precompile
+			.deposit(U256::ZERO, *usdc.address(), delegate_amount, 0)
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
 			.await?;
+		assert!(deposit_result.status());
 
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				evs.find_first::<api::assets::events::Issued>()?
-					.expect("Issued event to be emitted");
-				info!("Minted {mint_amount} USDC for Bob");
-				break;
-			}
-		}
-
-		let deposit_call = api::tx().multi_asset_delegation().deposit(
-			Asset::Custom(t.usdc_asset_id),
-			MOCK_DEPOSIT,
-			None,
-			None,
-		);
-		let mut result = t
-			.subxt
-			.tx()
-			.sign_and_submit_then_watch_default(&deposit_call, &bob.substrate_signer())
+		let delegate_result = precompile
+			.delegate(
+				alice.account_id().0.into(),
+				U256::ZERO,
+				*usdc.address(),
+				delegate_amount,
+				vec![],
+			)
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
 			.await?;
-		while let Some(Ok(s)) = result.next().await {
-			if let TxStatus::InBestBlock(b) = s {
-				let _evs = match b.wait_for_success().await {
-					Ok(evs) => evs,
-					Err(e) => {
-						error!("Error: {:?}", e);
-						break;
-					},
-				};
-				break;
-			}
-		}
+		assert!(delegate_result.status());
+
+		// Verify state
+		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+		assert!(maybe_operator.is_some());
+		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
+		assert_eq!(
+			maybe_operator.map(|p| p.delegations.0[0].clone()),
+			Some(DelegatorBond {
+				delegator: bob.address().to_account_id(),
+				amount: delegate_amount.to::<u128>(),
+				asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
+				__ignore: std::marker::PhantomData
+			})
+		);
 
 		// Wait for one year to pass
 		wait_for_more_blocks(&t.provider, 51).await;
@@ -1103,9 +1108,10 @@ fn mad_rewards() {
 		let apy = cfg.apy;
 		info!("APY: {}%", apy.0);
 
-		let rewards_addr = api::apis()
-			.rewards_api()
-			.query_user_rewards(bob.account_id(), Asset::Custom(t.usdc_asset_id));
+		let rewards_addr = api::apis().rewards_api().query_user_rewards(
+			bob.address().to_account_id(),
+			Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
+		);
 
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {

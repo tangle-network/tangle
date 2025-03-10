@@ -141,6 +141,7 @@ pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-tangle-lst = { workspace = true }
+pallet-evm-precompile-rewards = { workspace = true }
 precompile-utils = { workspace = true }
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
@@ -307,6 +308,7 @@ std = [
     "precompile-utils/std",
     "pallet-evm-precompile-services/std",
     "pallet-evm-precompile-tangle-lst/std",
+    "pallet-evm-precompile-rewards/std",
 
     # Hyperbridge
     "pallet-hyperbridge/std",

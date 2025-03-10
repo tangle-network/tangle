@@ -85,6 +85,8 @@ pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
 pallet-transaction-payment-rpc-runtime-api = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
+pallet-ismp-runtime-api = { workspace = true }
+pallet-ismp-rpc = { workspace = true }
 
 # Frontier
 fc-api = { workspace = true }

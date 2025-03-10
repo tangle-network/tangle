@@ -107,6 +107,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::Codec;
+use frame_support::traits::fungibles::metadata::Mutate;
 use frame_support::{
 	defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
@@ -255,6 +256,7 @@ pub mod pallet {
 		/// The fungibles trait used for managing fungible assets.
 		type Fungibles: fungibles::Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
 			+ fungibles::Mutate<Self::AccountId, AssetId = Self::AssetId>
+			+ fungibles::metadata::Mutate<Self::AccountId, AssetId = Self::AssetId>
 			+ fungibles::Create<Self::AccountId>;
 
 		/// The asset ID type.
@@ -1749,14 +1751,17 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::PoolTokenCreationFailed
 		);
 
-		let admin_account = T::PalletId::get().into_account_truncating();
-		T::Fungibles::create(pool_id.into(), admin_account, false, 1_u32.into())?;
+		let admin_account: T::AccountId = T::PalletId::get().into_account_truncating();
+		T::Fungibles::create(pool_id.into(), admin_account.clone(), false, 1_u32.into())?;
+		let name_vec = name.clone().map_or_else(Vec::new, |n| n.to_vec());
+		let _ = T::Fungibles::set(pool_id.into(), &admin_account, name_vec.clone(), name_vec, 18);
 
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(
 			MaxPools::<T>::get().map_or(true, |max_pools| BondedPools::<T>::count() < max_pools),
 			Error::<T>::MaxPools
 		);
+
 		let mut bonded_pool = BondedPool::<T>::new(
 			pool_id,
 			PoolRoles {
