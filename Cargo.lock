@@ -4272,7 +4272,7 @@ dependencies = [
 [[package]]
 name = "ed448-goldilocks-plus"
 version = "0.13.2"
-source = "git+https://github.com/webb-tools/Ed448-Goldilocks#5af06c81541ed19e2456117536be66331b9fac69"
+source = "git+https://github.com/tangle-network/Ed448-Goldilocks#5af06c81541ed19e2456117536be66331b9fac69"
 dependencies = [
  "elliptic-curve",
  "rand_core",
