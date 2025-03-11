@@ -12,7 +12,7 @@ You can use the following command to pull the latest image and run from your CLI
 
 ```bash
 docker run --network="host" -v "/var/lib/data" \
-ghcr.io/webb-tools/tangle/tangle:update-docker-container \
+ghcr.io/tangle-network/tangle/tangle:update-docker-container \
 --chain tangle-testnet \
 --name="YOUR-NODE-NAME" \
 --trie-cache-size 0 \

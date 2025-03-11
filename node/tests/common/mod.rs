@@ -55,7 +55,7 @@ impl SubstrateCli for CliWrapper {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/webb-tools/tangle/issues".into()
+		"https://github.com/tangle-network/tangle/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {

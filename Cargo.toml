@@ -3,8 +3,8 @@ version = "1.2.15"
 authors = ["Tangle Foundation."]
 edition = "2021"
 license = "Unlicense"
-homepage = "https://webb.tools"
-repository = "https://github.com/webb-tools/tangle"
+homepage = "https://tangle.tools"
+repository = "https://github.com/tangle-network/tangle"
 
 exclude = ["examples"]
 
