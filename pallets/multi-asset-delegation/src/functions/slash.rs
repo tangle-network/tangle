@@ -24,6 +24,7 @@ use frame_support::{
 	},
 	weights::Weight,
 };
+use parity_scale_codec::Encode;
 use sp_runtime::{traits::CheckedSub, DispatchError};
 use tangle_primitives::services::EvmAddressMapping;
 use tangle_primitives::{
@@ -90,7 +91,7 @@ impl<T: Config> Pallet<T> {
 		unapplied_slash: &UnappliedSlash<T::AccountId>,
 		delegator: &T::AccountId,
 	) -> Result<Weight, DispatchError> {
-		let weight = T::DbWeight::get().reads(1);
+		let mut weight = T::DbWeight::get().reads(1);
 
 		Delegators::<T>::try_mutate(delegator, |maybe_metadata| -> DispatchResult {
 			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
@@ -124,17 +125,17 @@ impl<T: Config> Pallet<T> {
 
 			match delegation.asset {
 				Asset::Erc20(address) => {
-					let on_slash_call = Self::call_slash_alert(
-						&Self::pallet_evm_account(),
+					let (_, _weight) = Self::call_slash_alert(
+						Self::pallet_evm_account(),
 						address,
 						unapplied_slash.blueprint_id,
 						unapplied_slash.service_id,
-						unapplied_slash.operator,
+						unapplied_slash.operator.encode().try_into().unwrap_or_default(),
 						slash_amount,
-					);
-					let (success, _weight) =
-						on_slash_call.map_err(|_| Error::<T>::ERC20TransferFailed)?;
-					ensure!(success, Error::<T>::ERC20TransferFailed);
+						500_000,
+					)
+					.map_err(|_| Error::<T>::SlashAlertFailed)?;
+					weight += _weight;
 				},
 				Asset::Custom(_) => {
 					// No custom asset handling for now
@@ -173,7 +174,7 @@ impl<T: Config> Pallet<T> {
 		asset: Asset<T::AssetId>,
 		slash_amount: BalanceOf<T>,
 	) -> Result<Weight, DispatchError> {
-		let weight: Weight = Weight::zero();
+		let mut weight: Weight = Weight::zero();
 
 		match asset {
 			Asset::Custom(asset_id) => {
@@ -197,6 +198,8 @@ impl<T: Config> Pallet<T> {
 				)
 				.map_err(|_| Error::<T>::ERC20TransferFailed)?;
 				ensure!(success, Error::<T>::ERC20TransferFailed);
+
+				weight += _weight;
 			},
 		}
 

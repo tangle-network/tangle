@@ -203,9 +203,9 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: u64,
 		service_id: u64,
 		operator: [u8; 32],
-		slash_amount: U256,
+		slash_amount: BalanceOf<T>,
 		gas_limit: u64,
-	) -> Result<fp_evm::CallInfo, DispatchErrorWithPostInfo> {
+	) -> Result<(fp_evm::CallInfo, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		let slash_fn = Function {
 			name: String::from("onSlash"),
@@ -236,19 +236,21 @@ impl<T: Config> Pallet<T> {
 			state_mutability: StateMutability::NonPayable,
 		};
 
-		let data = slash_fn.encode_input(&[
-			Token::Uint(blueprint_id.into()),
-			Token::Uint(service_id.into()),
-			Token::FixedBytes(operator.to_vec()),
-			Token::Uint(slash_amount.into()),
-		])?;
+		let data = slash_fn
+			.encode_input(&[
+				Token::Uint(blueprint_id.into()),
+				Token::Uint(service_id.into()),
+				Token::FixedBytes(operator.to_vec()),
+				Token::Uint(slash_amount.using_encoded(U256::from_little_endian)),
+			])
+			.map_err(|_| Error::<T>::EVMAbiEncode)?;
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(slash_fn.short_signature()), slash_fn.signature());
 		let call_result = Self::evm_call(from, to, U256::zero(), data, gas_limit);
 		let info = match call_result {
 			Ok(info) => info,
 			Err(e) => {
-				log::debug!(target: "evm", "ERC20 Transfer Call failed: {:?}", e);
+				log::debug!(target: "evm", "Cross-chain ERC20 onSlash call failed: {:?}", e);
 				return Err(e);
 			},
 		};
@@ -259,7 +261,7 @@ impl<T: Config> Pallet<T> {
 		if maybe_value.is_none() {
 			return Err(Error::<T>::EVMAbiDecode.into());
 		}
-		Ok(info)
+		Ok((info, weight))
 	}
 
 	/// Convert the gas used in the call info to weight.
