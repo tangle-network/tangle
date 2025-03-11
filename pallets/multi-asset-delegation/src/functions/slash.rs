@@ -122,6 +122,25 @@ impl<T: Config> Pallet<T> {
 				Self::handle_asset_transfer(delegation.asset, slash_amount)?;
 			}
 
+			match delegation.asset {
+				Asset::Erc20(address) => {
+					let on_slash_call = Self::call_slash_alert(
+						&Self::pallet_evm_account(),
+						address,
+						unapplied_slash.blueprint_id,
+						unapplied_slash.service_id,
+						unapplied_slash.operator,
+						slash_amount,
+					);
+					let (success, _weight) =
+						on_slash_call.map_err(|_| Error::<T>::ERC20TransferFailed)?;
+					ensure!(success, Error::<T>::ERC20TransferFailed);
+				},
+				Asset::Custom(_) => {
+					// No custom asset handling for now
+				},
+			}
+
 			Self::deposit_event(Event::DelegatorSlashed {
 				delegator: delegator.clone(),
 				asset: delegation.asset,

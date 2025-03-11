@@ -197,6 +197,71 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	pub fn call_slash_alert(
+		from: H160,
+		to: H160,
+		blueprint_id: u64,
+		service_id: u64,
+		operator: [u8; 32],
+		slash_amount: U256,
+		gas_limit: u64,
+	) -> Result<fp_evm::CallInfo, DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let slash_fn = Function {
+			name: String::from("onSlash"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("blueprintId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("serviceId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("operator"),
+					kind: ethabi::ParamType::FixedBytes(32),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("slashAmount"),
+					kind: ethabi::ParamType::Uint(256),
+					internal_type: None,
+				},
+			],
+			outputs: vec![],
+			constant: None,
+			state_mutability: StateMutability::NonPayable,
+		};
+
+		let data = slash_fn.encode_input(&[
+			Token::Uint(blueprint_id.into()),
+			Token::Uint(service_id.into()),
+			Token::FixedBytes(operator.to_vec()),
+			Token::Uint(slash_amount.into()),
+		])?;
+
+		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(slash_fn.short_signature()), slash_fn.signature());
+		let call_result = Self::evm_call(from, to, U256::zero(), data, gas_limit);
+		let info = match call_result {
+			Ok(info) => info,
+			Err(e) => {
+				log::debug!(target: "evm", "ERC20 Transfer Call failed: {:?}", e);
+				return Err(e);
+			},
+		};
+		let weight = Self::weight_from_call_info(&info);
+
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		if maybe_value.is_none() {
+			return Err(Error::<T>::EVMAbiDecode.into());
+		}
+		Ok(info)
+	}
+
 	/// Convert the gas used in the call info to weight.
 	pub fn weight_from_call_info(info: &fp_evm::CallInfo) -> Weight {
 		let mut gas_to_weight = T::EvmGasWeightMapping::gas_to_weight(
