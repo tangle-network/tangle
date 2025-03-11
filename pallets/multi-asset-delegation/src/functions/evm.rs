@@ -256,11 +256,11 @@ impl<T: Config> Pallet<T> {
 		};
 		let weight = Self::weight_from_call_info(&info);
 
-		// decode the result and return it
-		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
-		if maybe_value.is_none() {
-			return Err(Error::<T>::EVMAbiDecode.into());
+		// If the call failed, that's ok - the contract may not support onSlash
+		if !info.exit_reason.is_succeed() {
+			log::debug!(target: "evm", "Contract does not support onSlash method");
 		}
+
 		Ok((info, weight))
 	}
 
