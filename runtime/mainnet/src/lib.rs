@@ -166,7 +166,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1211, // v1.2.11
+	spec_version: 1300, // v1.3.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1478,6 +1478,7 @@ pub type Executive = frame_executive::Executive<
 		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
 		migrations::slashing_enabled_03062025::EnsureSlashingNotEnabled<Runtime>,
 		migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,
+		migrations::mads_default_values_13032025::SetRewardsDefaultValues<Runtime>,
 	),
 >;
 
