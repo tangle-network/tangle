@@ -1,6 +1,6 @@
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
-use sp_runtime::{traits::Header, Perbill};
 use frame_system::pallet_prelude::BlockNumberFor;
+use sp_runtime::{traits::Header, Perbill};
 
 /// Migration to set default values for rewards pallet storage items
 pub struct SetRewardsDefaultValues<T>(sp_std::marker::PhantomData<T>);

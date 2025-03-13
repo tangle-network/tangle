@@ -68,15 +68,15 @@ impl<T: pallet_session::Config> OnRuntimeUpgrade for MigrateSessionKeys<T> {
 	/// database as needed.
 	fn on_runtime_upgrade() -> Weight {
 		log::info!(target: "runtime::session", "Running session keys migration");
-		
+
 		// Perform the key upgrade
 		Session::upgrade_keys::<OldSessionKeys, _>(transform_session_keys);
 		log::info!(target: "runtime::session", "Session keys migration complete");
-		
+
 		// Calculate and return the weight
 		T::DbWeight::get().reads_writes(100, 100)
 	}
-	
+
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
 		log::info!(target: "runtime::session", "Starting session key migration pre-upgrade checks");
