@@ -306,19 +306,19 @@ pub enum FieldType {
 impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
-			(_, FieldType::Optional(ty)) => {
-				matches!(self, Self::Optional(_, None)) || self == &**ty
+			(Self::Optional(lty, lval), FieldType::Optional(rty)) => {
+				lty == &**rty && (lval.is_none() || lval.as_ref().unwrap().eq(rty.as_ref()))
 			},
-			(Self::Bool(_), FieldType::Bool) => true,
-			(Self::Uint8(_), FieldType::Uint8) => true,
-			(Self::Int8(_), FieldType::Int8) => true,
-			(Self::Uint16(_), FieldType::Uint16) => true,
-			(Self::Int16(_), FieldType::Int16) => true,
-			(Self::Uint32(_), FieldType::Uint32) => true,
-			(Self::Int32(_), FieldType::Int32) => true,
-			(Self::Uint64(_), FieldType::Uint64) => true,
-			(Self::Int64(_), FieldType::Int64) => true,
-			(Self::String(_), FieldType::String) => true,
+			(Self::Bool(_), FieldType::Bool)
+			| (Self::Uint8(_), FieldType::Uint8)
+			| (Self::Int8(_), FieldType::Int8)
+			| (Self::Uint16(_), FieldType::Uint16)
+			| (Self::Int16(_), FieldType::Int16)
+			| (Self::Uint32(_), FieldType::Uint32)
+			| (Self::Int32(_), FieldType::Int32)
+			| (Self::Uint64(_), FieldType::Uint64)
+			| (Self::Int64(_), FieldType::Int64)
+			| (Self::String(_), FieldType::String) => true,
 			(Self::Array(lty, a), FieldType::Array(len, rty)) => {
 				lty == &**rty && a.len() == *len as usize && a.iter().all(|f| f.eq(rty.as_ref()))
 			},

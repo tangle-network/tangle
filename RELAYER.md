@@ -25,7 +25,7 @@ INTERNAL_NODE_SURI=//Alice
 mkdir -p relayer-config && touch relayer-config/example.toml
 ```
 
-> For all possible configuration, please refer to [Relayer configuration](https://github.com/webb-tools/relayer/tree/develop/config#readme)
+> For all possible configuration, please refer to [Relayer configuration](https://github.com/tangle-network/relayer/tree/develop/config#readme)
 
 4. Edit your example config file
 ```toml

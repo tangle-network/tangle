@@ -23,7 +23,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 parity-scale-codec = { workspace = true }
-ed448-goldilocks = { git = "https://github.com/webb-tools/Ed448-Goldilocks", package = "ed448-goldilocks-plus", default-features = false, features = ["zeroize"] }
+ed448-goldilocks = { git = "https://github.com/tangle-network/Ed448-Goldilocks", package = "ed448-goldilocks-plus", default-features = false, features = ["zeroize"] }
 sp-std = { workspace = true }
 tg-frost-core = { workspace = true, features = ["internals"] }
 rand_core = { workspace = true }

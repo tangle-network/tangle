@@ -492,6 +492,8 @@ pub mod pallet {
 		BlueprintNotSelected,
 		/// Erc20 transfer failed
 		ERC20TransferFailed,
+		/// Slash alert failed
+		SlashAlertFailed,
 		/// EVM encode error
 		EVMAbiEncode,
 		/// EVM decode error

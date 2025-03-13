@@ -9,7 +9,7 @@ cd "$PROJECT_ROOT"
 
 # Find the current version from Cargo.toml
 VERSION=$(grep "^version" ./node/Cargo.toml | grep -E -o "([0-9\.]+)")
-GITUSER=webb-tools
+GITUSER=tangle-network
 IMAGE_NAME=tangle
 
 # Build the image
