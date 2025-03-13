@@ -14,7 +14,7 @@ export default {
 				{
 					name: "operator",
 					type: "AccountId",
-					isHistoric: true,
+					isHistoric: false,
 					isOptional: false,
 				},
 			],
@@ -149,10 +149,7 @@ export default {
 			_enum: ["Unknown", "Linux", "Windows", "MacOS", "BSD"],
 		},
 		ImageRegistryFetcher: {
-			_alias: {
-				registry_: "registry",
-			},
-			registry_: "Bytes",
+			registry: "Bytes",
 			image: "Bytes",
 			tag: "Bytes",
 		},
@@ -203,14 +200,36 @@ export default {
 		},
 		MembershipModel: {
 			_enum: {
-				Fixed: {
-					minOperators: "u32",
-				},
-				Dynamic: {
-					minOperators: "u32",
-					maxOperators: "Option<u32>",
-				},
+				Fixed: "MembershipModelFixed",
+				Dynamic: "MembershipModelDynamic",
 			},
 		},
+		MembershipModelFixed: {
+			minOperators: "u32",
+		},
+		MembershipModelDynamic: {
+			minOperators: "u32",
+			maxOperators: "Option<u32>",
+		},
 	},
-} satisfies Definitions;
+	runtime: {
+		ServiceApi: [
+			{
+				version: 2,
+				methods: {
+					queryServicesWithBlueprintsByOperator: {
+						description:
+							"Query all the services that this operator is providing along with their blueprints.",
+						params: [
+							{
+								name: "operator",
+								type: "AccountId",
+							},
+						],
+						type: "Result<Vec<TanglePrimitivesServicesServiceRpcServicesWithBlueprint>, SpRuntimeDispatchError>",
+					},
+				},
+			},
+		],
+	},
+} as const satisfies Definitions;
