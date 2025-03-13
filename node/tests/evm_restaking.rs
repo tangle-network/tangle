@@ -50,7 +50,9 @@ sol! {
 	"tests/fixtures/TangleLiquidRestakingVault.json",
 }
 
+const TNT_ERC20: Address = address!("0000000000000000000000000000000000000802");
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
+const REWARDS: Address = address!("0000000000000000000000000000000000000823");
 const BATCH_ADDRESS: Address = address!("0000000000000000000000000000000000000804");
 
 /// Waits for a specific block number to be reached
@@ -185,11 +187,14 @@ async fn deploy_tangle_lrt(
 		operator.into(),
 		vec![],
 		MULTI_ASSET_DELEGATION,
+		REWARDS,
 		name.into(),
 		symbol.into(),
 	)
 	.await?;
 	info!("Deployed {} Tangle LRT contract at address: {}", symbol, token.address());
+	let added = token.addRewardToken(TNT_ERC20).send().await?.get_receipt().await?;
+	assert!(added.status());
 	Ok(*token.address())
 }
 
@@ -1257,10 +1262,26 @@ fn lrt_rewards_erc20() {
 		}
 
 		// Check out the rewards for Bob
-		let rewards = lrt.getClaimableRewards(bob.address(), t.weth).call().await?;
-		info!("Bob's rewards: {}", format_ether(rewards._0));
+		let rewards = lrt
+			.claimRewards(bob.address(), vec![TNT_ERC20])
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
 
-		assert!(rewards._0 > U256::from(0), "Rewards should be greater than zero");
+		assert!(rewards.status());
+		let result = rewards
+			.inner
+			.logs()
+			.iter()
+			.find_map(|log| log.log_decode::<TangleLiquidRestakingVault::RewardsClaimed>().ok())
+			.expect("RewardsClaimed event to be emitted");
+
+		info!("Bob's rewards: {}", format_ether(result.data().amount));
+
+		assert!(result.data().amount > U256::from(0), "Rewards should be greater than zero");
 
 		anyhow::Ok(())
 	});
