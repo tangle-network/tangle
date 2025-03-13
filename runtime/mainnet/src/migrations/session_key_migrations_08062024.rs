@@ -1,7 +1,9 @@
 use crate::{AccountId, Babe, Grandpa, KeyTypeId, OpaqueKeys, Session, SessionKeys};
-use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
+use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use sp_runtime::{BoundToRuntimeAppPublic, RuntimeAppPublic, RuntimeDebug};
+#[cfg(feature = "try-runtime")]
+use sp_std::vec::Vec;
 
 /// Old session keys structure.
 ///
@@ -65,7 +67,25 @@ impl<T: pallet_session::Config> OnRuntimeUpgrade for MigrateSessionKeys<T> {
 	/// new structure using the `transform_session_keys` function. It reads and writes to the
 	/// database as needed.
 	fn on_runtime_upgrade() -> Weight {
+		log::info!(target: "runtime::session", "Running session keys migration");
+
+		// Perform the key upgrade
 		Session::upgrade_keys::<OldSessionKeys, _>(transform_session_keys);
-		T::DbWeight::get().reads_writes(10, 10)
+		log::info!(target: "runtime::session", "Session keys migration complete");
+
+		// Calculate and return the weight
+		T::DbWeight::get().reads_writes(100, 100)
+	}
+
+	#[cfg(feature = "try-runtime")]
+	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+		log::info!(target: "runtime::session", "Starting session key migration pre-upgrade checks");
+		Ok(Vec::new())
+	}
+
+	#[cfg(feature = "try-runtime")]
+	fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
+		log::info!(target: "runtime::session", "Session key migration completed successfully");
+		Ok(())
 	}
 }
