@@ -263,8 +263,8 @@ where
 		// Create a new vault and these assets to it.
 		let vault_id = 0;
 		// in Manual Sealing and fast runtime, we have 1 block per sec
-		// we consider 1 year as 50 blocks, for testing purposes
-		let one_year_blocks = SECONDS_PER_BLOCK * 50;
+		// we consider 1 year as 35 blocks, for testing purposes
+		let one_year_blocks = SECONDS_PER_BLOCK * 35;
 
 		let set_apy_blocks = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
@@ -1103,7 +1103,7 @@ fn mad_rewards() {
 		);
 
 		// Wait for one year to pass
-		wait_for_more_blocks(&t.provider, 51).await;
+		wait_for_more_blocks(&t.provider, 36).await;
 
 		let apy = cfg.apy;
 		info!("APY: {}%", apy.0 / 10_000_000);
@@ -1116,7 +1116,7 @@ fn mad_rewards() {
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
 			Ok(rewards) => {
-				info!("User rewards: {} USDC", format_ether(U256::from(rewards)));
+				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
 			},
 			Err(e) => {
@@ -1132,6 +1132,10 @@ fn mad_rewards() {
 #[test]
 fn lrt_rewards_erc20() {
 	run_mad_test(|t| async move {
+		let vault_id = 0;
+		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
+		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
+
 		let alice = TestAccount::Alice;
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
@@ -1147,6 +1151,31 @@ fn lrt_rewards_erc20() {
 			"lrtETH",
 		)
 		.await?;
+
+		let transfer_tx = api::tx().balances().transfer_keep_alive(
+			subxt::utils::MultiAddress::Address32(lrt_address.to_account_id().0),
+			tnt.to::<u128>(),
+		);
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&transfer_tx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::balances::events::Transfer>()?
+					.expect("Transfer event to be emitted");
+				break;
+			}
+		}
 
 		// Bob as delegator
 		let bob = TestAccount::Bob;
@@ -1205,17 +1234,20 @@ fn lrt_rewards_erc20() {
 		);
 
 		// Wait for one year to pass
-		wait_for_more_blocks(&t.provider, 51).await;
+		wait_for_more_blocks(&t.provider, 36).await;
 
 		let rewards_addr = api::apis().rewards_api().query_user_rewards(
 			lrt_address.to_account_id(),
-			Asset::Erc20((<[u8; 20]>::from(*t.weth)).into()),
+			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
 		);
+
+		let apy = cfg.apy;
+		info!("APY: {}%", apy.0 / 10_000_000);
 
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
 			Ok(rewards) => {
-				info!("LRT rewards: {} WETH", format_ether(U256::from(rewards)));
+				info!("LRT rewards: {} TNT", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
 			},
 			Err(e) => {
