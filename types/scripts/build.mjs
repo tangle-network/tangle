@@ -1,6 +1,6 @@
 import { bundle } from "bunchee";
-import { resolve } from "path";
 import { readFile, writeFile } from "fs/promises";
+import { resolve } from "path";
 
 async function updateInterfaceProperties() {
 	const filePath = resolve("src/interfaces/types-lookup.ts");
@@ -22,8 +22,9 @@ async function main() {
 	// Update interface properties before bundling
 	await updateInterfaceProperties();
 
-	// Then proceed with bundling
-	await bundle(resolve("src/index.ts"));
+	await bundle("", {
+		clean: true,
+	});
 }
 
 main().then(
