@@ -70,8 +70,8 @@ impl<T: pallet_session::Config> OnRuntimeUpgrade for MigrateSessionKeys<T> {
 		log::info!(target: "runtime::session", "Running session keys migration");
 		
 		// Perform the key upgrade
-		let result = Session::upgrade_keys::<OldSessionKeys, _>(transform_session_keys);
-		log::info!(target: "runtime::session", "Session keys migration complete: {:?}", result);
+		Session::upgrade_keys::<OldSessionKeys, _>(transform_session_keys);
+		log::info!(target: "runtime::session", "Session keys migration complete");
 		
 		// Calculate and return the weight
 		T::DbWeight::get().reads_writes(100, 100)
