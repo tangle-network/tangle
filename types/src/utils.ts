@@ -1,51 +1,64 @@
-export function jsonrpcFromDefs(
-  definitions: Record<string, { rpc?: Record<string, any> }>,
-  jsonrpc: Record<string, Record<string, any>> = {}
-): Record<string, Record<string, any>> {
-  Object.keys(definitions)
-    .filter(key => Object.keys(definitions[key]?.rpc ?? {}).length !== 0)
-    .forEach((section): void => {
-      jsonrpc[section] = {}
-      Object.entries(definitions[section].rpc ?? {}).forEach(
-        ([method, def]): void => {
-          const isSubscription = !!def.pubsub
+import {
+	AliasDefinition,
+	DefinitionRpc,
+	DefinitionRpcSub,
+	DefinitionsTypes,
+	RegistryTypes,
+} from "@polkadot/types/types";
 
-          jsonrpc[section][method] = {
-            ...def,
-            isSubscription,
-            jsonrpc: `${section}_${method}`,
-            method,
-            section,
-          }
-        }
-      )
-    })
+export function jsonrpcFromDefs<
+	Defs extends Record<string, { rpc?: Record<string, any> }>,
+>(
+	definitions: Defs,
+	jsonrpc = {} as Record<
+		string,
+		Record<string, DefinitionRpc | DefinitionRpcSub>
+	>,
+) {
+	Object.keys(definitions)
+		.filter((key) => Object.keys(definitions[key]?.rpc ?? {}).length !== 0)
+		.forEach((section): void => {
+			jsonrpc[section] = {};
 
-  return jsonrpc
+			Object.entries(definitions[section].rpc ?? {}).forEach(
+				([method, def]): void => {
+					const isSubscription = !!def.pubsub;
+
+					jsonrpc[section][method] = {
+						...def,
+						isSubscription,
+						jsonrpc: `${section}_${method}`,
+						method,
+						section,
+					};
+				},
+			);
+		});
+
+	return jsonrpc;
 }
 
-export function typesAliasFromDefs(
-  definitions: Record<string, Record<string, any>>,
-  initAlias: Record<string, any> = {}
-): Record<string, any> {
-  return Object.values(definitions).reduce(
-    (res: Record<string, any>, { typesAlias }): Record<string, any> => ({
-      ...typesAlias,
-      ...res,
-    }),
-    initAlias
-  )
+export function typesAliasFromDefs<
+	const Defs extends Record<string, { typesAlias?: AliasDefinition }>,
+	ReturnType extends AliasDefinition,
+>(definitions: Defs, initAlias = {} as ReturnType): ReturnType {
+	return Object.values(definitions).reduce(
+		(res: ReturnType, { typesAlias }): ReturnType => ({
+			...typesAlias,
+			...res,
+		}),
+		initAlias,
+	);
 }
 
-export function typesFromDefs(
-  definitions: Record<string, { types: Record<string, any> }>,
-  initTypes: Record<string, any> = {}
-): Record<string, any> {
-  return Object.values(definitions).reduce(
-    (res: Record<string, any>, { types }): Record<string, any> => ({
-      ...res,
-      ...types,
-    }),
-    initTypes
-  )
+export function typesFromDefs<
+	Defs extends Record<string, { types: DefinitionsTypes }>,
+>(definitions: Defs, initTypes = {} as RegistryTypes) {
+	return Object.values(definitions).reduce(
+		(res, { types }) => ({
+			...res,
+			...(types as RegistryTypes),
+		}),
+		initTypes,
+	);
 }
