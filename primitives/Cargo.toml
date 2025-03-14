@@ -23,6 +23,8 @@ sp-staking = { workspace = true }
 ethabi = { workspace = true }
 fp-evm = { workspace = true }
 frame-system = { workspace = true }
+precompile-utils = { workspace = true }
+hex-literal = { workspace = true }
 impl-trait-for-tuples = "0.2.2"
 
 # Arkworks
@@ -75,6 +77,7 @@ std = [
   "sp-staking/std",
   "fp-evm/std",
   "frame-system/std",
+  "precompile-utils/std"
 ]
 verifying = [
   "ark-crypto-primitives",

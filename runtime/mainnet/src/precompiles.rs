@@ -28,9 +28,12 @@ use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile;
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
+use pallet_evm_precompile_rewards::RewardsPrecompile;
+use pallet_evm_precompile_services::ServicesPrecompile;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
 use pallet_evm_precompile_staking::StakingPrecompile;
+use pallet_evm_precompile_tangle_lst::TangleLstPrecompile;
 use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
@@ -38,11 +41,8 @@ use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
-use precompile_utils::precompile_set::{
-	AcceptDelegateCall, AddressU64, CallableByContract, CallableByPrecompile, OnlyFrom,
-	PrecompileAt, PrecompileSetBuilder, PrecompileSetStartingWith, PrecompilesInRangeInclusive,
-	SubcallWithMaxNesting,
-};
+use precompile_utils::precompile_set::*;
+use tangle_primitives::precompiles::*;
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
 
 pub struct NativeErc20Metadata;
@@ -98,121 +98,152 @@ pub type TanglePrecompilesAt<R> = (
 	PrecompileAt<AddressU64<1028>, Curve25519ScalarMul, (CallableByContract, CallableByPrecompile)>,
 	PrecompileAt<AddressU64<1029>, Ed25519Verify, (CallableByContract, CallableByPrecompile)>,
 	// Tangle precompiles
+	// Address: 0x0000000000000000000000000000000000000800 - PRECOMPILE_STAKING (2048)
 	PrecompileAt<
 		AddressU64<2048>,
 		StakingPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	// Address: 0x0000000000000000000000000000000000000801 - PRECOMPILE_VESTING (2049)
 	PrecompileAt<
 		AddressU64<2049>,
 		VestingPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	// Address: 0x0000000000000000000000000000000000000802 - PRECOMPILE_ERC20_BALANCES (2050)
 	PrecompileAt<
 		AddressU64<2050>,
 		Erc20BalancesPrecompile<R, NativeErc20Metadata>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	// Address: 0x0000000000000000000000000000000000000803 - PRECOMPILE_DEMOCRACY (2051)
 	PrecompileAt<
-		AddressU64<2051>,
+		AddressU64<{ PRECOMPILE_DEMOCRACY }>,
 		DemocracyPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	// Address: 0x0000000000000000000000000000000000000804 - PRECOMPILE_BATCH (2052)
 	PrecompileAt<
-		AddressU64<2052>,
+		AddressU64<{ PRECOMPILE_BATCH }>,
 		BatchPrecompile<R>,
 		(
 			SubcallWithMaxNesting<2>,
 			// Batch is the only precompile allowed to call Batch.
-			CallableByPrecompile<OnlyFrom<AddressU64<2052>>>,
+			CallableByPrecompile<OnlyFrom<AddressU64<{ PRECOMPILE_BATCH }>>>,
 		),
 	>,
+	// Address: 0x0000000000000000000000000000000000000805 - PRECOMPILE_CALL_PERMIT (2053)
 	PrecompileAt<
-		AddressU64<2053>,
+		AddressU64<{ PRECOMPILE_CALL_PERMIT }>,
 		CallPermitPrecompile<R>,
 		(SubcallWithMaxNesting<0>, CallableByContract),
 	>,
+	// Address: 0x0000000000000000000000000000000000000806 - PRECOMPILE_PREIMAGE (2054)
 	PrecompileAt<
-		AddressU64<2054>,
+		AddressU64<{ PRECOMPILE_PREIMAGE }>,
 		PreimagePrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
+	// Address: 0x0000000000000000000000000000000000000807 - PRECOMPILE_REGISTRY (2055)
 	PrecompileAt<
-		AddressU64<2055>,
+		AddressU64<{ PRECOMPILE_REGISTRY }>,
 		PrecompileRegistry<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Ecdsa-Secp256k1 signature verifier precompile
+	// Address: 0x0000000000000000000000000000000000000816 - PRECOMPILE_ECDSA_SECP256K1 (2070)
 	PrecompileAt<
-		AddressU64<2070>,
+		AddressU64<{ PRECOMPILE_ECDSA_SECP256K1 }>,
 		EcdsaSecp256k1Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Ecdsa-Secp256r1 signature verifier precompile
+	// Address: 0x0000000000000000000000000000000000000817 - PRECOMPILE_ECDSA_SECP256R1 (2071)
 	PrecompileAt<
-		AddressU64<2071>,
+		AddressU64<{ PRECOMPILE_ECDSA_SECP256R1 }>,
 		EcdsaSecp256r1Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Ecdsa-Stark signature verifier precompile
+	// Address: 0x0000000000000000000000000000000000000818 - PRECOMPILE_ECDSA_STARK (2072)
 	PrecompileAt<
-		AddressU64<2072>,
+		AddressU64<{ PRECOMPILE_ECDSA_STARK }>,
 		EcdsaStarkPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-Sr25519 signature verifier precompile
+	// Address: 0x0000000000000000000000000000000000000819 - PRECOMPILE_SCHNORR_SR25519 (2073)
 	PrecompileAt<
-		AddressU64<2073>,
+		AddressU64<{ PRECOMPILE_SCHNORR_SR25519 }>,
 		SchnorrSr25519Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-Secp256k1 signature verifier precompile
+	// Address: 0x000000000000000000000000000000000000081a - PRECOMPILE_SCHNORR_SECP256K1 (2074)
 	PrecompileAt<
-		AddressU64<2074>,
+		AddressU64<{ PRECOMPILE_SCHNORR_SECP256K1 }>,
 		SchnorrSecp256k1Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-Ed25519 signature verifier precompile
+	// Address: 0x000000000000000000000000000000000000081b - PRECOMPILE_SCHNORR_ED25519 (2075)
 	PrecompileAt<
-		AddressU64<2075>,
+		AddressU64<{ PRECOMPILE_SCHNORR_ED25519 }>,
 		SchnorrEd25519Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-Ed448 signature verifier precompile
+	// Address: 0x000000000000000000000000000000000000081c - PRECOMPILE_SCHNORR_ED448 (2076)
 	PrecompileAt<
-		AddressU64<2076>,
+		AddressU64<{ PRECOMPILE_SCHNORR_ED448 }>,
 		SchnorrEd448Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-P256 signature verifier precompile
+	// Address: 0x000000000000000000000000000000000000081d - PRECOMPILE_SCHNORR_P256 (2077)
 	PrecompileAt<
-		AddressU64<2077>,
+		AddressU64<{ PRECOMPILE_SCHNORR_P256 }>,
 		SchnorrP256Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-P384 signature verifier precompile
+	// Address: 0x000000000000000000000000000000000000081e - PRECOMPILE_SCHNORR_P384 (2078)
 	PrecompileAt<
-		AddressU64<2078>,
+		AddressU64<{ PRECOMPILE_SCHNORR_P384 }>,
 		SchnorrP384Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-Ristretto255 signature verifier precompile
+	// Address: 0x000000000000000000000000000000000000081f - PRECOMPILE_SCHNORR_RISTRETTO255 (2079)
 	PrecompileAt<
-		AddressU64<2079>,
+		AddressU64<{ PRECOMPILE_SCHNORR_RISTRETTO255 }>,
 		SchnorrRistretto255Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Schnorr-Taproot signature verifier precompile
+	// Address: 0x0000000000000000000000000000000000000820 - PRECOMPILE_SCHNORR_TAPROOT (2080)
 	PrecompileAt<
-		AddressU64<2080>,
+		AddressU64<{ PRECOMPILE_SCHNORR_TAPROOT }>,
 		SchnorrTaprootPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	PrecompileAt<AddressU64<2081>, Bls381Precompile<R>, (CallableByContract, CallableByPrecompile)>,
-	// MultiAsset Delegation precompile
+	// Address: 0x0000000000000000000000000000000000000821 - PRECOMPILE_BLS381 (2081)
 	PrecompileAt<
-		AddressU64<2082>,
+		AddressU64<{ PRECOMPILE_BLS381 }>,
+		Bls381Precompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Address: 0x0000000000000000000000000000000000000822
+	PrecompileAt<
+		AddressU64<{ PRECOMPILE_MULTI_ASSET_DELEGATION }>,
 		MultiAssetDelegationPrecompile<R>,
+		(CallableByContract, CallableByPrecompile, SubcallWithMaxNesting<1>),
+	>,
+	// Address: 0x0000000000000000000000000000000000000823
+	PrecompileAt<
+		AddressU64<{ PRECOMPILE_SERVICES }>,
+		ServicesPrecompile<R>,
+		(CallableByContract, CallableByPrecompile, SubcallWithMaxNesting<1>),
+	>,
+	// Address: 0x0000000000000000000000000000000000000824
+	PrecompileAt<
+		AddressU64<{ PRECOMPILE_TANGLE_LST }>,
+		TangleLstPrecompile<R>,
+		(CallableByContract, CallableByPrecompile),
+	>,
+	// Address: 0x0000000000000000000000000000000000000825
+	PrecompileAt<
+		AddressU64<{ PRECOMPILE_REWARDS }>,
+		RewardsPrecompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
 );

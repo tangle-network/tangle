@@ -35,6 +35,7 @@ pub mod impls;
 pub mod services;
 pub mod types;
 pub use types::*;
+pub mod precompiles;
 pub mod traits;
 
 #[cfg(feature = "verifying")]
