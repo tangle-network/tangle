@@ -433,7 +433,7 @@ pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
 		min_inflation: 0_015_000, // min inflation of 1.5%
 		max_inflation: 0_025_000, // max inflation of 2.5% (acheived only at ideal stake)
-		ideal_stake: 0_600_000, // ideal stake (60% of total supply)
+		ideal_stake: 0_800_000, // ideal stake (80% of total supply)
 		falloff: 0_050_000,
 		max_piece_count: 40,
 		test_precision: 0_005_000,
