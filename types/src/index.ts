@@ -9,7 +9,6 @@ import "./interfaces/types-lookup";
 import type {
 	OverrideBundleDefinition,
 	OverrideBundleType,
-	RegistryTypes,
 } from "@polkadot/types/types";
 
 import * as tangleDefs from "./interfaces/definitions";

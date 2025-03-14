@@ -1,10 +1,10 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+import { TanglePrimitivesServicesFieldFieldType } from '@polkadot/types/lookup';
 import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, Percent } from '@polkadot/types/interfaces/runtime';
-import { TanglePrimitivesServicesFieldFieldType } from '@polkadot/types/lookup';
 
 /** @name Architecture */
 export interface Architecture extends Enum {
