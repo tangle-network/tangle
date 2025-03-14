@@ -4,6 +4,7 @@
 import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, Percent } from '@polkadot/types/interfaces/runtime';
+import { TanglePrimitivesServicesFieldFieldType } from '@polkadot/types/lookup';
 
 /** @name Architecture */
 export interface Architecture extends Enum {
@@ -45,31 +46,6 @@ export interface AssetSecurityRequirement extends Struct {
 /** @name ContainerGadget */
 export interface ContainerGadget extends Struct {
   readonly sources: Vec<GadgetSource>;
-}
-
-/** @name FieldFieldType */
-export interface FieldFieldType extends Enum {
-  readonly isVoid: boolean;
-  readonly isBool: boolean;
-  readonly isUint8: boolean;
-  readonly isInt8: boolean;
-  readonly isUint16: boolean;
-  readonly isInt16: boolean;
-  readonly isUint32: boolean;
-  readonly isInt32: boolean;
-  readonly isUint64: boolean;
-  readonly isInt64: boolean;
-  readonly isText: boolean;
-  readonly isOptional: boolean;
-  readonly asOptional: FieldFieldType;
-  readonly isArray: boolean;
-  readonly asArray: ITuple<[u64, FieldFieldType]>;
-  readonly isList: boolean;
-  readonly asList: FieldFieldType;
-  readonly isStruct: boolean;
-  readonly asStruct: Vec<FieldFieldType>;
-  readonly isAccountId: boolean;
-  readonly type: 'Void' | 'Bool' | 'Uint8' | 'Int8' | 'Uint16' | 'Int16' | 'Uint32' | 'Int32' | 'Uint64' | 'Int64' | 'Text' | 'Optional' | 'Array' | 'List' | 'Struct' | 'AccountId';
 }
 
 /** @name Gadget */
@@ -127,8 +103,8 @@ export interface ImageRegistryFetcher extends Struct {
 /** @name JobDefinition */
 export interface JobDefinition extends Struct {
   readonly metadata: JobMetadata;
-  readonly params: Vec<FieldFieldType>;
-  readonly result: Vec<FieldFieldType>;
+  readonly params: Vec<TanglePrimitivesServicesFieldFieldType>;
+  readonly result: Vec<TanglePrimitivesServicesFieldFieldType>;
 }
 
 /** @name JobMetadata */
@@ -148,15 +124,21 @@ export interface MasterBlueprintServiceManagerRevision extends Enum {
 /** @name MembershipModel */
 export interface MembershipModel extends Enum {
   readonly isFixed: boolean;
-  readonly asFixed: {
-    readonly minOperators: u32;
-  } & Struct;
+  readonly asFixed: MembershipModelFixed;
   readonly isDynamic: boolean;
-  readonly asDynamic: {
-    readonly minOperators: u32;
-    readonly maxOperators: Option<u32>;
-  } & Struct;
+  readonly asDynamic: MembershipModelDynamic;
   readonly type: 'Fixed' | 'Dynamic';
+}
+
+/** @name MembershipModelDynamic */
+export interface MembershipModelDynamic extends Struct {
+  readonly minOperators: u32;
+  readonly maxOperators: Option<u32>;
+}
+
+/** @name MembershipModelFixed */
+export interface MembershipModelFixed extends Struct {
+  readonly minOperators: u32;
 }
 
 /** @name MembershipModelType */
@@ -204,8 +186,8 @@ export interface Service extends Struct {
 export interface ServiceBlueprint extends Struct {
   readonly metadata: ServiceMetadata;
   readonly jobs: Vec<JobDefinition>;
-  readonly registrationParams: Vec<FieldFieldType>;
-  readonly requestParams: Vec<FieldFieldType>;
+  readonly registrationParams: Vec<TanglePrimitivesServicesFieldFieldType>;
+  readonly requestParams: Vec<TanglePrimitivesServicesFieldFieldType>;
   readonly manager: ServiceBlueprintServiceManager;
   readonly masterManagerRevision: MasterBlueprintServiceManagerRevision;
   readonly gadget: Gadget;
@@ -229,22 +211,6 @@ export interface ServiceMetadata extends Struct {
   readonly logo: Option<Bytes>;
   readonly website: Option<Bytes>;
   readonly license: Option<Bytes>;
-}
-
-/** @name ServiceRegistrationHook */
-export interface ServiceRegistrationHook extends Enum {
-  readonly isNone: boolean;
-  readonly isEvm: boolean;
-  readonly asEvm: H160;
-  readonly type: 'None' | 'Evm';
-}
-
-/** @name ServiceRequestHook */
-export interface ServiceRequestHook extends Enum {
-  readonly isNone: boolean;
-  readonly isEvm: boolean;
-  readonly asEvm: H160;
-  readonly type: 'None' | 'Evm';
 }
 
 /** @name TestFetcher */

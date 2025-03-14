@@ -30,8 +30,8 @@ export default {
 		ServiceBlueprint: {
 			metadata: "ServiceMetadata",
 			jobs: "Vec<JobDefinition>",
-			registrationParams: "Vec<FieldFieldType>",
-			requestParams: "Vec<FieldFieldType>",
+			registrationParams: "Vec<TanglePrimitivesServicesFieldFieldType>",
+			requestParams: "Vec<TanglePrimitivesServicesFieldFieldType>",
 			manager: "ServiceBlueprintServiceManager",
 			masterManagerRevision: "MasterBlueprintServiceManagerRevision",
 			gadget: "Gadget",
@@ -49,44 +49,12 @@ export default {
 		},
 		JobDefinition: {
 			metadata: "JobMetadata",
-			params: "Vec<FieldFieldType>",
-			result: "Vec<FieldFieldType>",
+			params: "Vec<TanglePrimitivesServicesFieldFieldType>",
+			result: "Vec<TanglePrimitivesServicesFieldFieldType>",
 		},
 		JobMetadata: {
 			name: "Bytes",
 			description: "Option<Bytes>",
-		},
-		FieldFieldType: {
-			_enum: {
-				Void: "Null",
-				Bool: "Null",
-				Uint8: "Null",
-				Int8: "Null",
-				Uint16: "Null",
-				Int16: "Null",
-				Uint32: "Null",
-				Int32: "Null",
-				Uint64: "Null",
-				Int64: "Null",
-				String: "Null",
-				Optional: "FieldFieldType",
-				Array: "(u64,FieldFieldType)",
-				List: "FieldFieldType",
-				Struct: "Vec<FieldFieldType>",
-				AccountId: "Null",
-			},
-		},
-		ServiceRegistrationHook: {
-			_enum: {
-				None: "Null",
-				Evm: "H160",
-			},
-		},
-		ServiceRequestHook: {
-			_enum: {
-				None: "Null",
-				Evm: "H160",
-			},
 		},
 		Gadget: {
 			_enum: {
@@ -149,7 +117,10 @@ export default {
 			_enum: ["Unknown", "Linux", "Windows", "MacOS", "BSD"],
 		},
 		ImageRegistryFetcher: {
-			registry: "Bytes",
+			_alias: {
+				registry_: "registry",
+			},
+			registry_: "Bytes",
 			image: "Bytes",
 			tag: "Bytes",
 		},
@@ -213,7 +184,7 @@ export default {
 		},
 	},
 	runtime: {
-		ServiceApi: [
+		serviceApi: [
 			{
 				version: 2,
 				methods: {

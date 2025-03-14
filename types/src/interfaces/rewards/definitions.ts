@@ -8,7 +8,7 @@ export default {
 	rpc: {
 		queryUserRewards: {
 			description: "Query the reward for a user for a specific asset",
-			type: "RpcResult<Balance>",
+			type: "Result<Balance, ErrorObjectOwned>",
 			params: [
 				{
 					name: "operator",
@@ -32,15 +32,36 @@ export default {
 				Erc20: "H160",
 			},
 		},
+		ErrorObjectOwned: {
+			code: "ErrorCode",
+			message: "String",
+			data: "Option<RawValue>",
+		},
+		ErrorCode: {
+			_enum: {
+				ParseError: "Null",
+				OversizedRequest: "Null",
+				InvalidRequest: "Null",
+				MethodNotFound: "Null",
+				ServerIsBusy: "Null",
+				InvalidParams: "Null",
+				InternalError: "Null",
+				ServerError: "u32",
+			},
+		},
+		RawValue: {
+			json: "String",
+		},
 	},
 	runtime: {
-		RewardsApi: [
+		rewardsApi: [
 			{
 				version: 2,
 				methods: {
 					queryUserRewards: {
 						description:
 							"Query the reward for a user for a specific asset",
+						type: "Result<u128, SpRuntimeDispatchError>",
 						params: [
 							{
 								name: "operator",
@@ -51,7 +72,6 @@ export default {
 								type: "ServicesTypesAsset",
 							},
 						],
-						type: "RpcResult<Balance>",
 					},
 				},
 			},

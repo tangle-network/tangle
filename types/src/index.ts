@@ -9,10 +9,11 @@ import "./interfaces/types-lookup";
 import type {
 	OverrideBundleDefinition,
 	OverrideBundleType,
+	RegistryTypes,
 } from "@polkadot/types/types";
 
 import * as tangleDefs from "./interfaces/definitions";
-import { jsonrpcFromDefs, typesAliasFromDefs, typesFromDefs } from "./utils";
+import { jsonrpcFromDefs, typesFromDefs } from "./utils";
 
 export * as tangleLookupTypes from "./interfaces/lookup";
 

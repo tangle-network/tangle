@@ -2,7 +2,7 @@ import {
 	AliasDefinition,
 	DefinitionRpc,
 	DefinitionRpcSub,
-	DefinitionType,
+	DefinitionsTypes,
 	RegistryTypes,
 } from "@polkadot/types/types";
 
@@ -52,12 +52,12 @@ export function typesAliasFromDefs<
 }
 
 export function typesFromDefs<
-	Defs extends Record<string, { types: RegistryTypes }>,
+	Defs extends Record<string, { types: DefinitionsTypes }>,
 >(definitions: Defs, initTypes = {} as RegistryTypes) {
 	return Object.values(definitions).reduce(
 		(res, { types }) => ({
 			...res,
-			...types,
+			...(types as RegistryTypes),
 		}),
 		initTypes,
 	);

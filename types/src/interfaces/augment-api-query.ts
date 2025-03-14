@@ -1289,6 +1289,10 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       serviceStatus: AugmentedQuery<ApiType, (arg1: u64 | AnyNumber | Uint8Array, arg2: u64 | AnyNumber | Uint8Array) => Observable<Option<Null>>, [u64, u64]> & QueryableStorageEntry<ApiType, [u64, u64]>;
       /**
+       * Slashing is enabled.
+       **/
+      slashingEnabled: AugmentedQuery<ApiType, () => Observable<bool>, []> & QueryableStorageEntry<ApiType, []>;
+      /**
        * Holds the service payment information for a service request.
        * Once the service is initiated, the payment is transferred to the MBSM and this
        * information is removed.
