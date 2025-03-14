@@ -184,9 +184,9 @@ export default {
 		},
 	},
 	runtime: {
-		serviceApi: [
+		ServicesApi: [
 			{
-				version: 2,
+				version: 1,
 				methods: {
 					queryServicesWithBlueprintsByOperator: {
 						description:
@@ -197,7 +197,7 @@ export default {
 								type: "AccountId",
 							},
 						],
-						type: "Result<Vec<TanglePrimitivesServicesServiceRpcServicesWithBlueprint>, SpRuntimeDispatchError>",
+						type: "Result<Vec<RpcServicesWithBlueprint>, SpRuntimeDispatchError>",
 					},
 				},
 			},
