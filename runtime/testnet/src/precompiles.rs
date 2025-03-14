@@ -42,7 +42,7 @@ use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
 use precompile_utils::precompile_set::*;
-use tangle_primitives::precompiles::*;
+use tangle_primitives::precompiles_constants::*;
 type EthereumPrecompilesChecks = (AcceptDelegateCall, CallableByContract, CallableByPrecompile);
 
 pub struct NativeErc20Metadata;

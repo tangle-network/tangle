@@ -35,7 +35,7 @@ pub mod impls;
 pub mod services;
 pub mod types;
 pub use types::*;
-pub mod precompiles;
+pub mod precompiles_constants;
 pub mod traits;
 
 #[cfg(feature = "verifying")]
@@ -189,7 +189,7 @@ pub mod evm {
 				}
 			}
 
-			fn is_governance_precompile(precompile_name: &precompiles::PrecompileName) -> bool {
+			fn is_governance_precompile(precompile_name: &crate::precompiles::PrecompileName) -> bool {
 				matches!(
 					precompile_name,
 					PrecompileName::DemocracyPrecompile | PrecompileName::PreimagePrecompile
