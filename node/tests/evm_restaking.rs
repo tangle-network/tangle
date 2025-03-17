@@ -1312,6 +1312,8 @@ fn lrt_rewards_erc20() {
 			},
 		};
 
+		assert!(rewards_amount > 0);
+
 		// set bob balance to ED so that we dont overflow
 		let bob_balance_setx = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
@@ -1342,17 +1344,6 @@ fn lrt_rewards_erc20() {
 			}
 		}
 
-		// Check the balance of bob account
-		let bob_balance_addr = api::storage().system().account(bob.address().to_account_id());
-		let bob_balance = t
-			.subxt
-			.storage()
-			.at_latest()
-			.await?
-			.fetch(&bob_balance_addr)
-			.await?
-			.expect("Failed to fetch balance");
-		let bob_original_balance = bob_balance.data.free;
 		// Check out the rewards for Bob
 		let rewards = lrt
 			.claimRewards(bob.address(), vec![TNT_ERC20])
