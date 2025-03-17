@@ -1142,6 +1142,57 @@ fn lrt_rewards_erc20() {
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
 
 		let alice = TestAccount::Alice;
+		let vault_account_addr = api::storage().rewards().reward_vaults_pot_account(vault_id);
+		let vault_pot_account =
+			t.subxt.storage().at_latest().await?.fetch(&vault_account_addr).await?;
+		assert!(vault_pot_account.is_some());
+		let vault_pot_account_wrapper =
+			subxt::utils::MultiAddress::Id(vault_pot_account.clone().unwrap());
+
+		let add_funds_tx = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
+				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
+					who: vault_pot_account_wrapper,
+					new_free: MOCK_DEPOSIT_CAP,
+				},
+			),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&add_funds_tx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				let result = evs
+					.find_first::<api::sudo::events::Sudid>()?
+					.expect("Sudo event to be emitted");
+				info!("Added funds to the vault pot account result: {:?}", result);
+				break;
+			}
+		}
+
+		// Check the balance of the vault pot account
+		let vault_pot_balance =
+			api::storage().system().account(vault_pot_account.as_ref().unwrap());
+		let vault_pot_balance =
+			t.subxt.storage().at_latest().await?.fetch(&vault_pot_balance).await?;
+		assert!(vault_pot_balance.is_some());
+
+		let vault_pot_balance = vault_pot_balance.unwrap();
+		assert!(
+			vault_pot_balance.data.free > 0,
+			"Vault pot account should have a positive balance"
+		);
 		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
 		// Join operators
 		let tnt = U256::from(100_000u128);
@@ -1240,11 +1291,6 @@ fn lrt_rewards_erc20() {
 
 		wait_for_more_blocks(&t.provider, 2).await;
 
-		let vault_account_addr = api::storage().rewards().reward_vaults_pot_account(vault_id);
-		let vault_pot_account =
-			t.subxt.storage().at_latest().await?.fetch(&vault_account_addr).await?;
-		assert!(vault_pot_account.is_some());
-
 		let rewards_addr = api::apis().rewards_api().query_user_rewards(
 			lrt_address.to_account_id(),
 			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
@@ -1266,21 +1312,12 @@ fn lrt_rewards_erc20() {
 			},
 		};
 
-		info!(
-			"Adding funds to the vault pot account: {}",
-			vault_pot_account.as_ref().map(|a| a.to_string()).unwrap(),
-		);
-
-		let to_be_sent_to_bot = rewards_amount * 2;
-		// Sanity check
-		let vault_pot_account_wrapper =
-			subxt::utils::MultiAddress::Id(vault_pot_account.clone().unwrap());
-
-		let add_funds_tx = api::tx().sudo().sudo(
+		// set bob balance to ED so that we dont overflow
+		let bob_balance_setx = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
 				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
-					who: vault_pot_account_wrapper,
-					new_free: to_be_sent_to_bot,
+					who: subxt::utils::MultiAddress::Id(bob.address().to_account_id()),
+					new_free: EIGHTEEN_DECIMALS,
 				},
 			),
 		);
@@ -1288,7 +1325,7 @@ fn lrt_rewards_erc20() {
 		let mut result = t
 			.subxt
 			.tx()
-			.sign_and_submit_then_watch_default(&add_funds_tx, &alice.substrate_signer())
+			.sign_and_submit_then_watch_default(&bob_balance_setx, &alice.substrate_signer())
 			.await?;
 
 		while let Some(Ok(s)) = result.next().await {
@@ -1300,31 +1337,22 @@ fn lrt_rewards_erc20() {
 						break;
 					},
 				};
-				let result = evs
-					.find_first::<api::sudo::events::Sudid>()?
-					.expect("Sudo event to be emitted");
-				info!("Added funds to the vault pot account result: {:?}", result);
+				evs.find_first::<api::sudo::events::Sudid>()?.expect("Sudo event to be emitted");
 				break;
 			}
 		}
 
-		// Check the balance of the vault pot account
-		let vault_pot_balance =
-			api::storage().system().account(vault_pot_account.as_ref().unwrap());
-		let vault_pot_balance =
-			t.subxt.storage().at_latest().await?.fetch(&vault_pot_balance).await?;
-		assert!(vault_pot_balance.is_some());
-
-		let vault_pot_balance = vault_pot_balance.unwrap();
-		assert!(
-			vault_pot_balance.data.free > 0,
-			"Vault pot account should have a positive balance"
-		);
-		assert!(
-			vault_pot_balance.data.free >= to_be_sent_to_bot,
-			"Vault pot account should have at least the amount to be sent"
-		);
-
+		// Check the balance of bob account
+		let bob_balance_addr = api::storage().system().account(bob.address().to_account_id());
+		let bob_balance = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_balance_addr)
+			.await?
+			.expect("Failed to fetch balance");
+		let bob_original_balance = bob_balance.data.free;
 		// Check out the rewards for Bob
 		let rewards = lrt
 			.claimRewards(bob.address(), vec![TNT_ERC20])
@@ -1344,7 +1372,6 @@ fn lrt_rewards_erc20() {
 			.expect("RewardsClaimed event to be emitted");
 
 		info!("Bob's rewards: {}", format_ether(result.data().amount));
-
 		assert!(result.data().amount > U256::from(0), "Rewards should be greater than zero");
 
 		anyhow::Ok(())
