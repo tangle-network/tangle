@@ -1381,7 +1381,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	pallet_multi_asset_delegation::migrations::DelegatorMetadataMigration<Runtime>,
+	(),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {

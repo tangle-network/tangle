@@ -111,12 +111,20 @@ impl<T: Config> Pallet<T> {
 			RewardVaultsPotAccount::<T>::get(vault_id).ok_or(Error::<T>::PotAccountNotFound)?;
 
 		// Transfer rewards from the pot account to the user
+		let funds_in_pot = T::Currency::free_balance(&pot_account);
+		log::debug!(target: LOG_TARGET, "funds_in_pot: {:?}", funds_in_pot.saturated_into::<u128>());
+
+		let balance_of_account = T::Currency::free_balance(account_id);
+		log::debug!(target: LOG_TARGET, "balance_of_account: {:?}", balance_of_account.saturated_into::<u128>());
+
 		T::Currency::transfer(
 			&pot_account,
 			account_id,
 			rewards_to_be_paid,
 			frame_support::traits::ExistenceRequirement::AllowDeath,
 		)?;
+
+		log::debug!(target: LOG_TARGET, "balance_of_account_after_transfer: {:?}", T::Currency::free_balance(account_id).saturated_into::<u128>());
 
 		// update the last claim
 		UserClaimedReward::<T>::try_mutate(

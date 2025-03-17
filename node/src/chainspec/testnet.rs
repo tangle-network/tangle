@@ -46,7 +46,7 @@ use tangle_testnet_runtime::{
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec;
 
-pub const ENDOWMENT: Balance = 10_000_000 * UNIT;
+pub const ENDOWMENT: Balance = 1000 * UNIT;
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
