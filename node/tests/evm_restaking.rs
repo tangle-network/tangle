@@ -1238,18 +1238,17 @@ fn mad_rewards() {
 		let user_rewards =
 			t.subxt.runtime_api().at_latest().await?.call(rewards_addr.clone()).await?;
 
-		let mut original_user_rewards = 0;
-		match user_rewards {
+		let original_user_rewards = match user_rewards {
 			Ok(rewards) => {
 				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
-				original_user_rewards = rewards;
+				rewards
 			},
 			Err(e) => {
 				error!("Error: {:?}", e);
 				bail!("Error while fetching user rewards");
 			},
-		}
+		};
 
 		info!("Original user rewards: {}", format_ether(U256::from(original_user_rewards)));
 
