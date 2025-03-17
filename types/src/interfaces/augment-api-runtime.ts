@@ -19,11 +19,13 @@ import type { GenesisBuildErr } from '@polkadot/types/interfaces/genesisBuilder'
 import type { AuthorityList, GrandpaEquivocationProof, SetId } from '@polkadot/types/interfaces/grandpa';
 import type { OpaqueMetadata } from '@polkadot/types/interfaces/metadata';
 import type { FeeDetails, RuntimeDispatchInfo } from '@polkadot/types/interfaces/payment';
-import type { AccountId, Balance, Block, ExtrinsicInclusionMode, H160, H256, Header, Index, KeyTypeId, Permill, Slot, Weight } from '@polkadot/types/interfaces/runtime';
+import type { AccountId, AssetId, Balance, Block, ExtrinsicInclusionMode, H160, H256, Header, Index, KeyTypeId, Permill, Slot, Weight } from '@polkadot/types/interfaces/runtime';
 import type { RuntimeVersion } from '@polkadot/types/interfaces/state';
 import type { ApplyExtrinsicResult, DispatchError } from '@polkadot/types/interfaces/system';
 import type { TransactionSource, TransactionValidity } from '@polkadot/types/interfaces/txqueue';
+import type { SpRuntimeDispatchError } from '@polkadot/types/lookup';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
+import type { RpcServicesWithBlueprint } from '@tangle-network/tangle-substrate-types/services';
 
 export type __AugmentedCall<ApiType extends ApiTypes> = AugmentedCall<ApiType>;
 export type __DecoratedCallBase<ApiType extends ApiTypes> = DecoratedCallBase<ApiType>;
@@ -251,6 +253,28 @@ declare module '@polkadot/api-base/types/calls' {
        * Starts the off-chain task for given block header.
        **/
       offchainWorker: AugmentedCall<ApiType, (header: Header | { parentHash?: any; number?: any; stateRoot?: any; extrinsicsRoot?: any; digest?: any } | string | Uint8Array) => Observable<Null>>;
+      /**
+       * Generic call
+       **/
+      [key: string]: DecoratedCallBase<ApiType>;
+    };
+    /** 0x8f5c2d0094ecd047/1 */
+    rewardsApi: {
+      /**
+       * Query all the rewards of a specific asset for a specific user
+       **/
+      queryUserRewards: AugmentedCall<ApiType, (accountId: AccountId | string | Uint8Array, assetId: AssetId | AnyNumber | Uint8Array) => Observable<Result<Balance, SpRuntimeDispatchError>>>;
+      /**
+       * Generic call
+       **/
+      [key: string]: DecoratedCallBase<ApiType>;
+    };
+    /** 0x9bbaa777b4c15fc4/1 */
+    servicesApi: {
+      /**
+       * Query all the services that this operator is providing along with their blueprints.
+       **/
+      queryServicesWithBlueprintsByOperator: AugmentedCall<ApiType, (operator: AccountId | string | Uint8Array) => Observable<Result<Vec<RpcServicesWithBlueprint>, SpRuntimeDispatchError>>>;
       /**
        * Generic call
        **/

@@ -35,6 +35,7 @@ pub mod impls;
 pub mod services;
 pub mod types;
 pub use types::*;
+pub mod precompiles_constants;
 pub mod traits;
 
 #[cfg(feature = "verifying")]
@@ -188,11 +189,11 @@ pub mod evm {
 				}
 			}
 
-			fn is_governance_precompile(precompile_name: &precompiles::PrecompileName) -> bool {
-				matches!(
-					precompile_name,
-					PrecompileName::DemocracyPrecompile | PrecompileName::PreimagePrecompile
-				)
+			fn is_governance_precompile(address: H160) -> bool {
+				// Check if the precompile address matches Democracy (2051) or Preimage (2054) precompiles
+				let democracy_address = precompile_utils::precompile_set::AddressU64::<{ tangle_primitives::precompiles_constants::PRECOMPILE_DEMOCRACY }>::get();
+				let preimage_address = precompile_utils::precompile_set::AddressU64::<{ tangle_primitives::precompiles_constants::PRECOMPILE_PREIMAGE }>::get();
+				address == democracy_address || address == preimage_address
 			}
 
 			// Be careful: Each time this filter is modified, the substrate filter must also be modified
@@ -210,7 +211,7 @@ pub mod evm {
 							call.value == U256::zero() &&
 								matches!(
 									PrecompileName::from_address(call.to.0),
-									Some(ref precompile) if is_governance_precompile(precompile)
+									Some(ref precompile) if is_governance_precompile(call.to.0)
 								),
 						// The proxy precompile does not contain method cancel_proxy
 						ProxyType::CancelProxy => false,

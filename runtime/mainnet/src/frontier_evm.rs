@@ -30,6 +30,7 @@ use pallet_evm::HashedAddressMapping;
 use pallet_evm_precompileset_assets_erc20::AddressToAssetId;
 use tangle_primitives::evm::WEIGHT_PER_GAS;
 impl pallet_evm_chain_id::Config for Runtime {}
+use tangle_primitives::impl_proxy_type;
 
 const ASSET_ID_SIZE: usize = core::mem::size_of::<AssetId>();
 
@@ -67,33 +68,7 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
 	}
 }
 
-#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-#[derive(
-	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
-)]
-pub enum ProxyType {
-	/// All calls can be proxied. This is the trivial/most permissive filter.
-	Any = 0,
-	/// Only extrinsics related to governance (democracy and collectives).
-	Governance = 1,
-	/// Allow to veto an announced proxy call.
-	CancelProxy = 2,
-	/// Allow extrinsic related to Balances.
-	Balances = 3,
-}
-
-impl Default for ProxyType {
-	fn default() -> Self {
-		Self::Any
-	}
-}
-
-fn is_governance_precompile(precompile_name: &precompiles::PrecompileName) -> bool {
-	matches!(
-		precompile_name,
-		PrecompileName::DemocracyPrecompile | PrecompileName::PreimagePrecompile
-	)
-}
+impl_proxy_type!();
 
 pub struct BaseFeeThreshold;
 impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
@@ -105,39 +80,6 @@ impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
 	}
 	fn upper() -> Permill {
 		Permill::from_parts(1_000_000)
-	}
-}
-
-// Be careful: Each time this filter is modified, the substrate filter must also be modified
-// consistently.
-impl pallet_evm_precompile_proxy::EvmProxyCallFilter for ProxyType {
-	fn is_evm_proxy_call_allowed(
-		&self,
-		call: &pallet_evm_precompile_proxy::EvmSubCall,
-		recipient_has_code: bool,
-		gas: u64,
-	) -> precompile_utils::EvmResult<bool> {
-		Ok(match self {
-			ProxyType::Any => true,
-			ProxyType::Governance => {
-				call.value == U256::zero()
-					&& matches!(
-						PrecompileName::from_address(call.to.0),
-						Some(ref precompile) if is_governance_precompile(precompile)
-					)
-			},
-			// The proxy precompile does not contain method cancel_proxy
-			ProxyType::CancelProxy => false,
-			ProxyType::Balances => {
-				// Allow only "simple" accounts as recipient (no code nor precompile).
-				// Note: Checking the presence of the code is not enough because some precompiles
-				// have no code.
-				!recipient_has_code
-					&& !precompile_utils::precompile_set::is_precompile_or_fail::<Runtime>(
-						call.to.0, gas,
-					)?
-			},
-		})
 	}
 }
 

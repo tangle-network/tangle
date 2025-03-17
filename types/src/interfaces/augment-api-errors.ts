@@ -1246,6 +1246,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       PendingUnstakeRequestExists: AugmentedError<ApiType>;
       /**
+       * Slash alert failed
+       **/
+      SlashAlertFailed: AugmentedError<ApiType>;
+      /**
        * Overflow while adding stake
        **/
       StakeOverflow: AugmentedError<ApiType>;

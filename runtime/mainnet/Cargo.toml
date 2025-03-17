@@ -133,6 +133,9 @@ pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
 pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
 pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 pallet-evm-precompile-multi-asset-delegation = { workspace = true }
+pallet-evm-precompile-services = { workspace = true }
+pallet-evm-precompile-tangle-lst = { workspace = true }
+pallet-evm-precompile-rewards = { workspace = true }
 precompile-utils = { workspace = true }
 
 evm-tracer = { workspace = true }
@@ -284,6 +287,9 @@ std = [
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
     "pallet-evm-precompile-multi-asset-delegation/std",
+    "pallet-evm-precompile-services/std",
+    "pallet-evm-precompile-tangle-lst/std",
+    "pallet-evm-precompile-rewards/std",
 ]
 
 try-runtime = [
