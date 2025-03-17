@@ -50,7 +50,9 @@ sol! {
 	"tests/fixtures/TangleLiquidRestakingVault.json",
 }
 
+const TNT_ERC20: Address = address!("0000000000000000000000000000000000000802");
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
+const REWARDS: Address = address!("0000000000000000000000000000000000000825");
 const BATCH_ADDRESS: Address = address!("0000000000000000000000000000000000000804");
 
 /// Waits for a specific block number to be reached
@@ -185,11 +187,14 @@ async fn deploy_tangle_lrt(
 		operator.into(),
 		vec![],
 		MULTI_ASSET_DELEGATION,
+		REWARDS,
 		name.into(),
 		symbol.into(),
 	)
 	.await?;
 	info!("Deployed {} Tangle LRT contract at address: {}", symbol, token.address());
+	let added = token.addRewardToken(TNT_ERC20).send().await?.get_receipt().await?;
+	assert!(added.status());
 	Ok(*token.address())
 }
 
@@ -197,7 +202,7 @@ async fn deploy_tangle_lrt(
 const EIGHTEEN_DECIMALS: u128 = 1_000_000_000_000_000_000_000;
 const MOCK_DEPOSIT_CAP: u128 = 1_000_000_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
 const MOCK_DEPOSIT: u128 = 100_000 * EIGHTEEN_DECIMALS; // 100k tokens with 18 decimals
-const MOCK_APY: u32 = 10; // 10% APY
+const MOCK_APY: u32 = 1; // 1% APY
 
 /// Setup the E2E test environment.
 #[track_caller]
@@ -263,8 +268,8 @@ where
 		// Create a new vault and these assets to it.
 		let vault_id = 0;
 		// in Manual Sealing and fast runtime, we have 1 block per sec
-		// we consider 1 year as 50 blocks, for testing purposes
-		let one_year_blocks = SECONDS_PER_BLOCK * 50;
+		// we consider 1 year as 35 blocks, for testing purposes
+		let one_year_blocks = SECONDS_PER_BLOCK * 35;
 
 		let set_apy_blocks = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Rewards(
@@ -1103,10 +1108,10 @@ fn mad_rewards() {
 		);
 
 		// Wait for one year to pass
-		wait_for_more_blocks(&t.provider, 51).await;
+		wait_for_more_blocks(&t.provider, 36).await;
 
 		let apy = cfg.apy;
-		info!("APY: {}%", apy.0);
+		info!("APY: {}%", apy.0 / 10_000_000);
 
 		let rewards_addr = api::apis().rewards_api().query_user_rewards(
 			bob.address().to_account_id(),
@@ -1116,7 +1121,7 @@ fn mad_rewards() {
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
 		match user_rewards {
 			Ok(rewards) => {
-				info!("User rewards: {} USDC", format_ether(U256::from(rewards)));
+				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
 			},
 			Err(e) => {
@@ -1124,6 +1129,241 @@ fn mad_rewards() {
 				bail!("Error while fetching user rewards");
 			},
 		}
+
+		anyhow::Ok(())
+	});
+}
+
+#[test]
+fn lrt_rewards_erc20() {
+	run_mad_test(|t| async move {
+		let vault_id = 0;
+		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
+		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
+
+		let alice = TestAccount::Alice;
+		let vault_account_addr = api::storage().rewards().reward_vaults_pot_account(vault_id);
+		let vault_pot_account =
+			t.subxt.storage().at_latest().await?.fetch(&vault_account_addr).await?;
+		assert!(vault_pot_account.is_some());
+		let vault_pot_account_wrapper =
+			subxt::utils::MultiAddress::Id(vault_pot_account.clone().unwrap());
+
+		let add_funds_tx = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
+				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
+					who: vault_pot_account_wrapper,
+					new_free: MOCK_DEPOSIT_CAP,
+				},
+			),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&add_funds_tx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				let result = evs
+					.find_first::<api::sudo::events::Sudid>()?
+					.expect("Sudo event to be emitted");
+				info!("Added funds to the vault pot account result: {:?}", result);
+				break;
+			}
+		}
+
+		// Check the balance of the vault pot account
+		let vault_pot_balance =
+			api::storage().system().account(vault_pot_account.as_ref().unwrap());
+		let vault_pot_balance =
+			t.subxt.storage().at_latest().await?.fetch(&vault_pot_balance).await?;
+		assert!(vault_pot_balance.is_some());
+
+		let vault_pot_balance = vault_pot_balance.unwrap();
+		assert!(
+			vault_pot_balance.data.free > 0,
+			"Vault pot account should have a positive balance"
+		);
+		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
+		// Join operators
+		let tnt = U256::from(100_000u128);
+		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
+
+		// Setup a LRT Vault for Alice.
+		let lrt_address = deploy_tangle_lrt(
+			alice_provider.clone(),
+			t.weth,
+			alice.account_id().0,
+			"Liquid Restaked Ether",
+			"lrtETH",
+		)
+		.await?;
+
+		let transfer_tx = api::tx().balances().transfer_keep_alive(
+			subxt::utils::MultiAddress::Id(lrt_address.to_account_id()),
+			tnt.to::<u128>(),
+		);
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&transfer_tx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::balances::events::Transfer>()?
+					.expect("Transfer event to be emitted");
+				break;
+			}
+		}
+
+		// Bob as delegator
+		let bob = TestAccount::Bob;
+		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
+		// Mint WETH for Bob
+		let weth_amount = U256::from(200 * EIGHTEEN_DECIMALS);
+		let weth = MockERC20::new(t.weth, &bob_provider);
+		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
+		info!("Minted {} WETH for Bob", format_ether(weth_amount));
+
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, weth_amount);
+
+		// Approve LRT contract to spend WETH
+		let deposit_amount = weth_amount.div(U256::from(2));
+		let approve_result =
+			weth.approve(lrt_address, deposit_amount).send().await?.get_receipt().await?;
+		assert!(approve_result.status());
+		info!("Approved {} WETH for deposit in LRT", format_ether(deposit_amount));
+
+		// Deposit WETH to LRT
+		let lrt = TangleLiquidRestakingVault::new(lrt_address, &bob_provider);
+		let deposit_result = lrt
+			.deposit(deposit_amount, bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(deposit_result.status());
+		info!("Deposited {} WETH in LRT", format_ether(deposit_amount));
+
+		// Bob deposited `deposit_amount` WETH, should receive `deposit_amount` lrtETH in return
+		let lrt_balance = lrt.balanceOf(bob.address()).call().await?;
+		assert_eq!(lrt_balance._0, deposit_amount);
+		// Bob should have `weth_amount - deposit_amount` WETH
+		let bob_balance = weth.balanceOf(bob.address()).call().await?;
+		assert_eq!(bob_balance._0, weth_amount - deposit_amount);
+
+		let mad_weth_balance = weth.balanceOf(t.pallet_account_id.to_address()).call().await?;
+		assert_eq!(mad_weth_balance._0, deposit_amount);
+
+		// LRT should be a delegator to the operator in the MAD pallet.
+		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
+		let maybe_operator = t.subxt.storage().at_latest().await?.fetch(&operator_key).await?;
+		assert!(maybe_operator.is_some());
+		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
+		assert_eq!(
+			maybe_operator.map(|p| p.delegations.0[0].clone()),
+			Some(DelegatorBond {
+				delegator: lrt_address.to_account_id(),
+				amount: deposit_amount.to::<u128>(),
+				asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+				__ignore: std::marker::PhantomData
+			})
+		);
+
+		wait_for_more_blocks(&t.provider, 2).await;
+
+		let rewards_addr = api::apis().rewards_api().query_user_rewards(
+			lrt_address.to_account_id(),
+			Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+		);
+
+		let apy = cfg.apy;
+		info!("APY: {}%", apy.0 / 10_000_000);
+
+		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
+		let rewards_amount = match user_rewards {
+			Ok(rewards) => {
+				info!("LRT rewards: {} TNT", format_ether(U256::from(rewards)));
+				assert!(rewards > 0);
+				rewards
+			},
+			Err(e) => {
+				error!("Error: {:?}", e);
+				bail!("Error while fetching LRT rewards");
+			},
+		};
+
+		assert!(rewards_amount > 0);
+
+		// set bob balance to ED so that we dont overflow
+		let bob_balance_setx = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
+				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
+					who: subxt::utils::MultiAddress::Id(bob.address().to_account_id()),
+					new_free: EIGHTEEN_DECIMALS,
+				},
+			),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&bob_balance_setx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				evs.find_first::<api::sudo::events::Sudid>()?.expect("Sudo event to be emitted");
+				break;
+			}
+		}
+
+		// Check out the rewards for Bob
+		let rewards = lrt
+			.claimRewards(bob.address(), vec![TNT_ERC20])
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+
+		assert!(rewards.status());
+		let result = rewards
+			.inner
+			.logs()
+			.iter()
+			.find_map(|log| log.log_decode::<TangleLiquidRestakingVault::RewardsClaimed>().ok())
+			.expect("RewardsClaimed event to be emitted");
+
+		info!("Bob's rewards: {}", format_ether(result.data().amount));
+		assert!(result.data().amount > U256::from(0), "Rewards should be greater than zero");
 
 		anyhow::Ok(())
 	});
