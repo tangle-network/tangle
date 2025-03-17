@@ -1119,7 +1119,7 @@ fn mad_rewards() {
 		let bob_balance_setx = api::tx().sudo().sudo(
 			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
 				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
-					who: subxt::utils::MultiAddress::Id(bob.account_id()),
+					who: subxt::utils::MultiAddress::Id(bob.address().to_account_id()),
 					new_free: EIGHTEEN_DECIMALS,
 				},
 			),
@@ -1147,6 +1147,18 @@ fn mad_rewards() {
 				break;
 			}
 		}
+
+		// Check the balance of bob account
+		let bob_balance = api::storage().system().account(bob.address().to_account_id());
+		let bob_balance = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_balance)
+			.await?
+			.expect("Failed to fetch balance");
+		let bob_original_balance = bob_balance.data.free;
 
 		// Join operators
 		let tnt = U256::from(100_000u128);
@@ -1223,12 +1235,13 @@ fn mad_rewards() {
 			Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
 		);
 
-		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
+		let user_rewards =
+			t.subxt.runtime_api().at_latest().await?.call(rewards_addr.clone()).await?;
 
 		let mut original_user_rewards = 0;
 		match user_rewards {
 			Ok(rewards) => {
-				info!("User rewards: {} USDC", format_ether(U256::from(rewards)));
+				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
 				original_user_rewards = rewards;
 			},
@@ -1251,6 +1264,35 @@ fn mad_rewards() {
 			.get_receipt()
 			.await?;
 		assert!(claim_result.status());
+
+		// Check the balance of bob account after claim
+		let bob_balance = api::storage().system().account(bob.address().to_account_id());
+		let bob_balance = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_balance)
+			.await?
+			.expect("Failed to fetch balance");
+		let bob_new_balance = bob_balance.data.free;
+		assert!(bob_new_balance > bob_original_balance);
+		let change_in_bob_balance = bob_new_balance - bob_original_balance;
+		assert!(change_in_bob_balance <= original_user_rewards); // account for some fee loss
+
+		// finally lets check that the rewards claimed are not shown again in rpc
+		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
+
+		match user_rewards {
+			Ok(rewards) => {
+				info!("User rewards on second call: {} TNT", format_ether(U256::from(rewards)));
+				assert!(rewards == 0);
+			},
+			Err(e) => {
+				error!("Error: {:?}", e);
+				bail!("Error while fetching user rewards");
+			},
+		}
 
 		anyhow::Ok(())
 	});
