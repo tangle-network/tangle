@@ -21,6 +21,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+mod extension;
 mod filters;
 pub mod frontier_evm;
 pub mod hyperbridge;
@@ -30,7 +31,6 @@ pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
 pub mod weights;
-mod extension;
 
 use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},

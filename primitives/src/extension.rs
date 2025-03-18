@@ -53,7 +53,10 @@ macro_rules! impl_check_nominated_restaked {
 
 		impl CheckNominatedRestaked<$runtime> {
 			/// Checks if unbonding is allowed based on delegated nominations
-			pub fn can_unbound(who: &<$runtime as frame_system::Config>::AccountId, amount: Balance) -> bool {
+			pub fn can_unbound(
+				who: &<$runtime as frame_system::Config>::AccountId,
+				amount: Balance,
+			) -> bool {
 				pallet_multi_asset_delegation::Pallet::<$runtime>::can_unbound(who, amount)
 			}
 		}
@@ -75,7 +78,9 @@ macro_rules! impl_check_nominated_restaked {
 
 			type Pre = ();
 
-			fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+			fn additional_signed(
+				&self,
+			) -> Result<Self::AdditionalSigned, TransactionValidityError> {
 				Ok(())
 			}
 
@@ -87,19 +92,27 @@ macro_rules! impl_check_nominated_restaked {
 				_len: usize,
 			) -> TransactionValidity {
 				match call {
-					<$runtime as frame_system::Config>::RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
+					<$runtime as frame_system::Config>::RuntimeCall::Staking(
+						pallet_staking::Call::unbond { value },
+					) => {
 						if Self::can_unbound(who, *value) {
 							Ok(ValidTransaction::default())
 						} else {
 							Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
 						}
 					},
-					<$runtime as frame_system::Config>::RuntimeCall::Proxy(pallet_proxy::Call::proxy { ref call, real, .. }) => {
-						self.validate(real, call, _info, _len)
-					},
-					<$runtime as frame_system::Config>::RuntimeCall::Utility(pallet_utility::Call::batch { ref calls })
-					| <$runtime as frame_system::Config>::RuntimeCall::Utility(pallet_utility::Call::batch_all { ref calls })
-					| <$runtime as frame_system::Config>::RuntimeCall::Utility(pallet_utility::Call::force_batch { ref calls }) => {
+					<$runtime as frame_system::Config>::RuntimeCall::Proxy(
+						pallet_proxy::Call::proxy { ref call, real, .. },
+					) => self.validate(real, call, _info, _len),
+					<$runtime as frame_system::Config>::RuntimeCall::Utility(
+						pallet_utility::Call::batch { ref calls },
+					)
+					| <$runtime as frame_system::Config>::RuntimeCall::Utility(
+						pallet_utility::Call::batch_all { ref calls },
+					)
+					| <$runtime as frame_system::Config>::RuntimeCall::Utility(
+						pallet_utility::Call::force_batch { ref calls },
+					) => {
 						for call in calls {
 							self.validate(who, call, _info, _len)?;
 						}
