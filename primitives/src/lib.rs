@@ -31,6 +31,7 @@ use sp_runtime::{
 extern crate alloc;
 
 pub mod chain_identifier;
+pub mod extension;
 pub mod impls;
 pub mod services;
 pub mod types;
