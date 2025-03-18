@@ -44,6 +44,11 @@ sol! {
 }
 
 sol! {
+	#[sol(rpc, all_derives)]
+	"../precompiles/rewards/Rewards.sol",
+}
+
+sol! {
 	#[allow(clippy::too_many_arguments)]
 	#[sol(rpc, all_derives)]
 	TangleLiquidRestakingVault,
@@ -54,6 +59,7 @@ const TNT_ERC20: Address = address!("0000000000000000000000000000000000000802");
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
 const REWARDS: Address = address!("0000000000000000000000000000000000000825");
 const BATCH_ADDRESS: Address = address!("0000000000000000000000000000000000000804");
+const REWARDS: Address = address!("0000000000000000000000000000000000000825");
 
 /// Waits for a specific block number to be reached
 pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
@@ -308,7 +314,7 @@ where
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
 							apy: api::runtime_types::sp_arithmetic::per_things::Perbill(
-								MOCK_APY * 10000000,
+								MOCK_APY * 10000,
 							), // convert percent to perbill
 							deposit_cap: MOCK_DEPOSIT_CAP,
 							incentive_cap: 1,
@@ -1040,8 +1046,125 @@ fn mad_rewards() {
 		let vault_id = 0;
 		let cfg_addr = api::storage().rewards().reward_config_storage(vault_id);
 		let cfg = t.subxt.storage().at_latest().await?.fetch(&cfg_addr).await?.unwrap();
-
 		let alice = TestAccount::Alice;
+		let bob = TestAccount::Bob;
+
+		// Prep vault account to receive funds
+		let vault_account_addr = api::storage().rewards().reward_vaults_pot_account(vault_id);
+		let vault_pot_account =
+			t.subxt.storage().at_latest().await?.fetch(&vault_account_addr).await?;
+		assert!(vault_pot_account.is_some());
+
+		let total_issuance = api::storage().balances().total_issuance();
+		let total_issuance = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&total_issuance)
+			.await?
+			.expect("Failed to fetch total issuance");
+
+		info!(
+			"Adding funds to the vault pot account: {} where total issueance is {}",
+			vault_pot_account.as_ref().map(|a| a.to_string()).unwrap(),
+			total_issuance,
+		);
+
+		// Sanity check
+		let vault_pot_account_wrapper =
+			subxt::utils::MultiAddress::Id(vault_pot_account.clone().unwrap());
+
+		let add_funds_tx = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
+				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
+					who: vault_pot_account_wrapper,
+					new_free: total_issuance / 10,
+				},
+			),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&add_funds_tx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				let result = evs
+					.find_first::<api::sudo::events::Sudid>()?
+					.expect("Sudo event to be emitted");
+				info!("Added funds to the vault pot account result: {:?}", result);
+				break;
+			}
+		}
+
+		// Check the balance of the vault pot account
+		let vault_pot_balance =
+			api::storage().system().account(vault_pot_account.as_ref().unwrap());
+		let vault_pot_balance =
+			t.subxt.storage().at_latest().await?.fetch(&vault_pot_balance).await?;
+		assert!(vault_pot_balance.is_some());
+
+		let vault_pot_balance = vault_pot_balance.unwrap();
+		assert!(
+			vault_pot_balance.data.free > 0,
+			"Vault pot account should have a positive balance"
+		);
+
+		// set bob balance to ED so that we dont overflow
+		let bob_balance_setx = api::tx().sudo().sudo(
+			api::runtime_types::tangle_testnet_runtime::RuntimeCall::Balances(
+				api::runtime_types::pallet_balances::pallet::Call::force_set_balance {
+					who: subxt::utils::MultiAddress::Id(bob.address().to_account_id()),
+					new_free: EIGHTEEN_DECIMALS,
+				},
+			),
+		);
+
+		let mut result = t
+			.subxt
+			.tx()
+			.sign_and_submit_then_watch_default(&bob_balance_setx, &alice.substrate_signer())
+			.await?;
+
+		while let Some(Ok(s)) = result.next().await {
+			if let TxStatus::InBestBlock(b) = s {
+				let evs = match b.wait_for_success().await {
+					Ok(evs) => evs,
+					Err(e) => {
+						error!("Error: {:?}", e);
+						break;
+					},
+				};
+				let result = evs
+					.find_first::<api::sudo::events::Sudid>()?
+					.expect("Sudo event to be emitted");
+				info!("Added funds to the vault pot account result: {:?}", result);
+				break;
+			}
+		}
+
+		// Check the balance of bob account
+		let bob_balance = api::storage().system().account(bob.address().to_account_id());
+		let bob_balance = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_balance)
+			.await?
+			.expect("Failed to fetch balance");
+		let bob_original_balance = bob_balance.data.free;
+
 		// Join operators
 		let tnt = U256::from(100_000u128);
 		assert!(join_as_operator(&t.subxt, alice.substrate_signer(), tnt.to::<u128>()).await?);
@@ -1052,7 +1175,6 @@ fn mad_rewards() {
 		assert_eq!(maybe_operator.map(|p| p.stake), Some(tnt.to::<u128>()));
 
 		// Setup Bob as delegator
-		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 		let usdc = MockERC20::new(t.usdc, &bob_provider);
 
@@ -1118,11 +1240,57 @@ fn mad_rewards() {
 			Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
 		);
 
-		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
-		match user_rewards {
+		let user_rewards =
+			t.subxt.runtime_api().at_latest().await?.call(rewards_addr.clone()).await?;
+
+		let original_user_rewards = match user_rewards {
 			Ok(rewards) => {
 				info!("User rewards: {} TNT", format_ether(U256::from(rewards)));
 				assert!(rewards > 0);
+				rewards
+			},
+			Err(e) => {
+				error!("Error: {:?}", e);
+				bail!("Error while fetching user rewards");
+			},
+		};
+
+		info!("Original user rewards: {}", format_ether(U256::from(original_user_rewards)));
+
+		// claim the rewards via rewards precompile
+		let rewards_precompile = Rewards::new(REWARDS, &bob_provider);
+		let claim_result = rewards_precompile
+			.claimRewards(U256::from(0), *usdc.address())
+			.from(bob.address())
+			.send()
+			.await?
+			.with_timeout(Some(Duration::from_secs(5)))
+			.get_receipt()
+			.await?;
+		assert!(claim_result.status());
+
+		// Check the balance of bob account after claim
+		let bob_balance = api::storage().system().account(bob.address().to_account_id());
+		let bob_balance = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_balance)
+			.await?
+			.expect("Failed to fetch balance");
+		let bob_new_balance = bob_balance.data.free;
+		assert!(bob_new_balance > bob_original_balance);
+		let change_in_bob_balance = bob_new_balance - bob_original_balance;
+		assert!(change_in_bob_balance <= original_user_rewards); // account for some fee loss
+
+		// finally lets check that the rewards claimed are not shown again in rpc
+		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
+
+		match user_rewards {
+			Ok(rewards) => {
+				info!("User rewards on second call: {} TNT", format_ether(U256::from(rewards)));
+				assert!(rewards == 0);
 			},
 			Err(e) => {
 				error!("Error: {:?}", e);
