@@ -59,7 +59,6 @@ const TNT_ERC20: Address = address!("0000000000000000000000000000000000000802");
 const MULTI_ASSET_DELEGATION: Address = address!("0000000000000000000000000000000000000822");
 const REWARDS: Address = address!("0000000000000000000000000000000000000825");
 const BATCH_ADDRESS: Address = address!("0000000000000000000000000000000000000804");
-const REWARDS: Address = address!("0000000000000000000000000000000000000825");
 
 /// Waits for a specific block number to be reached
 pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
