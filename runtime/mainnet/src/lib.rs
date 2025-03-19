@@ -21,7 +21,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-mod extension;
+pub mod extension;
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
