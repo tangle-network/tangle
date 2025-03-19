@@ -1479,6 +1479,7 @@ pub type Executive = frame_executive::Executive<
 		migrations::slashing_enabled_03062025::EnsureSlashingNotEnabled<Runtime>,
 		migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,
 		migrations::mads_default_values_13032025::SetRewardsDefaultValues<Runtime>,
+		migrations::pause_new_pallets_19032025::PauseNewPallets<Runtime>,
 	),
 >;
 
