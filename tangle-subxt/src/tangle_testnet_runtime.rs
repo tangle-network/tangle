@@ -43412,6 +43412,7 @@ pub mod api {
 				pub who: scheduled_withdraw::Who,
 				pub amount: scheduled_withdraw::Amount,
 				pub asset: scheduled_withdraw::Asset,
+				pub when: scheduled_withdraw::When,
 			}
 			pub mod scheduled_withdraw {
 				use super::runtime_types;
@@ -43420,6 +43421,7 @@ pub mod api {
 				pub type Asset = runtime_types::tangle_primitives::services::types::Asset<
 					::core::primitive::u128,
 				>;
+				pub type When = ::core::primitive::u32;
 			}
 			impl ::subxt_core::events::StaticEvent for ScheduledWithdraw {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -63415,6 +63417,7 @@ pub mod api {
 						asset: runtime_types::tangle_primitives::services::types::Asset<
 							::core::primitive::u128,
 						>,
+						when: ::core::primitive::u32,
 					},
 					#[codec(index = 12)]
 					#[doc = "An withdraw has been executed."]

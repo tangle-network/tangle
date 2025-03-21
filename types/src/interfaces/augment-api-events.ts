@@ -978,7 +978,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * An withdraw has been scheduled.
        **/
-      ScheduledWithdraw: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset], { who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset }>;
+      ScheduledWithdraw: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset, when: u32], { who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset, when: u32 }>;
       /**
        * Generic event
        **/

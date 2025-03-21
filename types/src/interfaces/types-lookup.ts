@@ -1705,6 +1705,7 @@ declare module '@polkadot/types/lookup' {
       readonly who: AccountId32;
       readonly amount: u128;
       readonly asset: TanglePrimitivesServicesTypesAsset;
+      readonly when: u32;
     } & Struct;
     readonly isExecutedWithdraw: boolean;
     readonly asExecutedWithdraw: {
