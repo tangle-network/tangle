@@ -1754,7 +1754,7 @@ impl<T: Config> Pallet<T> {
 		let admin_account: T::AccountId = T::PalletId::get().into_account_truncating();
 		T::Fungibles::create(pool_id.into(), admin_account.clone(), false, 1_u32.into())?;
 		let name_vec = name.clone().map_or_else(Vec::new, |n| n.to_vec());
-		let _ = T::Fungibles::set(pool_id.into(), &admin_account, name_vec.clone(), name_vec, 18);
+		T::Fungibles::set(pool_id.into(), &admin_account, name_vec.clone(), name_vec, 18)?;
 
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(

@@ -1,4 +1,5 @@
 use super::*;
+use frame_support::traits::fungibles::metadata::Inspect;
 use frame_support::{assert_err, assert_noop, assert_ok};
 
 #[test]
@@ -20,10 +21,19 @@ fn create_works() {
 			123,
 			456,
 			789,
-			Default::default(),
-			Default::default()
+			Some("test_name".as_bytes().to_vec().try_into().unwrap()),
+			Some("test_icon".as_bytes().to_vec().try_into().unwrap()),
 		));
 
+		assert_eq!(Assets::total_issuance(2_u32.into()), 10_u32.into());
+		assert_eq!(
+			<Assets as Inspect<AccountId>>::name(2_u32.into()),
+			"test_name".as_bytes().to_vec()
+		);
+		assert_eq!(
+			<Assets as Inspect<AccountId>>::symbol(2_u32.into()),
+			"test_name".as_bytes().to_vec()
+		);
 		assert_eq!(TotalValueLocked::<T>::get(), 10 + StakingMock::minimum_nominator_bond());
 
 		assert_eq!(Currency::free_balance(11), 90);
