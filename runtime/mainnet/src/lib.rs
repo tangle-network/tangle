@@ -1202,8 +1202,9 @@ parameter_types! {
 	pub const AssetAccountDeposit: Balance = DOLLAR;
 	pub const ApprovalDeposit: Balance = ExistentialDeposit::get();
 	pub const AssetsStringLimit: u32 = 50;
-	pub const MetadataDepositBase: Balance = deposit(1, 68);
-	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
+	// set to zero since only the LST pallet is allowed to create assets
+	pub const MetadataDepositBase: Balance = 0;
+	pub const MetadataDepositPerByte: Balance = 0;
 }
 
 #[cfg(not(feature = "runtime-benchmarks"))]
