@@ -547,7 +547,7 @@ fn cancel_withdraw_should_work() {
 
 		// Check event
 		System::assert_last_event(RuntimeEvent::MultiAssetDelegation(
-			crate::Event::CancelledWithdraw { who: who.clone() },
+			crate::Event::CancelledWithdraw { who: who.clone(), asset, amount },
 		));
 	});
 }

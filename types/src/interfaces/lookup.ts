@@ -1555,12 +1555,15 @@ export default {
         who: 'AccountId32',
         amount: 'u128',
         asset: 'TanglePrimitivesServicesTypesAsset',
+        when: 'u32',
       },
       ExecutedWithdraw: {
         who: 'AccountId32',
       },
       CancelledWithdraw: {
         who: 'AccountId32',
+        asset: 'TanglePrimitivesServicesTypesAsset',
+        amount: 'u128',
       },
       Delegated: {
         who: 'AccountId32',
