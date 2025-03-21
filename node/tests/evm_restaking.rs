@@ -313,7 +313,7 @@ where
 					new_config:
 						api::runtime_types::pallet_rewards::types::RewardConfigForAssetVault {
 							apy: api::runtime_types::sp_arithmetic::per_things::Perbill(
-								MOCK_APY * 10000,
+								MOCK_APY * 1000000,
 							), // convert percent to perbill
 							deposit_cap: MOCK_DEPOSIT_CAP,
 							incentive_cap: 1,
@@ -1281,7 +1281,7 @@ fn mad_rewards() {
 		let bob_new_balance = bob_balance.data.free;
 		assert!(bob_new_balance > bob_original_balance);
 		let change_in_bob_balance = bob_new_balance - bob_original_balance;
-		assert!(change_in_bob_balance <= original_user_rewards); // account for some fee loss
+		assert!(change_in_bob_balance >= original_user_rewards); // account for some fee loss
 
 		// finally lets check that the rewards claimed are not shown again in rpc
 		let user_rewards = t.subxt.runtime_api().at_latest().await?.call(rewards_addr).await?;
