@@ -291,11 +291,16 @@ pub mod pallet {
 		/// A deposit has been made.
 		Deposited { who: T::AccountId, amount: BalanceOf<T>, asset: Asset<T::AssetId> },
 		/// An withdraw has been scheduled.
-		ScheduledWithdraw { who: T::AccountId, amount: BalanceOf<T>, asset: Asset<T::AssetId> },
+		ScheduledWithdraw {
+			who: T::AccountId,
+			amount: BalanceOf<T>,
+			asset: Asset<T::AssetId>,
+			when: RoundIndex,
+		},
 		/// An withdraw has been executed.
 		ExecutedWithdraw { who: T::AccountId },
 		/// An withdraw has been cancelled.
-		CancelledWithdraw { who: T::AccountId },
+		CancelledWithdraw { who: T::AccountId, asset: Asset<T::AssetId>, amount: BalanceOf<T> },
 		/// A delegation has been made.
 		Delegated {
 			who: T::AccountId,
@@ -838,7 +843,12 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_schedule_withdraw(who.clone(), asset, amount)?;
-			Self::deposit_event(Event::ScheduledWithdraw { who, amount, asset });
+			Self::deposit_event(Event::ScheduledWithdraw {
+				who,
+				amount,
+				asset,
+				when: Self::current_round() + T::LeaveDelegatorsDelay::get(),
+			});
 			Ok(())
 		}
 
@@ -896,7 +906,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_withdraw(who.clone(), asset, amount)?;
-			Self::deposit_event(Event::CancelledWithdraw { who });
+			Self::deposit_event(Event::CancelledWithdraw { who, asset, amount });
 			Ok(())
 		}
 

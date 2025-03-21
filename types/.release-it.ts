@@ -12,7 +12,7 @@ export default {
   },
   github: {
     release: true,
-    releaseName: 'Release ${npm.name} v${version}',
+    releaseName: 'Release ${npm.name} v${version} [skip ci]',
     releaseNotes(context) {
       return `Release ${context.npm.name} version ${context.version}`
     },

@@ -21,7 +21,9 @@
 use parity_scale_codec::Codec;
 use sp_runtime::{traits::MaybeDisplay, Serialize};
 use sp_std::vec::Vec;
-use tangle_primitives::services::{AssetIdT, Constraints, RpcServicesWithBlueprint};
+use tangle_primitives::services::{
+	AssetIdT, Constraints, RpcServicesWithBlueprint, ServiceRequest,
+};
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
@@ -43,6 +45,19 @@ sp_api::decl_runtime_apis! {
 			operator: AccountId,
 		) -> Result<
 			Vec<RpcServicesWithBlueprint<C, AccountId, BlockNumberOf<Block>, AssetId>>,
+			sp_runtime::DispatchError,
+		>;
+
+		/// Query all pending service requests associated with a specific operator and blueprints.
+		///
+		/// ## Arguments
+		/// - `operator`: The operator account id.
+		/// ## Return
+		/// - `Vec<(u64, ServiceRequest<C, AccountId, BlockNumberOf<Block>, AssetId>)>`: A list of service requests with their IDs.
+		fn query_service_requests_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<(u64, ServiceRequest<C, AccountId, BlockNumberOf<Block>, AssetId>)>,
 			sp_runtime::DispatchError,
 		>;
 	}

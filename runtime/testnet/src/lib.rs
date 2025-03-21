@@ -96,7 +96,7 @@ use sp_std::{prelude::*, vec::Vec};
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use tangle_primitives::services::RpcServicesWithBlueprint;
+use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 
 pub use frame_support::{
 	construct_runtime,
@@ -1655,6 +1655,15 @@ impl_runtime_apis! {
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
+
+		fn query_service_requests_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<(u64, ServiceRequest<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>)>,
+			sp_runtime::DispatchError,
+		> {
+			Services::service_requests_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
 	}
 

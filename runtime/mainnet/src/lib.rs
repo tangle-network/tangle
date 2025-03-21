@@ -82,7 +82,7 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
-use tangle_primitives::services::RpcServicesWithBlueprint;
+use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 pub use tangle_services::PalletServicesConstraints;
 
 #[cfg(any(feature = "std", test))]
@@ -1965,6 +1965,15 @@ impl_runtime_apis! {
 			sp_runtime::DispatchError,
 		> {
 			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
+
+		fn query_service_requests_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<(u64, ServiceRequest<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>)>,
+			sp_runtime::DispatchError,
+		> {
+			Services::service_requests_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
 	}
 
