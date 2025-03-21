@@ -15,6 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use frame_support::assert_noop;
 use frame_support::{assert_err, assert_ok, traits::ConstU128};
 use sp_core::{H160, U256};
 use sp_runtime::TokenError;
@@ -60,6 +61,12 @@ fn test_payment_refunds_on_failure() {
 
 		// Bob rejects the request
 		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 0));
+
+		// Bob cannot reject the same request again
+		assert_noop!(
+			Services::reject(RuntimeOrigin::signed(bob.clone()), 0),
+			Error::<Runtime>::ApprovalNotRequested
+		);
 
 		// Verify payment is refunded
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), 0);

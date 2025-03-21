@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
+use crate::ServiceRequests;
 use crate::{Config, Error, Event, Pallet, StagingServicePayments};
 use frame_support::{
 	pallet_prelude::*,
@@ -40,17 +40,24 @@ impl<T: Config> Pallet<T> {
 	/// Returns a DispatchResult indicating success or the specific error that occurred
 	pub fn do_reject(operator: T::AccountId, request_id: u64) -> DispatchResult {
 		let mut request = Self::service_requests(request_id)?;
-		let updated =
-			request.operators_with_approval_state.iter_mut().find_map(|(v, ref mut s)| {
-				if v == &operator {
-					*s = ApprovalState::Rejected;
-					Some(())
-				} else {
-					None
-				}
-			});
 
-		ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
+		// First check if the operator exists and what their current state is
+		let operator_index =
+			request.operators_with_approval_state.iter().position(|(v, _)| v == &operator);
+
+		// Make sure operator is listed in the request
+		let operator_index = operator_index.ok_or(Error::<T>::ApprovalNotRequested)?;
+
+		// Check if the operator has already rejected the request
+		if matches!(
+			request.operators_with_approval_state[operator_index].1,
+			ApprovalState::Rejected
+		) {
+			return Err(Error::<T>::ApprovalNotRequested.into());
+		}
+
+		// Set the operator's state to Rejected
+		request.operators_with_approval_state[operator_index].1 = ApprovalState::Rejected;
 
 		let blueprint_id = request.blueprint;
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;
@@ -112,6 +119,9 @@ impl<T: Config> Pallet<T> {
 			}
 			StagingServicePayments::<T>::remove(request_id);
 		}
+
+		// Store the updated request back to storage
+		ServiceRequests::<T>::insert(request_id, request);
 
 		Ok(())
 	}
