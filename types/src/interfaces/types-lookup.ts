@@ -1713,6 +1713,8 @@ declare module '@polkadot/types/lookup' {
     readonly isCancelledWithdraw: boolean;
     readonly asCancelledWithdraw: {
       readonly who: AccountId32;
+      readonly asset: TanglePrimitivesServicesTypesAsset;
+      readonly amount: u128;
     } & Struct;
     readonly isDelegated: boolean;
     readonly asDelegated: {

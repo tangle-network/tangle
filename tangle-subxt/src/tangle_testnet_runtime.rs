@@ -43468,10 +43468,16 @@ pub mod api {
 			#[doc = "An withdraw has been cancelled."]
 			pub struct CancelledWithdraw {
 				pub who: cancelled_withdraw::Who,
+				pub asset: cancelled_withdraw::Asset,
+				pub amount: cancelled_withdraw::Amount,
 			}
 			pub mod cancelled_withdraw {
 				use super::runtime_types;
 				pub type Who = ::subxt_core::utils::AccountId32;
+				pub type Asset = runtime_types::tangle_primitives::services::types::Asset<
+					::core::primitive::u128,
+				>;
+				pub type Amount = ::core::primitive::u128;
 			}
 			impl ::subxt_core::events::StaticEvent for CancelledWithdraw {
 				const PALLET: &'static str = "MultiAssetDelegation";
@@ -63415,7 +63421,13 @@ pub mod api {
 					ExecutedWithdraw { who: ::subxt_core::utils::AccountId32 },
 					#[codec(index = 13)]
 					#[doc = "An withdraw has been cancelled."]
-					CancelledWithdraw { who: ::subxt_core::utils::AccountId32 },
+					CancelledWithdraw {
+						who: ::subxt_core::utils::AccountId32,
+						asset: runtime_types::tangle_primitives::services::types::Asset<
+							::core::primitive::u128,
+						>,
+						amount: ::core::primitive::u128,
+					},
 					#[codec(index = 14)]
 					#[doc = "A delegation has been made."]
 					Delegated {

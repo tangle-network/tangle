@@ -295,7 +295,7 @@ pub mod pallet {
 		/// An withdraw has been executed.
 		ExecutedWithdraw { who: T::AccountId },
 		/// An withdraw has been cancelled.
-		CancelledWithdraw { who: T::AccountId },
+		CancelledWithdraw { who: T::AccountId, asset: Asset<T::AssetId>, amount: BalanceOf<T> },
 		/// A delegation has been made.
 		Delegated {
 			who: T::AccountId,
@@ -896,7 +896,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::process_cancel_withdraw(who.clone(), asset, amount)?;
-			Self::deposit_event(Event::CancelledWithdraw { who });
+			Self::deposit_event(Event::CancelledWithdraw { who, asset, amount });
 			Ok(())
 		}
 
