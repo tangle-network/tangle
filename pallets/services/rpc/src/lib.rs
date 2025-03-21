@@ -29,7 +29,9 @@ use sp_runtime::{
 	DispatchError, Serialize,
 };
 use std::sync::Arc;
-use tangle_primitives::services::{AssetIdT, Constraints, RpcServicesWithBlueprint};
+use tangle_primitives::services::{
+	AssetIdT, Constraints, RpcServicesWithBlueprint, ServiceRequest,
+};
 
 type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
@@ -49,6 +51,13 @@ where
 		operator: AccountId,
 		at: Option<BlockHash>,
 	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber, AssetId>>>;
+
+	#[method(name = "services_queryServiceRequestsWithBlueprintsByOperator")]
+	fn query_service_requests_with_blueprints_by_operator(
+		&self,
+		operator: AccountId,
+		at: Option<BlockHash>,
+	) -> RpcResult<Vec<(u64, ServiceRequest<X, AccountId, BlockNumber, AssetId>)>>;
 }
 
 /// A struct that implements the `ServicesApi`.
@@ -84,6 +93,21 @@ where
 		let at = at.unwrap_or_else(|| self.client.info().best_hash);
 
 		match api.query_services_with_blueprints_by_operator(at, operator) {
+			Ok(Ok(res)) => Ok(res),
+			Ok(Err(e)) => Err(custom_error_into_rpc_err(Error::CustomDispatchError(e))),
+			Err(e) => Err(custom_error_into_rpc_err(Error::RuntimeError(e))),
+		}
+	}
+
+	fn query_service_requests_with_blueprints_by_operator(
+		&self,
+		operator: AccountId,
+		at: Option<<Block as BlockT>::Hash>,
+	) -> RpcResult<Vec<(u64, ServiceRequest<X, AccountId, BlockNumberOf<Block>, AssetId>)>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_service_requests_with_blueprints_by_operator(at, operator) {
 			Ok(Ok(res)) => Ok(res),
 			Ok(Err(e)) => Err(custom_error_into_rpc_err(Error::CustomDispatchError(e))),
 			Err(e) => Err(custom_error_into_rpc_err(Error::RuntimeError(e))),
