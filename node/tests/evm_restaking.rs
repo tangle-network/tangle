@@ -1404,7 +1404,7 @@ fn lrt_rewards_erc20() {
 		let bob = TestAccount::Bob;
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 		// Mint WETH for Bob
-		let weth_amount = U256::from(200 * EIGHTEEN_DECIMALS);
+		let weth_amount = U256::from(MOCK_DEPOSIT * 2);
 		let weth = MockERC20::new(t.weth, &bob_provider);
 		weth.mint(bob.address(), weth_amount).send().await?.get_receipt().await?;
 		info!("Minted {} WETH for Bob", format_ether(weth_amount));
