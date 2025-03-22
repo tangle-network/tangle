@@ -19,6 +19,19 @@ export default {
 				},
 			],
 		},
+		queryServiceRequestsWithBlueprintsByOperator: {
+			description:
+				"Query all pending service requests associated with a specific operator and blueprints.",
+			type: "Vec<(u64, ServiceRequest)>",
+			params: [
+				{
+					name: "operator",
+					type: "AccountId",
+					isHistoric: false,
+					isOptional: false,
+				},
+			],
+		},
 	},
 	types: {
 		RpcServicesWithBlueprint: {
@@ -26,7 +39,26 @@ export default {
 			blueprint: "ServiceBlueprint",
 			services: "Vec<Service>",
 		},
-		//
+		ServiceRequest: {
+			blueprint: "u64",
+			owner: "AccountId32",
+			securityRequirements: "Vec<AssetSecurityRequirement>",
+			ttl: "u64",
+			args: "Vec<TanglePrimitivesServicesField>",
+			permittedCallers: "Vec<AccountId32>",
+			operatorsWithApprovalState: "Vec<(AccountId32, ApprovalState)>",
+			membershipModel: "MembershipModel",
+		},
+		ApprovalState: {
+			_enum: {
+				Pending: "Null",
+				Approved: "ApprovalStateApproved",
+				Rejected: "Null",
+			},
+		},
+		ApprovalStateApproved: {
+			securityCommitments: "Vec<AssetSecurityCommitment>",
+		},
 		ServiceBlueprint: {
 			metadata: "ServiceMetadata",
 			jobs: "Vec<JobDefinition>",
@@ -198,6 +230,17 @@ export default {
 							},
 						],
 						type: "Result<Vec<RpcServicesWithBlueprint>, SpRuntimeDispatchError>",
+					},
+					queryServiceRequestsWithBlueprintsByOperator: {
+						description:
+							"Query all pending service requests associated with a specific operator and blueprints.",
+						params: [
+							{
+								name: "operator",
+								type: "AccountId",
+							},
+						],
+						type: "Result<Vec<(u64, ServiceRequest)>, SpRuntimeDispatchError>",
 					},
 				},
 			},
