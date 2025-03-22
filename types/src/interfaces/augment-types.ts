@@ -78,7 +78,7 @@ import type { AssetIdV2, AssetIdV3, AssetIdV4, AssetInstance, AssetInstanceV0, A
 import type { XcmPaymentApiError } from '@polkadot/types/interfaces/xcmPaymentApi';
 import type { Error } from '@polkadot/types/interfaces/xcmRuntimeApi';
 import type { ErrorCode, ErrorObjectOwned, RawValue, RewardsAssetId } from '@tangle-network/tangle-substrate-types/rewards';
-import type { Architecture, Asset, AssetSecurityCommitment, AssetSecurityRequirement, ContainerGadget, Gadget, GadgetBinary, GadgetSource, GadgetSourceFetcher, GithubFetcher, ImageRegistryFetcher, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelDynamic, MembershipModelFixed, MembershipModelType, NativeGadget, OperatingSystem, RpcServicesWithBlueprint, Service, ServiceBlueprint, ServiceBlueprintServiceManager, ServiceMetadata, TestFetcher, WasmGadget, WasmRuntime } from '@tangle-network/tangle-substrate-types/services';
+import type { ApprovalState, ApprovalStateApproved, Architecture, Asset, AssetSecurityCommitment, AssetSecurityRequirement, ContainerGadget, Gadget, GadgetBinary, GadgetSource, GadgetSourceFetcher, GithubFetcher, ImageRegistryFetcher, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelDynamic, MembershipModelFixed, MembershipModelType, NativeGadget, OperatingSystem, RpcServicesWithBlueprint, Service, ServiceBlueprint, ServiceBlueprintServiceManager, ServiceMetadata, ServiceRequest, TestFetcher, WasmGadget, WasmRuntime } from '@tangle-network/tangle-substrate-types/services';
 
 declare module '@polkadot/types/types/registry' {
   interface InterfaceTypes {
@@ -117,6 +117,8 @@ declare module '@polkadot/types/types/registry' {
     ApplyExtrinsicResultPre6: ApplyExtrinsicResultPre6;
     ApprovalFlag: ApprovalFlag;
     Approvals: Approvals;
+    ApprovalState: ApprovalState;
+    ApprovalStateApproved: ApprovalStateApproved;
     ApprovalVotingParams: ApprovalVotingParams;
     Architecture: Architecture;
     ArithmeticError: ArithmeticError;
@@ -1038,6 +1040,7 @@ declare module '@polkadot/types/types/registry' {
     ServiceBlueprintServiceManager: ServiceBlueprintServiceManager;
     ServiceMetadata: ServiceMetadata;
     ServiceQuality: ServiceQuality;
+    ServiceRequest: ServiceRequest;
     SessionIndex: SessionIndex;
     SessionInfo: SessionInfo;
     SessionInfoValidatorGroup: SessionInfoValidatorGroup;

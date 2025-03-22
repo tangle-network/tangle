@@ -1,10 +1,24 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-import { TanglePrimitivesServicesFieldFieldType } from '@polkadot/types/lookup';
+import { TanglePrimitivesServicesField, TanglePrimitivesServicesFieldFieldType } from '@polkadot/types/lookup';
 import type { Bytes, Enum, Option, Struct, U8aFixed, Vec, u128, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, Percent } from '@polkadot/types/interfaces/runtime';
+
+/** @name ApprovalState */
+export interface ApprovalState extends Enum {
+  readonly isPending: boolean;
+  readonly isApproved: boolean;
+  readonly asApproved: ApprovalStateApproved;
+  readonly isRejected: boolean;
+  readonly type: 'Pending' | 'Approved' | 'Rejected';
+}
+
+/** @name ApprovalStateApproved */
+export interface ApprovalStateApproved extends Struct {
+  readonly securityCommitments: Vec<AssetSecurityCommitment>;
+}
 
 /** @name Architecture */
 export interface Architecture extends Enum {
@@ -211,6 +225,18 @@ export interface ServiceMetadata extends Struct {
   readonly logo: Option<Bytes>;
   readonly website: Option<Bytes>;
   readonly license: Option<Bytes>;
+}
+
+/** @name ServiceRequest */
+export interface ServiceRequest extends Struct {
+  readonly blueprint: u64;
+  readonly owner: AccountId32;
+  readonly securityRequirements: Vec<AssetSecurityRequirement>;
+  readonly ttl: u64;
+  readonly args: Vec<TanglePrimitivesServicesField>;
+  readonly permittedCallers: Vec<AccountId32>;
+  readonly operatorsWithApprovalState: Vec<ITuple<[AccountId32, ApprovalState]>>;
+  readonly membershipModel: MembershipModel;
 }
 
 /** @name TestFetcher */

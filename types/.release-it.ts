@@ -5,14 +5,14 @@ export default {
     'after:bump': 'yarn run build',
   },
   git: {
-    commitMessage: 'Release `tangle-substrate-types` v${version}',
+    commitMessage: 'Release `tangle-substrate-types` v${version}  [skip ci]',
     tagName: '${npm.name}/v${version}',
     tagAnnotation: 'Release ${npm.name} v${version}',
     pushRepo: 'git@github.com:tangle-network/tangle.git',
   },
   github: {
     release: true,
-    releaseName: 'Release ${npm.name} v${version} [skip ci]',
+    releaseName: 'Release ${npm.name} v${version}',
     releaseNotes(context) {
       return `Release ${context.npm.name} version ${context.version}`
     },
