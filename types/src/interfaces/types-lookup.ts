@@ -7053,7 +7053,10 @@ declare module '@polkadot/types/lookup' {
     readonly type: 'Disabled' | 'Enabled';
   }
 
-  /** @name TangleTestnetRuntimeRuntime (864) */
+  /** @name TangleTestnetRuntimeExtensionCheckNominatedRestaked (863) */
+  type TangleTestnetRuntimeExtensionCheckNominatedRestaked = Null;
+
+  /** @name TangleTestnetRuntimeRuntime (865) */
   type TangleTestnetRuntimeRuntime = Null;
 
 } // declare module

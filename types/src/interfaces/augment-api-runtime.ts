@@ -25,7 +25,7 @@ import type { ApplyExtrinsicResult, DispatchError } from '@polkadot/types/interf
 import type { TransactionSource, TransactionValidity } from '@polkadot/types/interfaces/txqueue';
 import type { SpRuntimeDispatchError } from '@polkadot/types/lookup';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
-import type { RpcServicesWithBlueprint } from '@tangle-network/tangle-substrate-types/services';
+import type { RpcServicesWithBlueprint, ServiceRequest } from '@tangle-network/tangle-substrate-types/services';
 
 export type __AugmentedCall<ApiType extends ApiTypes> = AugmentedCall<ApiType>;
 export type __DecoratedCallBase<ApiType extends ApiTypes> = DecoratedCallBase<ApiType>;
@@ -271,6 +271,10 @@ declare module '@polkadot/api-base/types/calls' {
     };
     /** 0x9bbaa777b4c15fc4/1 */
     servicesApi: {
+      /**
+       * Query all pending service requests associated with a specific operator and blueprints.
+       **/
+      queryServiceRequestsWithBlueprintsByOperator: AugmentedCall<ApiType, (operator: AccountId | string | Uint8Array) => Observable<Result<Vec<ITuple<[u64, ServiceRequest]>>, SpRuntimeDispatchError>>>;
       /**
        * Query all the services that this operator is providing along with their blueprints.
        **/

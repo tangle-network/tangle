@@ -6724,7 +6724,11 @@ export default {
     _enum: ['Disabled', 'Enabled']
   },
   /**
-   * Lookup864: tangle_testnet_runtime::Runtime
+   * Lookup863: tangle_testnet_runtime::extension::CheckNominatedRestaked<T>
+   **/
+  TangleTestnetRuntimeExtensionCheckNominatedRestaked: 'Null',
+  /**
+   * Lookup865: tangle_testnet_runtime::Runtime
    **/
   TangleTestnetRuntimeRuntime: 'Null'
 };

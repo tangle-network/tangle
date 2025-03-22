@@ -8,7 +8,7 @@ import '@polkadot/rpc-core/types/jsonrpc';
 import type { AugmentedRpc } from '@polkadot/rpc-core/types';
 import type { Metadata, StorageKey } from '@polkadot/types';
 import type { Bytes, HashMap, Json, Null, Option, Result, Text, U256, U64, Vec, bool, f64, u32, u64 } from '@polkadot/types-codec';
-import type { AnyNumber, Codec } from '@polkadot/types-codec/types';
+import type { AnyNumber, Codec, ITuple } from '@polkadot/types-codec/types';
 import type { ExtrinsicOrHash, ExtrinsicStatus } from '@polkadot/types/interfaces/author';
 import type { EpochAuthorship } from '@polkadot/types/interfaces/babe';
 import type { BeefyVersionedFinalityProof } from '@polkadot/types/interfaces/beefy';
@@ -30,7 +30,7 @@ import type { MigrationStatusResult, ReadProof, RuntimeVersion, TraceBlockRespon
 import type { ApplyExtrinsicResult, ChainProperties, ChainType, Health, NetworkState, NodeRole, PeerInfo, SyncState } from '@polkadot/types/interfaces/system';
 import type { IExtrinsic, Observable } from '@polkadot/types/types';
 import type { ErrorObjectOwned, RewardsAssetId } from '@tangle-network/tangle-substrate-types/rewards';
-import type { RpcServicesWithBlueprint } from '@tangle-network/tangle-substrate-types/services';
+import type { RpcServicesWithBlueprint, ServiceRequest } from '@tangle-network/tangle-substrate-types/services';
 
 export type __AugmentedRpc = AugmentedRpc<() => unknown>;
 
@@ -440,6 +440,10 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
       methods: AugmentedRpc<() => Observable<RpcMethods>>;
     };
     services: {
+      /**
+       * Query all pending service requests associated with a specific operator and blueprints.
+       **/
+      queryServiceRequestsWithBlueprintsByOperator: AugmentedRpc<(operator: AccountId | string | Uint8Array) => Observable<Vec<ITuple<[u64, ServiceRequest]>>>>;
       /**
        * Query all the services that this operator is providing along with their blueprints.
        **/
