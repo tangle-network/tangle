@@ -19,8 +19,15 @@ function updateInterfaceProperties() {
 }
 
 function addMissingImport() {
+	const MISSING_IMPORTS = [
+		"TanglePrimitivesServicesField",
+		"TanglePrimitivesServicesFieldFieldType",
+	];
+
+	const missingTypesImport = MISSING_IMPORTS.join(", ");
+
 	const filePath = resolve("src/interfaces/services/types.ts");
-	const importContent = `import { TanglePrimitivesServicesFieldFieldType } from '@polkadot/types/lookup';`;
+	const importContent = `import { ${missingTypesImport} } from '@polkadot/types/lookup';`;
 
 	// Check if the import exists
 	if (!existsSync(filePath)) {
@@ -35,7 +42,7 @@ function addMissingImport() {
 	// Check if the import already exists
 	if (content.includes(importContent)) {
 		console.log(
-			`✅ Import for TanglePrimitivesServicesFieldFieldType already exists inside ${filePath}`,
+			`✅ Import for ${missingTypesImport} already exists inside ${filePath}`,
 		);
 		return;
 	}
@@ -55,7 +62,9 @@ async function main() {
 	updateInterfaceProperties();
 
 	// Add missing import for TanglePrimitivesServicesFieldFieldType
-	// Manually add until this issue is resolved: https://github.com/polkadot-js/api/issues/6117
+	// More details:
+	// - https://github.com/polkadot-js/api/issues/6117
+	// - https://github.com/polkadot-js/api/issues/5780
 	addMissingImport();
 
 	await bundle("", {
