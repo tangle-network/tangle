@@ -49,8 +49,10 @@ members = [
     "precompiles/vesting",
     "precompiles/staking",
     "precompiles/rewards",
+    "pricing-engine",
     "tangle-subxt",
     "evm-tracer",
+    "pricing-engine",
 ]
 resolver = "2"
 
@@ -104,6 +106,7 @@ primitive-types = { version = "0.12.2", default-features = false, features = ["s
 fixed = { version = "1.28.0", default-features = false }
 educe = { version = "0.6.0", default-features = false }
 honggfuzz = { version = "0.5.55" }
+thiserror = { version = "2.0.12" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
@@ -378,20 +381,20 @@ rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "evm-tracer", default-features = false }
 
 # Hyperbridge EVM necessary dependencies
-alloy-sol-macro       = "0.7.7"
-alloy-sol-types       = { version = "0.7.7", default-features = false }
-alloy-primitives      = { version = "0.7.7", default-features = false, features = ["rlp"] }
+alloy-sol-macro = "0.7.7"
+alloy-sol-types = { version = "0.7.7", default-features = false }
+alloy-primitives = { version = "0.7.7", default-features = false, features = ["rlp"] }
 
 # Hyperbridge
-token-gateway-primitives    = { path = "pallets/token-gateway/primitives" }
-pallet-token-gateway        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-pallet-ismp                 = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-pallet-ismp-rpc             = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1" }
-pallet-ismp-runtime-api     = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-ismp-grandpa 				= { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-ismp                        = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-pallet-hyperbridge          = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
-anyhow                      = { version = "1.0.93", default-features = false }
+token-gateway-primitives = { path = "pallets/token-gateway/primitives" }
+pallet-token-gateway = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+pallet-ismp = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+pallet-ismp-rpc = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1" }
+pallet-ismp-runtime-api = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+ismp-grandpa = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+ismp = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+pallet-hyperbridge = { git = "https://github.com/polytope-labs/hyperbridge", branch = "polkadot-stable2407-1", default-features = false }
+anyhow = { version = "1.0.93", default-features = false }
 
 # Subxt
 subxt = { version = "0.39.0", default-features = false }

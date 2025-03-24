@@ -1,0 +1,52 @@
+[package]
+name = "pricing-engine"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+exclude.workspace = true
+description = "Tangle Cloud Pricing Engine for service offerings"
+
+[dependencies]
+serde = { workspace = true, features = ["derive"], optional = true }
+thiserror = { workspace = true }
+log = { workspace = true }
+scale-info = { workspace = true, features = ["derive"] }
+parity-scale-codec = { workspace = true, features = ["derive"] }
+uuid = { version = "1.3", features = ["v4"] }
+once_cell = "1.17"
+
+# Substrate RPC and runtime API dependencies
+substrate-prometheus-endpoint = { workspace = true, optional = true }
+jsonrpsee = { workspace = true, features = ["server", "macros"] }
+tracing = { workspace = true }
+
+# Use tangle-subxt for blockchain interaction
+tangle-subxt = { workspace = true, features = ["std"] }
+
+# Substrate chain
+sc-client-api = { workspace = true }
+sc-utils = { workspace = true }
+sp-api = { workspace = true }
+sp-blockchain = { workspace = true }
+sp-consensus = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sc-service = { workspace = true, optional = true }
+sc-network = { workspace = true, optional = true }
+sc-transaction-pool-api = { workspace = true, optional = true }
+
+# Async
+futures = { workspace = true, features = ["thread-pool"] }
+tokio = { workspace = true, features = ["full"] }
+async-trait = { workspace = true }
+
+[dev-dependencies]
+simple_logger = "4.2"
+
+[features]
+default = ["std"]
+std = ["log/std", "serde/std", "scale-info/std", "parity-scale-codec/std"]
+prometheus = ["substrate-prometheus-endpoint"]

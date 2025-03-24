@@ -14,7 +14,7 @@ dependencies = [
 
 [[package]]
 name = "account-util"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "frame-support 37.1.0",
  "pallet-airdrop-claims",
@@ -2954,6 +2954,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b63caa9aa9397e2d9480a9b13673856c78d8ac123288526c37d7839f2a86990"
 
 [[package]]
+name = "colored"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
+dependencies = [
+ "lazy_static",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
 name = "combine"
 version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4554,7 +4564,7 @@ dependencies = [
  "sha2 0.10.8",
  "sha3",
  "thiserror 1.0.69",
- "uuid",
+ "uuid 0.8.2",
 ]
 
 [[package]]
@@ -6196,7 +6206,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "ed448-goldilocks-plus",
  "parity-scale-codec",
@@ -6223,7 +6233,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "p384",
  "parity-scale-codec",
@@ -6277,7 +6287,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1-tr"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "k256",
  "parity-scale-codec",
@@ -9643,6 +9653,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "num_threads"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c7398b9c8b70908f6371f47ed36737907c87c52af34c268fed0bf0ceb92ead9"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "nybbles"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9842,7 +9861,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "frame-benchmarking 37.0.0",
  "frame-support 37.1.0",
@@ -12033,7 +12052,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -12633,7 +12652,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -12692,7 +12711,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-rewards-rpc-runtime-api",
@@ -12705,7 +12724,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc-runtime-api"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "parity-scale-codec",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -12834,7 +12853,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -12895,7 +12914,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-services-rpc-runtime-api",
@@ -12908,7 +12927,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "parity-scale-codec",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -14952,6 +14971,37 @@ checksum = "f1ccf34da56fc294e7d4ccf69a85992b7dfb826b7cf57bac6a70bba3494cc08a"
 dependencies = [
  "proc-macro2",
  "syn 2.0.100",
+]
+
+[[package]]
+name = "pricing-engine"
+version = "1.2.19"
+dependencies = [
+ "async-trait",
+ "futures 0.3.31",
+ "jsonrpsee 0.23.2",
+ "log",
+ "once_cell",
+ "parity-scale-codec",
+ "sc-client-api",
+ "sc-network",
+ "sc-service",
+ "sc-transaction-pool-api",
+ "sc-utils",
+ "scale-info",
+ "serde",
+ "simple_logger",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "substrate-prometheus-endpoint",
+ "tangle-subxt",
+ "thiserror 2.0.12",
+ "tokio",
+ "tracing",
+ "uuid 1.16.0",
 ]
 
 [[package]]
@@ -18273,6 +18323,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "simple_logger"
+version = "4.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e7e46c8c90251d47d08b28b8a419ffb4aede0f87c2eea95e17d1d5bacbf3ef1"
+dependencies = [
+ "colored",
+ "log",
+ "time",
+ "windows-sys 0.48.0",
+]
+
+[[package]]
 name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -21323,7 +21385,7 @@ dependencies = [
 
 [[package]]
 name = "tangle"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "alloy",
  "anyhow",
@@ -21421,7 +21483,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -21430,7 +21492,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "ark-bn254",
  "ark-crypto-primitives",
@@ -21463,7 +21525,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -21594,7 +21656,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "anyhow",
  "evm-tracer",
@@ -21802,7 +21864,7 @@ dependencies = [
 
 [[package]]
 name = "tg-frost-core"
-version = "1.2.15"
+version = "1.2.19"
 dependencies = [
  "byteorder",
  "const-crc32-nostd",
@@ -21933,7 +21995,9 @@ checksum = "dad298b01a40a23aac4580b67e3dbedb7cc8402f3592d7f49469de2ea4aecdd8"
 dependencies = [
  "deranged",
  "itoa",
+ "libc",
  "num-conv",
+ "num_threads",
  "powerfmt",
  "serde",
  "time-core",
@@ -22692,6 +22756,15 @@ checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 dependencies = [
  "getrandom 0.2.15",
  "serde",
+]
+
+[[package]]
+name = "uuid"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "458f7a779bf54acc9f347480ac654f68407d3aab21269a6e3c9f922acd9e2da9"
+dependencies = [
+ "getrandom 0.3.1",
 ]
 
 [[package]]
