@@ -212,6 +212,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
+			pub role: Roles,
 		}
 	}
 }

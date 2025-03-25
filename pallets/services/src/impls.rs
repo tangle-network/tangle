@@ -127,3 +127,50 @@ impl<T: crate::Config, Balance: Default>
 		None
 	}
 }
+
+impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
+	type Public = T::RoleKeyId;
+}
+
+impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
+	type Key = T::RoleKeyId;
+
+	fn on_genesis_session<'a, I: 'a>(validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
+	{
+		validators
+			.into_iter()
+			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
+			.for_each(|(acc, role_key)| {
+				match Self::update_ledger_role_key(acc, role_key.encode()) {
+					Ok(_) => (),
+					Err(e) => log::error!("Error updating ledger role key: {:?}", e),
+				}
+			});
+	}
+
+	fn on_new_session<'a, I: 'a>(_changed: bool, validators: I, _queued_validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
+	{
+		validators
+			.into_iter()
+			.filter(|(acc, _)| Ledger::<T>::contains_key(acc))
+			.for_each(|(acc, role_key)| {
+				match Self::update_ledger_role_key(acc, role_key.encode()) {
+					Ok(_) => (),
+					Err(e) => log::error!("Error updating ledger role key: {:?}", e),
+				}
+			});
+	}
+
+	fn on_disabled(_i: u32) {
+		// ignore
+	}
+
+	// Distribute the inflation rewards
+	fn on_before_session_ending() {
+		// ignore
+	}
+}
