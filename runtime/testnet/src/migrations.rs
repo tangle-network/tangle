@@ -28,7 +28,7 @@ impl OpaqueKeys for OldSessionKeys {
 			<<Grandpa as BoundToRuntimeAppPublic>::Public>::ID,
 			<<Babe as BoundToRuntimeAppPublic>::Public>::ID,
 			sp_core::crypto::key_types::IM_ONLINE,
-			tangle_crypto_primitives::ROLE_KEY_TYPE,
+			tangle_primitives::ROLE_KEY_TYPE,
 		]
 	}
 
@@ -38,7 +38,7 @@ impl OpaqueKeys for OldSessionKeys {
 			<<Grandpa as BoundToRuntimeAppPublic>::Public>::ID => self.grandpa.as_ref(),
 			<<Babe as BoundToRuntimeAppPublic>::Public>::ID => self.babe.as_ref(),
 			sp_core::crypto::key_types::IM_ONLINE => self.im_online.as_ref(),
-			tangle_crypto_primitives::ROLE_KEY_TYPE => self.role.as_ref(),
+			tangle_primitives::ROLE_KEY_TYPE => self.role.as_ref(),
 			_ => &[],
 		}
 	}
