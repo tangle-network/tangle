@@ -81,6 +81,7 @@ pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
 sp-staking = { workspace = true }
 frame-election-provider-support = { workspace = true }
+tangle-crypto-primitives = { workspace = true }
 
 ethabi = { workspace = true }
 
@@ -139,6 +140,7 @@ std = [
   "pallet-staking/std",
   "sp-staking/std",
   "frame-election-provider-support/std",
+  "tangle-crypto-primitives/std",
 ]
 runtime-benchmarks = [
     "pallet-multi-asset-delegation/runtime-benchmarks",

@@ -11322,6 +11322,7 @@ dependencies = [
  "sp-runtime 39.0.3",
  "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-crypto-primitives",
  "tangle-primitives",
 ]
 
@@ -12890,6 +12891,7 @@ dependencies = [
  "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-weights 31.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-crypto-primitives",
  "tangle-primitives",
 ]
 

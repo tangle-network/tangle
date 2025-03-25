@@ -290,11 +290,11 @@ impl pallet_assets::Config for Runtime {
 	type Currency = Balances;
 	type CreateOrigin = AsEnsureOriginWithArg<frame_system::EnsureSigned<AccountId>>;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type AssetDeposit = ConstU64<1>;
-	type AssetAccountDeposit = ConstU64<10>;
-	type MetadataDepositBase = ConstU64<1>;
-	type MetadataDepositPerByte = ConstU64<1>;
-	type ApprovalDeposit = ConstU64<1>;
+	type AssetDeposit = ConstU64<0>;
+	type AssetAccountDeposit = ConstU64<0>;
+	type MetadataDepositBase = ConstU64<0>;
+	type MetadataDepositPerByte = ConstU64<0>;
+	type ApprovalDeposit = ConstU64<0>;
 	type StringLimit = ConstU32<50>;
 	type Freezer = ();
 	type WeightInfo = ();

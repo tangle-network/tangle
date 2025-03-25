@@ -82,7 +82,7 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
-pub use tangle_primitives::crypto::AuthorityId as RoleKeyId;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 pub use tangle_services::PalletServicesConstraints;
 

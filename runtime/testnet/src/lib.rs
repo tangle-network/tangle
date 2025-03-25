@@ -96,7 +96,7 @@ use sp_std::{prelude::*, vec::Vec};
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-pub use tangle_primitives::crypto::AuthorityId as RoleKeyId;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 
 pub use frame_support::{

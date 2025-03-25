@@ -42,7 +42,7 @@ use sp_runtime::{
 	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
-pub use tangle_primitives::crypto::AuthorityId as RoleKeyId;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::rewards::UserDepositWithLocks;
 use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
 

@@ -136,12 +136,14 @@ impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
 impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
 	type Key = T::RoleKeyId;
 
+	#[allow(clippy::multiple_bound_locations)]
 	fn on_genesis_session<'a, I: 'a>(_validators: I)
 	where
 		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
 	{
 	}
 
+	#[allow(clippy::multiple_bound_locations)]
 	fn on_new_session<'a, I: 'a>(_changed: bool, _validators: I, _queued_validators: I)
 	where
 		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
