@@ -26,6 +26,8 @@ use frame_support::{
 	traits::{Currency, ReservableCurrency},
 };
 use frame_system::pallet_prelude::*;
+use sp_core::ecdsa;
+use sp_runtime::RuntimeAppPublic;
 use sp_runtime::{
 	traits::{Get, Zero},
 	DispatchResult,
@@ -106,6 +108,16 @@ pub mod module {
 
 		/// The asset ID type.
 		type AssetId: AssetIdT;
+
+		/// Authority identifier type
+		type RoleKeyId: Member
+			+ Parameter
+			+ RuntimeAppPublic
+			+ MaybeSerializeDeserialize
+			+ AsRef<[u8]>
+			+ Into<ecdsa::Public>
+			+ From<ecdsa::Public>
+			+ MaxEncodedLen;
 
 		/// Maximum number of fields in a job call.
 		#[pallet::constant]

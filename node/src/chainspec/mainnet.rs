@@ -36,8 +36,8 @@ use sp_runtime::{
 };
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
-	AccountId, Balance, MaxVestingSchedules, Perbill, Precompiles, StakerStatus, TreasuryPalletId,
-	UNIT, WASM_BINARY,
+	AccountId, Balance, MaxVestingSchedules, Perbill, Precompiles, RoleKeyId, StakerStatus,
+	TreasuryPalletId, UNIT, WASM_BINARY,
 };
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
@@ -61,12 +61,15 @@ where
 }
 
 /// Generate an babe authority key.
-pub fn authority_keys_from_seed(stash: &str) -> (AccountId, BabeId, GrandpaId, ImOnlineId) {
+pub fn authority_keys_from_seed(
+	stash: &str,
+) -> (AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId) {
 	(
 		get_account_id_from_seed::<sr25519::Public>(stash),
 		get_from_seed::<BabeId>(stash),
 		get_from_seed::<GrandpaId>(stash),
 		get_from_seed::<ImOnlineId>(stash),
+		get_from_seed::<RoleKeyId>(stash),
 	)
 }
 
@@ -78,8 +81,9 @@ fn generate_session_keys(
 	babe: BabeId,
 	grandpa: GrandpaId,
 	im_online: ImOnlineId,
+	role: RoleKeyId,
 ) -> tangle_runtime::opaque::SessionKeys {
-	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online }
+	tangle_runtime::opaque::SessionKeys { babe, grandpa, im_online, role }
 }
 
 pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
@@ -170,7 +174,7 @@ pub fn tangle_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 
 #[allow(clippy::too_many_arguments)]
 fn mainnet_genesis(
-	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId)>,
+	initial_authorities: Vec<(AccountId, BabeId, GrandpaId, ImOnlineId, RoleKeyId)>,
 	endowed_accounts: Vec<(AccountId, Balance)>,
 	root_key: AccountId,
 	chain_id: u64,
@@ -249,7 +253,7 @@ fn mainnet_genesis(
 			(
 				x.0.clone(),
 				x.0.clone(),
-				generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
+				generate_session_keys(x.1.clone(), x.2.clone(), x.3.clone(), x.4.clone()),
 			)
 				})
 				.collect::<Vec<_>>()

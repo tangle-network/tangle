@@ -43,6 +43,7 @@ use sp_runtime::{
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
 	traits::RewardsManager,
@@ -406,6 +407,7 @@ impl pallet_services::Config for Runtime {
 	type OperatorDelegationManager = MultiAssetDelegation;
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
+	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
 }
 

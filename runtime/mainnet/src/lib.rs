@@ -82,6 +82,7 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 pub use tangle_services::PalletServicesConstraints;
 
@@ -212,7 +213,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
-			pub role: Roles,
+			pub role: Services,
 		}
 	}
 }
@@ -1479,7 +1480,6 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 	(
-		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
 		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
 		migrations::slashing_enabled_03062025::EnsureSlashingNotEnabled<Runtime>,
 		migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,
