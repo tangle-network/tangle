@@ -273,7 +273,7 @@ pub fn get_initial_endowed_accounts(
 
 	let initial_authorities = get_initial_authorities();
 
-	#[cfg(feature = "mainnet")]
+	#[cfg(not(feature = "testnet"))]
 	for (acco, _, _, _, _) in initial_authorities.iter() {
 		endowed_accounts.push((acco.clone(), 100 * UNIT));
 	}
