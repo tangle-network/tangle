@@ -1,5 +1,6 @@
 use super::*;
 use crate::types::BalanceOf;
+use frame_support::traits::OneSessionHandler;
 use sp_std::{vec, vec::Vec};
 use tangle_primitives::{services::Constraints, traits::ServiceManager, BlueprintId};
 
@@ -125,5 +126,36 @@ impl<T: crate::Config, Balance: Default>
 		_asset: Asset<T::AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
 		None
+	}
+}
+
+impl<T: Config> sp_runtime::BoundToRuntimeAppPublic for Pallet<T> {
+	type Public = T::RoleKeyId;
+}
+
+impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T> {
+	type Key = T::RoleKeyId;
+
+	#[allow(clippy::multiple_bound_locations)]
+	fn on_genesis_session<'a, I: 'a>(_validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
+	{
+	}
+
+	#[allow(clippy::multiple_bound_locations)]
+	fn on_new_session<'a, I: 'a>(_changed: bool, _validators: I, _queued_validators: I)
+	where
+		I: Iterator<Item = (&'a T::AccountId, T::RoleKeyId)>,
+	{
+	}
+
+	fn on_disabled(_i: u32) {
+		// ignore
+	}
+
+	// Distribute the inflation rewards
+	fn on_before_session_ending() {
+		// ignore
 	}
 }

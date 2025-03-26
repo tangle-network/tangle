@@ -198,5 +198,6 @@ impl pallet_services::Config for Runtime {
 	#[cfg(feature = "runtime-benchmarks")]
 	type OperatorDelegationManager =
 		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
+	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
 }
