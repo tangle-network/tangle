@@ -311,7 +311,7 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const MaxLocks: u32 = 50;
 	pub const MinOperatorBondAmount: u64 = 10_000;
-	pub const BondDuration: u32 = 10;
+
 	pub PID: PalletId = PalletId(*b"PotStake");
 
 	pub const SlashRecipient: AccountId = AccountId32::new([1u8; 32]);
@@ -405,7 +405,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
 	type SlashRecipient = SlashRecipient;
-	type BondDuration = BondDuration;
+
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = MockServiceManager;

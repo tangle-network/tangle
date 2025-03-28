@@ -1502,7 +1502,7 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 
 parameter_types! {
 	pub const MinOperatorBondAmount: Balance = 100;
-	pub const BondDuration: u32 = 10;
+
 	pub const MinDelegateAmount : Balance = 1;
 	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -1553,7 +1553,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
+
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = Services;

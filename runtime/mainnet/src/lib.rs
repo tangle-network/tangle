@@ -1215,12 +1215,6 @@ pub type AssetId = u128;
 #[cfg(feature = "runtime-benchmarks")]
 pub type AssetId = u32;
 
-// impl tangle_primitives::traits::NextAssetId<AssetId> for Runtime {
-// 	fn next_asset_id() -> Option<AssetId> {
-// 		pallet_assets::NextAssetId::<Runtime, GeneralAssetsInstance>::get()
-// 	}
-// }
-
 ord_parameter_types! {
 	pub const LstPalletOrigin: sp_runtime::AccountId32 =
 		AccountIdConversion::<sp_runtime::AccountId32>::into_account_truncating(&LstPalletId::get());
@@ -1254,18 +1248,27 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 10_000;
-	pub const BondDuration: u32 = 10;
-	pub const MinDelegateAmount : Balance = 1000;
+	pub const MinOperatorBondAmount: Balance = 1000 * UNIT;
+	pub const MinDelegateAmount : Balance = 10 * UNIT;
+
+	pub const LeaveOperatorsDelay: u32 = 28 * DAYS;
+	pub const OperatorBondLessDelay: u32 = 28 * DAYS;
+	pub const LeaveDelegatorsDelay: u32 = 28 * DAYS;
+	pub const DelegationBondLessDelay: u32 = 28 * DAYS;
+
 	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxOperatorBlueprints : u32 = 50;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxWithdrawRequests: u32 = 5;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxUnstakeRequests: u32 = 5;
+
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	pub const MaxDelegations: u32 = 50;
 }
@@ -1275,14 +1278,13 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = Services;
-	type LeaveOperatorsDelay = ConstU32<10>;
-	type OperatorBondLessDelay = ConstU32<1>;
-	type LeaveDelegatorsDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<5>;
+	type LeaveOperatorsDelay = LeaveOperatorsDelay;
+	type OperatorBondLessDelay = OperatorBondLessDelay;
+	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
+	type DelegationBondLessDelay = DelegationBondLessDelay;
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
@@ -1302,7 +1304,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 
 parameter_types! {
 	pub const PostUnbondingPoolsWindow: u32 = 2;
-	pub const MaxMetadataLen: u32 = 2;
+	pub const MaxMetadataLen: u32 = 256;
 	pub const CheckLevel: u8 = 255;
 	pub const LstPalletId: PalletId = PalletId(*b"py/tnlst");
 }
