@@ -1039,8 +1039,8 @@ impl pallet_tx_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BasicDeposit: Balance = deposit(0, 100);
-	pub const ByteDeposit: Balance = deposit(0, 100);
+	pub const BasicDeposit: Balance = deposit(0, 10);
+	pub const ByteDeposit: Balance = deposit(0, 10);
 	pub const SubAccountDeposit: Balance = deposit(1, 1);
 	pub const MaxSubAccounts: u32 = 100;
 	#[derive(Serialize, Deserialize)]
@@ -1200,9 +1200,9 @@ impl pallet_proxy::Config for Runtime {
 }
 
 parameter_types! {
-	pub const AssetDeposit: Balance = 10 * UNIT;
-	pub const AssetAccountDeposit: Balance = DOLLAR;
-	pub const ApprovalDeposit: Balance = ExistentialDeposit::get();
+	pub const AssetDeposit: Balance = 0;
+	pub const AssetAccountDeposit: Balance = 0;
+	pub const ApprovalDeposit: Balance = 0;
 	pub const AssetsStringLimit: u32 = 50;
 	// set to zero since only the LST pallet is allowed to create assets
 	pub const MetadataDepositBase: Balance = 0;
@@ -1231,7 +1231,7 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	// only lst pallet can create pool tokens
 	type CreateOrigin =
 		AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
-	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type AssetDeposit = AssetDeposit;
 	type AssetAccountDeposit = AssetAccountDeposit;
 	type MetadataDepositBase = MetadataDepositBase;
@@ -1248,29 +1248,40 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 1000 * UNIT;
+	// Min operator bond amount to `join_operators`
+	pub const MinOperatorBondAmount: Balance = 10 * UNIT;
+	// Min delegate amount to `delegate`
 	pub const MinDelegateAmount : Balance = 10 * UNIT;
-
-	pub const LeaveOperatorsDelay: u32 = 28 * DAYS;
-	pub const OperatorBondLessDelay: u32 = 28 * DAYS;
-	pub const LeaveDelegatorsDelay: u32 = 28 * DAYS;
-	pub const DelegationBondLessDelay: u32 = 28 * DAYS;
+	// Time delay for leaving operators, time between `schedule_leave_operators` and `execute_leave_operators`
+	pub const LeaveOperatorsDelay: u32 = 14 * DAYS;
+	// Time delay for reducing operator bond
+	pub const OperatorBondLessDelay: u32 = 14 * DAYS;
+	// Time delay for leaving delegators, time between `schedule_withdraw` and `execute_withdraw`
+	pub const LeaveDelegatorsDelay: u32 = 7 * DAYS;
+	// Time delay for reducing delegation bond, time between `schedule_delegator_unstake` and `execute_delegator_unstake`
+	pub const DelegationBondLessDelay: u32 = 7 * DAYS;
 
 	pub PID: PalletId = PalletId(*b"PotStake");
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegatorBlueprints : u32 = 50;
 
+	// Max number of blueprints a delegator can have in Fixed mode per operator
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxOperatorBlueprints : u32 = 50;
+	pub const MaxDelegatorBlueprints : u32 = 16;
 
+	// Max number of blueprints an operator can support
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxWithdrawRequests: u32 = 5;
+	pub const MaxOperatorBlueprints : u32 = 16;
 
+	// Max number of withdraw requests a delegator can have
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxUnstakeRequests: u32 = 5;
+	pub const MaxWithdrawRequests: u32 = 8;
 
+	// Max number of unstake requests a delegator can have
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegations: u32 = 50;
+	pub const MaxUnstakeRequests: u32 = 8;
+
+	// Max number of delegations a delegator can have
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = 64;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -1288,7 +1299,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type PalletId = PID;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
@@ -1303,6 +1314,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 }
 
 parameter_types! {
+	// `PostUnbondingPoolsWindow` taken from polkadot runtime
 	pub const PostUnbondingPoolsWindow: u32 = 2;
 	pub const MaxMetadataLen: u32 = 256;
 	pub const CheckLevel: u8 = 255;
@@ -1328,7 +1340,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }
 
@@ -1336,7 +1348,7 @@ parameter_types! {
 	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
 	pub const MaxDepositCap: u128 = UNIT * 100_000_000;
 	pub const MaxIncentiveCap: u128 = UNIT * 100_000_000;
-	pub const MaxApy: Perbill = Perbill::from_percent(20);
+	pub const MaxApy: Perbill = Perbill::from_percent(2);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
 }
@@ -1348,7 +1360,7 @@ impl pallet_rewards::Config for Runtime {
 	type PalletId = RewardsPID;
 	type VaultId = u32;
 	type DelegationManager = MultiAssetDelegation;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type MaxApy = MaxApy;
 	type MaxDepositCap = MaxDepositCap;
 	type MaxIncentiveCap = MaxIncentiveCap;
