@@ -11,6 +11,7 @@ use sp_std::{vec, vec::Vec};
 use tangle_primitives::Balance;
 pub const BLOCK_TIME: u128 = 6;
 pub const ONE_YEAR_BLOCKS: u64 = (365 * 24 * 60 * 60 / BLOCK_TIME) as u64;
+use log::info;
 use sp_staking::StakingInterface;
 
 pub const TEAM_ACCOUNT: [u8; 32] = [
@@ -83,55 +84,121 @@ where
 
 		// Remove staking records from team accounts
 		for (account, amount) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE.iter() {
-			let account_id: T::AccountId =
-				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
-			let _controller =
-				pallet_staking::Bonded::<T>::get(account_id.clone()).expect("Controller not found");
-			let ledger =
-				pallet_staking::Ledger::<T>::get(_controller.clone()).expect("Ledger not found");
-			let nominations = pallet_staking::Nominators::<T>::get(account_id.clone())
-				.expect("Nominations not found");
+			let account_id = match T::AccountId::decode(&mut account.as_ref()) {
+				Ok(id) => id,
+				Err(e) => {
+					info!("Failed to decode account ID");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
 
-			let amount_encoded: StakingBalanceOf<T> =
-				StakingBalanceOf::<T>::decode(&mut amount.encode().as_ref())
-					.expect("Invalid amount");
+			let _controller = match pallet_staking::Bonded::<T>::get(account_id.clone()) {
+				Some(controller) => controller,
+				None => {
+					info!("Controller not found for account");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
+
+			let ledger = match pallet_staking::Ledger::<T>::get(_controller.clone()) {
+				Some(l) => l,
+				None => {
+					info!("Ledger not found for controller");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
+
+			let nominations = match pallet_staking::Nominators::<T>::get(account_id.clone()) {
+				Some(n) => n,
+				None => {
+					info!("Nominations not found for account");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
+
+			let amount_encoded = match StakingBalanceOf::<T>::decode(&mut amount.encode().as_ref())
+			{
+				Ok(a) => a,
+				Err(e) => {
+					info!("Failed to decode amount");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
+
 			nominated_validators.push((
 				account_id,
 				ledger.active - amount_encoded,
 				nominations.targets.iter().cloned().collect(),
 			));
-			pallet_staking::Pallet::<T>::force_unstake(
+
+			if let Err(e) = pallet_staking::Pallet::<T>::force_unstake(
 				T::RuntimeOrigin::from(RawOrigin::Root),
 				_controller,
 				100,
-			)
-			.unwrap();
+			) {
+				info!("Failed to force unstake");
+				return T::DbWeight::get().reads_writes(reads, writes);
+			}
 		}
 
 		// Send back balance from team member account with no vesting change
-		let team_account_id: T::AccountId =
-			T::AccountId::decode(&mut TEAM_ACCOUNT.as_ref()).expect("Invalid account ID");
-		let source_account_id: T::AccountId =
-			T::AccountId::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].0.as_ref())
-				.expect("Invalid source account ID");
-		let amount: T::Balance =
-			T::Balance::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].1.encode().as_ref())
-				.expect("Invalid amount");
-		pallet_balances::Pallet::<T>::force_transfer(
+		let team_account_id = match T::AccountId::decode(&mut TEAM_ACCOUNT.as_ref()) {
+			Ok(id) => id,
+			Err(e) => {
+				info!("Failed to decode team account ID");
+				return T::DbWeight::get().reads_writes(reads, writes);
+			},
+		};
+
+		let source_account_id =
+			match T::AccountId::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].0.as_ref()) {
+				Ok(id) => id,
+				Err(e) => {
+					info!("Failed to decode source account ID");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
+
+		let amount = match T::Balance::decode(
+			&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].1.encode().as_ref(),
+		) {
+			Ok(a) => a,
+			Err(e) => {
+				info!("Failed to decode amount");
+				return T::DbWeight::get().reads_writes(reads, writes);
+			},
+		};
+
+		if let Err(e) = pallet_balances::Pallet::<T>::force_transfer(
 			T::RuntimeOrigin::from(RawOrigin::Root),
 			T::Lookup::unlookup(source_account_id),
 			T::Lookup::unlookup(team_account_id.clone()),
 			BalanceOf::<T>::from(amount),
-		)
-		.expect("Failed to transfer balance");
+		) {
+			info!("Failed to transfer balance");
+			return T::DbWeight::get().reads_writes(reads, writes);
+		}
 
 		// Update vesting record and balance from team account with vesting change
-		let vesting_amount: VestingBalanceOf<T> =
-			VestingBalanceOf::<T>::decode(&mut TEAM_ACCOUNT_VESTING_UPDATE.1.encode().as_ref())
-				.expect("Invalid vesting amount");
-		let vesting_account_id: T::AccountId =
-			T::AccountId::decode(&mut TEAM_ACCOUNT_VESTING_UPDATE.0.as_ref())
-				.expect("Invalid vesting account ID");
+		let vesting_amount = match VestingBalanceOf::<T>::decode(
+			&mut TEAM_ACCOUNT_VESTING_UPDATE.1.encode().as_ref(),
+		) {
+			Ok(a) => a,
+			Err(e) => {
+				info!("Failed to decode vesting amount");
+				return T::DbWeight::get().reads_writes(reads, writes);
+			},
+		};
+
+		let vesting_account_id =
+			match T::AccountId::decode(&mut TEAM_ACCOUNT_VESTING_UPDATE.0.as_ref()) {
+				Ok(id) => id,
+				Err(e) => {
+					info!("Failed to decode vesting account ID");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
+
 		update_account_vesting::<T>(
 			&vesting_account_id,
 			vesting_amount,
@@ -143,12 +210,14 @@ where
 		// Nominate the same validators as before
 		for (account_id, amount, targets) in nominated_validators {
 			// Bond the stash accounts
-			pallet_staking::Pallet::<T>::bond(
+			if let Err(e) = pallet_staking::Pallet::<T>::bond(
 				T::RuntimeOrigin::from(RawOrigin::Root),
 				amount,
 				pallet_staking::RewardDestination::Staked,
-			)
-			.unwrap();
+			) {
+				info!("Failed to bond");
+				return T::DbWeight::get().reads_writes(reads, writes);
+			}
 
 			let _ = <pallet_staking::Pallet<T> as StakingInterface>::nominate(
 				&account_id,
@@ -167,7 +236,13 @@ where
 	#[cfg(feature = "try-runtime")]
 	fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
 		for (account, _) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE {
-			let account_id = account.parse().expect("Invalid account ID");
+			let account_id = match account.parse() {
+				Ok(id) => id,
+				Err(_) => {
+					info!("Invalid account ID in post_upgrade");
+					return Err("Invalid account ID");
+				},
+			};
 			verify_updated::<T>(&account_id)?;
 		}
 
@@ -232,9 +307,15 @@ fn update_vesting_schedule<
 
 	// Calculate the difference between the amount to change to and the total vested amount
 	// Send the difference back to team account
-	let difference: T::Balance =
-		T::Balance::decode(&mut amount_to_change_to.saturating_sub(total_vested).encode().as_ref())
-			.expect("Invalid account ID");
+	let difference = match T::Balance::decode(
+		&mut amount_to_change_to.saturating_sub(total_vested).encode().as_ref(),
+	) {
+		Ok(diff) => diff,
+		Err(e) => {
+			info!("Failed to decode difference amount");
+			return;
+		},
+	};
 
 	if total_vested.is_zero() {
 		return;
@@ -249,32 +330,50 @@ fn update_vesting_schedule<
 	let cliff_amount = quarter_percentage.mul_floor(amount_to_change_to);
 	// Remaining 75% vests linearly over 3 years
 	let remaining_amount = amount_to_change_to.saturating_sub(cliff_amount);
-	let per_block = remaining_amount
-		.ensure_div(T::BlockNumberToBalance::convert(three_year_blocks))
-		.unwrap();
+	let per_block =
+		match remaining_amount.ensure_div(T::BlockNumberToBalance::convert(three_year_blocks)) {
+			Ok(pb) => pb,
+			Err(e) => {
+				info!("Failed to calculate per_block amount");
+				return;
+			},
+		};
 
 	let mut bounded_new_schedules: BoundedVec<
 		VestingInfo<VestingBalanceOf<T>, BlockNumberOf<T>>,
 		MaxVestingSchedulesGet<T>,
 	> = BoundedVec::new();
 
-	bounded_new_schedules
-		.try_push(VestingInfo::new(cliff_amount, Zero::zero(), one_year_blocks))
-		.expect("Failed to push new schedules");
-	bounded_new_schedules
-		.try_push(VestingInfo::new(remaining_amount, per_block, one_year_blocks))
-		.expect("Failed to push new schedules");
+	if let Err(e) = bounded_new_schedules.try_push(VestingInfo::new(
+		cliff_amount,
+		Zero::zero(),
+		one_year_blocks,
+	)) {
+		info!("Failed to push first vesting schedule");
+		return;
+	}
+
+	if let Err(e) = bounded_new_schedules.try_push(VestingInfo::new(
+		remaining_amount,
+		per_block,
+		one_year_blocks,
+	)) {
+		info!("Failed to push second vesting schedule");
+		return;
+	}
 
 	// Update storage
 	Vesting::<T>::insert(account_id, bounded_new_schedules);
 
 	// Send the difference back to team account
-	let _ = pallet_balances::Pallet::<T>::force_transfer(
+	if let Err(e) = pallet_balances::Pallet::<T>::force_transfer(
 		T::RuntimeOrigin::from(RawOrigin::Root),
 		T::Lookup::unlookup(account_id.clone()),
 		T::Lookup::unlookup(team_account_id.clone()),
 		BalanceOf::<T>::from(difference),
-	);
+	) {
+		info!("Failed to force transfer difference");
+	}
 }
 
 #[cfg(feature = "try-runtime")]

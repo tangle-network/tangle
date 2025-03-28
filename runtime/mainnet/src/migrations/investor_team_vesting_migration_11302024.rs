@@ -1,4 +1,5 @@
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
+use log::info;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::{
 	traits::{Convert, EnsureDiv, Header, Zero},
@@ -195,15 +196,25 @@ impl<T: pallet_vesting::Config + pallet_balances::Config> OnRuntimeUpgrade
 
 		// Update investor vesting schedules
 		for account in INVESTOR_ACCOUNTS.iter() {
-			let account_id: T::AccountId =
-				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
+			let account_id = match T::AccountId::decode(&mut account.as_ref()) {
+				Ok(id) => id,
+				Err(_) => {
+					info!("Failed to decode investor account ID");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
 			update_account_vesting::<T>(&account_id, &mut reads, &mut writes);
 		}
 
 		// Update team vesting schedule
 		for account in TEAM_ACCOUNTS.iter() {
-			let account_id: T::AccountId =
-				T::AccountId::decode(&mut account.as_ref()).expect("Invalid account ID");
+			let account_id = match T::AccountId::decode(&mut account.as_ref()) {
+				Ok(id) => id,
+				Err(_) => {
+					info!("Failed to decode team account ID");
+					return T::DbWeight::get().reads_writes(reads, writes);
+				},
+			};
 			update_account_vesting::<T>(&account_id, &mut reads, &mut writes);
 		}
 
@@ -220,15 +231,33 @@ impl<T: pallet_vesting::Config + pallet_balances::Config> OnRuntimeUpgrade
 		// Verify schedules for all accounts
 		for (address, _) in INVESTOR_ACCOUNTS {
 			let account_id = if address.starts_with("0x") {
-				MultiAddress::Evm(H160::from_str(address).expect("should be a valid address"))
-					.to_account_id_32()
+				let h160 = match H160::from_str(address) {
+					Ok(h) => h,
+					Err(_) => {
+						info!("Invalid EVM address");
+						return Err("Invalid EVM address");
+					},
+				};
+				MultiAddress::Evm(h160).to_account_id_32()
 			} else {
-				address.parse().expect("Invalid account ID")
+				match address.parse() {
+					Ok(id) => id,
+					Err(_) => {
+						info!("Invalid investor account ID");
+						return Err("Invalid investor account ID");
+					},
+				}
 			};
 			verify_updated_schedule::<T>(&account_id)?;
 		}
 		for (address, _) in TEAM_ACCOUNT_TO_UPDATE {
-			let account_id = address.parse().expect("Invalid account ID");
+			let account_id = match address.parse() {
+				Ok(id) => id,
+				Err(_) => {
+					info!("Invalid team account ID");
+					return Err("Invalid team account ID");
+				},
+			};
 			verify_updated_schedule::<T>(&account_id)?;
 		}
 
@@ -273,21 +302,37 @@ fn update_vesting_schedule<T: pallet_vesting::Config>(
 	let cliff_amount = quarter_percentage.mul_floor(total_vested);
 	// Remaining 75% vests linearly over 3 years
 	let remaining_amount = total_vested.saturating_sub(cliff_amount);
-	let per_block = remaining_amount
-		.ensure_div(T::BlockNumberToBalance::convert(three_year_blocks))
-		.unwrap();
+	let per_block =
+		match remaining_amount.ensure_div(T::BlockNumberToBalance::convert(three_year_blocks)) {
+			Ok(pb) => pb,
+			Err(_) => {
+				info!("Failed to calculate per_block amount");
+				return;
+			},
+		};
 
 	let mut bounded_new_schedules: BoundedVec<
 		VestingInfo<BalanceOf<T>, BlockNumberOf<T>>,
 		MaxVestingSchedulesGet<T>,
 	> = BoundedVec::new();
 
-	bounded_new_schedules
-		.try_push(VestingInfo::new(cliff_amount, Zero::zero(), one_year_blocks))
-		.expect("Failed to push new schedules");
-	bounded_new_schedules
-		.try_push(VestingInfo::new(remaining_amount, per_block, one_year_blocks))
-		.expect("Failed to push new schedules");
+	if let Err(_) = bounded_new_schedules.try_push(VestingInfo::new(
+		cliff_amount,
+		Zero::zero(),
+		one_year_blocks,
+	)) {
+		info!("Failed to push first vesting schedule");
+		return;
+	}
+
+	if let Err(_) = bounded_new_schedules.try_push(VestingInfo::new(
+		remaining_amount,
+		per_block,
+		one_year_blocks,
+	)) {
+		info!("Failed to push second vesting schedule");
+		return;
+	}
 
 	// Update storage
 	Vesting::<T>::insert(account_id, bounded_new_schedules);
