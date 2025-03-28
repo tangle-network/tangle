@@ -316,20 +316,18 @@ fn update_vesting_schedule<T: pallet_vesting::Config>(
 		MaxVestingSchedulesGet<T>,
 	> = BoundedVec::new();
 
-	if let Err(_) = bounded_new_schedules.try_push(VestingInfo::new(
-		cliff_amount,
-		Zero::zero(),
-		one_year_blocks,
-	)) {
+	if bounded_new_schedules
+		.try_push(VestingInfo::new(cliff_amount, Zero::zero(), one_year_blocks))
+		.is_err()
+	{
 		info!("Failed to push first vesting schedule");
 		return;
 	}
 
-	if let Err(_) = bounded_new_schedules.try_push(VestingInfo::new(
-		remaining_amount,
-		per_block,
-		one_year_blocks,
-	)) {
+	if bounded_new_schedules
+		.try_push(VestingInfo::new(remaining_amount, per_block, one_year_blocks))
+		.is_err()
+	{
 		info!("Failed to push second vesting schedule");
 		return;
 	}

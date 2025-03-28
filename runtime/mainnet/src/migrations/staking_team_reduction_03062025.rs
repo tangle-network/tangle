@@ -86,7 +86,7 @@ where
 		for (account, amount) in TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE.iter() {
 			let account_id = match T::AccountId::decode(&mut account.as_ref()) {
 				Ok(id) => id,
-				Err(e) => {
+				Err(_e) => {
 					info!("Failed to decode account ID");
 					return T::DbWeight::get().reads_writes(reads, writes);
 				},
@@ -119,7 +119,7 @@ where
 			let amount_encoded = match StakingBalanceOf::<T>::decode(&mut amount.encode().as_ref())
 			{
 				Ok(a) => a,
-				Err(e) => {
+				Err(_e) => {
 					info!("Failed to decode amount");
 					return T::DbWeight::get().reads_writes(reads, writes);
 				},
@@ -131,7 +131,7 @@ where
 				nominations.targets.iter().cloned().collect(),
 			));
 
-			if let Err(e) = pallet_staking::Pallet::<T>::force_unstake(
+			if let Err(_e) = pallet_staking::Pallet::<T>::force_unstake(
 				T::RuntimeOrigin::from(RawOrigin::Root),
 				_controller,
 				100,
@@ -144,7 +144,7 @@ where
 		// Send back balance from team member account with no vesting change
 		let team_account_id = match T::AccountId::decode(&mut TEAM_ACCOUNT.as_ref()) {
 			Ok(id) => id,
-			Err(e) => {
+			Err(_e) => {
 				info!("Failed to decode team account ID");
 				return T::DbWeight::get().reads_writes(reads, writes);
 			},
@@ -153,7 +153,7 @@ where
 		let source_account_id =
 			match T::AccountId::decode(&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].0.as_ref()) {
 				Ok(id) => id,
-				Err(e) => {
+				Err(_e) => {
 					info!("Failed to decode source account ID");
 					return T::DbWeight::get().reads_writes(reads, writes);
 				},
@@ -163,13 +163,13 @@ where
 			&mut TEAM_MEMBER_ACCOUNTS_STAKING_UPDATE[1].1.encode().as_ref(),
 		) {
 			Ok(a) => a,
-			Err(e) => {
+			Err(_e) => {
 				info!("Failed to decode amount");
 				return T::DbWeight::get().reads_writes(reads, writes);
 			},
 		};
 
-		if let Err(e) = pallet_balances::Pallet::<T>::force_transfer(
+		if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
 			T::RuntimeOrigin::from(RawOrigin::Root),
 			T::Lookup::unlookup(source_account_id),
 			T::Lookup::unlookup(team_account_id.clone()),
@@ -184,7 +184,7 @@ where
 			&mut TEAM_ACCOUNT_VESTING_UPDATE.1.encode().as_ref(),
 		) {
 			Ok(a) => a,
-			Err(e) => {
+			Err(_e) => {
 				info!("Failed to decode vesting amount");
 				return T::DbWeight::get().reads_writes(reads, writes);
 			},
@@ -193,7 +193,7 @@ where
 		let vesting_account_id =
 			match T::AccountId::decode(&mut TEAM_ACCOUNT_VESTING_UPDATE.0.as_ref()) {
 				Ok(id) => id,
-				Err(e) => {
+				Err(_e) => {
 					info!("Failed to decode vesting account ID");
 					return T::DbWeight::get().reads_writes(reads, writes);
 				},
@@ -210,7 +210,7 @@ where
 		// Nominate the same validators as before
 		for (account_id, amount, targets) in nominated_validators {
 			// Bond the stash accounts
-			if let Err(e) = pallet_staking::Pallet::<T>::bond(
+			if let Err(_e) = pallet_staking::Pallet::<T>::bond(
 				T::RuntimeOrigin::from(RawOrigin::Root),
 				amount,
 				pallet_staking::RewardDestination::Staked,
@@ -311,7 +311,7 @@ fn update_vesting_schedule<
 		&mut amount_to_change_to.saturating_sub(total_vested).encode().as_ref(),
 	) {
 		Ok(diff) => diff,
-		Err(e) => {
+		Err(_e) => {
 			info!("Failed to decode difference amount");
 			return;
 		},
@@ -333,7 +333,7 @@ fn update_vesting_schedule<
 	let per_block =
 		match remaining_amount.ensure_div(T::BlockNumberToBalance::convert(three_year_blocks)) {
 			Ok(pb) => pb,
-			Err(e) => {
+			Err(_e) => {
 				info!("Failed to calculate per_block amount");
 				return;
 			},
@@ -344,7 +344,7 @@ fn update_vesting_schedule<
 		MaxVestingSchedulesGet<T>,
 	> = BoundedVec::new();
 
-	if let Err(e) = bounded_new_schedules.try_push(VestingInfo::new(
+	if let Err(_e) = bounded_new_schedules.try_push(VestingInfo::new(
 		cliff_amount,
 		Zero::zero(),
 		one_year_blocks,
@@ -353,7 +353,7 @@ fn update_vesting_schedule<
 		return;
 	}
 
-	if let Err(e) = bounded_new_schedules.try_push(VestingInfo::new(
+	if let Err(_e) = bounded_new_schedules.try_push(VestingInfo::new(
 		remaining_amount,
 		per_block,
 		one_year_blocks,
@@ -366,7 +366,7 @@ fn update_vesting_schedule<
 	Vesting::<T>::insert(account_id, bounded_new_schedules);
 
 	// Send the difference back to team account
-	if let Err(e) = pallet_balances::Pallet::<T>::force_transfer(
+	if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
 		T::RuntimeOrigin::from(RawOrigin::Root),
 		T::Lookup::unlookup(account_id.clone()),
 		T::Lookup::unlookup(team_account_id.clone()),

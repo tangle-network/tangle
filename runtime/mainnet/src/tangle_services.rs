@@ -2,6 +2,7 @@ use super::*;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_evm::GasWeightMapping;
 use scale_info::TypeInfo;
+use sp_staking::EraIndex;
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");

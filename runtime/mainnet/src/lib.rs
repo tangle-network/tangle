@@ -1253,13 +1253,13 @@ parameter_types! {
 	// Min delegate amount to `delegate`
 	pub const MinDelegateAmount : Balance = 10 * UNIT;
 	// Time delay for leaving operators, time between `schedule_leave_operators` and `execute_leave_operators`
-	pub const LeaveOperatorsDelay: u32 = 14 * DAYS;
+	pub const LeaveOperatorsDelay: u32 = 14;
 	// Time delay for reducing operator bond
-	pub const OperatorBondLessDelay: u32 = 14 * DAYS;
+	pub const OperatorBondLessDelay: u32 = 14;
 	// Time delay for leaving delegators, time between `schedule_withdraw` and `execute_withdraw`
-	pub const LeaveDelegatorsDelay: u32 = 7 * DAYS;
+	pub const LeaveDelegatorsDelay: u32 = 7;
 	// Time delay for reducing delegation bond, time between `schedule_delegator_unstake` and `execute_delegator_unstake`
-	pub const DelegationBondLessDelay: u32 = 7 * DAYS;
+	pub const DelegationBondLessDelay: u32 = 7;
 
 	pub PID: PalletId = PalletId(*b"PotStake");
 
