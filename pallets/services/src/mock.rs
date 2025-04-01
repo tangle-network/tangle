@@ -486,10 +486,6 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const BondDuration: u32 = 28;
-
-	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxDelegatorBlueprints: u32 = 10;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -515,7 +511,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type SlashRecipient = SlashRecipient;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = Services;

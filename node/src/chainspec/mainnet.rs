@@ -92,7 +92,16 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 	properties.insert("tokenDecimals".into(), 18u32.into());
 	properties.insert("ss58Format".into(), tangle_primitives::MAINNET_SS58_PREFIX.into());
 
-	let endowment: Balance = 10_000_000 * UNIT;
+	let endowment: Balance = 10_000 * UNIT;
+
+	let mut endowed_accounts = mainnet::get_initial_endowed_accounts().0;
+	endowed_accounts.extend(vec![
+		(get_account_id_from_seed::<sr25519::Public>("Alice"), endowment),
+		(get_account_id_from_seed::<sr25519::Public>("Bob"), endowment),
+		(get_account_id_from_seed::<sr25519::Public>("Alice//stash"), endowment),
+		(get_account_id_from_seed::<sr25519::Public>("Bob//stash"), endowment),
+	]);
+
 	Ok(ChainSpec::builder(WASM_BINARY.expect("WASM not available"), Default::default())
 		.with_name("Local Tangle Mainnet")
 		.with_id("local-tangle-mainnet")
@@ -102,14 +111,7 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 			// Initial validators
 			vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 			// Endowed accounts
-			vec![
-				(get_account_id_from_seed::<sr25519::Public>("Alice"), endowment),
-				(get_account_id_from_seed::<sr25519::Public>("Bob"), endowment),
-				(get_account_id_from_seed::<sr25519::Public>("Charlie"), endowment),
-				(get_account_id_from_seed::<sr25519::Public>("Alice//stash"), endowment),
-				(get_account_id_from_seed::<sr25519::Public>("Bob//stash"), endowment),
-				(get_account_id_from_seed::<sr25519::Public>("Charlie//stash"), endowment),
-			],
+			endowed_accounts,
 			// Sudo account
 			get_account_id_from_seed::<sr25519::Public>("Alice"),
 			// EVM chain ID
@@ -119,12 +121,14 @@ pub fn local_mainnet_config(chain_id: u64) -> Result<ChainSpec, String> {
 				mainnet::get_edgeware_genesis_balance_distribution(),
 				mainnet::get_leaderboard_balance_distribution(),
 				mainnet::get_edgeware_snapshot_distribution(),
+				mainnet::get_polkadot_validator_distribution(),
 			]),
 			// Genesis investor / team distribution (pallet-balances + pallet-vesting)
 			combine_distributions(vec![
 				mainnet::get_team_balance_distribution(),
-				mainnet::get_investor_balance_distribution(),
 				mainnet::get_team_direct_vesting_distribution(),
+				mainnet::get_investor_balance_distribution(),
+				mainnet::get_foundation_balance_distribution(),
 			]),
 			Default::default(),
 		))

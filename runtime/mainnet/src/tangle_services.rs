@@ -2,6 +2,7 @@ use super::*;
 use frontier_evm::DefaultBaseFeePerGas;
 use pallet_evm::GasWeightMapping;
 use scale_info::TypeInfo;
+use sp_staking::EraIndex;
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
@@ -88,7 +89,7 @@ parameter_types! {
 	pub const MaxMetadataLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxJobsPerService: u32 = 1024;
+	pub const MaxJobsPerService: u32 = 64;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxOperatorsPerService: u32 = 1024;
@@ -106,43 +107,44 @@ parameter_types! {
 	pub const MaxServicesPerUser: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxBinariesPerGadget: u32 = 64;
+	pub const MaxBinariesPerGadget: u32 = 16;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxSourcesPerGadget: u32 = 64;
+	pub const MaxSourcesPerGadget: u32 = 16;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxGitOwnerLength: u32 = 1024;
+	pub const MaxGitOwnerLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxGitRepoLength: u32 = 1024;
+	pub const MaxGitRepoLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxGitTagLength: u32 = 1024;
+	pub const MaxGitTagLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxBinaryNameLength: u32 = 1024;
+	pub const MaxBinaryNameLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxIpfsHashLength: u32 = 46;
+	pub const MaxIpfsHashLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxContainerRegistryLength: u32 = 1024;
+	pub const MaxContainerRegistryLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxContainerImageNameLength: u32 = 1024;
+	pub const MaxContainerImageNameLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxContainerImageTagLength: u32 = 1024;
+	pub const MaxContainerImageTagLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxAssetsPerService: u32 = 64;
 
+	// Slash defer duration in days (era-index)
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const SlashDeferDuration: u32 = 7;
+	pub const SlashDeferDuration: EraIndex = 7;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxMasterBlueprintServiceManagerVersions: u32 = u32::MAX;
+	pub const MaxMasterBlueprintServiceManagerVersions: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
