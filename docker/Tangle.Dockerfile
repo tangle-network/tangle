@@ -22,7 +22,7 @@ LABEL description="Tangle Network Builder"
 # Install dependencies required for building
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates git build-essential \
-    clang cmake pkg-config libssl-dev \
+    clang cmake pkg-config libssl-dev libc6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust
@@ -47,7 +47,7 @@ LABEL description="Tangle Network Node"
 
 # Install minimal runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
+    ca-certificates libc6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the binary from builder stage
