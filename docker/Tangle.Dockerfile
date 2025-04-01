@@ -14,37 +14,33 @@
 #
 
 # Build stage
-FROM ubuntu:24.04 AS builder
+FROM ubuntu:22.04 AS builder
 
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Builder"
 
 # Install dependencies required for building
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    git \
-    build-essential \
-    clang \
-    cmake \
-    pkg-config \
-    libssl-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates git build-essential \
+    clang cmake pkg-config libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Clone the repository
+# Copy the source code
 WORKDIR /build
 COPY . /build
 
 # Build the Tangle binary
 RUN cargo build --release
 
-# Run stage - using the same Ubuntu version to ensure binary compatibility
-FROM ubuntu:24.04
+# Verify the binary works in this environment
+RUN /build/target/release/tangle --version
+
+# Run stage - using the same Ubuntu 22.04 to ensure binary compatibility
+FROM ubuntu:22.04
 
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
@@ -62,7 +58,9 @@ RUN useradd -m -u 5000 -U -s /bin/sh -d /tangle tangle && \
 	mkdir -p /data /tangle/.local/share && \
 	chown -R tangle:tangle /data && \
 	ln -s /data /tangle/.local/share/tangle && \
-	# Check if executable works in this container
+	# unclutter and minimize the attack surface
+	rm -rf /usr/bin /usr/sbin && \
+	# Verify the binary works in the final container
 	/usr/local/bin/tangle --version
 
 USER tangle
