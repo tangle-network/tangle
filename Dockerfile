@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 LABEL maintainer="Webb Developers <dev@webb.tools>"
 LABEL description="Tangle Network Node"
