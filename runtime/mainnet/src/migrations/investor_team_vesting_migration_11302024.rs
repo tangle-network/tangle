@@ -317,7 +317,7 @@ fn update_vesting_schedule<T: pallet_vesting::Config>(
 	> = BoundedVec::new();
 
 	if bounded_new_schedules
-		.try_push(VestingInfo::new(cliff_amount, Zero::zero(), one_year_blocks))
+		.try_push(VestingInfo::new(cliff_amount, cliff_amount, one_year_blocks))
 		.is_err()
 	{
 		info!("Failed to push first vesting schedule");
