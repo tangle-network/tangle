@@ -21584,7 +21584,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
