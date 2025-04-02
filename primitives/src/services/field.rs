@@ -20,7 +20,7 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_std::{boxed::Box, vec};
+use sp_std::boxed::Box;
 
 use super::Constraints;
 
@@ -397,18 +397,15 @@ impl<'a, C: Constraints, AccountId: Encode + Clone> From<&'a Field<C, AccountId>
 			Field::Uint64(val) => ethabi::Token::Uint((*val).into()),
 			Field::Int64(val) => ethabi::Token::Int((*val).into()),
 			Field::String(val) => ethabi::Token::String(val.to_string()),
-			Field::Array(_, val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
+			Field::Array(_, val) => {
+				ethabi::Token::FixedArray(val.into_iter().map(Into::into).collect())
+			},
 			Field::List(_, val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),
-			Field::Struct(_, fields) => ethabi::Token::Array(
+			Field::Struct(_, fields) => ethabi::Token::Tuple(
 				fields
 					.into_iter()
-					.map(|(field_name, field_value)| {
-						ethabi::Token::Tuple(vec![
-							ethabi::Token::String(field_name.to_string()),
-							field_value.as_ref().clone().into(),
-						])
-					})
+					.map(|(_name, field_value)| field_value.as_ref().clone().into())
 					.collect(),
 			),
 		}
