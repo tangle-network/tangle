@@ -103,10 +103,11 @@ pub fn new_partial(
 		})
 		.transpose()?;
 
-	// Create the WasmExecutor
+	// Create the WasmExecutor with allow_missing_host_functions flag set to true
 	let executor = WasmExecutor::builder()
 		.with_max_runtime_instances(config.max_runtime_instances)
 		.with_runtime_cache_size(config.runtime_cache_size)
+		.with_allow_missing_host_functions(true)
 		.build();
 
 	let (client, backend, keystore_container, task_manager) =

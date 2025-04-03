@@ -23,7 +23,7 @@ use crate::{
 		StorageOverrideHandler,
 	},
 };
-use futures::{future, prelude::*, FutureExt};
+use futures::{future, FutureExt};
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::BabeWorkerHandle;
@@ -49,62 +49,12 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
 #[cfg(not(feature = "testnet"))]
-pub mod tangle {
-	// Our native executor instance.
-	pub struct ExecutorDispatch;
-
-	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
-		/// Only enable the benchmarking host functions when we actually want to benchmark.
-		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions =
-			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
-		/// Otherwise we only use the default Substrate host functions.
-		#[cfg(not(feature = "runtime-benchmarks"))]
-		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
-
-		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-			tangle_runtime::api::dispatch(method, data)
-		}
-
-		fn native_version() -> sc_executor::NativeVersion {
-			tangle_runtime::native_version()
-		}
-	}
-}
-
-#[cfg(feature = "testnet")]
-pub mod testnet {
-	// Our native executor instance.
-	pub struct ExecutorDispatch;
-
-	impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
-		/// Only enable the benchmarking host functions when we actually want to benchmark.
-		#[cfg(feature = "runtime-benchmarks")]
-		type ExtendHostFunctions =
-			(frame_benchmarking::benchmarking::HostFunctions, primitives_ext::ext::HostFunctions);
-		/// Otherwise we only use the default Substrate host functions.
-		#[cfg(not(feature = "runtime-benchmarks"))]
-		type ExtendHostFunctions = primitives_ext::ext::HostFunctions;
-
-		fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-			tangle_testnet_runtime::api::dispatch(method, data)
-		}
-
-		fn native_version() -> sc_executor::NativeVersion {
-			tangle_testnet_runtime::native_version()
-		}
-	}
-}
-
-#[cfg(not(feature = "testnet"))]
 #[allow(deprecated)]
-pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<tangle::ExecutorDispatch>>;
+pub(crate) type FullClient = sc_service::TFullClient<Block, RuntimeApi, WasmExecutor>;
 
 #[cfg(feature = "testnet")]
 #[allow(deprecated)]
-pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<testnet::ExecutorDispatch>>;
+pub(crate) type FullClient = sc_service::TFullClient<Block, RuntimeApi, WasmExecutor>;
 
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
@@ -174,8 +124,12 @@ where
 		})
 		.transpose()?;
 
-	#[allow(deprecated)]
-	let executor = sc_service::new_native_or_wasm_executor(config);
+	// Create the WasmExecutor with allow_missing_host_functions flag set to true
+	let executor = WasmExecutor::builder()
+		.with_max_runtime_instances(config.max_runtime_instances)
+		.with_runtime_cache_size(config.runtime_cache_size)
+		.with_allow_missing_host_functions(true)
+		.build();
 
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(

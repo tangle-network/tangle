@@ -19,7 +19,7 @@ use std::{
 	time::Duration,
 };
 
-use futures::{future, prelude::*};
+use futures::StreamExt;
 // Substrate
 pub use fc_storage::{StorageOverride, StorageOverrideHandler};
 use sc_client_api::BlockchainEvents;
@@ -215,26 +215,33 @@ pub async fn spawn_frontier_tasks(
 	// Spawn main mapping sync worker background task.
 	match &*frontier_backend {
 		fc_db::Backend::KeyValue(b) => {
+			// Create a MappingSyncWorker and spawn it using StreamExt::for_each
+			let import_notifications = client.import_notification_stream();
+
+			let worker = fc_mapping_sync::kv::MappingSyncWorker::new(
+				import_notifications,
+				Duration::new(6, 0),
+				client.clone(),
+				backend,
+				storage_override.clone(),
+				b.clone(),
+				3,
+				0,
+				fc_mapping_sync::SyncStrategy::Normal,
+				sync,
+				pubsub_notification_sinks,
+			);
+
 			task_manager.spawn_essential_handle().spawn(
 				"frontier-mapping-sync-worker",
 				Some("frontier"),
-				fc_mapping_sync::kv::MappingSyncWorker::new(
-					client.import_notification_stream(),
-					Duration::new(6, 0),
-					client.clone(),
-					backend,
-					storage_override.clone(),
-					b.clone(),
-					3,
-					0,
-					fc_mapping_sync::SyncStrategy::Normal,
-					sync,
-					pubsub_notification_sinks,
-				)
-				.for_each(|()| future::ready(())),
+				worker.for_each(|_| futures::future::ready(())),
 			);
 		},
 		fc_db::Backend::Sql(b) => {
+			// Create a SyncWorker with blockchain notifications
+			let import_notifications = client.import_notification_stream();
+
 			task_manager.spawn_essential_handle().spawn_blocking(
 				"frontier-mapping-sync-worker",
 				Some("frontier"),
@@ -242,7 +249,7 @@ pub async fn spawn_frontier_tasks(
 					client.clone(),
 					backend,
 					b.clone(),
-					client.import_notification_stream(),
+					import_notifications,
 					fc_mapping_sync::sql::SyncWorkerConfig {
 						read_notification_timeout: Duration::from_secs(10),
 						check_indexed_blocks_interval: Duration::from_secs(60),
