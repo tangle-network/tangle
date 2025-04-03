@@ -29,7 +29,7 @@ use sc_consensus::BasicQueue;
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
-pub use sc_executor::NativeElseWasmExecutor;
+pub use sc_executor::WasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
@@ -99,12 +99,12 @@ pub mod testnet {
 #[cfg(not(feature = "testnet"))]
 #[allow(deprecated)]
 pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<tangle::ExecutorDispatch>>;
+	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<tangle::ExecutorDispatch>>;
 
 #[cfg(feature = "testnet")]
 #[allow(deprecated)]
 pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<testnet::ExecutorDispatch>>;
+	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<testnet::ExecutorDispatch>>;
 
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
