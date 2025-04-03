@@ -46,8 +46,7 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
 #[allow(deprecated)]
-pub(crate) type FullClient =
-	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor>;
+pub(crate) type FullClient = sc_service::TFullClient<Block, RuntimeApi, WasmExecutor>;
 
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
