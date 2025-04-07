@@ -168,7 +168,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1300, // v1.3.0
+	spec_version: 1302, // v1.3.2
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,

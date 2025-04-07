@@ -169,13 +169,28 @@ where
 			},
 		};
 
-		if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
-			T::RuntimeOrigin::from(RawOrigin::Root),
-			T::Lookup::unlookup(source_account_id),
-			T::Lookup::unlookup(team_account_id.clone()),
-			BalanceOf::<T>::from(amount),
-		) {
-			info!("Failed to transfer balance");
+		// Check free balance before transfer
+		let free_balance = pallet_balances::Pallet::<T>::free_balance(&source_account_id);
+		info!("Source account free balance before transfer: {:?}", free_balance);
+		info!("Amount to transfer: {:?}", amount);
+		
+		// Only transfer if sufficient free balance exists
+		let transfer_amount = BalanceOf::<T>::from(amount);
+		
+		if free_balance >= transfer_amount {
+			if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
+				T::RuntimeOrigin::from(RawOrigin::Root),
+				T::Lookup::unlookup(source_account_id),
+				T::Lookup::unlookup(team_account_id.clone()),
+				transfer_amount,
+			) {
+				info!("Failed to transfer balance: {:?}", _e);
+				return T::DbWeight::get().reads_writes(reads, writes);
+			} else {
+				info!("Successfully transferred balance to team account");
+			}
+		} else {
+			info!("Insufficient free balance for transfer: needed {:?}, had {:?}", transfer_amount, free_balance);
 			return T::DbWeight::get().reads_writes(reads, writes);
 		}
 
@@ -305,17 +320,27 @@ fn update_vesting_schedule<
 			acc.saturating_add(val)
 		});
 
-	// Calculate the difference between the amount to change to and the total vested amount
-	// Send the difference back to team account
-	let difference = match T::Balance::decode(
-		&mut amount_to_change_to.saturating_sub(total_vested).encode().as_ref(),
-	) {
-		Ok(diff) => diff,
-		Err(_e) => {
-			info!("Failed to decode difference amount");
-			return;
-		},
-	};
+	// Check if there is a difference to transfer
+	let mut difference_to_transfer = BalanceOf::<T>::zero();
+	
+	// If total_vested > amount_to_change_to, we need to transfer the difference back to team
+	if total_vested > amount_to_change_to {
+		// Calculate the difference safely without relying on decode
+		let vesting_diff = total_vested.saturating_sub(amount_to_change_to);
+		
+		match BalanceOf::<T>::try_from(vesting_diff.saturated_into::<u128>()) {
+			Ok(diff) => difference_to_transfer = diff,
+			Err(_) => {
+				info!("Failed to convert difference amount");
+				return;
+			},
+		}
+		
+		info!("Difference to transfer: {:?}", difference_to_transfer);
+	} else {
+		// No need to transfer anything if the new amount is larger or equal
+		info!("No difference to transfer or new amount is larger");
+	}
 
 	if total_vested.is_zero() {
 		return;
@@ -365,14 +390,29 @@ fn update_vesting_schedule<
 	// Update storage
 	Vesting::<T>::insert(account_id, bounded_new_schedules);
 
-	// Send the difference back to team account
-	if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
-		T::RuntimeOrigin::from(RawOrigin::Root),
-		T::Lookup::unlookup(account_id.clone()),
-		T::Lookup::unlookup(team_account_id.clone()),
-		BalanceOf::<T>::from(difference),
-	) {
-		info!("Failed to force transfer difference");
+	// Only attempt transfer if there's an actual difference to transfer
+	if !difference_to_transfer.is_zero() {
+		info!("Attempting to transfer difference");
+		
+		// Check free balance before transfer
+		let free_balance = pallet_balances::Pallet::<T>::free_balance(account_id);
+		info!("Account free balance before transfer: {:?}", free_balance);
+		
+		// Only transfer if sufficient free balance exists
+		if free_balance >= difference_to_transfer {
+			if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
+				T::RuntimeOrigin::from(RawOrigin::Root),
+				T::Lookup::unlookup(account_id.clone()),
+				T::Lookup::unlookup(team_account_id.clone()),
+				difference_to_transfer,
+			) {
+				info!("Failed to force transfer difference: {:?}", _e);
+			} else {
+				info!("Successfully transferred difference to team account");
+			}
+		} else {
+			info!("Insufficient free balance for transfer: needed {:?}, had {:?}", difference_to_transfer, free_balance);
+		}
 	}
 }
 
