@@ -19,7 +19,7 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 use tangle_primitives::types::rewards::UserDepositWithLocks;
-use tangle_primitives::{services::Asset, traits::MultiAssetDelegationInfo, RoundIndex};
+use tangle_primitives::{RoundIndex, services::Asset, traits::MultiAssetDelegationInfo};
 
 impl<T: crate::Config>
 	MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>, T::AssetId>

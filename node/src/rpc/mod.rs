@@ -19,11 +19,11 @@ use jsonrpsee::RpcModule;
 use std::sync::Arc;
 // Substrate
 use pallet_ismp_rpc::{IsmpApiServer, IsmpRpcHandler};
+use sc_client_api::{BlockBackend, ProofProvider};
 use sc_client_api::{
 	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
 };
-use sc_client_api::{BlockBackend, ProofProvider};
 use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState,
@@ -50,7 +50,7 @@ use tangle_testnet_runtime::{AccountId, AssetId, Balance, Hash, Index, PalletSer
 
 pub mod eth;
 pub mod tracing;
-pub use self::eth::{create_eth, EthDeps};
+pub use self::eth::{EthDeps, create_eth};
 
 /// Extra dependencies for BABE.
 pub struct BabeDeps {
@@ -123,11 +123,11 @@ where
 	C::Api: sp_block_builder::BlockBuilder<Block>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: pallet_services_rpc::ServicesRuntimeApi<
-		Block,
-		PalletServicesConstraints,
-		AccountId,
-		AssetId,
-	>,
+			Block,
+			PalletServicesConstraints,
+			AccountId,
+			AssetId,
+		>,
 	C::Api: pallet_rewards_rpc::RewardsRuntimeApi<Block, AccountId, AssetId, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,

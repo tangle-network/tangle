@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::{constraints::Constraints, BoundedString};
+use super::{BoundedString, constraints::Constraints};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
 

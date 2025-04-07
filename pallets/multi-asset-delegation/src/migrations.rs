@@ -15,8 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	types::{delegator::*, DelegatorMetadata},
 	Config, Delegators,
+	types::{DelegatorMetadata, delegator::*},
 };
 use frame_support::storage::unhashed;
 use frame_support::traits::Currency;
@@ -25,7 +25,7 @@ use frame_system;
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_std::collections::btree_map::BTreeMap;
 use sp_std::marker::PhantomData;
-use tangle_primitives::{services::Asset, RoundIndex};
+use tangle_primitives::{RoundIndex, services::Asset};
 
 /// Migration to update DelegatorMetadata structure with new field names and add is_nomination field
 pub struct DelegatorMetadataMigration<T>(PhantomData<T>);

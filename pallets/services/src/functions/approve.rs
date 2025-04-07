@@ -15,22 +15,22 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	types::*, Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet,
-	ServiceRequests, ServiceStatus, StagingServicePayments, UserServices,
+	Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet, ServiceRequests,
+	ServiceStatus, StagingServicePayments, UserServices, types::*,
 };
 use frame_support::{
 	pallet_prelude::*,
-	traits::{fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement},
+	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
 };
 use frame_system::pallet_prelude::*;
 use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
 use tangle_primitives::{
+	BlueprintId,
 	services::{
 		ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
 		StagingServicePayment,
 	},
-	BlueprintId,
 };
 
 impl<T: Config> Pallet<T> {
@@ -106,11 +106,7 @@ impl<T: Config> Pallet<T> {
 			.operators_with_approval_state
 			.iter()
 			.filter_map(|(op, state)| {
-				if matches!(state, ApprovalState::Pending) {
-					Some(op.clone())
-				} else {
-					None
-				}
+				if matches!(state, ApprovalState::Pending) { Some(op.clone()) } else { None }
 			})
 			.collect::<Vec<_>>();
 

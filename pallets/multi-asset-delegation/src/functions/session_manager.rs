@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{types::*, AtStake, Config, CurrentRound, Operators, Pallet};
+use crate::{AtStake, Config, CurrentRound, Operators, Pallet, types::*};
 
 impl<T: Config> Pallet<T> {
 	pub fn handle_round_change(i: u32) {

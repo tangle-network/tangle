@@ -9,7 +9,7 @@ use rand_core::{CryptoRng, RngCore};
 use criterion::{BenchmarkId, Criterion, Throughput};
 
 use crate as frost;
-use crate::{batch, Ciphersuite, Signature, SigningKey, VerifyingKey};
+use crate::{Ciphersuite, Signature, SigningKey, VerifyingKey, batch};
 
 struct Item<C: Ciphersuite> {
 	vk: VerifyingKey<C>,

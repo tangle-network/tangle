@@ -28,15 +28,15 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{ed25519, sr25519, Pair, Public, H160, U256};
+use sp_core::{H160, Pair, Public, U256, ed25519, sr25519};
 use sp_runtime::{
-	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
 };
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::{
-	types::{BlockNumber, Signature},
 	TESTNET_LOCAL_SS58_PREFIX,
+	types::{BlockNumber, Signature},
 };
 use tangle_testnet_runtime::{
 	AccountId, Balance, MaxVestingSchedules, Perbill, Precompiles, StakerStatus, TreasuryPalletId,

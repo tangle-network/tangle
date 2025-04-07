@@ -27,7 +27,7 @@ use frame_support::traits::{Currency, Get};
 use honggfuzz::fuzz;
 use pallet_evm::AddressMapping;
 use pallet_evm_precompile_multi_asset_delegation::{
-	mock::*, mock_evm::PrecompilesValue, MultiAssetDelegationPrecompileCall as MADPrecompileCall,
+	MultiAssetDelegationPrecompileCall as MADPrecompileCall, mock::*, mock_evm::PrecompilesValue,
 };
 use pallet_multi_asset_delegation::{
 	mock::{Asset, AssetId},
@@ -36,10 +36,10 @@ use pallet_multi_asset_delegation::{
 };
 use precompile_utils::prelude::*;
 use precompile_utils::testing::*;
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, seq::SliceRandom};
 use sp_core::U256;
-use sp_runtime::traits::Scale;
 use sp_runtime::DispatchResult;
+use sp_runtime::traits::Scale;
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
@@ -47,7 +47,7 @@ const MIN_ED_MULTIPLE: Balance = 10;
 type PCall = MADPrecompileCall<Runtime>;
 
 fn random_address<R: Rng>(rng: &mut R) -> Address {
-	Address(rng.gen::<[u8; 20]>().into())
+	Address(rng.r#gen::<[u8; 20]>().into())
 }
 
 /// Grab random accounts.
@@ -65,7 +65,7 @@ fn random_ed_multiple<R: Rng>(rng: &mut R) -> Balance {
 fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
 	let is_evm = rng.gen_bool(0.5);
 	if is_evm {
-		let evm_address = rng.gen::<[u8; 20]>().into();
+		let evm_address = rng.r#gen::<[u8; 20]>().into();
 		Asset::Erc20(evm_address)
 	} else {
 		Asset::Custom(0)
@@ -153,7 +153,7 @@ fn random_calls<R: Rng>(mut rng: &mut R) -> impl IntoIterator<Item = (PCall, Add
 			let amount = random_ed_multiple(&mut rng).into();
 			let blueprint_selection = {
 				let count = rng.gen_range(1..MaxDelegatorBlueprints::get());
-				(0..count).map(|_| rng.gen::<u64>()).collect::<Vec<_>>()
+				(0..count).map(|_| rng.r#gen::<u64>()).collect::<Vec<_>>()
 			};
 			join_operators(&mut rng, &operator).unwrap();
 			vec![(
@@ -228,7 +228,7 @@ fn main() {
 	let to = Precompile1.into();
 	loop {
 		fuzz!(|seed: [u8; 32]| {
-			use ::rand::{rngs::SmallRng, SeedableRng};
+			use ::rand::{SeedableRng, rngs::SmallRng};
 			let mut rng = SmallRng::from_seed(seed);
 
 			ext.execute_with(|| {
@@ -277,7 +277,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 	let caller = <TestAccount as AddressMapping<AccountId>>::into_account_id(origin.0);
 	match call {
 		PCall::deposit { asset_id, amount, token_address, lock_multiplier: 0 } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
 				(0, erc20_token) if erc20_token != [0; 20] => {
 					(Asset::Erc20(erc20_token.into()), amount)
 				},
@@ -308,7 +308,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			);
 		},
 		PCall::schedule_withdraw { asset_id, amount, token_address } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
 				(0, erc20_token) if erc20_token != [0; 20] => {
 					(Asset::Erc20(erc20_token.into()), amount)
 				},
@@ -339,7 +339,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		PCall::cancel_withdraw { asset_id, amount, token_address } => {
 			let round = MultiAssetDelegation::current_round();
 
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
 				(0, erc20_token) if erc20_token != [0; 20] => {
 					(Asset::Erc20(erc20_token.into()), amount)
 				},
@@ -358,7 +358,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			);
 		},
 		PCall::delegate { operator, asset_id, amount, token_address, .. } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
 				(0, erc20_token) if erc20_token != [0; 20] => {
 					(Asset::Erc20(erc20_token.into()), amount)
 				},
@@ -372,13 +372,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 				delegator
 					.calculate_delegation_by_operator(operator_account)
 					.iter()
-					.find_map(|x| {
-						if x.asset == deposit_asset {
-							Some(x.amount)
-						} else {
-							None
-						}
-					})
+					.find_map(|x| { if x.asset == deposit_asset { Some(x.amount) } else { None } })
 					.ge(&Some(amount.as_u64())),
 				"delegation amount not set"
 			);

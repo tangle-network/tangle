@@ -88,12 +88,12 @@ use tangle_primitives::BlueprintId;
 pub mod pallet {
 	use super::*;
 	use frame_support::{
+		PalletId,
 		pallet_prelude::*,
 		traits::{Currency, LockableCurrency, ReservableCurrency},
-		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::{traits::AccountIdConversion, Perbill};
+	use sp_runtime::{Perbill, traits::AccountIdConversion};
 	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
@@ -124,11 +124,11 @@ pub mod pallet {
 
 		/// Manager for getting operator stake and delegation info
 		type DelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
-			Self::AccountId,
-			BalanceOf<Self>,
-			BlockNumberFor<Self>,
-			Self::AssetId,
-		>;
+				Self::AccountId,
+				BalanceOf<Self>,
+				BlockNumberFor<Self>,
+				Self::AssetId,
+			>;
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;

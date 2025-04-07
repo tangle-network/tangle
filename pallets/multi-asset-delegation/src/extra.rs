@@ -72,12 +72,12 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
 				}
 			},
-			RuntimeCall::Proxy(pallet_proxy::Call::proxy { ref call, real, .. }) => {
+			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) => {
 				self.validate(real, call, _info, _len)
 			},
-			RuntimeCall::Utility(pallet_utility::Call::batch { ref calls })
-			| RuntimeCall::Utility(pallet_utility::Call::batch_all { ref calls })
-			| RuntimeCall::Utility(pallet_utility::Call::force_batch { ref calls }) => {
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls })
+			| RuntimeCall::Utility(pallet_utility::Call::batch_all { calls })
+			| RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
 					self.validate(who, call, _info, _len)?;
 				}

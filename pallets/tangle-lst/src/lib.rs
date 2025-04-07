@@ -110,27 +110,25 @@
 use codec::Codec;
 use frame_support::traits::fungibles::metadata::Mutate;
 use frame_support::{
-	defensive, defensive_assert, ensure,
+	DefaultNoBound, PalletError, defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		fungibles,
+		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
+		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency, fungibles,
 		fungibles::{Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate},
 		tokens::{Fortitude, Precision, Preservation},
-		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
-		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency,
 	},
-	DefaultNoBound, PalletError,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_core::U256;
 use sp_runtime::{
+	FixedPointNumber, Perbill,
 	traits::{
 		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating,
 		StaticLookup, Zero,
 	},
-	FixedPointNumber, Perbill,
 };
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};

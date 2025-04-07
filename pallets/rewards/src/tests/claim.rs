@@ -1,7 +1,7 @@
 use crate::{
-	mock::*, tests::reward_calc::setup_test_env, AssetAction, BalanceOf, DecayRate,
-	DecayStartPeriod, Error, Pallet as RewardsPallet, RewardConfigForAssetVault,
-	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
+	AssetAction, BalanceOf, DecayRate, DecayStartPeriod, Error, Pallet as RewardsPallet,
+	RewardConfigForAssetVault, TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward,
+	mock::*, tests::reward_calc::setup_test_env,
 };
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::Perbill;

@@ -1,10 +1,10 @@
 use rand::Rng;
 use sc_service::{ChainType, Configuration};
-use sp_core::{ed25519, sr25519, ByteArray, Pair, Public};
+use sp_core::{ByteArray, Pair, Public, ed25519, sr25519};
 use sp_keystore::{Keystore, KeystorePtr};
 use sp_runtime::{
-	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 	KeyTypeId,
+	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 };
 
 /// Helper function to generate a crypto pair from seed.

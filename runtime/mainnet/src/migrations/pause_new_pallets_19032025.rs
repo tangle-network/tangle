@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight, BoundedVec};
+use frame_support::{BoundedVec, pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
 use sp_runtime::{DispatchError, DispatchResult};
 use sp_std::{marker::PhantomData, vec::Vec};
 

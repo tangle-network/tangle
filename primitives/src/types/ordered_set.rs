@@ -1,4 +1,4 @@
-use frame_support::{traits::Get, BoundedVec, CloneNoBound, DefaultNoBound, PartialEqNoBound};
+use frame_support::{BoundedVec, CloneNoBound, DefaultNoBound, PartialEqNoBound, traits::Get};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]

@@ -167,11 +167,7 @@ where
 {
 	if deserializer.is_human_readable() {
 		let s: alloc::string::String = serde::de::Deserialize::deserialize(deserializer)?;
-		if s != C::ID {
-			Err(serde::de::Error::custom("wrong ciphersuite"))
-		} else {
-			Ok(())
-		}
+		if s != C::ID { Err(serde::de::Error::custom("wrong ciphersuite")) } else { Ok(()) }
 	} else {
 		let buffer: [u8; 4] = serde::de::Deserialize::deserialize(deserializer)?;
 		if buffer != short_id::<C>() {

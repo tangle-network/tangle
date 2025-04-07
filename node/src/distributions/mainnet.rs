@@ -28,7 +28,7 @@ use crate::testnet_fixtures::{get_initial_authorities, get_testnet_root_key as g
 use hex_literal::hex;
 use pallet_airdrop_claims::{EthereumAddress, MultiAddress, StatementKind};
 use sp_core::H160;
-use sp_runtime::{traits::AccountIdConversion, AccountId32};
+use sp_runtime::{AccountId32, traits::AccountIdConversion};
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::types::BlockNumber;
 use tangle_runtime::{AccountId, Balance, Perbill, UNIT};
@@ -260,8 +260,8 @@ pub fn get_team_balance_distribution() -> Vec<(MultiAddress, u128, u64, u64, u12
 	compute_balance_distribution_with_cliff_and_vesting(team_accounts)
 }
 
-pub fn get_initial_endowed_accounts(
-) -> (Vec<(AccountId, u128)>, Vec<(H160, fp_evm::GenesisAccount)>) {
+pub fn get_initial_endowed_accounts()
+-> (Vec<(AccountId, u128)>, Vec<(H160, fp_evm::GenesisAccount)>) {
 	let mut endowed_accounts = vec![];
 
 	let pallet_id = tangle_primitives::treasury::TREASURY_PALLET_ID;
