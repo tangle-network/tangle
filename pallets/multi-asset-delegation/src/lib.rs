@@ -159,10 +159,6 @@ pub mod pallet {
 		#[pallet::constant]
 		type MinDelegateAmount: Get<BalanceOf<Self>>;
 
-		/// The duration for which the stake is locked.
-		#[pallet::constant]
-		type BondDuration: Get<RoundIndex>;
-
 		/// The service manager that manages active services.
 		type ServiceManager: ServiceManager<Self::AccountId, BalanceOf<Self>>;
 

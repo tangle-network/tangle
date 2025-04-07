@@ -324,7 +324,7 @@ parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const MaxLocks: u32 = 50;
 	pub const MinOperatorBondAmount: u64 = 10_000;
-	pub const BondDuration: u32 = 10;
+
 	pub PID: PalletId = PalletId(*b"PotStake");
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]

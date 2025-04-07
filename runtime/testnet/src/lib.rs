@@ -96,6 +96,7 @@ use sp_std::{prelude::*, vec::Vec};
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 
 pub use frame_support::{
@@ -179,7 +180,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1219, // v1.2.19
+	spec_version: 1300, // v1.3.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1501,7 +1502,7 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 
 parameter_types! {
 	pub const MinOperatorBondAmount: Balance = 100;
-	pub const BondDuration: u32 = 10;
+
 	pub const MinDelegateAmount : Balance = 1;
 	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -1552,7 +1553,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
+
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = Services;

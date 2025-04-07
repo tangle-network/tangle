@@ -43,6 +43,7 @@ use sp_runtime::{
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
 	traits::RewardsManager,
@@ -406,6 +407,7 @@ impl pallet_services::Config for Runtime {
 	type OperatorDelegationManager = MultiAssetDelegation;
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
+	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
 }
 
@@ -484,10 +486,6 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const BondDuration: u32 = 28;
-
-	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxDelegatorBlueprints: u32 = 10;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -513,7 +511,6 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type SlashRecipient = SlashRecipient;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = Services;

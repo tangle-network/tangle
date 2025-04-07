@@ -82,6 +82,7 @@ use sp_runtime::{
 	SaturatedConversion,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
+pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 pub use tangle_services::PalletServicesConstraints;
 
@@ -212,6 +213,7 @@ pub mod opaque {
 			pub babe: Babe,
 			pub grandpa: Grandpa,
 			pub im_online: ImOnline,
+			pub role: Services,
 		}
 	}
 }
@@ -1037,8 +1039,8 @@ impl pallet_tx_pause::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BasicDeposit: Balance = deposit(0, 100);
-	pub const ByteDeposit: Balance = deposit(0, 100);
+	pub const BasicDeposit: Balance = deposit(0, 10);
+	pub const ByteDeposit: Balance = deposit(0, 10);
 	pub const SubAccountDeposit: Balance = deposit(1, 1);
 	pub const MaxSubAccounts: u32 = 100;
 	#[derive(Serialize, Deserialize)]
@@ -1198,9 +1200,9 @@ impl pallet_proxy::Config for Runtime {
 }
 
 parameter_types! {
-	pub const AssetDeposit: Balance = 10 * UNIT;
-	pub const AssetAccountDeposit: Balance = DOLLAR;
-	pub const ApprovalDeposit: Balance = ExistentialDeposit::get();
+	pub const AssetDeposit: Balance = 0;
+	pub const AssetAccountDeposit: Balance = 0;
+	pub const ApprovalDeposit: Balance = 0;
 	pub const AssetsStringLimit: u32 = 50;
 	// set to zero since only the LST pallet is allowed to create assets
 	pub const MetadataDepositBase: Balance = 0;
@@ -1212,12 +1214,6 @@ pub type AssetId = u128;
 
 #[cfg(feature = "runtime-benchmarks")]
 pub type AssetId = u32;
-
-// impl tangle_primitives::traits::NextAssetId<AssetId> for Runtime {
-// 	fn next_asset_id() -> Option<AssetId> {
-// 		pallet_assets::NextAssetId::<Runtime, GeneralAssetsInstance>::get()
-// 	}
-// }
 
 ord_parameter_types! {
 	pub const LstPalletOrigin: sp_runtime::AccountId32 =
@@ -1235,7 +1231,7 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	// only lst pallet can create pool tokens
 	type CreateOrigin =
 		AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
-	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type AssetDeposit = AssetDeposit;
 	type AssetAccountDeposit = AssetAccountDeposit;
 	type MetadataDepositBase = MetadataDepositBase;
@@ -1252,20 +1248,40 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 10_000;
-	pub const BondDuration: u32 = 10;
-	pub const MinDelegateAmount : Balance = 1000;
+	// Min operator bond amount to `join_operators`
+	pub const MinOperatorBondAmount: Balance = 10 * UNIT;
+	// Min delegate amount to `delegate`
+	pub const MinDelegateAmount : Balance = 10 * UNIT;
+	// Time delay for leaving operators, time between `schedule_leave_operators` and `execute_leave_operators`
+	pub const LeaveOperatorsDelay: u32 = 14;
+	// Time delay for reducing operator bond
+	pub const OperatorBondLessDelay: u32 = 14;
+	// Time delay for leaving delegators, time between `schedule_withdraw` and `execute_withdraw`
+	pub const LeaveDelegatorsDelay: u32 = 7;
+	// Time delay for reducing delegation bond, time between `schedule_delegator_unstake` and `execute_delegator_unstake`
+	pub const DelegationBondLessDelay: u32 = 7;
+
 	pub PID: PalletId = PalletId(*b"PotStake");
+
+	// Max number of blueprints a delegator can have in Fixed mode per operator
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegatorBlueprints : u32 = 50;
+	pub const MaxDelegatorBlueprints : u32 = 16;
+
+	// Max number of blueprints an operator can support
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxOperatorBlueprints : u32 = 50;
+	pub const MaxOperatorBlueprints : u32 = 16;
+
+	// Max number of withdraw requests a delegator can have
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxWithdrawRequests: u32 = 5;
+	pub const MaxWithdrawRequests: u32 = 8;
+
+	// Max number of unstake requests a delegator can have
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxUnstakeRequests: u32 = 5;
+	pub const MaxUnstakeRequests: u32 = 8;
+
+	// Max number of delegations a delegator can have
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegations: u32 = 50;
+	pub const MaxDelegations: u32 = 64;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -1273,18 +1289,17 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type Currency = Balances;
 	type SlashRecipient = TreasuryAccount;
 	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type BondDuration = BondDuration;
 	type CurrencyToVote = U128CurrencyToVote;
 	type StakingInterface = Staking;
 	type ServiceManager = Services;
-	type LeaveOperatorsDelay = ConstU32<10>;
-	type OperatorBondLessDelay = ConstU32<1>;
-	type LeaveDelegatorsDelay = ConstU32<1>;
-	type DelegationBondLessDelay = ConstU32<5>;
+	type LeaveOperatorsDelay = LeaveOperatorsDelay;
+	type OperatorBondLessDelay = OperatorBondLessDelay;
+	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
+	type DelegationBondLessDelay = DelegationBondLessDelay;
 	type MinDelegateAmount = MinDelegateAmount;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
-	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type PalletId = PID;
 	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
 	type MaxOperatorBlueprints = MaxOperatorBlueprints;
@@ -1299,8 +1314,9 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 }
 
 parameter_types! {
+	// `PostUnbondingPoolsWindow` taken from polkadot runtime
 	pub const PostUnbondingPoolsWindow: u32 = 2;
-	pub const MaxMetadataLen: u32 = 2;
+	pub const MaxMetadataLen: u32 = 256;
 	pub const CheckLevel: u8 = 255;
 	pub const LstPalletId: PalletId = PalletId(*b"py/tnlst");
 }
@@ -1324,7 +1340,7 @@ impl pallet_tangle_lst::Config for Runtime {
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type PoolId = AssetId;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type MaxPointsToBalance = frame_support::traits::ConstU8<10>;
 }
 
@@ -1332,7 +1348,7 @@ parameter_types! {
 	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
 	pub const MaxDepositCap: u128 = UNIT * 100_000_000;
 	pub const MaxIncentiveCap: u128 = UNIT * 100_000_000;
-	pub const MaxApy: Perbill = Perbill::from_percent(20);
+	pub const MaxApy: Perbill = Perbill::from_percent(2);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
 }
@@ -1344,7 +1360,7 @@ impl pallet_rewards::Config for Runtime {
 	type PalletId = RewardsPID;
 	type VaultId = u32;
 	type DelegationManager = MultiAssetDelegation;
-	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type MaxApy = MaxApy;
 	type MaxDepositCap = MaxDepositCap;
 	type MaxIncentiveCap = MaxIncentiveCap;
@@ -1478,7 +1494,6 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 	(
-		migrations::session_key_migrations_08062024::MigrateSessionKeys<Runtime>,
 		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
 		migrations::slashing_enabled_03062025::EnsureSlashingNotEnabled<Runtime>,
 		migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,
