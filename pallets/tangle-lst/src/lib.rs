@@ -105,6 +105,7 @@
 //! always has the correct ED, even if the ED requirement changes over time.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::unused_unit, clippy::useless_conversion, clippy::type_complexity)]
 
 use codec::Codec;
 use frame_support::traits::fungibles::metadata::Mutate;
@@ -1212,7 +1213,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `min_join_bond` - Config operation for minimum bond to join a pool
-		/// * `min_create_bond` - Config operation for minimum bond to create a pool  
+		/// * `min_create_bond` - Config operation for minimum bond to create a pool
 		/// * `max_pools` - Config operation for maximum number of pools
 		/// * `global_max_commission` - Config operation for maximum global commission
 		///
@@ -1261,7 +1262,7 @@ pub mod pallet {
 		/// * `origin` - Origin of the call
 		/// * `pool_id` - Pool identifier
 		/// * `new_root` - New root role configuration
-		/// * `new_nominator` - New nominator role configuration  
+		/// * `new_nominator` - New nominator role configuration
 		/// * `new_bouncer` - New bouncer role configuration
 		///
 		/// # Errors
@@ -1758,7 +1759,7 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(
-			MaxPools::<T>::get().map_or(true, |max_pools| BondedPools::<T>::count() < max_pools),
+			MaxPools::<T>::get().is_none_or(|max_pools| BondedPools::<T>::count() < max_pools),
 			Error::<T>::MaxPools
 		);
 

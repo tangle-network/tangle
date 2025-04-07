@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(clippy::unused_unit)]
-#![allow(clippy::type_complexity)]
+#![allow(clippy::unused_unit, clippy::useless_conversion, clippy::type_complexity)]
 
 #[cfg(not(feature = "std"))]
 extern crate alloc;
@@ -1549,7 +1548,7 @@ pub mod module {
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
-		/// * `era` - Era containing the slash to dispute  
+		/// * `era` - Era containing the slash to dispute
 		/// * `index` - Index of the slash within the era
 		///
 		/// # Errors
