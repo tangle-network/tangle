@@ -89,9 +89,9 @@ pub mod pallet {
 	use crate::types::{delegator::DelegatorBlueprintSelection, *};
 	use crate::weights::WeightInfo;
 	use frame_support::{
-		pallet_prelude::*,
-		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
 		PalletId,
+		pallet_prelude::*,
+		traits::{Currency, Get, LockableCurrency, ReservableCurrency, tokens::fungibles},
 	};
 	use frame_system::pallet_prelude::*;
 	use pallet_session::SessionManager;
@@ -103,8 +103,8 @@ pub mod pallet {
 	use tangle_primitives::traits::RewardsManager;
 	use tangle_primitives::types::rewards::LockMultiplier;
 	use tangle_primitives::{
-		services::Asset, services::EvmAddressMapping, traits::ServiceManager, BlueprintId,
-		RoundIndex,
+		BlueprintId, RoundIndex, services::Asset, services::EvmAddressMapping,
+		traits::ServiceManager,
 	};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -202,21 +202,21 @@ pub mod pallet {
 
 		/// Type that implements the reward manager trait
 		type RewardsManager: tangle_primitives::traits::RewardsManager<
-			Self::AccountId,
-			Self::AssetId,
-			BalanceOf<Self>,
-			BlockNumberFor<Self>,
-		>;
+				Self::AccountId,
+				Self::AssetId,
+				BalanceOf<Self>,
+				BlockNumberFor<Self>,
+			>;
 
 		/// Currency to vote conversion
 		type CurrencyToVote: sp_staking::currency_to_vote::CurrencyToVote<BalanceOf<Self>>;
 
 		/// Interface to the staking system for nomination information
 		type StakingInterface: StakingInterface<
-			AccountId = Self::AccountId,
-			Balance = BalanceOf<Self>,
-			CurrencyToVote = Self::CurrencyToVote,
-		>;
+				AccountId = Self::AccountId,
+				Balance = BalanceOf<Self>,
+				CurrencyToVote = Self::CurrencyToVote,
+			>;
 
 		#[pallet::constant]
 		type SlashRecipient: Get<Self::AccountId>;

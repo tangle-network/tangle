@@ -25,11 +25,7 @@ use crate::{Ciphersuite, Element, Field, Group, Scalar};
 const fn div_ceil(lhs: usize, rhs: usize) -> usize {
 	let d = lhs / rhs;
 	let r = lhs % rhs;
-	if r > 0 && rhs > 0 {
-		d + 1
-	} else {
-		d
-	}
+	if r > 0 && rhs > 0 { d + 1 } else { d }
 }
 
 /// A trait for transforming a scalar generic over a ciphersuite to a non-adjacent form (NAF).

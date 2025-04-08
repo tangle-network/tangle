@@ -21,7 +21,7 @@ impl<T: Config> Pallet<T> {
 		// Validate membership model
 		match instance.membership_model {
 			MembershipModel::Fixed { .. } => {
-				return Err(Error::<T>::DynamicMembershipNotSupported.into())
+				return Err(Error::<T>::DynamicMembershipNotSupported.into());
 			},
 			MembershipModel::Dynamic { max_operators, .. } => {
 				// Check max operators if set
@@ -89,7 +89,7 @@ impl<T: Config> Pallet<T> {
 		// Validate membership model
 		match instance.membership_model {
 			MembershipModel::Fixed { .. } => {
-				return Err(Error::<T>::DynamicMembershipNotSupported.into())
+				return Err(Error::<T>::DynamicMembershipNotSupported.into());
 			},
 			MembershipModel::Dynamic { min_operators, .. } => {
 				// Ensure minimum operators maintained

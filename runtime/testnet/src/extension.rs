@@ -97,7 +97,7 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 				}
 			},
 			// Match on Proxy calls
-			RuntimeCall::Proxy(pallet_proxy::Call::proxy { ref call, real, .. }) => {
+			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) => {
 				// Convert MultiAddress to AccountId
 				if let sp_runtime::MultiAddress::Id(account_id) = real {
 					self.validate(account_id, call, _info, _len)
@@ -107,9 +107,9 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 				}
 			},
 			// Match on various Utility batch calls
-			RuntimeCall::Utility(pallet_utility::Call::batch { ref calls })
-			| RuntimeCall::Utility(pallet_utility::Call::batch_all { ref calls })
-			| RuntimeCall::Utility(pallet_utility::Call::force_batch { ref calls }) => {
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls })
+			| RuntimeCall::Utility(pallet_utility::Call::batch_all { calls })
+			| RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
 					self.validate(who, call, _info, _len)?;
 				}

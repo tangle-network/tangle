@@ -14,16 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{types::*, Config, Error, Operators, Pallet};
+use crate::{Config, Error, Operators, Pallet, types::*};
 use frame_support::{
-	ensure,
+	BoundedVec, ensure,
 	pallet_prelude::DispatchResult,
 	traits::{Get, ReservableCurrency},
-	BoundedVec,
 };
 use sp_runtime::{
-	traits::{CheckedAdd, CheckedSub},
 	DispatchError,
+	traits::{CheckedAdd, CheckedSub},
 };
 use tangle_primitives::traits::ServiceManager;
 

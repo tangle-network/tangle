@@ -29,14 +29,14 @@ use frame_support::{
 use frame_system::ensure_signed_or_root;
 use honggfuzz::fuzz;
 use pallet_multi_asset_delegation::{mock::*, pallet as mad, types::*};
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, seq::SliceRandom};
 use sp_runtime::traits::{Scale, Zero};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
 
 fn random_account_id<R: Rng>(rng: &mut R) -> AccountId {
-	rng.gen::<[u8; 32]>().into()
+	rng.r#gen::<[u8; 32]>().into()
 }
 
 /// Grab random accounts.
@@ -54,7 +54,7 @@ fn random_asset<R: Rng>(rng: &mut R) -> Asset<AssetId> {
 	let asset = rng.gen_range(1..u128::MAX);
 	let is_evm = rng.gen_bool(0.5);
 	if is_evm {
-		let evm_address = rng.gen::<[u8; 20]>().into();
+		let evm_address = rng.r#gen::<[u8; 20]>().into();
 		Asset::Erc20(evm_address)
 	} else {
 		Asset::Custom(asset)
@@ -193,7 +193,7 @@ fn random_calls<R: Rng>(
 			let asset = random_asset(&mut rng);
 			let amount = random_ed_multiple(&mut rng);
 			let evm_address =
-				if rng.gen_bool(0.5) { Some(rng.gen::<[u8; 20]>().into()) } else { None };
+				if rng.gen_bool(0.5) { Some(rng.r#gen::<[u8; 20]>().into()) } else { None };
 			[(mad::Call::deposit { asset, amount, evm_address, lock_multiplier: None }, origin)]
 				.to_vec()
 		},
@@ -210,7 +210,7 @@ fn random_calls<R: Rng>(
 			let (origin, who) = random_signed_origin(&mut rng);
 			fund_account(&mut rng, &who);
 			let evm_address =
-				if rng.gen_bool(0.5) { Some(rng.gen::<[u8; 20]>().into()) } else { None };
+				if rng.gen_bool(0.5) { Some(rng.r#gen::<[u8; 20]>().into()) } else { None };
 			[(mad::Call::execute_withdraw { evm_address }, origin)].to_vec()
 		},
 		"cancel_withdraw" => {
@@ -236,7 +236,7 @@ fn random_calls<R: Rng>(
 					let count = rng.gen_range(1..MaxDelegatorBlueprints::get());
 					DelegatorBlueprintSelection::Fixed(
 						(0..count)
-							.map(|_| rng.gen::<u64>())
+							.map(|_| rng.r#gen::<u64>())
 							.collect::<Vec<_>>()
 							.try_into()
 							.unwrap(),
@@ -293,7 +293,7 @@ fn main() {
 	let mut block_number = 1;
 	loop {
 		fuzz!(|seed: [u8; 32]| {
-			use ::rand::{rngs::SmallRng, SeedableRng};
+			use ::rand::{SeedableRng, rngs::SmallRng};
 			let mut rng = SmallRng::from_seed(seed);
 
 			ext.execute_with(|| {
@@ -459,13 +459,7 @@ fn do_sanity_checks(call: mad::Call<Runtime>, origin: RuntimeOrigin, outcome: Po
 				delegator
 					.calculate_delegation_by_operator(operator)
 					.iter()
-					.find_map(|x| {
-						if x.asset == asset {
-							Some(x.amount)
-						} else {
-							None
-						}
-					})
+					.find_map(|x| { if x.asset == asset { Some(x.amount) } else { None } })
 					.ge(&Some(amount)),
 				"delegation amount not set"
 			);

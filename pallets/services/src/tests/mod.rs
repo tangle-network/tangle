@@ -19,8 +19,8 @@ use std::collections::BTreeMap;
 pub use super::*;
 pub use crate::mock::*;
 use frame_support::assert_ok;
-use sp_core::bounded_vec;
 use sp_core::Pair;
+use sp_core::bounded_vec;
 use sp_runtime::Percent;
 use tangle_primitives::services::*;
 

@@ -2,8 +2,8 @@ use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
 use log::info;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::{
-	traits::{Convert, EnsureDiv, Header, Zero},
 	Percent, Saturating,
+	traits::{Convert, EnsureDiv, Header, Zero},
 };
 use sp_std::vec::Vec;
 

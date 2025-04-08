@@ -24,8 +24,8 @@ use sp_core::H160;
 use serde::{Deserialize, Serialize};
 
 use super::{
-	field::{Field, FieldType},
 	BoundedString,
+	field::{Field, FieldType},
 };
 
 /// A Job Definition is a definition of a job that can be called.

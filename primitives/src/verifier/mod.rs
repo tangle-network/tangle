@@ -12,7 +12,7 @@ pub fn to_field_elements<F: PrimeField>(bytes: &[u8]) -> Result<Vec<F>, Error> {
 	// Pad the input with zeros to prevent crashes in arkworks
 	let padding_len = (max_size_bytes - (bytes.len() % max_size_bytes)) % max_size_bytes;
 	let padded_input: Vec<u8> =
-		bytes.iter().cloned().chain(core::iter::repeat(0u8).take(padding_len)).collect();
+		bytes.iter().cloned().chain(core::iter::repeat_n(0u8, padding_len)).collect();
 
 	// Reverse all chunks so the values are formatted in little-endian.
 	// This is necessary because arkworks assumes little-endian.

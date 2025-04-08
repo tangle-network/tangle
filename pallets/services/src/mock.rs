@@ -19,13 +19,13 @@ use crate::{self as pallet_services};
 use core::ops::Mul;
 use ethabi::Uint;
 use frame_election_provider_support::{
+	SequentialPhragmen,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
-	onchain, SequentialPhragmen,
+	onchain,
 };
 use frame_support::{
-	construct_runtime, derive_impl, parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, Hooks, OneSessionHandler},
-	PalletId,
+	PalletId, construct_runtime, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, Hooks, OneSessionHandler},
 };
 use frame_system::EnsureRoot;
 use pallet_evm::GasWeightMapping;
@@ -33,12 +33,12 @@ use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde_json::json;
-use sp_core::{sr25519, RuntimeDebug, H160};
-use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
+use sp_core::{H160, RuntimeDebug, sr25519};
+use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
+	AccountId32, BuildStorage, DispatchError, Perbill, Percent,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, DispatchError, Perbill, Percent,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
@@ -47,7 +47,7 @@ pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
 	traits::RewardsManager,
-	types::{rewards::LockMultiplier, BlockNumber},
+	types::{BlockNumber, rewards::LockMultiplier},
 };
 
 pub type AccountId = AccountId32;
@@ -464,8 +464,8 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 }
 
 impl MockRewardsManager {
-	pub fn record_deposit_calls(
-	) -> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
+	pub fn record_deposit_calls()
+	-> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
 		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
 	}
 
