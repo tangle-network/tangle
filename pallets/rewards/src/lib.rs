@@ -150,6 +150,17 @@ pub mod pallet {
 
 		/// Weight information for the pallet
 		type WeightInfo: WeightInfo;
+
+		/// Max length for vault name
+		#[pallet::constant]
+		type MaxVaultNameLength: Get<u32>;
+
+		/// Max length for vault logo URL/data
+		#[pallet::constant]
+		type MaxVaultLogoLength: Get<u32>;
+
+		/// The origin that is allowed to set vault metadata.
+		type VaultMetadataOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 	}
 
 	#[pallet::pallet]
@@ -239,6 +250,20 @@ pub mod pallet {
 	/// Per-block decay rate in basis points (1/10000). e.g., 1 = 0.01% per block
 	pub type DecayRate<T: Config> = StorageValue<_, Perbill, ValueQuery>;
 
+	/// Defines the structure for storing vault metadata.
+	#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+	#[scale_info(skip_type_params(T))]
+	pub struct VaultMetadata<T: Config> {
+		pub name: BoundedVec<u8, T::MaxVaultNameLength>,
+		pub logo: BoundedVec<u8, T::MaxVaultLogoLength>,
+	}
+
+	/// Storage for vault metadata.
+	#[pallet::storage]
+	#[pallet::getter(fn vault_metadata_store)]
+	pub type VaultMetadataStore<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::VaultId, VaultMetadata<T>, OptionQuery>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -278,6 +303,14 @@ pub mod pallet {
 		DecayConfigUpdated { start_period: BlockNumberFor<T>, rate: Perbill },
 		/// The number of blocks for APY calculation has been updated
 		ApyBlocksUpdated { blocks: BlockNumberFor<T> },
+		/// Metadata for a vault was set or updated.
+		VaultMetadataSet {
+			vault_id: T::VaultId,
+			name: BoundedVec<u8, T::MaxVaultNameLength>,
+			logo: BoundedVec<u8, T::MaxVaultLogoLength>,
+		},
+		/// Metadata for a vault was removed.
+		VaultMetadataRemoved { vault_id: T::VaultId },
 	}
 
 	#[pallet::error]
@@ -330,6 +363,12 @@ pub mod pallet {
 		IncentiveCapLessThanMinIncentiveCap,
 		/// Deposit cap is less than min deposit cap
 		DepositCapLessThanMinDepositCap,
+		/// Vault name exceeds the maximum allowed length.
+		NameTooLong,
+		/// Vault logo exceeds the maximum allowed length.
+		LogoTooLong,
+		/// Vault metadata not found for the given vault ID.
+		VaultMetadataNotFound,
 	}
 
 	#[pallet::genesis_config]
@@ -559,6 +598,67 @@ pub mod pallet {
 			ApyBlocks::<T>::put(blocks);
 
 			Self::deposit_event(Event::ApyBlocksUpdated { blocks });
+			Ok(())
+		}
+
+		/// Set the metadata for a specific vault.
+		///
+		/// Parameters:
+		/// - `origin`: The origin authorized to set metadata (e.g., root or a specific council).
+		/// - `vault_id`: The account ID of the vault.
+		/// - `name`: The name of the vault (bounded string).
+		/// - `logo`: The logo URL or data for the vault (bounded string).
+		///
+		/// Emits `VaultMetadataSet` event on success.
+		/// Requires `VaultMetadataOrigin`.
+		#[pallet::call_index(8)]
+		#[pallet::weight(<T as Config>::WeightInfo::set_vault_metadata())]
+		pub fn set_vault_metadata(
+			origin: OriginFor<T>,
+			vault_id: T::VaultId,
+			name: Vec<u8>,
+			logo: Vec<u8>,
+		) -> DispatchResult {
+			T::VaultMetadataOrigin::ensure_origin(origin)?;
+
+			let bounded_name: BoundedVec<u8, T::MaxVaultNameLength> =
+				name.try_into().map_err(|_| Error::<T>::NameTooLong)?;
+			let bounded_logo: BoundedVec<u8, T::MaxVaultLogoLength> =
+				logo.try_into().map_err(|_| Error::<T>::LogoTooLong)?;
+
+			let metadata =
+				VaultMetadata::<T> { name: bounded_name.clone(), logo: bounded_logo.clone() };
+
+			VaultMetadataStore::<T>::insert(vault_id, metadata);
+
+			Self::deposit_event(Event::VaultMetadataSet {
+				vault_id,
+				name: bounded_name,
+				logo: bounded_logo,
+			});
+			Ok(())
+		}
+
+		/// Remove the metadata associated with a specific vault.
+		///
+		/// Parameters:
+		/// - `origin`: The origin authorized to remove metadata (e.g., root or a specific council).
+		/// - `vault_id`: The account ID of the vault whose metadata should be removed.
+		///
+		/// Emits `VaultMetadataRemoved` event on success.
+		/// Requires `VaultMetadataOrigin`.
+		#[pallet::call_index(9)]
+		#[pallet::weight(<T as Config>::WeightInfo::remove_vault_metadata())]
+		pub fn remove_vault_metadata(origin: OriginFor<T>, vault_id: T::VaultId) -> DispatchResult {
+			T::VaultMetadataOrigin::ensure_origin(origin)?;
+
+			ensure!(
+				VaultMetadataStore::<T>::contains_key(vault_id),
+				Error::<T>::VaultMetadataNotFound
+			);
+			VaultMetadataStore::<T>::remove(vault_id);
+
+			Self::deposit_event(Event::VaultMetadataRemoved { vault_id });
 			Ok(())
 		}
 	}

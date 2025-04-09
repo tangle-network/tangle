@@ -1,5 +1,1 @@
-pub mod investor_team_vesting_migration_11302024;
-pub mod mads_default_values_13032025;
-pub mod pause_new_pallets_19032025;
-pub mod slashing_enabled_03062025;
 pub mod staking_team_reduction_03062025;

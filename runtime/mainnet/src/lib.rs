@@ -167,7 +167,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1300, // v1.3.0
+	spec_version: 1302, // v1.3.2
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1350,6 +1350,8 @@ parameter_types! {
 	pub const MaxApy: Perbill = Perbill::from_percent(2);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
+	pub const MaxVaultNameLen: u32 = 64;
+	pub const MaxVaultLogoLen: u32 = 256;
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -1365,6 +1367,9 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	type MaxVaultNameLength = MaxVaultNameLen;
+	type MaxVaultLogoLength = MaxVaultLogoLen;
+	type VaultMetadataOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = ();
 }
 
@@ -1492,13 +1497,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	(
-		migrations::investor_team_vesting_migration_11302024::UpdateTeamInvestorVesting<Runtime>,
-		migrations::slashing_enabled_03062025::EnsureSlashingNotEnabled<Runtime>,
-		migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,
-		migrations::mads_default_values_13032025::SetRewardsDefaultValues<Runtime>,
-		migrations::pause_new_pallets_19032025::PauseNewPallets<Runtime>,
-	),
+	(migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {
