@@ -16,7 +16,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_core::{offchain::KeyTypeId, ByteArray};
+use sp_core::{ByteArray, offchain::KeyTypeId};
 
 #[test]
 fn job_calls() {

@@ -105,31 +105,30 @@
 //! always has the correct ED, even if the ED requirement changes over time.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::unused_unit, clippy::useless_conversion, clippy::type_complexity)]
 
 use codec::Codec;
 use frame_support::traits::fungibles::metadata::Mutate;
 use frame_support::{
-	defensive, defensive_assert, ensure,
+	DefaultNoBound, PalletError, defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		fungibles,
+		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
+		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency, fungibles,
 		fungibles::{Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate},
 		tokens::{Fortitude, Precision, Preservation},
-		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
-		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency,
 	},
-	DefaultNoBound, PalletError,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_core::U256;
 use sp_runtime::{
+	FixedPointNumber, Perbill,
 	traits::{
 		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating,
 		StaticLookup, Zero,
 	},
-	FixedPointNumber, Perbill,
 };
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
@@ -1212,7 +1211,7 @@ pub mod pallet {
 		///
 		/// * `origin` - Origin of the call
 		/// * `min_join_bond` - Config operation for minimum bond to join a pool
-		/// * `min_create_bond` - Config operation for minimum bond to create a pool  
+		/// * `min_create_bond` - Config operation for minimum bond to create a pool
 		/// * `max_pools` - Config operation for maximum number of pools
 		/// * `global_max_commission` - Config operation for maximum global commission
 		///
@@ -1261,7 +1260,7 @@ pub mod pallet {
 		/// * `origin` - Origin of the call
 		/// * `pool_id` - Pool identifier
 		/// * `new_root` - New root role configuration
-		/// * `new_nominator` - New nominator role configuration  
+		/// * `new_nominator` - New nominator role configuration
 		/// * `new_bouncer` - New bouncer role configuration
 		///
 		/// # Errors
@@ -1758,7 +1757,7 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(amount >= Pallet::<T>::depositor_min_bond(), Error::<T>::MinimumBondNotMet);
 		ensure!(
-			MaxPools::<T>::get().map_or(true, |max_pools| BondedPools::<T>::count() < max_pools),
+			MaxPools::<T>::get().is_none_or(|max_pools| BondedPools::<T>::count() < max_pools),
 			Error::<T>::MaxPools
 		);
 

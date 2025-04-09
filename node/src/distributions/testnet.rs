@@ -23,7 +23,7 @@ use std::{
 
 use fp_evm::GenesisAccount;
 use serde_json::Value;
-use sp_core::{crypto::Ss58Codec, H160, U256};
+use sp_core::{H160, U256, crypto::Ss58Codec};
 use sp_runtime::AccountId32;
 use tangle_testnet_runtime::{AccountId, Balance};
 

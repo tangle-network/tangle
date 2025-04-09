@@ -4,8 +4,8 @@ use frame_system::RawOrigin;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::traits::StaticLookup;
 use sp_runtime::{
-	traits::{Convert, EnsureDiv, Header, Zero},
 	Percent, Saturating,
+	traits::{Convert, EnsureDiv, Header, Zero},
 };
 use sp_std::{vec, vec::Vec};
 use tangle_primitives::Balance;

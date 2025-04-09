@@ -18,15 +18,15 @@ use educe::Educe;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize};
-use sp_core::{RuntimeDebug, H160};
-use sp_runtime::{traits::AtLeast32BitUnsigned, Percent};
+use sp_core::{H160, RuntimeDebug};
+use sp_runtime::{Percent, traits::AtLeast32BitUnsigned};
 use sp_staking::EraIndex;
 use sp_std::fmt::Display;
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec, vec::Vec};
 
-use super::{field::FieldType, Constraints};
+use super::{Constraints, field::FieldType};
 
 /// An error that can occur during type checking.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -100,11 +100,7 @@ impl<AssetId: AssetIdT> Asset<AssetId> {
 	}
 
 	pub fn is_native(&self) -> bool {
-		if let Asset::Custom(asset_id) = self {
-			asset_id == &AssetId::default()
-		} else {
-			false
-		}
+		if let Asset::Custom(asset_id) = self { asset_id == &AssetId::default() } else { false }
 	}
 
 	pub fn to_ethabi_param_type() -> ethabi::ParamType {

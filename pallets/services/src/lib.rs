@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(clippy::unused_unit)]
-#![allow(clippy::type_complexity)]
+#![allow(clippy::unused_unit, clippy::useless_conversion, clippy::type_complexity)]
 
 #[cfg(not(feature = "std"))]
 extern crate alloc;
@@ -29,16 +28,16 @@ use frame_system::pallet_prelude::*;
 use sp_core::ecdsa;
 use sp_runtime::RuntimeAppPublic;
 use sp_runtime::{
-	traits::{Get, Zero},
 	DispatchResult,
+	traits::{Get, Zero},
 };
 use tangle_primitives::traits::SlashManager;
 use tangle_primitives::{
+	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 	services::{
 		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
 	},
 	traits::MultiAssetDelegationInfo,
-	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 };
 
 pub mod functions;
@@ -74,7 +73,7 @@ pub mod module {
 		traits::fungibles::{Inspect, Mutate},
 	};
 	use sp_core::H160;
-	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent};
+	use sp_runtime::{Percent, traits::MaybeSerializeDeserialize};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
 	use tangle_primitives::services::*;
 
@@ -192,11 +191,11 @@ pub mod module {
 
 		/// Manager for getting operator stake and delegation info
 		type OperatorDelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
-			Self::AccountId,
-			BalanceOf<Self>,
-			BlockNumberFor<Self>,
-			Self::AssetId,
-		>;
+				Self::AccountId,
+				BalanceOf<Self>,
+				BlockNumberFor<Self>,
+				Self::AssetId,
+			>;
 
 		/// Manager for slashing that dispatches slash operations to `pallet-multi-asset-delegation`.
 		type SlashManager: tangle_primitives::traits::SlashManager<Self::AccountId>;
@@ -1549,7 +1548,7 @@ pub mod module {
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
-		/// * `era` - Era containing the slash to dispute  
+		/// * `era` - Era containing the slash to dispute
 		/// * `index` - Index of the slash within the era
 		///
 		/// # Errors

@@ -17,24 +17,24 @@
 use crate::{self as pallet_rewards};
 use ethabi::Uint;
 use frame_election_provider_support::{
+	SequentialPhragmen,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
-	onchain, SequentialPhragmen,
+	onchain,
 };
 use frame_support::{
-	construct_runtime, derive_impl, parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
-	PalletId,
+	PalletId, construct_runtime, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, OneSessionHandler},
 };
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use sp_core::{sr25519, H160};
+use sp_core::{H160, sr25519};
 use sp_keyring::AccountKeyring;
-use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
+use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
+	AccountId32, BuildStorage, Perbill,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BuildStorage, Perbill,
 };
 use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
 
@@ -293,11 +293,7 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 	}
 
 	fn get_operator_stake(operator: &AccountId) -> Balance {
-		if operator == &mock_pub_key(10) {
-			Default::default()
-		} else {
-			1000
-		}
+		if operator == &mock_pub_key(10) { Default::default() } else { 1000 }
 	}
 
 	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {

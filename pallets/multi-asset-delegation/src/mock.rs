@@ -18,15 +18,15 @@ use super::*;
 use crate::{self as pallet_multi_asset_delegation};
 use ethabi::Uint;
 use frame_election_provider_support::{
+	SequentialPhragmen,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
-	onchain, SequentialPhragmen,
+	onchain,
 };
 use frame_support::{
-	construct_runtime, derive_impl,
+	PalletId, construct_runtime, derive_impl,
 	pallet_prelude::{Hooks, Weight},
 	parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, OneSessionHandler},
-	PalletId,
+	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, OneSessionHandler},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use mock_evm::MockedEvmRunner;
@@ -35,14 +35,13 @@ use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde_json::json;
-use sp_core::{sr25519, H160};
+use sp_core::{H160, sr25519};
 use sp_keyring::AccountKeyring;
-use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
+use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
-	generic,
+	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill, generic,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup, OpaqueKeys},
-	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use std::cell::RefCell;

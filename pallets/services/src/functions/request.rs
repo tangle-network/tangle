@@ -3,20 +3,20 @@ use crate::{
 	NextServiceRequestId, Pallet, ServiceRequests, StagingServicePayments,
 };
 use frame_support::{
-	pallet_prelude::*,
-	traits::{fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement},
 	BoundedVec,
+	pallet_prelude::*,
+	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::{traits::Zero, Percent};
+use sp_runtime::{Percent, traits::Zero};
 use sp_std::vec::Vec;
 use tangle_primitives::{
+	Account,
 	services::{
 		ApprovalState, Asset, AssetSecurityRequirement, EvmAddressMapping, Field, MembershipModel,
 		ServiceRequest, StagingServicePayment,
 	},
-	Account,
 };
 
 impl<T: Config> Pallet<T> {

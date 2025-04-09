@@ -31,8 +31,8 @@ use weights::WeightInfo;
 mod benchmarking;
 
 pub use crate::utils::{
-	ethereum_address::{EcdsaSignature, EthereumAddress},
 	MultiAddress, MultiAddressSignature,
+	ethereum_address::{EcdsaSignature, EthereumAddress},
 };
 use frame_support::{
 	ensure,
@@ -43,16 +43,16 @@ use pallet_evm::AddressMapping;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use serde::{self, Deserialize, Serialize};
-use sp_core::{sr25519::Public, H160};
+use sp_core::{H160, sr25519::Public};
 use sp_io::{
 	crypto::{secp256k1_ecdsa_recover, sr25519_verify},
 	hashing::keccak_256,
 };
 use sp_runtime::Saturating;
 use sp_runtime::{
+	AccountId32, RuntimeDebug,
 	traits::{CheckedSub, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
-	AccountId32, RuntimeDebug,
 };
 use sp_std::{convert::TryInto, prelude::*, vec};
 use utils::Sr25519Signature;
@@ -250,7 +250,10 @@ pub mod pallet {
 			if let Some(expiry_config) = expiry_config {
 				if current_block > expiry_config.0 {
 					let unclaimed_amount = Total::<T>::take();
-					log::info!("Claims : Expiry block passed, sweeping remaining amount of {:?} to destination", unclaimed_amount);
+					log::info!(
+						"Claims : Expiry block passed, sweeping remaining amount of {:?} to destination",
+						unclaimed_amount
+					);
 					let expiry_destination =
 						match Self::convert_multi_address_to_account_id(expiry_config.1) {
 							Ok(a) => a,
@@ -519,8 +522,8 @@ fn to_ascii_hex(data: &[u8]) -> Vec<u8> {
 impl<T: Config> Pallet<T> {
 	fn encode_multi_address(multi_address: &MultiAddress) -> Vec<u8> {
 		match multi_address {
-			MultiAddress::EVM(ref address) => address.using_encoded(to_ascii_hex),
-			MultiAddress::Native(ref address) => address.using_encoded(to_ascii_hex),
+			MultiAddress::EVM(address) => address.using_encoded(to_ascii_hex),
+			MultiAddress::Native(address) => address.using_encoded(to_ascii_hex),
 		}
 	}
 	/// Constructs the message that Ethereum RPC's `personal_sign` and `eth_sign` would sign.
@@ -708,7 +711,7 @@ mod sr25519_utils {
 	use super::*;
 	use frame_support::assert_ok;
 	use schnorrkel::Signature;
-	use sp_core::{sr25519, Pair};
+	use sp_core::{Pair, sr25519};
 
 	#[allow(dead_code)]
 	pub fn public(pair: &sr25519::Pair) -> sr25519::Public {

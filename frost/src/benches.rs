@@ -9,7 +9,7 @@ use rand_core::{CryptoRng, RngCore};
 use criterion::{BenchmarkId, Criterion, Throughput};
 
 use crate as frost;
-use crate::{batch, Ciphersuite, Signature, SigningKey, VerifyingKey};
+use crate::{Ciphersuite, Signature, SigningKey, VerifyingKey, batch};
 
 struct Item<C: Ciphersuite> {
 	vk: VerifyingKey<C>,
@@ -79,7 +79,7 @@ pub fn bench_sign<C: Ciphersuite, R: RngCore + CryptoRng + Clone>(
 	let mut group = c.benchmark_group(format!("FROST Signing {name}"));
 	for &n in [3u16, 10, 100, 1000].iter() {
 		let max_signers = n;
-		let min_signers = (n * 2 + 2) / 3;
+		let min_signers = (n * 2).div_ceil(3);
 
 		group.bench_with_input(
 			BenchmarkId::new("Key Generation with Dealer", max_signers),

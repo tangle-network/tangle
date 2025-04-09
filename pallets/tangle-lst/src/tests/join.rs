@@ -1,5 +1,5 @@
 use super::*;
-use crate::{mock::Currency, Event};
+use crate::{Event, mock::Currency};
 use frame_support::{assert_noop, assert_ok};
 
 #[test]

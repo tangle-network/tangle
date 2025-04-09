@@ -16,8 +16,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // Disable the following two lints since they originate from an external macro (namely decl_storage)
-#![allow(clippy::string_lit_as_bytes)]
-#![allow(clippy::unused_unit)]
+#![allow(clippy::string_lit_as_bytes, clippy::unused_unit, clippy::useless_conversion)]
 
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 
