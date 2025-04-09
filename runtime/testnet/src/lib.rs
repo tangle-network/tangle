@@ -1235,6 +1235,8 @@ parameter_types! {
 	pub const MaxApy: Perbill = Perbill::from_percent(20);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
+	pub const MaxVaultNameLen: u32 = 64;
+	pub const MaxVaultLogoLen: u32 = 256;
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -1250,6 +1252,9 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	type MaxVaultNameLength = MaxVaultNameLen;
+	type MaxVaultLogoLength = MaxVaultLogoLen;
+	type VaultMetadataOrigin = EnsureRootOrHalfCouncil;
 	type WeightInfo = ();
 }
 

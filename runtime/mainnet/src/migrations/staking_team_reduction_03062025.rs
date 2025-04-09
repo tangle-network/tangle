@@ -173,10 +173,10 @@ where
 		let free_balance = pallet_balances::Pallet::<T>::free_balance(&source_account_id);
 		info!("Source account free balance before transfer: {:?}", free_balance);
 		info!("Amount to transfer: {:?}", amount);
-		
+
 		// Only transfer if sufficient free balance exists
 		let transfer_amount = BalanceOf::<T>::from(amount);
-		
+
 		if free_balance >= transfer_amount {
 			if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
 				T::RuntimeOrigin::from(RawOrigin::Root),
@@ -190,7 +190,10 @@ where
 				info!("Successfully transferred balance to team account");
 			}
 		} else {
-			info!("Insufficient free balance for transfer: needed {:?}, had {:?}", transfer_amount, free_balance);
+			info!(
+				"Insufficient free balance for transfer: needed {:?}, had {:?}",
+				transfer_amount, free_balance
+			);
 			return T::DbWeight::get().reads_writes(reads, writes);
 		}
 
@@ -322,12 +325,12 @@ fn update_vesting_schedule<
 
 	// Check if there is a difference to transfer
 	let mut difference_to_transfer = BalanceOf::<T>::zero();
-	
+
 	// If total_vested > amount_to_change_to, we need to transfer the difference back to team
 	if total_vested > amount_to_change_to {
 		// Calculate the difference safely without relying on decode
 		let vesting_diff = total_vested.saturating_sub(amount_to_change_to);
-		
+
 		match BalanceOf::<T>::try_from(vesting_diff.saturated_into::<u128>()) {
 			Ok(diff) => difference_to_transfer = diff,
 			Err(_) => {
@@ -335,7 +338,7 @@ fn update_vesting_schedule<
 				return;
 			},
 		}
-		
+
 		info!("Difference to transfer: {:?}", difference_to_transfer);
 	} else {
 		// No need to transfer anything if the new amount is larger or equal
@@ -393,11 +396,11 @@ fn update_vesting_schedule<
 	// Only attempt transfer if there's an actual difference to transfer
 	if !difference_to_transfer.is_zero() {
 		info!("Attempting to transfer difference");
-		
+
 		// Check free balance before transfer
 		let free_balance = pallet_balances::Pallet::<T>::free_balance(account_id);
 		info!("Account free balance before transfer: {:?}", free_balance);
-		
+
 		// Only transfer if sufficient free balance exists
 		if free_balance >= difference_to_transfer {
 			if let Err(_e) = pallet_balances::Pallet::<T>::force_transfer(
@@ -411,7 +414,10 @@ fn update_vesting_schedule<
 				info!("Successfully transferred difference to team account");
 			}
 		} else {
-			info!("Insufficient free balance for transfer: needed {:?}, had {:?}", difference_to_transfer, free_balance);
+			info!(
+				"Insufficient free balance for transfer: needed {:?}, had {:?}",
+				difference_to_transfer, free_balance
+			);
 		}
 	}
 }

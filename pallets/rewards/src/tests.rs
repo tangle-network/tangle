@@ -20,5 +20,6 @@ use tangle_primitives::services::Asset;
 
 pub mod apy_calc;
 pub mod claim;
+pub mod metadata;
 pub mod reward_calc;
 pub mod vault;

@@ -49,6 +49,8 @@ pub trait WeightInfo {
 	fn create_reward_vault() -> Weight;
 	fn update_decay_config() -> Weight;
 	fn update_apy_blocks() -> Weight;
+    fn set_vault_metadata() -> Weight;
+    fn remove_vault_metadata() -> Weight;
 }
 
 /// Weight functions needed for rewards pallet.
@@ -125,6 +127,20 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
             .saturating_add(T::DbWeight::get().reads(1))
             .saturating_add(T::DbWeight::get().writes(1))
     }
+    /// Storage: `Rewards::VaultMetadataStore` (r:0 w:1)
+	/// Proof: `Rewards::VaultMetadataStore` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+    fn set_vault_metadata() -> Weight {
+        Weight::from_parts(65_000_000, 0)
+            .saturating_add(T::DbWeight::get().reads(1))
+            .saturating_add(T::DbWeight::get().writes(1))
+    }
+    /// Storage: `Rewards::VaultMetadataStore` (r:0 w:1)
+	/// Proof: `Rewards::VaultMetadataStore` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+    fn remove_vault_metadata() -> Weight {
+        Weight::from_parts(65_000_000, 0)
+            .saturating_add(T::DbWeight::get().reads(1))
+            .saturating_add(T::DbWeight::get().writes(1))
+    }
 }
 
 // For backwards compatibility and tests
@@ -186,6 +202,20 @@ impl WeightInfo for () {
 	/// Storage: `Rewards::ApyBlocks` (r:0 w:1)
 	/// Proof: `Rewards::ApyBlocks` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
     fn update_apy_blocks() -> Weight {
+        Weight::from_parts(65_000_000, 0)
+            .saturating_add(RocksDbWeight::get().reads(1))
+            .saturating_add(RocksDbWeight::get().writes(1))
+    }
+        /// Storage: `Rewards::VaultMetadataStore` (r:0 w:1)
+	/// Proof: `Rewards::VaultMetadataStore` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+    fn set_vault_metadata() -> Weight {
+        Weight::from_parts(65_000_000, 0)
+            .saturating_add(RocksDbWeight::get().reads(1))
+            .saturating_add(RocksDbWeight::get().writes(1))
+    }
+    /// Storage: `Rewards::VaultMetadataStore` (r:0 w:1)
+	/// Proof: `Rewards::VaultMetadataStore` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
+    fn remove_vault_metadata() -> Weight {
         Weight::from_parts(65_000_000, 0)
             .saturating_add(RocksDbWeight::get().reads(1))
             .saturating_add(RocksDbWeight::get().writes(1))

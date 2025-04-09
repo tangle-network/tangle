@@ -260,6 +260,12 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
+	// Add constants for metadata lengths
+	type MaxVaultNameLength = ConstU32<64>;
+	type MaxVaultLogoLength = ConstU32<256>;
+	// Use EnsureSigned for mock origin
+	type VaultMetadataOrigin = frame_system::EnsureSigned<AccountId>;
+
 	type WeightInfo = ();
 }
 
