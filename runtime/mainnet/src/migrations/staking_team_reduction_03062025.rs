@@ -2,6 +2,7 @@ use crate::RuntimeOrigin;
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
 use frame_system::RawOrigin;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
+use sp_runtime::SaturatedConversion;
 use sp_runtime::traits::StaticLookup;
 use sp_runtime::{
 	Percent, Saturating,
