@@ -629,7 +629,7 @@ pub mod pallet {
 			let metadata =
 				VaultMetadata::<T> { name: bounded_name.clone(), logo: bounded_logo.clone() };
 
-			VaultMetadataStore::<T>::insert(&vault_id, metadata);
+			VaultMetadataStore::<T>::insert(vault_id, metadata);
 
 			Self::deposit_event(Event::VaultMetadataSet {
 				vault_id,
@@ -653,10 +653,10 @@ pub mod pallet {
 			T::VaultMetadataOrigin::ensure_origin(origin)?;
 
 			ensure!(
-				VaultMetadataStore::<T>::contains_key(&vault_id),
+				VaultMetadataStore::<T>::contains_key(vault_id),
 				Error::<T>::VaultMetadataNotFound
 			);
-			VaultMetadataStore::<T>::remove(&vault_id);
+			VaultMetadataStore::<T>::remove(vault_id);
 
 			Self::deposit_event(Event::VaultMetadataRemoved { vault_id });
 			Ok(())
