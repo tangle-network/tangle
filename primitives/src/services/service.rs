@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
-	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BoundedString, Gadget,
+	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintSource, BoundedString,
 	MembershipModelType, TypeCheckError,
 	constraints::Constraints,
 	jobs::{JobDefinition, type_checker},
@@ -137,8 +137,8 @@ pub struct ServiceBlueprint<C: Constraints> {
 	/// If not sure what to use, use `MasterBlueprintServiceManagerRevision::default()` which will
 	/// use the latest revision available.
 	pub master_manager_revision: MasterBlueprintServiceManagerRevision,
-	/// The gadget that will be executed for the service.
-	pub gadget: Gadget<C>,
+	/// The binary sources for the blueprint.
+	pub sources: BoundedVec<BlueprintSource<C>, C::MaxFields>,
 	/// The membership models supported by this blueprint
 	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
 }
