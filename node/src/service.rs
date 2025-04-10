@@ -526,6 +526,10 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	)
 	.await;
 
+	#[cfg(feature = "blueprint-manager")]
+	let config_data_path = config.data_path.clone();
+	#[cfg(feature = "blueprint-manager")]
+	let rpc_port = config.rpc_port;
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -645,6 +649,26 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			None,
 			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
+	}
+
+	#[cfg(feature = "blueprint-manager")]
+	{
+		let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
+			rpc_port,
+			config_data_path.join("blueprints"),
+			keystore_container.local_keystore(),
+		)?;
+
+		task_manager
+			.spawn_essential_handle()
+			.spawn("blueprint-manager", None, async move {
+				match bp_mngr.await {
+					Ok(()) => (),
+					Err(e) => {
+						log::error!("Blueprint manager failed: {}", e);
+					},
+				}
+			});
 	}
 
 	network_starter.start_network();

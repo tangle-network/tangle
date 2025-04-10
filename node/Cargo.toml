@@ -77,6 +77,7 @@ substrate-prometheus-endpoint = { workspace = true }
 sp-session = { workspace = true }
 frame-system-rpc-runtime-api = { workspace = true }
 sp-io = { workspace = true }
+sc-keystore = { workspace = true }
 
 # RPC related dependencies
 jsonrpsee = { workspace = true }
@@ -120,6 +121,10 @@ tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
 futures-timer = { workspace = true }
 
+blueprint-manager = { workspace = true, optional = true }
+blueprint-runner = { workspace = true, optional = true }
+blueprint-keystore = { workspace = true, optional = true }
+
 [dev-dependencies]
 tangle-subxt = { workspace = true }
 sp-tracing = { workspace = true }
@@ -152,4 +157,5 @@ txpool = ["fc-rpc/txpool"]
 fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runtime"]
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
 manual-seal = ["tangle-testnet-runtime/manual-seal"]
+blueprint-manager = ["dep:blueprint-manager", "dep:blueprint-runner", "dep:blueprint-keystore"]
 try-runtime = []

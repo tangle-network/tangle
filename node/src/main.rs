@@ -7,6 +7,8 @@ mod chainspec;
 mod service;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+#[cfg(feature = "blueprint-manager")]
+mod blueprint_service;
 mod cli;
 mod command;
 mod distributions;

@@ -1,3 +1,5 @@
+#[cfg(feature = "blueprint-manager")]
+pub mod blueprint_service;
 pub mod chainspec;
 pub mod cli;
 pub mod distributions;
