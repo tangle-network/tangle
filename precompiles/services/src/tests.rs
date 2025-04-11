@@ -92,7 +92,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		],
 		registration_params: bounded_vec![],
 		request_params: bounded_vec![],
-		gadget: Default::default(),
+		sources: Default::default(),
 		supported_membership_models: bounded_vec![
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
