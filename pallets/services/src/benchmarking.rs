@@ -79,7 +79,7 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints
 		.unwrap(),
 		registration_params: Default::default(),
 		request_params: Default::default(),
-		gadget: Default::default(),
+		sources: Default::default(),
 		supported_membership_models: vec![MembershipModelType::Fixed, MembershipModelType::Dynamic]
 			.try_into()
 			.unwrap(),
