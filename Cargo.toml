@@ -72,7 +72,7 @@ clap = { version = "4.5.16", features = ["derive"] }
 parity-scale-codec = { version = "3.6.12", default-features = false, features = ["derive", "max-encoded-len"] }
 rlp = { version = "0.5", default-features = false }
 tracing = "0.1.40"
-tokio = { version = "1.39" }
+tokio = { version = "1.44.2" }
 futures = { version = "0.3.30" }
 futures-timer = { version = "3.0.2" }
 rand_core = { version = "0.6", default-features = false }
@@ -397,6 +397,15 @@ anyhow = { version = "1.0.93", default-features = false }
 subxt = { version = "0.39.0", default-features = false }
 subxt-core = { version = "0.39.0", default-features = false }
 subxt-signer = { version = "0.39.0", default-features = false }
+
+# Blueprint
+blueprint-manager = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2407" }
+blueprint-runner = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2407" }
+blueprint-keystore = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2407" }
+# --
+# blueprint-manager = { default-features = false, path = "../gadget/crates/manager" }
+# blueprint-runner = { default-features = false, path = "../gadget/crates/runner" }
+# blueprint-keystore = { default-features = false, path = "../gadget/crates/keystore" }
 
 [profile.release]
 panic = "unwind"

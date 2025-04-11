@@ -1,11 +1,13 @@
 use rand::Rng;
 use sc_service::{ChainType, Configuration};
-use sp_core::{ByteArray, Pair, Public, ed25519, sr25519};
+use sp_core::{ByteArray, Pair, Public, ecdsa, ed25519, sr25519};
 use sp_keystore::{Keystore, KeystorePtr};
 use sp_runtime::{
 	KeyTypeId,
 	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 };
+
+pub const ROLE: KeyTypeId = KeyTypeId(*b"role");
 
 /// Helper function to generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -38,6 +40,8 @@ pub fn insert_controller_account_keys_into_keystore(
 		key_store.clone(),
 		"ImOnline",
 	);
+	insert_account_keys_into_keystore::<ecdsa::Public>(config, ROLE, key_store.clone(), "role");
+	insert_account_keys_into_keystore::<ed25519::Public>(config, ROLE, key_store.clone(), "role");
 }
 
 /// Inserts keys of specified type into the keystore.
@@ -77,14 +81,19 @@ fn insert_account_keys_into_keystore<TPublic: Public>(
 	if let Some(keystore) = key_store {
 		let _ = Keystore::insert(&*keystore, key_type, &seed_hex, &pub_key);
 	}
-	println!("++++++++++++++++++++++++++++++++++++++++++++++++  
-                AUTO GENERATED KEYS                                                                        
+	println!(
+		"++++++++++++++++++++++++++++++++++++++++++++++++
+                AUTO GENERATED KEYS
                 '{}' key inserted to keystore
                 Seed: {}
                 PublicKey: 0x{}
                 STORE THE KEYS SAFELY, NOT TO BE SHARED WITH ANYONE ELSE.
-    ++++++++++++++++++++++++++++++++++++++++++++++++   							
-            \n", key_name, seed_hex, hex::encode(pub_key));
+    ++++++++++++++++++++++++++++++++++++++++++++++++
+            \n",
+		key_name,
+		seed_hex,
+		hex::encode(pub_key)
+	);
 }
 
 /// Inserts a key of type `ACCOUNT` into the keystore for development/testing.
@@ -96,6 +105,9 @@ pub fn insert_dev_controller_account_keys_into_keystore(
 	key_store: Option<KeystorePtr>,
 ) {
 	insert_dev_account_keys_into_keystore::<sr25519::Public>(config, ACCOUNT, key_store.clone());
+	insert_dev_account_keys_into_keystore::<ed25519::Public>(config, ROLE, key_store.clone());
+
+	insert_dev_account_keys_into_keystore::<ecdsa::Public>(config, ROLE, key_store.clone());
 }
 
 /// Inserts keys of specified type into the keystore for predefined nodes in development mode.
