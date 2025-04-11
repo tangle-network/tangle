@@ -16,7 +16,7 @@ pub fn create_blueprint_manager_service<P: AsRef<Path>>(
 ) -> Result<BlueprintManagerHandle, ServiceError> {
 	let config = BlueprintManagerConfig {
 		gadget_config: None,
-		keystore_uri: String::new(),
+		keystore_uri: data_dir.as_ref().display().to_string(),
 		data_dir: data_dir.as_ref().to_path_buf(),
 		verbose: 2,
 		pretty: false,
@@ -36,7 +36,7 @@ pub fn create_blueprint_manager_service<P: AsRef<Path>>(
 		.map_err(|e| ServiceError::Application(e.into()))?;
 
 	let shutdown_cmd = futures::future::pending();
-	let mut handle = match run_blueprint_manager_with_keystore(config, &keystore, env, shutdown_cmd)
+	let mut handle = match run_blueprint_manager_with_keystore(config, keystore, env, shutdown_cmd)
 	{
 		Ok(handle) => handle,
 		Err(e) => {

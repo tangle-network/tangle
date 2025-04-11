@@ -30,7 +30,7 @@ use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
 pub use sc_executor::WasmExecutor;
-use sc_service::{Configuration, TaskManager, error::Error as ServiceError};
+use sc_service::{ChainType, Configuration, TaskManager, error::Error as ServiceError};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
@@ -337,6 +337,23 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			metrics,
 		})?;
 
+	if config.role.is_authority() {
+		if config.chain_spec.chain_type() == ChainType::Development
+			|| config.chain_spec.chain_type() == ChainType::Local
+		{
+			if auto_insert_keys {
+				crate::utils::insert_controller_account_keys_into_keystore(
+					&config,
+					Some(keystore_container.local_keystore()),
+				);
+			} else {
+				crate::utils::insert_dev_controller_account_keys_into_keystore(
+					&config,
+					Some(keystore_container.local_keystore()),
+				);
+			}
+		}
+	}
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
 	let name = config.network.node_name.clone();
