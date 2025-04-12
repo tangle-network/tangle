@@ -3208,7 +3208,7 @@ dependencies = [
 [[package]]
 name = "blueprint-client-core"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "auto_impl",
  "blueprint-std",
@@ -3217,8 +3217,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-client-eigenlayer"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-contract 0.12.6",
  "alloy-network 0.12.6",
@@ -3241,7 +3241,7 @@ dependencies = [
 [[package]]
 name = "blueprint-client-evm"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-consensus 0.12.6",
  "alloy-json-rpc 0.12.6",
@@ -3267,8 +3267,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-client-tangle"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "auto_impl",
  "blueprint-client-core",
@@ -3280,15 +3280,15 @@ dependencies = [
  "serde",
  "serde_json",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "tangle-subxt 0.14.0",
+ "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 2.0.12",
  "tokio",
 ]
 
 [[package]]
 name = "blueprint-clients"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-client-core",
  "blueprint-client-eigenlayer",
@@ -3301,7 +3301,7 @@ dependencies = [
 [[package]]
 name = "blueprint-core"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "bytes",
  "futures-util",
@@ -3314,8 +3314,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-crypto-bls",
  "blueprint-crypto-bn254",
@@ -3332,7 +3332,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-bls"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "ark-serialize 0.5.0",
  "blueprint-crypto-core",
@@ -3348,7 +3348,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-bn254"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "ark-bn254 0.5.0",
  "ark-ec 0.5.0",
@@ -3368,7 +3368,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-core"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-std",
  "clap",
@@ -3379,7 +3379,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-ed25519"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-crypto-core",
  "blueprint-std",
@@ -3393,7 +3393,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-hashing"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blake3",
  "blueprint-std",
@@ -3404,7 +3404,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-k256"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-primitives 0.8.25",
  "alloy-signer-local 0.12.6",
@@ -3420,7 +3420,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-sp-core"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "ark-ec 0.5.0",
  "ark-ff 0.5.0",
@@ -3440,7 +3440,7 @@ dependencies = [
 [[package]]
 name = "blueprint-crypto-sr25519"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-crypto-core",
  "blueprint-std",
@@ -3453,8 +3453,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-crypto-tangle-pair-signer"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-crypto-core",
  "blueprint-crypto-sp-core",
@@ -3462,14 +3462,14 @@ dependencies = [
  "serde",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
- "tangle-subxt 0.14.0",
+ "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "blueprint-evm-extra"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-consensus 0.12.6",
  "alloy-network 0.12.6",
@@ -3499,8 +3499,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-keystore"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-network 0.12.6",
  "alloy-primitives 0.8.25",
@@ -3532,7 +3532,7 @@ dependencies = [
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-keystore 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "tangle-subxt 0.14.0",
+ "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 2.0.12",
  "tnt-bls",
  "tokio",
@@ -3541,8 +3541,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-manager"
-version = "0.3.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.3.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "auto_impl",
  "blueprint-clients",
@@ -3565,7 +3565,7 @@ dependencies = [
  "serde",
  "sha2 0.10.8",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "tangle-subxt 0.14.0",
+ "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 2.0.12",
  "tokio",
  "toml 0.8.20",
@@ -3576,15 +3576,15 @@ dependencies = [
 [[package]]
 name = "blueprint-metrics-rpc-calls"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "metrics",
 ]
 
 [[package]]
 name = "blueprint-networking"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-primitives 0.8.25",
  "anyhow",
@@ -3616,7 +3616,7 @@ dependencies = [
 [[package]]
 name = "blueprint-router"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-core",
  "bytes",
@@ -3629,8 +3629,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-runner"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "alloy-contract 0.12.6",
  "alloy-primitives 0.8.25",
@@ -3655,7 +3655,7 @@ dependencies = [
  "k256",
  "libp2p 0.55.0",
  "serde",
- "tangle-subxt 0.14.0",
+ "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 2.0.12",
  "tokio",
  "tower 0.5.2",
@@ -3666,7 +3666,7 @@ dependencies = [
 [[package]]
 name = "blueprint-std"
 version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "colored",
  "num-traits",
@@ -3676,8 +3676,8 @@ dependencies = [
 
 [[package]]
 name = "blueprint-tangle-extra"
-version = "0.1.0-alpha.1"
-source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#f28aaace54ed895ff93acf832697e3fab6d2766e"
+version = "0.1.0-alpha.2"
+source = "git+https://github.com/tangle-network/blueprint?branch=polkadot-stable2407#ab6b902b84b03e3e58c3ff690cf73f13b0c8758b"
 dependencies = [
  "blueprint-core",
  "bytes",
@@ -3687,7 +3687,7 @@ dependencies = [
  "futures-util",
  "pin-project-lite",
  "serde",
- "tangle-subxt 0.14.0",
+ "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tower 0.5.2",
 ]
 
@@ -4429,9 +4429,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.35"
+version = "4.5.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8aa86934b44c19c50f87cc2790e19f54f7a67aedb64101c2e1a2e5ecfb73944"
+checksum = "2df961d8c8a0d08aa9945718ccf584145eee3f3aa06cddbeac12933781102e04"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -4439,9 +4439,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.35"
+version = "4.5.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2414dbb2dd0695280da6ea9261e327479e9d37b0630f6b53ba2a11c60c679fd9"
+checksum = "132dbda40fb6753878316a489d5a1242a8ef2f0d9e47ba01c951ea8aa7d013a5"
 dependencies = [
  "anstream",
  "anstyle",
@@ -5579,15 +5579,15 @@ dependencies = [
 
 [[package]]
 name = "data-encoding"
-version = "2.8.0"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "575f75dfd25738df5b91b8e43e14d44bda14637a58fae779fd2b064f8bf3e010"
+checksum = "2a2330da5de22e8a3cb63252ce2abb30116bf5265e89c0e01bc17015ce30a476"
 
 [[package]]
 name = "data-encoding-macro"
-version = "0.1.17"
+version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f9724adfcf41f45bf652b3995837669d73c4d49a1b5ac1ff82905ac7d9b5558"
+checksum = "47ce6c96ea0102f01122a185683611bd5ac8d99e62bc59dd12e6bda344ee673d"
 dependencies = [
  "data-encoding",
  "data-encoding-macro-internal",
@@ -5595,9 +5595,9 @@ dependencies = [
 
 [[package]]
 name = "data-encoding-macro-internal"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18e4fdb82bd54a12e42fb58a800dcae6b9e13982238ce2296dc3570b92148e1f"
+checksum = "8d162beedaa69905488a8da94f5ac3edb4dd4788b732fadb7bd120b2625c1976"
 dependencies = [
  "data-encoding",
  "syn 2.0.100",
@@ -24636,9 +24636,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67db974027a094bc4fe6476f9eceb0a72df0cd4f72603c2cfd66667cfb656b93"
+version = "0.15.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -24651,6 +24649,8 @@ dependencies = [
 [[package]]
 name = "tangle-subxt"
 version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96a67cb08b9287064e14221a69ddec5db1f3dcc59e831510beef7c284ca3714d"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
