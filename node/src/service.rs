@@ -530,6 +530,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let config_data_path = config.data_path.clone();
 	#[cfg(feature = "blueprint-manager")]
 	let rpc_port = config.rpc_port;
+	#[cfg(feature = "blueprint-manager")]
+	let chain_type = config.chain_spec.chain_type();
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -653,10 +655,12 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 	#[cfg(feature = "blueprint-manager")]
 	{
+		let test_mode = chain_type == ChainType::Development || chain_type == ChainType::Local;
 		let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
 			rpc_port,
 			config_data_path.join("blueprints"),
 			keystore_container.local_keystore(),
+			test_mode,
 		)?;
 
 		task_manager
