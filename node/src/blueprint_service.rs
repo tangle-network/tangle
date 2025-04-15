@@ -13,15 +13,20 @@ pub fn create_blueprint_manager_service<P: AsRef<Path>>(
 	rpc_port: u16,
 	data_dir: P,
 	local_keystore: Arc<LocalKeystore>,
+	test_mode: bool,
 ) -> Result<BlueprintManagerHandle, ServiceError> {
+	let data_dir = data_dir.as_ref().to_path_buf();
+	let base_dir = data_dir.parent().ok_or_else(|| {
+		ServiceError::Application("Failed to get parent directory for keystore".into())
+	})?;
 	let config = BlueprintManagerConfig {
 		gadget_config: None,
-		keystore_uri: data_dir.as_ref().display().to_string(),
-		data_dir: data_dir.as_ref().to_path_buf(),
+		keystore_uri: base_dir.join("keystore").to_path_buf().to_string_lossy().into(),
+		data_dir,
 		verbose: 2,
 		pretty: false,
 		instance_id: None,
-		test_mode: false,
+		test_mode,
 	};
 	let mut env = BlueprintEnvironment::default();
 
