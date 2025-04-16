@@ -178,6 +178,9 @@ pub mod module {
 		/// Maximum number of assets per service.
 		#[pallet::constant]
 		type MaxAssetsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+		/// Maximum length of rpc address.
+		#[pallet::constant]
+		type MaxRpcAddressLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 		/// Maximum number of versions of Master Blueprint Service Manager allowed.
 		#[pallet::constant]
 		type MaxMasterBlueprintServiceManagerVersions: Get<u32>
@@ -447,7 +450,7 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The preferences for the operator for this specific blueprint.
-			preferences: OperatorPreferences,
+			preferences: OperatorPreferences<T::Constraints>,
 			/// The arguments used for registration.
 			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 		},
@@ -598,6 +601,13 @@ pub mod module {
 			/// The address of the Master Blueprint Service Manager.
 			address: H160,
 		},
+		/// A request for a pricing quote has been made.
+		RequestForQuote {
+			/// The account requesting the quote.
+			requester: T::AccountId,
+			/// The ID of the blueprint being quoted.
+			blueprint_id: u64,
+		},
 	}
 
 	#[pallet::pallet]
@@ -669,7 +679,7 @@ pub mod module {
 		u64,
 		Identity,
 		T::AccountId,
-		OperatorPreferences,
+		OperatorPreferences<T::Constraints>,
 		ResultQuery<Error<T>::NotRegistered>,
 	>;
 
@@ -929,7 +939,7 @@ pub mod module {
 		pub fn register(
 			origin: OriginFor<T>,
 			#[pallet::compact] blueprint_id: BlueprintId,
-			preferences: OperatorPreferences,
+			preferences: OperatorPreferences<T::Constraints>,
 			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
@@ -1045,7 +1055,7 @@ pub mod module {
 						.as_mut()
 						.map(|v| {
 							v.price_targets = price_targets;
-							*v
+							v.clone()
 						})
 						.ok_or(Error::<T>::NotRegistered)
 				})?;
@@ -1670,6 +1680,32 @@ pub mod module {
 
 			// Call membership implementation
 			Self::do_leave_service(&blueprint, instance.blueprint, instance_id, &operator)?;
+
+			Ok(())
+		}
+
+		/// Request a pricing quote for a specific blueprint.
+		///
+		/// Anyone can request a quote for any blueprint.
+		/// Emits a `RequestForQuote` event.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call, must be a signed account.
+		/// * `blueprint_id` - The ID of the blueprint to request a quote for.
+		///
+		/// # Errors
+		///
+		/// * [`Error::<T>::BlueprintNotFound`] - If the blueprint with the given ID does not exist.
+		#[pallet::weight(10_000)]
+		pub fn request_for_quote(origin: OriginFor<T>, blueprint_id: u64) -> DispatchResult {
+			let requester = ensure_signed(origin)?;
+
+			// Ensure the blueprint exists
+			ensure!(Blueprints::<T>::contains_key(blueprint_id), Error::<T>::BlueprintNotFound);
+
+			// Emit the event
+			Self::deposit_event(Event::<T>::RequestForQuote { requester, blueprint_id });
 
 			Ok(())
 		}

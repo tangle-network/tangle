@@ -208,7 +208,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_register_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 		registration_args: &[Field<T::Constraints, T::AccountId>],
 		value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -223,7 +223,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 					ethabi::Param {
 						name: String::from("registrationInputs"),
 						kind: ethabi::ParamType::Bytes,
@@ -259,7 +259,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_unregister_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -272,7 +272,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 				],
 				outputs: Default::default(),
 				constant: None,
@@ -299,7 +299,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_update_price_targets(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -312,7 +312,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 				],
 				outputs: Default::default(),
 				constant: None,
@@ -341,7 +341,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_approve_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 		request_id: u64,
 		restaking_percent: u8,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -356,7 +356,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 					ethabi::Param {
 						name: String::from("requestId"),
 						kind: ethabi::ParamType::Uint(64),
@@ -398,7 +398,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_reject_hook(
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 		request_id: u64,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
@@ -412,7 +412,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 					ethabi::Param {
 						name: String::from("requestId"),
 						kind: ethabi::ParamType::Uint(64),
@@ -457,7 +457,7 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: u64,
 		requester: &T::AccountId,
 		request_id: u64,
-		operators: &[OperatorPreferences],
+		operators: &[OperatorPreferences<T::Constraints>],
 		request_args: &[Field<T::Constraints, T::AccountId>],
 		permitted_callers: &[T::AccountId],
 		ttl: BlockNumberFor<T>,
@@ -485,7 +485,7 @@ impl<T: Config> Pallet<T> {
 							ethabi::ParamType::Address,
 							// operatorsWithPreferences
 							ethabi::ParamType::Array(Box::new(
-								OperatorPreferences::to_ethabi_param_type(),
+								OperatorPreferences::<T::Constraints>::to_ethabi_param_type(),
 							)),
 							// requestInputs
 							ethabi::ParamType::Bytes,
@@ -769,7 +769,7 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		job: u8,
 		job_call_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 		inputs: &[Field<T::Constraints, T::AccountId>],
 		outputs: &[Field<T::Constraints, T::AccountId>],
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -799,7 +799,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 					ethabi::Param {
 						name: String::from("inputs"),
 						kind: ethabi::ParamType::Bytes,
@@ -849,7 +849,7 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -872,7 +872,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Address,
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 				],
 				outputs: Default::default(),
 				constant: None,
@@ -909,7 +909,7 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -932,7 +932,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Address,
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 				],
 				outputs: Default::default(),
 				constant: None,
