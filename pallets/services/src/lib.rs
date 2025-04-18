@@ -28,18 +28,13 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use sp_core::ecdsa;
-use sp_runtime::{
-	traits::Zero,
-	RuntimeAppPublic,
-};
+use sp_runtime::{RuntimeAppPublic, traits::Zero};
+use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 use tangle_primitives::{
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
-	services::{
-		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel
-	},
+	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
 	traits::{MultiAssetDelegationInfo, SlashManager},
 };
-use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 
 pub mod functions;
 mod impls;
@@ -1252,13 +1247,12 @@ pub mod module {
 			Instances::<T>::remove(service_id);
 			let blueprint_id = service.blueprint;
 			let (_, _blueprint) = Self::blueprints(blueprint_id)?;
-			let (allowed, _weight) =
-				Self::on_service_termination_hook(
-					&_blueprint,
-					blueprint_id,
-					service_id,
-					&service.owner,
-				)?;
+			let (allowed, _weight) = Self::on_service_termination_hook(
+				&_blueprint,
+				blueprint_id,
+				service_id,
+				&service.owner,
+			)?;
 
 			ensure!(allowed, Error::<T>::TerminationInterrupted);
 			// Remove the service from the operator's profile.
@@ -1570,6 +1564,65 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
+		/// Join a service instance as an operator
+		#[pallet::call_index(15)]
+		#[pallet::weight(10_000)]
+		pub fn join_service(
+			origin: OriginFor<T>,
+			instance_id: u64,
+			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
+		) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Get service instance
+			let instance = Instances::<T>::get(instance_id)?;
+
+			// Check if operator is already in the set
+			ensure!(
+				!instance.operator_security_commitments.iter().any(|(op, _)| op == &operator),
+				Error::<T>::AlreadyJoined
+			);
+
+			ensure!(
+				instance.validate_security_commitments(&security_commitments),
+				Error::<T>::InvalidSecurityCommitments
+			);
+
+			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
+			let preferences = Self::operators(instance.blueprint, operator.clone())?;
+
+			// Call membership implementation
+			Self::do_join_service(
+				&blueprint,
+				instance.blueprint,
+				instance_id,
+				&operator,
+				&preferences,
+				security_commitments,
+			)?;
+
+			Ok(())
+		}
+
+		/// Leave a service instance as an operator
+		#[pallet::call_index(16)]
+		#[pallet::weight(10_000)]
+		pub fn leave_service(origin: OriginFor<T>, instance_id: u64) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Get service instance
+			let instance = Instances::<T>::get(instance_id)?;
+
+			// Get blueprint
+			let (_, blueprint) = Self::blueprints(instance.blueprint)?;
+			let _ = Self::operators(instance.blueprint, operator.clone())?;
+
+			// Call membership implementation
+			Self::do_leave_service(&blueprint, instance.blueprint, instance_id, &operator)?;
+
+			Ok(())
+		}
+
 		/// Updates the RPC address for a registered operator's service blueprint.
 		///
 		/// Allows an operator to modify their RPC address for a specific blueprint they are
@@ -1591,6 +1644,7 @@ pub mod module {
 		///
 		/// * [`Error::NotRegistered`] - The caller is not registered for this blueprint.
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
+		#[pallet::call_index(17)]
 		#[pallet::weight(T::WeightInfo::update_rpc_address())]
 		pub fn update_rpc_address(
 			origin: OriginFor<T>,
@@ -1663,7 +1717,7 @@ pub mod module {
 		/// * [`Error::NotRegistered`] - One or more operators not registered for blueprint.
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
-		#[pallet::call_index(17)]
+		#[pallet::call_index(18)]
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request_with_quote(
 			origin: OriginFor<T>,
@@ -1681,7 +1735,7 @@ pub mod module {
 			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			
+
 			// Ensure all operators are active
 			for operator in operators.iter() {
 				ensure!(
@@ -1721,10 +1775,7 @@ pub mod module {
 			// Verify that we have a signature from each operator
 			let mut operator_signatures = BTreeMap::new();
 			for (operator, signature) in quote_signatures.iter() {
-				ensure!(
-					operators.contains(operator),
-					Error::<T>::InvalidQuoteSignature
-				);
+				ensure!(operators.contains(operator), Error::<T>::InvalidQuoteSignature);
 				operator_signatures.insert(operator.clone(), *signature);
 			}
 
@@ -1740,7 +1791,7 @@ pub mod module {
 			// For simplicity, we'll use a basic signature verification
 			for (operator, signature) in operator_signatures.iter() {
 				let operator_preferences = Operators::<T>::get(blueprint_id, operator)?;
-				
+
 				// Convert 65-byte key to 33-byte format for ECDSA verification
 				let mut public_key_bytes = [0u8; 33];
 				if operator_preferences.key.len() >= 33 {
@@ -1750,19 +1801,15 @@ pub mod module {
 					// This is an error case, but we'll handle it gracefully
 					ensure!(false, Error::<T>::InvalidQuoteSignature);
 				}
-				
+
 				let public_key = ecdsa::Public::from_raw(public_key_bytes);
-				
+
 				// Create a simple message to verify (in production, this would be a hash of the quote details)
 				let message = [0u8; 32];
-				
+
 				// Verify the signature
 				ensure!(
-					sp_io::crypto::ecdsa_verify(
-						signature,
-						&message,
-						&public_key,
-					),
+					sp_io::crypto::ecdsa_verify(signature, &message, &public_key,),
 					Error::<T>::InvalidQuoteSignature
 				);
 			}
@@ -1781,7 +1828,7 @@ pub mod module {
 				value,
 				membership_model.clone(),
 			)?;
-			
+
 			// Now approve the service for each operator
 			for operator in operators.iter() {
 				Self::do_approve(operator.clone(), service_id, &security_commitments)?;
