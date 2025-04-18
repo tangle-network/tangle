@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
-use crate::mock_evm::MockedEvmRunner;
-use crate::{self as pallet_services};
+use crate::{
+	mock_evm::MockedEvmRunner,
+	{self as pallet_services},
+};
 use core::ops::Mul;
 use ethabi::Uint;
 use frame_election_provider_support::{
@@ -359,6 +361,10 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxRpcAddressLength: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const SlashDeferDuration: u32 = 7;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -401,6 +407,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
+	type MaxRpcAddressLength = MaxRpcAddressLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;

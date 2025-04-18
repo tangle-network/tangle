@@ -1,5 +1,7 @@
-use crate::types::rewards::UserDepositWithLocks;
-use crate::{services::Asset, types::RoundIndex};
+use crate::{
+	services::Asset,
+	types::{RoundIndex, rewards::UserDepositWithLocks},
+};
 use sp_std::prelude::*;
 
 /// A trait to provide information about multi-asset delegation.
@@ -74,7 +76,8 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// # Parameters
 	///
 	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `asset`: A reference to the asset identifier for which the total delegation amount is requested.
+	/// * `asset`: A reference to the asset identifier for which the total delegation amount is
+	///   requested.
 	///
 	/// # Returns
 	///

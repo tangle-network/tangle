@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::services::Asset;
-use crate::types::rewards::LockMultiplier;
+use crate::{services::Asset, types::rewards::LockMultiplier};
 use sp_runtime::traits::Zero;
 
 /// Trait for managing rewards in the Tangle network.

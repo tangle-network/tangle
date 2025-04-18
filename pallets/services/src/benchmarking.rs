@@ -4,12 +4,10 @@ use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use parity_scale_codec::Decode;
 use scale_info::prelude::boxed::Box;
-use sp_core::Pair;
-use sp_core::{H160, ecdsa};
-use sp_runtime::KeyTypeId;
-use sp_runtime::Percent;
+use sp_core::{H160, Pair, ecdsa};
+use sp_runtime::{KeyTypeId, Percent};
 use sp_std::vec;
-use tangle_primitives::services::*;
+use tangle_primitives::{BoundedString, services::*};
 
 pub type AssetId = u32;
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
@@ -51,8 +49,11 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 	T::AccountId::decode(&mut &[id; 32][..]).unwrap()
 }
 
-fn operator_preferences<T: Config>() -> OperatorPreferences {
-	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() }
+fn operator_preferences<T: Config>() -> OperatorPreferences<T::Constraints> {
+	OperatorPreferences {
+		key: test_ecdsa_key(),
+		rpc_address: BoundedString::try_from("https://example.com/rpc".to_string()).unwrap(),
+	}
 }
 
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints> {
@@ -131,18 +132,18 @@ benchmarks! {
 
 	}: _(RawOrigin::Signed(bob.clone()), 0)
 
-	update_price_targets {
+	update_rpc_address {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
-		let price_targets = Default::default();
+		let rpc_address = BoundedString::try_from("https://example.com/rpc".to_string()).unwrap();
 
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, price_targets)
+	}: _(RawOrigin::Signed(bob.clone()), 0, rpc_address)
 
 
 	request {

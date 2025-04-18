@@ -20,8 +20,7 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::traits::{DispatchInfoOf, SignedExtension};
 
-use crate::Balance;
-use crate::Runtime;
+use crate::{Balance, Runtime};
 
 /// Extension that checks for nominated tokens that are being restaked.
 /// Prevents unbonding when tokens are delegated through the multi-asset-delegation system.

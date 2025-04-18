@@ -19,8 +19,7 @@ use std::collections::BTreeMap;
 pub use super::*;
 pub use crate::mock::*;
 use frame_support::assert_ok;
-use sp_core::Pair;
-use sp_core::bounded_vec;
+use sp_core::{Pair, bounded_vec};
 use sp_runtime::Percent;
 use tangle_primitives::services::*;
 
@@ -51,37 +50,6 @@ pub fn mint_tokens(
 	amount: Balance,
 ) {
 	assert_ok!(Assets::mint(RuntimeOrigin::signed(creator.clone()), asset_id, recipient, amount));
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum MachineKind {
-	Large,
-	Medium,
-	Small,
-}
-
-/// All prices are specified in USD/hr (in u64, so 1e6 = 1$)
-fn price_targets(kind: MachineKind) -> PriceTargets {
-	match kind {
-		MachineKind::Large => PriceTargets {
-			cpu: 2_000,
-			mem: 1_000,
-			storage_hdd: 100,
-			storage_ssd: 200,
-			storage_nvme: 300,
-		},
-		MachineKind::Medium => PriceTargets {
-			cpu: 1_000,
-			mem: 500,
-			storage_hdd: 50,
-			storage_ssd: 100,
-			storage_nvme: 150,
-		},
-		MachineKind::Small => {
-			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
-		},
-	}
 }
 
 // Common test utilities and setup
@@ -158,13 +126,7 @@ fn deploy() -> Deployment {
 	let alice = mock_pub_key(ALICE);
 	let bob = mock_pub_key(BOB);
 
-	assert_ok!(join_and_register(
-		bob.clone(),
-		blueprint_id,
-		test_ecdsa_key(),
-		Default::default(),
-		1000
-	));
+	assert_ok!(join_and_register(bob.clone(), blueprint_id, test_ecdsa_key(), 1000, None));
 
 	let eve = mock_pub_key(EVE);
 	let service_id = Services::next_instance_id();
@@ -205,8 +167,8 @@ pub fn join_and_register(
 	operator: AccountId,
 	blueprint_id: BlueprintId,
 	key: [u8; 65],
-	price_targets: PriceTargets,
 	stake_amount: Balance,
+	rpc_address: Option<&str>,
 ) -> DispatchResult {
 	// Join operators with stake
 	assert_ok!(MultiAssetDelegation::join_operators(
@@ -215,10 +177,16 @@ pub fn join_and_register(
 	));
 
 	// Register for blueprint
+	let rpc_address = match rpc_address {
+		Some(addr) => BoundedString::try_from(addr.to_string()).unwrap(),
+		None => BoundedString::default(),
+	};
+
+	// Register for blueprint
 	assert_ok!(Services::register(
 		RuntimeOrigin::signed(operator.clone()),
 		blueprint_id,
-		OperatorPreferences { key, price_targets },
+		OperatorPreferences { key, rpc_address },
 		Default::default(),
 		0,
 	));
@@ -226,6 +194,7 @@ pub fn join_and_register(
 	Ok(())
 }
 
+#[allow(dead_code)]
 pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 	let mut actual: Vec<RuntimeEvent> = System::events()
 		.into_iter()

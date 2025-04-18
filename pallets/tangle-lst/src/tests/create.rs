@@ -1,6 +1,5 @@
 use super::*;
-use frame_support::traits::fungibles::metadata::Inspect;
-use frame_support::{assert_err, assert_noop, assert_ok};
+use frame_support::{assert_err, assert_noop, assert_ok, traits::fungibles::metadata::Inspect};
 
 #[test]
 fn create_works() {

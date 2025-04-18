@@ -86,8 +86,10 @@ pub const LOG_TARGET: &str = "runtime::multi-asset-delegation";
 #[frame_support::pallet]
 pub mod pallet {
 	use super::functions::*;
-	use crate::types::{delegator::DelegatorBlueprintSelection, *};
-	use crate::weights::WeightInfo;
+	use crate::{
+		types::{delegator::DelegatorBlueprintSelection, *},
+		weights::WeightInfo,
+	};
 	use frame_support::{
 		PalletId,
 		pallet_prelude::*,
@@ -100,11 +102,11 @@ pub mod pallet {
 	use sp_runtime::traits::{MaybeSerializeDeserialize, Member, Zero};
 	use sp_staking::{SessionIndex, StakingInterface};
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
-	use tangle_primitives::traits::RewardsManager;
-	use tangle_primitives::types::rewards::LockMultiplier;
 	use tangle_primitives::{
-		BlueprintId, RoundIndex, services::Asset, services::EvmAddressMapping,
-		traits::ServiceManager,
+		BlueprintId, RoundIndex,
+		services::{Asset, EvmAddressMapping},
+		traits::{RewardsManager, ServiceManager},
+		types::rewards::LockMultiplier,
 	};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -557,7 +559,8 @@ pub mod pallet {
 		/// # Errors
 		///
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
-		/// * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
+		/// * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake
+		///   request
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::schedule_leave_operators())]
 		pub fn schedule_leave_operators(origin: OriginFor<T>) -> DispatchResult {
@@ -655,7 +658,8 @@ pub mod pallet {
 		/// # Errors
 		///
 		/// * [`Error::NotOperator`] - Account is not registered as an operator
-		/// * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
+		/// * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake
+		///   request
 		/// * [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake
 		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::schedule_operator_unstake())]

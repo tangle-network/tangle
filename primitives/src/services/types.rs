@@ -144,63 +144,6 @@ impl<AssetId: AssetIdT> Asset<AssetId> {
 	}
 }
 
-/// Represents the pricing structure for various hardware resources.
-/// All prices are specified in USD/hr, calculated based on the average block time.
-#[derive(
-	PartialEq, Eq, Default, Encode, Decode, RuntimeDebug, TypeInfo, Copy, Clone, MaxEncodedLen,
-)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-pub struct PriceTargets {
-	/// Price per vCPU per hour
-	pub cpu: u64,
-	/// Price per MB of memory per hour
-	pub mem: u64,
-	/// Price per GB of HDD storage per hour
-	pub storage_hdd: u64,
-	/// Price per GB of SSD storage per hour
-	pub storage_ssd: u64,
-	/// Price per GB of NVMe storage per hour
-	pub storage_nvme: u64,
-}
-
-impl PriceTargets {
-	/// Converts the struct to ethabi ParamType.
-	pub fn to_ethabi_param_type() -> ethabi::ParamType {
-		ethabi::ParamType::Tuple(vec![
-			// Price per vCPU per hour
-			ethabi::ParamType::Uint(64),
-			// Price per MB of memory per hour
-			ethabi::ParamType::Uint(64),
-			// Price per GB of HDD storage per hour
-			ethabi::ParamType::Uint(64),
-			// Price per GB of SSD storage per hour
-			ethabi::ParamType::Uint(64),
-			// Price per GB of NVMe storage per hour
-			ethabi::ParamType::Uint(64),
-		])
-	}
-
-	/// Converts the struct to ethabi Param.
-	pub fn to_ethabi_param() -> ethabi::Param {
-		ethabi::Param {
-			name: String::from("priceTargets"),
-			kind: Self::to_ethabi_param_type(),
-			internal_type: Some(String::from("struct ServiceOperators.PriceTargets")),
-		}
-	}
-
-	/// Converts the struct to ethabi Token.
-	pub fn to_ethabi(&self) -> ethabi::Token {
-		ethabi::Token::Tuple(vec![
-			ethabi::Token::Uint(self.cpu.into()),
-			ethabi::Token::Uint(self.mem.into()),
-			ethabi::Token::Uint(self.storage_hdd.into()),
-			ethabi::Token::Uint(self.storage_ssd.into()),
-			ethabi::Token::Uint(self.storage_nvme.into()),
-		])
-	}
-}
-
 /// Trait for asset identifiers
 pub trait AssetIdT:
 	Default
@@ -308,19 +251,13 @@ pub struct AssetSecurityCommitment<AssetId: AssetIdT> {
 pub struct OperatorPreferences<C: Constraints> {
 	/// The operator ECDSA public key.
 	pub key: [u8; 65],
-	/// The pricing targets for the operator's resources.
-	pub price_targets: PriceTargets,
 	/// The address of the RPC server the operator is running.
 	pub rpc_address: BoundedString<C::MaxRpcAddressLength>,
 }
 
 impl<C: Constraints> Default for OperatorPreferences<C> {
 	fn default() -> Self {
-		Self {
-			key: [0u8; 65],
-			price_targets: PriceTargets::default(),
-			rpc_address: BoundedString::default(),
-		}
+		Self { key: [0u8; 65], rpc_address: BoundedString::default() }
 	}
 }
 
@@ -333,7 +270,6 @@ impl<C: Constraints> Serialize for OperatorPreferences<C> {
 		use serde::ser::SerializeTuple;
 		let mut tup = serializer.serialize_tuple(3)?;
 		tup.serialize_element(&self.key[..])?;
-		tup.serialize_element(&self.price_targets)?;
 		tup.serialize_element(&self.rpc_address)?;
 		tup.end()
 	}
@@ -359,9 +295,6 @@ impl<'de, C: Constraints> serde::de::Visitor<'de> for OperatorPreferencesVisitor
 		let key = seq
 			.next_element::<Vec<u8>>()?
 			.ok_or_else(|| serde::de::Error::custom("key is missing"))?;
-		let price_targets = seq
-			.next_element::<PriceTargets>()?
-			.ok_or_else(|| serde::de::Error::custom("price_targets is missing"))?;
 		let rpc_address = seq
 			.next_element::<BoundedString<C::MaxRpcAddressLength>>()?
 			.ok_or_else(|| serde::de::Error::custom("rpc_address is missing"))?;
@@ -370,7 +303,7 @@ impl<'de, C: Constraints> serde::de::Visitor<'de> for OperatorPreferencesVisitor
 				"key must be in the uncompressed format with length of 65 bytes",
 			)
 		})?;
-		Ok(OperatorPreferences { key: key_arr, price_targets, rpc_address })
+		Ok(OperatorPreferences { key: key_arr, rpc_address })
 	}
 }
 
@@ -393,8 +326,6 @@ impl<C: Constraints> OperatorPreferences<C> {
 		ethabi::ParamType::Tuple(vec![
 			// Operator's ECDSA Public Key (33 bytes)
 			ethabi::ParamType::Bytes,
-			// Operator's price targets
-			PriceTargets::to_ethabi_param_type(),
 			// Operator's RPC address - represent as String in ABI
 			ethabi::ParamType::String,
 		])
@@ -415,8 +346,6 @@ impl<C: Constraints> OperatorPreferences<C> {
 		ethabi::Token::Tuple(vec![
 			// operator public key
 			ethabi::Token::Bytes(self.key.to_vec()),
-			// price targets
-			self.price_targets.to_ethabi(),
 			// rpc address
 			ethabi::Token::String(self.rpc_address.to_string()),
 		])

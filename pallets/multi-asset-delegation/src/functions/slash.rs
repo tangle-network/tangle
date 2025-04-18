@@ -26,9 +26,8 @@ use frame_support::{
 };
 use parity_scale_codec::Encode;
 use sp_runtime::{DispatchError, traits::CheckedSub};
-use tangle_primitives::services::EvmAddressMapping;
 use tangle_primitives::{
-	services::{Asset, UnappliedSlash},
+	services::{Asset, EvmAddressMapping, UnappliedSlash},
 	traits::SlashManager,
 };
 

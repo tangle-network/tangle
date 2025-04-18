@@ -1,6 +1,5 @@
 use crate::tests::{ConstraintsOf, Runtime};
-use sp_core::bounded_vec;
-use sp_core::crypto::AccountId32;
+use sp_core::{bounded_vec, crypto::AccountId32};
 use tangle_primitives::services::{Field as PrimitivesField, FieldType};
 
 type Field = PrimitivesField<ConstraintsOf<Runtime>, AccountId32>;

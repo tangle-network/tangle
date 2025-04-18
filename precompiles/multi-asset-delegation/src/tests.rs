@@ -1,8 +1,7 @@
 use crate::{mock::*, mock_evm::*, U256};
 use frame_support::{assert_ok, traits::Currency};
 use pallet_multi_asset_delegation::{CurrentRound, Delegators, Operators};
-use precompile_utils::prelude::*;
-use precompile_utils::testing::*;
+use precompile_utils::{prelude::*, testing::*};
 use sp_core::{H160, H256};
 use sp_runtime::AccountId32;
 use tangle_primitives::services::Asset;

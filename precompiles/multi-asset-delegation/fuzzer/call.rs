@@ -21,8 +21,7 @@
 //! # Debugging a panic
 //! Once a panic is found, it can be debugged with
 //! `cargo hfuzz run-debug mad-fuzzer hfuzz_workspace/mad-fuzzer/*.fuzz`.
-use fp_evm::Context;
-use fp_evm::PrecompileSet;
+use fp_evm::{Context, PrecompileSet};
 use frame_support::traits::{Currency, Get};
 use honggfuzz::fuzz;
 use pallet_evm::AddressMapping;
@@ -34,12 +33,10 @@ use pallet_multi_asset_delegation::{
 	pallet as mad,
 	types::*,
 };
-use precompile_utils::prelude::*;
-use precompile_utils::testing::*;
+use precompile_utils::{prelude::*, testing::*};
 use rand::{Rng, seq::SliceRandom};
 use sp_core::U256;
-use sp_runtime::DispatchResult;
-use sp_runtime::traits::Scale;
+use sp_runtime::{DispatchResult, traits::Scale};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
