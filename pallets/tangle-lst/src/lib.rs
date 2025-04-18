@@ -108,7 +108,6 @@
 #![allow(clippy::unused_unit, clippy::useless_conversion, clippy::type_complexity)]
 
 use codec::Codec;
-use frame_support::traits::fungibles::metadata::Mutate;
 use frame_support::{
 	DefaultNoBound, PalletError, defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
@@ -116,7 +115,9 @@ use frame_support::{
 	traits::{
 		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
 		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency, fungibles,
-		fungibles::{Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate},
+		fungibles::{
+			Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate, metadata::Mutate,
+		},
 		tokens::{Fortitude, Precision, Preservation},
 	},
 };
@@ -411,9 +412,8 @@ pub mod pallet {
 		PaidOut { member: T::AccountId, pool_id: PoolId, payout: BalanceOf<T> },
 		/// A member has unbonded from their pool.
 		///
-		/// - `balance` is the corresponding balance of the number of points that has been
-		///   requested to be unbonded (the argument of the `unbond` transaction) from the bonded
-		///   pool.
+		/// - `balance` is the corresponding balance of the number of points that has been requested
+		///   to be unbonded (the argument of the `unbond` transaction) from the bonded pool.
 		/// - `points` is the number of points that are issued as a result of `balance` being
 		///   dissolved into the corresponding unbonding pool.
 		/// - `era` is the era in which the balance will be unbonded.
@@ -719,9 +719,9 @@ pub mod pallet {
 		/// * [`Error::DefensiveError`] - Not enough space in unbond pool
 		///
 		/// # Note
-		/// If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first.
-		/// The staking interface will attempt this automatically but may still return `NoMoreChunks`
-		/// if chunks cannot be released.
+		/// If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called
+		/// first. The staking interface will attempt this automatically but may still return
+		/// `NoMoreChunks` if chunks cannot be released.
 		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::unbond())]
 		pub fn unbond(
@@ -1248,8 +1248,8 @@ pub mod pallet {
 
 		/// Update the roles of a pool.
 		///
-		/// Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed.
-		/// Emits a `RolesUpdated` event on successful update.
+		/// Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be
+		/// changed. Emits a `RolesUpdated` event on successful update.
 		///
 		/// # Permissions
 		///
@@ -1382,7 +1382,8 @@ pub mod pallet {
 		///
 		/// * `origin` - The origin of the call
 		/// * `pool_id` - The pool identifier
-		/// * `new_commission` - Optional commission rate and payee. None removes existing commission
+		/// * `new_commission` - Optional commission rate and payee. None removes existing
+		///   commission
 		///
 		/// # Errors
 		///
@@ -1419,8 +1420,9 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Set the maximum commission rate for a pool. Initial max can be set to any value, with only
-		/// lower values allowed thereafter. Current commission will be reduced if above new max.
+		/// Set the maximum commission rate for a pool. Initial max can be set to any value, with
+		/// only lower values allowed thereafter. Current commission will be reduced if above new
+		/// max.
 		///
 		/// # Permissions
 		///
@@ -1461,7 +1463,8 @@ pub mod pallet {
 		///
 		/// # Arguments
 		///
-		/// * `origin` - The origin of the call. Must be signed by an account with commission management permission.
+		/// * `origin` - The origin of the call. Must be signed by an account with commission
+		///   management permission.
 		/// * `pool_id` - The identifier of the pool to set commission change rate for.
 		/// * `change_rate` - The new commission change rate configuration.
 		#[pallet::call_index(19)]
@@ -1487,13 +1490,14 @@ pub mod pallet {
 
 		/// Claim pending commission for a pool.
 		///
-		/// The dispatch origin of this call must be signed by an account with commission claim permission.
-		/// Pending commission is paid out and added to total claimed commission. Total pending commission
-		/// is reset to zero.
+		/// The dispatch origin of this call must be signed by an account with commission claim
+		/// permission. Pending commission is paid out and added to total claimed commission.
+		/// Total pending commission is reset to zero.
 		///
 		/// # Arguments
 		///
-		/// * `origin` - The origin of the call. Must be signed by an account with commission claim permission.
+		/// * `origin` - The origin of the call. Must be signed by an account with commission claim
+		///   permission.
 		/// * `pool_id` - The identifier of the pool to claim commission from.
 		#[pallet::call_index(20)]
 		#[pallet::weight(T::WeightInfo::claim_commission())]
@@ -1530,7 +1534,8 @@ pub mod pallet {
 		///
 		/// * `origin` - The origin of the call. Must be signed by the pool's root account.
 		/// * `pool_id` - The identifier of the pool to set permissions for.
-		/// * `permission` - Optional commission claim permission configuration. If None, removes any existing permission.
+		/// * `permission` - Optional commission claim permission configuration. If None, removes
+		///   any existing permission.
 		#[pallet::call_index(22)]
 		#[pallet::weight(T::WeightInfo::set_commission_claim_permission())]
 		pub fn set_commission_claim_permission(

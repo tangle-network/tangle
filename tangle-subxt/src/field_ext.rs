@@ -1,6 +1,6 @@
-use crate::tangle_testnet_runtime::api::runtime_types::bounded_collections::bounded_vec::BoundedVec;
-use crate::tangle_testnet_runtime::api::runtime_types::tangle_primitives::services::field::{
-	Field, FieldType,
+use crate::tangle_testnet_runtime::api::runtime_types::{
+	bounded_collections::bounded_vec::BoundedVec,
+	tangle_primitives::services::field::{Field, FieldType},
 };
 use subxt_core::utils::AccountId32;
 

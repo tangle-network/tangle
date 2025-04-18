@@ -345,7 +345,8 @@ impl<
 		&mut self,
 		amount_to_increase: Balance,
 	) -> Result<(), &'static str> {
-		// sanity check that the proposed amount when added to the current delegated amount is not greater than the total amount
+		// sanity check that the proposed amount when added to the current delegated amount is not
+		// greater than the total amount
 		let new_delegated_amount =
 			self.delegated_amount.clone().saturating_add(amount_to_increase.clone());
 		ensure!(

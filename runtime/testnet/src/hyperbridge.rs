@@ -24,8 +24,7 @@ use crate::{
 use frame_support::parameter_types;
 use ismp::{host::StateMachine, module::IsmpModule, router::IsmpRouter};
 use pallet_token_gateway::types::EvmToSubstrate;
-use sp_std::boxed::Box;
-use sp_std::vec::Vec;
+use sp_std::{boxed::Box, vec::Vec};
 use tangle_primitives::Balance;
 
 impl pallet_hyperbridge::Config for Runtime {
@@ -55,7 +54,8 @@ impl pallet_ismp::Config for Runtime {
 	type Currency = Balances;
 	// Co-processor
 	type Coprocessor = Coprocessor;
-	// A tuple of types implementing the ConsensusClient interface, which defines all consensus algorithms supported by this protocol deployment
+	// A tuple of types implementing the ConsensusClient interface, which defines all consensus
+	// algorithms supported by this protocol deployment
 	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type WeightProvider = ();
 	type OffchainDB = ();

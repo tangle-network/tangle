@@ -139,6 +139,9 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxAssetsPerService: u32 = 64;
 
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxRpcAddressLength: u32 = 256;
+
 	// Slash defer duration in days (era-index)
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const SlashDeferDuration: EraIndex = 7;
@@ -190,6 +193,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
+	type MaxRpcAddressLength = MaxRpcAddressLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = PalletServicesConstraints;

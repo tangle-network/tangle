@@ -13,8 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::ServiceRequests;
-use crate::{Config, Error, Event, Pallet, StagingServicePayments};
+use crate::{Config, Error, Event, Pallet, ServiceRequests, StagingServicePayments};
 use frame_support::{
 	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},

@@ -19,8 +19,8 @@ use jsonrpsee::RpcModule;
 use std::sync::Arc;
 // Substrate
 use pallet_ismp_rpc::{IsmpApiServer, IsmpRpcHandler};
-use sc_client_api::{BlockBackend, ProofProvider};
 use sc_client_api::{
+	BlockBackend, ProofProvider,
 	backend::{Backend, StorageProvider},
 	client::BlockchainEvents,
 };

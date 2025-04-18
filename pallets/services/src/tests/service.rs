@@ -30,7 +30,13 @@ fn request_service() {
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -38,13 +44,19 @@ fn request_service() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let dave = mock_pub_key(DAVE);
 		let dave_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			dave.clone(),
+			0,
+			dave_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let eve = mock_pub_key(EVE);
 
@@ -217,7 +229,13 @@ fn request_service_with_no_assets() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 		let eve = mock_pub_key(EVE);
 		assert_err!(
 			Services::request(
@@ -252,7 +270,13 @@ fn request_service_with_payment_asset() {
 		));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -321,7 +345,13 @@ fn request_service_with_payment_erc20_token() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -398,7 +428,13 @@ fn reject_service_with_payment_token() {
 		));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie_address = mock_address(CHARLIE);
@@ -470,7 +506,13 @@ fn reject_service_with_payment_asset() {
 		));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -535,8 +577,8 @@ fn test_service_creation_dynamic_max_operators() {
 				operator.clone(),
 				0,
 				test_ecdsa_key(),
-				Default::default(),
 				1000,
+				Some("https://example.com/rpc")
 			));
 			operators.push(operator);
 		}
@@ -566,8 +608,8 @@ fn test_service_creation_dynamic_max_operators() {
 			extra_operator.clone(),
 			0,
 			test_ecdsa_key(),
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 		operators.push(extra_operator);
 
@@ -604,7 +646,13 @@ fn test_service_creation_fixed_min_operators() {
 		// Register some operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -612,8 +660,8 @@ fn test_service_creation_fixed_min_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -685,7 +733,13 @@ fn test_service_creation_invalid_operators() {
 		// Register one valid operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create an unregistered operator
 		let unregistered = mock_pub_key(CHARLIE);
@@ -725,7 +779,13 @@ fn test_service_creation_duplicate_operators() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -733,8 +793,8 @@ fn test_service_creation_duplicate_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -773,7 +833,13 @@ fn test_service_creation_inactive_operators() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -781,8 +847,8 @@ fn test_service_creation_inactive_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		// Deactivate one operator
@@ -839,7 +905,13 @@ fn test_termination_with_partial_approvals() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -847,13 +919,19 @@ fn test_termination_with_partial_approvals() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let dave = mock_pub_key(DAVE);
 		let dave_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			dave.clone(),
+			0,
+			dave_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create service request
 		let eve = mock_pub_key(EVE);
@@ -919,7 +997,13 @@ fn test_operator_offline_during_active_service() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create service
 		let eve = mock_pub_key(EVE);

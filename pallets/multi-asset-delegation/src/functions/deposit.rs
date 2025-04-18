@@ -22,9 +22,11 @@ use frame_support::{
 	traits::{Get, fungibles::Mutate, tokens::Preservation},
 };
 use sp_core::H160;
-use tangle_primitives::services::{Asset, EvmAddressMapping};
-use tangle_primitives::traits::RewardsManager;
-use tangle_primitives::types::rewards::LockMultiplier;
+use tangle_primitives::{
+	services::{Asset, EvmAddressMapping},
+	traits::RewardsManager,
+	types::rewards::LockMultiplier,
+};
 
 impl<T: Config> Pallet<T> {
 	/// Returns the account ID of the pallet.
@@ -157,8 +159,8 @@ impl<T: Config> Pallet<T> {
 
 	/// Returns an iterator over all withdraw requests that are ready to be executed.
 	///
-	/// A withdraw request is considered ready when the current round number is greater than or equal to
-	/// the requested round plus the configured delay period.
+	/// A withdraw request is considered ready when the current round number is greater than or
+	/// equal to the requested round plus the configured delay period.
 	///
 	/// # Arguments
 	///
@@ -221,9 +223,10 @@ impl<T: Config> Pallet<T> {
 							// Handled by the Precompile, always return true
 							//
 							// Note to the reader: This is set to true with the assumption that the
-							// if the precompiled failed to transfer the funds, after this call, the whole
-							// transaction will be reverted. This is a safe assumption because the precompile
-							// will revert the transaction if the transfer fails.
+							// if the precompiled failed to transfer the funds, after this call, the
+							// whole transaction will be reverted. This is a safe assumption
+							// because the precompile will revert the transaction if the
+							// transfer fails.
 							true
 						},
 					};

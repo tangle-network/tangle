@@ -37,10 +37,10 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain,
 };
-use frame_support::ord_parameter_types;
 use frame_support::{
 	derive_impl,
 	genesis_builder_helper::{build_state, get_preset},
+	ord_parameter_types,
 	traits::{
 		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
@@ -76,16 +76,15 @@ use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{H160, H256, OpaqueMetadata, U256, crypto::KeyTypeId};
 use sp_genesis_builder::PresetId;
-use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion, create_runtime_str,
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
-		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
-		UniqueSaturatedInto,
+		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
+		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
+		StaticLookup, UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,

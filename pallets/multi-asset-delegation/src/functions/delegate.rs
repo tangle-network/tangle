@@ -419,8 +419,8 @@ impl<T: Config> Pallet<T> {
 
 	/// Processes the delegation of nominated tokens to an operator.
 	///
-	/// This function allows delegators to utilize their nominated (staked) tokens in the delegation system.
-	/// It differs from regular delegation in that:
+	/// This function allows delegators to utilize their nominated (staked) tokens in the delegation
+	/// system. It differs from regular delegation in that:
 	/// 1. It uses nominated tokens instead of deposited assets
 	/// 2. It maintains a lock on the nominated tokens
 	/// 3. It tracks total nomination delegations to prevent over-delegation

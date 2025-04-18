@@ -16,13 +16,14 @@
 use super::*;
 use crate::{Pallet as MultiAssetDelegation, types::*};
 use frame_benchmarking::{account, benchmarks, whitelisted_caller};
-use frame_support::BoundedVec;
-use frame_support::traits::{Currency, Get};
+use frame_support::{
+	BoundedVec,
+	traits::{Currency, Get},
+};
 use frame_system::RawOrigin;
 use sp_core::H160;
 use sp_std::vec;
-use tangle_primitives::rewards::LockMultiplier;
-use tangle_primitives::{BlueprintId, services::Asset};
+use tangle_primitives::{BlueprintId, rewards::LockMultiplier, services::Asset};
 
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;
