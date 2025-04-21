@@ -24,6 +24,7 @@ ethabi = { workspace = true }
 fp-evm = { workspace = true }
 frame-system = { workspace = true }
 precompile-utils = { workspace = true }
+sha2 = { workspace = true }
 hex-literal = { workspace = true }
 impl-trait-for-tuples = "0.2.2"
 

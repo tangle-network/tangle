@@ -24506,6 +24506,7 @@ dependencies = [
  "precompile-utils",
  "scale-info",
  "serde",
+ "sha2 0.10.8",
  "smallvec",
  "sp-arithmetic 26.0.0",
  "sp-consensus-babe 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",

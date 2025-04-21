@@ -993,7 +993,7 @@ pub mod module {
 			#[pallet::compact] blueprint_id: u64,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-			let (_, _blueprint) = Self::blueprints(blueprint_id)?;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let preferences = Operators::<T>::get(blueprint_id, &caller)?;
 
 			// Check for active services for this operator
@@ -1004,7 +1004,7 @@ pub mod module {
 				);
 			}
 			let (allowed, _weight) =
-				Self::on_unregister_hook(&_blueprint, blueprint_id, &preferences)?;
+				Self::on_unregister_hook(&blueprint, blueprint_id, &preferences)?;
 			ensure!(allowed, Error::<T>::NotAllowedToUnregister);
 			Operators::<T>::remove(blueprint_id, &caller);
 
@@ -1246,9 +1246,9 @@ pub mod module {
 			ensure!(removed, Error::<T>::ServiceNotFound);
 			Instances::<T>::remove(service_id);
 			let blueprint_id = service.blueprint;
-			let (_, _blueprint) = Self::blueprints(blueprint_id)?;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
 			let (allowed, _weight) = Self::on_service_termination_hook(
-				&_blueprint,
+				&blueprint,
 				blueprint_id,
 				service_id,
 				&service.owner,
@@ -1686,7 +1686,7 @@ pub mod module {
 		/// since the operators have already agreed to the terms via the quote.
 		///
 		/// The quote is obtained externally through a gRPC server, and this function accepts the necessary
-		/// information from that quote including the price and the operator's signature.
+		/// signatures from the operators to verify their approval.
 		///
 		/// # Permissions
 		///
@@ -1705,8 +1705,9 @@ pub mod module {
 		/// * `payment_asset` - Asset used for payment (native, custom or ERC20).
 		/// * `value` - Amount to pay for the service.
 		/// * `membership_model` - Membership model for the service.
-		/// * `quote_signatures` - Signatures from operators confirming the quote.
+		/// * `operator_signatures` - Signatures from operators confirming the quote.
 		/// * `security_commitments` - Security commitments from operators.
+		/// * `pricing_quote` - Pricing quote details.
 		///
 		/// # Errors
 		///
@@ -1719,7 +1720,7 @@ pub mod module {
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
 		#[pallet::call_index(18)]
 		#[pallet::weight(T::WeightInfo::request())]
-		pub fn request_with_quote(
+		pub fn request_with_signed_price_quotes(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,
 			#[pallet::compact] blueprint_id: u64,
@@ -1731,8 +1732,9 @@ pub mod module {
 			payment_asset: Asset<T::AssetId>,
 			#[pallet::compact] value: BalanceOf<T>,
 			membership_model: MembershipModel,
-			quote_signatures: Vec<(T::AccountId, ecdsa::Signature)>,
+			operator_signatures: Vec<(T::AccountId, [u8; 65])>,
 			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
+			pricing_quote: tangle_primitives::services::pricing::PricingQuote<T::Constraints>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
@@ -1741,17 +1743,6 @@ pub mod module {
 				ensure!(
 					T::OperatorDelegationManager::is_operator_active(operator),
 					Error::<T>::OperatorNotActive,
-				);
-			}
-
-			// Ensure each asset has non-zero exposure requirements
-			for requirement in asset_security_requirements.iter() {
-				ensure!(
-					requirement.min_exposure_percent > Percent::zero()
-						&& requirement.max_exposure_percent > Percent::zero()
-						&& requirement.min_exposure_percent <= requirement.max_exposure_percent
-						&& requirement.max_exposure_percent <= Percent::from_percent(100),
-					Error::<T>::InvalidSecurityRequirements,
 				);
 			}
 
@@ -1773,48 +1764,50 @@ pub mod module {
 			}
 
 			// Verify that we have a signature from each operator
-			let mut operator_signatures = BTreeMap::new();
-			for (operator, signature) in quote_signatures.iter() {
+			let mut operator_signatures_map = BTreeMap::new();
+			for (operator, signature) in operator_signatures.iter() {
 				ensure!(operators.contains(operator), Error::<T>::InvalidQuoteSignature);
-				operator_signatures.insert(operator.clone(), *signature);
+				operator_signatures_map.insert(operator.clone(), *signature);
 			}
 
 			// Ensure all operators have provided a signature
 			for operator in operators.iter() {
 				ensure!(
-					operator_signatures.contains_key(operator),
+					operator_signatures_map.contains_key(operator),
 					Error::<T>::InvalidQuoteSignature
 				);
 			}
 
 			// Verify each operator's signature
-			// For simplicity, we'll use a basic signature verification
-			for (operator, signature) in operator_signatures.iter() {
+			for (operator, signature) in operator_signatures_map.iter() {
 				let operator_preferences = Operators::<T>::get(blueprint_id, operator)?;
 
-				// Convert 65-byte key to 33-byte format for ECDSA verification
-				let mut public_key_bytes = [0u8; 33];
-				if operator_preferences.key.len() >= 33 {
-					// Take the first 33 bytes if the key is larger
-					public_key_bytes.copy_from_slice(&operator_preferences.key[..33]);
+				let public_key = ecdsa::Public::from_full(&operator_preferences.key)
+					.map_err(|_| Error::<T>::InvalidQuoteSignature)?;
+
+				// Hash the pricing quote to create the message to verify
+				let message =
+					tangle_primitives::services::pricing::hash_pricing_quote(&pricing_quote);
+
+				// Convert the hash to a fixed-size array for signature verification
+				let mut message_bytes = [0u8; 32];
+				if message.len() >= 32 {
+					message_bytes.copy_from_slice(&message[..32]);
 				} else {
-					// This is an error case, but we'll handle it gracefully
 					ensure!(false, Error::<T>::InvalidQuoteSignature);
 				}
+				use sp_core::crypto_bytes::CryptoBytes;
 
-				let public_key = ecdsa::Public::from_raw(public_key_bytes);
-
-				// Create a simple message to verify (in production, this would be a hash of the quote details)
-				let message = [0u8; 32];
+				let signature = CryptoBytes::from_raw(*signature);
 
 				// Verify the signature
 				ensure!(
-					sp_io::crypto::ecdsa_verify(signature, &message, &public_key,),
+					sp_io::crypto::ecdsa_verify_prehashed(&signature, &message_bytes, &public_key,),
 					Error::<T>::InvalidQuoteSignature
 				);
 			}
 
-			// Create service request
+			// Request service
 			let service_id = Self::do_request(
 				caller.clone(),
 				evm_origin,
@@ -1829,7 +1822,7 @@ pub mod module {
 				membership_model.clone(),
 			)?;
 
-			// Now approve the service for each operator
+			// Automatically approve the service for each operator
 			for operator in operators.iter() {
 				Self::do_approve(operator.clone(), service_id, &security_commitments)?;
 			}
