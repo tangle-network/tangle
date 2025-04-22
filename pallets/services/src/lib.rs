@@ -1090,7 +1090,30 @@ pub mod module {
 				ensure!(seen_operators.insert(operator), Error::<T>::DuplicateOperator);
 			}
 
-			let (_, _blueprint) = Self::blueprints(blueprint_id)?;
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let supported_membership_models = blueprint.supported_membership_models;
+
+			// Check that the number of operators doesn't exceed the membership model max
+			match membership_model {
+				MembershipModel::Fixed { min_operators } => {
+					ensure!(
+						supported_membership_models.contains(&MembershipModelType::Fixed),
+						Error::<T>::UnsupportedMembershipModel
+					);
+					ensure!(min_operators > 0, Error::<T>::TooFewOperators);
+					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
+				},
+				MembershipModel::Dynamic { min_operators, max_operators } => {
+					ensure!(
+						supported_membership_models.contains(&MembershipModelType::Dynamic),
+						Error::<T>::UnsupportedMembershipModel
+					);
+					ensure!(operators.len() >= min_operators as usize, Error::<T>::TooFewOperators);
+					if let Some(max_ops) = max_operators {
+						ensure!(operators.len() <= max_ops as usize, Error::<T>::TooManyOperators);
+					}
+				},
+			}
 
 			// Ensure all operators are registered for this blueprint
 			for operator in operators.iter() {

@@ -183,12 +183,15 @@ fn test_registration_max_blueprints() {
 			assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 			// Register for each blueprint
-			assert_ok!(join_and_register(
-				bob.clone(),
+			assert_ok!(Services::register(
+				RuntimeOrigin::signed(bob.clone()),
 				i.into(),
-				bob_ecdsa_key,
-				1000,
-				Some("https://example.com/rpc")
+				OperatorPreferences {
+					key: bob_ecdsa_key,
+					rpc_address: BoundedString::try_from("https://example.com/rpc").unwrap()
+				},
+				Default::default(),
+				0,
 			));
 		}
 
@@ -198,12 +201,15 @@ fn test_registration_max_blueprints() {
 
 		// Try to register for one more blueprint - should fail
 		assert_err!(
-			join_and_register(
-				bob.clone(),
+			Services::register(
+				RuntimeOrigin::signed(bob.clone()),
 				MaxBlueprintsPerOperator::get().into(),
-				bob_ecdsa_key,
-				1000,
-				Some("https://example.com/rpc")
+				OperatorPreferences {
+					key: bob_ecdsa_key,
+					rpc_address: BoundedString::try_from("https://example.com/rpc").unwrap()
+				},
+				Default::default(),
+				0,
 			),
 			Error::<Runtime>::MaxBlueprintsPerOperatorExceeded
 		);
@@ -259,7 +265,7 @@ fn test_registration_duplicate_keys() {
 			0,
 			ecdsa_key,
 			1000,
-			Some("https://example.com/rpc")
+			Some("https://example.com/rpc"),
 		));
 
 		// Join operators first for Charlie
@@ -270,7 +276,16 @@ fn test_registration_duplicate_keys() {
 
 		// Second registration with same key should fail with DuplicateKey error
 		assert_err!(
-			join_and_register(charlie.clone(), 0, ecdsa_key, 1000, Some("https://example.com/rpc")),
+			Services::register(
+				RuntimeOrigin::signed(charlie.clone()),
+				0,
+				OperatorPreferences {
+					key: ecdsa_key,
+					rpc_address: BoundedString::try_from("https://example.com/rpc").unwrap(),
+				},
+				Default::default(),
+				0,
+			),
 			Error::<Runtime>::DuplicateKey
 		);
 	});
@@ -293,12 +308,15 @@ fn test_registration_during_active_services() {
 		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000));
 
 		// Register Bob as an operator
-		assert_ok!(join_and_register(
-			bob.clone(),
+		assert_ok!(Services::register(
+			RuntimeOrigin::signed(bob.clone()),
 			0,
-			test_ecdsa_key(),
-			1000,
-			Some("https://example.com/rpc")
+			OperatorPreferences {
+				key: test_ecdsa_key(),
+				rpc_address: BoundedString::try_from("https://example.com/rpc").unwrap(),
+			},
+			Default::default(),
+			0,
 		));
 
 		// Create a service request
@@ -356,7 +374,7 @@ fn test_registration_during_active_services() {
 			0,
 			test_ecdsa_key(),
 			1000,
-			Some("https://example.com/rpc")
+			Some("https://example.com/rpc"),
 		));
 
 		// Verify Charlie was registered successfully despite active service

@@ -126,7 +126,13 @@ fn deploy() -> Deployment {
 	let alice = mock_pub_key(ALICE);
 	let bob = mock_pub_key(BOB);
 
-	assert_ok!(join_and_register(bob.clone(), blueprint_id, test_ecdsa_key(), 1000, None));
+	assert_ok!(join_and_register(
+		bob.clone(),
+		blueprint_id,
+		test_ecdsa_key(),
+		1000,
+		Some("https://example.com/rpc")
+	));
 
 	let eve = mock_pub_key(EVE);
 	let service_id = Services::next_instance_id();
