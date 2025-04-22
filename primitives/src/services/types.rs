@@ -247,7 +247,6 @@ pub struct AssetSecurityCommitment<AssetId: AssetIdT> {
 #[codec(encode_bound(skip_type_params(C)))]
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
-// #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct OperatorPreferences<C: Constraints> {
 	/// The operator ECDSA public key.
 	pub key: [u8; 65],
