@@ -45,6 +45,11 @@ pub struct Cli {
 	#[arg(short, long)]
 	pub auto_insert_keys: bool,
 
+	// TODO: Eventually split blueprint manager options to their own struct
+	#[arg(short, long)]
+	#[cfg(feature = "blueprint-manager")]
+	pub manager_test_mode: bool,
+
 	/// Choose sealing method.
 	#[cfg(feature = "manual-seal")]
 	#[arg(long, value_enum, ignore_case = true)]
