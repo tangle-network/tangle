@@ -28,7 +28,7 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use sp_core::ecdsa;
-use sp_runtime::{RuntimeAppPublic, traits::Zero};
+use sp_runtime::{RuntimeAppPublic, SaturatedConversion, traits::Zero};
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 use tangle_primitives::{
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
@@ -1704,12 +1704,13 @@ pub mod module {
 
 		/// Request a service with a pre-approved quote from operators.
 		///
-		/// This function creates a service request using a quote that has already been approved by the operators.
-		/// Unlike the regular `request` method, this doesn't require operator approval after submission
-		/// since the operators have already agreed to the terms via the quote.
+		/// This function creates a service request using a quote that has already been approved by
+		/// the operators. Unlike the regular `request` method, this doesn't require operator
+		/// approval after submission since the operators have already agreed to the terms via the
+		/// quote.
 		///
-		/// The quote is obtained externally through a gRPC server, and this function accepts the necessary
-		/// signatures from the operators to verify their approval.
+		/// The quote is obtained externally through a gRPC server, and this function accepts the
+		/// necessary signatures from the operators to verify their approval.
 		///
 		/// # Permissions
 		///
@@ -1720,7 +1721,8 @@ pub mod module {
 		/// * `origin` - The origin of the call, must be a signed account.
 		/// * `evm_origin` - Optional EVM address for ERC20 payments.
 		/// * `blueprint_id` - The ID of the blueprint to use.
-		/// * `permitted_callers` - Accounts allowed to call the service. If empty, only owner can call.
+		/// * `permitted_callers` - Accounts allowed to call the service. If empty, only owner can
+		///   call.
 		/// * `operators` - List of operators that will run the service.
 		/// * `request_args` - Blueprint initialization arguments.
 		/// * `asset_security_requirements` - Security requirements for assets.
@@ -1753,11 +1755,10 @@ pub mod module {
 			asset_security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			payment_asset: Asset<T::AssetId>,
-			#[pallet::compact] value: BalanceOf<T>,
 			membership_model: MembershipModel,
 			operator_signatures: Vec<(T::AccountId, [u8; 65])>,
 			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
-			pricing_quote: tangle_primitives::services::pricing::PricingQuote<T::Constraints>,
+			pricing_quotes: Vec<PricingQuote<T::Constraints>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
@@ -1802,7 +1803,7 @@ pub mod module {
 			}
 
 			// Verify each operator's signature
-			for (operator, signature) in operator_signatures_map.iter() {
+			for (i, (operator, signature)) in operator_signatures_map.iter().enumerate() {
 				let operator_preferences = Operators::<T>::get(blueprint_id, operator)?;
 
 				let public_key = ecdsa::Public::from_full(&operator_preferences.key)
@@ -1810,7 +1811,7 @@ pub mod module {
 
 				// Hash the pricing quote to create the message to verify
 				let message =
-					tangle_primitives::services::pricing::hash_pricing_quote(&pricing_quote);
+					tangle_primitives::services::pricing::hash_pricing_quote(&pricing_quotes[i]);
 
 				// Convert the hash to a fixed-size array for signature verification
 				let mut message_bytes = [0u8; 32];
@@ -1829,6 +1830,12 @@ pub mod module {
 					Error::<T>::InvalidQuoteSignature
 				);
 			}
+
+			// Calculate the cost of from the quotes
+			let total_cost_rate =
+				pricing_quotes.iter().map(|q| q.total_cost_rate as u64).sum::<u64>();
+			let value = (total_cost_rate * ttl.saturated_into::<u64>() * 6)
+				.saturated_into::<BalanceOf<T>>();
 
 			// Request service
 			let service_id = Self::do_request(
