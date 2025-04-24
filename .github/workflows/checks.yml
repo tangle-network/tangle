@@ -21,7 +21,7 @@ jobs:
       - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly-2025-01-09
           override: true
           components: rustfmt
 
