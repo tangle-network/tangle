@@ -288,6 +288,8 @@ where
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
 					auto_insert_keys: cli.auto_insert_keys,
+					#[cfg(feature = "blueprint-manager")]
+					manager_test_mode: cli.manager_test_mode,
 					#[cfg(feature = "manual-seal")]
 					sealing: cli.sealing,
 				})
