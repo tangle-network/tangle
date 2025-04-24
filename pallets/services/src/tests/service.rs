@@ -102,15 +102,11 @@ fn request_service() {
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -127,15 +123,11 @@ fn request_service() {
 		})));
 
 		// Charlie approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 15),
-				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 15),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+			get_security_commitment(USDC, 15),
+			get_security_commitment(WETH, 15),
+			get_security_commitment(TNT, 15),
+		],));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -155,28 +147,20 @@ fn request_service() {
 		// because the security commitments are misordered. They must be in the same order as the
 		// security requirements.
 		assert_err!(
-			Services::approve(
-				RuntimeOrigin::signed(dave.clone()),
-				0,
-				vec![
-					get_security_commitment(TNT, 20),
-					get_security_commitment(USDC, 20),
-					get_security_commitment(WETH, 20),
-				],
-			),
+			Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+				get_security_commitment(TNT, 20),
+				get_security_commitment(USDC, 20),
+				get_security_commitment(WETH, 20),
+			],),
 			Error::<Runtime>::InvalidSecurityCommitments,
 		);
 
 		// Dave approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 20),
-				get_security_commitment(WETH, 20),
-				get_security_commitment(TNT, 20),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+			get_security_commitment(USDC, 20),
+			get_security_commitment(WETH, 20),
+			get_security_commitment(TNT, 20),
+		],));
 
 		let service = Services::services(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
@@ -307,15 +291,11 @@ fn request_service_with_payment_asset() {
 		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
 
 		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -383,15 +363,11 @@ fn request_service_with_payment_erc20_token() {
 		);
 
 		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -950,17 +926,15 @@ fn test_termination_with_partial_approvals() {
 		));
 
 		// Only two operators approve
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 15)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+			get_security_commitment(USDC, 15),
+			get_security_commitment(TNT, 15)
+		],));
 
 		// Attempt to terminate service with partial approvals - should fail
 		assert_err!(
@@ -969,11 +943,10 @@ fn test_termination_with_partial_approvals() {
 		);
 
 		// Complete the approvals
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			vec![get_security_commitment(USDC, 20), get_security_commitment(TNT, 20)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+			get_security_commitment(USDC, 20),
+			get_security_commitment(TNT, 20)
+		],));
 
 		// Now termination should succeed
 		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
@@ -1022,11 +995,10 @@ fn test_operator_offline_during_active_service() {
 		));
 
 		// Approve service request
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		// Verify service is active
 		assert!(Instances::<Runtime>::contains_key(0));

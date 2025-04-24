@@ -54,9 +54,8 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
 		let (asset, _) = match (asset_id.as_u32(), token_address.0 .0) {
-			(0, erc20_token) if erc20_token != [0; 20] => {
-				(Asset::Erc20(erc20_token.into()), U256::zero())
-			},
+			(0, erc20_token) if erc20_token != [0; 20] =>
+				(Asset::Erc20(erc20_token.into()), U256::zero()),
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), U256::zero()),
 		};
 

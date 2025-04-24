@@ -312,10 +312,9 @@ impl<'de, C: Constraints> Deserialize<'de> for OperatorPreferences<C> {
 	where
 		D: Deserializer<'de>,
 	{
-		deserializer.deserialize_tuple(
-			3,
-			OperatorPreferencesVisitor { _phantom: std::marker::PhantomData::<C> },
-		)
+		deserializer.deserialize_tuple(3, OperatorPreferencesVisitor {
+			_phantom: std::marker::PhantomData::<C>,
+		})
 	}
 }
 

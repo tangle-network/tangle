@@ -496,11 +496,10 @@ fn test_slash_with_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service2_id,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service2_id, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		// Create slashes for both services
 		let service1 = Services::services(service_id).unwrap();

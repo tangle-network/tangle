@@ -660,15 +660,12 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			raw_hex = format!("0{}", raw_hex);
 		}
 		let code = hex::decode(raw_hex).unwrap();
-		evm_accounts.insert(
-			address,
-			fp_evm::GenesisAccount {
-				code,
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Default::default(),
-			},
-		);
+		evm_accounts.insert(address, fp_evm::GenesisAccount {
+			code,
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Default::default(),
+		});
 	};
 
 	create_contract(include_str!("./test-artifacts/CGGMP21Blueprint.hex"), CGGMP21_BLUEPRINT);
@@ -680,27 +677,21 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	create_contract(include_str!("./test-artifacts/MockERC20.hex"), USDC_ERC20);
 
 	for i in 1..=authorities.len() {
-		evm_accounts.insert(
-			mock_address(i as u8),
-			fp_evm::GenesisAccount {
-				code: vec![],
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-			},
-		);
+		evm_accounts.insert(mock_address(i as u8), fp_evm::GenesisAccount {
+			code: vec![],
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+		});
 	}
 
 	for a in &authorities {
-		evm_accounts.insert(
-			account_id_to_address(a.clone()),
-			fp_evm::GenesisAccount {
-				code: vec![],
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-			},
-		);
+		evm_accounts.insert(account_id_to_address(a.clone()), fp_evm::GenesisAccount {
+			code: vec![],
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+		});
 	}
 
 	let evm_config =

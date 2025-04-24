@@ -306,33 +306,29 @@ pub enum FieldType {
 impl<C: Constraints, AccountId> PartialEq<FieldType> for Field<C, AccountId> {
 	fn eq(&self, other: &FieldType) -> bool {
 		match (self, other) {
-			(Self::Optional(lty, lval), FieldType::Optional(rty)) => {
-				lty == &**rty && (lval.is_none() || lval.as_ref().unwrap().eq(rty.as_ref()))
-			},
-			(Self::Bool(_), FieldType::Bool)
-			| (Self::Uint8(_), FieldType::Uint8)
-			| (Self::Int8(_), FieldType::Int8)
-			| (Self::Uint16(_), FieldType::Uint16)
-			| (Self::Int16(_), FieldType::Int16)
-			| (Self::Uint32(_), FieldType::Uint32)
-			| (Self::Int32(_), FieldType::Int32)
-			| (Self::Uint64(_), FieldType::Uint64)
-			| (Self::Int64(_), FieldType::Int64)
-			| (Self::String(_), FieldType::String) => true,
-			(Self::Array(lty, a), FieldType::Array(len, rty)) => {
-				lty == &**rty && a.len() == *len as usize && a.iter().all(|f| f.eq(rty.as_ref()))
-			},
-			(Self::List(lty, a), FieldType::List(rty)) => {
-				lty == &**rty && a.iter().all(|f| f.eq(rty.as_ref()))
-			},
+			(Self::Optional(lty, lval), FieldType::Optional(rty)) =>
+				lty == &**rty && (lval.is_none() || lval.as_ref().unwrap().eq(rty.as_ref())),
+			(Self::Bool(_), FieldType::Bool) |
+			(Self::Uint8(_), FieldType::Uint8) |
+			(Self::Int8(_), FieldType::Int8) |
+			(Self::Uint16(_), FieldType::Uint16) |
+			(Self::Int16(_), FieldType::Int16) |
+			(Self::Uint32(_), FieldType::Uint32) |
+			(Self::Int32(_), FieldType::Int32) |
+			(Self::Uint64(_), FieldType::Uint64) |
+			(Self::Int64(_), FieldType::Int64) |
+			(Self::String(_), FieldType::String) => true,
+			(Self::Array(lty, a), FieldType::Array(len, rty)) =>
+				lty == &**rty && a.len() == *len as usize && a.iter().all(|f| f.eq(rty.as_ref())),
+			(Self::List(lty, a), FieldType::List(rty)) =>
+				lty == &**rty && a.iter().all(|f| f.eq(rty.as_ref())),
 			(Self::AccountId(_), FieldType::AccountId) => true,
-			(Self::Struct(_, fields_a), FieldType::Struct(fields_b)) => {
-				fields_a.into_iter().len() == fields_b.into_iter().len()
-					&& fields_a
+			(Self::Struct(_, fields_a), FieldType::Struct(fields_b)) =>
+				fields_a.into_iter().len() == fields_b.into_iter().len() &&
+					fields_a
 						.into_iter()
 						.zip(fields_b)
-						.all(|((_, v_a), v_b)| v_a.as_ref().eq(v_b))
-			},
+						.all(|((_, v_a), v_b)| v_a.as_ref().eq(v_b)),
 			_ => false,
 		}
 	}
@@ -397,9 +393,8 @@ impl<'a, C: Constraints, AccountId: Encode + Clone> From<&'a Field<C, AccountId>
 			Field::Uint64(val) => ethabi::Token::Uint((*val).into()),
 			Field::Int64(val) => ethabi::Token::Int((*val).into()),
 			Field::String(val) => ethabi::Token::String(val.to_string()),
-			Field::Array(_, val) => {
-				ethabi::Token::FixedArray(val.into_iter().map(Into::into).collect())
-			},
+			Field::Array(_, val) =>
+				ethabi::Token::FixedArray(val.into_iter().map(Into::into).collect()),
 			Field::List(_, val) => ethabi::Token::Array(val.into_iter().map(Into::into).collect()),
 			Field::AccountId(val) => ethabi::Token::Bytes(val.encode()),
 			Field::Struct(_, fields) => ethabi::Token::Tuple(

@@ -296,10 +296,9 @@ impl<T: Config> Pallet<T> {
 				.delegator_unstake_requests
 				.iter()
 				.position(|r| {
-					r.asset == asset
-						&& r.amount == amount
-						&& r.operator == operator
-						&& !r.is_nomination
+					r.asset == asset &&
+						r.amount == amount && r.operator == operator &&
+						!r.is_nomination
 				})
 				.ok_or(Error::<T>::NoBondLessRequest)?;
 

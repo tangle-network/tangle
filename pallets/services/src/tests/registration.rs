@@ -340,11 +340,10 @@ fn test_registration_during_active_services() {
 		assert!(!UserServices::<Runtime>::get(eve.clone()).contains(&0));
 
 		// Approve the service request
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		// Verify service is active and in instances storage
 		// Check service instance exists

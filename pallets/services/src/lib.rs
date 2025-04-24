@@ -1079,10 +1079,10 @@ pub mod module {
 			// Ensure each asset has non-zero exposure requirements
 			for requirement in asset_security_requirements.iter() {
 				ensure!(
-					requirement.min_exposure_percent > Percent::zero()
-						&& requirement.max_exposure_percent > Percent::zero()
-						&& requirement.min_exposure_percent <= requirement.max_exposure_percent
-						&& requirement.max_exposure_percent <= Percent::from_percent(100),
+					requirement.min_exposure_percent > Percent::zero() &&
+						requirement.max_exposure_percent > Percent::zero() &&
+						requirement.min_exposure_percent <= requirement.max_exposure_percent &&
+						requirement.max_exposure_percent <= Percent::from_percent(100),
 					Error::<T>::InvalidSecurityRequirements,
 				);
 			}

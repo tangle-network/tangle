@@ -236,6 +236,8 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub auto_insert_keys: bool,
+	#[cfg(feature = "blueprint-manager")]
+	pub manager_test_mode: bool,
 	pub sealing: Sealing,
 }
 
@@ -266,6 +268,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		rpc_config,
 		debug_output: _,
 		auto_insert_keys,
+		#[cfg(feature = "blueprint-manager")]
+		manager_test_mode,
 		sealing,
 	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
@@ -338,8 +342,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		})?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development
-			|| config.chain_spec.chain_type() == ChainType::Local
+		if config.chain_spec.chain_type() == ChainType::Development ||
+			config.chain_spec.chain_type() == ChainType::Local
 		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(
@@ -527,6 +531,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let config_data_path = config.data_path.clone();
 	#[cfg(feature = "blueprint-manager")]
 	let rpc_port = config.rpc_port;
+	#[cfg(feature = "blueprint-manager")]
+	let chain_type = config.chain_spec.chain_type();
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -629,7 +635,9 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 				rpc_port,
 				config_data_path.join("blueprints"),
 				keystore_container.local_keystore(),
-			)?;
+				manager_test_mode,
+			)
+			.await?;
 
 			task_manager
 				.spawn_essential_handle()
@@ -689,11 +697,14 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	#[cfg(feature = "blueprint-manager")]
 	{
 		log::info!("Blueprint Manager is enabled.");
+		let test_mode = chain_type == ChainType::Development || chain_type == ChainType::Local;
 		let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
 			rpc_port,
 			config_data_path.join("blueprints"),
 			keystore_container.local_keystore(),
-		)?;
+			test_mode,
+		)
+		.await?;
 
 		task_manager
 			.spawn_essential_handle()
