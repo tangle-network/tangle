@@ -43,8 +43,7 @@ pub struct PricingQuote<C: Constraints> {
 	/// Resource pricing details
 	pub resources: BoundedVec<ResourcePricing<C>, C::MaxOperatorsPerService>,
 	/// Security commitments for assets
-	pub security_commitments:
-		Option<BoundedVec<AssetSecurityCommitment<u128>, C::MaxOperatorsPerService>>,
+	pub security_commitments: BoundedVec<AssetSecurityCommitment<u128>, C::MaxOperatorsPerService>,
 }
 
 /// Pricing for a specific resource type

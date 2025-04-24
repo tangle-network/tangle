@@ -1747,7 +1747,7 @@ pub mod module {
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
 		#[pallet::call_index(18)]
-		#[pallet::weight(T::WeightInfo::request())]
+		#[pallet::weight(10_000)]
 		pub fn request_with_signed_price_quotes(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,
@@ -1759,9 +1759,9 @@ pub mod module {
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			payment_asset: Asset<T::AssetId>,
 			membership_model: MembershipModel,
+			pricing_quotes: Vec<PricingQuote<T::Constraints>>,
 			operator_signatures: Vec<ecdsa::Signature>,
 			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
-			pricing_quotes: Vec<PricingQuote<T::Constraints>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
