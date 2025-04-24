@@ -4010,9 +4010,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				14u8, 61u8, 217u8, 108u8, 55u8, 224u8, 126u8, 225u8, 246u8, 165u8, 163u8, 248u8,
-				76u8, 64u8, 69u8, 126u8, 89u8, 228u8, 250u8, 206u8, 87u8, 59u8, 139u8, 221u8,
-				120u8, 135u8, 236u8, 88u8, 113u8, 125u8, 126u8, 96u8,
+				58u8, 183u8, 175u8, 119u8, 30u8, 121u8, 246u8, 48u8, 209u8, 78u8, 79u8, 206u8,
+				56u8, 249u8, 10u8, 64u8, 205u8, 137u8, 109u8, 248u8, 205u8, 202u8, 142u8, 244u8,
+				94u8, 255u8, 58u8, 36u8, 92u8, 78u8, 41u8, 183u8,
 			]
 	}
 	pub mod system {
@@ -47870,12 +47870,12 @@ pub mod api {
 					)
 				}
 				#[doc = " Maximum number of resource types."]
-				pub fn max_resource_types(
+				pub fn max_resource_name_length(
 					&self,
 				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
 					::subxt_core::constants::address::StaticAddress::new_static(
 						"Services",
-						"MaxResourceTypes",
+						"MaxResourceNameLength",
 						[
 							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
 							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,

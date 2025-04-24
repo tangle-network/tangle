@@ -56,7 +56,7 @@ pub struct PricingQuote<C: Constraints> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct ResourcePricing<C: Constraints> {
 	/// Resource kind (CPU, Memory, GPU, etc.)
-	pub kind: BoundedString<C::MaxResourceTypes>,
+	pub kind: BoundedString<C::MaxResourceNameLength>,
 	/// Quantity of the resource
 	pub count: u64,
 	/// Price per unit in USD with decimal precision (scaled by 10^6, i.e., 0.00005 USD = 50)

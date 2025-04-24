@@ -143,7 +143,7 @@ parameter_types! {
 	pub const MaxRpcAddressLength: u32 = 256;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxResourceTypes: u32 = 8;
+	pub const MaxResourceNameLength: u32 = 16;
 
 	// Slash defer duration in days (era-index)
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
@@ -197,7 +197,7 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type MaxRpcAddressLength = MaxRpcAddressLength;
-	type MaxResourceTypes = MaxResourceTypes;
+	type MaxResourceNameLength = MaxResourceNameLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = PalletServicesConstraints;

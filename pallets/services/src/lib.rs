@@ -179,7 +179,7 @@ pub mod module {
 		type MaxRpcAddressLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 		/// Maximum number of resource types.
 		#[pallet::constant]
-		type MaxResourceTypes: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+		type MaxResourceNameLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 		/// Maximum number of versions of Master Blueprint Service Manager allowed.
 		#[pallet::constant]
 		type MaxMasterBlueprintServiceManagerVersions: Get<u32>

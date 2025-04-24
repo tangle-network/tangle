@@ -61,5 +61,5 @@ pub trait Constraints {
 	/// Maximum length of an rpc address.
 	type MaxRpcAddressLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 	/// Maximum number of resource types for pricing.
-	type MaxResourceTypes: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	type MaxResourceNameLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 }
