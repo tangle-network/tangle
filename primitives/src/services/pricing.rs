@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::{AssetSecurityCommitment, Constraints};
+use super::{AssetSecurityCommitment, BoundedString, Constraints};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
@@ -44,7 +44,7 @@ pub struct PricingQuote<C: Constraints> {
 	pub resources: BoundedVec<ResourcePricing<C>, C::MaxOperatorsPerService>,
 	/// Security commitments for assets
 	pub security_commitments:
-		Option<BoundedVec<AssetSecurityCommitment<u32>, C::MaxOperatorsPerService>>,
+		Option<BoundedVec<AssetSecurityCommitment<u128>, C::MaxOperatorsPerService>>,
 }
 
 /// Pricing for a specific resource type
@@ -57,7 +57,7 @@ pub struct PricingQuote<C: Constraints> {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
 pub struct ResourcePricing<C: Constraints> {
 	/// Resource kind (CPU, Memory, GPU, etc.)
-	pub kind: BoundedVec<u8, C::MaxOperatorsPerService>,
+	pub kind: BoundedString<C::MaxResourceTypes>,
 	/// Quantity of the resource
 	pub count: u64,
 	/// Price per unit in USD with decimal precision (scaled by 10^6, i.e., 0.00005 USD = 50)

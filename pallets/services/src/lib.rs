@@ -177,6 +177,9 @@ pub mod module {
 		/// Maximum length of rpc address.
 		#[pallet::constant]
 		type MaxRpcAddressLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+		/// Maximum number of resource types.
+		#[pallet::constant]
+		type MaxResourceTypes: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 		/// Maximum number of versions of Master Blueprint Service Manager allowed.
 		#[pallet::constant]
 		type MaxMasterBlueprintServiceManagerVersions: Get<u32>
@@ -1756,7 +1759,7 @@ pub mod module {
 			#[pallet::compact] ttl: BlockNumberFor<T>,
 			payment_asset: Asset<T::AssetId>,
 			membership_model: MembershipModel,
-			operator_signatures: Vec<(T::AccountId, [u8; 65])>,
+			operator_signatures: Vec<ecdsa::Signature>,
 			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 			pricing_quotes: Vec<PricingQuote<T::Constraints>>,
 		) -> DispatchResultWithPostInfo {
@@ -1789,7 +1792,7 @@ pub mod module {
 
 			// Verify that we have a signature from each operator
 			let mut operator_signatures_map = BTreeMap::new();
-			for (operator, signature) in operator_signatures.iter() {
+			for (signature, operator) in operator_signatures.iter().zip(operators.iter()) {
 				ensure!(operators.contains(operator), Error::<T>::InvalidQuoteSignature);
 				operator_signatures_map.insert(operator.clone(), *signature);
 			}
@@ -1820,20 +1823,16 @@ pub mod module {
 				} else {
 					ensure!(false, Error::<T>::InvalidQuoteSignature);
 				}
-				use sp_core::crypto_bytes::CryptoBytes;
-
-				let signature = CryptoBytes::from_raw(*signature);
 
 				// Verify the signature
 				ensure!(
-					sp_io::crypto::ecdsa_verify_prehashed(&signature, &message_bytes, &public_key,),
+					sp_io::crypto::ecdsa_verify_prehashed(signature, &message_bytes, &public_key,),
 					Error::<T>::InvalidQuoteSignature
 				);
 			}
 
 			// Calculate the cost of from the quotes
-			let total_cost_rate =
-				pricing_quotes.iter().map(|q| q.total_cost_rate as u64).sum::<u64>();
+			let total_cost_rate = pricing_quotes.iter().map(|q| q.total_cost_rate).sum::<u64>();
 			let value = (total_cost_rate * ttl.saturated_into::<u64>() * 6)
 				.saturated_into::<BalanceOf<T>>();
 

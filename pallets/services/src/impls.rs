@@ -51,6 +51,8 @@ impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxAssetsPerService = T::MaxAssetsPerService;
 
 	type MaxRpcAddressLength = T::MaxRpcAddressLength;
+
+	type MaxResourceTypes = T::MaxResourceTypes;
 }
 
 impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {
