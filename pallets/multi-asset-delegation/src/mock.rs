@@ -583,27 +583,21 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let mut evm_accounts = BTreeMap::new();
 
 	for i in 1..=authorities.len() {
-		evm_accounts.insert(
-			mock_address(i as u8),
-			fp_evm::GenesisAccount {
-				code: vec![],
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-			},
-		);
+		evm_accounts.insert(mock_address(i as u8), fp_evm::GenesisAccount {
+			code: vec![],
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+		});
 	}
 
 	for a in &authorities {
-		evm_accounts.insert(
-			account_id_to_address(a.clone()),
-			fp_evm::GenesisAccount {
-				code: vec![],
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-			},
-		);
+		evm_accounts.insert(account_id_to_address(a.clone()), fp_evm::GenesisAccount {
+			code: vec![],
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+		});
 	}
 
 	let evm_config =

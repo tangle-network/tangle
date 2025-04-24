@@ -20,8 +20,7 @@ use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_runtime::traits::{DispatchInfoOf, SignedExtension};
 
-use crate::Balance;
-use crate::Runtime;
+use crate::{Balance, Runtime};
 
 /// Extension that checks for nominated tokens that are being restaked.
 /// Prevents unbonding when tokens are delegated through the multi-asset-delegation system.
@@ -107,9 +106,9 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 				}
 			},
 			// Match on various Utility batch calls
-			RuntimeCall::Utility(pallet_utility::Call::batch { calls })
-			| RuntimeCall::Utility(pallet_utility::Call::batch_all { calls })
-			| RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls }) |
+			RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) |
+			RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
 					self.validate(who, call, _info, _len)?;
 				}

@@ -118,15 +118,11 @@ fn hooks() {
 
 		// OnApprove hook should be called
 		// OnServiceInitialized is also called
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			vec![
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 		assert_evm_logs(&[
 			evm_log!(HOOKS_TEST, b"OnApprove()"),
 			evm_log!(HOOKS_TEST, b"OnServiceInitialized()"),

@@ -261,9 +261,9 @@ impl<T: Config> BondedPool<T> {
 
 		// any unbond must comply with the balance condition:
 		ensure!(
-			is_full_unbond
-				|| balance_after_unbond
-					>= if is_depositor {
+			is_full_unbond ||
+				balance_after_unbond >=
+					if is_depositor {
 						Pallet::<T>::depositor_min_bond()
 					} else {
 						MinJoinBond::<T>::get()
@@ -334,15 +334,10 @@ impl<T: Config> BondedPool<T> {
 	) -> Result<BalanceOf<T>, DispatchError> {
 		// Cache the value
 		let bonded_account = self.bonded_account();
-		T::Currency::transfer(
-			who,
-			&bonded_account,
-			amount,
-			match ty {
-				BondType::Create => ExistenceRequirement::KeepAlive,
-				BondType::Later => ExistenceRequirement::AllowDeath,
-			},
-		)?;
+		T::Currency::transfer(who, &bonded_account, amount, match ty {
+			BondType::Create => ExistenceRequirement::KeepAlive,
+			BondType::Later => ExistenceRequirement::AllowDeath,
+		})?;
 		// We must calculate the points issued *before* we bond who's funds, else points:balance
 		// ratio will be wrong.
 		let points_issued = self.issue(amount);

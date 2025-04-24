@@ -14,18 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::pallet::{UserClaimedReward, UserServiceReward};
-use crate::{Call, Config, Pallet, types::*};
+use crate::{
+	Call, Config, Pallet,
+	pallet::{UserClaimedReward, UserServiceReward},
+	types::*,
+};
 use frame_benchmarking::{
 	BenchmarkError, account, benchmarks, impl_benchmark_test_suite, whitelisted_caller,
 };
 use frame_support::traits::{Currency, EnsureOrigin};
 use frame_system::{RawOrigin, pallet_prelude::BlockNumberFor};
 use sp_runtime::Perbill;
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::prelude::*;
-use tangle_primitives::rewards::UserDepositWithLocks;
-use tangle_primitives::services::Asset;
+use sp_std::{collections::btree_map::BTreeMap, prelude::*};
+use tangle_primitives::{rewards::UserDepositWithLocks, services::Asset};
 
 const SEED: u32 = 0;
 

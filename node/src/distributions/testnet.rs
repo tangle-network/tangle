@@ -95,15 +95,12 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 		.into_iter()
 		.chain(get_discord_list())
 		.map(|address| {
-			(
-				address,
-				GenesisAccount {
-					balance: U256::from(ENDOWMENT),
-					code: Default::default(),
-					nonce: Default::default(),
-					storage: Default::default(),
-				},
-			)
+			(address, GenesisAccount {
+				balance: U256::from(ENDOWMENT),
+				code: Default::default(),
+				nonce: Default::default(),
+				storage: Default::default(),
+			})
 		})
 		.collect()
 }

@@ -132,13 +132,10 @@ fn update_price_targets() {
 			1000,
 		));
 
-		assert_eq!(
-			Operators::<Runtime>::get(0, &bob).unwrap(),
-			OperatorPreferences {
-				key: bob_operator_ecdsa_key,
-				price_targets: price_targets(MachineKind::Small)
-			}
-		);
+		assert_eq!(Operators::<Runtime>::get(0, &bob).unwrap(), OperatorPreferences {
+			key: bob_operator_ecdsa_key,
+			price_targets: price_targets(MachineKind::Small)
+		});
 
 		System::reset_events(); // Clear all previous events
 
@@ -407,11 +404,10 @@ fn test_registration_during_active_services() {
 		assert!(!UserServices::<Runtime>::get(eve.clone()).contains(&0));
 
 		// Approve the service request
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		// Verify service is active and in instances storage
 		// Check service instance exists

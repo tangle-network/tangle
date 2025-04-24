@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-use fp_evm::PrecompileHandle;
-use fp_evm::{ExitError, PrecompileFailure};
+use fp_evm::{ExitError, PrecompileFailure, PrecompileHandle};
 use precompile_utils::prelude::*;
 use sp_core::{sr25519, ConstU32};
 use sp_io::{crypto::sr25519_verify, hashing::keccak_256};
