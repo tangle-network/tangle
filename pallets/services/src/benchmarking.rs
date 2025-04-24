@@ -4,10 +4,8 @@ use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use parity_scale_codec::Decode;
 use scale_info::prelude::boxed::Box;
-use sp_core::Pair;
-use sp_core::{H160, ecdsa};
-use sp_runtime::KeyTypeId;
-use sp_runtime::Percent;
+use sp_core::{H160, Pair, ecdsa};
+use sp_runtime::{KeyTypeId, Percent};
 use sp_std::vec;
 use tangle_primitives::services::*;
 

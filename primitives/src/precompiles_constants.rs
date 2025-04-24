@@ -61,8 +61,7 @@ pub const PRECOMPILE_REWARDS: u64 = 2085;
 #[test]
 fn test_precompile_addresses_match() {
 	use precompile_utils::precompile_set::AddressU64;
-	use sp_core::Get;
-	use sp_core::H160;
+	use sp_core::{Get, H160};
 
 	// Helper function to create H160 address from hex string
 	fn h160_from_hex(hex_str: &str) -> H160 {

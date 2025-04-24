@@ -26,18 +26,16 @@ use frame_support::{
 };
 use frame_system::pallet_prelude::*;
 use sp_core::ecdsa;
-use sp_runtime::RuntimeAppPublic;
 use sp_runtime::{
-	DispatchResult,
+	DispatchResult, RuntimeAppPublic,
 	traits::{Get, Zero},
 };
-use tangle_primitives::traits::SlashManager;
 use tangle_primitives::{
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 	services::{
 		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
 	},
-	traits::MultiAssetDelegationInfo,
+	traits::{MultiAssetDelegationInfo, SlashManager},
 };
 
 pub mod functions;
@@ -197,7 +195,8 @@ pub mod module {
 				Self::AssetId,
 			>;
 
-		/// Manager for slashing that dispatches slash operations to `pallet-multi-asset-delegation`.
+		/// Manager for slashing that dispatches slash operations to
+		/// `pallet-multi-asset-delegation`.
 		type SlashManager: tangle_primitives::traits::SlashManager<Self::AccountId>;
 
 		/// Number of eras that slashes are deferred by, after computation.
@@ -785,9 +784,9 @@ pub mod module {
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
 		///
-		/// A Service Blueprint is a template for a service that can be instantiated by users. The blueprint
-		/// defines the service's constraints, requirements and behavior, including the master blueprint service
-		/// manager revision to use.
+		/// A Service Blueprint is a template for a service that can be instantiated by users. The
+		/// blueprint defines the service's constraints, requirements and behavior, including the
+		/// master blueprint service manager revision to use.
 		///
 		/// # Permissions
 		///
@@ -795,7 +794,8 @@ pub mod module {
 		///
 		/// # Arguments
 		///
-		/// * `origin` - The origin of the call, must be signed by the account creating the blueprint
+		/// * `origin` - The origin of the call, must be signed by the account creating the
+		///   blueprint
 		/// * `blueprint` - The service blueprint containing:
 		///   - Service constraints and requirements
 		///   - Master blueprint service manager revision (Latest or Specific)
@@ -804,13 +804,14 @@ pub mod module {
 		/// # Errors
 		///
 		/// * [`Error::BadOrigin`] - Origin is not signed
-		/// * [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist
+		/// * [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision
+		///   does not exist
 		/// * [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks
 		///
 		/// # Returns
 		///
-		/// Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event
-		/// containing the owner and blueprint ID.
+		/// Returns a `DispatchResultWithPostInfo` which on success emits a
+		/// [`Event::BlueprintCreated`] event containing the owner and blueprint ID.
 		#[pallet::weight(T::WeightInfo::create_blueprint())]
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
@@ -854,20 +855,20 @@ pub mod module {
 
 		/// Pre-register the caller as an operator for a specific blueprint.
 		///
-		/// This function allows an account to signal intent to become an operator for a blueprint by emitting
-		/// a `PreRegistration` event. The operator node can listen for this event to execute any custom
-		/// registration logic defined in the blueprint.
+		/// This function allows an account to signal intent to become an operator for a blueprint
+		/// by emitting a `PreRegistration` event. The operator node can listen for this event to
+		/// execute any custom registration logic defined in the blueprint.
 		///
-		/// Pre-registration is the first step in the operator registration flow. After pre-registering,
-		/// operators must complete the full registration process by calling `register()` with their preferences
-		/// and registration arguments.
+		/// Pre-registration is the first step in the operator registration flow. After
+		/// pre-registering, operators must complete the full registration process by calling
+		/// `register()` with their preferences and registration arguments.
 		///
 		/// # Arguments
 		///
-		/// * `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to
-		///   become an operator.
-		/// * `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer
-		///   to an existing blueprint.
+		/// * `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that
+		///   wants to become an operator.
+		/// * `blueprint_id: u64` - The identifier of the service blueprint to pre-register for.
+		///   Must refer to an existing blueprint.
 		///
 		/// # Permissions
 		///
@@ -900,9 +901,10 @@ pub mod module {
 
 		/// Register the caller as an operator for a specific blueprint.
 		///
-		/// This function allows an account to register as an operator for a blueprint by providing their
-		/// service preferences, registration arguments, and staking the required tokens. The operator must
-		/// be active in the delegation system and may require approval before accepting service requests.
+		/// This function allows an account to register as an operator for a blueprint by providing
+		/// their service preferences, registration arguments, and staking the required tokens.
+		/// The operator must be active in the delegation system and may require approval before
+		/// accepting service requests.
 		///
 		/// # Permissions
 		///
@@ -920,11 +922,13 @@ pub mod module {
 		///
 		/// # Errors
 		///
-		/// * [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system
+		/// * [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation
+		///   system
 		/// * [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint
 		/// * [`Error::TypeCheck`] - Registration arguments failed type checking
 		/// * [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration
-		/// * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit
+		/// * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services
+		///   limit
 		#[pallet::weight(T::WeightInfo::register())]
 		pub fn register(
 			origin: OriginFor<T>,
@@ -1012,8 +1016,9 @@ pub mod module {
 
 		/// Updates the price targets for a registered operator's service blueprint.
 		///
-		/// Allows an operator to modify their price targets for a specific blueprint they are registered for.
-		/// The operator must already be registered for the blueprint to update prices.
+		/// Allows an operator to modify their price targets for a specific blueprint they are
+		/// registered for. The operator must already be registered for the blueprint to update
+		/// prices.
 		///
 		/// # Arguments
 		///
@@ -1028,7 +1033,8 @@ pub mod module {
 		/// # Errors
 		///
 		/// * [`Error::NotRegistered`] - The caller is not registered for this blueprint.
-		/// * [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted.
+		/// * [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently
+		///   restricted.
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		#[pallet::weight(T::WeightInfo::update_price_targets())]
 		pub fn update_price_targets(
@@ -1070,9 +1076,11 @@ pub mod module {
 		/// * `origin: OriginFor<T>` - The origin of the call. Must be signed.
 		/// * `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments.
 		/// * `blueprint_id: u64` - The identifier of the blueprint to use.
-		/// * `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call.
+		/// * `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If
+		///   empty, only owner can call.
 		/// * `operators: Vec<T::AccountId>` - List of operators that will run the service.
-		/// * `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments.
+		/// * `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization
+		///   arguments.
 		/// * `assets: Vec<T::AssetId>` - Required assets for the service.
 		/// * `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request.
 		/// * `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20).
@@ -1117,10 +1125,10 @@ pub mod module {
 			// Ensure each asset has non-zero exposure requirements
 			for requirement in asset_security_requirements.iter() {
 				ensure!(
-					requirement.min_exposure_percent > Percent::zero()
-						&& requirement.max_exposure_percent > Percent::zero()
-						&& requirement.min_exposure_percent <= requirement.max_exposure_percent
-						&& requirement.max_exposure_percent <= Percent::from_percent(100),
+					requirement.min_exposure_percent > Percent::zero() &&
+						requirement.max_exposure_percent > Percent::zero() &&
+						requirement.min_exposure_percent <= requirement.max_exposure_percent &&
+						requirement.max_exposure_percent <= Percent::from_percent(100),
 					Error::<T>::InvalidSecurityRequirements,
 				);
 			}
@@ -1173,7 +1181,8 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-		/// Approve a service request, allowing it to be initiated once all required approvals are received.
+		/// Approve a service request, allowing it to be initiated once all required approvals are
+		/// received.
 		///
 		/// # Permissions
 		///
@@ -1233,8 +1242,10 @@ pub mod module {
 		///
 		/// # Errors
 		///
-		/// * [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request
-		/// * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment
+		/// * [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to
+		///   approve this request
+		/// * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when
+		///   refunding payment
 		/// * [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook
 		#[pallet::weight(T::WeightInfo::reject())]
 		pub fn reject(
@@ -1462,21 +1473,23 @@ pub mod module {
 
 		/// Slash an operator's stake for a service by scheduling a deferred slashing action.
 		///
-		/// This function schedules a deferred slashing action against an operator's stake for a specific service.
-		/// The slash is not applied immediately, but rather queued to be executed by another entity later.
+		/// This function schedules a deferred slashing action against an operator's stake for a
+		/// specific service. The slash is not applied immediately, but rather queued to be
+		/// executed by another entity later.
 		///
 		/// # Permissions
 		///
 		/// * The caller must be an authorized Slash Origin for the target service, as determined by
-		///   `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call
-		///   will fail.
+		///   `query_slashing_origin`. If no slashing origin is set, or the caller does not match,
+		///   the call will fail.
 		///
 		/// # Arguments
 		///
 		/// * `origin` - The origin of the call. Must be signed by an authorized Slash Origin.
 		/// * `offender` - The account ID of the operator to be slashed.
 		/// * `service_id` - The ID of the service for which to slash the operator.
-		/// * `slash_percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value.
+		/// * `slash_percent` - The percentage of the operator's exposed stake to slash, as a
+		///   `Percent` value.
 		///
 		/// # Errors
 		///
@@ -1555,7 +1568,6 @@ pub mod module {
 		///
 		/// * [Error::NoDisputeOrigin] - Service has no dispute origin configured
 		/// * [DispatchError::BadOrigin] - Caller is not the authorized dispute origin
-		///
 
 		pub fn dispute(
 			origin: OriginFor<T>,
@@ -1596,7 +1608,8 @@ pub mod module {
 		///
 		/// # Errors
 		///
-		/// * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached
+		/// * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of
+		///   revisions reached
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
 			address: H160,

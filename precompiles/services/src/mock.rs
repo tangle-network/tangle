@@ -43,8 +43,10 @@ use sp_runtime::{
 };
 use std::{collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::rewards::UserDepositWithLocks;
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
+use tangle_primitives::{
+	rewards::UserDepositWithLocks,
+	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;

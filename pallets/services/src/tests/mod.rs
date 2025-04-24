@@ -19,8 +19,7 @@ use std::collections::BTreeMap;
 pub use super::*;
 pub use crate::mock::*;
 use frame_support::assert_ok;
-use sp_core::Pair;
-use sp_core::bounded_vec;
+use sp_core::{Pair, bounded_vec};
 use sp_runtime::Percent;
 use tangle_primitives::services::*;
 
@@ -78,9 +77,8 @@ fn price_targets(kind: MachineKind) -> PriceTargets {
 			storage_ssd: 100,
 			storage_nvme: 150,
 		},
-		MachineKind::Small => {
-			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
-		},
+		MachineKind::Small =>
+			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 },
 	}
 }
 

@@ -269,15 +269,12 @@ fn testnet_genesis(
 		}
 
 		Precompiles::used_addresses_h160().for_each(|address| {
-			map.insert(
-				address,
-				fp_evm::GenesisAccount {
-					nonce: Default::default(),
-					balance: Default::default(),
-					storage: Default::default(),
-					code: revert_bytecode.to_vec(),
-				},
-			);
+			map.insert(address, fp_evm::GenesisAccount {
+				nonce: Default::default(),
+				balance: Default::default(),
+				storage: Default::default(),
+				code: revert_bytecode.to_vec(),
+			});
 		});
 
 		let fully_loaded_accounts = get_fully_funded_accounts_for([
@@ -356,16 +353,13 @@ fn testnet_genesis(
 }
 
 fn generate_fully_loaded_evm_account_for(acc: &str) -> (H160, fp_evm::GenesisAccount) {
-	(
-		H160::from_str(acc).expect("internal H160 is valid; qed"),
-		fp_evm::GenesisAccount {
-			balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-				.expect("internal U256 is valid; qed"),
-			code: Default::default(),
-			nonce: Default::default(),
-			storage: Default::default(),
-		},
-	)
+	(H160::from_str(acc).expect("internal H160 is valid; qed"), fp_evm::GenesisAccount {
+		balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+			.expect("internal U256 is valid; qed"),
+		code: Default::default(),
+		nonce: Default::default(),
+		storage: Default::default(),
+	})
 }
 
 fn get_fully_funded_accounts_for<'a, T: AsRef<[&'a str]>>(

@@ -62,9 +62,9 @@ where
 		lambda_i: Scalar<C>,
 		challenge: &Challenge<C>,
 	) -> Result<(), Error<C>> {
-		if (<C::Group>::generator() * self.to_scalar())
-			!= (group_commitment_share.to_element()
-				+ (verifying_share.to_element() * challenge.0 * lambda_i))
+		if (<C::Group>::generator() * self.to_scalar()) !=
+			(group_commitment_share.to_element() +
+				(verifying_share.to_element() * challenge.0 * lambda_i))
 		{
 			return Err(Error::InvalidSignatureShare { culprit: identifier });
 		}
@@ -94,9 +94,9 @@ pub(super) fn compute_signature_share<C: Ciphersuite>(
 	key_package: &keys::KeyPackage<C>,
 	challenge: Challenge<C>,
 ) -> SignatureShare<C> {
-	let z_share: <<C::Group as Group>::Field as Field>::Scalar = signer_nonces.hiding.to_scalar()
-		+ (signer_nonces.binding.to_scalar() * binding_factor.0)
-		+ (lambda_i * key_package.signing_share.to_scalar() * challenge.to_scalar());
+	let z_share: <<C::Group as Group>::Field as Field>::Scalar = signer_nonces.hiding.to_scalar() +
+		(signer_nonces.binding.to_scalar() * binding_factor.0) +
+		(lambda_i * key_package.signing_share.to_scalar() * challenge.to_scalar());
 
 	SignatureShare::<C>::new(z_share)
 }

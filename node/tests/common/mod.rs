@@ -132,8 +132,7 @@ impl TestAccount {
 	}
 
 	pub fn account_id(&self) -> subxt::utils::AccountId32 {
-		use subxt::PolkadotConfig;
-		use subxt::tx::Signer;
+		use subxt::{PolkadotConfig, tx::Signer};
 
 		let signer = self.substrate_signer();
 		Signer::<PolkadotConfig>::account_id(&signer)

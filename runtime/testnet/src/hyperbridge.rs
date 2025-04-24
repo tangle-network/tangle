@@ -24,8 +24,7 @@ use crate::{
 use frame_support::parameter_types;
 use ismp::{host::StateMachine, module::IsmpModule, router::IsmpRouter};
 use pallet_token_gateway::types::EvmToSubstrate;
-use sp_std::boxed::Box;
-use sp_std::vec::Vec;
+use sp_std::{boxed::Box, vec::Vec};
 use tangle_primitives::Balance;
 
 impl pallet_hyperbridge::Config for Runtime {
@@ -55,7 +54,8 @@ impl pallet_ismp::Config for Runtime {
 	type Currency = Balances;
 	// Co-processor
 	type Coprocessor = Coprocessor;
-	// A tuple of types implementing the ConsensusClient interface, which defines all consensus algorithms supported by this protocol deployment
+	// A tuple of types implementing the ConsensusClient interface, which defines all consensus
+	// algorithms supported by this protocol deployment
 	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type WeightProvider = ();
 	type OffchainDB = ();
@@ -73,9 +73,8 @@ pub struct Router;
 impl IsmpRouter for Router {
 	fn module_for_id(&self, id: Vec<u8>) -> Result<Box<dyn IsmpModule>, anyhow::Error> {
 		match id.as_slice() {
-			pallet_hyperbridge::PALLET_HYPERBRIDGE_ID => {
-				Ok(Box::new(pallet_hyperbridge::Pallet::<Runtime>::default()))
-			},
+			pallet_hyperbridge::PALLET_HYPERBRIDGE_ID =>
+				Ok(Box::new(pallet_hyperbridge::Pallet::<Runtime>::default())),
 			id if TokenGateway::is_token_gateway(id) => Ok(Box::new(TokenGateway::default())),
 			_ => Err(ismp::Error::ModuleNotFound(id))?,
 		}

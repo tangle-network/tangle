@@ -18,8 +18,10 @@ use crate::types::{BalanceOf, OperatorStatus};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
-use tangle_primitives::types::rewards::UserDepositWithLocks;
-use tangle_primitives::{RoundIndex, services::Asset, traits::MultiAssetDelegationInfo};
+use tangle_primitives::{
+	RoundIndex, services::Asset, traits::MultiAssetDelegationInfo,
+	types::rewards::UserDepositWithLocks,
+};
 
 impl<T: crate::Config>
 	MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>, T::AssetId>

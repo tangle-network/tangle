@@ -1,5 +1,7 @@
-use crate::types::BalanceOf;
-use crate::{Config, Error, Event, MasterBlueprintServiceManagerRevisions, Pallet, Pays, Weight};
+use crate::{
+	Config, Error, Event, MasterBlueprintServiceManagerRevisions, Pallet, Pays, Weight,
+	types::BalanceOf,
+};
 use ethabi::{Function, StateMutability, Token};
 use frame_support::dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo};
 use frame_system::pallet_prelude::BlockNumberFor;
@@ -75,9 +77,8 @@ impl<T: Config> Pallet<T> {
 	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
-			MasterBlueprintServiceManagerRevision::Latest => {
-				Self::mbsm_address(Self::mbsm_latest_revision())
-			},
+			MasterBlueprintServiceManagerRevision::Latest =>
+				Self::mbsm_address(Self::mbsm_latest_revision()),
 			other => unimplemented!("Got unexpected case for {:?}", other),
 		}
 	}
@@ -830,8 +831,8 @@ impl<T: Config> Pallet<T> {
 
 	/// Checks if an operator can join a service instance by calling the blueprint's EVM contract.
 	///
-	/// This function dispatches a call to the `canJoin` function of the service blueprint's manager contract
-	/// to determine if an operator is allowed to join a service instance.
+	/// This function dispatches a call to the `canJoin` function of the service blueprint's manager
+	/// contract to determine if an operator is allowed to join a service instance.
 	///
 	/// # Parameters
 	/// * `blueprint` - The service blueprint containing the contract details
@@ -890,8 +891,8 @@ impl<T: Config> Pallet<T> {
 
 	/// Notifies the blueprint's EVM contract that an operator has joined a service instance.
 	///
-	/// This function dispatches a call to the `onOperatorJoined` function of the service blueprint's
-	/// manager contract after an operator successfully joins a service instance.
+	/// This function dispatches a call to the `onOperatorJoined` function of the service
+	/// blueprint's manager contract after an operator successfully joins a service instance.
 	///
 	/// # Parameters
 	/// * `blueprint` - The service blueprint containing the contract details
@@ -950,8 +951,8 @@ impl<T: Config> Pallet<T> {
 
 	/// Checks if an operator can leave a service instance by calling the blueprint's EVM contract.
 	///
-	/// This function dispatches a call to the `canLeave` function of the service blueprint's manager contract
-	/// to determine if an operator is allowed to leave a service instance.
+	/// This function dispatches a call to the `canLeave` function of the service blueprint's
+	/// manager contract to determine if an operator is allowed to leave a service instance.
 	///
 	/// # Parameters
 	/// * `blueprint` - The service blueprint containing the contract details
@@ -1314,7 +1315,8 @@ impl<T: Config> Pallet<T> {
 	/// * `Ok((bool, Weight))` - A tuple containing:
 	///   * A boolean indicating if the transfer was successful
 	///   * The weight consumed by the EVM call
-	/// * `Err(DispatchErrorWithPostInfo)` - If the EVM call fails or the ABI encoding/decoding fails
+	/// * `Err(DispatchErrorWithPostInfo)` - If the EVM call fails or the ABI encoding/decoding
+	///   fails
 	pub fn erc20_transfer(
 		erc20: H160,
 		from: H160,
