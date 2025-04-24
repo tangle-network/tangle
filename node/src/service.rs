@@ -235,11 +235,21 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub auto_insert_keys: bool,
+	#[cfg(feature = "blueprint-manager")]
+	pub manager_test_mode: bool,
 }
 
 /// Builds a new service for a full client.
 pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
+	RunFullParams {
+		mut config,
+		eth_config,
+		rpc_config,
+		debug_output: _,
+		auto_insert_keys,
+		#[cfg(feature = "blueprint-manager")]
+		manager_test_mode,
+	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -655,13 +665,13 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 	#[cfg(feature = "blueprint-manager")]
 	{
-		let test_mode = chain_type == ChainType::Development || chain_type == ChainType::Local;
 		let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
 			rpc_port,
 			config_data_path.join("blueprints"),
 			keystore_container.local_keystore(),
-			test_mode,
-		)?;
+			manager_test_mode,
+		)
+		.await?;
 
 		task_manager
 			.spawn_essential_handle()

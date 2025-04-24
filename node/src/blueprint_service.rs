@@ -3,13 +3,15 @@ use std::sync::Arc;
 
 use blueprint_keystore::{Keystore, KeystoreConfig};
 use blueprint_manager::config::BlueprintManagerConfig;
+use blueprint_manager::config::DEFAULT_DOCKER_HOST;
+use blueprint_manager::config::SourceType;
 use blueprint_manager::executor::{BlueprintManagerHandle, run_blueprint_manager_with_keystore};
 use blueprint_runner::config::BlueprintEnvironment;
 use sc_keystore::LocalKeystore;
 use sc_service::error::Error as ServiceError;
 
 /// Runs the blueprint manager service.
-pub fn create_blueprint_manager_service<P: AsRef<Path>>(
+pub async fn create_blueprint_manager_service<P: AsRef<Path>>(
 	rpc_port: u16,
 	data_dir: P,
 	local_keystore: Arc<LocalKeystore>,
@@ -27,6 +29,8 @@ pub fn create_blueprint_manager_service<P: AsRef<Path>>(
 		pretty: false,
 		instance_id: None,
 		test_mode,
+		podman_host: DEFAULT_DOCKER_HOST.clone(),
+		preferred_source: SourceType::default(),
 	};
 	let mut env = BlueprintEnvironment::default();
 
@@ -41,14 +45,14 @@ pub fn create_blueprint_manager_service<P: AsRef<Path>>(
 		.map_err(|e| ServiceError::Application(e.into()))?;
 
 	let shutdown_cmd = futures::future::pending();
-	let mut handle = match run_blueprint_manager_with_keystore(config, keystore, env, shutdown_cmd)
-	{
-		Ok(handle) => handle,
-		Err(e) => {
-			log::error!("Failed to start blueprint manager: {}", e);
-			return Err(ServiceError::Application(e.into()));
-		},
-	};
+	let mut handle =
+		match run_blueprint_manager_with_keystore(config, keystore, env, shutdown_cmd).await {
+			Ok(handle) => handle,
+			Err(e) => {
+				log::error!("Failed to start blueprint manager: {}", e);
+				return Err(ServiceError::Application(e.into()));
+			},
+		};
 	handle.start().map_err(|e| ServiceError::Application(e.into()))?;
 	log::info!("Blueprint manager started successfully.");
 	Ok(handle)
