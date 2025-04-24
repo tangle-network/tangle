@@ -203,11 +203,10 @@ fn test_native_restaking_slash_with_multiple_services() {
 		));
 
 		// Approve second service
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		let delegator = mock_pub_key(CHARLIE);
 		let stake_amount = 1000;

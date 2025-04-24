@@ -229,9 +229,9 @@ fn test_delegate_assets() {
 			.unwrap()
 			.delegations
 			.iter()
-			.any(|x| x.delegator == delegator_account
-				&& x.asset == Asset::Custom(1)
-				&& x.amount == 100));
+			.any(|x| x.delegator == delegator_account &&
+				x.asset == Asset::Custom(1) &&
+				x.amount == 100));
 	});
 }
 

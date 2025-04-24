@@ -1,10 +1,10 @@
 use std::{path::Path, sync::Arc};
 
 use blueprint_keystore::{Keystore, KeystoreConfig};
-use blueprint_manager::config::BlueprintManagerConfig;
-use blueprint_manager::config::DEFAULT_DOCKER_HOST;
-use blueprint_manager::config::SourceType;
-use blueprint_manager::executor::{BlueprintManagerHandle, run_blueprint_manager_with_keystore};
+use blueprint_manager::{
+	config::{BlueprintManagerConfig, DEFAULT_DOCKER_HOST, SourceType},
+	executor::{BlueprintManagerHandle, run_blueprint_manager_with_keystore},
+};
 use blueprint_runner::config::BlueprintEnvironment;
 use sc_keystore::LocalKeystore;
 use sc_service::error::Error as ServiceError;

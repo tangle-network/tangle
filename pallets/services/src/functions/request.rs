@@ -58,10 +58,10 @@ impl<T: Config> Pallet<T> {
 		// First validate all security requirements have non-zero exposures
 		for requirement in security_requirements.iter() {
 			ensure!(
-				requirement.min_exposure_percent > Percent::zero()
-					&& requirement.max_exposure_percent > Percent::zero()
-					&& requirement.min_exposure_percent <= requirement.max_exposure_percent
-					&& requirement.max_exposure_percent <= Percent::from_percent(100),
+				requirement.min_exposure_percent > Percent::zero() &&
+					requirement.max_exposure_percent > Percent::zero() &&
+					requirement.min_exposure_percent <= requirement.max_exposure_percent &&
+					requirement.max_exposure_percent <= Percent::from_percent(100),
 				Error::<T>::InvalidSecurityRequirements
 			);
 		}
@@ -95,8 +95,8 @@ impl<T: Config> Pallet<T> {
 			.ok_or(Error::<T>::NoNativeAsset)?;
 
 		ensure!(
-			native_asset_requirement.min_exposure_percent
-				>= T::MinimumNativeSecurityRequirement::get(),
+			native_asset_requirement.min_exposure_percent >=
+				T::MinimumNativeSecurityRequirement::get(),
 			Error::<T>::NativeAssetExposureTooLow
 		);
 
@@ -198,19 +198,16 @@ impl<T: Config> Pallet<T> {
 			BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 				.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 
-		ServiceRequests::<T>::insert(
-			request_id,
-			ServiceRequest {
-				blueprint: blueprint_id,
-				owner: caller.clone(),
-				security_requirements: security_requirements.clone(),
-				ttl,
-				args,
-				permitted_callers,
-				operators_with_approval_state,
-				membership_model,
-			},
-		);
+		ServiceRequests::<T>::insert(request_id, ServiceRequest {
+			blueprint: blueprint_id,
+			owner: caller.clone(),
+			security_requirements: security_requirements.clone(),
+			ttl,
+			args,
+			permitted_callers,
+			operators_with_approval_state,
+			membership_model,
+		});
 		NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 
 		Self::deposit_event(Event::ServiceRequested {
