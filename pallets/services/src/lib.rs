@@ -424,6 +424,16 @@ pub mod module {
 		InvalidSecurityRequirements,
 		/// Invalid quote signature
 		InvalidQuoteSignature,
+		/// Mismatched number of signatures
+		SignatureCountMismatch,
+		/// Missing quote signature
+		MissingQuoteSignature,
+		/// Invalid key for quote
+		InvalidKeyForQuote,
+		/// Signature verification failed
+		SignatureVerificationFailed,
+		/// Invalid signature bytes
+		InvalidSignatureBytes,
 	}
 
 	#[pallet::event]
@@ -1793,7 +1803,7 @@ pub mod module {
 			// Verify that we have a signature from each operator
 			let mut operator_signatures_map = BTreeMap::new();
 			for (signature, operator) in operator_signatures.iter().zip(operators.iter()) {
-				ensure!(operators.contains(operator), Error::<T>::InvalidQuoteSignature);
+				ensure!(operators.contains(operator), Error::<T>::SignatureCountMismatch);
 				operator_signatures_map.insert(operator.clone(), *signature);
 			}
 
@@ -1801,7 +1811,7 @@ pub mod module {
 			for operator in operators.iter() {
 				ensure!(
 					operator_signatures_map.contains_key(operator),
-					Error::<T>::InvalidQuoteSignature
+					Error::<T>::MissingQuoteSignature
 				);
 			}
 
@@ -1810,31 +1820,23 @@ pub mod module {
 				let operator_preferences = Operators::<T>::get(blueprint_id, operator)?;
 
 				let public_key = ecdsa::Public::from_full(&operator_preferences.key)
-					.map_err(|_| Error::<T>::InvalidQuoteSignature)?;
+					.map_err(|_| Error::<T>::InvalidKeyForQuote)?;
 
 				// Hash the pricing quote to create the message to verify
 				let message =
 					tangle_primitives::services::pricing::hash_pricing_quote(&pricing_quotes[i]);
 
-				// Convert the hash to a fixed-size array for signature verification
-				let mut message_bytes = [0u8; 32];
-				if message.len() >= 32 {
-					message_bytes.copy_from_slice(&message[..32]);
-				} else {
-					ensure!(false, Error::<T>::InvalidQuoteSignature);
-				}
-
 				// Verify the signature
 				ensure!(
-					sp_io::crypto::ecdsa_verify_prehashed(signature, &message_bytes, &public_key,),
-					Error::<T>::InvalidQuoteSignature
+					sp_io::crypto::ecdsa_verify(signature, &message, &public_key),
+					Error::<T>::SignatureVerificationFailed
 				);
 			}
 
 			// Calculate the cost of from the quotes
 			let total_cost_rate = pricing_quotes.iter().map(|q| q.total_cost_rate).sum::<u64>();
-			let value = (total_cost_rate * ttl.saturated_into::<u64>() * 6)
-				.saturated_into::<BalanceOf<T>>();
+			let value =
+				(total_cost_rate * ttl.saturated_into::<u64>()).saturated_into::<BalanceOf<T>>();
 
 			// Request service
 			let service_id = Self::do_request(

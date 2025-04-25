@@ -63,13 +63,9 @@ pub struct ResourcePricing<C: Constraints> {
 	pub price_per_unit_rate: u64,
 }
 
-/// Creates a deterministic hash of the pricing quote that can be reproduced in any language.
-pub fn hash_pricing_quote<C: Constraints>(
-	pricing_quote: &PricingQuote<C>,
-) -> sp_std::prelude::Vec<u8> {
-	// Encode the pricing quote
+/// Creates a deterministic hash of the pricing quote that can more easily be reproduced in other
+/// languages.
+pub fn hash_pricing_quote<C: Constraints>(pricing_quote: &PricingQuote<C>) -> [u8; 32] {
 	let encoded = pricing_quote.encode();
-
-	// Hash the encoded bytes using keccak-256
-	keccak_256(&encoded).to_vec()
+	keccak_256(&encoded)
 }

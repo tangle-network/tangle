@@ -4010,9 +4010,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				58u8, 183u8, 175u8, 119u8, 30u8, 121u8, 246u8, 48u8, 209u8, 78u8, 79u8, 206u8,
-				56u8, 249u8, 10u8, 64u8, 205u8, 137u8, 109u8, 248u8, 205u8, 202u8, 142u8, 244u8,
-				94u8, 255u8, 58u8, 36u8, 92u8, 78u8, 41u8, 183u8,
+				13u8, 169u8, 174u8, 168u8, 17u8, 84u8, 198u8, 212u8, 95u8, 250u8, 67u8, 180u8,
+				93u8, 111u8, 126u8, 180u8, 35u8, 38u8, 244u8, 132u8, 45u8, 80u8, 90u8, 163u8, 91u8,
+				242u8, 216u8, 60u8, 28u8, 185u8, 117u8, 152u8,
 			]
 	}
 	pub mod system {
@@ -67350,6 +67350,21 @@ pub mod api {
 					#[codec(index = 71)]
 					#[doc = "Invalid quote signature"]
 					InvalidQuoteSignature,
+					#[codec(index = 72)]
+					#[doc = "Mismatched number of signatures"]
+					SignatureCountMismatch,
+					#[codec(index = 73)]
+					#[doc = "Missing quote signature"]
+					MissingQuoteSignature,
+					#[codec(index = 74)]
+					#[doc = "Invalid key for quote"]
+					InvalidKeyForQuote,
+					#[codec(index = 75)]
+					#[doc = "Signature verification failed"]
+					SignatureVerificationFailed,
+					#[codec(index = 76)]
+					#[doc = "Invalid signature bytes"]
+					InvalidSignatureBytes,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
