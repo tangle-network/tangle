@@ -522,6 +522,14 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxRpcAddressLength: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxResourceNameLength: u32 = 16;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxMasterBlueprintServiceManagerRevisions: u32 = u32::MAX;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -571,6 +579,8 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
+	type MaxRpcAddressLength = MaxRpcAddressLength;
+	type MaxResourceNameLength = MaxResourceNameLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;

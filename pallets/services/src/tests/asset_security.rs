@@ -28,7 +28,13 @@ fn test_security_requirements_validation() {
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 		// Register operator
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 		// Test Case 1: Invalid min exposure (0%)
 		assert_err!(
 			Services::request(
@@ -124,7 +130,13 @@ fn test_security_commitment_validation() {
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 		// Register operator
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 		// Create service request
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(eve.clone()),
@@ -191,7 +203,13 @@ fn test_exposure_calculations() {
 
 		// Register operators
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
-			assert_ok!(join_and_register(operator, 0, test_ecdsa_key(), Default::default(), 1000));
+			assert_ok!(join_and_register(
+				operator,
+				0,
+				test_ecdsa_key(),
+				1000,
+				Some("https://example.com/rpc")
+			));
 		}
 
 		// Create service with multiple assets and exposure requirements
@@ -268,7 +286,13 @@ fn test_exposure_limits() {
 
 		// Register operators
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
-			assert_ok!(join_and_register(operator, 0, test_ecdsa_key(), Default::default(), 1000));
+			assert_ok!(join_and_register(
+				operator,
+				0,
+				test_ecdsa_key(),
+				1000,
+				Some("https://example.com/rpc")
+			));
 		}
 
 		assert_ok!(Services::request(

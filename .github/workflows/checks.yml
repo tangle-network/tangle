@@ -21,12 +21,12 @@ jobs:
       - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly-2025-01-09
           override: true
           components: rustfmt
 
       - name: Rustfmt check
-        run: cargo fmt +nightly-2025-01-09 --all -- --check
+        run: cargo fmt --all -- --check
 
   test:
     env:

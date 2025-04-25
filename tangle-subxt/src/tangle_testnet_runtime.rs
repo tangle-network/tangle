@@ -4010,9 +4010,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				81u8, 222u8, 19u8, 22u8, 127u8, 56u8, 179u8, 172u8, 240u8, 85u8, 124u8, 133u8,
-				204u8, 213u8, 254u8, 230u8, 149u8, 153u8, 81u8, 77u8, 144u8, 181u8, 206u8, 60u8,
-				197u8, 186u8, 63u8, 22u8, 207u8, 182u8, 213u8, 49u8,
+				13u8, 169u8, 174u8, 168u8, 17u8, 84u8, 198u8, 212u8, 95u8, 250u8, 67u8, 180u8,
+				93u8, 111u8, 126u8, 180u8, 35u8, 38u8, 244u8, 132u8, 45u8, 80u8, 90u8, 163u8, 91u8,
+				242u8, 216u8, 60u8, 28u8, 185u8, 117u8, 152u8,
 			]
 	}
 	pub mod system {
@@ -5148,9 +5148,10 @@ pub mod api {
 						"Events",
 						(),
 						[
-							45u8, 143u8, 185u8, 106u8, 101u8, 70u8, 178u8, 83u8, 14u8, 179u8, 63u8,
-							250u8, 37u8, 13u8, 50u8, 184u8, 85u8, 34u8, 190u8, 202u8, 148u8, 207u8,
-							18u8, 181u8, 57u8, 223u8, 253u8, 131u8, 93u8, 240u8, 225u8, 248u8,
+							147u8, 190u8, 174u8, 197u8, 87u8, 18u8, 112u8, 237u8, 23u8, 167u8,
+							113u8, 94u8, 80u8, 145u8, 65u8, 226u8, 188u8, 139u8, 138u8, 57u8,
+							145u8, 197u8, 23u8, 101u8, 247u8, 137u8, 119u8, 39u8, 211u8, 232u8,
+							132u8, 197u8,
 						],
 					)
 				}
@@ -5807,10 +5808,9 @@ pub mod api {
 						"sudo",
 						types::Sudo { call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							165u8, 186u8, 180u8, 225u8, 90u8, 107u8, 140u8, 71u8, 187u8, 215u8,
-							35u8, 33u8, 181u8, 216u8, 51u8, 244u8, 23u8, 184u8, 150u8, 189u8,
-							247u8, 38u8, 235u8, 53u8, 16u8, 214u8, 207u8, 54u8, 254u8, 80u8, 127u8,
-							239u8,
+							205u8, 208u8, 195u8, 51u8, 124u8, 70u8, 36u8, 36u8, 140u8, 202u8, 57u8,
+							97u8, 238u8, 208u8, 161u8, 10u8, 237u8, 21u8, 252u8, 234u8, 9u8, 10u8,
+							93u8, 30u8, 52u8, 157u8, 156u8, 82u8, 141u8, 192u8, 4u8, 129u8,
 						],
 					)
 				}
@@ -5832,9 +5832,10 @@ pub mod api {
 							weight,
 						},
 						[
-							137u8, 123u8, 84u8, 191u8, 235u8, 253u8, 231u8, 23u8, 56u8, 91u8, 99u8,
-							60u8, 237u8, 102u8, 170u8, 88u8, 144u8, 178u8, 214u8, 110u8, 228u8,
-							5u8, 119u8, 245u8, 95u8, 88u8, 2u8, 96u8, 165u8, 39u8, 243u8, 1u8,
+							62u8, 53u8, 46u8, 239u8, 114u8, 185u8, 194u8, 184u8, 241u8, 184u8,
+							202u8, 162u8, 41u8, 134u8, 2u8, 117u8, 87u8, 113u8, 118u8, 108u8,
+							254u8, 145u8, 32u8, 232u8, 60u8, 114u8, 28u8, 40u8, 248u8, 157u8,
+							142u8, 154u8,
 						],
 					)
 				}
@@ -5870,10 +5871,9 @@ pub mod api {
 						"sudo_as",
 						types::SudoAs { who, call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							226u8, 132u8, 143u8, 225u8, 47u8, 68u8, 191u8, 115u8, 202u8, 210u8,
-							104u8, 233u8, 175u8, 93u8, 153u8, 202u8, 140u8, 95u8, 177u8, 114u8,
-							2u8, 7u8, 202u8, 209u8, 188u8, 178u8, 4u8, 246u8, 179u8, 19u8, 108u8,
-							246u8,
+							209u8, 132u8, 168u8, 40u8, 4u8, 53u8, 205u8, 104u8, 223u8, 6u8, 247u8,
+							61u8, 186u8, 50u8, 93u8, 227u8, 42u8, 95u8, 78u8, 73u8, 202u8, 140u8,
+							188u8, 243u8, 243u8, 232u8, 28u8, 8u8, 223u8, 35u8, 52u8, 239u8,
 						],
 					)
 				}
@@ -16279,9 +16279,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							27u8, 228u8, 161u8, 120u8, 38u8, 3u8, 206u8, 80u8, 25u8, 135u8, 57u8,
-							127u8, 254u8, 249u8, 172u8, 0u8, 131u8, 209u8, 115u8, 221u8, 93u8,
-							154u8, 50u8, 136u8, 219u8, 111u8, 62u8, 29u8, 34u8, 23u8, 148u8, 30u8,
+							50u8, 177u8, 163u8, 139u8, 169u8, 130u8, 219u8, 92u8, 29u8, 36u8,
+							101u8, 155u8, 143u8, 47u8, 91u8, 232u8, 234u8, 242u8, 128u8, 129u8,
+							231u8, 223u8, 159u8, 48u8, 232u8, 37u8, 114u8, 52u8, 8u8, 227u8, 139u8,
+							186u8,
 						],
 					)
 				}
@@ -16314,9 +16315,9 @@ pub mod api {
 							length_bound,
 						},
 						[
-							215u8, 66u8, 176u8, 159u8, 88u8, 229u8, 56u8, 103u8, 41u8, 168u8,
-							156u8, 110u8, 229u8, 71u8, 82u8, 91u8, 244u8, 39u8, 33u8, 132u8, 205u8,
-							229u8, 80u8, 33u8, 75u8, 83u8, 128u8, 192u8, 124u8, 95u8, 108u8, 44u8,
+							100u8, 187u8, 69u8, 11u8, 233u8, 77u8, 57u8, 67u8, 226u8, 25u8, 49u8,
+							166u8, 69u8, 140u8, 95u8, 224u8, 245u8, 239u8, 88u8, 56u8, 226u8, 5u8,
+							64u8, 120u8, 227u8, 216u8, 79u8, 86u8, 235u8, 58u8, 39u8, 102u8,
 						],
 					)
 				}
@@ -16705,10 +16706,9 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							147u8, 136u8, 168u8, 239u8, 18u8, 45u8, 211u8, 105u8, 95u8, 198u8,
-							78u8, 102u8, 138u8, 159u8, 187u8, 204u8, 217u8, 233u8, 5u8, 30u8,
-							133u8, 23u8, 46u8, 82u8, 71u8, 236u8, 53u8, 110u8, 144u8, 98u8, 226u8,
-							110u8,
+							98u8, 36u8, 75u8, 86u8, 135u8, 27u8, 226u8, 24u8, 119u8, 161u8, 251u8,
+							83u8, 236u8, 245u8, 19u8, 65u8, 153u8, 173u8, 247u8, 240u8, 111u8,
+							198u8, 135u8, 1u8, 154u8, 100u8, 90u8, 22u8, 130u8, 209u8, 15u8, 17u8,
 						],
 					)
 				}
@@ -16728,10 +16728,9 @@ pub mod api {
 						"ProposalOf",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							147u8, 136u8, 168u8, 239u8, 18u8, 45u8, 211u8, 105u8, 95u8, 198u8,
-							78u8, 102u8, 138u8, 159u8, 187u8, 204u8, 217u8, 233u8, 5u8, 30u8,
-							133u8, 23u8, 46u8, 82u8, 71u8, 236u8, 53u8, 110u8, 144u8, 98u8, 226u8,
-							110u8,
+							98u8, 36u8, 75u8, 86u8, 135u8, 27u8, 226u8, 24u8, 119u8, 161u8, 251u8,
+							83u8, 236u8, 245u8, 19u8, 65u8, 153u8, 173u8, 247u8, 240u8, 111u8,
+							198u8, 135u8, 1u8, 154u8, 100u8, 90u8, 22u8, 130u8, 209u8, 15u8, 17u8,
 						],
 					)
 				}
@@ -32324,10 +32323,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							235u8, 202u8, 191u8, 138u8, 141u8, 153u8, 34u8, 138u8, 248u8, 127u8,
-							43u8, 229u8, 201u8, 101u8, 9u8, 55u8, 255u8, 152u8, 241u8, 218u8,
-							197u8, 14u8, 219u8, 246u8, 223u8, 184u8, 204u8, 113u8, 76u8, 250u8,
-							135u8, 224u8,
+							154u8, 140u8, 18u8, 126u8, 192u8, 229u8, 127u8, 38u8, 210u8, 216u8,
+							73u8, 122u8, 14u8, 182u8, 182u8, 184u8, 191u8, 38u8, 125u8, 72u8, 44u8,
+							37u8, 10u8, 79u8, 87u8, 120u8, 112u8, 168u8, 156u8, 59u8, 87u8, 77u8,
 						],
 					)
 				}
@@ -32369,9 +32367,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							82u8, 26u8, 133u8, 135u8, 26u8, 67u8, 234u8, 95u8, 208u8, 215u8, 185u8,
-							188u8, 203u8, 59u8, 93u8, 4u8, 139u8, 199u8, 29u8, 54u8, 109u8, 185u8,
-							19u8, 255u8, 251u8, 217u8, 146u8, 72u8, 194u8, 52u8, 90u8, 196u8,
+							42u8, 58u8, 146u8, 211u8, 50u8, 46u8, 25u8, 243u8, 11u8, 127u8, 229u8,
+							129u8, 56u8, 248u8, 177u8, 172u8, 81u8, 97u8, 232u8, 225u8, 34u8,
+							163u8, 110u8, 79u8, 247u8, 224u8, 152u8, 127u8, 63u8, 71u8, 189u8,
+							161u8,
 						],
 					)
 				}
@@ -32409,9 +32408,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							97u8, 2u8, 94u8, 83u8, 189u8, 232u8, 93u8, 65u8, 183u8, 186u8, 92u8,
-							172u8, 156u8, 51u8, 100u8, 82u8, 205u8, 209u8, 76u8, 180u8, 194u8, 1u8,
-							234u8, 199u8, 171u8, 181u8, 56u8, 43u8, 167u8, 187u8, 67u8, 65u8,
+							106u8, 120u8, 134u8, 254u8, 182u8, 12u8, 136u8, 179u8, 8u8, 160u8,
+							87u8, 128u8, 52u8, 48u8, 74u8, 149u8, 81u8, 13u8, 152u8, 201u8, 128u8,
+							112u8, 253u8, 47u8, 141u8, 36u8, 214u8, 239u8, 240u8, 130u8, 110u8,
+							162u8,
 						],
 					)
 				}
@@ -32435,9 +32435,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							215u8, 203u8, 241u8, 116u8, 133u8, 204u8, 210u8, 98u8, 92u8, 197u8,
-							76u8, 124u8, 16u8, 48u8, 139u8, 176u8, 78u8, 230u8, 41u8, 198u8, 109u8,
-							172u8, 2u8, 19u8, 126u8, 14u8, 103u8, 142u8, 2u8, 217u8, 33u8, 173u8,
+							204u8, 94u8, 3u8, 207u8, 62u8, 124u8, 79u8, 34u8, 89u8, 119u8, 66u8,
+							242u8, 166u8, 191u8, 242u8, 103u8, 129u8, 45u8, 152u8, 101u8, 133u8,
+							117u8, 15u8, 93u8, 244u8, 67u8, 85u8, 28u8, 134u8, 209u8, 129u8, 95u8,
 						],
 					)
 				}
@@ -37153,10 +37153,9 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							110u8, 194u8, 199u8, 102u8, 215u8, 25u8, 220u8, 73u8, 131u8, 29u8,
-							163u8, 242u8, 174u8, 246u8, 46u8, 63u8, 50u8, 206u8, 236u8, 228u8,
-							83u8, 81u8, 222u8, 208u8, 98u8, 73u8, 183u8, 64u8, 76u8, 3u8, 181u8,
-							251u8,
+							64u8, 73u8, 71u8, 209u8, 187u8, 67u8, 204u8, 241u8, 199u8, 228u8,
+							159u8, 84u8, 205u8, 32u8, 163u8, 59u8, 11u8, 61u8, 250u8, 42u8, 10u8,
+							131u8, 186u8, 5u8, 74u8, 139u8, 44u8, 151u8, 0u8, 194u8, 121u8, 216u8,
 						],
 					)
 				}
@@ -37186,10 +37185,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							232u8, 33u8, 56u8, 135u8, 56u8, 206u8, 179u8, 243u8, 175u8, 175u8,
-							238u8, 152u8, 143u8, 135u8, 209u8, 92u8, 162u8, 196u8, 168u8, 186u8,
-							239u8, 227u8, 39u8, 155u8, 76u8, 234u8, 63u8, 26u8, 113u8, 95u8, 157u8,
-							40u8,
+							131u8, 161u8, 187u8, 24u8, 221u8, 178u8, 166u8, 130u8, 235u8, 55u8,
+							21u8, 162u8, 206u8, 237u8, 107u8, 196u8, 223u8, 91u8, 210u8, 26u8,
+							56u8, 174u8, 135u8, 230u8, 137u8, 145u8, 138u8, 115u8, 211u8, 199u8,
+							161u8, 248u8,
 						],
 					)
 				}
@@ -37215,10 +37214,10 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							176u8, 145u8, 239u8, 185u8, 119u8, 85u8, 2u8, 18u8, 71u8, 99u8, 2u8,
-							184u8, 48u8, 88u8, 203u8, 196u8, 185u8, 100u8, 198u8, 248u8, 38u8,
-							209u8, 41u8, 97u8, 216u8, 204u8, 158u8, 157u8, 178u8, 133u8, 210u8,
-							45u8,
+							170u8, 59u8, 200u8, 247u8, 246u8, 128u8, 240u8, 160u8, 114u8, 195u8,
+							12u8, 95u8, 220u8, 197u8, 1u8, 251u8, 41u8, 62u8, 3u8, 224u8, 87u8,
+							252u8, 220u8, 243u8, 65u8, 127u8, 158u8, 222u8, 254u8, 75u8, 148u8,
+							132u8,
 						],
 					)
 				}
@@ -37241,10 +37240,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							73u8, 37u8, 184u8, 48u8, 213u8, 37u8, 182u8, 246u8, 4u8, 246u8, 208u8,
-							235u8, 140u8, 153u8, 191u8, 109u8, 13u8, 162u8, 165u8, 228u8, 37u8,
-							188u8, 162u8, 79u8, 223u8, 24u8, 217u8, 42u8, 162u8, 115u8, 71u8,
-							183u8,
+							144u8, 206u8, 60u8, 235u8, 230u8, 57u8, 18u8, 110u8, 38u8, 230u8,
+							111u8, 88u8, 86u8, 198u8, 219u8, 173u8, 131u8, 71u8, 189u8, 30u8,
+							252u8, 226u8, 74u8, 38u8, 75u8, 139u8, 44u8, 238u8, 234u8, 103u8, 18u8,
+							85u8,
 						],
 					)
 				}
@@ -37270,10 +37269,10 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							56u8, 126u8, 186u8, 250u8, 106u8, 113u8, 163u8, 73u8, 64u8, 228u8,
-							145u8, 201u8, 165u8, 6u8, 45u8, 13u8, 192u8, 47u8, 49u8, 224u8, 132u8,
-							146u8, 154u8, 124u8, 178u8, 137u8, 83u8, 234u8, 238u8, 212u8, 135u8,
-							202u8,
+							128u8, 143u8, 102u8, 33u8, 152u8, 97u8, 161u8, 15u8, 188u8, 220u8,
+							159u8, 84u8, 107u8, 61u8, 234u8, 154u8, 16u8, 125u8, 118u8, 25u8, 3u8,
+							120u8, 146u8, 108u8, 105u8, 214u8, 98u8, 244u8, 75u8, 251u8, 48u8,
+							129u8,
 						],
 					)
 				}
@@ -37296,10 +37295,9 @@ pub mod api {
 							weight,
 						},
 						[
-							163u8, 2u8, 138u8, 49u8, 116u8, 203u8, 55u8, 193u8, 224u8, 196u8,
-							221u8, 192u8, 182u8, 53u8, 191u8, 62u8, 16u8, 75u8, 172u8, 247u8,
-							179u8, 168u8, 243u8, 27u8, 53u8, 159u8, 83u8, 184u8, 120u8, 161u8,
-							87u8, 2u8,
+							56u8, 166u8, 89u8, 10u8, 26u8, 161u8, 186u8, 1u8, 248u8, 121u8, 246u8,
+							230u8, 136u8, 239u8, 179u8, 144u8, 212u8, 80u8, 58u8, 143u8, 154u8,
+							230u8, 16u8, 227u8, 92u8, 29u8, 90u8, 52u8, 86u8, 75u8, 76u8, 234u8,
 						],
 					)
 				}
@@ -37750,9 +37748,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							42u8, 217u8, 83u8, 120u8, 181u8, 9u8, 103u8, 73u8, 86u8, 125u8, 129u8,
-							32u8, 105u8, 82u8, 179u8, 24u8, 63u8, 4u8, 177u8, 38u8, 198u8, 16u8,
-							114u8, 103u8, 103u8, 127u8, 244u8, 4u8, 171u8, 185u8, 147u8, 14u8,
+							208u8, 41u8, 205u8, 70u8, 146u8, 29u8, 234u8, 209u8, 224u8, 106u8,
+							119u8, 70u8, 29u8, 179u8, 114u8, 195u8, 236u8, 229u8, 146u8, 189u8,
+							32u8, 78u8, 180u8, 210u8, 90u8, 117u8, 176u8, 127u8, 142u8, 38u8,
+							244u8, 200u8,
 						],
 					)
 				}
@@ -37814,10 +37813,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							114u8, 84u8, 117u8, 163u8, 235u8, 84u8, 90u8, 31u8, 48u8, 176u8, 17u8,
-							60u8, 170u8, 162u8, 169u8, 71u8, 79u8, 214u8, 123u8, 62u8, 100u8,
-							236u8, 243u8, 43u8, 158u8, 225u8, 141u8, 173u8, 100u8, 158u8, 83u8,
-							232u8,
+							231u8, 190u8, 79u8, 8u8, 32u8, 171u8, 15u8, 99u8, 51u8, 98u8, 92u8,
+							25u8, 45u8, 162u8, 127u8, 14u8, 246u8, 240u8, 55u8, 167u8, 80u8, 133u8,
+							85u8, 136u8, 169u8, 184u8, 205u8, 83u8, 138u8, 177u8, 41u8, 15u8,
 						],
 					)
 				}
@@ -40776,9 +40774,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							249u8, 17u8, 93u8, 135u8, 172u8, 178u8, 230u8, 103u8, 3u8, 62u8, 99u8,
-							64u8, 174u8, 73u8, 240u8, 220u8, 123u8, 232u8, 115u8, 23u8, 157u8,
-							219u8, 83u8, 30u8, 40u8, 107u8, 210u8, 45u8, 109u8, 61u8, 57u8, 143u8,
+							191u8, 102u8, 244u8, 184u8, 192u8, 163u8, 172u8, 40u8, 231u8, 154u8,
+							185u8, 150u8, 196u8, 83u8, 2u8, 126u8, 123u8, 188u8, 212u8, 233u8,
+							203u8, 72u8, 254u8, 46u8, 120u8, 51u8, 9u8, 73u8, 175u8, 50u8, 14u8,
+							62u8,
 						],
 					)
 				}
@@ -41034,10 +41033,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							141u8, 228u8, 159u8, 164u8, 31u8, 112u8, 114u8, 196u8, 61u8, 179u8,
-							59u8, 213u8, 151u8, 78u8, 85u8, 0u8, 221u8, 70u8, 33u8, 176u8, 217u8,
-							102u8, 170u8, 144u8, 132u8, 180u8, 157u8, 74u8, 122u8, 249u8, 84u8,
-							26u8,
+							179u8, 111u8, 202u8, 132u8, 143u8, 106u8, 54u8, 68u8, 237u8, 11u8,
+							222u8, 97u8, 246u8, 178u8, 41u8, 152u8, 64u8, 233u8, 111u8, 36u8, 34u8,
+							21u8, 155u8, 177u8, 106u8, 82u8, 192u8, 210u8, 44u8, 209u8, 110u8,
+							206u8,
 						],
 					)
 				}
@@ -41515,7 +41514,8 @@ pub mod api {
 				#[doc = "# Errors"]
 				#[doc = ""]
 				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
-				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake"]
+				#[doc = "  request"]
 				pub struct ScheduleLeaveOperators;
 				impl ::subxt_core::blocks::StaticExtrinsic for ScheduleLeaveOperators {
 					const PALLET: &'static str = "MultiAssetDelegation";
@@ -41656,7 +41656,8 @@ pub mod api {
 				#[doc = "# Errors"]
 				#[doc = ""]
 				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
-				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake"]
+				#[doc = "  request"]
 				#[doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"]
 				pub struct ScheduleOperatorUnstake {
 					pub unstake_amount: schedule_operator_unstake::UnstakeAmount,
@@ -42457,7 +42458,8 @@ pub mod api {
 				#[doc = "# Errors"]
 				#[doc = ""]
 				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
-				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake"]
+				#[doc = "  request"]
 				pub fn schedule_leave_operators(
 					&self,
 				) -> ::subxt_core::tx::payload::StaticPayload<types::ScheduleLeaveOperators> {
@@ -42575,7 +42577,8 @@ pub mod api {
 				#[doc = "# Errors"]
 				#[doc = ""]
 				#[doc = "* [`Error::NotOperator`] - Account is not registered as an operator"]
-				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"]
+				#[doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake"]
+				#[doc = "  request"]
 				#[doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"]
 				pub fn schedule_operator_unstake(
 					&self,
@@ -44394,9 +44397,9 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Create a new service blueprint."]
 				#[doc = ""]
-				#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The blueprint"]
-				#[doc = "defines the service's constraints, requirements and behavior, including the master blueprint service"]
-				#[doc = "manager revision to use."]
+				#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The"]
+				#[doc = "blueprint defines the service's constraints, requirements and behavior, including the"]
+				#[doc = "master blueprint service manager revision to use."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -44404,7 +44407,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin` - The origin of the call, must be signed by the account creating the blueprint"]
+				#[doc = "* `origin` - The origin of the call, must be signed by the account creating the"]
+				#[doc = "  blueprint"]
 				#[doc = "* `blueprint` - The service blueprint containing:"]
 				#[doc = "  - Service constraints and requirements"]
 				#[doc = "  - Master blueprint service manager revision (Latest or Specific)"]
@@ -44413,13 +44417,14 @@ pub mod api {
 				#[doc = "# Errors"]
 				#[doc = ""]
 				#[doc = "* [`Error::BadOrigin`] - Origin is not signed"]
-				#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist"]
+				#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision"]
+				#[doc = "  does not exist"]
 				#[doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"]
 				#[doc = ""]
 				#[doc = "# Returns"]
 				#[doc = ""]
-				#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event"]
-				#[doc = "containing the owner and blueprint ID."]
+				#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a"]
+				#[doc = "[`Event::BlueprintCreated`] event containing the owner and blueprint ID."]
 				pub struct CreateBlueprint {
 					pub blueprint: create_blueprint::Blueprint,
 				}
@@ -44448,20 +44453,20 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Pre-register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "This function allows an account to signal intent to become an operator for a blueprint by emitting"]
-				#[doc = "a `PreRegistration` event. The operator node can listen for this event to execute any custom"]
-				#[doc = "registration logic defined in the blueprint."]
+				#[doc = "This function allows an account to signal intent to become an operator for a blueprint"]
+				#[doc = "by emitting a `PreRegistration` event. The operator node can listen for this event to"]
+				#[doc = "execute any custom registration logic defined in the blueprint."]
 				#[doc = ""]
-				#[doc = "Pre-registration is the first step in the operator registration flow. After pre-registering,"]
-				#[doc = "operators must complete the full registration process by calling `register()` with their preferences"]
-				#[doc = "and registration arguments."]
+				#[doc = "Pre-registration is the first step in the operator registration flow. After"]
+				#[doc = "pre-registering, operators must complete the full registration process by calling"]
+				#[doc = "`register()` with their preferences and registration arguments."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to"]
-				#[doc = "  become an operator."]
-				#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer"]
-				#[doc = "  to an existing blueprint."]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that"]
+				#[doc = "  wants to become an operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for."]
+				#[doc = "  Must refer to an existing blueprint."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -44504,9 +44509,10 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "This function allows an account to register as an operator for a blueprint by providing their"]
-				#[doc = "service preferences, registration arguments, and staking the required tokens. The operator must"]
-				#[doc = "be active in the delegation system and may require approval before accepting service requests."]
+				#[doc = "This function allows an account to register as an operator for a blueprint by providing"]
+				#[doc = "their service preferences, registration arguments, and staking the required tokens."]
+				#[doc = "The operator must be active in the delegation system and may require approval before"]
+				#[doc = "accepting service requests."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -44524,11 +44530,13 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system"]
+				#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation"]
+				#[doc = "  system"]
 				#[doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"]
 				#[doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"]
 				#[doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"]
-				#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit"]
+				#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services"]
+				#[doc = "  limit"]
 				pub struct Register {
 					#[codec(compact)]
 					pub blueprint_id: register::BlueprintId,
@@ -44613,55 +44621,6 @@ pub mod api {
 				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Updates the price targets for a registered operator's service blueprint."]
-				#[doc = ""]
-				#[doc = "Allows an operator to modify their price targets for a specific blueprint they are registered for."]
-				#[doc = "The operator must already be registered for the blueprint to update prices."]
-				#[doc = ""]
-				#[doc = "# Arguments"]
-				#[doc = ""]
-				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
-				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update price targets for."]
-				#[doc = "* `price_targets: PriceTargets` - The new price targets to set for the blueprint."]
-				#[doc = ""]
-				#[doc = "# Permissions"]
-				#[doc = ""]
-				#[doc = "* Must be signed by a registered operator for this blueprint."]
-				#[doc = ""]
-				#[doc = "# Errors"]
-				#[doc = ""]
-				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
-				#[doc = "* [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted."]
-				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
-				pub struct UpdatePriceTargets {
-					#[codec(compact)]
-					pub blueprint_id: update_price_targets::BlueprintId,
-					pub price_targets: update_price_targets::PriceTargets,
-				}
-				pub mod update_price_targets {
-					use super::runtime_types;
-					pub type BlueprintId = ::core::primitive::u64;
-					pub type PriceTargets =
-						runtime_types::tangle_primitives::services::types::PriceTargets;
-				}
-				impl ::subxt_core::blocks::StaticExtrinsic for UpdatePriceTargets {
-					const PALLET: &'static str = "Services";
-					const CALL: &'static str = "update_price_targets";
-				}
-				#[derive(
-					:: subxt_core :: ext :: codec :: Decode,
-					:: subxt_core :: ext :: codec :: Encode,
-					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
-					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
-					Clone,
-					Debug,
-					Eq,
-					PartialEq,
-				)]
-				# [codec (crate = :: subxt_core :: ext :: codec)]
-				#[codec(dumb_trait_bound)]
-				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
-				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Request a new service using a blueprint and specified operators."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
@@ -44669,9 +44628,11 @@ pub mod api {
 				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."]
 				#[doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."]
 				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."]
-				#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call."]
+				#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If"]
+				#[doc = "  empty, only owner can call."]
 				#[doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."]
-				#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments."]
+				#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization"]
+				#[doc = "  arguments."]
 				#[doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."]
 				#[doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."]
 				#[doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."]
@@ -44750,7 +44711,8 @@ pub mod api {
 				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Approve a service request, allowing it to be initiated once all required approvals are received."]
+				#[doc = "Approve a service request, allowing it to be initiated once all required approvals are"]
+				#[doc = "received."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -44818,8 +44780,10 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request"]
-				#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment"]
+				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to"]
+				#[doc = "  approve this request"]
+				#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when"]
+				#[doc = "  refunding payment"]
 				#[doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"]
 				pub struct Reject {
 					#[codec(compact)]
@@ -45004,21 +44968,23 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."]
 				#[doc = ""]
-				#[doc = "This function schedules a deferred slashing action against an operator's stake for a specific service."]
-				#[doc = "The slash is not applied immediately, but rather queued to be executed by another entity later."]
+				#[doc = "This function schedules a deferred slashing action against an operator's stake for a"]
+				#[doc = "specific service. The slash is not applied immediately, but rather queued to be"]
+				#[doc = "executed by another entity later."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
 				#[doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"]
-				#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call"]
-				#[doc = "  will fail."]
+				#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match,"]
+				#[doc = "  the call will fail."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
 				#[doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."]
 				#[doc = "* `offender` - The account ID of the operator to be slashed."]
 				#[doc = "* `service_id` - The ID of the service for which to slash the operator."]
-				#[doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value."]
+				#[doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a"]
+				#[doc = "  `Percent` value."]
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
@@ -45075,7 +45041,6 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"]
 				#[doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"]
-				#[doc = ""]
 				pub struct Dispute {
 					#[codec(compact)]
 					pub era: dispute::Era,
@@ -45118,7 +45083,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached"]
+				#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of"]
+				#[doc = "  revisions reached"]
 				pub struct UpdateMasterBlueprintServiceManager {
 					pub address: update_master_blueprint_service_manager::Address,
 				}
@@ -45188,14 +45154,176 @@ pub mod api {
 					const PALLET: &'static str = "Services";
 					const CALL: &'static str = "leave_service";
 				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Updates the RPC address for a registered operator's service blueprint."]
+				#[doc = ""]
+				#[doc = "Allows an operator to modify their RPC address for a specific blueprint they are"]
+				#[doc = "registered for. The operator must already be registered for the blueprint to update"]
+				#[doc = "the RPC address."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update the RPC address for."]
+				#[doc = "* `rpc_address: BoundedString<T::Constraints::MaxRpcAddressLength>` - The new RPC"]
+				#[doc = "  address to set for the blueprint."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by a registered operator for this blueprint."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
+				pub struct UpdateRpcAddress {
+					#[codec(compact)]
+					pub blueprint_id: update_rpc_address::BlueprintId,
+					pub rpc_address: update_rpc_address::RpcAddress,
+				}
+				pub mod update_rpc_address {
+					use super::runtime_types;
+					pub type BlueprintId = ::core::primitive::u64;
+					pub type RpcAddress =
+						runtime_types::tangle_primitives::services::field::BoundedString;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for UpdateRpcAddress {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "update_rpc_address";
+				}
+				#[derive(
+					:: subxt_core :: ext :: codec :: Decode,
+					:: subxt_core :: ext :: codec :: Encode,
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				# [codec (crate = :: subxt_core :: ext :: codec)]
+				#[codec(dumb_trait_bound)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Request a service with a pre-approved quote from operators."]
+				#[doc = ""]
+				#[doc = "This function creates a service request using a quote that has already been approved by"]
+				#[doc = "the operators. Unlike the regular `request` method, this doesn't require operator"]
+				#[doc = "approval after submission since the operators have already agreed to the terms via the"]
+				#[doc = "quote."]
+				#[doc = ""]
+				#[doc = "The quote is obtained externally through a gRPC server, and this function accepts the"]
+				#[doc = "necessary signatures from the operators to verify their approval."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Anyone can call this function"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be a signed account."]
+				#[doc = "* `evm_origin` - Optional EVM address for ERC20 payments."]
+				#[doc = "* `blueprint_id` - The ID of the blueprint to use."]
+				#[doc = "* `permitted_callers` - Accounts allowed to call the service. If empty, only owner can"]
+				#[doc = "  call."]
+				#[doc = "* `operators` - List of operators that will run the service."]
+				#[doc = "* `request_args` - Blueprint initialization arguments."]
+				#[doc = "* `asset_security_requirements` - Security requirements for assets."]
+				#[doc = "* `ttl` - Time-to-live in blocks for the service request."]
+				#[doc = "* `payment_asset` - Asset used for payment (native, custom or ERC20)."]
+				#[doc = "* `value` - Amount to pay for the service."]
+				#[doc = "* `membership_model` - Membership model for the service."]
+				#[doc = "* `operator_signatures` - Signatures from operators confirming the quote."]
+				#[doc = "* `security_commitments` - Security commitments from operators."]
+				#[doc = "* `pricing_quote` - Pricing quote details."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."]
+				#[doc = "* [`Error::NoAssetsProvided`] - No assets were specified."]
+				#[doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."]
+				#[doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."]
+				#[doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
+				#[doc = "* [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid."]
+				pub struct RequestWithSignedPriceQuotes {
+					pub evm_origin: request_with_signed_price_quotes::EvmOrigin,
+					#[codec(compact)]
+					pub blueprint_id: request_with_signed_price_quotes::BlueprintId,
+					pub permitted_callers: request_with_signed_price_quotes::PermittedCallers,
+					pub operators: request_with_signed_price_quotes::Operators,
+					pub request_args: request_with_signed_price_quotes::RequestArgs,
+					pub asset_security_requirements:
+						request_with_signed_price_quotes::AssetSecurityRequirements,
+					#[codec(compact)]
+					pub ttl: request_with_signed_price_quotes::Ttl,
+					pub payment_asset: request_with_signed_price_quotes::PaymentAsset,
+					pub membership_model: request_with_signed_price_quotes::MembershipModel,
+					pub pricing_quotes: request_with_signed_price_quotes::PricingQuotes,
+					pub operator_signatures: request_with_signed_price_quotes::OperatorSignatures,
+					pub security_commitments: request_with_signed_price_quotes::SecurityCommitments,
+				}
+				pub mod request_with_signed_price_quotes {
+					use super::runtime_types;
+					pub type EvmOrigin = ::core::option::Option<::subxt_core::utils::H160>;
+					pub type BlueprintId = ::core::primitive::u64;
+					pub type PermittedCallers =
+						::subxt_core::alloc::vec::Vec<::subxt_core::utils::AccountId32>;
+					pub type Operators =
+						::subxt_core::alloc::vec::Vec<::subxt_core::utils::AccountId32>;
+					pub type RequestArgs = ::subxt_core::alloc::vec::Vec<
+						runtime_types::tangle_primitives::services::field::Field<
+							::subxt_core::utils::AccountId32,
+						>,
+					>;
+					pub type AssetSecurityRequirements = ::subxt_core::alloc::vec::Vec<
+						runtime_types::tangle_primitives::services::types::AssetSecurityRequirement<
+							::core::primitive::u128,
+						>,
+					>;
+					pub type Ttl = ::core::primitive::u64;
+					pub type PaymentAsset =
+						runtime_types::tangle_primitives::services::types::Asset<
+							::core::primitive::u128,
+						>;
+					pub type MembershipModel =
+						runtime_types::tangle_primitives::services::types::MembershipModel;
+					pub type PricingQuotes = ::subxt_core::alloc::vec::Vec<
+						runtime_types::tangle_primitives::services::pricing::PricingQuote,
+					>;
+					pub type OperatorSignatures =
+						::subxt_core::alloc::vec::Vec<[::core::primitive::u8; 65usize]>;
+					pub type SecurityCommitments = ::subxt_core::alloc::vec::Vec<
+						runtime_types::tangle_primitives::services::types::AssetSecurityCommitment<
+							::core::primitive::u128,
+						>,
+					>;
+				}
+				impl ::subxt_core::blocks::StaticExtrinsic for RequestWithSignedPriceQuotes {
+					const PALLET: &'static str = "Services";
+					const CALL: &'static str = "request_with_signed_price_quotes";
+				}
 			}
 			pub struct TransactionApi;
 			impl TransactionApi {
 				#[doc = "Create a new service blueprint."]
 				#[doc = ""]
-				#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The blueprint"]
-				#[doc = "defines the service's constraints, requirements and behavior, including the master blueprint service"]
-				#[doc = "manager revision to use."]
+				#[doc = "A Service Blueprint is a template for a service that can be instantiated by users. The"]
+				#[doc = "blueprint defines the service's constraints, requirements and behavior, including the"]
+				#[doc = "master blueprint service manager revision to use."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -45203,7 +45331,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin` - The origin of the call, must be signed by the account creating the blueprint"]
+				#[doc = "* `origin` - The origin of the call, must be signed by the account creating the"]
+				#[doc = "  blueprint"]
 				#[doc = "* `blueprint` - The service blueprint containing:"]
 				#[doc = "  - Service constraints and requirements"]
 				#[doc = "  - Master blueprint service manager revision (Latest or Specific)"]
@@ -45212,13 +45341,14 @@ pub mod api {
 				#[doc = "# Errors"]
 				#[doc = ""]
 				#[doc = "* [`Error::BadOrigin`] - Origin is not signed"]
-				#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist"]
+				#[doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision"]
+				#[doc = "  does not exist"]
 				#[doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"]
 				#[doc = ""]
 				#[doc = "# Returns"]
 				#[doc = ""]
-				#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event"]
-				#[doc = "containing the owner and blueprint ID."]
+				#[doc = "Returns a `DispatchResultWithPostInfo` which on success emits a"]
+				#[doc = "[`Event::BlueprintCreated`] event containing the owner and blueprint ID."]
 				pub fn create_blueprint(
 					&self,
 					blueprint: types::create_blueprint::Blueprint,
@@ -45236,20 +45366,20 @@ pub mod api {
 				}
 				#[doc = "Pre-register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "This function allows an account to signal intent to become an operator for a blueprint by emitting"]
-				#[doc = "a `PreRegistration` event. The operator node can listen for this event to execute any custom"]
-				#[doc = "registration logic defined in the blueprint."]
+				#[doc = "This function allows an account to signal intent to become an operator for a blueprint"]
+				#[doc = "by emitting a `PreRegistration` event. The operator node can listen for this event to"]
+				#[doc = "execute any custom registration logic defined in the blueprint."]
 				#[doc = ""]
-				#[doc = "Pre-registration is the first step in the operator registration flow. After pre-registering,"]
-				#[doc = "operators must complete the full registration process by calling `register()` with their preferences"]
-				#[doc = "and registration arguments."]
+				#[doc = "Pre-registration is the first step in the operator registration flow. After"]
+				#[doc = "pre-registering, operators must complete the full registration process by calling"]
+				#[doc = "`register()` with their preferences and registration arguments."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to"]
-				#[doc = "  become an operator."]
-				#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer"]
-				#[doc = "  to an existing blueprint."]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that"]
+				#[doc = "  wants to become an operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for."]
+				#[doc = "  Must refer to an existing blueprint."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -45281,9 +45411,10 @@ pub mod api {
 				}
 				#[doc = "Register the caller as an operator for a specific blueprint."]
 				#[doc = ""]
-				#[doc = "This function allows an account to register as an operator for a blueprint by providing their"]
-				#[doc = "service preferences, registration arguments, and staking the required tokens. The operator must"]
-				#[doc = "be active in the delegation system and may require approval before accepting service requests."]
+				#[doc = "This function allows an account to register as an operator for a blueprint by providing"]
+				#[doc = "their service preferences, registration arguments, and staking the required tokens."]
+				#[doc = "The operator must be active in the delegation system and may require approval before"]
+				#[doc = "accepting service requests."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -45301,11 +45432,13 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system"]
+				#[doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation"]
+				#[doc = "  system"]
 				#[doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"]
 				#[doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"]
 				#[doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"]
-				#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit"]
+				#[doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services"]
+				#[doc = "  limit"]
 				pub fn register(
 					&self,
 					blueprint_id: types::register::BlueprintId,
@@ -45318,10 +45451,10 @@ pub mod api {
 						"register",
 						types::Register { blueprint_id, preferences, registration_args, value },
 						[
-							27u8, 78u8, 182u8, 218u8, 112u8, 7u8, 58u8, 101u8, 105u8, 11u8, 246u8,
-							118u8, 190u8, 228u8, 25u8, 232u8, 26u8, 188u8, 24u8, 223u8, 119u8,
-							190u8, 127u8, 110u8, 172u8, 39u8, 22u8, 215u8, 35u8, 233u8, 83u8,
-							255u8,
+							184u8, 214u8, 97u8, 114u8, 228u8, 160u8, 195u8, 46u8, 49u8, 255u8,
+							192u8, 109u8, 70u8, 54u8, 41u8, 177u8, 160u8, 101u8, 98u8, 241u8,
+							184u8, 34u8, 236u8, 139u8, 205u8, 19u8, 133u8, 3u8, 171u8, 4u8, 81u8,
+							206u8,
 						],
 					)
 				}
@@ -45360,43 +45493,6 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Updates the price targets for a registered operator's service blueprint."]
-				#[doc = ""]
-				#[doc = "Allows an operator to modify their price targets for a specific blueprint they are registered for."]
-				#[doc = "The operator must already be registered for the blueprint to update prices."]
-				#[doc = ""]
-				#[doc = "# Arguments"]
-				#[doc = ""]
-				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
-				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update price targets for."]
-				#[doc = "* `price_targets: PriceTargets` - The new price targets to set for the blueprint."]
-				#[doc = ""]
-				#[doc = "# Permissions"]
-				#[doc = ""]
-				#[doc = "* Must be signed by a registered operator for this blueprint."]
-				#[doc = ""]
-				#[doc = "# Errors"]
-				#[doc = ""]
-				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
-				#[doc = "* [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted."]
-				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
-				pub fn update_price_targets(
-					&self,
-					blueprint_id: types::update_price_targets::BlueprintId,
-					price_targets: types::update_price_targets::PriceTargets,
-				) -> ::subxt_core::tx::payload::StaticPayload<types::UpdatePriceTargets> {
-					::subxt_core::tx::payload::StaticPayload::new_static(
-						"Services",
-						"update_price_targets",
-						types::UpdatePriceTargets { blueprint_id, price_targets },
-						[
-							64u8, 243u8, 239u8, 182u8, 174u8, 160u8, 96u8, 140u8, 62u8, 187u8,
-							247u8, 111u8, 78u8, 96u8, 33u8, 159u8, 95u8, 203u8, 204u8, 31u8, 254u8,
-							57u8, 114u8, 219u8, 245u8, 19u8, 201u8, 6u8, 205u8, 145u8, 138u8,
-							100u8,
-						],
-					)
-				}
 				#[doc = "Request a new service using a blueprint and specified operators."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
@@ -45404,9 +45500,11 @@ pub mod api {
 				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."]
 				#[doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."]
 				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."]
-				#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call."]
+				#[doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If"]
+				#[doc = "  empty, only owner can call."]
 				#[doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."]
-				#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments."]
+				#[doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization"]
+				#[doc = "  arguments."]
 				#[doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."]
 				#[doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."]
 				#[doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."]
@@ -45461,7 +45559,8 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Approve a service request, allowing it to be initiated once all required approvals are received."]
+				#[doc = "Approve a service request, allowing it to be initiated once all required approvals are"]
+				#[doc = "received."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -45514,8 +45613,10 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request"]
-				#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment"]
+				#[doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to"]
+				#[doc = "  approve this request"]
+				#[doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when"]
+				#[doc = "  refunding payment"]
 				#[doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"]
 				pub fn reject(
 					&self,
@@ -45644,21 +45745,23 @@ pub mod api {
 				}
 				#[doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."]
 				#[doc = ""]
-				#[doc = "This function schedules a deferred slashing action against an operator's stake for a specific service."]
-				#[doc = "The slash is not applied immediately, but rather queued to be executed by another entity later."]
+				#[doc = "This function schedules a deferred slashing action against an operator's stake for a"]
+				#[doc = "specific service. The slash is not applied immediately, but rather queued to be"]
+				#[doc = "executed by another entity later."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
 				#[doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"]
-				#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call"]
-				#[doc = "  will fail."]
+				#[doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match,"]
+				#[doc = "  the call will fail."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
 				#[doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."]
 				#[doc = "* `offender` - The account ID of the operator to be slashed."]
 				#[doc = "* `service_id` - The ID of the service for which to slash the operator."]
-				#[doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value."]
+				#[doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a"]
+				#[doc = "  `Percent` value."]
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
@@ -45702,7 +45805,6 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"]
 				#[doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"]
-				#[doc = ""]
 				pub fn dispute(
 					&self,
 					era: types::dispute::Era,
@@ -45732,7 +45834,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
-				#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached"]
+				#[doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of"]
+				#[doc = "  revisions reached"]
 				pub fn update_master_blueprint_service_manager(
 					&self,
 					address: types::update_master_blueprint_service_manager::Address,
@@ -45782,6 +45885,126 @@ pub mod api {
 							224u8, 35u8, 93u8, 174u8, 1u8, 67u8, 35u8, 46u8, 195u8, 56u8, 103u8,
 							19u8, 112u8, 218u8, 195u8, 149u8, 175u8, 203u8, 198u8, 44u8, 76u8,
 							95u8, 0u8, 121u8, 82u8, 91u8, 244u8, 230u8, 27u8, 113u8, 12u8, 72u8,
+						],
+					)
+				}
+				#[doc = "Updates the RPC address for a registered operator's service blueprint."]
+				#[doc = ""]
+				#[doc = "Allows an operator to modify their RPC address for a specific blueprint they are"]
+				#[doc = "registered for. The operator must already be registered for the blueprint to update"]
+				#[doc = "the RPC address."]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."]
+				#[doc = "* `blueprint_id: u64` - The identifier of the blueprint to update the RPC address for."]
+				#[doc = "* `rpc_address: BoundedString<T::Constraints::MaxRpcAddressLength>` - The new RPC"]
+				#[doc = "  address to set for the blueprint."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Must be signed by a registered operator for this blueprint."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
+				pub fn update_rpc_address(
+					&self,
+					blueprint_id: types::update_rpc_address::BlueprintId,
+					rpc_address: types::update_rpc_address::RpcAddress,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::UpdateRpcAddress> {
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"Services",
+						"update_rpc_address",
+						types::UpdateRpcAddress { blueprint_id, rpc_address },
+						[
+							204u8, 82u8, 163u8, 126u8, 118u8, 163u8, 102u8, 62u8, 192u8, 70u8,
+							146u8, 34u8, 197u8, 199u8, 26u8, 186u8, 76u8, 27u8, 84u8, 190u8, 18u8,
+							40u8, 133u8, 219u8, 196u8, 67u8, 187u8, 79u8, 147u8, 42u8, 235u8,
+							157u8,
+						],
+					)
+				}
+				#[doc = "Request a service with a pre-approved quote from operators."]
+				#[doc = ""]
+				#[doc = "This function creates a service request using a quote that has already been approved by"]
+				#[doc = "the operators. Unlike the regular `request` method, this doesn't require operator"]
+				#[doc = "approval after submission since the operators have already agreed to the terms via the"]
+				#[doc = "quote."]
+				#[doc = ""]
+				#[doc = "The quote is obtained externally through a gRPC server, and this function accepts the"]
+				#[doc = "necessary signatures from the operators to verify their approval."]
+				#[doc = ""]
+				#[doc = "# Permissions"]
+				#[doc = ""]
+				#[doc = "* Anyone can call this function"]
+				#[doc = ""]
+				#[doc = "# Arguments"]
+				#[doc = ""]
+				#[doc = "* `origin` - The origin of the call, must be a signed account."]
+				#[doc = "* `evm_origin` - Optional EVM address for ERC20 payments."]
+				#[doc = "* `blueprint_id` - The ID of the blueprint to use."]
+				#[doc = "* `permitted_callers` - Accounts allowed to call the service. If empty, only owner can"]
+				#[doc = "  call."]
+				#[doc = "* `operators` - List of operators that will run the service."]
+				#[doc = "* `request_args` - Blueprint initialization arguments."]
+				#[doc = "* `asset_security_requirements` - Security requirements for assets."]
+				#[doc = "* `ttl` - Time-to-live in blocks for the service request."]
+				#[doc = "* `payment_asset` - Asset used for payment (native, custom or ERC20)."]
+				#[doc = "* `value` - Amount to pay for the service."]
+				#[doc = "* `membership_model` - Membership model for the service."]
+				#[doc = "* `operator_signatures` - Signatures from operators confirming the quote."]
+				#[doc = "* `security_commitments` - Security commitments from operators."]
+				#[doc = "* `pricing_quote` - Pricing quote details."]
+				#[doc = ""]
+				#[doc = "# Errors"]
+				#[doc = ""]
+				#[doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."]
+				#[doc = "* [`Error::NoAssetsProvided`] - No assets were specified."]
+				#[doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."]
+				#[doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."]
+				#[doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."]
+				#[doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."]
+				#[doc = "* [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid."]
+				pub fn request_with_signed_price_quotes(
+					&self,
+					evm_origin: types::request_with_signed_price_quotes::EvmOrigin,
+					blueprint_id: types::request_with_signed_price_quotes::BlueprintId,
+					permitted_callers: types::request_with_signed_price_quotes::PermittedCallers,
+					operators: types::request_with_signed_price_quotes::Operators,
+					request_args: types::request_with_signed_price_quotes::RequestArgs,
+					asset_security_requirements : types :: request_with_signed_price_quotes :: AssetSecurityRequirements,
+					ttl: types::request_with_signed_price_quotes::Ttl,
+					payment_asset: types::request_with_signed_price_quotes::PaymentAsset,
+					membership_model: types::request_with_signed_price_quotes::MembershipModel,
+					pricing_quotes: types::request_with_signed_price_quotes::PricingQuotes,
+					operator_signatures : types :: request_with_signed_price_quotes :: OperatorSignatures,
+					security_commitments : types :: request_with_signed_price_quotes :: SecurityCommitments,
+				) -> ::subxt_core::tx::payload::StaticPayload<types::RequestWithSignedPriceQuotes>
+				{
+					::subxt_core::tx::payload::StaticPayload::new_static(
+						"Services",
+						"request_with_signed_price_quotes",
+						types::RequestWithSignedPriceQuotes {
+							evm_origin,
+							blueprint_id,
+							permitted_callers,
+							operators,
+							request_args,
+							asset_security_requirements,
+							ttl,
+							payment_asset,
+							membership_model,
+							pricing_quotes,
+							operator_signatures,
+							security_commitments,
+						},
+						[
+							150u8, 152u8, 171u8, 117u8, 181u8, 242u8, 106u8, 121u8, 229u8, 202u8,
+							213u8, 40u8, 145u8, 50u8, 42u8, 166u8, 228u8, 146u8, 58u8, 131u8,
+							192u8, 206u8, 252u8, 71u8, 193u8, 125u8, 247u8, 204u8, 15u8, 158u8,
+							133u8, 227u8,
 						],
 					)
 				}
@@ -45911,37 +46134,6 @@ pub mod api {
 			impl ::subxt_core::events::StaticEvent for Unregistered {
 				const PALLET: &'static str = "Services";
 				const EVENT: &'static str = "Unregistered";
-			}
-			#[derive(
-				:: subxt_core :: ext :: codec :: Decode,
-				:: subxt_core :: ext :: codec :: Encode,
-				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
-				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
-				Clone,
-				Debug,
-				Eq,
-				PartialEq,
-			)]
-			# [codec (crate = :: subxt_core :: ext :: codec)]
-			#[codec(dumb_trait_bound)]
-			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
-			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-			#[doc = "The price targets for an operator has been updated."]
-			pub struct PriceTargetsUpdated {
-				pub operator: price_targets_updated::Operator,
-				pub blueprint_id: price_targets_updated::BlueprintId,
-				pub price_targets: price_targets_updated::PriceTargets,
-			}
-			pub mod price_targets_updated {
-				use super::runtime_types;
-				pub type Operator = ::subxt_core::utils::AccountId32;
-				pub type BlueprintId = ::core::primitive::u64;
-				pub type PriceTargets =
-					runtime_types::tangle_primitives::services::types::PriceTargets;
-			}
-			impl ::subxt_core::events::StaticEvent for PriceTargetsUpdated {
-				const PALLET: &'static str = "Services";
-				const EVENT: &'static str = "PriceTargetsUpdated";
 			}
 			#[derive(
 				:: subxt_core :: ext :: codec :: Decode,
@@ -46321,6 +46513,65 @@ pub mod api {
 			impl ::subxt_core::events::StaticEvent for MasterBlueprintServiceManagerRevised {
 				const PALLET: &'static str = "Services";
 				const EVENT: &'static str = "MasterBlueprintServiceManagerRevised";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "A request for a pricing quote has been made."]
+			pub struct RequestForQuote {
+				pub requester: request_for_quote::Requester,
+				pub blueprint_id: request_for_quote::BlueprintId,
+			}
+			pub mod request_for_quote {
+				use super::runtime_types;
+				pub type Requester = ::subxt_core::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+			}
+			impl ::subxt_core::events::StaticEvent for RequestForQuote {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "RequestForQuote";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "RPC address updated."]
+			pub struct RpcAddressUpdated {
+				pub operator: rpc_address_updated::Operator,
+				pub blueprint_id: rpc_address_updated::BlueprintId,
+				pub rpc_address: rpc_address_updated::RpcAddress,
+			}
+			pub mod rpc_address_updated {
+				use super::runtime_types;
+				pub type Operator = ::subxt_core::utils::AccountId32;
+				pub type BlueprintId = ::core::primitive::u64;
+				pub type RpcAddress =
+					runtime_types::tangle_primitives::services::field::BoundedString;
+			}
+			impl ::subxt_core::events::StaticEvent for RpcAddressUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "RpcAddressUpdated";
 			}
 		}
 		pub mod storage {
@@ -46721,9 +46972,10 @@ pub mod api {
 						"Operators",
 						(),
 						[
-							167u8, 232u8, 100u8, 27u8, 110u8, 5u8, 85u8, 2u8, 25u8, 172u8, 131u8,
-							21u8, 230u8, 12u8, 57u8, 92u8, 95u8, 18u8, 151u8, 243u8, 1u8, 147u8,
-							130u8, 7u8, 16u8, 149u8, 66u8, 168u8, 208u8, 20u8, 132u8, 154u8,
+							177u8, 132u8, 252u8, 238u8, 176u8, 97u8, 255u8, 27u8, 183u8, 240u8,
+							109u8, 48u8, 59u8, 89u8, 201u8, 226u8, 59u8, 237u8, 148u8, 203u8, 31u8,
+							158u8, 154u8, 218u8, 99u8, 199u8, 149u8, 240u8, 222u8, 194u8, 202u8,
+							201u8,
 						],
 					)
 				}
@@ -46744,9 +46996,10 @@ pub mod api {
 						"Operators",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							167u8, 232u8, 100u8, 27u8, 110u8, 5u8, 85u8, 2u8, 25u8, 172u8, 131u8,
-							21u8, 230u8, 12u8, 57u8, 92u8, 95u8, 18u8, 151u8, 243u8, 1u8, 147u8,
-							130u8, 7u8, 16u8, 149u8, 66u8, 168u8, 208u8, 20u8, 132u8, 154u8,
+							177u8, 132u8, 252u8, 238u8, 176u8, 97u8, 255u8, 27u8, 183u8, 240u8,
+							109u8, 48u8, 59u8, 89u8, 201u8, 226u8, 59u8, 237u8, 148u8, 203u8, 31u8,
+							158u8, 154u8, 218u8, 99u8, 199u8, 149u8, 240u8, 222u8, 194u8, 202u8,
+							201u8,
 						],
 					)
 				}
@@ -46774,9 +47027,10 @@ pub mod api {
 							::subxt_core::storage::address::StaticStorageKey::new(_1.borrow()),
 						),
 						[
-							167u8, 232u8, 100u8, 27u8, 110u8, 5u8, 85u8, 2u8, 25u8, 172u8, 131u8,
-							21u8, 230u8, 12u8, 57u8, 92u8, 95u8, 18u8, 151u8, 243u8, 1u8, 147u8,
-							130u8, 7u8, 16u8, 149u8, 66u8, 168u8, 208u8, 20u8, 132u8, 154u8,
+							177u8, 132u8, 252u8, 238u8, 176u8, 97u8, 255u8, 27u8, 183u8, 240u8,
+							109u8, 48u8, 59u8, 89u8, 201u8, 226u8, 59u8, 237u8, 148u8, 203u8, 31u8,
+							158u8, 154u8, 218u8, 99u8, 199u8, 149u8, 240u8, 222u8, 194u8, 202u8,
+							201u8,
 						],
 					)
 				}
@@ -47098,9 +47352,9 @@ pub mod api {
 						"UnappliedSlashes",
 						(),
 						[
-							241u8, 6u8, 166u8, 93u8, 49u8, 152u8, 8u8, 112u8, 250u8, 117u8, 206u8,
-							37u8, 6u8, 3u8, 159u8, 205u8, 43u8, 40u8, 6u8, 87u8, 197u8, 149u8,
-							234u8, 51u8, 46u8, 145u8, 133u8, 27u8, 33u8, 152u8, 176u8, 149u8,
+							88u8, 58u8, 119u8, 165u8, 102u8, 0u8, 19u8, 253u8, 170u8, 214u8, 140u8,
+							76u8, 207u8, 88u8, 151u8, 51u8, 114u8, 250u8, 176u8, 160u8, 52u8,
+							234u8, 48u8, 2u8, 5u8, 30u8, 49u8, 26u8, 30u8, 13u8, 67u8, 52u8,
 						],
 					)
 				}
@@ -47124,9 +47378,9 @@ pub mod api {
 						"UnappliedSlashes",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							241u8, 6u8, 166u8, 93u8, 49u8, 152u8, 8u8, 112u8, 250u8, 117u8, 206u8,
-							37u8, 6u8, 3u8, 159u8, 205u8, 43u8, 40u8, 6u8, 87u8, 197u8, 149u8,
-							234u8, 51u8, 46u8, 145u8, 133u8, 27u8, 33u8, 152u8, 176u8, 149u8,
+							88u8, 58u8, 119u8, 165u8, 102u8, 0u8, 19u8, 253u8, 170u8, 214u8, 140u8,
+							76u8, 207u8, 88u8, 151u8, 51u8, 114u8, 250u8, 176u8, 160u8, 52u8,
+							234u8, 48u8, 2u8, 5u8, 30u8, 49u8, 26u8, 30u8, 13u8, 67u8, 52u8,
 						],
 					)
 				}
@@ -47159,9 +47413,9 @@ pub mod api {
 							::subxt_core::storage::address::StaticStorageKey::new(_1.borrow()),
 						),
 						[
-							241u8, 6u8, 166u8, 93u8, 49u8, 152u8, 8u8, 112u8, 250u8, 117u8, 206u8,
-							37u8, 6u8, 3u8, 159u8, 205u8, 43u8, 40u8, 6u8, 87u8, 197u8, 149u8,
-							234u8, 51u8, 46u8, 145u8, 133u8, 27u8, 33u8, 152u8, 176u8, 149u8,
+							88u8, 58u8, 119u8, 165u8, 102u8, 0u8, 19u8, 253u8, 170u8, 214u8, 140u8,
+							76u8, 207u8, 88u8, 151u8, 51u8, 114u8, 250u8, 176u8, 160u8, 52u8,
+							234u8, 48u8, 2u8, 5u8, 30u8, 49u8, 26u8, 30u8, 13u8, 67u8, 52u8,
 						],
 					)
 				}
@@ -47600,6 +47854,36 @@ pub mod api {
 						],
 					)
 				}
+				#[doc = " Maximum length of rpc address."]
+				pub fn max_rpc_address_length(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Services",
+						"MaxRpcAddressLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum number of resource types."]
+				pub fn max_resource_name_length(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Services",
+						"MaxResourceNameLength",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
 				#[doc = " Maximum number of versions of Master Blueprint Service Manager allowed."]
 				pub fn max_master_blueprint_service_manager_versions(
 					&self,
@@ -47811,9 +48095,9 @@ pub mod api {
 				#[doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"]
 				#[doc = ""]
 				#[doc = "# Note"]
-				#[doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."]
-				#[doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"]
-				#[doc = "if chunks cannot be released."]
+				#[doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called"]
+				#[doc = "first. The staking interface will attempt this automatically but may still return"]
+				#[doc = "`NoMoreChunks` if chunks cannot be released."]
 				pub struct Unbond {
 					pub member_account: unbond::MemberAccount,
 					pub pool_id: unbond::PoolId,
@@ -48304,8 +48588,8 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Update the roles of a pool."]
 				#[doc = ""]
-				#[doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."]
-				#[doc = "Emits a `RolesUpdated` event on successful update."]
+				#[doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be"]
+				#[doc = "changed. Emits a `RolesUpdated` event on successful update."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -48463,7 +48747,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "* `origin` - The origin of the call"]
 				#[doc = "* `pool_id` - The pool identifier"]
-				#[doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"]
+				#[doc = "* `new_commission` - Optional commission rate and payee. None removes existing"]
+				#[doc = "  commission"]
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
@@ -48499,8 +48784,9 @@ pub mod api {
 				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-				#[doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"]
-				#[doc = "lower values allowed thereafter. Current commission will be reduced if above new max."]
+				#[doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with"]
+				#[doc = "only lower values allowed thereafter. Current commission will be reduced if above new"]
+				#[doc = "max."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -48550,7 +48836,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission"]
+				#[doc = "  management permission."]
 				#[doc = "* `pool_id` - The identifier of the pool to set commission change rate for."]
 				#[doc = "* `change_rate` - The new commission change rate configuration."]
 				pub struct SetCommissionChangeRate {
@@ -48585,13 +48872,14 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Claim pending commission for a pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by an account with commission claim permission."]
-				#[doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"]
-				#[doc = "is reset to zero."]
+				#[doc = "The dispatch origin of this call must be signed by an account with commission claim"]
+				#[doc = "permission. Pending commission is paid out and added to total claimed commission."]
+				#[doc = "Total pending commission is reset to zero."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim"]
+				#[doc = "  permission."]
 				#[doc = "* `pool_id` - The identifier of the pool to claim commission from."]
 				pub struct ClaimCommission {
 					pub pool_id: claim_commission::PoolId,
@@ -48664,7 +48952,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."]
 				#[doc = "* `pool_id` - The identifier of the pool to set permissions for."]
-				#[doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."]
+				#[doc = "* `permission` - Optional commission claim permission configuration. If None, removes"]
+				#[doc = "  any existing permission."]
 				pub struct SetCommissionClaimPermission {
 					pub pool_id: set_commission_claim_permission::PoolId,
 					pub permission: set_commission_claim_permission::Permission,
@@ -48813,9 +49102,9 @@ pub mod api {
 				#[doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"]
 				#[doc = ""]
 				#[doc = "# Note"]
-				#[doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."]
-				#[doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"]
-				#[doc = "if chunks cannot be released."]
+				#[doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called"]
+				#[doc = "first. The staking interface will attempt this automatically but may still return"]
+				#[doc = "`NoMoreChunks` if chunks cannot be released."]
 				pub fn unbond(
 					&self,
 					member_account: types::unbond::MemberAccount,
@@ -49162,8 +49451,8 @@ pub mod api {
 				}
 				#[doc = "Update the roles of a pool."]
 				#[doc = ""]
-				#[doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."]
-				#[doc = "Emits a `RolesUpdated` event on successful update."]
+				#[doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be"]
+				#[doc = "changed. Emits a `RolesUpdated` event on successful update."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -49277,7 +49566,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "* `origin` - The origin of the call"]
 				#[doc = "* `pool_id` - The pool identifier"]
-				#[doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"]
+				#[doc = "* `new_commission` - Optional commission rate and payee. None removes existing"]
+				#[doc = "  commission"]
 				#[doc = ""]
 				#[doc = "# Errors"]
 				#[doc = ""]
@@ -49299,8 +49589,9 @@ pub mod api {
 						],
 					)
 				}
-				#[doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"]
-				#[doc = "lower values allowed thereafter. Current commission will be reduced if above new max."]
+				#[doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with"]
+				#[doc = "only lower values allowed thereafter. Current commission will be reduced if above new"]
+				#[doc = "max."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -49340,7 +49631,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission"]
+				#[doc = "  management permission."]
 				#[doc = "* `pool_id` - The identifier of the pool to set commission change rate for."]
 				#[doc = "* `change_rate` - The new commission change rate configuration."]
 				pub fn set_commission_change_rate(
@@ -49362,13 +49654,14 @@ pub mod api {
 				}
 				#[doc = "Claim pending commission for a pool."]
 				#[doc = ""]
-				#[doc = "The dispatch origin of this call must be signed by an account with commission claim permission."]
-				#[doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"]
-				#[doc = "is reset to zero."]
+				#[doc = "The dispatch origin of this call must be signed by an account with commission claim"]
+				#[doc = "permission. Pending commission is paid out and added to total claimed commission."]
+				#[doc = "Total pending commission is reset to zero."]
 				#[doc = ""]
 				#[doc = "# Arguments"]
 				#[doc = ""]
-				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."]
+				#[doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim"]
+				#[doc = "  permission."]
 				#[doc = "* `pool_id` - The identifier of the pool to claim commission from."]
 				pub fn claim_commission(
 					&self,
@@ -49421,7 +49714,8 @@ pub mod api {
 				#[doc = ""]
 				#[doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."]
 				#[doc = "* `pool_id` - The identifier of the pool to set permissions for."]
-				#[doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."]
+				#[doc = "* `permission` - Optional commission claim permission configuration. If None, removes"]
+				#[doc = "  any existing permission."]
 				pub fn set_commission_claim_permission(
 					&self,
 					pool_id: types::set_commission_claim_permission::PoolId,
@@ -49567,9 +49861,8 @@ pub mod api {
 			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 			#[doc = "A member has unbonded from their pool."]
 			#[doc = ""]
-			#[doc = "- `balance` is the corresponding balance of the number of points that has been"]
-			#[doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"]
-			#[doc = "  pool."]
+			#[doc = "- `balance` is the corresponding balance of the number of points that has been requested"]
+			#[doc = "  to be unbonded (the argument of the `unbond` transaction) from the bonded pool."]
 			#[doc = "- `points` is the number of points that are issued as a result of `balance` being"]
 			#[doc = "  dissolved into the corresponding unbonding pool."]
 			#[doc = "- `era` is the era in which the balance will be unbonded."]
@@ -63506,7 +63799,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The callable functions (extrinsics) of the pallet."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Allows an account to join as an operator by staking the required bond amount."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account joining as operator"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `bond_amount` - Amount to stake as operator bond"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking"] # [doc = "* [`Error::StakeOverflow`] - Bond amount would overflow stake tracking"] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "Schedules an operator to leave the system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"] schedule_leave_operators , # [codec (index = 2)] # [doc = "Cancels a scheduled leave for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_leave_operators , # [codec (index = 3)] # [doc = "Executes a scheduled leave for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"] execute_leave_operators , # [codec (index = 4)] # [doc = "Allows an operator to increase their stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `additional_bond` - Additional amount to stake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::StakeOverflow`] - Additional bond would overflow stake tracking"] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Schedules an operator to decrease their stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `unstake_amount` - Amount to unstake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request"] # [doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Executes a scheduled stake decrease for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"] execute_operator_unstake , # [codec (index = 7)] # [doc = "Cancels a scheduled stake decrease for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_operator_unstake , # [codec (index = 8)] # [doc = "Allows an operator to go offline."] # [doc = ""] # [doc = "Being offline means the operator should not be able to be"] # [doc = "requested for services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::AlreadyOffline`] - Operator is already offline"] go_offline , # [codec (index = 9)] # [doc = "Allows an operator to go online."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::AlreadyOnline`] - Operator is already online"] go_online , # [codec (index = 10)] # [doc = "Allows a user to deposit an asset."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the depositor account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset` - Asset on to deposit"] # [doc = "* `amount` - Amount to deposit"] # [doc = "* `evm_address` - Optional EVM address"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::DepositOverflow`] - Deposit would overflow tracking"] # [doc = "* [`Error::InvalidAsset`] - Asset is not supported"] deposit { asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , lock_multiplier : :: core :: option :: Option < runtime_types :: tangle_primitives :: types :: rewards :: LockMultiplier > , } , # [codec (index = 11)] # [doc = "Schedules a withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset` - Asset on to withdraw"] # [doc = "* `amount` - Amount to withdraw"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::InsufficientBalance`] - Insufficient balance to withdraw"] # [doc = "* [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists"] schedule_withdraw { asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "Executes a scheduled withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `evm_address` - Optional EVM address"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"] # [doc = "* [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed"] execute_withdraw { evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 13)] # [doc = "Cancels a scheduled withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset` - Asset on withdrawal to cancel"] # [doc = "* `amount` - Amount of the withdrawal to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"] cancel_withdraw { asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "Allows a user to delegate an amount of an asset to an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to delegate to"] # [doc = "* `asset` - ID of asset to delegate"] # [doc = "* `amount` - Amount to delegate"] # [doc = "* `blueprint_selection` - Blueprint selection strategy"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Target account is not an operator"] # [doc = "* [`Error::InsufficientBalance`] - Insufficient balance to delegate"] # [doc = "* [`Error::MaxDelegationsExceeded`] - Would exceed max delegations"] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 15)] # [doc = "Schedules a request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to unstake from"] # [doc = "* `asset` - ID of asset to unstake"] # [doc = "* `amount` - Amount to unstake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::InsufficientDelegation`] - Insufficient delegation to unstake"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists"] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Executes a scheduled request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed"] execute_delegator_unstake , # [codec (index = 17)] # [doc = "Cancels a scheduled request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to cancel unstake from"] # [doc = "* `asset` - ID of asset unstake to cancel"] # [doc = "* `amount` - Amount of unstake to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "Delegates nominated tokens to an operator."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator to delegate to"] # [doc = "* `amount` - Amount of nominated tokens to delegate"] # [doc = "* `blueprint_selection` - Strategy for selecting which blueprints to work with"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NotNominator` - Account has no nominated tokens"] # [doc = "* `InsufficientBalance` - Not enough nominated tokens available"] # [doc = "* `MaxDelegationsExceeded` - Would exceed maximum allowed delegations"] # [doc = "* `OverflowRisk` - Arithmetic overflow during calculations"] # [doc = "* `InvalidAmount` - Amount specified is zero"] delegate_nomination { operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 19)] # [doc = "Schedules an unstake request for nomination delegations."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator to unstake from"] # [doc = "* `amount` - Amount of nominated tokens to unstake"] # [doc = "* `blueprint_selection` - The blueprint selection to use after unstaking"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NoActiveDelegation` - No active nomination delegation found"] # [doc = "* `InsufficientBalance` - Trying to unstake more than delegated"] # [doc = "* `MaxUnstakeRequestsExceeded` - Too many pending unstake requests"] # [doc = "* `InvalidAmount` - Amount specified is zero"] schedule_nomination_unstake { operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 20)] # [doc = "Executes a scheduled unstake request for nomination delegations."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator to execute unstake from"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NoBondLessRequest` - No matching unstake request found"] # [doc = "* `BondLessNotReady` - Unstake request not ready for execution"] # [doc = "* `NoActiveDelegation` - No active nomination delegation found"] # [doc = "* `InsufficientBalance` - Insufficient balance for unstaking"] execute_nomination_unstake { operator : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 21)] # [doc = "Cancels a scheduled unstake request for nomination delegations."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator whose unstake request to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NoBondLessRequest` - No matching unstake request found"] cancel_nomination_unstake { operator : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 22)] # [doc = "Adds a blueprint ID to a delegator's selection."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::DuplicateBlueprintId`] - Blueprint ID already exists"] # [doc = "* [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints"] # [doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"] add_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 23)] # [doc = "Removes a blueprint ID from a delegator's selection."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to remove"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::BlueprintIdNotFound`] - Blueprint ID not found"] # [doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"] remove_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , }
+					# [codec (index = 0)] # [doc = "Allows an account to join as an operator by staking the required bond amount."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account joining as operator"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `bond_amount` - Amount to stake as operator bond"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::DepositOverflow`] - Bond amount would overflow deposit tracking"] # [doc = "* [`Error::StakeOverflow`] - Bond amount would overflow stake tracking"] join_operators { bond_amount : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "Schedules an operator to leave the system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake"] # [doc = "  request"] schedule_leave_operators , # [codec (index = 2)] # [doc = "Cancels a scheduled leave for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_leave_operators , # [codec (index = 3)] # [doc = "Executes a scheduled leave for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"] execute_leave_operators , # [codec (index = 4)] # [doc = "Allows an operator to increase their stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `additional_bond` - Additional amount to stake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::StakeOverflow`] - Additional bond would overflow stake tracking"] operator_bond_more { additional_bond : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Schedules an operator to decrease their stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `unstake_amount` - Amount to unstake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake"] # [doc = "  request"] # [doc = "* [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake"] schedule_operator_unstake { unstake_amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Executes a scheduled stake decrease for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed yet"] execute_operator_unstake , # [codec (index = 7)] # [doc = "Cancels a scheduled stake decrease for an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_operator_unstake , # [codec (index = 8)] # [doc = "Allows an operator to go offline."] # [doc = ""] # [doc = "Being offline means the operator should not be able to be"] # [doc = "requested for services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::AlreadyOffline`] - Operator is already offline"] go_offline , # [codec (index = 9)] # [doc = "Allows an operator to go online."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the operator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Account is not registered as an operator"] # [doc = "* [`Error::AlreadyOnline`] - Operator is already online"] go_online , # [codec (index = 10)] # [doc = "Allows a user to deposit an asset."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the depositor account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset` - Asset on to deposit"] # [doc = "* `amount` - Amount to deposit"] # [doc = "* `evm_address` - Optional EVM address"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::DepositOverflow`] - Deposit would overflow tracking"] # [doc = "* [`Error::InvalidAsset`] - Asset is not supported"] deposit { asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , lock_multiplier : :: core :: option :: Option < runtime_types :: tangle_primitives :: types :: rewards :: LockMultiplier > , } , # [codec (index = 11)] # [doc = "Schedules a withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset` - Asset on to withdraw"] # [doc = "* `amount` - Amount to withdraw"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::InsufficientBalance`] - Insufficient balance to withdraw"] # [doc = "* [`Error::PendingWithdrawRequestExists`] - Pending withdraw request exists"] schedule_withdraw { asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "Executes a scheduled withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `evm_address` - Optional EVM address"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"] # [doc = "* [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed"] execute_withdraw { evm_address : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , } , # [codec (index = 13)] # [doc = "Cancels a scheduled withdraw request."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the withdrawer account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `asset` - Asset on withdrawal to cancel"] # [doc = "* `amount` - Amount of the withdrawal to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists"] cancel_withdraw { asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 14)] # [doc = "Allows a user to delegate an amount of an asset to an operator."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to delegate to"] # [doc = "* `asset` - ID of asset to delegate"] # [doc = "* `amount` - Amount to delegate"] # [doc = "* `blueprint_selection` - Blueprint selection strategy"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotOperator`] - Target account is not an operator"] # [doc = "* [`Error::InsufficientBalance`] - Insufficient balance to delegate"] # [doc = "* [`Error::MaxDelegationsExceeded`] - Would exceed max delegations"] delegate { operator : :: subxt_core :: utils :: AccountId32 , asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 15)] # [doc = "Schedules a request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to unstake from"] # [doc = "* `asset` - ID of asset to unstake"] # [doc = "* `amount` - Amount to unstake"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::InsufficientDelegation`] - Insufficient delegation to unstake"] # [doc = "* [`Error::PendingUnstakeRequestExists`] - Pending unstake request exists"] schedule_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Executes a scheduled request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] # [doc = "* [`Error::UnstakePeriodNotElapsed`] - Unstake period has not elapsed"] execute_delegator_unstake , # [codec (index = 17)] # [doc = "Cancels a scheduled request to reduce a delegator's stake."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - Operator to cancel unstake from"] # [doc = "* `asset` - ID of asset unstake to cancel"] # [doc = "* `amount` - Amount of unstake to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::NoUnstakeRequestExists`] - No pending unstake request exists"] cancel_delegator_unstake { operator : :: subxt_core :: utils :: AccountId32 , asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "Delegates nominated tokens to an operator."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator to delegate to"] # [doc = "* `amount` - Amount of nominated tokens to delegate"] # [doc = "* `blueprint_selection` - Strategy for selecting which blueprints to work with"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NotNominator` - Account has no nominated tokens"] # [doc = "* `InsufficientBalance` - Not enough nominated tokens available"] # [doc = "* `MaxDelegationsExceeded` - Would exceed maximum allowed delegations"] # [doc = "* `OverflowRisk` - Arithmetic overflow during calculations"] # [doc = "* `InvalidAmount` - Amount specified is zero"] delegate_nomination { operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 19)] # [doc = "Schedules an unstake request for nomination delegations."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator to unstake from"] # [doc = "* `amount` - Amount of nominated tokens to unstake"] # [doc = "* `blueprint_selection` - The blueprint selection to use after unstaking"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NoActiveDelegation` - No active nomination delegation found"] # [doc = "* `InsufficientBalance` - Trying to unstake more than delegated"] # [doc = "* `MaxUnstakeRequestsExceeded` - Too many pending unstake requests"] # [doc = "* `InvalidAmount` - Amount specified is zero"] schedule_nomination_unstake { operator : :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , blueprint_selection : runtime_types :: pallet_multi_asset_delegation :: types :: delegator :: DelegatorBlueprintSelection < runtime_types :: tangle_testnet_runtime :: MaxDelegatorBlueprints > , } , # [codec (index = 20)] # [doc = "Executes a scheduled unstake request for nomination delegations."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator to execute unstake from"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NoBondLessRequest` - No matching unstake request found"] # [doc = "* `BondLessNotReady` - Unstake request not ready for execution"] # [doc = "* `NoActiveDelegation` - No active nomination delegation found"] # [doc = "* `InsufficientBalance` - Insufficient balance for unstaking"] execute_nomination_unstake { operator : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 21)] # [doc = "Cancels a scheduled unstake request for nomination delegations."] # [doc = ""] # [doc = "# Arguments"] # [doc = "* `origin` - Origin of the call"] # [doc = "* `operator` - The operator whose unstake request to cancel"] # [doc = ""] # [doc = "# Errors"] # [doc = "* `NotDelegator` - Account is not a delegator"] # [doc = "* `NoBondLessRequest` - No matching unstake request found"] cancel_nomination_unstake { operator : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 22)] # [doc = "Adds a blueprint ID to a delegator's selection."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::DuplicateBlueprintId`] - Blueprint ID already exists"] # [doc = "* [`Error::MaxBlueprintsExceeded`] - Would exceed max blueprints"] # [doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"] add_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 23)] # [doc = "Removes a blueprint ID from a delegator's selection."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the delegator account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `blueprint_id` - ID of blueprint to remove"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotDelegator`] - Account is not a delegator"] # [doc = "* [`Error::BlueprintIdNotFound`] - Blueprint ID not found"] # [doc = "* [`Error::NotInFixedMode`] - Not in fixed blueprint selection mode"] remove_blueprint_id { blueprint_id : :: core :: primitive :: u64 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -66822,7 +67115,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Create a new service blueprint."] # [doc = ""] # [doc = "A Service Blueprint is a template for a service that can be instantiated by users. The blueprint"] # [doc = "defines the service's constraints, requirements and behavior, including the master blueprint service"] # [doc = "manager revision to use."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The origin must be signed by the account that will own the blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be signed by the account creating the blueprint"] # [doc = "* `blueprint` - The service blueprint containing:"] # [doc = "  - Service constraints and requirements"] # [doc = "  - Master blueprint service manager revision (Latest or Specific)"] # [doc = "  - Template configuration for service instantiation"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - Origin is not signed"] # [doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist"] # [doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"] # [doc = ""] # [doc = "# Returns"] # [doc = ""] # [doc = "Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event"] # [doc = "containing the owner and blueprint ID."] create_blueprint { blueprint : runtime_types :: tangle_primitives :: services :: service :: ServiceBlueprint , } , # [codec (index = 1)] # [doc = "Pre-register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to signal intent to become an operator for a blueprint by emitting"] # [doc = "a `PreRegistration` event. The operator node can listen for this event to execute any custom"] # [doc = "registration logic defined in the blueprint."] # [doc = ""] # [doc = "Pre-registration is the first step in the operator registration flow. After pre-registering,"] # [doc = "operators must complete the full registration process by calling `register()` with their preferences"] # [doc = "and registration arguments."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to"] # [doc = "  become an operator."] # [doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer"] # [doc = "  to an existing blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account."] # [doc = ""] # [doc = "# Events"] # [doc = ""] # [doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"] # [doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"] # [doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - The origin was not signed."] pre_register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "Register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to register as an operator for a blueprint by providing their"] # [doc = "service preferences, registration arguments, and staking the required tokens. The operator must"] # [doc = "be active in the delegation system and may require approval before accepting service requests."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account"] # [doc = "* The caller must be an active operator in the delegation system"] # [doc = "* The caller must not already be registered for this blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to register for"] # [doc = "* `preferences` - The operator's service preferences and configuration"] # [doc = "* `registration_args` - Registration arguments required by the blueprint"] # [doc = "* `value` - Amount of tokens to stake for registration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system"] # [doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"] # [doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"] # [doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"] # [doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit"] register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , # [codec (compact)] value : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "Unregisters a service provider from a specific service blueprint."] # [doc = ""] # [doc = "Can only be called if the no services are active for the blueprint."] # [doc = "After unregistering, the provider will no longer receive new service"] # [doc = "assignments for this blueprint."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered service provider"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"] # [doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"] unregister { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "Updates the price targets for a registered operator's service blueprint."] # [doc = ""] # [doc = "Allows an operator to modify their price targets for a specific blueprint they are registered for."] # [doc = "The operator must already be registered for the blueprint to update prices."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to update price targets for."] # [doc = "* `price_targets: PriceTargets` - The new price targets to set for the blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered operator for this blueprint."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."] # [doc = "* [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] update_price_targets { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , price_targets : runtime_types :: tangle_primitives :: services :: types :: PriceTargets , } , # [codec (index = 5)] # [doc = "Request a new service using a blueprint and specified operators."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."] # [doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."] # [doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call."] # [doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."] # [doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments."] # [doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."] # [doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value: BalanceOf<T>` - Payment amount for the service."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by an account with sufficient balance to pay for the service."] # [doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] request { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , # [codec (compact)] value : :: core :: primitive :: u128 , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , } , # [codec (index = 6)] # [doc = "Approve a service request, allowing it to be initiated once all required approvals are received."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the service blueprint"] # [doc = "* Caller must be in the pending approvals list for this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to approve"] # [doc = "* `native_exposure_percent` - Percentage of native token stake to expose"] # [doc = "* `asset_exposure` - Vector of asset-specific exposure commitments"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"] # [doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"] # [doc = "* [`Error::InvalidRequestInput`] - Asset exposure commitments don't meet requirements"] approve { # [codec (compact)] request_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 7)] # [doc = "Reject a service request, preventing its initiation."] # [doc = ""] # [doc = "The service request will remain in the system but marked as rejected. The requester will"] # [doc = "need to update the service request to proceed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the blueprint associated with this request"] # [doc = "* Caller must be one of the operators required to approve this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to reject"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request"] # [doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment"] # [doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"] reject { # [codec (compact)] request_id : :: core :: primitive :: u64 , } , # [codec (index = 8)] # [doc = "Terminates a running service instance."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The identifier of the service to terminate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::NotRegistered`] - Service operator not registered"] # [doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"] terminate { # [codec (compact)] service_id : :: core :: primitive :: u64 , } , # [codec (index = 9)] # [doc = "Call a job in the service with the provided arguments."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner or a permitted caller"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The service identifier"] # [doc = "* `job` - The job index to call"] # [doc = "* `args` - The arguments to pass to the job"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"] # [doc = "* [`Error::TypeCheck`] - Arguments fail type checking"] # [doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"] call { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "Submit a result for a previously called job."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `service_id` - ID of the service"] # [doc = "* `call_id` - ID of the job call"] # [doc = "* `result` - Vector of result fields"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an operator of the service"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"] # [doc = "* [`Error::TypeCheck`] - Result fields fail type checking"] # [doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"] submit_result { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] call_id : :: core :: primitive :: u64 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 11)] # [doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."] # [doc = ""] # [doc = "This function schedules a deferred slashing action against an operator's stake for a specific service."] # [doc = "The slash is not applied immediately, but rather queued to be executed by another entity later."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"] # [doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call"] # [doc = "  will fail."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."] # [doc = "* `offender` - The account ID of the operator to be slashed."] # [doc = "* `service_id` - The ID of the service for which to slash the operator."] # [doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"] # [doc = "* `BadOrigin` - Caller is not the authorized slashing origin"] # [doc = "* `OffenderNotOperator` - Target account is not an operator for this service"] # [doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"] slash { offender : :: subxt_core :: utils :: AccountId32 , # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , } , # [codec (index = 12)] # [doc = "Disputes and removes an [UnappliedSlash] from storage."] # [doc = ""] # [doc = "The slash will not be applied once disputed and is permanently removed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be the authorized dispute origin for the service"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `era` - Era containing the slash to dispute"] # [doc = "* `index` - Index of the slash within the era"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"] # [doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"] # [doc = ""] dispute { # [codec (compact)] era : :: core :: primitive :: u32 , # [codec (compact)] index : :: core :: primitive :: u32 , } , # [codec (index = 13)] # [doc = "Updates the Master Blueprint Service Manager by adding a new revision."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `address` - New manager address to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached"] update_master_blueprint_service_manager { address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "Join a service instance as an operator"] join_service { instance_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 16)] # [doc = "Leave a service instance as an operator"] leave_service { instance_id : :: core :: primitive :: u64 , } , }
+					# [codec (index = 0)] # [doc = "Create a new service blueprint."] # [doc = ""] # [doc = "A Service Blueprint is a template for a service that can be instantiated by users. The"] # [doc = "blueprint defines the service's constraints, requirements and behavior, including the"] # [doc = "master blueprint service manager revision to use."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The origin must be signed by the account that will own the blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be signed by the account creating the"] # [doc = "  blueprint"] # [doc = "* `blueprint` - The service blueprint containing:"] # [doc = "  - Service constraints and requirements"] # [doc = "  - Master blueprint service manager revision (Latest or Specific)"] # [doc = "  - Template configuration for service instantiation"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - Origin is not signed"] # [doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision"] # [doc = "  does not exist"] # [doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"] # [doc = ""] # [doc = "# Returns"] # [doc = ""] # [doc = "Returns a `DispatchResultWithPostInfo` which on success emits a"] # [doc = "[`Event::BlueprintCreated`] event containing the owner and blueprint ID."] create_blueprint { blueprint : runtime_types :: tangle_primitives :: services :: service :: ServiceBlueprint , } , # [codec (index = 1)] # [doc = "Pre-register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to signal intent to become an operator for a blueprint"] # [doc = "by emitting a `PreRegistration` event. The operator node can listen for this event to"] # [doc = "execute any custom registration logic defined in the blueprint."] # [doc = ""] # [doc = "Pre-registration is the first step in the operator registration flow. After"] # [doc = "pre-registering, operators must complete the full registration process by calling"] # [doc = "`register()` with their preferences and registration arguments."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that"] # [doc = "  wants to become an operator."] # [doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for."] # [doc = "  Must refer to an existing blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account."] # [doc = ""] # [doc = "# Events"] # [doc = ""] # [doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"] # [doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"] # [doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - The origin was not signed."] pre_register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "Register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to register as an operator for a blueprint by providing"] # [doc = "their service preferences, registration arguments, and staking the required tokens."] # [doc = "The operator must be active in the delegation system and may require approval before"] # [doc = "accepting service requests."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account"] # [doc = "* The caller must be an active operator in the delegation system"] # [doc = "* The caller must not already be registered for this blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to register for"] # [doc = "* `preferences` - The operator's service preferences and configuration"] # [doc = "* `registration_args` - Registration arguments required by the blueprint"] # [doc = "* `value` - Amount of tokens to stake for registration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation"] # [doc = "  system"] # [doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"] # [doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"] # [doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"] # [doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services"] # [doc = "  limit"] register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , # [codec (compact)] value : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "Unregisters a service provider from a specific service blueprint."] # [doc = ""] # [doc = "Can only be called if the no services are active for the blueprint."] # [doc = "After unregistering, the provider will no longer receive new service"] # [doc = "assignments for this blueprint."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered service provider"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"] # [doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"] unregister { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "Request a new service using a blueprint and specified operators."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."] # [doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."] # [doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If"] # [doc = "  empty, only owner can call."] # [doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."] # [doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization"] # [doc = "  arguments."] # [doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."] # [doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value: BalanceOf<T>` - Payment amount for the service."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by an account with sufficient balance to pay for the service."] # [doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] request { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , # [codec (compact)] value : :: core :: primitive :: u128 , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , } , # [codec (index = 5)] # [doc = "Approve a service request, allowing it to be initiated once all required approvals are"] # [doc = "received."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the service blueprint"] # [doc = "* Caller must be in the pending approvals list for this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to approve"] # [doc = "* `native_exposure_percent` - Percentage of native token stake to expose"] # [doc = "* `asset_exposure` - Vector of asset-specific exposure commitments"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"] # [doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"] # [doc = "* [`Error::InvalidRequestInput`] - Asset exposure commitments don't meet requirements"] approve { # [codec (compact)] request_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 6)] # [doc = "Reject a service request, preventing its initiation."] # [doc = ""] # [doc = "The service request will remain in the system but marked as rejected. The requester will"] # [doc = "need to update the service request to proceed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the blueprint associated with this request"] # [doc = "* Caller must be one of the operators required to approve this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to reject"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to"] # [doc = "  approve this request"] # [doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when"] # [doc = "  refunding payment"] # [doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"] reject { # [codec (compact)] request_id : :: core :: primitive :: u64 , } , # [codec (index = 7)] # [doc = "Terminates a running service instance."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The identifier of the service to terminate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::NotRegistered`] - Service operator not registered"] # [doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"] terminate { # [codec (compact)] service_id : :: core :: primitive :: u64 , } , # [codec (index = 8)] # [doc = "Call a job in the service with the provided arguments."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner or a permitted caller"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The service identifier"] # [doc = "* `job` - The job index to call"] # [doc = "* `args` - The arguments to pass to the job"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"] # [doc = "* [`Error::TypeCheck`] - Arguments fail type checking"] # [doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"] call { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 9)] # [doc = "Submit a result for a previously called job."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `service_id` - ID of the service"] # [doc = "* `call_id` - ID of the job call"] # [doc = "* `result` - Vector of result fields"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an operator of the service"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"] # [doc = "* [`Error::TypeCheck`] - Result fields fail type checking"] # [doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"] submit_result { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] call_id : :: core :: primitive :: u64 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."] # [doc = ""] # [doc = "This function schedules a deferred slashing action against an operator's stake for a"] # [doc = "specific service. The slash is not applied immediately, but rather queued to be"] # [doc = "executed by another entity later."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"] # [doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match,"] # [doc = "  the call will fail."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."] # [doc = "* `offender` - The account ID of the operator to be slashed."] # [doc = "* `service_id` - The ID of the service for which to slash the operator."] # [doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a"] # [doc = "  `Percent` value."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"] # [doc = "* `BadOrigin` - Caller is not the authorized slashing origin"] # [doc = "* `OffenderNotOperator` - Target account is not an operator for this service"] # [doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"] slash { offender : :: subxt_core :: utils :: AccountId32 , # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , } , # [codec (index = 11)] # [doc = "Disputes and removes an [UnappliedSlash] from storage."] # [doc = ""] # [doc = "The slash will not be applied once disputed and is permanently removed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be the authorized dispute origin for the service"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `era` - Era containing the slash to dispute"] # [doc = "* `index` - Index of the slash within the era"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"] # [doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"] dispute { # [codec (compact)] era : :: core :: primitive :: u32 , # [codec (compact)] index : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Updates the Master Blueprint Service Manager by adding a new revision."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `address` - New manager address to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of"] # [doc = "  revisions reached"] update_master_blueprint_service_manager { address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "Join a service instance as an operator"] join_service { instance_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 16)] # [doc = "Leave a service instance as an operator"] leave_service { instance_id : :: core :: primitive :: u64 , } , # [codec (index = 17)] # [doc = "Updates the RPC address for a registered operator's service blueprint."] # [doc = ""] # [doc = "Allows an operator to modify their RPC address for a specific blueprint they are"] # [doc = "registered for. The operator must already be registered for the blueprint to update"] # [doc = "the RPC address."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to update the RPC address for."] # [doc = "* `rpc_address: BoundedString<T::Constraints::MaxRpcAddressLength>` - The new RPC"] # [doc = "  address to set for the blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered operator for this blueprint."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] update_rpc_address { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , rpc_address : runtime_types :: tangle_primitives :: services :: field :: BoundedString , } , # [codec (index = 18)] # [doc = "Request a service with a pre-approved quote from operators."] # [doc = ""] # [doc = "This function creates a service request using a quote that has already been approved by"] # [doc = "the operators. Unlike the regular `request` method, this doesn't require operator"] # [doc = "approval after submission since the operators have already agreed to the terms via the"] # [doc = "quote."] # [doc = ""] # [doc = "The quote is obtained externally through a gRPC server, and this function accepts the"] # [doc = "necessary signatures from the operators to verify their approval."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Anyone can call this function"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account."] # [doc = "* `evm_origin` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id` - The ID of the blueprint to use."] # [doc = "* `permitted_callers` - Accounts allowed to call the service. If empty, only owner can"] # [doc = "  call."] # [doc = "* `operators` - List of operators that will run the service."] # [doc = "* `request_args` - Blueprint initialization arguments."] # [doc = "* `asset_security_requirements` - Security requirements for assets."] # [doc = "* `ttl` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value` - Amount to pay for the service."] # [doc = "* `membership_model` - Membership model for the service."] # [doc = "* `operator_signatures` - Signatures from operators confirming the quote."] # [doc = "* `security_commitments` - Security commitments from operators."] # [doc = "* `pricing_quote` - Pricing quote details."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] # [doc = "* [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid."] request_with_signed_price_quotes { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , pricing_quotes : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: pricing :: PricingQuote > , operator_signatures : :: subxt_core :: alloc :: vec :: Vec < [:: core :: primitive :: u8 ; 65usize] > , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -66849,29 +67142,29 @@ pub mod api {
 					#[doc = "The caller is already registered as a operator."]
 					AlreadyRegistered,
 					#[codec(index = 3)]
-					#[doc = "The caller is registering with a key that is already registered"]
-					DuplicateKey,
-					#[codec(index = 4)]
-					#[doc = "The caller does not have the requirements to be a operator."]
-					InvalidRegistrationInput,
-					#[codec(index = 5)]
-					#[doc = "The Operator is not allowed to unregister."]
-					NotAllowedToUnregister,
-					#[codec(index = 6)]
-					#[doc = "The Operator is not allowed to update their price targets."]
-					NotAllowedToUpdatePriceTargets,
-					#[codec(index = 7)]
-					#[doc = "The caller does not have the requirements to request a service."]
-					InvalidRequestInput,
-					#[codec(index = 8)]
-					#[doc = "The caller does not have the requirements to call a job."]
-					InvalidJobCallInput,
-					#[codec(index = 9)]
-					#[doc = "The caller provided an invalid job result."]
-					InvalidJobResult,
-					#[codec(index = 10)]
 					#[doc = "The caller is not registered as a operator."]
 					NotRegistered,
+					#[codec(index = 4)]
+					#[doc = "The Operator is not active in the delegation system."]
+					OperatorNotActive,
+					#[codec(index = 5)]
+					#[doc = "The Operator is not allowed to register."]
+					InvalidRegistrationInput,
+					#[codec(index = 6)]
+					#[doc = "The Operator is not allowed to unregister."]
+					NotAllowedToUnregister,
+					#[codec(index = 7)]
+					#[doc = "The Operator is not allowed to update their RPC address."]
+					NotAllowedToUpdateRpcAddress,
+					#[codec(index = 8)]
+					#[doc = "The caller does not have the requirements to request a service."]
+					InvalidRequestInput,
+					#[codec(index = 9)]
+					#[doc = "The caller does not have the requirements to call a job."]
+					InvalidJobCallInput,
+					#[codec(index = 10)]
+					#[doc = "The caller provided an invalid job result."]
+					InvalidJobResult,
 					#[codec(index = 11)]
 					#[doc = "Approval Process is interrupted."]
 					ApprovalInterrupted,
@@ -66935,11 +67228,11 @@ pub mod api {
 					#[doc = "Maximum number of blueprints registered by the operator reached."]
 					MaxBlueprintsPerOperatorExceeded,
 					#[codec(index = 31)]
-					#[doc = "The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation"]
-					OperatorNotActive,
-					#[codec(index = 32)]
 					#[doc = "Duplicate operator registration."]
 					DuplicateOperator,
+					#[codec(index = 32)]
+					#[doc = "Duplicate key used for registration."]
+					DuplicateKey,
 					#[codec(index = 33)]
 					#[doc = "Too many operators provided for the service's membership model"]
 					TooManyOperators,
@@ -66965,98 +67258,113 @@ pub mod api {
 					#[doc = "Offender is not a registered operator."]
 					OffenderNotOperator,
 					#[codec(index = 41)]
-					#[doc = "Offender is not an active operator."]
-					OffenderNotActiveOperator,
-					#[codec(index = 42)]
 					#[doc = "The Service Blueprint did not return a slashing origin for this service."]
 					NoSlashingOrigin,
-					#[codec(index = 43)]
+					#[codec(index = 42)]
 					#[doc = "The Service Blueprint did not return a dispute origin for this service."]
 					NoDisputeOrigin,
-					#[codec(index = 44)]
+					#[codec(index = 43)]
 					#[doc = "The Unapplied Slash are not found."]
 					UnappliedSlashNotFound,
-					#[codec(index = 45)]
+					#[codec(index = 44)]
 					#[doc = "The Supplied Master Blueprint Service Manager Revision is not found."]
 					MasterBlueprintServiceManagerRevisionNotFound,
-					#[codec(index = 46)]
+					#[codec(index = 45)]
 					#[doc = "Duplicate membership model"]
 					DuplicateMembershipModel,
-					#[codec(index = 47)]
+					#[codec(index = 46)]
 					#[doc = "Maximum number of Master Blueprint Service Manager revisions reached."]
 					MaxMasterBlueprintServiceManagerVersionsExceeded,
-					#[codec(index = 48)]
+					#[codec(index = 47)]
 					#[doc = "The ERC20 transfer failed."]
 					ERC20TransferFailed,
-					#[codec(index = 49)]
+					#[codec(index = 48)]
 					#[doc = "Missing EVM Origin for the EVM execution."]
 					MissingEVMOrigin,
-					#[codec(index = 50)]
+					#[codec(index = 49)]
 					#[doc = "Expected the account to be an EVM address."]
 					ExpectedEVMAddress,
-					#[codec(index = 51)]
+					#[codec(index = 50)]
 					#[doc = "Expected the account to be an account ID."]
 					ExpectedAccountId,
-					#[codec(index = 52)]
+					#[codec(index = 51)]
 					#[doc = "Request hook failure"]
 					OnRequestFailure,
-					#[codec(index = 53)]
+					#[codec(index = 52)]
 					#[doc = "Register hook failure"]
 					OnRegisterHookFailed,
-					#[codec(index = 54)]
+					#[codec(index = 53)]
 					#[doc = "Approve service request hook failure"]
 					OnApproveFailure,
-					#[codec(index = 55)]
+					#[codec(index = 54)]
 					#[doc = "Reject service request hook failure"]
 					OnRejectFailure,
-					#[codec(index = 56)]
+					#[codec(index = 55)]
 					#[doc = "Service init hook"]
 					OnServiceInitHook,
-					#[codec(index = 57)]
+					#[codec(index = 56)]
 					#[doc = "Membership model not supported by blueprint"]
 					UnsupportedMembershipModel,
-					#[codec(index = 58)]
+					#[codec(index = 57)]
 					#[doc = "Service does not support dynamic membership"]
 					DynamicMembershipNotSupported,
-					#[codec(index = 59)]
+					#[codec(index = 58)]
 					#[doc = "Cannot join service - rejected by blueprint"]
 					JoinRejected,
-					#[codec(index = 60)]
+					#[codec(index = 59)]
 					#[doc = "Cannot leave service - rejected by blueprint"]
 					LeaveRejected,
-					#[codec(index = 61)]
+					#[codec(index = 60)]
 					#[doc = "Maximum operators reached"]
 					MaxOperatorsReached,
-					#[codec(index = 62)]
+					#[codec(index = 61)]
 					#[doc = "Can join hook failure"]
 					OnCanJoinFailure,
-					#[codec(index = 63)]
+					#[codec(index = 62)]
 					#[doc = "Can leave hook failure"]
 					OnCanLeaveFailure,
-					#[codec(index = 64)]
+					#[codec(index = 63)]
 					#[doc = "Operator join hook failure"]
 					OnOperatorJoinFailure,
-					#[codec(index = 65)]
+					#[codec(index = 64)]
 					#[doc = "Operator leave hook failure"]
 					OnOperatorLeaveFailure,
-					#[codec(index = 66)]
+					#[codec(index = 65)]
 					#[doc = "Operator is a member or has already joined the service"]
 					AlreadyJoined,
-					#[codec(index = 67)]
+					#[codec(index = 66)]
 					#[doc = "Caller is not an operator of the service"]
 					NotAnOperator,
-					#[codec(index = 68)]
+					#[codec(index = 67)]
 					#[doc = "Invalid slash percentage"]
 					InvalidSlashPercentage,
-					#[codec(index = 69)]
+					#[codec(index = 68)]
 					#[doc = "Invalid key (zero byte ECDSA key provided)"]
 					InvalidKey,
-					#[codec(index = 70)]
+					#[codec(index = 69)]
 					#[doc = "Invalid security commitments"]
 					InvalidSecurityCommitments,
-					#[codec(index = 71)]
+					#[codec(index = 70)]
 					#[doc = "Invalid Security Requirements"]
 					InvalidSecurityRequirements,
+					#[codec(index = 71)]
+					#[doc = "Invalid quote signature"]
+					InvalidQuoteSignature,
+					#[codec(index = 72)]
+					#[doc = "Mismatched number of signatures"]
+					SignatureCountMismatch,
+					#[codec(index = 73)]
+					#[doc = "Missing quote signature"]
+					MissingQuoteSignature,
+					#[codec(index = 74)]
+					#[doc = "Invalid key for quote"]
+					InvalidKeyForQuote,
+					#[codec(index = 75)]
+					#[doc = "Signature verification failed"]
+					SignatureVerificationFailed,
+					#[codec(index = 76)]
+					#[doc = "Invalid signature bytes"]
+					InvalidSignatureBytes,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -67074,7 +67382,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "A new service blueprint has been created."] BlueprintCreated { owner : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 1)] # [doc = "An operator has pre-registered for a service blueprint."] PreRegistration { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "An new operator has been registered."] Registered { provider : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 3)] # [doc = "An operator has been unregistered."] Unregistered { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "The price targets for an operator has been updated."] PriceTargetsUpdated { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , price_targets : runtime_types :: tangle_primitives :: services :: types :: PriceTargets , } , # [codec (index = 5)] # [doc = "A new service has been requested."] ServiceRequested { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , security_requirements : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , } , # [codec (index = 6)] # [doc = "A service request has been approved."] ServiceRequestApproved { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 7)] # [doc = "A service request has been rejected."] ServiceRequestRejected { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 8)] # [doc = "A service has been initiated."] ServiceInitiated { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , operator_security_commitments : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < (:: subxt_core :: utils :: AccountId32 , runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > ,) > , } , # [codec (index = 9)] # [doc = "A service has been terminated."] ServiceTerminated { owner : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 10)] # [doc = "A job has been called."] JobCalled { caller : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 11)] # [doc = "A job result has been submitted."] JobResultSubmitted { operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 12)] # [doc = "EVM execution reverted with a reason."] EvmReverted { from : :: subxt_core :: utils :: H160 , to : :: subxt_core :: utils :: H160 , data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , reason : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 13)] # [doc = "An Operator has an unapplied slash."] UnappliedSlash { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "An Unapplied Slash got discarded."] SlashDiscarded { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "The Master Blueprint Service Manager has been revised."] MasterBlueprintServiceManagerRevised { revision : :: core :: primitive :: u32 , address : :: subxt_core :: utils :: H160 , } , }
+					# [codec (index = 0)] # [doc = "A new service blueprint has been created."] BlueprintCreated { owner : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 1)] # [doc = "An operator has pre-registered for a service blueprint."] PreRegistration { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "An new operator has been registered."] Registered { provider : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 3)] # [doc = "An operator has been unregistered."] Unregistered { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "A new service has been requested."] ServiceRequested { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , security_requirements : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , } , # [codec (index = 5)] # [doc = "A service request has been approved."] ServiceRequestApproved { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 6)] # [doc = "A service request has been rejected."] ServiceRequestRejected { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 7)] # [doc = "A service has been initiated."] ServiceInitiated { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , operator_security_commitments : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < (:: subxt_core :: utils :: AccountId32 , runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > ,) > , } , # [codec (index = 8)] # [doc = "A service has been terminated."] ServiceTerminated { owner : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 9)] # [doc = "A job has been called."] JobCalled { caller : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "A job result has been submitted."] JobResultSubmitted { operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 11)] # [doc = "EVM execution reverted with a reason."] EvmReverted { from : :: subxt_core :: utils :: H160 , to : :: subxt_core :: utils :: H160 , data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , reason : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 12)] # [doc = "An Operator has an unapplied slash."] UnappliedSlash { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 13)] # [doc = "An Unapplied Slash got discarded."] SlashDiscarded { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "The Master Blueprint Service Manager has been revised."] MasterBlueprintServiceManagerRevised { revision : :: core :: primitive :: u32 , address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "A request for a pricing quote has been made."] RequestForQuote { requester : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 16)] # [doc = "RPC address updated."] RpcAddressUpdated { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , rpc_address : runtime_types :: tangle_primitives :: services :: field :: BoundedString , } , }
 			}
 		}
 		pub mod pallet_session {
@@ -68344,7 +68652,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to stake"] # [doc = "* `pool_id` - Target pool ID"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* Member must have `existential deposit + amount` in account"] # [doc = "* Pool must be in [`PoolState::Open`] state"] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Bond additional funds into an existing pool position."] # [doc = ""] # [doc = "Additional funds can come from either free balance or accumulated rewards."] # [doc = "Automatically pays out all pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `extra` - Source and amount of additional funds"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = "* Must have permission to bond extra if not self"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* This transaction prioritizes readability and correctness over optimization"] # [doc = "* Multiple storage reads/writes are performed to reuse code"] # [doc = "* See `bond_extra_other` to bond pending rewards of other members"] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "Unbond points from a member's pool position, collecting any pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to unbond from"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `unbonding_points` - Amount of points to unbond"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is blocked and caller is root/bouncer (kick)"] # [doc = "  - Pool is destroying and member is not depositor"] # [doc = "  - Pool is destroying, member is depositor, and pool is empty"] # [doc = "* Permissioned (caller must be member) if:"] # [doc = "  - Caller is not depositor"] # [doc = "  - Caller is depositor, pool is destroying, and pool is empty"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"] # [doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"] # [doc = ""] # [doc = "# Note"] # [doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first."] # [doc = "The staking interface will attempt this automatically but may still return `NoMoreChunks`"] # [doc = "if chunks cannot be released."] unbond { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Withdraws unbonded funds from the pool's staking account."] # [doc = ""] # [doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."] # [doc = "Prevents `NoMoreChunks` errors from the staking system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Can be signed by any account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans to check"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotDestroying`] - Pool is in destroying state"] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Withdraw unbonded funds from a member account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is in destroy mode and target is not depositor"] # [doc = "  - Target is depositor and only member in sub pools"] # [doc = "  - Pool is blocked and caller is root/bouncer"] # [doc = "* Permissioned if caller is target and not depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to withdraw from"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolMemberNotFound`] - Member account not found"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"] # [doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"] # [doc = ""] # [doc = "If target is depositor, pool will be destroyed."] withdraw_unbonded { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Create a new delegation pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the initial depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"] # [doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 7)] # [doc = "Create a new delegation pool with a previously used pool ID."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `pool_id` - Pool ID to reuse"] # [doc = "* `name` - Optional pool name"] # [doc = "* `icon` - Optional pool icon"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"] # [doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 8)] # [doc = "Nominate validators on behalf of the pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool nominator or root role can nominate validators"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `validators` - List of validator accounts to nominate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Forwards nomination call to staking pallet using pool's bonded account."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"] # [doc = "changed again under any circumstances."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool bouncer or root role can set any state"] # [doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `state` - New state to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"] # [doc = "commission, member count and roles."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "Updates the metadata for a given pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the pool bouncer or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `metadata` - New metadata to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "Updates the global configuration parameters for nomination pools."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by Root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"] # [doc = "* `min_create_bond` - Config operation for minimum bond to create a pool"] # [doc = "* `max_pools` - Config operation for maximum number of pools"] # [doc = "* `global_max_commission` - Config operation for maximum global commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "Update the roles of a pool."] # [doc = ""] # [doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed."] # [doc = "Emits a `RolesUpdated` event on successful update."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be Root or pool root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `new_root` - New root role configuration"] # [doc = "* `new_nominator` - New nominator role configuration"] # [doc = "* `new_bouncer` - New bouncer role configuration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be signed by pool nominator or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "Bond additional funds for a pool member into their respective pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must match member account for bonding from free balance/pending rewards"] # [doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"] # [doc = "  `PermissionlessCompound` claim permissions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `member` - Pool member account to bond for"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `extra` - Amount to bond from free balance or pending rewards"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"] # [doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"] bond_extra_other { member : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "Set or remove the commission rate and payee for a pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `new_commission` - Optional commission rate and payee. None removes existing commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with only"] # [doc = "lower values allowed thereafter. Current commission will be reduced if above new max."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `max_commission` - The new maximum commission rate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "Set the commission change rate for a pool."] # [doc = ""] # [doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"] # [doc = "restrictive than the current."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission management permission."] # [doc = "* `pool_id` - The identifier of the pool to set commission change rate for."] # [doc = "* `change_rate` - The new commission change rate configuration."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "Claim pending commission for a pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by an account with commission claim permission."] # [doc = "Pending commission is paid out and added to total claimed commission. Total pending commission"] # [doc = "is reset to zero."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim permission."] # [doc = "* `pool_id` - The identifier of the pool to claim commission from."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Top up the deficit or withdraw the excess ED from the pool."] # [doc = ""] # [doc = "When a pool is created, the pool depositor transfers ED to the reward account of the"] # [doc = "pool. ED is subject to change and over time, the deposit in the reward account may be"] # [doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"] # [doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"] # [doc = "pool by either topping up the deficit or claiming the excess."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set or remove a pool's commission claim permission."] # [doc = ""] # [doc = "Only the `Root` role of the pool is able to configure commission claim permissions."] # [doc = "This determines which accounts are allowed to claim the pool's pending commission."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."] # [doc = "* `pool_id` - The identifier of the pool to set permissions for."] # [doc = "* `permission` - Optional commission claim permission configuration. If None, removes any existing permission."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 23)] set_last_pool_id { pool_id : :: core :: primitive :: u32 , } , }
+					# [codec (index = 0)] # [doc = "Stakes funds with a pool by transferring the bonded amount from member to pool account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to stake"] # [doc = "* `pool_id` - Target pool ID"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::MinimumBondNotMet`] - Amount below minimum bond"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* Member must have `existential deposit + amount` in account"] # [doc = "* Pool must be in [`PoolState::Open`] state"] join { # [codec (compact)] amount : :: core :: primitive :: u128 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Bond additional funds into an existing pool position."] # [doc = ""] # [doc = "Additional funds can come from either free balance or accumulated rewards."] # [doc = "Automatically pays out all pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `extra` - Source and amount of additional funds"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed"] # [doc = "* Must have permission to bond extra if not self"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks permission"] # [doc = "* [`Error::DefensiveError`] - Reward pool not found"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "* This transaction prioritizes readability and correctness over optimization"] # [doc = "* Multiple storage reads/writes are performed to reuse code"] # [doc = "* See `bond_extra_other` to bond pending rewards of other members"] bond_extra { pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 3)] # [doc = "Unbond points from a member's pool position, collecting any pending rewards."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to unbond from"] # [doc = "* `pool_id` - Target pool ID"] # [doc = "* `unbonding_points` - Amount of points to unbond"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is blocked and caller is root/bouncer (kick)"] # [doc = "  - Pool is destroying and member is not depositor"] # [doc = "  - Pool is destroying, member is depositor, and pool is empty"] # [doc = "* Permissioned (caller must be member) if:"] # [doc = "  - Caller is not depositor"] # [doc = "  - Caller is depositor, pool is destroying, and pool is empty"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NoBalanceToUnbond`] - Member has insufficient points"] # [doc = "* [`Error::DefensiveError`] - Not enough space in unbond pool"] # [doc = ""] # [doc = "# Note"] # [doc = "If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called"] # [doc = "first. The staking interface will attempt this automatically but may still return"] # [doc = "`NoMoreChunks` if chunks cannot be released."] unbond { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , # [codec (compact)] unbonding_points : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Withdraws unbonded funds from the pool's staking account."] # [doc = ""] # [doc = "Useful for clearing unlocking chunks when there are too many to call `unbond`."] # [doc = "Prevents `NoMoreChunks` errors from the staking system."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Can be signed by any account"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans to check"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotDestroying`] - Pool is in destroying state"] pool_withdraw_unbonded { pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Withdraw unbonded funds from a member account."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Permissionless if:"] # [doc = "  - Pool is in destroy mode and target is not depositor"] # [doc = "  - Target is depositor and only member in sub pools"] # [doc = "  - Pool is blocked and caller is root/bouncer"] # [doc = "* Permissioned if caller is target and not depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `member_account` - Account to withdraw from"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `num_slashing_spans` - Number of slashing spans"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolMemberNotFound`] - Member account not found"] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::SubPoolsNotFound`] - Sub pools not found"] # [doc = "* [`Error::CannotWithdrawAny`] - No unbonded funds available"] # [doc = ""] # [doc = "If target is depositor, pool will be destroyed."] withdraw_unbonded { member_account : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , num_slashing_spans : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Create a new delegation pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the initial depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `name` - Optional pool name bounded by `T::MaxNameLength`"] # [doc = "* `icon` - Optional pool icon bounded by `T::MaxIconLength`"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OverflowRisk`] - Pool ID increment would overflow"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 7)] # [doc = "Create a new delegation pool with a previously used pool ID."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the account that will become the depositor"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `amount` - Amount to delegate to the pool"] # [doc = "* `root` - Account to set as pool root"] # [doc = "* `nominator` - Account to set as pool nominator"] # [doc = "* `bouncer` - Account to set as pool bouncer"] # [doc = "* `pool_id` - Pool ID to reuse"] # [doc = "* `name` - Optional pool name"] # [doc = "* `icon` - Optional pool icon"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolIdInUse`] - Pool ID is already in use"] # [doc = "* [`Error::InvalidPoolId`] - Pool ID is greater than last pool ID"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Caller must have `amount + existential_deposit` transferable funds."] create_with_pool_id { # [codec (compact)] amount : :: core :: primitive :: u128 , root : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , nominator : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , bouncer : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , name : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , icon : :: core :: option :: Option < runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < :: core :: primitive :: u8 > > , } , # [codec (index = 8)] # [doc = "Nominate validators on behalf of the pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool nominator or root role can nominate validators"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `validators` - List of validator accounts to nominate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Caller lacks nominator permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "Forwards nomination call to staking pallet using pool's bonded account."] nominate { pool_id : :: core :: primitive :: u32 , validators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "Updates the state of a pool. Once a pool is in `Destroying` state, its state cannot be"] # [doc = "changed again under any circumstances."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Pool bouncer or root role can set any state"] # [doc = "* Any account can set state to `Destroying` if pool fails `ok_to_be_open` conditions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `state` - New state to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::CanNotChangeState`] - Pool is in destroying state or caller lacks permissions"] # [doc = ""] # [doc = "# Note"] # [doc = ""] # [doc = "State changes are validated through `ok_to_be_open` which checks pool properties like"] # [doc = "commission, member count and roles."] set_state { pool_id : :: core :: primitive :: u32 , state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 10)] # [doc = "Updates the metadata for a given pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by the pool bouncer or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `metadata` - New metadata to set"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::MetadataExceedsMaxLen`] - Metadata length exceeds maximum allowed"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks required permissions"] set_metadata { pool_id : :: core :: primitive :: u32 , metadata : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 11)] # [doc = "Updates the global configuration parameters for nomination pools."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be called by Root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `min_join_bond` - Config operation for minimum bond to join a pool"] # [doc = "* `min_create_bond` - Config operation for minimum bond to create a pool"] # [doc = "* `max_pools` - Config operation for maximum number of pools"] # [doc = "* `global_max_commission` - Config operation for maximum global commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not Root"] set_configs { min_join_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , min_create_bond : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u128 > , max_pools : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: core :: primitive :: u32 > , global_max_commission : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill > , } , # [codec (index = 12)] # [doc = "Update the roles of a pool."] # [doc = ""] # [doc = "Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be"] # [doc = "changed. Emits a `RolesUpdated` event on successful update."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be Root or pool root"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `new_root` - New root role configuration"] # [doc = "* `new_nominator` - New nominator role configuration"] # [doc = "* `new_bouncer` - New bouncer role configuration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Origin does not have permission"] update_roles { pool_id : :: core :: primitive :: u32 , new_root : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_nominator : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , new_bouncer : runtime_types :: pallet_tangle_lst :: types :: ConfigOp < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 13)] # [doc = "Chill on behalf of the pool by forwarding the call to the staking pallet."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must be signed by pool nominator or root role"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - Pool identifier"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::NotNominator`] - Origin lacks nomination permission"] chill { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "Bond additional funds for a pool member into their respective pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Origin must match member account for bonding from free balance/pending rewards"] # [doc = "* Any origin can bond from pending rewards if member has `PermissionlessAll` or"] # [doc = "  `PermissionlessCompound` claim permissions"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `member` - Pool member account to bond for"] # [doc = "* `pool_id` - Pool identifier"] # [doc = "* `extra` - Amount to bond from free balance or pending rewards"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - Pool does not exist"] # [doc = "* [`Error::PoolMemberNotFound`] - Account is not a member of pool"] # [doc = "* [`Error::NoPermission`] - Origin lacks permission to bond for member"] bond_extra_other { member : :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , pool_id : :: core :: primitive :: u32 , extra : runtime_types :: pallet_tangle_lst :: types :: BondExtra < :: core :: primitive :: u128 > , } , # [codec (index = 17)] # [doc = "Set or remove the commission rate and payee for a pool."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `new_commission` - Optional commission rate and payee. None removes existing"] # [doc = "  commission"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission { pool_id : :: core :: primitive :: u32 , new_commission : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 18)] # [doc = "Set the maximum commission rate for a pool. Initial max can be set to any value, with"] # [doc = "only lower values allowed thereafter. Current commission will be reduced if above new"] # [doc = "max."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must have commission management permission for the pool"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `pool_id` - The pool identifier"] # [doc = "* `max_commission` - The new maximum commission rate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::PoolNotFound`] - The pool_id does not exist"] # [doc = "* [`Error::DoesNotHavePermission`] - Caller lacks commission management permission"] set_commission_max { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 19)] # [doc = "Set the commission change rate for a pool."] # [doc = ""] # [doc = "Initial change rate is not bounded, whereas subsequent updates can only be more"] # [doc = "restrictive than the current."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission"] # [doc = "  management permission."] # [doc = "* `pool_id` - The identifier of the pool to set commission change rate for."] # [doc = "* `change_rate` - The new commission change rate configuration."] set_commission_change_rate { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 20)] # [doc = "Claim pending commission for a pool."] # [doc = ""] # [doc = "The dispatch origin of this call must be signed by an account with commission claim"] # [doc = "permission. Pending commission is paid out and added to total claimed commission."] # [doc = "Total pending commission is reset to zero."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an account with commission claim"] # [doc = "  permission."] # [doc = "* `pool_id` - The identifier of the pool to claim commission from."] claim_commission { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Top up the deficit or withdraw the excess ED from the pool."] # [doc = ""] # [doc = "When a pool is created, the pool depositor transfers ED to the reward account of the"] # [doc = "pool. ED is subject to change and over time, the deposit in the reward account may be"] # [doc = "insufficient to cover the ED deficit of the pool or vice-versa where there is excess"] # [doc = "deposit to the pool. This call allows anyone to adjust the ED deposit of the"] # [doc = "pool by either topping up the deficit or claiming the excess."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `pool_id` - The identifier of the pool to adjust the deposit for."] adjust_pool_deposit { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set or remove a pool's commission claim permission."] # [doc = ""] # [doc = "Only the `Root` role of the pool is able to configure commission claim permissions."] # [doc = "This determines which accounts are allowed to claim the pool's pending commission."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by the pool's root account."] # [doc = "* `pool_id` - The identifier of the pool to set permissions for."] # [doc = "* `permission` - Optional commission claim permission configuration. If None, removes"] # [doc = "  any existing permission."] set_commission_claim_permission { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 23)] set_last_pool_id { pool_id : :: core :: primitive :: u32 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -68510,7 +68818,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Events of this pallet."]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has become bonded in a pool."] Bonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been"] # [doc = "  requested to be unbonded (the argument of the `unbond` transaction) from the bonded"] # [doc = "  pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "  dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return for `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "The last PoolId is updated"] LastPoolIdUpdated { pool_id : :: core :: primitive :: u32 , } , }
+					# [codec (index = 0)] # [doc = "A pool has been created."] Created { depositor : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "A member has become bonded in a pool."] Bonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , bonded : :: core :: primitive :: u128 , joined : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "A payout has been made to a member."] PaidOut { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , payout : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A member has unbonded from their pool."] # [doc = ""] # [doc = "- `balance` is the corresponding balance of the number of points that has been requested"] # [doc = "  to be unbonded (the argument of the `unbond` transaction) from the bonded pool."] # [doc = "- `points` is the number of points that are issued as a result of `balance` being"] # [doc = "  dissolved into the corresponding unbonding pool."] # [doc = "- `era` is the era in which the balance will be unbonded."] # [doc = "In the absence of slashing, these values will match. In the presence of slashing, the"] # [doc = "number of points that are issued in the unbonding pool will be less than the amount"] # [doc = "requested to be unbonded."] Unbonded { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , era : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "A member has withdrawn from their pool."] # [doc = ""] # [doc = "The given number of `points` have been dissolved in return for `balance`."] # [doc = ""] # [doc = "Similar to `Unbonded` event, in the absence of slashing, the ratio of point to balance"] # [doc = "will be 1."] Withdrawn { member : :: subxt_core :: utils :: AccountId32 , pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , points : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "A pool has been destroyed."] Destroyed { pool_id : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "The state of a pool has changed"] StateChanged { pool_id : :: core :: primitive :: u32 , new_state : runtime_types :: pallet_tangle_lst :: types :: pools :: PoolState , } , # [codec (index = 7)] # [doc = "A member has been removed from a pool."] # [doc = ""] # [doc = "The removal can be voluntary (withdrawn all unbonded funds) or involuntary (kicked)."] MemberRemoved { pool_id : :: core :: primitive :: u32 , member : :: subxt_core :: utils :: AccountId32 , } , # [codec (index = 8)] # [doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"] # [doc = "can never change."] RolesUpdated { root : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , bouncer : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , nominator : :: core :: option :: Option < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 9)] # [doc = "The active balance of pool `pool_id` has been slashed to `balance`."] PoolSlashed { pool_id : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 10)] # [doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."] UnbondingPoolSlashed { pool_id : :: core :: primitive :: u32 , era : :: core :: primitive :: u32 , balance : :: core :: primitive :: u128 , } , # [codec (index = 11)] # [doc = "A pool's commission setting has been changed."] PoolCommissionUpdated { pool_id : :: core :: primitive :: u32 , current : :: core :: option :: Option < (runtime_types :: sp_arithmetic :: per_things :: Perbill , :: subxt_core :: utils :: AccountId32 ,) > , } , # [codec (index = 12)] # [doc = "A pool's maximum commission setting has been changed."] PoolMaxCommissionUpdated { pool_id : :: core :: primitive :: u32 , max_commission : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 13)] # [doc = "A pool's commission `change_rate` has been changed."] PoolCommissionChangeRateUpdated { pool_id : :: core :: primitive :: u32 , change_rate : runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionChangeRate < :: core :: primitive :: u64 > , } , # [codec (index = 14)] # [doc = "Pool commission claim permission has been updated."] PoolCommissionClaimPermissionUpdated { pool_id : :: core :: primitive :: u32 , permission : :: core :: option :: Option < runtime_types :: pallet_tangle_lst :: types :: commission :: CommissionClaimPermission < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 15)] # [doc = "Pool commission has been claimed."] PoolCommissionClaimed { pool_id : :: core :: primitive :: u32 , commission : :: core :: primitive :: u128 , } , # [codec (index = 16)] # [doc = "Topped up deficit in frozen ED of the reward pool."] MinBalanceDeficitAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 17)] # [doc = "Claimed excess frozen ED of the reward pool."] MinBalanceExcessAdjusted { pool_id : :: core :: primitive :: u32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 18)] # [doc = "The last PoolId is updated"] LastPoolIdUpdated { pool_id : :: core :: primitive :: u32 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -72205,6 +72513,43 @@ pub mod api {
 						>,
 					}
 				}
+				pub mod pricing {
+					use super::runtime_types;
+					#[derive(
+						:: subxt_core :: ext :: codec :: Decode,
+						:: subxt_core :: ext :: codec :: Encode,
+						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
+					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+					pub struct PricingQuote { pub blueprint_id : :: core :: primitive :: u64 , pub ttl_blocks : :: core :: primitive :: u64 , pub total_cost_rate : :: core :: primitive :: u64 , pub timestamp : :: core :: primitive :: u64 , pub expiry : :: core :: primitive :: u64 , pub resources : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: pricing :: ResourcePricing > , pub security_commitments : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , }
+					#[derive(
+						:: subxt_core :: ext :: codec :: Decode,
+						:: subxt_core :: ext :: codec :: Encode,
+						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					# [codec (crate = :: subxt_core :: ext :: codec)]
+					#[codec(dumb_trait_bound)]
+					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+					pub struct ResourcePricing {
+						pub kind: runtime_types::tangle_primitives::services::field::BoundedString,
+						pub count: ::core::primitive::u64,
+						pub price_per_unit_rate: ::core::primitive::u64,
+					}
+				}
 				pub mod service {
 					use super::runtime_types;
 					#[derive(
@@ -72773,8 +73118,8 @@ pub mod api {
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct OperatorPreferences {
 						pub key: [::core::primitive::u8; 65usize],
-						pub price_targets:
-							runtime_types::tangle_primitives::services::types::PriceTargets,
+						pub rpc_address:
+							runtime_types::tangle_primitives::services::field::BoundedString,
 					}
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,
@@ -72799,27 +73144,6 @@ pub mod api {
 							runtime_types::bounded_collections::bounded_btree_set::BoundedBTreeSet<
 								::core::primitive::u64,
 							>,
-					}
-					#[derive(
-						:: subxt_core :: ext :: codec :: Decode,
-						:: subxt_core :: ext :: codec :: Encode,
-						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
-						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
-						Clone,
-						Debug,
-						Eq,
-						PartialEq,
-					)]
-					# [codec (crate = :: subxt_core :: ext :: codec)]
-					#[codec(dumb_trait_bound)]
-					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
-					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct PriceTargets {
-						pub cpu: ::core::primitive::u64,
-						pub mem: ::core::primitive::u64,
-						pub storage_hdd: ::core::primitive::u64,
-						pub storage_ssd: ::core::primitive::u64,
-						pub storage_nvme: ::core::primitive::u64,
 					}
 					#[derive(
 						:: subxt_core :: ext :: codec :: Decode,

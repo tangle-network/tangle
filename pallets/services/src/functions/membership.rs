@@ -12,7 +12,7 @@ impl<T: Config> Pallet<T> {
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 		security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 	) -> DispatchResult {
 		// Get service instance

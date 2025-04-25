@@ -33,7 +33,13 @@ fn test_payment_refunds_on_failure() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -162,7 +168,13 @@ fn test_payment_distribution_operators() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -170,8 +182,8 @@ fn test_payment_distribution_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
-			1000
+			1000,
+			Some("https://example.com/rpc")
 		));
 
 		// Test Case 1: Custom Asset Payment (USDC)
@@ -345,7 +357,13 @@ fn test_payment_multiple_asset_types() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Test Case 1: Multiple asset security requirements
 		let eve = mock_pub_key(EVE);
@@ -522,7 +540,13 @@ fn test_payment_zero_amount() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -589,7 +613,13 @@ fn test_payment_maximum_amount() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -672,7 +702,13 @@ fn test_payment_invalid_asset_types() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let payment = 5 * 10u128.pow(6); // 5 USDC

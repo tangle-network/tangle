@@ -49,6 +49,10 @@ impl<T: Config> Constraints for types::ConstraintsOf<T> {
 	type MaxContainerImageTagLength = T::MaxContainerImageTagLength;
 
 	type MaxAssetsPerService = T::MaxAssetsPerService;
+
+	type MaxRpcAddressLength = T::MaxRpcAddressLength;
+
+	type MaxResourceNameLength = T::MaxResourceNameLength;
 }
 
 impl<T: crate::Config> ServiceManager<T::AccountId, BalanceOf<T>> for crate::Pallet<T> {

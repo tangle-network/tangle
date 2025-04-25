@@ -29,19 +29,31 @@ fn job_calls() {
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(join_and_register(
 			charlie.clone(),
 			0,
 			test_ecdsa_key(),
-			Default::default(),
-			1000
+			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(join_and_register(dave.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			dave.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
@@ -127,19 +139,31 @@ fn job_result() {
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		assert_ok!(join_and_register(
 			charlie.clone(),
 			0,
 			test_ecdsa_key(),
-			Default::default(),
-			1000
+			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let dave = mock_pub_key(DAVE);
-		assert_ok!(join_and_register(dave.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			dave.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
@@ -265,8 +289,8 @@ fn test_concurrent_job_execution() {
 				operator.clone(),
 				0,
 				test_ecdsa_key(),
-				Default::default(),
-				1000
+				1000,
+				Some("https://example.com/rpc")
 			));
 		}
 
@@ -345,8 +369,8 @@ fn test_result_submission_non_operators() {
 				operator.clone(),
 				0,
 				test_ecdsa_key(),
-				Default::default(),
-				1000
+				1000,
+				Some("https://example.com/rpc")
 			));
 		}
 
@@ -403,7 +427,13 @@ fn test_invalid_result_formats() {
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create and approve service
 		assert_ok!(Services::request(
@@ -457,7 +487,13 @@ fn test_result_submission_after_termination() {
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create and approve service
 		assert_ok!(Services::request(

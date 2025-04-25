@@ -27,7 +27,7 @@ impl<T: Config> Pallet<T> {
 	pub fn do_register(
 		operator: &T::AccountId,
 		blueprint_id: u64,
-		preferences: OperatorPreferences,
+		preferences: OperatorPreferences<T::Constraints>,
 		registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 		value: BalanceOf<T>,
 	) -> DispatchResult {
@@ -59,7 +59,7 @@ impl<T: Config> Pallet<T> {
 
 		ensure!(allowed, Error::<T>::InvalidRegistrationInput);
 
-		Operators::<T>::insert(blueprint_id, &operator, preferences);
+		Operators::<T>::insert(blueprint_id, &operator, &preferences);
 
 		OperatorsProfile::<T>::try_mutate(&operator, |profile| {
 			match profile {
@@ -82,7 +82,7 @@ impl<T: Config> Pallet<T> {
 		Self::deposit_event(Event::Registered {
 			provider: operator.clone(),
 			blueprint_id,
-			preferences,
+			preferences: preferences.clone(),
 			registration_args,
 		});
 
