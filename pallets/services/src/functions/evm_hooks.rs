@@ -424,7 +424,7 @@ impl<T: Config> Pallet<T> {
 		ttl: BlockNumberFor<T>,
 		payment_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
-		native_value: BalanceOf<T>,
+		_native_value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -487,7 +487,7 @@ impl<T: Config> Pallet<T> {
 					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
 				]),
 			],
-			native_value,
+			Zero::zero(),
 		)
 	}
 
