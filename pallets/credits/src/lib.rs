@@ -8,28 +8,27 @@
 //! users who stake TNT tokens with passively accrued credits.
 //!
 //! ### Key Features:
-//! - **Staking-Based Credit Accrual:** Users automatically earn credits based on the amount of TNT
-//!   they have staked via a configured `StakingInfo` provider. Credit emission rates are tiered
-//!   based on stake size.
+//! - **Staking-Based Credit Accrual:** Users automatically earn credits based on the amount
+//!   of TNT they have staked via a configured `StakingInfo` provider. Credit emission rates
+//!   are tiered based on stake size.
 //! - **TNT Burning:** Users can burn TNT tokens for an immediate, one-time grant of credits.
 //! - **Account Linking:** Users link their on-chain account (`AccountId`) to an off-chain
 //!   identifier (e.g., GitHub handle, email hash) to facilitate off-chain credit redemption.
-//! - **Credit Claiming:** Users initiate a claim on-chain, signaling the intention to use credits
-//!   off-chain. This reduces the on-chain balance.
-//! - **Activity-Based Decay:** To strongly incentivize weekly interaction, the *claimable* portion
-//!   of a user's credit balance decays significantly if they do not claim or actively update their
-//!   credits frequently (ideally weekly). The raw accrued balance remains, but its effective
-//!   claimable value diminishes rapidly with prolonged inactivity.
-//! - **Admin Controls:** Provides administrative functions to manage credit balances and account
-//!   links.
+//! - **Credit Claiming:** Users initiate a claim on-chain, signaling the intention to use
+//!   credits off-chain. This reduces the on-chain balance.
+//! - **Activity-Based Decay:** To strongly incentivize weekly interaction, the
+//!   *claimable* portion of a user's credit balance decays significantly if they do not
+//!   claim or actively update their credits frequently (ideally weekly). The raw accrued balance
+//!   remains, but its effective claimable value diminishes rapidly with prolonged inactivity.
+//! - **Admin Controls:** Provides administrative functions to manage credit balances and account links.
 //!
 //! ## Integration
 //!
 //! This pallet relies on:
-//! - An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo`
-//!   (`Config::StakingInfo`) to query the active TNT stake for users.
+//! - An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::StakingInfo`)
+//!   to query the active TNT stake for users.
 //! - An implementation of `frame_support::traits::tokens::fungibles` (`Config::Currency`) to handle
-//!   TNT token balances, transfers (for burning to a target address), and burning.
+//!   TNT token balances and burning.
 //! - `frame_system` for basic system types and block numbers.
 //! - `sp_arithmetic::Perbill` for decay calculations.
 //!
@@ -37,15 +36,12 @@
 //! - **TNT:** The primary utility token used for staking and burning.
 //! - **Credits:** An on-chain numerical balance representing usage rights for off-chain services.
 //!   Credits are not transferable tokens themselves.
-//! - **Staking:** Locking TNT tokens via the `StakingInfo` provider (e.g.,
-//!   `pallet-multi-asset-delegation`).
+//! - **Staking:** Locking TNT tokens via the `StakingInfo` provider (e.g., `pallet-multi-asset-delegation`).
 //! - **Burning:** Permanently destroying TNT tokens in exchange for immediate credits.
 //! - **Linking:** Associating an on-chain `AccountId` with an off-chain identifier.
 //! - **Claiming:** Reducing the on-chain credit balance, implying off-chain usage.
-//! - **Interaction:** An action (linking, claiming, triggering update) that resets the decay timer.
-//! - **Decay:** Reduction in the *claimable percentage* of the raw credit balance over time due to
-//!   inactivity. Designed to be aggressive after a grace period (e.g., 1 week) to encourage regular
-//!   claims.
+//! - **Interaction:** An action (linking, claiming, triggering update, admin action) that resets the decay timer.
+//! - **Decay:** Reduction in the *claimable percentage* of the raw credit balance over time due to inactivity. Designed to be aggressive after a grace period (e.g., 1 week) to encourage regular claims.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -66,8 +62,8 @@ pub mod pallet {
 		pallet_prelude::{ConstU32, *},
 		traits::{
 			tokens::{
-				fungibles::{self, Inspect, Mutate},
-				Fortunes, Precision,
+				fungibles::{Inspect, Mutate},
+				Fortitude, Precision, Preservation,
 			},
 			EnsureOriginWithArg,
 		},
@@ -181,6 +177,7 @@ pub mod pallet {
 		StorageMap<_, Blake2_128Concat, T::AccountId, BlockNumberOf<T>, ValueQuery>;
 
 	// --- Events ---
+	/// Events emitted by this pallet.
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -228,8 +225,19 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Links the sender's on-chain account to an off-chain identifier and resets decay timer.
+		///
+		/// # Arguments
+		/// * `origin`: The origin of the call.
+		/// * `offchain_account_id`: The off-chain account ID to link.
+		///
+		/// # Errors
+		/// * `AlreadyLinked`: The account is already linked.
+		/// * `Overflow`: The credit balance overflowed.
+		///
+		/// # Weight
+		/// * `reads_writes(1, 2)`: Reads: LinkedAccounts. Writes: LinkedAccounts, LastInteractionBlock
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(1, 2))] // Reads: LinkedAccounts. Writes: LinkedAccounts, LastInteractionBlock
+		#[pallet::weight(T::DbWeight::get().reads_writes(1, 2))]
 		pub fn link_account(
 			origin: OriginFor<T>,
 			offchain_account_id: OffchainAccountIdOf<T>,
@@ -246,8 +254,20 @@ pub mod pallet {
 		}
 
 		/// Burns TNT tokens for immediate credits. Accrues staking rewards first.
+		///
+		/// # Arguments
+		/// * `origin`: The origin of the call.
+		/// * `amount`: The amount of TNT to burn.
+		///
+		/// # Errors
+		/// * `AmountZero`: The amount to burn must be greater than zero.
+		/// * `InsufficientTntBalance`: The user does not have enough TNT to burn.
+		/// * `Overflow`: The credit balance overflowed.
+		///
+		/// # Weight
+		/// * `reads_writes(3, 3)`: Reads: Balance, LastUpdate, StakeInfo/Tiers. Writes: Balance, CreditBalance, LastUpdate
 		#[pallet::call_index(1)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(3, 3))] // Reads: Balance, LastUpdate, StakeInfo/Tiers. Writes: Balance, CreditBalance, LastUpdate
+		#[pallet::weight(T::DbWeight::get().reads_writes(3, 3))]
 		pub fn burn(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -271,9 +291,17 @@ pub mod pallet {
 		}
 
 		/// Updates accrued credits based on staking and resets the decay timer.
+		///
+		/// # Arguments
+		/// * `origin`: The origin of the call.
+		///
+		/// # Errors
+		/// * `Overflow`: The credit balance overflowed.
+		///
+		/// # Weight
+		/// * `reads_writes(4, 3)`: Reads: LastUpdate, StakeInfo, Tiers, LastInteract. Writes: LastUpdate, CreditBalance,
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(4, 3))] // Reads: LastUpdate, StakeInfo, Tiers, LastInteract. Writes: LastUpdate, CreditBalance,
-														   // LastInteract
+		#[pallet::weight(T::DbWeight::get().reads_writes(4, 3))]
 		pub fn trigger_credit_update(origin: OriginFor<T>) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Self::accrue_credits(&who)?; // Accrue raw credits
@@ -284,9 +312,19 @@ pub mod pallet {
 		}
 
 		/// Claims credits, applying decay based on time since last interaction.
+		///
+		/// # Arguments
+		/// * `origin`: The origin of the call.
+		/// * `amount_to_claim`: The amount of credits to claim.
+		/// * `target_offchain_account_id`: The off-chain account ID to link.
+		///
+		/// # Errors
+		/// * `AmountZero`: The amount to claim must be greater than zero.
+		/// # Weight
+		/// * `reads_writes(5, 3)`: Reads: LinkedAcc, LastInteract, LastUpdate, StakeInfo, Tiers. Writes: LastUpdate,
+		/// CreditBalance, LastInteract
 		#[pallet::call_index(3)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(5, 3))] // Reads: LinkedAcc, LastInteract, LastUpdate, StakeInfo, Tiers. Writes: LastUpdate,
-														   // CreditBalance, LastInteract
+		#[pallet::weight(T::DbWeight::get().reads_writes(5, 3))]
 		pub fn claim_credits(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount_to_claim: BalanceOf<T>,
@@ -345,8 +383,16 @@ pub mod pallet {
 		}
 
 		/// Forcefully sets credit balance and resets decay timer. Requires AdminOrigin.
+		///
+		/// # Arguments
+		/// * `origin`: The origin of the call.
+		/// * `who`: The AccountId to set the balance for.
+		/// * `new_balance`: The new balance to set.
+		///
+		/// # Weight
+		/// * `writes(2)`: Writes: CreditBalance, LastInteraction
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::DbWeight::get().writes(2))] // Writes: CreditBalance, LastInteraction
+		#[pallet::weight(T::DbWeight::get().writes(2))]
 		pub fn force_set_credit_balance(
 			origin: OriginFor<T>,
 			who: T::AccountId,
@@ -363,8 +409,16 @@ pub mod pallet {
 		}
 
 		/// Forcefully links an account and resets decay timer. Requires AdminOrigin.
+		///
+		/// # Arguments
+		/// * `origin`: The origin of the call.
+		/// * `who`: The AccountId to link.
+		/// * `offchain_account_id`: The off-chain account ID to link.
+		///
+		/// # Weight
+		/// * `writes(2)`: Writes: LinkedAccount, LastInteraction
 		#[pallet::call_index(5)]
-		#[pallet::weight(T::DbWeight::get().writes(2))] // Writes: LinkedAccount, LastInteraction
+		#[pallet::weight(T::DbWeight::get().writes(2))]
 		pub fn force_link_account(
 			origin: OriginFor<T>,
 			who: T::AccountId,
@@ -383,6 +437,12 @@ pub mod pallet {
 
 	impl<T: Config> Pallet<T> {
 		/// Determines the appropriate credit emission rate based on the staked amount.
+		///
+		/// # Arguments
+		/// * `staked_amount`: The amount of staked TNT.
+		///
+		/// # Returns
+		/// * `BalanceOf<T>`: The appropriate credit emission rate.
 		fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
 			let tiers = T::StakeTiers::get();
 			for tier in tiers.iter().rev() {
@@ -394,6 +454,12 @@ pub mod pallet {
 		}
 
 		/// Calculates and adds accrued credits based on staking duration and amount.
+		///
+		/// # Arguments
+		/// * `who`: The AccountId to accrue credits for.
+		///
+		/// # Errors
+		/// * `Overflow`: The credit balance overflowed.
 		fn accrue_credits(who: &T::AccountId) -> DispatchResult {
 			let current_block = frame_system::Pallet::<T>::block_number();
 			let last_update = LastRewardUpdateBlock::<T>::get(who);
@@ -475,10 +541,18 @@ pub mod pallet {
 			);
 
 			match T::CreditBurnTarget::get() {
-				Some(target_account) =>
-					Err(DispatchError::Other("CreditBurnTarget transfer not implemented")),
+				Some(target_account) => {
+					Err(DispatchError::Other("CreditBurnTarget transfer not implemented"))
+				},
 				None => {
-					T::Currency::burn_from(tnt_asset_id, who, amount, Precision::Exact)?;
+					T::Currency::burn_from(
+						tnt_asset_id,
+						who,
+						amount,
+						Preservation::Preserve,
+						Precision::Exact,
+						Fortitude::Dangerous,
+					)?;
 				},
 			}
 			Ok(())
