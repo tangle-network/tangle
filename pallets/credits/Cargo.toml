@@ -1,0 +1,64 @@
+[package]
+name = "pallet-cloud-credits"
+description = "Cloud credits module that allows users to buy/earn credits."
+repository = "https://github.com/tangle-network/tangle"
+license = "Apache-2.0"
+version = "1.0.0"
+authors = ["Tangle Developers <hello@tangle.tools>"]
+edition = "2021"
+
+[dependencies]
+parity-scale-codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true, optional = true }
+
+pallet-assets = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-multi-asset-delegation = { workspace = true }
+pallet-session = { workspace = true }
+pallet-staking = { workspace = true }
+pallet-timestamp = { workspace = true }
+pallet-utility = { workspace = true }
+
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+sp-application-crypto = { workspace = true }
+sp-io = { workspace = true }
+sp-runtime = { workspace = true }
+sp-std = { workspace = true }
+sp-arithmetic = { workspace = true }
+frame-benchmarking = { workspace = true, optional = true }
+tangle-primitives = { workspace = true }
+
+[dev-dependencies]
+sp-core = { workspace = true }
+
+[features]
+default = ["std"]
+std = [
+    "frame-benchmarking?/std",
+    "frame-support/std",
+    "frame-system/std",
+    "tangle-primitives/std",
+    "parity-scale-codec/std",
+    "scale-info/std",
+    "serde",
+    "sp-application-crypto/std",
+    "sp-io/std",
+    "sp-runtime/std",
+    "sp-std/std",
+    "pallet-assets/std",
+    "pallet-balances/std",
+    "pallet-multi-asset-delegation/std",
+    "pallet-session/std",
+    "pallet-staking/std",
+    "pallet-timestamp/std",
+    "pallet-utility/std",
+]
+try-runtime = ["frame-support/try-runtime", "frame-system/try-runtime", "sp-runtime/try-runtime"]
+runtime-benchmarks = [
+    "frame-benchmarking/runtime-benchmarks",
+    "frame-support/runtime-benchmarks",
+    "frame-system/runtime-benchmarks",
+    "sp-runtime/runtime-benchmarks",
+]
