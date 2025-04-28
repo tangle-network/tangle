@@ -3,13 +3,13 @@
 
 use crate::{self as pallet_credits, types::*, Config, Pallet as CreditsPallet};
 use frame_support::{
-	bounded_vec, construct_runtime, derive_impl, parameter_types,
+	assert_ok, bounded_vec, construct_runtime, derive_impl, parameter_types,
 	traits::{
 		fungible::Credit, // Needed for Balance pallet AccountData
-		tokens::fungibles::{
-			self, DepositConsequence, Inspect, Mutate, Transfer, WithdrawConsequence,
+		tokens::{
+			fungibles::{self, DepositConsequence, Inspect, Mutate, Transfer, WithdrawConsequence},
+			Fortunes, Precision,
 		},
-		tokens::{Fortunes, Precision}, // Import Precision/Fortunes here
 		AsEnsureOriginWithArg,
 		ConstU128,
 		ConstU16,
@@ -72,7 +72,6 @@ construct_runtime! {
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Utility: pallet_utility::{Pallet, Call, Event},
-		Historical: pallet_session_historical::{Pallet},
 		MultiAssetDelegation: pallet_multi_asset_delegation::{Pallet, Call, Storage, Event<T>},
 		Credits: pallet_credits::{Pallet, Call, Storage, Event<T>},
 	}
@@ -100,7 +99,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(ALICE, 1_000_000),
 			(BOB, 1_000_000),
 			(CHARLIE, 1_000_000),
-			(ADMIN, 1_000_000),
+			(ADMIN, 1_000_000), // Keep Admin balance for Asset creation if needed
 		],
 	}
 	.assimilate_storage(&mut t)
@@ -109,15 +108,12 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	// Configure Assets - Create TNT Asset (ID 0)
 	pallet_assets::GenesisConfig::<Test> {
 		assets: vec![
-			(TNT_ASSET_ID, ADMIN, true, 1), // Admin is owner, min_balance = 1
+			(TNT_ASSET_ID, ADMIN, true, 1), // Admin creates/owns asset
 		],
 		metadata: vec![
 			(TNT_ASSET_ID, b"TNT Token".to_vec(), b"TNT".to_vec(), 12), // Name, Symbol, Decimals
 		],
-		accounts: vec![
-			(TNT_ASSET_ID, ALICE, 10_000), // Give Alice initial TNT
-			(TNT_ASSET_ID, BOB, 5_000),    // Give Bob initial TNT
-		],
+		accounts: vec![(TNT_ASSET_ID, ALICE, 10_000), (TNT_ASSET_ID, BOB, 5_000)],
 		next_asset_id: Some(TNT_ASSET_ID + 1),
 	}
 	.assimilate_storage(&mut t)
@@ -126,7 +122,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	// Configure MultiAssetDelegation genesis
 	// Initialize Alice and Bob as operators first (needs native balance)
 	pallet_multi_asset_delegation::GenesisConfig::<Test> {
-		operators: vec![(ALICE, 1000), (BOB, 1000)], // Bond native currency
+		operators: vec![(ALICE, 1000), (BOB, 1000)], // Need native currency for bond
 		delegations: vec![],                         // Start with no delegations
 	}
 	.assimilate_storage(&mut t)
@@ -177,6 +173,6 @@ pub fn run_to_block(n: BlockNumber) {
 		Session::on_initialize(block_num);
 		Staking::on_initialize(block_num);
 		MultiAssetDelegation::on_initialize(block_num);
-		// CreditsPallet::on_initialize(block_num); // If it had hooks
+		CreditsPallet::<Test>::on_initialize(block_num); // If Credits pallet had hooks
 	}
 }

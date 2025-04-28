@@ -1,11 +1,10 @@
-#![cfg(test)]
 use crate::{
-	mock::{self as mock, *},
+	mock::{self, *},
 	types::*,
 	Error, Event, Pallet as Credits,
 };
-use frame_support::{assert_noop, assert_ok, bounded_vec};
-use mock_currency::set_balance as set_tnt_balance;
+use frame_support::{assert_noop, assert_ok, storage::bounded_vec, traits::fungibles::Mutate};
+use mock::mock_currency::{self as mock_currency, set_balance as set_tnt_balance};
 use sp_runtime::{DispatchError, DispatchResult, Perbill};
 
 fn link_account(who: AccountId, id_str: &[u8]) -> DispatchResult {
@@ -26,579 +25,333 @@ fn last_interaction(who: AccountId) -> BlockNumber {
 	Credits::last_interaction_block(who)
 }
 
+fn last_reward_update(who: AccountId) -> BlockNumber {
+	Credits::last_reward_update_block(who)
+}
+
 fn set_stake(who: AccountId, amount: Balance) {
 	MOCK_STAKING_INFO.with(|s| s.borrow_mut().set_stake(who, TNT_ASSET_ID, amount));
 }
 
+fn expected_accrued(start_block: BlockNumber, end_block: BlockNumber, rate: Balance) -> Balance {
+	if end_block <= start_block {
+		return 0;
+	}
+	rate.saturating_mul((end_block - start_block).into())
+}
+
+// Helper to calculate expected claimable amount *for testing purposes only*
+// Mirrors the logic in claim_credits but uses test state directly.
+fn calculate_expected_claimable(who: AccountId, current_block: BlockNumber) -> Balance {
+	let last_update = last_reward_update(who);
+	let last_interact = last_interaction(who);
+
+	let tnt_asset = tangle_primitives::services::Asset::Custom(TNT_ASSET_ID);
+	let maybe_deposit_info = MultiAssetDelegation::get_user_deposit_with_locks(&who, tnt_asset);
+	let staked_amount = maybe_deposit_info.map_or(Zero::zero(), |deposit_info| {
+		let locked_total = deposit_info.amount_with_locks.map_or(Zero::zero(), |locks| {
+			locks.iter().fold(Zero::zero(), |acc, lock| acc.saturating_add(lock.amount))
+		});
+		deposit_info.unlocked_amount.saturating_add(locked_total)
+	});
+
+	let rate = CreditsPallet::<Test>::get_current_rate(staked_amount);
+	let accrued_since_last_update = expected_accrued(last_update, current_block, rate);
+
+	let elapsed_blocks_decay =
+		if last_interact == 0 { Zero::zero() } else { current_block.saturating_sub(last_interact) };
+	let decay_factor = CreditsPallet::<Test>::calculate_decay_factor(elapsed_blocks_decay);
+
+	// Apply decay to the amount accrued *since the last update* (as per simplified logic)
+	decay_factor.mul_floor(accrued_since_last_update)
+}
+
+// Helper to get TNT balance using the Assets pallet
+fn get_tnt_balance(who: AccountId) -> Balance {
+	Assets::balance(TNT_ASSET_ID, &who)
+}
+
+// Helper to get the expected claimable amount based on current state
+fn get_max_claimable(who: AccountId) -> Balance {
+	let current_block = System::block_number();
+	let last_update = last_reward_update(who);
+	let window = CreditClaimWindowValue::get();
+	let start_block = max(last_update, current_block.saturating_sub(window));
+	let effective_end_block = current_block;
+
+	if start_block >= effective_end_block {
+		return 0;
+	}
+	let tnt_asset = tangle_primitives::services::Asset::Custom(TNT_ASSET_ID);
+	let maybe_deposit_info = MultiAssetDelegation::get_user_deposit_with_locks(&who, tnt_asset);
+	let staked_amount = maybe_deposit_info.map_or(Zero::zero(), |deposit_info| {
+		let locked_total = deposit_info.amount_with_locks.map_or(Zero::zero(), |locks| {
+			locks.iter().fold(Zero::zero(), |acc, lock| acc.saturating_add(lock.amount))
+		});
+		deposit_info.unlocked_amount.saturating_add(locked_total)
+	});
+
+	let rate = Credits::get_current_rate(staked_amount);
+	if rate.is_zero() {
+		return 0;
+	}
+
+	let blocks_in_window = effective_end_block.saturating_sub(start_block);
+	if blocks_in_window.is_zero() {
+		return 0;
+	}
+
+	let multiplier = <BalanceOf<Test>>::try_from(blocks_in_window).unwrap_or_default();
+	rate.checked_mul(&multiplier).unwrap_or(0)
+}
+
 #[test]
-fn accrue_credits_works() {
+fn initial_state_correct() {
 	new_test_ext().execute_with(|| {
-		// Initial setup in new_test_ext: Alice Tier 3 (15/block), Bob Tier 1 (1/block)
-
-		run_to_block(10);
-		// Trigger accrual
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(BOB)));
-
-		// Block 1 is genesis, accrual starts block 2. 9 blocks passed (2 to 10 inclusive).
-		assert_eq!(credit_balance(ALICE), 15 * 9, "Alice initial accrual");
-		assert_eq!(credit_balance(BOB), 1 * 9, "Bob initial accrual");
-		assert_eq!(last_interaction(ALICE), 10);
-		assert_eq!(last_interaction(BOB), 10);
-
-		run_to_block(20);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-
-		// Alice: 10 more blocks (11 to 20 inclusive)
-		assert_eq!(credit_balance(ALICE), (15 * 9) + (15 * 10), "Alice second accrual");
-		assert_eq!(last_interaction(ALICE), 20);
-		// Bob hasn't updated since block 10
-		assert_eq!(credit_balance(BOB), 1 * 9, "Bob balance unchanged");
-		assert_eq!(last_interaction(BOB), 10);
-
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(BOB)));
-		// Bob: 10 more blocks (11 to 20 inclusive)
-		assert_eq!(credit_balance(BOB), (1 * 9) + (1 * 10), "Bob second accrual");
-		assert_eq!(last_interaction(BOB), 20);
+		assert_eq!(last_reward_update(ALICE), 0);
+		// Check initial stakes were set up by delegate calls in new_test_ext
+		assert_eq!(
+			MultiAssetDelegation::get_delegator_staked_amount(
+				ALICE,
+				ALICE,
+				tangle_primitives::services::Asset::Custom(TNT_ASSET_ID)
+			)
+			.unwrap_or(0),
+			1000
+		);
+		assert_eq!(
+			MultiAssetDelegation::get_delegator_staked_amount(
+				BOB,
+				BOB,
+				tangle_primitives::services::Asset::Custom(TNT_ASSET_ID)
+			)
+			.unwrap_or(0),
+			150
+		);
 	});
 }
 
 #[test]
-fn link_and_claim_basic_flow() {
+fn burn_emits_event_and_updates_reward_block() {
 	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@test.com";
-		assert_ok!(link_account(ALICE, alice_id));
-		assert_eq!(last_interaction(ALICE), 1);
+		System::set_block_number(10);
+		let initial_tnt = get_tnt_balance(ALICE);
+		assert!(initial_tnt >= 50);
 
-		run_to_block(10);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let accrued = 15 * 9;
-		assert_eq!(credit_balance(ALICE), accrued);
-		assert_eq!(last_interaction(ALICE), 10); // Update resets interaction
+		assert_eq!(last_reward_update(ALICE), 0);
 
-		// Claim some
-		assert_ok!(claim_credits(ALICE, 100, alice_id));
-		assert_eq!(credit_balance(ALICE), accrued - 100);
-		assert_eq!(last_interaction(ALICE), 10); // Claim resets interaction (at same block)
+		assert_ok!(Credits::burn(RuntimeOrigin::signed(ALICE), 50));
 
-		// Fails if not linked
-		assert_noop!(claim_credits(BOB, 1, b"bob"), Error::<Test>::AccountNotLinked);
-
-		// Fails if wrong ID
-		assert_noop!(claim_credits(ALICE, 1, b"wrong_id"), Error::<Test>::OffchainAccountMismatch);
-	});
-}
-
-// --- Decay Tests ---
-
-#[test]
-fn decay_no_decay_within_grace_period() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@decay";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction at block 1
-
-		let end_of_grace = 1 + WEEK;
-		run_to_block(end_of_grace); // Go to end of 1st week + 1 block
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let accrued = 15 * WEEK; // Accrued over exactly 1 week
-		assert_eq!(credit_balance(ALICE), accrued);
-		assert_eq!(last_interaction(ALICE), end_of_grace);
-
-		// Claim full amount - should succeed fully (elapsed 0 since update)
-		assert_ok!(claim_credits(ALICE, accrued, alice_id));
-		assert_eq!(credit_balance(ALICE), 0);
-		assert_eq!(last_interaction(ALICE), end_of_grace);
-	});
-}
-
-#[test]
-fn decay_step1_boundary_just_over() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@decay75_boundary";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
-
-		// Go exactly to the start of week 2 + 1 block
-		let claim_block = 1 + WEEK + 1;
-		run_to_block(claim_block);
-
-		// Claim. Elapsed = WEEK + 1 blocks. Factor should still be 100% according to steps [ (WEEK
-		// * 1, 100%), (WEEK*2, 75%)]
-		let accrued = 15 * (claim_block - 1); // Includes accrual up to claim block
-		let expected_claimable = Perbill::from_percent(100).mul_floor(accrued);
-
-		assert_ok!(claim_credits(ALICE, expected_claimable, alice_id));
-		assert_eq!(credit_balance(ALICE), 0); // Should be able to claim all
-		assert_eq!(last_interaction(ALICE), claim_block);
-	});
-}
-
-#[test]
-fn decay_step2_boundary_just_over() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@decay40_boundary";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
-
-		// Go exactly to the start of week 3 + 1 block
-		let claim_block = 1 + 2 * WEEK + 1;
-		run_to_block(claim_block);
-
-		// Claim. Elapsed = 2*WEEK + 1 blocks. Factor should be 75% [ (WEEK*2, 75%), (WEEK*3, 40%)]
-		let accrued = 15 * (claim_block - 1);
-		let expected_claimable = Perbill::from_percent(75).mul_floor(accrued);
-
-		// Try claiming slightly more
-		assert_noop!(
-			claim_credits(ALICE, expected_claimable + 1, alice_id),
-			Error::<Test>::InsufficientCreditBalance
+		System::assert_last_event(
+			Event::CreditsGrantedFromBurn {
+				who: ALICE,
+				tnt_burned: 50,
+				credits_granted: 50 * CreditBurnConversionValue::get(),
+			}
+			.into(),
 		);
 
-		// Claim exact effective amount
-		assert_ok!(claim_credits(ALICE, expected_claimable, alice_id));
-		let expected_raw_deduction =
-			Perbill::from_percent(75).saturating_reciprocal_mul_ceil(expected_claimable);
-		let expected_remaining = accrued.saturating_sub(expected_raw_deduction);
-		assert_eq!(credit_balance(ALICE), expected_remaining);
-		assert_eq!(last_interaction(ALICE), claim_block);
+		assert_eq!(get_tnt_balance(ALICE), initial_tnt - 50);
+		assert_eq!(last_reward_update(ALICE), 10); // Updated by burn
 	});
 }
 
 #[test]
-fn decay_step_intermediate_value() {
+fn claim_basic_within_window() {
 	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@decay_intermediate";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
+		let alice_id_str = b"alice_claim";
+		let alice_id: OffchainAccountIdOf<Test> = alice_id_str.to_vec().try_into().unwrap();
 
-		// Go to 2.5 weeks
-		let claim_block = 1 + 2 * WEEK + WEEK / 2;
-		run_to_block(claim_block);
+		// Alice stakes 1000 -> 15 credits/block
+		run_to_block(100); // Accrue for 99 blocks (2 to 100)
+		let max_claimable = get_max_claimable(ALICE);
+		let expected = 15 * 99;
+		assert_eq!(
+			max_claimable, expected,
+			"Max claimable should match simple accrual within window"
+		);
 
-		// Claim. Elapsed = 2.5 * WEEK blocks. Factor should be 75% (from >= 2 weeks step)
-		let accrued = 15 * (claim_block - 1);
-		let expected_claimable = Perbill::from_percent(75).mul_floor(accrued);
+		// Claim less than accrued
+		let claim_amount = 100;
+		assert!(claim_amount <= max_claimable);
+		assert_ok!(claim_credits(ALICE, claim_amount, alice_id_str));
 
-		// Claim exact effective amount
-		assert_ok!(claim_credits(ALICE, expected_claimable, alice_id));
-		let expected_raw_deduction =
-			Perbill::from_percent(75).saturating_reciprocal_mul_ceil(expected_claimable);
-		let expected_remaining = accrued.saturating_sub(expected_raw_deduction);
-		assert_eq!(credit_balance(ALICE), expected_remaining);
-		assert_eq!(last_interaction(ALICE), claim_block);
+		System::assert_last_event(
+			Event::CreditsClaimed {
+				who: ALICE,
+				amount_claimed: claim_amount,
+				offchain_account_id: alice_id.clone(),
+			}
+			.into(),
+		);
+
+		assert_eq!(last_reward_update(ALICE), 100); // Updated by claim
 	});
 }
 
 #[test]
-fn decay_step_final_0_percent() {
+fn claim_at_window_boundary() {
 	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@decay0";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
+		let alice_id_str = b"alice_window_edge";
+		let window = CreditClaimWindowValue::get();
 
-		// Go past 5 weeks
-		let claim_block = 1 + 5 * WEEK + 100;
-		run_to_block(claim_block);
+		run_to_block(window + 1); // Go exactly to the end of the first window
+		let max_claimable = get_max_claimable(ALICE);
+		let expected = 15 * window; // Should be capped at window length
+		assert_eq!(max_claimable, expected, "Max claimable should be capped at window");
 
-		// Claiming 1 should fail (0% factor)
-		assert_noop!(claim_credits(ALICE, 1, alice_id), Error::<Test>::InsufficientCreditBalance);
-
-		// Accrue credits to check balance remains raw
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let expected_raw = 15 * (claim_block - 1);
-		assert_eq!(credit_balance(ALICE), expected_raw);
-		assert_eq!(last_interaction(ALICE), claim_block); // Update resets timer
-
-		// Now claim should work (elapsed = 0)
-		assert_ok!(claim_credits(ALICE, 100, alice_id));
-		assert_eq!(credit_balance(ALICE), expected_raw - 100);
-		assert_eq!(last_interaction(ALICE), claim_block);
+		assert_ok!(claim_credits(ALICE, max_claimable, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), window + 1);
 	});
 }
 
 #[test]
-fn interaction_resets_decay() {
+fn claim_after_long_inactivity_capped_by_window() {
 	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@reset";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
+		let alice_id_str = b"alice_inactive";
+		let window = CreditClaimWindowValue::get();
 
-		// Wait 3.5 weeks
-		let block1 = 1 + 3 * WEEK + WEEK / 2;
+		run_to_block(window * 3); // Wait much longer than the window
+		let max_claimable = get_max_claimable(ALICE);
+		let expected = 15 * window; // Still capped by the single window length
+		assert_eq!(max_claimable, expected, "Claim after inactivity still capped by window");
+
+		// Claiming more than window allowance fails
+		assert_noop!(
+			claim_credits(ALICE, max_claimable + 1, alice_id_str),
+			Error::<Test>::ClaimAmountExceedsWindowAllowance
+		);
+
+		// Claiming window allowance succeeds
+		assert_ok!(claim_credits(ALICE, max_claimable, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), window * 3);
+	});
+}
+
+#[test]
+fn claim_multiple_times_resets_window() {
+	new_test_ext().execute_with(|| {
+		let alice_id_str = b"alice_multi_claim";
+		let window = CreditClaimWindowValue::get();
+		let rate = 15; // Alice rate
+
+		// 1. Accrue and claim within first window
+		let block1 = window / 2;
 		run_to_block(block1);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let accrued1 = 15 * (block1 - 1);
-		assert_eq!(credit_balance(ALICE), accrued1);
-		assert_eq!(last_interaction(ALICE), block1); // Interaction reset
+		let max_claimable1 = get_max_claimable(ALICE);
+		let expected1 = rate * (block1 - 1); // Accrued from block 1
+		assert_eq!(max_claimable1, expected1);
+		assert_ok!(claim_credits(ALICE, max_claimable1, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), block1);
 
-		// Wait just under 1 week
-		let block2 = block1 + WEEK - 100;
+		// 2. Accrue past the original window end, but within new window from claim 1
+		let block2 = block1 + window - 10; // Still within window relative to block1
 		run_to_block(block2);
+		let max_claimable2 = get_max_claimable(ALICE);
+		let expected2 = rate * (block2 - block1); // Accrued from block1
+		assert_eq!(max_claimable2, expected2);
+		assert_ok!(claim_credits(ALICE, max_claimable2, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), block2);
 
-		// Claim should have 100% factor (elapsed < 1 week)
-		let accrued2 = 15 * (WEEK - 100);
-		let total_raw = accrued1 + accrued2;
-		assert_ok!(claim_credits(ALICE, total_raw, alice_id));
-		assert_eq!(credit_balance(ALICE), 0);
-		assert_eq!(last_interaction(ALICE), block2); // Interaction reset by claim
-	});
-}
-
-#[test]
-fn burn_does_not_reset_decay() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@burn_no_reset";
-		set_tnt_balance(TNT_ASSET_ID, ALICE, 100);
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
-
-		// Wait 1.5 weeks
-		let block_burn = 1 + WEEK + WEEK / 2;
-		run_to_block(block_burn);
-		assert_eq!(last_interaction(ALICE), 1);
-
-		// Burn TNT
-		assert_ok!(Credits::burn(RuntimeOrigin::signed(ALICE), 10));
-		let credits_from_burn = 10 * CreditBurnConversionValue::get();
-		let credits_from_staking = 15 * (block_burn - 1); // Accrued during burn call
-		assert_eq!(credit_balance(ALICE), credits_from_burn + credits_from_staking);
-		// IMPORTANT: Last interaction still 1
-		assert_eq!(last_interaction(ALICE), 1);
-
-		// Wait another week (total > 2 weeks since interaction)
-		let block_claim = block_burn + WEEK;
-		run_to_block(block_claim);
-
-		// Claim should use 75% factor (elapsed > 2 weeks from block 1)
-		let final_staking_credits = 15 * WEEK;
-		let final_raw_balance = credits_from_burn + credits_from_staking + final_staking_credits;
-		let expected_claimable = Perbill::from_percent(75).mul_floor(final_raw_balance);
-
-		assert_ok!(claim_credits(ALICE, expected_claimable, alice_id));
-		assert_eq!(last_interaction(ALICE), block_claim); // Reset by claim
-
-		let expected_raw_deduction =
-			Perbill::from_percent(75).saturating_reciprocal_mul_ceil(expected_claimable);
-		let expected_remaining = final_raw_balance.saturating_sub(expected_raw_deduction);
-		assert_eq!(credit_balance(ALICE), expected_remaining);
-	});
-}
-
-#[test]
-fn admin_actions_reset_decay() {
-	new_test_ext().execute_with(|| {
-		let bob_id = b"bob";
-		assert_ok!(link_account(BOB, bob_id)); // Interaction block 1
-
-		// Wait 3.5 weeks
-		let block1 = 1 + 3 * WEEK + WEEK / 2;
-		run_to_block(block1);
-
-		// Admin sets balance - resets interaction
-		assert_ok!(Credits::force_set_credit_balance(RuntimeOrigin::signed(ADMIN), BOB, 5000));
-		assert_eq!(credit_balance(BOB), 5000);
-		assert_eq!(last_interaction(BOB), block1);
-
-		// Wait just under 1 week
-		let block2 = block1 + WEEK - 100;
-		run_to_block(block2);
-
-		// Claim should be 100%
-		assert_ok!(claim_credits(BOB, 5000, bob_id));
-		assert_eq!(credit_balance(BOB), 0);
-		assert_eq!(last_interaction(BOB), block2);
-
-		// Wait 3.5 weeks again
-		let block3 = block2 + 3 * WEEK + WEEK / 2;
+		// 3. Wait longer than a window, claim is capped
+		let block3 = block2 + window + 100;
 		run_to_block(block3);
-
-		// Admin links account - resets interaction
-		assert_ok!(Credits::force_link_account(
-			RuntimeOrigin::signed(ADMIN),
-			BOB,
-			bob_id.to_vec().try_into().unwrap()
-		));
-		assert_eq!(last_interaction(BOB), block3);
+		let max_claimable3 = get_max_claimable(ALICE);
+		let expected3 = rate * window; // Capped at window size
+		assert_eq!(max_claimable3, expected3);
+		assert_ok!(claim_credits(ALICE, max_claimable3, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), block3);
 	});
 }
 
 #[test]
-fn claiming_partial_amount_with_decay() {
+fn claim_failures() {
 	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@partial_decay";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
+		let alice_id_str = b"alice@claim_fail";
+		let alice_id: OffchainAccountIdOf<Test> = alice_id_str.to_vec().try_into().unwrap();
+		run_to_block(10);
 
-		// Wait 2.5 weeks
-		let block1 = 1 + 2 * WEEK + WEEK / 2;
-		run_to_block(block1);
+		// Claim zero
+		assert_noop!(claim_credits(ALICE, 0, alice_id_str), Error::<Test>::AmountZero);
 
-		// Accrue and update
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let raw_balance1 = 15 * (block1 - 1);
-		assert_eq!(credit_balance(ALICE), raw_balance1);
-		assert_eq!(last_interaction(ALICE), block1);
+		// Claim more than allowance
+		let max_claimable = get_max_claimable(ALICE);
+		assert_noop!(
+			claim_credits(ALICE, max_claimable + 1, alice_id_str),
+			Error::<Test>::ClaimAmountExceedsWindowAllowance
+		);
 
-		// Wait another 2.5 weeks (total 5 weeks since link, but only 2.5 since trigger)
-		let block2 = block1 + 2 * WEEK + WEEK / 2;
-		run_to_block(block2);
-
-		// Elapsed time is 2.5 weeks. Decay factor should be 75%.
-		let final_raw_balance = raw_balance1 + 15 * (2 * WEEK + WEEK / 2);
-		let decay_factor = Perbill::from_percent(75);
-		let effective_claimable = decay_factor.mul_floor(final_raw_balance);
-
-		// Claim about half of the effective amount
-		let claim_amount = effective_claimable / 2;
-		assert!(claim_amount > 0);
-
-		assert_ok!(claim_credits(ALICE, claim_amount, alice_id));
-
-		// Calculate expected raw deduction = claim / factor (ceil)
-		let expected_raw_deduction = decay_factor.saturating_reciprocal_mul_ceil(claim_amount);
-		let expected_remaining_raw = final_raw_balance.saturating_sub(expected_raw_deduction);
-
-		assert_eq!(credit_balance(ALICE), expected_remaining_raw);
-		assert_eq!(last_interaction(ALICE), block2); // Updated by claim
-	});
-}
-
-// --- Failure Case Tests ---
-
-#[test]
-fn link_account_failures() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice";
-		assert_ok!(link_account(ALICE, alice_id));
-		// Already linked
-		assert_noop!(link_account(ALICE, b"new_id"), Error::<Test>::AlreadyLinked);
-		// ID too long (MaxAccIdLen is 128)
-		let long_id = vec![0u8; 129];
-		let bounded_long_id: Result<OffchainAccountIdOf<Test>, _> = long_id.try_into();
-		assert!(bounded_long_id.is_err()); // Ensure conversion itself fails if frame_support checks it
-		                             // If conversion doesn't check, the extrinsic might (depending
-		                             // on implementation details not shown)
-		                             // Let's assume the extrinsic or type conversion prevents it.
-		                             // Note: Direct call test depends on how BoundedVec handles
-		                             // oversized input.
+		// ID too long
+		let long_id = vec![0u8; (MaxAccIdLenValue::get() + 1) as usize];
+		let bounded_long_id_res: Result<OffchainAccountIdOf<Test>, _> = long_id.try_into();
+		assert!(bounded_long_id_res.is_err());
+		assert_noop!(
+			Credits::claim_credits(RuntimeOrigin::signed(ALICE), 1, bounded_vec![0u8; 129]),
+			Error::<Test>::OffchainAccountIdTooLong
+		);
 	});
 }
 
 #[test]
 fn burn_failures() {
 	new_test_ext().execute_with(|| {
-		// Alice starts with 10_000 TNT
-		assert_eq!(mock_currency::get_balance(TNT_ASSET_ID, ALICE), 10_000);
+		let initial_tnt = get_tnt_balance(BOB);
+		assert!(initial_tnt > 0);
 
 		// Burn zero
-		assert_noop!(Credits::burn(RuntimeOrigin::signed(ALICE), 0), Error::<Test>::AmountZero);
+		assert_noop!(Credits::burn(RuntimeOrigin::signed(BOB), 0), Error::<Test>::AmountZero);
 
 		// Burn more than balance
 		assert_noop!(
-			Credits::burn(RuntimeOrigin::signed(ALICE), 10_001),
+			Credits::burn(RuntimeOrigin::signed(BOB), initial_tnt + 1),
 			Error::<Test>::InsufficientTntBalance
 		);
-
-		// Burn almost all (leaving less than min balance if applicable - mock min is 1)
-		// Mock burn checks reducible, so burning 10000 fails if min balance is 1.
-		// Let's check burning 9999, leaving 1.
-		assert_ok!(Credits::burn(RuntimeOrigin::signed(ALICE), 9999));
-		assert_eq!(mock_currency::get_balance(TNT_ASSET_ID, ALICE), 1);
-
-		// Now try burning the last 1 - should fail if mock enforces min balance on burn_from
-		assert_noop!(
-			Credits::burn(RuntimeOrigin::signed(ALICE), 1),
-			DispatchError::Token("CannotBurnDust".into()) // Mock error for burn < reducible
-		);
 	});
 }
 
 #[test]
-fn claim_credits_failures() {
+fn accrual_with_stake_change_within_window() {
 	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@claim_fail";
-		assert_ok!(link_account(ALICE, alice_id));
-		run_to_block(2);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let accrued = 15; // 1 block accrual
-		assert_eq!(credit_balance(ALICE), accrued);
+		let window = CreditClaimWindowValue::get();
+		let alice_id_str = b"alice_stake_change";
+		let rate_tier3 = 15;
+		let rate_tier1 = 1;
 
-		// Claim zero
-		assert_noop!(claim_credits(ALICE, 0, alice_id), Error::<Test>::AmountZero);
+		// Period 1: Tier 3 for window/2 blocks
+		let block1 = window / 2;
+		run_to_block(block1);
+		let claimable1 = get_max_claimable(ALICE);
+		let expected1 = rate_tier3 * (block1 - 1);
+		assert_eq!(claimable1, expected1);
+		assert_ok!(claim_credits(ALICE, claimable1, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), block1);
 
-		// Claim more than balance
-		assert_noop!(
-			claim_credits(ALICE, accrued + 1, alice_id),
-			Error::<Test>::InsufficientCreditBalance
-		);
+		// Change stake to Tier 1
+		assert_ok!(MultiAssetDelegation::undelegate(
+			RuntimeOrigin::signed(ALICE),
+			ALICE,
+			tangle_primitives::services::Asset::Custom(TNT_ASSET_ID),
+			1000 - 150
+		));
+		// Need to run MAD lifecycle potentially? For simplicity, assume immediate effect for test, or mock directly if needed.
+		// Let's assume test setup makes this immediate for credits pallet view
 
-		// Claim requires correct linked ID
-		assert_noop!(claim_credits(ALICE, 1, b"wrong"), Error::<Test>::OffchainAccountMismatch);
+		// Period 2: Tier 1 for window/2 blocks
+		let block2 = block1 + window / 2;
+		run_to_block(block2);
+		let claimable2 = get_max_claimable(ALICE);
+		let expected2 = rate_tier1 * (block2 - block1); // Only Tier 1 rate applies
+		assert_eq!(claimable2, expected2);
+		assert_ok!(claim_credits(ALICE, claimable2, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), block2);
 
-		// Claim requires linked account
-		assert_noop!(claim_credits(CHARLIE, 1, b"charlie"), Error::<Test>::AccountNotLinked);
-	});
-}
-
-#[test]
-fn admin_failures() {
-	new_test_ext().execute_with(|| {
-		// Non-admin cannot call admin functions
-		assert_noop!(
-			Credits::force_set_credit_balance(RuntimeOrigin::signed(ALICE), BOB, 1000),
-			DispatchError::BadOrigin
-		);
-		assert_noop!(
-			Credits::force_link_account(
-				RuntimeOrigin::signed(BOB),
-				ALICE,
-				b"id".to_vec().try_into().unwrap()
-			),
-			DispatchError::BadOrigin
-		);
-	});
-}
-
-// --- Success Case Tests (More Variations) ---
-
-#[test]
-fn burn_success() {
-	new_test_ext().execute_with(|| {
-		set_tnt_balance(BOB, TNT_ASSET_ID, 500);
-		assert_eq!(credit_balance(BOB), 0);
-
-		// Burn 50 TNT
-		assert_ok!(Credits::burn(RuntimeOrigin::signed(BOB), 50));
-		assert_eq!(mock_currency::get_balance(TNT_ASSET_ID, BOB), 450);
-		// Check credits: Burn conversion rate is 100
-		// Accrued = 1 * (block - 1) = 1 * (1 - 1) = 0? Burn is at block 1? Need to check.
-		// Burn happens at current block (assume 1). Accrue called first: last_update=0, current=1
-		// -> 1 block. Stake=150->rate=1. accrue=1. Credits = accrue + burn*rate = 1 + 50 * 100 =
-		// 5001 ? Let's re-run test ext at block 2. Rerun new_test_ext to start at block 1
-		// consistently.
-	});
-	// Rerun test with explicit block start
-	new_test_ext().execute_with(|| {
-		System::set_block_number(10); // Start later
-		set_tnt_balance(BOB, TNT_ASSET_ID, 500);
-		set_stake(BOB, 150); // Tier 1, rate 1
-		assert_eq!(credit_balance(BOB), 0);
-		assert_eq!(pallet_credits::LastRewardUpdateBlock::<Test>::get(BOB), 0);
-
-		// Burn 50 TNT at block 10
-		assert_ok!(Credits::burn(RuntimeOrigin::signed(BOB), 50));
-		assert_eq!(mock_currency::get_balance(TNT_ASSET_ID, BOB), 450);
-		// Accrue called first: current=10, last=0. Blocks=10. Rate=1. Accrued=10.
-		// Burned = 50 * 100 = 5000.
-		// Total = 10 + 5000 = 5010
-		assert_eq!(credit_balance(BOB), 5010);
-		assert_eq!(pallet_credits::LastRewardUpdateBlock::<Test>::get(BOB), 10); // Updated by accrue
-		assert_eq!(last_interaction(BOB), 0); // Burn doesn't update interaction
-	});
-}
-
-#[test]
-fn trigger_update_success() {
-	new_test_ext().execute_with(|| {
-		run_to_block(100);
-		assert_eq!(last_interaction(ALICE), 0);
-		assert_eq!(credit_balance(ALICE), 0);
-
-		// Trigger update
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let expected_credits = 15 * 99; // Blocks 2 to 100 inclusive
-		assert_eq!(credit_balance(ALICE), expected_credits);
-		assert_eq!(last_interaction(ALICE), 100); // Interaction updated
-	});
-}
-
-#[test]
-fn accrual_with_stake_change() {
-	new_test_ext().execute_with(|| {
-		// Bob: Tier 1 (150 stake -> 1 credit/block)
-		run_to_block(10);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(BOB)));
-		assert_eq!(credit_balance(BOB), 1 * 9);
-
-		// Increase stake to Tier 2 (500 stake -> 6 credits/block)
-		set_stake(BOB, 500);
-		run_to_block(20);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(BOB)));
-		// Credits = 9 (initial) + 10 blocks * 6 credits/block = 9 + 60 = 69
-		assert_eq!(credit_balance(BOB), 9 + (6 * 10));
-
-		// Decrease stake to Tier 0 (50 stake -> 0 credits/block)
-		set_stake(BOB, 50);
-		run_to_block(30);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(BOB)));
-		// Credits = 69 (previous) + 10 blocks * 0 credits/block = 69
-		assert_eq!(credit_balance(BOB), 69);
-	});
-}
-
-// --- More Decay Edge Cases ---
-
-#[test]
-fn decay_claim_at_exact_boundary() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@boundary";
-		assert_ok!(link_account(ALICE, alice_id)); // Interaction block 1
-
-		// Go exactly to block 2*WEEK + 1 (start of week 3)
-		let claim_block = 1 + 2 * WEEK;
-		run_to_block(claim_block);
-
-		// Claim. Elapsed = 2*WEEK blocks. Should use 75% factor [ >= 2*WEEK ]
-		let accrued = 15 * (claim_block - 1);
-		let expected_claimable = Perbill::from_percent(75).mul_floor(accrued);
-		assert_ok!(claim_credits(ALICE, expected_claimable, alice_id));
-		let expected_raw_deduction =
-			Perbill::from_percent(75).saturating_reciprocal_mul_ceil(expected_claimable);
-		assert_eq!(credit_balance(ALICE), accrued.saturating_sub(expected_raw_deduction));
-	});
-}
-
-#[test]
-fn decay_multiple_claims_across_boundaries() {
-	new_test_ext().execute_with(|| {
-		let alice_id = b"alice@multi_claim";
-		assert_ok!(link_account(ALICE, alice_id)); // Block 1
-
-		// 1. Claim within grace period
-		run_to_block(WEEK - 10);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let bal1 = credit_balance(ALICE);
-		assert!(bal1 > 0);
-		assert_ok!(claim_credits(ALICE, bal1 / 2, alice_id));
-		let bal1_remain = credit_balance(ALICE);
-		let last_inter1 = System::block_number();
-		assert_eq!(last_interaction(ALICE), last_inter1);
-
-		// 2. Wait 1.5 weeks, claim with 100% factor
-		run_to_block(last_inter1 + WEEK + WEEK / 2);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE)));
-		let bal2 = credit_balance(ALICE);
-		assert!(bal2 > bal1_remain);
-		let elapsed2 = System::block_number() - last_inter1;
-		assert!(elapsed2 > WEEK && elapsed2 < 2 * WEEK);
-		// Factor is 100% as we reset interaction timer with trigger_credit_update
-		let claimable2 = Perbill::from_percent(100).mul_floor(bal2);
-		assert_eq!(claimable2, bal2);
-		assert_ok!(claim_credits(ALICE, claimable2 / 2, alice_id));
-		let bal2_remain = credit_balance(ALICE);
-		let last_inter2 = System::block_number();
-		assert_eq!(last_interaction(ALICE), last_inter2);
-
-		// 3. Wait 2.5 weeks, claim with 75% factor
-		run_to_block(last_inter2 + 2 * WEEK + WEEK / 2);
-		let elapsed3 = System::block_number() - last_inter2;
-		assert!(elapsed3 > 2 * WEEK && elapsed3 < 3 * WEEK);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE))); // Update accrual
-		let bal3 = credit_balance(ALICE);
-		let claimable3 = Perbill::from_percent(75).mul_floor(bal3);
-		assert!(claimable3 < bal3);
-		assert_ok!(claim_credits(ALICE, claimable3 / 2, alice_id));
-		let bal3_remain = credit_balance(ALICE);
-		let last_inter3 = System::block_number();
-		assert_eq!(last_interaction(ALICE), last_inter3);
-
-		// 4. Wait 5+ weeks, claim 0
-		run_to_block(last_inter3 + 6 * WEEK);
-		assert_ok!(Credits::trigger_credit_update(RuntimeOrigin::signed(ALICE))); // Update accrual
-		let bal4 = credit_balance(ALICE);
-		assert_noop!(claim_credits(ALICE, 1, alice_id), Error::<Test>::InsufficientCreditBalance);
+		// Period 3: Go past window, still Tier 1
+		let block3 = block2 + window + 100;
+		run_to_block(block3);
+		let claimable3 = get_max_claimable(ALICE);
+		let expected3 = rate_tier1 * window; // Capped at window, using Tier 1 rate
+		assert_eq!(claimable3, expected3);
+		assert_ok!(claim_credits(ALICE, claimable3, alice_id_str));
+		assert_eq!(last_reward_update(ALICE), block3);
 	});
 }

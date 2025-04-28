@@ -25,7 +25,7 @@
 //! ## Integration
 //!
 //! This pallet relies on:
-//! - An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::StakingInfo`)
+//! - An implementation of `MultiAssetDelegationInfo` (`Config::StakingInfo`)
 //!   to query the active TNT stake for users.
 //! - An implementation of `frame_support::traits::tokens::fungibles` (`Config::Currency`) to handle
 //!   TNT token balances and burning.
@@ -58,6 +58,7 @@ mod tests;
 #[frame_support::pallet(dev_mode)]
 pub mod pallet {
 	use crate::types::*;
+	use core::cmp::max;
 	use frame_support::{
 		pallet_prelude::{ConstU32, *},
 		traits::{
@@ -71,7 +72,7 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_arithmetic::Perbill;
-	use sp_runtime::traits::{MaybeDisplay, Saturating, Zero};
+	use sp_runtime::traits::{CheckedSub, MaybeDisplay, Saturating, Zero};
 	use sp_std::fmt::Debug;
 	use tangle_primitives::traits::MultiAssetDelegationInfo;
 
@@ -88,14 +89,14 @@ pub mod pallet {
 	pub const MAX_TIERS: u32 = 10;
 
 	// Move STORAGE_VERSION inside the pallet mod
-	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
 
 	// Define BalanceOf here based on the Currency trait
 	pub type BalanceOf<T> = <T as Config>::Currency::Balance;
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
-	// #[pallet::storage_version(STORAGE_VERSION)] // Comment out storage_version for now
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(_);
 
 	#[pallet::config]
@@ -133,9 +134,9 @@ pub mod pallet {
 		#[pallet::constant]
 		type BurnConversionRate: Get<BalanceOf<Self>>;
 
-		/// Defines the decay curve steps based on blocks since last interaction.
+		/// The maximum window (in blocks) for which credits can be accrued before claiming.
 		#[pallet::constant]
-		type DecaySteps: Get<BoundedVec<(BlockNumberOf<Self>, Perbill), ConstU32<MAX_DECAY_STEPS>>>;
+		type ClaimWindowBlocks: Get<BlockNumberOf<Self>>;
 
 		/// Optional: An account to send burned TNT to. If None, `Currency::burn_from` is used.
 		#[pallet::constant]
@@ -148,32 +149,20 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxOffchainAccountIdLength: Get<u32>;
 
-		/// The PalletId for deriving sovereign accounts.
+		/// The maximum decay steps.
 		#[pallet::constant]
-		type PalletId: Get<PalletId>;
+		type MaxDecaySteps: Get<u32>;
+
+		/// The maximum tiers.
+		#[pallet::constant]
+		type MaxTiers: Get<u32>;
 	}
 
 	// --- Storage Items ---
 
 	#[pallet::storage]
-	#[pallet::getter(fn credit_balance)]
-	pub type CreditBalances<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, BalanceOf<T>, ValueQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn linked_account)]
-	pub type LinkedAccounts<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, OffchainAccountIdOf<T>, OptionQuery>;
-
-	#[pallet::storage]
 	#[pallet::getter(fn last_reward_update_block)]
 	pub type LastRewardUpdateBlock<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, BlockNumberOf<T>, ValueQuery>;
-
-	/// Stores the block number of the last interaction (claim or update) for decay calculation.
-	#[pallet::storage]
-	#[pallet::getter(fn last_interaction_block)]
-	pub type LastInteractionBlock<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::AccountId, BlockNumberOf<T>, ValueQuery>;
 
 	// --- Events ---
@@ -181,93 +170,47 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// An on-chain account has been successfully linked to an off-chain ID.
-		/// \[who, offchain_account_id\]
-		AccountLinked { who: T::AccountId, offchain_account_id: OffchainAccountIdOf<T> },
-		/// TNT tokens were successfully burned in exchange for credits.
-		/// \[who, tnt_burned, credits_granted\]
-		CreditsBurned { who: T::AccountId, tnt_burned: BalanceOf<T>, credits_granted: BalanceOf<T> },
-		/// Credits were successfully claimed (implying off-chain usage).
-		/// The amount represents the effectively claimed value after decay.
-		/// \[who, amount, offchain_account_id\]
+		/// TNT tokens were successfully burned, granting potential off-chain credits.
+		/// \[who, tnt_burned, credits_granted]
+		CreditsGrantedFromBurn {
+			who: T::AccountId,
+			tnt_burned: BalanceOf<T>,
+			credits_granted: BalanceOf<T>,
+		},
+		/// A user successfully claimed credits, emitting details for off-chain processing.
+		/// The amount is the value requested by the user, verified against the claimable window.
+		/// \[who, amount_claimed, offchain_account_id]
 		CreditsClaimed {
 			who: T::AccountId,
-			amount: BalanceOf<T>,
+			amount_claimed: BalanceOf<T>,
 			offchain_account_id: OffchainAccountIdOf<T>,
 		},
-		/// A user's credit balance was updated due to staking rewards.
-		/// \[who, new_credits, total_balance\]
-		CreditsAccrued { who: T::AccountId, new_credits: BalanceOf<T>, total_balance: BalanceOf<T> },
-		/// An admin force-set a user's credit balance.
-		/// \[who, new_balance\]
-		AdminCreditBalanceSet { who: T::AccountId, new_balance: BalanceOf<T> },
-		/// An admin force-linked an account.
-		/// \[who, offchain_account_id\]
-		AdminAccountLinked { who: T::AccountId, offchain_account_id: OffchainAccountIdOf<T> },
 	}
 
 	// --- Errors ---
 	#[pallet::error]
 	pub enum Error<T> {
+		/// Insufficient TNT balance to perform the burn operation.
 		InsufficientTntBalance,
-		InsufficientCreditBalance,
-		AccountNotLinked,
-		OffchainAccountMismatch,
+		/// The requested claim amount exceeds the maximum calculated within the allowed window.
+		ClaimAmountExceedsWindowAllowance,
+		/// The provided off-chain account ID exceeds the maximum allowed length.
 		OffchainAccountIdTooLong,
-		AlreadyLinked,
+		/// An arithmetic operation resulted in an overflow.
 		Overflow,
-		NotStaking,
+		/// No staking tiers are configured in the runtime.
 		NoStakeTiersConfigured,
-		/// Amount to burn or claim must be greater than zero.
+		/// Amount specified for burn or claim must be greater than zero.
 		AmountZero,
+		/// Cannot transfer burned tokens to target account (feature not fully implemented).
+		BurnTransferNotImplemented,
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Links the sender's on-chain account to an off-chain identifier and resets decay timer.
-		///
-		/// # Arguments
-		/// * `origin`: The origin of the call.
-		/// * `offchain_account_id`: The off-chain account ID to link.
-		///
-		/// # Errors
-		/// * `AlreadyLinked`: The account is already linked.
-		/// * `Overflow`: The credit balance overflowed.
-		///
-		/// # Weight
-		/// * `reads_writes(1, 2)`: Reads: LinkedAccounts. Writes: LinkedAccounts, LastInteractionBlock
+		/// Burn TNT for potential off-chain credits. Updates reward tracking block.
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(1, 2))]
-		pub fn link_account(
-			origin: OriginFor<T>,
-			offchain_account_id: OffchainAccountIdOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(!LinkedAccounts::<T>::contains_key(&who), Error::<T>::AlreadyLinked);
-			LinkedAccounts::<T>::insert(&who, offchain_account_id.clone());
-
-			let current_block = frame_system::Pallet::<T>::block_number();
-			LastInteractionBlock::<T>::insert(&who, current_block);
-
-			Self::deposit_event(Event::AccountLinked { who, offchain_account_id });
-			Ok(())
-		}
-
-		/// Burns TNT tokens for immediate credits. Accrues staking rewards first.
-		///
-		/// # Arguments
-		/// * `origin`: The origin of the call.
-		/// * `amount`: The amount of TNT to burn.
-		///
-		/// # Errors
-		/// * `AmountZero`: The amount to burn must be greater than zero.
-		/// * `InsufficientTntBalance`: The user does not have enough TNT to burn.
-		/// * `Overflow`: The credit balance overflowed.
-		///
-		/// # Weight
-		/// * `reads_writes(3, 3)`: Reads: Balance, LastUpdate, StakeInfo/Tiers. Writes: Balance, CreditBalance, LastUpdate
-		#[pallet::call_index(1)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(3, 3))]
+		#[pallet::weight(T::DbWeight::get().reads_writes(2, 2))]
 		pub fn burn(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -275,264 +218,129 @@ pub mod pallet {
 			let who = ensure_signed(origin)?;
 			ensure!(amount > Zero::zero(), Error::<T>::AmountZero);
 
-			Self::accrue_credits(&who)?; // Accrue staking rewards
-			Self::burn_tnt(&who, amount)?; // Burn TNT
+			// Update reward block tracking first
+			Self::update_reward_block(&who)?;
+
+			Self::burn_tnt(&who, amount)?;
 
 			let conversion_rate = T::BurnConversionRate::get();
 			let credits_granted = amount.saturating_mul(conversion_rate);
+			ensure!(credits_granted > Zero::zero(), Error::<T>::Overflow);
 
-			CreditBalances::<T>::try_mutate(&who, |balance| -> DispatchResult {
-				*balance = balance.checked_add(&credits_granted).ok_or(Error::<T>::Overflow)?;
-				Ok(())
-			})?;
-			// Burn does NOT update LastInteractionBlock
-			Self::deposit_event(Event::CreditsBurned { who, tnt_burned: amount, credits_granted });
-			Ok(())
-		}
-
-		/// Updates accrued credits based on staking and resets the decay timer.
-		///
-		/// # Arguments
-		/// * `origin`: The origin of the call.
-		///
-		/// # Errors
-		/// * `Overflow`: The credit balance overflowed.
-		///
-		/// # Weight
-		/// * `reads_writes(4, 3)`: Reads: LastUpdate, StakeInfo, Tiers, LastInteract. Writes: LastUpdate, CreditBalance,
-		#[pallet::call_index(2)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(4, 3))]
-		pub fn trigger_credit_update(origin: OriginFor<T>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			Self::accrue_credits(&who)?; // Accrue raw credits
-
-			let current_block = frame_system::Pallet::<T>::block_number();
-			LastInteractionBlock::<T>::insert(&who, current_block); // Reset decay timer
-			Ok(())
-		}
-
-		/// Claims credits, applying decay based on time since last interaction.
-		///
-		/// # Arguments
-		/// * `origin`: The origin of the call.
-		/// * `amount_to_claim`: The amount of credits to claim.
-		/// * `target_offchain_account_id`: The off-chain account ID to link.
-		///
-		/// # Errors
-		/// * `AmountZero`: The amount to claim must be greater than zero.
-		/// # Weight
-		/// * `reads_writes(5, 3)`: Reads: LinkedAcc, LastInteract, LastUpdate, StakeInfo, Tiers. Writes: LastUpdate,
-		/// CreditBalance, LastInteract
-		#[pallet::call_index(3)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(5, 3))]
-		pub fn claim_credits(
-			origin: OriginFor<T>,
-			#[pallet::compact] amount_to_claim: BalanceOf<T>,
-			target_offchain_account_id: OffchainAccountIdOf<T>,
-		) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-			ensure!(amount_to_claim > Zero::zero(), Error::<T>::AmountZero);
-
-			let linked_account =
-				LinkedAccounts::<T>::get(&who).ok_or(Error::<T>::AccountNotLinked)?;
-			ensure!(
-				linked_account == target_offchain_account_id,
-				Error::<T>::OffchainAccountMismatch
-			);
-
-			Self::accrue_credits(&who)?; // Update raw balance
-
-			let current_block = frame_system::Pallet::<T>::block_number();
-			let last_interaction = LastInteractionBlock::<T>::get(&who);
-			let elapsed_blocks = if last_interaction.is_zero() {
-				Zero::zero()
-			} else {
-				current_block.saturating_sub(last_interaction)
-			};
-			let decay_factor = Self::calculate_decay_factor(elapsed_blocks);
-
-			let raw_balance = CreditBalances::<T>::get(&who);
-			let effective_claimable_balance = decay_factor.mul_floor(raw_balance);
-			ensure!(
-				amount_to_claim <= effective_claimable_balance,
-				Error::<T>::InsufficientCreditBalance
-			);
-
-			// Deduct the equivalent raw amount that corresponds to the claimed decayed amount
-			let raw_amount_to_deduct = if decay_factor.is_zero() {
-				raw_balance // Should be unreachable if amount_to_claim > 0
-			} else {
-				decay_factor.saturating_reciprocal_mul_ceil(amount_to_claim)
-			};
-
-			CreditBalances::<T>::try_mutate(&who, |balance| -> DispatchResult {
-				*balance = balance
-					.checked_sub(&raw_amount_to_deduct)
-					.ok_or(Error::<T>::InsufficientCreditBalance)?;
-				Ok(())
-			})?;
-
-			LastInteractionBlock::<T>::insert(&who, current_block); // Reset decay timer
-
-			Self::deposit_event(Event::CreditsClaimed {
+			Self::deposit_event(Event::CreditsGrantedFromBurn {
 				who,
-				amount: amount_to_claim,
-				offchain_account_id: linked_account,
+				tnt_burned: amount,
+				credits_granted,
 			});
 			Ok(())
 		}
 
-		/// Forcefully sets credit balance and resets decay timer. Requires AdminOrigin.
-		///
-		/// # Arguments
-		/// * `origin`: The origin of the call.
-		/// * `who`: The AccountId to set the balance for.
-		/// * `new_balance`: The new balance to set.
-		///
-		/// # Weight
-		/// * `writes(2)`: Writes: CreditBalance, LastInteraction
-		#[pallet::call_index(4)]
-		#[pallet::weight(T::DbWeight::get().writes(2))]
-		pub fn force_set_credit_balance(
+		/// Claim potential credits accrued within the allowed window. Emits event for off-chain processing.
+		#[pallet::call_index(1)]
+		#[pallet::weight(T::DbWeight::get().reads_writes(2, 1))]
+		pub fn claim_credits(
 			origin: OriginFor<T>,
-			who: T::AccountId,
-			#[pallet::compact] new_balance: BalanceOf<T>,
-		) -> DispatchResult {
-			T::AdminOrigin::ensure_origin(origin)?;
-			CreditBalances::<T>::insert(&who, new_balance);
-
-			let current_block = frame_system::Pallet::<T>::block_number();
-			LastInteractionBlock::<T>::insert(&who, current_block); // Reset decay
-
-			Self::deposit_event(Event::AdminCreditBalanceSet { who, new_balance });
-			Ok(())
-		}
-
-		/// Forcefully links an account and resets decay timer. Requires AdminOrigin.
-		///
-		/// # Arguments
-		/// * `origin`: The origin of the call.
-		/// * `who`: The AccountId to link.
-		/// * `offchain_account_id`: The off-chain account ID to link.
-		///
-		/// # Weight
-		/// * `writes(2)`: Writes: LinkedAccount, LastInteraction
-		#[pallet::call_index(5)]
-		#[pallet::weight(T::DbWeight::get().writes(2))]
-		pub fn force_link_account(
-			origin: OriginFor<T>,
-			who: T::AccountId,
+			#[pallet::compact] amount_to_claim: BalanceOf<T>,
 			offchain_account_id: OffchainAccountIdOf<T>,
 		) -> DispatchResult {
-			T::AdminOrigin::ensure_origin(origin)?;
-			LinkedAccounts::<T>::insert(&who, offchain_account_id.clone());
+			let who = ensure_signed(origin)?;
+			ensure!(amount_to_claim > Zero::zero(), Error::<T>::AmountZero);
+			ensure!(
+				offchain_account_id.len() <= T::MaxOffchainAccountIdLength::get() as usize,
+				Error::<T>::OffchainAccountIdTooLong
+			);
 
 			let current_block = frame_system::Pallet::<T>::block_number();
-			LastInteractionBlock::<T>::insert(&who, current_block); // Reset decay
 
-			Self::deposit_event(Event::AdminAccountLinked { who, offchain_account_id });
+			// Calculate maximum claimable amount within the window and update the block tracker
+			let max_claimable_in_window =
+				Self::update_reward_block_and_get_accrued_amount(&who, current_block)?;
+
+			// Verify requested amount against the calculated allowance
+			ensure!(
+				amount_to_claim <= max_claimable_in_window,
+				Error::<T>::ClaimAmountExceedsWindowAllowance
+			);
+
+			// Emit event with the *requested* amount
+			Self::deposit_event(Event::CreditsClaimed {
+				who,
+				amount_claimed: amount_to_claim,
+				offchain_account_id,
+			});
 			Ok(())
 		}
 	}
 
 	impl<T: Config> Pallet<T> {
-		/// Determines the appropriate credit emission rate based on the staked amount.
-		///
-		/// # Arguments
-		/// * `staked_amount`: The amount of staked TNT.
-		///
-		/// # Returns
-		/// * `BalanceOf<T>`: The appropriate credit emission rate.
-		fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
-			let tiers = T::StakeTiers::get();
-			for tier in tiers.iter().rev() {
-				if staked_amount >= tier.threshold {
-					return tier.rate_per_block;
-				}
-			}
-			BalanceOf::<T>::zero()
-		}
-
-		/// Calculates and adds accrued credits based on staking duration and amount.
-		///
-		/// # Arguments
-		/// * `who`: The AccountId to accrue credits for.
-		///
-		/// # Errors
-		/// * `Overflow`: The credit balance overflowed.
-		fn accrue_credits(who: &T::AccountId) -> DispatchResult {
-			let current_block = frame_system::Pallet::<T>::block_number();
+		/// Calculates potential credits accrued within the allowed window ending now,
+		/// and updates the last reward block.
+		fn update_reward_block_and_get_accrued_amount(
+			who: &T::AccountId,
+			current_block: BlockNumberOf<T>,
+		) -> Result<BalanceOf<T>, DispatchError> {
 			let last_update = LastRewardUpdateBlock::<T>::get(who);
-
 			if last_update >= current_block {
-				return Ok(()); // Already processed in this block
+				return Ok(Zero::zero());
 			}
 
+			let window = T::ClaimWindowBlocks::get();
+			// Calculate the earliest block to consider for accrual (start of the window)
+			let start_block = max(last_update, current_block.saturating_sub(window));
+
+			// Ensure we don't calculate for blocks past the current one if window is large
+			let effective_end_block = current_block;
+			if start_block >= effective_end_block {
+				return Ok(Zero::zero());
+			}
+
+			// Fetch stake *once* for the current block (simplification: assumes stake is constant during window)
+			// A more complex approach could sample stake at intervals, but adds significant complexity.
 			let tnt_asset_id = T::TntAssetId::get();
 			let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
 			let maybe_deposit_info = T::StakingInfo::get_user_deposit_with_locks(who, tnt_asset);
+			let staked_amount = maybe_deposit_info.map_or(Zero::zero(), |deposit_info| {
+				let locked_total = deposit_info.amount_with_locks.map_or(Zero::zero(), |locks| {
+					locks.iter().fold(Zero::zero(), |acc, lock| acc.saturating_add(lock.amount))
+				});
+				deposit_info.unlocked_amount.saturating_add(locked_total)
+			});
 
-			let staked_amount = match maybe_deposit_info {
-				Some(deposit_info) => {
-					let locked_total =
-						deposit_info.amount_with_locks.map_or(BalanceOf::<T>::zero(), |locks| {
-							locks.iter().fold(BalanceOf::<T>::zero(), |acc, lock| {
-								acc.saturating_add(lock.amount)
-							})
-						});
-					deposit_info.unlocked_amount.saturating_add(locked_total)
-				},
-				None => BalanceOf::<T>::zero(),
-			};
-
-			// Update last reward block *before* calculating rewards based on it
+			// Update the block *before* calculation
 			LastRewardUpdateBlock::<T>::insert(who, current_block);
 
 			if staked_amount.is_zero() {
-				return Ok(());
+				return Ok(Zero::zero());
 			}
-
 			let rate = Self::get_current_rate(staked_amount);
 			if rate.is_zero() {
-				return Ok(());
+				return Ok(Zero::zero());
 			}
 
-			// Calculate blocks passed since the *previous* update block
-			let blocks_since_last_update = current_block.saturating_sub(last_update);
-			if blocks_since_last_update.is_zero() {
-				return Ok(()); // Should not happen due to initial check
+			// Calculate blocks within the effective window
+			let blocks_in_window = effective_end_block.saturating_sub(start_block);
+			if blocks_in_window.is_zero() {
+				return Ok(Zero::zero());
 			}
 
-			let new_credits = rate.saturating_mul(
-				<BalanceOf<T>>::try_from(blocks_since_last_update).unwrap_or_else(|_| Zero::zero()),
-			);
+			let multiplier =
+				<BalanceOf<T>>::try_from(blocks_in_window).map_err(|_| Error::<T>::Overflow)?;
+			let new_credits = rate.checked_mul(&multiplier).ok_or(Error::<T>::Overflow)?;
 
-			if new_credits > BalanceOf::<T>::zero() {
-				let mut final_balance = BalanceOf::<T>::zero();
-				CreditBalances::<T>::try_mutate(who, |balance| -> DispatchResult {
-					*balance = balance.checked_add(&new_credits).ok_or(Error::<T>::Overflow)?;
-					final_balance = *balance; // Capture final balance for event
-					Ok(())
-				})?;
-				Self::deposit_event(Event::CreditsAccrued {
-					who: who.clone(),
-					new_credits,
-					total_balance: final_balance,
-				});
+			Ok(new_credits)
+		}
+
+		/// Helper to ONLY update the reward block (e.g., for burn).
+		fn update_reward_block(who: &T::AccountId) -> DispatchResult {
+			let current_block = frame_system::Pallet::<T>::block_number();
+			let last_update = LastRewardUpdateBlock::<T>::get(who);
+			if last_update < current_block {
+				LastRewardUpdateBlock::<T>::insert(who, current_block);
 			}
-
 			Ok(())
 		}
 
-		/// Burns the specified amount of TNT from the user's account.
-		///
-		/// Checks sufficient balance first. If `CreditBurnTarget` is configured, attempts
-		/// to transfer the tokens there (currently returns error as `Transfer` trait is not bound).
-		/// Otherwise, uses `Currency::burn_from`.
-		///
-		/// # Arguments
-		/// * `who`: The AccountId burning the tokens.
-		/// * `amount`: The amount of TNT to burn.
+		/// Burns TNT, returning an error if CreditBurnTarget is set.
 		fn burn_tnt(who: &T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
 			let tnt_asset_id = T::TntAssetId::get();
 			ensure!(
@@ -541,9 +349,7 @@ pub mod pallet {
 			);
 
 			match T::CreditBurnTarget::get() {
-				Some(target_account) => {
-					Err(DispatchError::Other("CreditBurnTarget transfer not implemented"))
-				},
+				Some(_) => Err(Error::<T>::BurnTransferNotImplemented.into()),
 				None => {
 					T::Currency::burn_from(
 						tnt_asset_id,
@@ -551,37 +357,28 @@ pub mod pallet {
 						amount,
 						Preservation::Preserve,
 						Precision::Exact,
-						Fortitude::Dangerous,
+						Fortitude::Force,
 					)?;
 				},
 			}
 			Ok(())
 		}
 
-		/// Calculates the decay factor (percentage remaining) based on elapsed blocks since last
-		/// interaction.
-		///
-		/// Reads `DecaySteps` from config (assumed sorted ascending by duration).
-		/// Finds the latest step whose duration is less than or equal to `elapsed_blocks`
-		/// and returns the corresponding `Perbill` factor.
-		/// Returns `Perbill::one()` (100%) if no steps apply or elapsed time is zero.
+		/// Determines the credit emission rate per block based on the staked amount.
 		///
 		/// # Arguments
-		/// * `elapsed_blocks`: The number of blocks since the user's last interaction.
-		fn calculate_decay_factor(elapsed_blocks: BlockNumberOf<T>) -> Perbill {
-			let decay_steps = T::DecaySteps::get();
-			if decay_steps.is_empty() || elapsed_blocks.is_zero() {
-				return Perbill::one();
-			}
-			let mut applicable_factor = Perbill::one();
-			for (duration, factor) in decay_steps.iter() {
-				if elapsed_blocks >= *duration {
-					applicable_factor = *factor;
-				} else {
-					break;
+		/// * `staked_amount`: The amount of staked TNT.
+		///
+		/// # Returns
+		/// * `BalanceOf<T>`: The appropriate credit emission rate.
+		pub(crate) fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
+			let tiers = T::StakeTiers::get();
+			for tier in tiers.iter().rev() {
+				if staked_amount >= tier.threshold {
+					return tier.rate_per_block;
 				}
 			}
-			applicable_factor
+			BalanceOf::<T>::zero()
 		}
 	}
 }
