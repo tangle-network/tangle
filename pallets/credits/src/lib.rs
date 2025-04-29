@@ -45,6 +45,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use frame_support::traits::Currency;
 pub use pallet::*;
 
 pub mod types;
@@ -55,9 +56,12 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
 #[frame_support::pallet(dev_mode)]
 pub mod pallet {
-	use crate::types::*;
+	use crate::{types::*, BalanceOf};
 	use core::cmp::max;
 	use frame_support::{
 		pallet_prelude::{ConstU32, *},
@@ -66,7 +70,7 @@ pub mod pallet {
 				fungibles::{Inspect, Mutate},
 				Fortitude, Precision, Preservation,
 			},
-			EnsureOriginWithArg,
+			Currency, EnsureOriginWithArg, LockableCurrency, ReservableCurrency,
 		},
 		PalletId,
 	};
@@ -91,9 +95,6 @@ pub mod pallet {
 	// Move STORAGE_VERSION inside the pallet mod
 	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
 
-	// Define BalanceOf here based on the Currency trait
-	pub type BalanceOf<T> = <T as Config>::Currency::Balance;
-
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	#[pallet::storage_version(STORAGE_VERSION)]
@@ -107,8 +108,9 @@ pub mod pallet {
 		/// The fungibles token trait for managing the TNT token.
 		/// Ensure the implementation's Balance type satisfies necessary bounds (like Zero,
 		/// From<BlockNumber> etc.)
-		type Currency: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
-			+ Mutate<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>;
+		type Currency: Currency<Self::AccountId>
+			+ ReservableCurrency<Self::AccountId>
+			+ LockableCurrency<Self::AccountId>;
 
 		/// The Asset ID type used by the Currency trait and StakingInfo.
 		type AssetId: Parameter + Member + MaybeDisplay + Ord + MaxEncodedLen + Copy + Debug;
