@@ -70,7 +70,8 @@ pub mod pallet {
 				fungibles::{Inspect, Mutate},
 				Fortitude, Precision, Preservation,
 			},
-			Currency, EnsureOriginWithArg, LockableCurrency, ReservableCurrency,
+			Currency, EnsureOriginWithArg, ExistenceRequirement, LockableCurrency,
+			ReservableCurrency,
 		},
 		PalletId,
 	};
@@ -327,7 +328,7 @@ pub mod pallet {
 
 			let multiplier =
 				<BalanceOf<T>>::try_from(blocks_in_window).map_err(|_| Error::<T>::Overflow)?;
-			let new_credits = rate.checked_mul(&multiplier).ok_or(Error::<T>::Overflow)?;
+			let new_credits = rate.saturating_mul(multiplier);
 
 			Ok(new_credits)
 		}
@@ -344,26 +345,15 @@ pub mod pallet {
 
 		/// Burns TNT, returning an error if CreditBurnTarget is set.
 		fn burn_tnt(who: &T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
-			let tnt_asset_id = T::TntAssetId::get();
-			ensure!(
-				T::Currency::balance(tnt_asset_id, who) >= amount,
-				Error::<T>::InsufficientTntBalance
-			);
+			ensure!(T::Currency::free_balance(who) >= amount, Error::<T>::InsufficientTntBalance);
 
 			match T::CreditBurnTarget::get() {
 				Some(_) => Err(Error::<T>::BurnTransferNotImplemented.into()),
 				None => {
-					T::Currency::burn_from(
-						tnt_asset_id,
-						who,
-						amount,
-						Preservation::Preserve,
-						Precision::Exact,
-						Fortitude::Force,
-					)?;
+					T::Currency::transfer(who, who, amount, ExistenceRequirement::KeepAlive)?;
+					Ok(())
 				},
 			}
-			Ok(())
 		}
 
 		/// Determines the credit emission rate per block based on the staked amount.
