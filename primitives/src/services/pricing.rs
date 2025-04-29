@@ -34,8 +34,8 @@ pub struct PricingQuote<C: Constraints> {
 	pub blueprint_id: u64,
 	/// Time-to-live for service in blocks
 	pub ttl_blocks: u64,
-	/// Total cost in USD with decimal precision (scaled by 10^6, i.e., 1.23 USD = 1_230_000)
-	pub total_cost_rate: u64,
+	/// Total pricing rate per block
+	pub total_cost_rate: u128,
 	/// Timestamp when quote was generated
 	pub timestamp: u64,
 	/// Expiry timestamp
@@ -59,8 +59,8 @@ pub struct ResourcePricing<C: Constraints> {
 	pub kind: BoundedString<C::MaxResourceNameLength>,
 	/// Quantity of the resource
 	pub count: u64,
-	/// Price per unit in USD with decimal precision (scaled by 10^6, i.e., 0.00005 USD = 50)
-	pub price_per_unit_rate: u64,
+	/// Price per unit per block
+	pub price_per_unit_rate: u128,
 }
 
 /// Creates a deterministic hash of the pricing quote that can more easily be reproduced in other

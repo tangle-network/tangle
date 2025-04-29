@@ -1834,9 +1834,9 @@ pub mod module {
 			}
 
 			// Calculate the cost of from the quotes
-			let total_cost_rate = pricing_quotes.iter().map(|q| q.total_cost_rate).sum::<u64>();
-			let value =
-				(total_cost_rate * ttl.saturated_into::<u64>()).saturated_into::<BalanceOf<T>>();
+			let total_cost_rate = pricing_quotes.iter().map(|q| q.total_cost_rate).sum::<u128>();
+			let value = total_cost_rate * ttl.saturated_into::<u128>();
+			let value = value.saturated_into::<BalanceOf<T>>();
 
 			// Request service
 			let service_id = Self::do_request(
