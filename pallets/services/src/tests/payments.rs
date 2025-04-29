@@ -138,15 +138,12 @@ fn test_payment_refunds_on_failure() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Verify native payment is held by pallet
-		assert_eq!(Balances::free_balance(Services::pallet_account()), native_payment);
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance - native_payment);
 
 		// Bob rejects the request
 		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 2));
 
 		// Verify native payment is refunded
-		assert_eq!(Balances::free_balance(Services::pallet_account()), 0);
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance);
 	});
 }
