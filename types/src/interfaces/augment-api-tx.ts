@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { BTreeMap, Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, IsmpGrandpaAddStateMachine, IsmpHostStateMachine, IsmpMessagingCreateConsensusState, IsmpMessagingMessage, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletIsmpUtilsFundMessageParams, PalletIsmpUtilsUpdateConsensusState, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletTokenGatewayAssetRegistration, PalletTokenGatewayPrecisionUpdate, PalletTokenGatewayTeleportParams, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesMembershipModel, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPriceTargets, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType, TokenGatewayPrimitivesGatewayAssetUpdate } from '@polkadot/types/lookup';
+import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, IsmpGrandpaAddStateMachine, IsmpHostStateMachine, IsmpMessagingCreateConsensusState, IsmpMessagingMessage, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletIsmpUtilsFundMessageParams, PalletIsmpUtilsUpdateConsensusState, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletTokenGatewayAssetRegistration, PalletTokenGatewayPrecisionUpdate, PalletTokenGatewayTeleportParams, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesPricingPricingQuote, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesMembershipModel, TanglePrimitivesServicesTypesOperatorPreferences, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType, TokenGatewayPrimitivesGatewayAssetUpdate } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -2213,13 +2213,14 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Claim pending commission for a pool.
        * 
-       * The dispatch origin of this call must be signed by an account with commission claim permission.
-       * Pending commission is paid out and added to total claimed commission. Total pending commission
-       * is reset to zero.
+       * The dispatch origin of this call must be signed by an account with commission claim
+       * permission. Pending commission is paid out and added to total claimed commission.
+       * Total pending commission is reset to zero.
        * 
        * # Arguments
        * 
-       * * `origin` - The origin of the call. Must be signed by an account with commission claim permission.
+       * * `origin` - The origin of the call. Must be signed by an account with commission claim
+       * permission.
        * * `pool_id` - The identifier of the pool to claim commission from.
        **/
       claimCommission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
@@ -2358,7 +2359,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * * `origin` - The origin of the call
        * * `pool_id` - The pool identifier
-       * * `new_commission` - Optional commission rate and payee. None removes existing commission
+       * * `new_commission` - Optional commission rate and payee. None removes existing
+       * commission
        * 
        * # Errors
        * 
@@ -2374,7 +2376,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Arguments
        * 
-       * * `origin` - The origin of the call. Must be signed by an account with commission management permission.
+       * * `origin` - The origin of the call. Must be signed by an account with commission
+       * management permission.
        * * `pool_id` - The identifier of the pool to set commission change rate for.
        * * `change_rate` - The new commission change rate configuration.
        **/
@@ -2389,12 +2392,14 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * * `origin` - The origin of the call. Must be signed by the pool's root account.
        * * `pool_id` - The identifier of the pool to set permissions for.
-       * * `permission` - Optional commission claim permission configuration. If None, removes any existing permission.
+       * * `permission` - Optional commission claim permission configuration. If None, removes
+       * any existing permission.
        **/
       setCommissionClaimPermission: AugmentedSubmittable<(poolId: u32 | AnyNumber | Uint8Array, permission: Option<PalletTangleLstCommissionCommissionClaimPermission> | null | Uint8Array | PalletTangleLstCommissionCommissionClaimPermission | { Permissionless: any } | { Account: any } | string) => SubmittableExtrinsic<ApiType>, [u32, Option<PalletTangleLstCommissionCommissionClaimPermission>]>;
       /**
-       * Set the maximum commission rate for a pool. Initial max can be set to any value, with only
-       * lower values allowed thereafter. Current commission will be reduced if above new max.
+       * Set the maximum commission rate for a pool. Initial max can be set to any value, with
+       * only lower values allowed thereafter. Current commission will be reduced if above new
+       * max.
        * 
        * # Permissions
        * 
@@ -2506,16 +2511,16 @@ declare module '@polkadot/api-base/types/submittable' {
        * * [`Error::DefensiveError`] - Not enough space in unbond pool
        * 
        * # Note
-       * If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called first.
-       * The staking interface will attempt this automatically but may still return `NoMoreChunks`
-       * if chunks cannot be released.
+       * If no unlocking chunks are available, [`Call::pool_withdraw_unbonded`] can be called
+       * first. The staking interface will attempt this automatically but may still return
+       * `NoMoreChunks` if chunks cannot be released.
        **/
       unbond: AugmentedSubmittable<(memberAccount: MultiAddress | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, poolId: u32 | AnyNumber | Uint8Array, unbondingPoints: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [MultiAddress, u32, Compact<u128>]>;
       /**
        * Update the roles of a pool.
        * 
-       * Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be changed.
-       * Emits a `RolesUpdated` event on successful update.
+       * Updates root, nominator and bouncer roles for a given pool. The depositor role cannot be
+       * changed. Emits a `RolesUpdated` event on successful update.
        * 
        * # Permissions
        * 
@@ -2947,7 +2952,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * # Errors
        * 
        * * [`Error::NotOperator`] - Account is not registered as an operator
-       * * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
+       * * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake
+       * request
        **/
       scheduleLeaveOperators: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;
       /**
@@ -2982,7 +2988,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * # Errors
        * 
        * * [`Error::NotOperator`] - Account is not registered as an operator
-       * * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake request
+       * * [`Error::PendingUnstakeRequestExists`] - Operator already has a pending unstake
+       * request
        * * [`Error::InsufficientBalance`] - Operator has insufficient stake to unstake
        **/
       scheduleOperatorUnstake: AugmentedSubmittable<(unstakeAmount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u128]>;
@@ -3705,6 +3712,30 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       manageAssetRewardVault: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, asset: TanglePrimitivesServicesTypesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, action: PalletRewardsAssetAction | 'Add' | 'Remove' | number | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, TanglePrimitivesServicesTypesAsset, PalletRewardsAssetAction]>;
       /**
+       * Remove the metadata associated with a specific vault.
+       * 
+       * Parameters:
+       * - `origin`: The origin authorized to remove metadata (e.g., root or a specific council).
+       * - `vault_id`: The account ID of the vault whose metadata should be removed.
+       * 
+       * Emits `VaultMetadataRemoved` event on success.
+       * Requires `VaultMetadataOrigin`.
+       **/
+      removeVaultMetadata: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32]>;
+      /**
+       * Set the metadata for a specific vault.
+       * 
+       * Parameters:
+       * - `origin`: The origin authorized to set metadata (e.g., root or a specific council).
+       * - `vault_id`: The account ID of the vault.
+       * - `name`: The name of the vault (bounded string).
+       * - `logo`: The logo URL or data for the vault (bounded string).
+       * 
+       * Emits `VaultMetadataSet` event on success.
+       * Requires `VaultMetadataOrigin`.
+       **/
+      setVaultMetadata: AugmentedSubmittable<(vaultId: u32 | AnyNumber | Uint8Array, name: Bytes | string | Uint8Array, logo: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u32, Bytes, Bytes]>;
+      /**
        * Update the number of blocks used for APY calculation
        **/
       updateApyBlocks: AugmentedSubmittable<(blocks: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64]>;
@@ -3808,7 +3839,8 @@ declare module '@polkadot/api-base/types/submittable' {
     };
     services: {
       /**
-       * Approve a service request, allowing it to be initiated once all required approvals are received.
+       * Approve a service request, allowing it to be initiated once all required approvals are
+       * received.
        * 
        * # Permissions
        * 
@@ -3856,9 +3888,9 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Create a new service blueprint.
        * 
-       * A Service Blueprint is a template for a service that can be instantiated by users. The blueprint
-       * defines the service's constraints, requirements and behavior, including the master blueprint service
-       * manager revision to use.
+       * A Service Blueprint is a template for a service that can be instantiated by users. The
+       * blueprint defines the service's constraints, requirements and behavior, including the
+       * master blueprint service manager revision to use.
        * 
        * # Permissions
        * 
@@ -3866,7 +3898,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Arguments
        * 
-       * * `origin` - The origin of the call, must be signed by the account creating the blueprint
+       * * `origin` - The origin of the call, must be signed by the account creating the
+       * blueprint
        * * `blueprint` - The service blueprint containing:
        * - Service constraints and requirements
        * - Master blueprint service manager revision (Latest or Specific)
@@ -3875,15 +3908,16 @@ declare module '@polkadot/api-base/types/submittable' {
        * # Errors
        * 
        * * [`Error::BadOrigin`] - Origin is not signed
-       * * [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision does not exist
+       * * [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision
+       * does not exist
        * * [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks
        * 
        * # Returns
        * 
-       * Returns a `DispatchResultWithPostInfo` which on success emits a [`Event::BlueprintCreated`] event
-       * containing the owner and blueprint ID.
+       * Returns a `DispatchResultWithPostInfo` which on success emits a
+       * [`Event::BlueprintCreated`] event containing the owner and blueprint ID.
        **/
-      createBlueprint: AugmentedSubmittable<(blueprint: TanglePrimitivesServicesServiceServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; gadget?: any; supportedMembershipModels?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesServiceServiceBlueprint]>;
+      createBlueprint: AugmentedSubmittable<(blueprint: TanglePrimitivesServicesServiceServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; sources?: any; supportedMembershipModels?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesServiceServiceBlueprint]>;
       /**
        * Disputes and removes an [UnappliedSlash] from storage.
        * 
@@ -3903,7 +3937,6 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * * [Error::NoDisputeOrigin] - Service has no dispute origin configured
        * * [DispatchError::BadOrigin] - Caller is not the authorized dispute origin
-       * 
        **/
       dispute: AugmentedSubmittable<(era: Compact<u32> | AnyNumber | Uint8Array, index: Compact<u32> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u32>, Compact<u32>]>;
       /**
@@ -3917,20 +3950,20 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Pre-register the caller as an operator for a specific blueprint.
        * 
-       * This function allows an account to signal intent to become an operator for a blueprint by emitting
-       * a `PreRegistration` event. The operator node can listen for this event to execute any custom
-       * registration logic defined in the blueprint.
+       * This function allows an account to signal intent to become an operator for a blueprint
+       * by emitting a `PreRegistration` event. The operator node can listen for this event to
+       * execute any custom registration logic defined in the blueprint.
        * 
-       * Pre-registration is the first step in the operator registration flow. After pre-registering,
-       * operators must complete the full registration process by calling `register()` with their preferences
-       * and registration arguments.
+       * Pre-registration is the first step in the operator registration flow. After
+       * pre-registering, operators must complete the full registration process by calling
+       * `register()` with their preferences and registration arguments.
        * 
        * # Arguments
        * 
-       * * `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that wants to
-       * become an operator.
-       * * `blueprint_id: u64` - The identifier of the service blueprint to pre-register for. Must refer
-       * to an existing blueprint.
+       * * `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that
+       * wants to become an operator.
+       * * `blueprint_id: u64` - The identifier of the service blueprint to pre-register for.
+       * Must refer to an existing blueprint.
        * 
        * # Permissions
        * 
@@ -3950,9 +3983,10 @@ declare module '@polkadot/api-base/types/submittable' {
       /**
        * Register the caller as an operator for a specific blueprint.
        * 
-       * This function allows an account to register as an operator for a blueprint by providing their
-       * service preferences, registration arguments, and staking the required tokens. The operator must
-       * be active in the delegation system and may require approval before accepting service requests.
+       * This function allows an account to register as an operator for a blueprint by providing
+       * their service preferences, registration arguments, and staking the required tokens.
+       * The operator must be active in the delegation system and may require approval before
+       * accepting service requests.
        * 
        * # Permissions
        * 
@@ -3970,13 +4004,15 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Errors
        * 
-       * * [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation system
+       * * [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation
+       * system
        * * [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint
        * * [`Error::TypeCheck`] - Registration arguments failed type checking
        * * [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration
-       * * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services limit
+       * * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services
+       * limit
        **/
-      register: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, preferences: TanglePrimitivesServicesTypesOperatorPreferences | { key?: any; priceTargets?: any } | string | Uint8Array, registrationArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { Optional: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesTypesOperatorPreferences, Vec<TanglePrimitivesServicesField>, Compact<u128>]>;
+      register: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, preferences: TanglePrimitivesServicesTypesOperatorPreferences | { key?: any; rpcAddress?: any } | string | Uint8Array, registrationArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { Optional: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], value: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesTypesOperatorPreferences, Vec<TanglePrimitivesServicesField>, Compact<u128>]>;
       /**
        * Reject a service request, preventing its initiation.
        * 
@@ -3995,8 +4031,10 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Errors
        * 
-       * * [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to approve this request
-       * * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when refunding payment
+       * * [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to
+       * approve this request
+       * * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when
+       * refunding payment
        * * [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook
        **/
       reject: AugmentedSubmittable<(requestId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
@@ -4008,9 +4046,11 @@ declare module '@polkadot/api-base/types/submittable' {
        * * `origin: OriginFor<T>` - The origin of the call. Must be signed.
        * * `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments.
        * * `blueprint_id: u64` - The identifier of the blueprint to use.
-       * * `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If empty, only owner can call.
+       * * `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If
+       * empty, only owner can call.
        * * `operators: Vec<T::AccountId>` - List of operators that will run the service.
-       * * `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization arguments.
+       * * `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization
+       * arguments.
        * * `assets: Vec<T::AssetId>` - Required assets for the service.
        * * `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request.
        * * `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20).
@@ -4032,23 +4072,69 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       request: AugmentedSubmittable<(evmOrigin: Option<H160> | null | Uint8Array | H160 | string, blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], operators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { Optional: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], assetSecurityRequirements: Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement> | (TanglePrimitivesServicesTypesAssetSecurityRequirement | { asset?: any; minExposurePercent?: any; maxExposurePercent?: any } | string | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, paymentAsset: TanglePrimitivesServicesTypesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, value: Compact<u128> | AnyNumber | Uint8Array, membershipModel: TanglePrimitivesServicesTypesMembershipModel | { Fixed: any } | { Dynamic: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Option<H160>, Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Vec<TanglePrimitivesServicesField>, Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement>, Compact<u64>, TanglePrimitivesServicesTypesAsset, Compact<u128>, TanglePrimitivesServicesTypesMembershipModel]>;
       /**
+       * Request a service with a pre-approved quote from operators.
+       * 
+       * This function creates a service request using a quote that has already been approved by
+       * the operators. Unlike the regular `request` method, this doesn't require operator
+       * approval after submission since the operators have already agreed to the terms via the
+       * quote.
+       * 
+       * The quote is obtained externally through a gRPC server, and this function accepts the
+       * necessary signatures from the operators to verify their approval.
+       * 
+       * # Permissions
+       * 
+       * * Anyone can call this function
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The origin of the call, must be a signed account.
+       * * `evm_origin` - Optional EVM address for ERC20 payments.
+       * * `blueprint_id` - The ID of the blueprint to use.
+       * * `permitted_callers` - Accounts allowed to call the service. If empty, only owner can
+       * call.
+       * * `operators` - List of operators that will run the service.
+       * * `request_args` - Blueprint initialization arguments.
+       * * `asset_security_requirements` - Security requirements for assets.
+       * * `ttl` - Time-to-live in blocks for the service request.
+       * * `payment_asset` - Asset used for payment (native, custom or ERC20).
+       * * `value` - Amount to pay for the service.
+       * * `membership_model` - Membership model for the service.
+       * * `operator_signatures` - Signatures from operators confirming the quote.
+       * * `security_commitments` - Security commitments from operators.
+       * * `pricing_quote` - Pricing quote details.
+       * 
+       * # Errors
+       * 
+       * * [`Error::TypeCheck`] - Request arguments fail blueprint type checking.
+       * * [`Error::NoAssetsProvided`] - No assets were specified.
+       * * [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment.
+       * * [`Error::ERC20TransferFailed`] - ERC20 token transfer failed.
+       * * [`Error::NotRegistered`] - One or more operators not registered for blueprint.
+       * * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
+       * * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
+       **/
+      requestWithSignedPriceQuotes: AugmentedSubmittable<(evmOrigin: Option<H160> | null | Uint8Array | H160 | string, blueprintId: Compact<u64> | AnyNumber | Uint8Array, permittedCallers: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], operators: Vec<AccountId32> | (AccountId32 | string | Uint8Array)[], requestArgs: Vec<TanglePrimitivesServicesField> | (TanglePrimitivesServicesField | { Optional: any } | { Bool: any } | { Uint8: any } | { Int8: any } | { Uint16: any } | { Int16: any } | { Uint32: any } | { Int32: any } | { Uint64: any } | { Int64: any } | { String: any } | { Array: any } | { List: any } | { Struct: any } | { AccountId: any } | string | Uint8Array)[], assetSecurityRequirements: Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement> | (TanglePrimitivesServicesTypesAssetSecurityRequirement | { asset?: any; minExposurePercent?: any; maxExposurePercent?: any } | string | Uint8Array)[], ttl: Compact<u64> | AnyNumber | Uint8Array, paymentAsset: TanglePrimitivesServicesTypesAsset | { Custom: any } | { Erc20: any } | string | Uint8Array, membershipModel: TanglePrimitivesServicesTypesMembershipModel | { Fixed: any } | { Dynamic: any } | string | Uint8Array, pricingQuotes: Vec<TanglePrimitivesServicesPricingPricingQuote> | (TanglePrimitivesServicesPricingPricingQuote | { blueprintId?: any; ttlBlocks?: any; totalCostRate?: any; timestamp?: any; expiry?: any; resources?: any; securityCommitments?: any } | string | Uint8Array)[], operatorSignatures: Vec<U8aFixed>, securityCommitments: Vec<TanglePrimitivesServicesTypesAssetSecurityCommitment> | (TanglePrimitivesServicesTypesAssetSecurityCommitment | { asset?: any; exposurePercent?: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [Option<H160>, Compact<u64>, Vec<AccountId32>, Vec<AccountId32>, Vec<TanglePrimitivesServicesField>, Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement>, Compact<u64>, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesMembershipModel, Vec<TanglePrimitivesServicesPricingPricingQuote>, Vec<U8aFixed>, Vec<TanglePrimitivesServicesTypesAssetSecurityCommitment>]>;
+      /**
        * Slash an operator's stake for a service by scheduling a deferred slashing action.
        * 
-       * This function schedules a deferred slashing action against an operator's stake for a specific service.
-       * The slash is not applied immediately, but rather queued to be executed by another entity later.
+       * This function schedules a deferred slashing action against an operator's stake for a
+       * specific service. The slash is not applied immediately, but rather queued to be
+       * executed by another entity later.
        * 
        * # Permissions
        * 
        * * The caller must be an authorized Slash Origin for the target service, as determined by
-       * `query_slashing_origin`. If no slashing origin is set, or the caller does not match, the call
-       * will fail.
+       * `query_slashing_origin`. If no slashing origin is set, or the caller does not match,
+       * the call will fail.
        * 
        * # Arguments
        * 
        * * `origin` - The origin of the call. Must be signed by an authorized Slash Origin.
        * * `offender` - The account ID of the operator to be slashed.
        * * `service_id` - The ID of the service for which to slash the operator.
-       * * `slash_percent` - The percentage of the operator's exposed stake to slash, as a `Percent` value.
+       * * `slash_percent` - The percentage of the operator's exposed stake to slash, as a
+       * `Percent` value.
        * 
        * # Errors
        * 
@@ -4139,20 +4225,23 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Errors
        * 
-       * * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of revisions reached
+       * * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of
+       * revisions reached
        **/
       updateMasterBlueprintServiceManager: AugmentedSubmittable<(address: H160 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [H160]>;
       /**
-       * Updates the price targets for a registered operator's service blueprint.
+       * Updates the RPC address for a registered operator's service blueprint.
        * 
-       * Allows an operator to modify their price targets for a specific blueprint they are registered for.
-       * The operator must already be registered for the blueprint to update prices.
+       * Allows an operator to modify their RPC address for a specific blueprint they are
+       * registered for. The operator must already be registered for the blueprint to update
+       * the RPC address.
        * 
        * # Arguments
        * 
        * * `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator.
-       * * `blueprint_id: u64` - The identifier of the blueprint to update price targets for.
-       * * `price_targets: PriceTargets` - The new price targets to set for the blueprint.
+       * * `blueprint_id: u64` - The identifier of the blueprint to update the RPC address for.
+       * * `rpc_address: BoundedString<T::Constraints::MaxRpcAddressLength>` - The new RPC
+       * address to set for the blueprint.
        * 
        * # Permissions
        * 
@@ -4161,10 +4250,9 @@ declare module '@polkadot/api-base/types/submittable' {
        * # Errors
        * 
        * * [`Error::NotRegistered`] - The caller is not registered for this blueprint.
-       * * [`Error::NotAllowedToUpdatePriceTargets`] - Price target updates are currently restricted.
        * * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
        **/
-      updatePriceTargets: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, priceTargets: TanglePrimitivesServicesTypesPriceTargets | { cpu?: any; mem?: any; storageHdd?: any; storageSsd?: any; storageNvme?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, TanglePrimitivesServicesTypesPriceTargets]>;
+      updateRpcAddress: AugmentedSubmittable<(blueprintId: Compact<u64> | AnyNumber | Uint8Array, rpcAddress: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, Bytes]>;
       /**
        * Generic tx
        **/
