@@ -19,6 +19,7 @@ use super::{
 	MembershipModelType, TypeCheckError,
 	constraints::Constraints,
 	jobs::{JobDefinition, type_checker},
+	pricing::ResourcePricing,
 	types::{ApprovalState, Asset, MembershipModel},
 };
 use crate::{Account, BlueprintId};
@@ -141,6 +142,8 @@ pub struct ServiceBlueprint<C: Constraints> {
 	pub sources: BoundedVec<BlueprintSource<C>, C::MaxFields>,
 	/// The membership models supported by this blueprint
 	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
+	/// Recommended resources for running this blueprint
+	pub recommended_resources: BoundedVec<ResourcePricing<C>, C::MaxOperatorsPerService>,
 }
 
 impl<C: Constraints> ServiceBlueprint<C> {

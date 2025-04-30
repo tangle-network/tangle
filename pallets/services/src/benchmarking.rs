@@ -98,6 +98,7 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints
 		supported_membership_models: vec![MembershipModelType::Fixed, MembershipModelType::Dynamic]
 			.try_into()
 			.unwrap(),
+		recommended_resources: Default::default(),
 	}
 }
 

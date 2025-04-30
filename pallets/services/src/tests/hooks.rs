@@ -45,6 +45,7 @@ fn hooks() {
 				MembershipModelType::Fixed,
 				MembershipModelType::Dynamic,
 			],
+			recommended_resources: Default::default(),
 		};
 
 		// OnBlueprintCreated hook should be called
