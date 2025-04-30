@@ -43,7 +43,7 @@ jobs:
       run: brew install protobuf
 
     - name: Build binary
-      run: cargo build --release -p tangle --locked --features testnet,txpool,manual-seal
+      run: cargo build --release -p tangle --locked --features testnet,txpool,manual-seal,blueprint-manager
 
     - name: Calculate SHA256
       run: |
