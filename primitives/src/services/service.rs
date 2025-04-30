@@ -19,8 +19,8 @@ use super::{
 	MembershipModelType, TypeCheckError,
 	constraints::Constraints,
 	jobs::{JobDefinition, type_checker},
-	types::{ApprovalState, Asset, MembershipModel},
 	pricing::ResourcePricing,
+	types::{ApprovalState, Asset, MembershipModel},
 };
 use crate::{Account, BlueprintId};
 use educe::Educe;
