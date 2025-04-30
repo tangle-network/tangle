@@ -3308,7 +3308,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tangle-subxt 0.15.0",
  "thiserror 2.0.12",
  "tokio",
  "workspace-hack",
@@ -3502,7 +3502,7 @@ dependencies = [
  "serde",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
- "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tangle-subxt 0.15.0",
  "thiserror 2.0.12",
  "workspace-hack",
 ]
@@ -3574,7 +3574,7 @@ dependencies = [
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-keystore 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tangle-subxt 0.15.0",
  "thiserror 2.0.12",
  "tnt-bls",
  "tokio",
@@ -3612,7 +3612,7 @@ dependencies = [
  "serde",
  "sha2 0.10.8",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
- "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tangle-subxt 0.15.0",
  "thiserror 2.0.12",
  "tokio",
  "toml 0.8.20",
@@ -3701,7 +3701,7 @@ dependencies = [
  "libp2p 0.55.0",
  "sc-keystore",
  "serde",
- "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tangle-subxt 0.15.0",
  "thiserror 2.0.12",
  "tokio",
  "tower 0.5.2",
@@ -3735,7 +3735,7 @@ dependencies = [
  "futures-util",
  "pin-project-lite",
  "serde",
- "tangle-subxt 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tangle-subxt 0.15.0",
  "tower 0.5.2",
  "workspace-hack",
 ]
@@ -25514,7 +25514,7 @@ dependencies = [
  "tangle-crypto-primitives",
  "tangle-primitives",
  "tangle-runtime",
- "tangle-subxt 0.15.0",
+ "tangle-subxt 0.16.0",
  "tangle-testnet-runtime",
  "tokio",
 ]
@@ -25684,6 +25684,8 @@ dependencies = [
 [[package]]
 name = "tangle-subxt"
 version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96a67cb08b9287064e14221a69ddec5db1f3dcc59e831510beef7c284ca3714d"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -25695,9 +25697,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96a67cb08b9287064e14221a69ddec5db1f3dcc59e831510beef7c284ca3714d"
+version = "0.16.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
