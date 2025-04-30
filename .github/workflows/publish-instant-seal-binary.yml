@@ -7,13 +7,14 @@ on:
 
 jobs:
   build:
-    name: Publish Manual Seal Binary (${{ matrix.os }})
+    name: Publish Manual Seal Binary (${{ matrix.os }}, ${{ matrix.features }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-latest]
+        features: [testnet, "testnet,txpool,blueprint-manager"]
     concurrency:
-      group: manual-seal-${{ github.ref }}-${{ matrix.os }}
+      group: manual-seal-${{ github.ref }}-${{ matrix.os }}-${{ matrix.features }}
       cancel-in-progress: true
 
     steps:
@@ -43,7 +44,7 @@ jobs:
       run: brew install protobuf
 
     - name: Build binary
-      run: cargo build --release -p tangle --locked --features testnet,txpool,manual-seal,blueprint-manager
+      run: cargo build --release -p tangle --locked --features manual-seal,${{ matrix.features }}
 
     - name: Calculate SHA256
       run: |
@@ -58,7 +59,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: target/release/tangle
-        asset_name: tangle-testnet-manual-seal-${{ matrix.os == 'macos-latest' && 'darwin' || 'linux' }}-amd64
+        asset_name: tangle-testnet-manual-seal-${{ matrix.features }}-${{ matrix.os == 'macos-latest' && 'darwin' || 'linux' }}-amd64
         tag: ${{ github.ref }}
         overwrite: true
 
