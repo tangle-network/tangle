@@ -718,6 +718,20 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
+    rewards: {
+      /**
+       * Max length for vault logo URL/data
+       **/
+      maxVaultLogoLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Max length for vault name
+       **/
+      maxVaultNameLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     scheduler: {
       /**
        * The maximum weight that may be scheduled per block for any dispatchables.
@@ -809,6 +823,14 @@ declare module '@polkadot/api-base/types/consts' {
        * Maximum number of permitted callers per service.
        **/
       maxPermittedCallers: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of resource types.
+       **/
+      maxResourceNameLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum length of rpc address.
+       **/
+      maxRpcAddressLength: u32 & AugmentedConst<ApiType>;
       /**
        * Maximum number of services per operator.
        **/

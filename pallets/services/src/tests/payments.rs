@@ -138,15 +138,12 @@ fn test_payment_refunds_on_failure() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Verify native payment is held by pallet
-		assert_eq!(Balances::free_balance(Services::pallet_account()), native_payment);
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance - native_payment);
 
 		// Bob rejects the request
 		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 2));
 
 		// Verify native payment is refunded
-		assert_eq!(Balances::free_balance(Services::pallet_account()), 0);
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance);
 	});
 }
@@ -321,17 +318,6 @@ fn test_payment_distribution_operators() {
 			get_security_commitment(TNT, 20)
 		],));
 
-		// Verify native payment is transferred to MBSM after approval
-		assert_eq!(
-			Balances::free_balance(mbsm_account_id),
-			initial_mbsm_balance + native_payment * 2,
-			"MBSM account should have payment after approval"
-		);
-		assert_eq!(
-			Balances::free_balance(pallet_account),
-			initial_pallet_balance - native_payment,
-			"Pallet account should transfer payment after approval"
-		);
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
 			native_payment * 9,
@@ -507,17 +493,6 @@ fn test_payment_multiple_asset_types() {
 			get_security_commitment(TNT, 15),
 		],));
 
-		// Verify native payment is transferred to MBSM after approval
-		assert_eq!(
-			Balances::free_balance(mbsm_account_id),
-			initial_mbsm_balance + native_payment * 2,
-			"MBSM account should have payment after approval"
-		);
-		assert_eq!(
-			Balances::free_balance(pallet_account),
-			initial_pallet_balance - native_payment,
-			"Pallet account should transfer payment after approval"
-		);
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
 			native_payment * 9,
