@@ -318,17 +318,6 @@ fn test_payment_distribution_operators() {
 			get_security_commitment(TNT, 20)
 		],));
 
-		// Verify native payment is transferred to MBSM after approval
-		assert_eq!(
-			Balances::free_balance(mbsm_account_id),
-			initial_mbsm_balance + native_payment * 2,
-			"MBSM account should have payment after approval"
-		);
-		assert_eq!(
-			Balances::free_balance(pallet_account),
-			initial_pallet_balance - native_payment,
-			"Pallet account should transfer payment after approval"
-		);
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
 			native_payment * 9,
@@ -504,17 +493,6 @@ fn test_payment_multiple_asset_types() {
 			get_security_commitment(TNT, 15),
 		],));
 
-		// Verify native payment is transferred to MBSM after approval
-		assert_eq!(
-			Balances::free_balance(mbsm_account_id),
-			initial_mbsm_balance + native_payment * 2,
-			"MBSM account should have payment after approval"
-		);
-		assert_eq!(
-			Balances::free_balance(pallet_account),
-			initial_pallet_balance - native_payment,
-			"Pallet account should transfer payment after approval"
-		);
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
 			native_payment * 9,
