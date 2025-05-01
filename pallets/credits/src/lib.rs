@@ -8,25 +8,26 @@
 //! users who stake TNT tokens with passively accrued credits.
 //!
 //! ### Key Features:
-//! - **Staking-Based Credit Accrual:** Users automatically earn credits based on the amount
-//!   of TNT they have staked via a configured `StakingInfo` provider. Credit emission rates
-//!   are tiered based on stake size.
+//! - **Staking-Based Credit Accrual:** Users automatically earn credits based on the amount of TNT
+//!   they have staked via a configured `StakingInfo` provider. Credit emission rates are tiered
+//!   based on stake size.
 //! - **TNT Burning:** Users can burn TNT tokens for an immediate, one-time grant of credits.
 //! - **Account Linking:** Users link their on-chain account (`AccountId`) to an off-chain
 //!   identifier (e.g., GitHub handle, email hash) to facilitate off-chain credit redemption.
-//! - **Credit Claiming:** Users initiate a claim on-chain, signaling the intention to use
-//!   credits off-chain. This reduces the on-chain balance.
-//! - **Activity-Based Decay:** To strongly incentivize weekly interaction, the
-//!   *claimable* portion of a user's credit balance decays significantly if they do not
-//!   claim or actively update their credits frequently (ideally weekly). The raw accrued balance
-//!   remains, but its effective claimable value diminishes rapidly with prolonged inactivity.
-//! - **Admin Controls:** Provides administrative functions to manage credit balances and account links.
+//! - **Credit Claiming:** Users initiate a claim on-chain, signaling the intention to use credits
+//!   off-chain. This reduces the on-chain balance.
+//! - **Activity-Based Decay:** To strongly incentivize weekly interaction, the *claimable* portion
+//!   of a user's credit balance decays significantly if they do not claim or actively update their
+//!   credits frequently (ideally weekly). The raw accrued balance remains, but its effective
+//!   claimable value diminishes rapidly with prolonged inactivity.
+//! - **Admin Controls:** Provides administrative functions to manage credit balances and account
+//!   links.
 //!
 //! ## Integration
 //!
 //! This pallet relies on:
-//! - An implementation of `MultiAssetDelegationInfo` (`Config::StakingInfo`)
-//!   to query the active TNT stake for users.
+//! - An implementation of `MultiAssetDelegationInfo` (`Config::StakingInfo`) to query the active
+//!   TNT stake for users.
 //! - An implementation of `frame_support::traits::tokens::fungibles` (`Config::Currency`) to handle
 //!   TNT token balances and burning.
 //! - `frame_system` for basic system types and block numbers.
@@ -36,12 +37,16 @@
 //! - **TNT:** The primary utility token used for staking and burning.
 //! - **Credits:** An on-chain numerical balance representing usage rights for off-chain services.
 //!   Credits are not transferable tokens themselves.
-//! - **Staking:** Locking TNT tokens via the `StakingInfo` provider (e.g., `pallet-multi-asset-delegation`).
+//! - **Staking:** Locking TNT tokens via the `StakingInfo` provider (e.g.,
+//!   `pallet-multi-asset-delegation`).
 //! - **Burning:** Permanently destroying TNT tokens in exchange for immediate credits.
 //! - **Linking:** Associating an on-chain `AccountId` with an off-chain identifier.
 //! - **Claiming:** Reducing the on-chain credit balance, implying off-chain usage.
-//! - **Interaction:** An action (linking, claiming, triggering update, admin action) that resets the decay timer.
-//! - **Decay:** Reduction in the *claimable percentage* of the raw credit balance over time due to inactivity. Designed to be aggressive after a grace period (e.g., 1 week) to encourage regular claims.
+//! - **Interaction:** An action (linking, claiming, triggering update, admin action) that resets
+//!   the decay timer.
+//! - **Decay:** Reduction in the *claimable percentage* of the raw credit balance over time due to
+//!   inactivity. Designed to be aggressive after a grace period (e.g., 1 week) to encourage regular
+//!   claims.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -52,6 +57,9 @@ pub mod types;
 
 #[cfg(test)]
 mod mock;
+
+#[cfg(test)]
+mod mock_evm;
 
 #[cfg(test)]
 mod tests;
@@ -65,19 +73,10 @@ pub mod pallet {
 	use core::cmp::max;
 	use frame_support::{
 		pallet_prelude::{ConstU32, *},
-		traits::{
-			tokens::{
-				fungibles::{Inspect, Mutate},
-				Fortitude, Precision, Preservation,
-			},
-			Currency, EnsureOriginWithArg, ExistenceRequirement, LockableCurrency,
-			ReservableCurrency,
-		},
-		PalletId,
+		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_arithmetic::Perbill;
-	use sp_runtime::traits::{CheckedSub, MaybeDisplay, Saturating, Zero};
+	use sp_runtime::traits::{MaybeDisplay, Saturating, UniqueSaturatedInto, Zero};
 	use sp_std::fmt::Debug;
 	use tangle_primitives::traits::MultiAssetDelegationInfo;
 
@@ -238,7 +237,8 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Claim potential credits accrued within the allowed window. Emits event for off-chain processing.
+		/// Claim potential credits accrued within the allowed window. Emits event for off-chain
+		/// processing.
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::DbWeight::get().reads_writes(2, 1))]
 		pub fn claim_credits(
@@ -278,6 +278,24 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Calculates potential credits accrued within the allowed window ending now,
 		/// and updates the last reward block.
+		///
+		/// ## Calculation Logic:
+		/// 1.  Determine the relevant time window for accrual:
+		///     *   `last_update` = `LastRewardUpdateBlock<T>::get(who)`
+		///     *   `window` = `T::ClaimWindowBlocks::get()`
+		///     *   `effective_start_block` = `max(last_update, current_block.saturating_sub(window))`
+		///     *   `effective_end_block` = `current_block`
+		///     *   If `effective_start_block >= effective_end_block`, accrued credits = 0.
+		/// 2.  Calculate the number of blocks in this window:
+		///     *   `blocks_in_window` = `effective_end_block.saturating_sub(effective_start_block)`
+		/// 3.  Fetch the user's current total staked TNT amount (`staked_amount`).
+		/// 4.  Determine the credit emission `rate` per block based on `staked_amount` using `get_current_rate`.
+		/// 5.  Calculate the accrued credits (using saturating math):
+		///     *   `accrued_credits` = `rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window.unique_saturated_into::<u32>()))`
+		/// 6.  Updates `LastRewardUpdateBlock<T>` for the user to `current_block`.
+		///
+		/// # Returns
+		/// The calculated potential credits accrued within the window, or `DispatchError`.
 		fn update_reward_block_and_get_accrued_amount(
 			who: &T::AccountId,
 			current_block: BlockNumberOf<T>,
@@ -294,22 +312,27 @@ pub mod pallet {
 			// Ensure we don't calculate for blocks past the current one if window is large
 			let effective_end_block = current_block;
 			if start_block >= effective_end_block {
+				// Also update the block even if no credits accrued this time
+				LastRewardUpdateBlock::<T>::insert(who, current_block);
 				return Ok(Zero::zero());
 			}
 
-			// Fetch stake *once* for the current block (simplification: assumes stake is constant during window)
-			// A more complex approach could sample stake at intervals, but adds significant complexity.
+			// Fetch stake *once* for the current block (simplification: assumes stake is constant
+			// during window) A more complex approach could sample stake at intervals, but adds
+			// significant complexity.
 			let tnt_asset_id = T::TntAssetId::get();
 			let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
 			let maybe_deposit_info = T::StakingInfo::get_user_deposit_with_locks(who, tnt_asset);
 			let staked_amount = maybe_deposit_info.map_or(Zero::zero(), |deposit_info| {
 				let locked_total = deposit_info.amount_with_locks.map_or(Zero::zero(), |locks| {
-					locks.iter().fold(Zero::zero(), |acc, lock| acc.saturating_add(lock.amount))
+					locks
+						.iter()
+						.fold(BalanceOf::<T>::zero(), |acc, lock| acc.saturating_add(lock.amount))
 				});
 				deposit_info.unlocked_amount.saturating_add(locked_total)
 			});
 
-			// Update the block *before* calculation
+			// Update the block *before* calculation (or after checks)
 			LastRewardUpdateBlock::<T>::insert(who, current_block);
 
 			if staked_amount.is_zero() {
@@ -322,13 +345,22 @@ pub mod pallet {
 
 			// Calculate blocks within the effective window
 			let blocks_in_window = effective_end_block.saturating_sub(start_block);
+			// Already checked if start_block >= effective_end_block, so blocks_in_window > 0 here
+			// unless effective_end_block == start_block, but that case is covered too.
+			// We still check for zero just in case, although it should be unreachable.
 			if blocks_in_window.is_zero() {
+				return Ok(Zero::zero()); // Should be unreachable given prior checks
+			}
+
+			// Convert BlockNumber to u32 safely for the multiplication
+			let blocks_in_window_u32: u32 = blocks_in_window.unique_saturated_into();
+			if blocks_in_window_u32 == 0 {
+				// This can happen if blocks_in_window > u32::MAX and saturates to 0 if BlockNumber is signed?
+				// Or more likely if BlockNumber itself was 0. Unlikely, but handle defensively.
 				return Ok(Zero::zero());
 			}
 
-			let multiplier =
-				<BalanceOf<T>>::try_from(blocks_in_window).map_err(|_| Error::<T>::Overflow)?;
-			let new_credits = rate.saturating_mul(multiplier);
+			let new_credits = rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window_u32));
 
 			Ok(new_credits)
 		}

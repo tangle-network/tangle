@@ -333,8 +333,9 @@ fn accrual_with_stake_change_within_window() {
 			tangle_primitives::services::Asset::Custom(TNT_ASSET_ID),
 			1000 - 150
 		));
-		// Need to run MAD lifecycle potentially? For simplicity, assume immediate effect for test, or mock directly if needed.
-		// Let's assume test setup makes this immediate for credits pallet view
+		// Need to run MAD lifecycle potentially? For simplicity, assume immediate effect for test,
+		// or mock directly if needed. Let's assume test setup makes this immediate for credits
+		// pallet view
 
 		// Period 2: Tier 1 for window/2 blocks
 		let block2 = block1 + window / 2;
