@@ -10,6 +10,7 @@ edition = "2021"
 [dependencies]
 frame-support = { workspace = true }
 frame-system = { workspace = true }
+serde = { workspace = true, optional = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 log = { workspace = true }
@@ -17,10 +18,8 @@ sp-core = { workspace = true }
 sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
-ethabi = { workspace = true }
 
 pallet-session = { workspace = true }
-pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
 pallet-staking = { workspace = true }
@@ -32,49 +31,19 @@ frame-benchmarking = { workspace = true, optional = true }
 tangle-primitives = { workspace = true }
 
 [dev-dependencies]
-ethereum = { workspace = true, features = ["with-codec"] }
 hex = { workspace = true }
 num_enum = { workspace = true }
 hex-literal = { workspace = true }
-libsecp256k1 = { workspace = true }
-pallet-assets = { workspace = true }
-pallet-balances = { workspace = true }
-pallet-timestamp = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 smallvec = { workspace = true }
 sp-io = { workspace = true }
 
-# Frontier Primitive
-fp-account = { workspace = true }
-fp-consensus = { workspace = true }
-fp-dynamic-fee = { workspace = true }
-fp-ethereum = { workspace = true }
-fp-rpc = { workspace = true }
-fp-self-contained = { workspace = true }
-fp-storage = { workspace = true }
-
-# Frontier FRAME
-pallet-base-fee = { workspace = true }
-pallet-dynamic-fee = { workspace = true }
-pallet-ethereum = { workspace = true }
-pallet-evm = { workspace = true }
-pallet-evm-chain-id = { workspace = true }
-
-pallet-evm-precompile-blake2 = { workspace = true }
-pallet-evm-precompile-bn128 = { workspace = true }
-pallet-evm-precompile-curve25519 = { workspace = true }
-pallet-evm-precompile-ed25519 = { workspace = true }
-pallet-evm-precompile-modexp = { workspace = true }
-pallet-evm-precompile-sha3fips = { workspace = true }
-pallet-evm-precompile-simple = { workspace = true }
-
-pallet-evm-precompile-balances-erc20 = { workspace = true }
-pallet-evm-precompileset-assets-erc20 = { workspace = true }
-
-precompile-utils = { workspace = true }
 tangle-crypto-primitives = { workspace = true }
 sp-core = { workspace = true }
+pallet-assets = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
@@ -85,6 +54,7 @@ frame-election-provider-support = { workspace = true }
 [features]
 default = ["std"]
 std = [
+    "serde",
     "frame-benchmarking?/std",
     "frame-support/std",
     "frame-system/std",

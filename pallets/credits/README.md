@@ -12,29 +12,29 @@ users who stake TNT tokens by tracking passively accrued potential credits withi
 ### Key Features:
 
 -   **Staking-Based Potential Credit Accrual:** Tracks potential credits earned based on
-    TNT stake via `StakingInfo`. Accrual is **capped** to a configurable time window
+    TNT stake via `MultiAssetDelegationInfo`. Accrual is **capped** to a configurable time window
     (`ClaimWindowBlocks`). Users do not accrue additional potential credits for periods
     longer than this window without claiming.
+-   **Stake Tier Configuration:** Credit emission rates based on stake size are defined via `StakeTier` structs,
+    which are configured during genesis and stored on-chain in `StoredStakeTiers`.
 -   **TNT Burning Event:** Burning TNT emits an event (`CreditsGrantedFromBurn`) indicating
     potential credits granted for immediate off-chain use.
 -   **Credit Claiming Event:** Users initiate a claim on-chain with an off-chain ID. The
     pallet calculates the potential credits accrued within the `ClaimWindowBlocks` ending
     at the current block. It verifies the requested amount against this calculated value and
     emits a `CreditsClaimed` event. **No on-chain balance is stored or deducted.**
--   **Window Cap (Implicit Decay):** Inactivity beyond the `ClaimWindowBlocks` simply results
-    in no further potential credit accrual for that past period; there is no percentage decay
-    applied to previously accrued potential amounts.
+-   **Window Cap:** Inactivity beyond the `ClaimWindowBlocks` simply results
+    in no further potential credit accrual for that past period.
 
 ## Integration
 
 This pallet relies on:
 
--   An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::StakingInfo`)
+-   An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::MultiAssetDelegationInfo`)
     to query the active TNT stake for users.
--   An implementation of `frame_support::traits::tokens::fungibles::{Inspect, Mutate}`
-    (`Config::Currency`) to handle TNT token balance checks and burning.
+-   An implementation of `frame_support::traits::Currency` (`Config::Currency`) to handle
+    TNT token balance checks and burning.
 -   `frame_system` for basic system types and block numbers.
--   `sp_arithmetic::Perbill` for decay calculations.
 -   **An external off-chain system** to listen for `CreditsGrantedFromBurn` and `CreditsClaimed`
     events and manage the actual credit balances associated with off-chain user accounts.
 
@@ -48,22 +48,23 @@ This pallet relies on:
 -   **Claiming:** An on-chain action that calculates potential credits earned within the current
     claim window, verifies a requested amount, and emits an event for off-chain processing.
     This action also updates the `LastRewardUpdateBlock` marker.
+-   **Stake Tier:** A configuration struct defining a TNT stake threshold and the corresponding
+    potential credit emission rate per block.
 
 ## Interface
 
 ### Config Trait
 
 -   `RuntimeEvent`: The overarching event type.
--   `Currency`: The fungibles token trait (`Inspect`, `Mutate`) for TNT.
+-   `Currency`: The currency trait for TNT.
 -   `AssetId`: The Asset ID type.
 -   `TntAssetId`: The specific Asset ID for TNT.
--   `StakingInfo`: Provides staking information.
--   `StakeTiers`: Defines potential credit emission rates.
+-   `MultiAssetDelegationInfo`: Provides staking information (`get_user_deposit_with_locks`).
 -   `BurnConversionRate`: Rate for converting burned TNT to potential credits.
 -   `ClaimWindowBlocks`: The maximum accrual window duration in blocks.
--   `CreditBurnTarget`: Optional account for burned TNT.
+-   `CreditBurnRecipient`: Optional account for burned TNT.
 -   `MaxOffchainAccountIdLength`: Max length for the off-chain ID during claim.
--   `MaxTiers`: Constant for BoundedVec limit.
+-   `MaxStakeTiers`: The maximum number of stake tiers allowed in storage.
 
 ### Dispatchable Functions (Extrinsics)
 
@@ -74,8 +75,9 @@ This pallet relies on:
 
 ### Storage Items
 
--   `LastRewardUpdateBlock`: Tracks the last block number potential staking rewards were accounted for.
+-   `LastRewardUpdateBlock`: Tracks the last block number potential staking rewards were accounted for per user.
     Effectively marks the start for the _next_ potential accrual window upon claim/burn.
+-   `StoredStakeTiers`: Stores the configured `StakeTier` definitions, initialized via genesis.
 
 ### Events
 
@@ -90,6 +92,6 @@ This pallet relies on:
     within the allowed window.
 -   `OffchainAccountIdTooLong`: Provided off-chain ID during claim exceeds the maximum length.
 -   `Overflow`: Arithmetic overflow occurred.
--   `NoStakeTiersConfigured`: Runtime configuration for `StakeTiers` is missing/empty.
+-   `NoStakeTiersConfigured`: `StoredStakeTiers` is empty.
 -   `AmountZero`: Trying to burn or claim zero amount.
--   `BurnTransferNotImplemented`: `CreditBurnTarget` is configured, but transfer logic isn't enabled.
+-   `BurnTransferNotImplemented`: `CreditBurnRecipient` is configured, but transfer logic isn't enabled.

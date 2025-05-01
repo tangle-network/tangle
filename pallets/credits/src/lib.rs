@@ -2,51 +2,54 @@
 //!
 //! ## Overview
 //!
-//! The Cloud Credits pallet provides an on-chain mechanism for users to acquire and manage
-//! usage credits, primarily intended for accessing off-chain services like AI assistants.
+//! The Cloud Credits pallet provides an on-chain mechanism for tracking potential usage credits
+//! earned through staking TNT or burning TNT. It is designed to work with an off-chain system
+//! that listens to events to manage actual user credit balances.
+//!
 //! It integrates with a staking system (like `pallet-multi-asset-delegation`) to reward
-//! users who stake TNT tokens with passively accrued credits.
+//! users who stake TNT tokens by tracking passively accrued potential credits within a defined time window.
 //!
 //! ### Key Features:
-//! - **Staking-Based Credit Accrual:** Users automatically earn credits based on the amount of TNT
-//!   they have staked via a configured `StakingInfo` provider. Credit emission rates are tiered
-//!   based on stake size.
-//! - **TNT Burning:** Users can burn TNT tokens for an immediate, one-time grant of credits.
-//! - **Account Linking:** Users link their on-chain account (`AccountId`) to an off-chain
-//!   identifier (e.g., GitHub handle, email hash) to facilitate off-chain credit redemption.
-//! - **Credit Claiming:** Users initiate a claim on-chain, signaling the intention to use credits
-//!   off-chain. This reduces the on-chain balance.
-//! - **Activity-Based Decay:** To strongly incentivize weekly interaction, the *claimable* portion
-//!   of a user's credit balance decays significantly if they do not claim or actively update their
-//!   credits frequently (ideally weekly). The raw accrued balance remains, but its effective
-//!   claimable value diminishes rapidly with prolonged inactivity.
-//! - **Admin Controls:** Provides administrative functions to manage credit balances and account
-//!   links.
+//!
+//! - **Staking-Based Potential Credit Accrual:** Tracks potential credits earned based on
+//!   TNT stake via `MultiAssetDelegationInfo`. Accrual is **capped** to a configurable time window
+//!   (`ClaimWindowBlocks`). Users do not accrue additional potential credits for periods
+//!   longer than this window without claiming.
+//! - **Stake Tier Configuration:** Credit emission rates based on stake size are defined via `StakeTier` structs,
+//!   which are configured during genesis and stored on-chain.
+//! - **TNT Burning Event:** Burning TNT emits an event (`CreditsGrantedFromBurn`) indicating
+//!   potential credits granted for immediate off-chain use.
+//! - **Credit Claiming Event:** Users initiate a claim on-chain with an off-chain ID. The
+//!   pallet calculates the potential credits accrued within the `ClaimWindowBlocks` ending
+//!   at the current block. It verifies the requested amount against this calculated value and
+//!   emits a `CreditsClaimed` event. **No on-chain balance is stored or deducted.**
+//! - **Window Cap:** Inactivity beyond the `ClaimWindowBlocks` simply results
+//!   in no further potential credit accrual for that past period.
 //!
 //! ## Integration
 //!
 //! This pallet relies on:
-//! - An implementation of `MultiAssetDelegationInfo` (`Config::StakingInfo`) to query the active
-//!   TNT stake for users.
-//! - An implementation of `frame_support::traits::tokens::fungibles` (`Config::Currency`) to handle
-//!   TNT token balances and burning.
+//!
+//! - An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::MultiAssetDelegationInfo`)
+//!   to query the active TNT stake for users.
+//! - An implementation of `frame_support::traits::Currency` (`Config::Currency`) to handle
+//!   TNT token balance checks and burning.
 //! - `frame_system` for basic system types and block numbers.
-//! - `sp_arithmetic::Perbill` for decay calculations.
+//! - **An external off-chain system** to listen for `CreditsGrantedFromBurn` and `CreditsClaimed`
+//!   events and manage the actual credit balances associated with off-chain user accounts.
 //!
 //! ## Terminology
-//! - **TNT:** The primary utility token used for staking and burning.
-//! - **Credits:** An on-chain numerical balance representing usage rights for off-chain services.
-//!   Credits are not transferable tokens themselves.
-//! - **Staking:** Locking TNT tokens via the `StakingInfo` provider (e.g.,
-//!   `pallet-multi-asset-delegation`).
-//! - **Burning:** Permanently destroying TNT tokens in exchange for immediate credits.
-//! - **Linking:** Associating an on-chain `AccountId` with an off-chain identifier.
-//! - **Claiming:** Reducing the on-chain credit balance, implying off-chain usage.
-//! - **Interaction:** An action (linking, claiming, triggering update, admin action) that resets
-//!   the decay timer.
-//! - **Decay:** Reduction in the *claimable percentage* of the raw credit balance over time due to
-//!   inactivity. Designed to be aggressive after a grace period (e.g., 1 week) to encourage regular
-//!   claims.
+//!
+//! - **TNT:** The utility token used for staking and burning.
+//! - **Potential Credits:** A value calculated on-chain based on staking or burning, used only for
+//!   verification during claims and emitted in events. Not stored on-chain.
+//! - **Claim Window:** A configurable duration (`ClaimWindowBlocks`) representing the maximum
+//!   period for which potential credits can be accrued before claiming.
+//! - **Claiming:** An on-chain action that calculates potential credits earned within the current
+//!   claim window, verifies a requested amount, and emits an event for off-chain processing.
+//!   This action also updates the `LastRewardUpdateBlock` marker.
+//! - **Stake Tier:** A configuration struct defining a TNT stake threshold and the corresponding
+//!   potential credit emission rate per block.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -59,9 +62,6 @@ pub mod types;
 mod mock;
 
 #[cfg(test)]
-mod mock_evm;
-
-#[cfg(test)]
 mod tests;
 
 pub type BalanceOf<T> =
@@ -72,25 +72,13 @@ pub mod pallet {
 	use crate::{types::*, BalanceOf};
 	use core::cmp::max;
 	use frame_support::{
-		pallet_prelude::{ConstU32, *},
+		pallet_prelude::*,
 		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::traits::{MaybeDisplay, Saturating, UniqueSaturatedInto, Zero};
 	use sp_std::fmt::Debug;
 	use tangle_primitives::traits::MultiAssetDelegationInfo;
-
-	// Define Max Decay Steps Const
-	#[cfg(feature = "runtime-benchmarks")]
-	pub const MAX_DECAY_STEPS: u32 = 5;
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	pub const MAX_DECAY_STEPS: u32 = 5;
-
-	// Define Max Tiers Const
-	#[cfg(feature = "runtime-benchmarks")]
-	pub const MAX_TIERS: u32 = 10;
-	#[cfg(not(feature = "runtime-benchmarks"))]
-	pub const MAX_TIERS: u32 = 10;
 
 	// Move STORAGE_VERSION inside the pallet mod
 	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
@@ -112,7 +100,7 @@ pub mod pallet {
 			+ ReservableCurrency<Self::AccountId>
 			+ LockableCurrency<Self::AccountId>;
 
-		/// The Asset ID type used by the Currency trait and StakingInfo.
+		/// The Asset ID type used by the Currency trait and MultiAssetDelegationInfo.
 		type AssetId: Parameter + Member + MaybeDisplay + Ord + MaxEncodedLen + Copy + Debug;
 
 		/// The specific Asset ID for the TNT token.
@@ -121,16 +109,12 @@ pub mod pallet {
 
 		/// The provider for checking the active TNT stake.
 		/// Ensure BalanceOf<Self> here resolves correctly to T::Currency::Balance.
-		type StakingInfo: MultiAssetDelegationInfo<
+		type MultiAssetDelegationInfo: MultiAssetDelegationInfo<
 			Self::AccountId,
 			BalanceOf<Self>,
 			BlockNumberOf<Self>,
 			Self::AssetId,
 		>;
-
-		/// The defined staking tiers for credit emission, sorted by threshold ascending.
-		#[pallet::constant]
-		type StakeTiers: Get<BoundedVec<StakeTier<BalanceOf<Self>>, ConstU32<MAX_TIERS>>>;
 
 		/// The conversion rate for burning TNT to credits.
 		#[pallet::constant]
@@ -142,22 +126,15 @@ pub mod pallet {
 
 		/// Optional: An account to send burned TNT to. If None, `Currency::burn_from` is used.
 		#[pallet::constant]
-		type CreditBurnTarget: Get<Option<Self::AccountId>>;
-
-		/// Origin that can perform administrative actions.
-		type AdminOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+		type CreditBurnRecipient: Get<Option<Self::AccountId>>;
 
 		/// The maximum length allowed for an off-chain account ID string.
 		#[pallet::constant]
 		type MaxOffchainAccountIdLength: Get<u32>;
 
-		/// The maximum decay steps.
+		/// The maximum number of stake tiers.
 		#[pallet::constant]
-		type MaxDecaySteps: Get<u32>;
-
-		/// The maximum tiers.
-		#[pallet::constant]
-		type MaxTiers: Get<u32>;
+		type MaxStakeTiers: Get<u32>;
 	}
 
 	// --- Storage Items ---
@@ -166,6 +143,45 @@ pub mod pallet {
 	#[pallet::getter(fn last_reward_update_block)]
 	pub type LastRewardUpdateBlock<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::AccountId, BlockNumberOf<T>, ValueQuery>;
+
+	/// Storage for the configured staking tiers.
+	#[pallet::storage]
+	#[pallet::getter(fn stake_tiers)]
+	pub type StoredStakeTiers<T: Config> =
+		StorageValue<_, BoundedVec<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>, ValueQuery>;
+
+	// --- Genesis Configuration ---
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		/// Initial staking tiers for credit accrual.
+		/// Should be sorted by threshold ascending.
+		pub stake_tiers: Vec<StakeTier<BalanceOf<T>>>,
+	}
+
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			GenesisConfig { stake_tiers: Default::default() }
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+		fn build(&self) {
+			let bounded_tiers: BoundedVec<_, T::MaxStakeTiers> = self
+				.stake_tiers
+				.clone()
+				.try_into()
+				.expect("Genesis config stake_tiers exceed maximum length");
+			// Ensure tiers are sorted by threshold, crucial for get_current_rate logic.
+			// We expect genesis to provide sorted data, but panic here if not as it's a config error.
+			assert!(
+				bounded_tiers.windows(2).all(|w| w[0].threshold <= w[1].threshold),
+				"Genesis stake_tiers must be sorted by threshold ascending"
+			);
+			StoredStakeTiers::<T>::put(bounded_tiers);
+		}
+	}
 
 	// --- Events ---
 	/// Events emitted by this pallet.
@@ -322,15 +338,22 @@ pub mod pallet {
 			// significant complexity.
 			let tnt_asset_id = T::TntAssetId::get();
 			let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
-			let maybe_deposit_info = T::StakingInfo::get_user_deposit_with_locks(who, tnt_asset);
-			let staked_amount = maybe_deposit_info.map_or(Zero::zero(), |deposit_info| {
-				let locked_total = deposit_info.amount_with_locks.map_or(Zero::zero(), |locks| {
-					locks
-						.iter()
-						.fold(BalanceOf::<T>::zero(), |acc, lock| acc.saturating_add(lock.amount))
-				});
-				deposit_info.unlocked_amount.saturating_add(locked_total)
-			});
+			let maybe_deposit_info =
+				T::MultiAssetDelegationInfo::get_user_deposit_with_locks(who, tnt_asset);
+
+			// Calculate total staked amount from the deposit info (unlocked + sum of locks)
+			let staked_amount = match maybe_deposit_info {
+				Some(deposit_info) => {
+					let locked_total =
+						deposit_info.amount_with_locks.map_or(BalanceOf::<T>::zero(), |locks| {
+							locks.iter().fold(BalanceOf::<T>::zero(), |acc, lock| {
+								acc.saturating_add(lock.amount)
+							})
+						});
+					deposit_info.unlocked_amount.saturating_add(locked_total)
+				},
+				None => BalanceOf::<T>::zero(),
+			};
 
 			// Update the block *before* calculation (or after checks)
 			LastRewardUpdateBlock::<T>::insert(who, current_block);
@@ -375,11 +398,11 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Burns TNT, returning an error if CreditBurnTarget is set.
+		/// Burns TNT, returning an error if CreditBurnRecipient is set.
 		fn burn_tnt(who: &T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
 			ensure!(T::Currency::free_balance(who) >= amount, Error::<T>::InsufficientTntBalance);
 
-			match T::CreditBurnTarget::get() {
+			match T::CreditBurnRecipient::get() {
 				Some(_) => Err(Error::<T>::BurnTransferNotImplemented.into()),
 				None => {
 					T::Currency::transfer(who, who, amount, ExistenceRequirement::KeepAlive)?;
@@ -389,6 +412,7 @@ pub mod pallet {
 		}
 
 		/// Determines the credit emission rate per block based on the staked amount.
+		/// Reads the tiers from storage.
 		///
 		/// # Arguments
 		/// * `staked_amount`: The amount of staked TNT.
@@ -396,12 +420,21 @@ pub mod pallet {
 		/// # Returns
 		/// * `BalanceOf<T>`: The appropriate credit emission rate.
 		pub(crate) fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
-			let tiers = T::StakeTiers::get();
+			// Read tiers from storage
+			let tiers = StoredStakeTiers::<T>::get();
+			if tiers.is_empty() {
+				// Handle case where no tiers are configured (e.g., during genesis or if cleared)
+				log::warn!("No stake tiers found in storage. Credit rate will be zero.");
+				return BalanceOf::<T>::zero();
+			}
+
+			// Iterate tiers in reverse (highest threshold first) because they are stored ascending
 			for tier in tiers.iter().rev() {
 				if staked_amount >= tier.threshold {
 					return tier.rate_per_block;
 				}
 			}
+			// If staked amount is below the lowest threshold, rate is zero.
 			BalanceOf::<T>::zero()
 		}
 	}

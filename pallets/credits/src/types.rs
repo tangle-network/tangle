@@ -6,6 +6,7 @@ use scale_info::TypeInfo;
 #[derive(
 	Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen, PartialOrd, Ord,
 )]
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub struct StakeTier<Balance>
 where
 	Balance: MaxEncodedLen + Encode + Decode + Clone + Eq + PartialEq + TypeInfo,
