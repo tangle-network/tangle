@@ -7,33 +7,34 @@
 //! that listens to events to manage actual user credit balances.
 //!
 //! It integrates with a staking system (like `pallet-multi-asset-delegation`) to reward
-//! users who stake TNT tokens by tracking passively accrued potential credits within a defined time window.
+//! users who stake TNT tokens by tracking passively accrued potential credits within a defined time
+//! window.
 //!
 //! ### Key Features:
 //!
-//! - **Staking-Based Potential Credit Accrual:** Tracks potential credits earned based on
-//!   TNT stake via `MultiAssetDelegationInfo`. Accrual is **capped** to a configurable time window
-//!   (`ClaimWindowBlocks`). Users do not accrue additional potential credits for periods
-//!   longer than this window without claiming.
-//! - **Stake Tier Configuration:** Credit emission rates based on stake size are defined via `StakeTier` structs,
-//!   which are configured during genesis and stored on-chain.
+//! - **Staking-Based Potential Credit Accrual:** Tracks potential credits earned based on TNT stake
+//!   via `MultiAssetDelegationInfo`. Accrual is **capped** to a configurable time window
+//!   (`ClaimWindowBlocks`). Users do not accrue additional potential credits for periods longer
+//!   than this window without claiming.
+//! - **Stake Tier Configuration:** Credit emission rates based on stake size are defined via
+//!   `StakeTier` structs, which are configured during genesis and stored on-chain.
 //! - **TNT Burning Event:** Burning TNT emits an event (`CreditsGrantedFromBurn`) indicating
 //!   potential credits granted for immediate off-chain use.
-//! - **Credit Claiming Event:** Users initiate a claim on-chain with an off-chain ID. The
-//!   pallet calculates the potential credits accrued within the `ClaimWindowBlocks` ending
-//!   at the current block. It verifies the requested amount against this calculated value and
-//!   emits a `CreditsClaimed` event. **No on-chain balance is stored or deducted.**
-//! - **Window Cap:** Inactivity beyond the `ClaimWindowBlocks` simply results
-//!   in no further potential credit accrual for that past period.
+//! - **Credit Claiming Event:** Users initiate a claim on-chain with an off-chain ID. The pallet
+//!   calculates the potential credits accrued within the `ClaimWindowBlocks` ending at the current
+//!   block. It verifies the requested amount against this calculated value and emits a
+//!   `CreditsClaimed` event. **No on-chain balance is stored or deducted.**
+//! - **Window Cap:** Inactivity beyond the `ClaimWindowBlocks` simply results in no further
+//!   potential credit accrual for that past period.
 //!
 //! ## Integration
 //!
 //! This pallet relies on:
 //!
-//! - An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::MultiAssetDelegationInfo`)
-//!   to query the active TNT stake for users.
-//! - An implementation of `frame_support::traits::Currency` (`Config::Currency`) to handle
-//!   TNT token balance checks and burning.
+//! - An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo`
+//!   (`Config::MultiAssetDelegationInfo`) to query the active TNT stake for users.
+//! - An implementation of `frame_support::traits::Currency` (`Config::Currency`) to handle TNT
+//!   token balance checks and burning.
 //! - `frame_system` for basic system types and block numbers.
 //! - **An external off-chain system** to listen for `CreditsGrantedFromBurn` and `CreditsClaimed`
 //!   events and manage the actual credit balances associated with off-chain user accounts.
@@ -46,8 +47,8 @@
 //! - **Claim Window:** A configurable duration (`ClaimWindowBlocks`) representing the maximum
 //!   period for which potential credits can be accrued before claiming.
 //! - **Claiming:** An on-chain action that calculates potential credits earned within the current
-//!   claim window, verifies a requested amount, and emits an event for off-chain processing.
-//!   This action also updates the `LastRewardUpdateBlock` marker.
+//!   claim window, verifies a requested amount, and emits an event for off-chain processing. This
+//!   action also updates the `LastRewardUpdateBlock` marker.
 //! - **Stake Tier:** A configuration struct defining a TNT stake threshold and the corresponding
 //!   potential credit emission rate per block.
 
@@ -174,7 +175,8 @@ pub mod pallet {
 				.try_into()
 				.expect("Genesis config stake_tiers exceed maximum length");
 			// Ensure tiers are sorted by threshold, crucial for get_current_rate logic.
-			// We expect genesis to provide sorted data, but panic here if not as it's a config error.
+			// We expect genesis to provide sorted data, but panic here if not as it's a config
+			// error.
 			assert!(
 				bounded_tiers.windows(2).all(|w| w[0].threshold <= w[1].threshold),
 				"Genesis stake_tiers must be sorted by threshold ascending"
@@ -296,19 +298,22 @@ pub mod pallet {
 		/// and updates the last reward block.
 		///
 		/// ## Calculation Logic:
-		/// 1.  Determine the relevant time window for accrual:
-		///     *   `last_update` = `LastRewardUpdateBlock<T>::get(who)`
-		///     *   `window` = `T::ClaimWindowBlocks::get()`
-		///     *   `effective_start_block` = `max(last_update, current_block.saturating_sub(window))`
-		///     *   `effective_end_block` = `current_block`
-		///     *   If `effective_start_block >= effective_end_block`, accrued credits = 0.
-		/// 2.  Calculate the number of blocks in this window:
-		///     *   `blocks_in_window` = `effective_end_block.saturating_sub(effective_start_block)`
-		/// 3.  Fetch the user's current total staked TNT amount (`staked_amount`).
-		/// 4.  Determine the credit emission `rate` per block based on `staked_amount` using `get_current_rate`.
-		/// 5.  Calculate the accrued credits (using saturating math):
-		///     *   `accrued_credits` = `rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window.unique_saturated_into::<u32>()))`
-		/// 6.  Updates `LastRewardUpdateBlock<T>` for the user to `current_block`.
+		/// 1. Determine the relevant time window for accrual:
+		///     * `last_update` = `LastRewardUpdateBlock<T>::get(who)`
+		///     * `window` = `T::ClaimWindowBlocks::get()`
+		///     * `effective_start_block` = `max(last_update, current_block.saturating_sub(window))`
+		///     * `effective_end_block` = `current_block`
+		///     * If `effective_start_block >= effective_end_block`, accrued credits = 0.
+		/// 2. Calculate the number of blocks in this window:
+		///     * `blocks_in_window` = `effective_end_block.saturating_sub(effective_start_block)`
+		/// 3. Fetch the user's current total staked TNT amount (`staked_amount`).
+		/// 4. Determine the credit emission `rate` per block based on `staked_amount` using
+		///    `get_current_rate`.
+		/// 5. Calculate the accrued credits (using saturating math):
+		///     * `accrued_credits` =
+		///       `rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window.
+		///       unique_saturated_into::<u32>()))`
+		/// 6. Updates `LastRewardUpdateBlock<T>` for the user to `current_block`.
 		///
 		/// # Returns
 		/// The calculated potential credits accrued within the window, or `DispatchError`.
@@ -378,8 +383,9 @@ pub mod pallet {
 			// Convert BlockNumber to u32 safely for the multiplication
 			let blocks_in_window_u32: u32 = blocks_in_window.unique_saturated_into();
 			if blocks_in_window_u32 == 0 {
-				// This can happen if blocks_in_window > u32::MAX and saturates to 0 if BlockNumber is signed?
-				// Or more likely if BlockNumber itself was 0. Unlikely, but handle defensively.
+				// This can happen if blocks_in_window > u32::MAX and saturates to 0 if BlockNumber
+				// is signed? Or more likely if BlockNumber itself was 0. Unlikely, but handle
+				// defensively.
 				return Ok(Zero::zero());
 			}
 
