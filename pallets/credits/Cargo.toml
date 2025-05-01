@@ -10,37 +10,25 @@ edition = "2021"
 [dependencies]
 frame-support = { workspace = true }
 frame-system = { workspace = true }
+frame-benchmarking = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
-parity-scale-codec = { workspace = true }
+parity-scale-codec = { workspace = true, features = ["derive", "max-encoded-len"] }
 scale-info = { workspace = true }
-log = { workspace = true }
 sp-core = { workspace = true }
-sp-io = { workspace = true }
 sp-runtime = { workspace = true }
 sp-std = { workspace = true }
-
-pallet-session = { workspace = true }
 pallet-balances = { workspace = true }
-pallet-multi-asset-delegation = { workspace = true }
-pallet-staking = { workspace = true }
-pallet-timestamp = { workspace = true }
-pallet-utility = { workspace = true }
-
-sp-arithmetic = { workspace = true }
-frame-benchmarking = { workspace = true, optional = true }
 tangle-primitives = { workspace = true }
 
 [dev-dependencies]
 hex = { workspace = true }
 num_enum = { workspace = true }
 hex-literal = { workspace = true }
-serde = { workspace = true }
 serde_json = { workspace = true }
-smallvec = { workspace = true }
-sp-io = { workspace = true }
 
 tangle-crypto-primitives = { workspace = true }
 sp-core = { workspace = true }
+sp-io = { workspace = true }
 pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
 pallet-timestamp = { workspace = true }
@@ -61,16 +49,10 @@ std = [
     "tangle-primitives/std",
     "parity-scale-codec/std",
     "scale-info/std",
-    "sp-io/std",
+    "sp-core/std",
     "sp-runtime/std",
     "sp-std/std",
-    "pallet-assets/std",
     "pallet-balances/std",
-    "pallet-multi-asset-delegation/std",
-    "pallet-session/std",
-    "pallet-staking/std",
-    "pallet-timestamp/std",
-    "pallet-utility/std",
 ]
 try-runtime = ["frame-support/try-runtime", "frame-system/try-runtime", "sp-runtime/try-runtime"]
 runtime-benchmarks = [

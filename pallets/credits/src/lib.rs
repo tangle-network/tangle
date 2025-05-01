@@ -424,7 +424,6 @@ pub mod pallet {
 			let tiers = StoredStakeTiers::<T>::get();
 			if tiers.is_empty() {
 				// Handle case where no tiers are configured (e.g., during genesis or if cleared)
-				log::warn!("No stake tiers found in storage. Credit rate will be zero.");
 				return BalanceOf::<T>::zero();
 			}
 
