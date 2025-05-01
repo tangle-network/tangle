@@ -21,9 +21,6 @@ pallet-balances = { workspace = true }
 tangle-primitives = { workspace = true }
 
 [dev-dependencies]
-hex = { workspace = true }
-num_enum = { workspace = true }
-hex-literal = { workspace = true }
 serde_json = { workspace = true }
 sp-core = { workspace = true }
 sp-io = { workspace = true }
