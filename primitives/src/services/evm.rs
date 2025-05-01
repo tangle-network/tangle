@@ -19,6 +19,7 @@ use fp_evm::{CallInfo, ExitReason, ExitSucceed, UsedGas};
 use frame_system::Config;
 use sp_core::{H160, U256};
 use sp_std::vec::Vec;
+use scale_info::prelude::vec;
 
 #[derive(Debug)]
 pub struct RunnerError<E: Into<sp_runtime::DispatchError>> {
