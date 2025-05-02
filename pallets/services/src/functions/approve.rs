@@ -15,22 +15,19 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet, ServiceRequests,
-	ServiceStatus, StagingServicePayments, UserServices, types::*,
+	BalanceOf, BlockNumberFor, Config, Event, Error, NextInstanceId, ServiceRequests, Instances, UserServices, StagingServicePayments, OperatorsProfile, ServiceStatus, Pallet,
 };
 use frame_support::{
-	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
+	dispatch::DispatchResult,
+	ensure,
+	traits::{fungibles::Mutate, ExistenceRequirement, tokens::Preservation, Currency},
+	BoundedVec,
 };
-use frame_system::pallet_prelude::*;
-use sp_runtime::traits::Zero;
+use sp_runtime::traits::{Zero, Saturating, SaturatedConversion};
 use sp_std::vec::Vec;
 use tangle_primitives::{
-	BlueprintId,
-	services::{
-		ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
-		StagingServicePayment,
-	},
+	services::{Asset, AssetSecurityCommitment, Service, ServiceRequest, StagingServicePayment, ApprovalState, EvmAddressMapping},
+	traits::RewardsManager,
 };
 
 impl<T: Config> Pallet<T> {
@@ -200,9 +197,47 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 		})?;
 
-		// Process payment if it exists
+		// Process payment if it exists - Distribute reward instead of immediate payout
 		if let Some(payment) = Self::service_payment(request_id) {
-			Self::process_service_payment(request.blueprint, &payment)?;
+			let num_operators = operator_security_commitments.len();
+			// Ensure there are operators to distribute rewards to (should always be true if approved)
+			ensure!(num_operators > 0, Error::<T>::TooFewOperators); // Or a more specific error if needed
+
+			// Calculate reward per operator (integer division, remainder is effectively lost/kept by pallet)
+			// Consider adding specific handling for remainders if necessary (e.g., send to treasury)
+			let reward_per_operator: BalanceOf<T> = payment.amount
+				.saturating_div((num_operators as u64).saturated_into());
+
+			// Ensure reward is not zero if payment amount is non-zero (protect against edge cases)
+			if !reward_per_operator.is_zero() || payment.amount.is_zero() {
+				// TODO: Get pricing model from blueprint/service data when available
+				// For now, assume PayOnce for calculation demonstration
+				let mock_model = tangle_primitives::services::PricingModel::PayOnce { amount: payment.amount };
+
+				// Record reward for each operator
+				for (operator, _) in operator_security_commitments.iter() {
+					T::RewardRecorder::record_reward(
+						operator,
+						service_id,
+						reward_per_operator,
+						&mock_model, // Pass the actual model when available
+					);
+				}
+			} else {
+				// Handle the case where the reward per operator rounds down to zero
+				// This could happen if payment.amount < num_operators
+				// Option 1: Log a warning/event
+				// Option 2: Send the total payment to a default beneficiary (e.g., treasury)
+				// Option 3: Distribute remaining amount to the first operator(s)
+				// For now, we'll just skip recording if the per-operator amount is zero.
+				// Consider adding more robust handling based on requirements.
+				log::warn!(
+					"Reward per operator is zero for service_id {}. Total payment: {:?}, Num operators: {}. No reward recorded.",
+					service_id, payment.amount, num_operators
+				);
+			}
+
+			// Remove the payment from staging - This remains necessary
 			StagingServicePayments::<T>::remove(request_id);
 		}
 
@@ -245,7 +280,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// Returns a DispatchResult indicating success or the specific error that occurred
 	pub(crate) fn process_service_payment(
-		blueprint_id: BlueprintId,
+		blueprint_id: u64,
 		payment: &StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>,
 	) -> DispatchResult {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;

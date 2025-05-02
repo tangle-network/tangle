@@ -448,3 +448,42 @@ pub struct UnappliedSlash<AccountId> {
 	/// The slash percentage
 	pub slash_percent: Percent,
 }
+
+pub type ServiceId = u64;
+
+/// Represents the different ways a service can be priced.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub enum PricingModel<BlockNumber, Balance> {
+    /// A one-time payment for the service.
+    PayOnce {
+        amount: Balance,
+    },
+    /// A recurring payment at a fixed interval.
+    Subscription {
+        rate_per_interval: Balance,
+        interval: BlockNumber,
+        /// Optional block number when the subscription ends.
+        maybe_end: Option<BlockNumber>,
+    },
+    /// Payment based on the number of events handled.
+    EventDriven {
+        reward_per_event: Balance,
+    },
+    /// Payment based on resource consumption.
+    UsageBased {
+        unit_price: Balance,
+        unit: UsageUnit,
+    },
+}
+
+/// Units for usage-based pricing.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub enum UsageUnit {
+    ApiCall,
+    Byte,
+    Transaction,
+}
+
+/// Represents the status of a service.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub enum ServiceStatus {

@@ -24,7 +24,6 @@ use frame_support::{
 	storage::TransactionOutcome,
 	traits::{Currency, ReservableCurrency},
 };
-use frame_system::pallet_prelude::*;
 use sp_core::ecdsa;
 use sp_runtime::RuntimeAppPublic;
 use sp_runtime::{
@@ -199,6 +198,14 @@ pub mod module {
 
 		/// Manager for slashing that dispatches slash operations to `pallet-multi-asset-delegation`.
 		type SlashManager: tangle_primitives::traits::SlashManager<Self::AccountId>;
+
+		/// Interface for recording rewards.
+		type RewardsManager: tangle_primitives::traits::RewardsManager<
+			AccountId = Self::AccountId,
+			AssetId = Self::AssetId,
+			Balance = BalanceOf<Self>,
+			BlockNumber = BlockNumberFor<Self>,
+		>;
 
 		/// Number of eras that slashes are deferred by, after computation.
 		///
@@ -1196,23 +1203,12 @@ pub mod module {
 		pub fn approve(
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
-			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
+			security_commitment: T::Hash,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
-			// Ensure asset security commitments don't exceed max assets per service
-			ensure!(
-				security_commitments.len() <= T::MaxAssetsPerService::get() as usize,
-				Error::<T>::MaxAssetsPerServiceExceeded
-			);
+			functions::approve::approve::<T>(caller, request_id, &security_commitment)?;
 
-			// Ensure no duplicate assets in exposures
-			let mut seen_assets = sp_std::collections::btree_set::BTreeSet::new();
-			for exposure in security_commitments.iter() {
-				ensure!(seen_assets.insert(&exposure.asset), Error::<T>::DuplicateAsset);
-			}
-
-			Self::do_approve(caller, request_id, &security_commitments)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1296,6 +1292,7 @@ pub mod module {
 			let removed = UserServices::<T>::try_mutate(&caller, |service_ids| {
 				Result::<_, Error<T>>::Ok(service_ids.remove(&service_id))
 			})?;
+
 			ensure!(removed, Error::<T>::ServiceNotFound);
 			Instances::<T>::remove(service_id);
 			let blueprint_id = service.blueprint;

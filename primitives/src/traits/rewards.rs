@@ -125,3 +125,25 @@ where
 		Ok(Balance::zero())
 	}
 }
+
+use super::{*};
+use crate::services::types::PricingModel;
+use sp_runtime::{DispatchError, DispatchResult};
+
+/// Defines the interface for managing reward distributions and contributions.
+pub trait RewardDistributor<AccountId, Balance> {
+	fn distribute_reward(operator: &AccountId, amount: Balance) -> DispatchResult;
+}
+
+/// Trait for recording rewards to be claimed later.
+///
+/// This allows decoupling the reward calculation (e.g., in the Services pallet)
+/// from the actual payout mechanism (handled by the Rewards pallet).
+pub trait RewardRecorder<AccountId, ServiceId, Balance, BlockNumber> {
+	fn record_reward(
+		operator: &AccountId,
+		service_id: ServiceId,
+		amount: Balance,
+		model: &PricingModel<BlockNumber, Balance>,
+	);
+}
