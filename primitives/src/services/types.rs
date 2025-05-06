@@ -8,7 +8,7 @@
 //
 // Tangle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR a PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
@@ -16,6 +16,7 @@
 
 use educe::Educe;
 use frame_support::pallet_prelude::*;
+use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize};
 use sp_core::{H160, RuntimeDebug};
@@ -451,39 +452,104 @@ pub struct UnappliedSlash<AccountId> {
 
 pub type ServiceId = u64;
 
-/// Represents the different ways a service can be priced.
-#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+/// Defines the different pricing models for services.
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 pub enum PricingModel<BlockNumber, Balance> {
     /// A one-time payment for the service.
     PayOnce {
+        /// The total amount to be paid.
         amount: Balance,
     },
-    /// A recurring payment at a fixed interval.
+    /// A subscription-based model with recurring payments.
     Subscription {
+        /// The amount to be paid per interval.
         rate_per_interval: Balance,
+        /// The duration of each billing interval.
         interval: BlockNumber,
-        /// Optional block number when the subscription ends.
+        /// An optional end block for the subscription.
         maybe_end: Option<BlockNumber>,
     },
-    /// Payment based on the number of events handled.
+    /// An event-driven model where rewards are based on reported events.
     EventDriven {
+        /// The reward amount per reported event.
         reward_per_event: Balance,
     },
-    /// Payment based on resource consumption.
+    /// A usage-based model where rewards are based on reported usage.
     UsageBased {
+        /// The price per unit of usage.
         unit_price: Balance,
+        /// The unit of measurement for usage.
         unit: UsageUnit,
     },
 }
 
-/// Units for usage-based pricing.
-#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+/// Defines the units for usage-based pricing.
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 pub enum UsageUnit {
+    /// Billing based on the number of API calls.
     ApiCall,
+    /// Billing based on the number of bytes processed or transferred.
     Byte,
+    /// Billing based on the number of transactions processed.
     Transaction,
 }
 
 /// Represents the status of a service.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
 pub enum ServiceStatus {
+
+}
+
+/// Blueprint data.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub struct BlueprintData<AccountId, AssetId, BlockNumber, Balance> {
+	/// The owner of the service blueprint.
+	pub owner: AccountId,
+	/// The metadata for the service blueprint.
+	pub metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
+	/// The type definition of the service blueprint.
+	pub typedef: TypeDefinition<AccountId>,
+	/// The membership model for the service blueprint.
+	pub membership_model: MembershipModel,
+	/// The security requirements for the service blueprint.
+	pub security_requirements: Vec<AssetSecurityRequirement<AssetId>>,
+	/// The price targets for the service blueprint.
+	pub price_targets: Option<PriceTargets>,
+	/// The pricing model for services created from this blueprint.
+	pub pricing_model: PricingModel<BlockNumber, Balance>,
+}
+
+/// Represents an instance of a service.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub struct Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance> {
+	/// The owner of the service instance.
+	pub owner: AccountId,
+	/// The blueprint ID from which this service instance was created.
+	pub blueprint: BlueprintId,
+	/// The set of permitted callers for this service instance.
+	pub permitted_callers: BoundedBTreeSet<AccountId, MaxPermittedCallers>,
+	/// The list of operators currently servicing this instance, along with their security
+	/// commitments.
+	pub operator_security_commitments:
+		BoundedVec<(AccountId, Vec<AssetSecurityCommitment<AssetId>>), MaxOperators>,
+	/// The pricing model for this service instance, copied from the blueprint.
+	pub pricing_model: PricingModel<BlockNumber, Balance>,
+	/// The block number when the last reward was recorded for this service.
+	/// Used for PayOnce and Subscription models to prevent double-billing.
+	pub last_billed: Option<BlockNumber>,
+}
+
+impl<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
+	Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
+{
+	/// Validates the security commitments against the blueprint's requirements.
+	pub fn validate_security_commitments(
+		&self,
+		_security_commitments: &[AssetSecurityCommitment<AssetId>],
+	) -> bool {
+		// TODO: Implement actual validation logic based on blueprint requirements.
+		// This likely involves fetching the blueprint's `security_requirements`
+		// and comparing them against the provided `security_commitments`.
+		true
+	}
+}

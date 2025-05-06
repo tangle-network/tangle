@@ -88,6 +88,14 @@ pub mod module {
 		type Fungibles: Inspect<Self::AccountId, AssetId = Self::AssetId, Balance = BalanceOf<Self>>
 			+ Mutate<Self::AccountId, AssetId = Self::AssetId>;
 
+		/// A type that implements the `RewardRecorder` trait for recording service rewards.
+		type RewardRecorder: RewardRecorderTrait<
+			Self::AccountId,
+			ServiceId,
+			BalanceOf<Self>,
+			PricingModel = PricingModel<BlockNumberFor<Self>, BalanceOf<Self>>
+		>;
+
 		/// PalletId used for deriving the AccountId and EVM address.
 		/// This account receives slashed assets upon slash event processing.
 		#[pallet::constant]
@@ -803,10 +811,12 @@ pub mod module {
 		/// # Arguments
 		///
 		/// * `origin` - The origin of the call, must be signed by the account creating the blueprint
-		/// * `blueprint` - The service blueprint containing:
-		///   - Service constraints and requirements
-		///   - Master blueprint service manager revision (Latest or Specific)
-		///   - Template configuration for service instantiation
+		/// * `metadata` - The metadata of the service blueprint.
+		/// * `typedef` - The type definition of the service blueprint.
+		/// * `membership_model` - The membership model of the service blueprint.
+		/// * `security_requirements` - The security requirements of the service blueprint.
+		/// * `price_targets` - The price targets of the service blueprint.
+		/// * `pricing_model` - The pricing model of the service blueprint.
 		///
 		/// # Errors
 		///
@@ -821,31 +831,26 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::create_blueprint())]
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
-			mut blueprint: ServiceBlueprint<T::Constraints>,
+			metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
+			typedef: TypeDefinition<T::AccountId>,
+			membership_model: MembershipModel,
+			security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
+			price_targets: Option<PriceTargets>,
+			pricing_model: PricingModel<BlockNumberFor<T>, BalanceOf<T>>,
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
-			let blueprint_id = Self::next_blueprint_id();
-			// Ensure membership models are unique
-			let models: Vec<_> = blueprint.supported_membership_models.iter().collect();
-			ensure!(
-				models.iter().all(|x| models.iter().filter(|y| x == *y).count() == 1),
-				Error::<T>::DuplicateMembershipModel
-			);
-			// Ensure the master blueprint service manager exists and if it uses
-			// latest, pin it to the latest revision.
-			match blueprint.master_manager_revision {
-				MasterBlueprintServiceManagerRevision::Latest => {
-					let latest_revision = Self::mbsm_latest_revision();
-					blueprint.master_manager_revision =
-						MasterBlueprintServiceManagerRevision::Specific(latest_revision);
-				},
-				MasterBlueprintServiceManagerRevision::Specific(rev) => {
-					ensure!(
-						rev <= Self::mbsm_latest_revision(),
-						Error::<T>::MasterBlueprintServiceManagerRevisionNotFound,
-					);
-				},
-				_ => unreachable!("MasterBlueprintServiceManagerRevision case is not implemented"),
+
+			// Validate and store the blueprint
+			let blueprint_id = NextBlueprintId::<T>::get();
+
+			let blueprint = BlueprintData {
+				owner: owner.clone(),
+				metadata,
+				typedef,
+				membership_model,
+				security_requirements,
+				price_targets,
+				pricing_model,
 			};
 
 			let (allowed, _weight) =
@@ -1209,6 +1214,9 @@ pub mod module {
 
 			functions::approve::approve::<T>(caller, request_id, &security_commitment)?;
 
+			// Get current block for initializing 'last_billed' for subscriptions
+			let current_block_for_init = <frame_system::Pallet<T>>::block_number();
+
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1446,6 +1454,39 @@ pub mod module {
 			ensure!(allowed, Error::<T>::InvalidJobResult);
 
 			JobResults::<T>::insert(service_id, call_id, job_result);
+
+			// --- Pay-Once Reward Logic --- 
+			let mut instance = Instances::<T>::get(service_id).map_err(|_| Error::<T>::ServiceNotFound)?;
+			match instance.pricing_model {
+				PricingModel::PayOnce { amount } => {
+					if instance.last_billed.is_none() {
+						let current_block = <frame_system::Pallet<T>>::block_number();
+						// Iterate over operators and record reward for each
+						// Assuming 'amount' is per operator for now.
+						// The RewardRecorder will handle the specifics of how rewards are accrued.
+						for (operator_id, _commitment) in instance.operator_security_commitments.iter() {
+							T::RewardRecorder::record_reward(
+								operator_id.clone(), 
+								service_id, 
+								amount, 
+								&instance.pricing_model
+							).map_err(|e| {
+								log::error!("Failed to record reward for operator {:?} and service {}: {:?}", operator_id, service_id, e);
+								// Decide if this should be a hard error or just a log
+								// For now, let's assume it's not a fatal error for the submit_result itself
+								// but we should consider the implications.
+								// Error::<T>::RewardRecordingFailed // Example, if we add this error
+								()
+							});
+						}
+						instance.last_billed = Some(current_block);
+						Instances::<T>::insert(service_id, instance.clone());
+					}
+				},
+				_ => { /* Not a PayOnce model, or already billed */ }
+			}
+			// --- End Pay-Once Reward Logic ---
+
 			Self::deposit_event(Event::JobResultSubmitted {
 				operator: caller.clone(),
 				service_id,
@@ -1670,5 +1711,104 @@ pub mod module {
 
 			Ok(())
 		}
+	}
+}
+
+#[pallet::hooks]
+impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+	fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
+		let mut weight = Zero::zero();
+		let current_era = T::OperatorDelegationManager::get_current_round();
+		let slash_defer_duration = T::SlashDeferDuration::get();
+
+		// Only process slashes from eras that have completed their deferral period
+		let process_era = current_era.saturating_sub(slash_defer_duration);
+
+		// Get all unapplied slashes for this era
+		let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
+		for (index, slash) in prefix_iter {
+			// TODO: This call must be all or nothing.
+			// TODO: If fail then revert all storage changes
+			if Self::slashing_enabled() {
+				let _ = frame_support::storage::with_transaction(
+					|| -> TransactionOutcome<Result<_, DispatchError>> {
+						let res = T::SlashManager::slash_operator(&slash);
+						match &res {
+							Ok(weight_used) => {
+								weight =
+									weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
+								// Remove the slash from storage after successful application
+								UnappliedSlashes::<T>::remove(process_era, index);
+								TransactionOutcome::Commit(Ok(res))
+							},
+							Err(_) => {
+								log::error!("Failed to apply slash for index: {:?}", index);
+								TransactionOutcome::Rollback(Ok(res))
+							},
+						}
+					},
+				);
+			}
+		}
+
+		// --- Subscription Reward Logic ---
+		let current_block = _n; // '_n' is the current block number passed to on_initialize
+		for (instance_id, mut instance) in Instances::<T>::iter() {
+			weight = weight.saturating_add(T::DbWeight::get().reads(1)); // Account for reading the instance
+
+			if let PricingModel::Subscription { amount, interval, maybe_end_block } = &instance.pricing_model {
+				// Check if the subscription has definitively ended
+				if let Some(end_block) = maybe_end_block {
+					if current_block > *end_block {
+						// Subscription has ended. Future work might involve cleanup.
+						continue; // Skip to the next instance
+					}
+				}
+
+				if let Some(last_billed_block) = instance.last_billed {
+					if current_block >= last_billed_block.saturating_add(*interval) {
+						// Time to bill for the subscription period
+						for (operator_id, _commitment) in instance.operator_security_commitments.iter() {
+							match T::RewardRecorder::record_reward(
+								operator_id.clone(),
+								instance_id, // service_id for which reward is recorded
+								*amount,     // amount for the subscription interval
+								&instance.pricing_model,
+							) {
+								Ok(_) => {
+									// Successfully recorded. Weight for RewardRecorder::record_reward
+									// should be accounted for by its implementation or configured.
+									// For now, we assume it's handled or add a placeholder if needed.
+									// e.g., weight = weight.saturating_add( T::WeightInfo::record_reward_subscription() );
+								}
+								Err(e) => {
+									log::error!(
+										"Subscription reward recording failed for op {:?}, service {}: {:?}",
+										operator_id, instance_id, e
+									);
+								}
+							}
+						}
+						instance.last_billed = Some(current_block);
+						Instances::<T>::insert(instance_id, instance.clone());
+						weight = weight.saturating_add(T::DbWeight::get().writes(1)); // Account for writing the instance
+					}
+				} else {
+					// This state (Subscription model but last_billed is None) should ideally not be reached
+					// if 'approve' correctly initializes 'last_billed' for new subscriptions.
+					// If it occurs, it implies an inconsistency or an old instance prior to this logic.
+					log::warn!(
+						"Subscription instance {} found with 'last_billed' as None. Initializing to current block.",
+						instance_id
+					);
+					instance.last_billed = Some(current_block); // Initialize to prevent repeated warnings
+					Instances::<T>::insert(instance_id, instance.clone());
+					weight = weight.saturating_add(T::DbWeight::get().writes(1));
+				}
+			}
+		}
+		// --- End Subscription Reward Logic ---
+
+		weight
 	}
 }
