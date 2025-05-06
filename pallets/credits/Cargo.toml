@@ -22,7 +22,6 @@ tangle-primitives = { workspace = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }
-sp-core = { workspace = true }
 sp-io = { workspace = true }
 pallet-assets = { workspace = true }
 pallet-balances = { workspace = true }
