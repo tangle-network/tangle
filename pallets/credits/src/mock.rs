@@ -32,13 +32,13 @@ use sp_core::{sr25519, ByteArray, ConstU64, RuntimeDebug, H160};
 use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	AccountId32, BoundedVec, BuildStorage, DispatchError, Perbill, Percent,
+	AccountId32, BuildStorage, DispatchError, Perbill, Percent,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
 use std::cell::RefCell;
 use tangle_primitives::{
-	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	services::{Asset, EvmAddressMapping, EvmGasWeightMapping},
 	traits::RewardsManager,
 	types::{rewards::LockMultiplier, BlockNumber},
 };

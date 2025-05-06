@@ -310,8 +310,7 @@ pub mod pallet {
 		/// 4. Determine the credit emission `rate` per block based on `staked_amount` using
 		///    `get_current_rate`.
 		/// 5. Calculate the accrued credits (using saturating math):
-		///     * `accrued_credits` =
-		///       `rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window.
+		///     * `accrued_credits` = `rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window.
 		///       unique_saturated_into::<u32>()))`
 		/// 6. Updates `LastRewardUpdateBlock<T>` for the user to `current_block`.
 		///
