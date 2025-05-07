@@ -84,6 +84,7 @@ pub mod pallet {
 		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
+	use scale_info::prelude::vec::Vec;
 	use sp_runtime::traits::{MaybeDisplay, Saturating, UniqueSaturatedInto, Zero};
 	use sp_std::fmt::Debug;
 	use tangle_primitives::traits::MultiAssetDelegationInfo;

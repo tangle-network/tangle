@@ -1,12 +1,21 @@
 use frame_support::pallet_prelude::*;
 use scale_info::TypeInfo;
-
 /// Defines a staking tier with its minimum stake threshold and credit emission rate per block.
 /// The rates are applied based on the stake amount reported by the `StakingProvider`.
 #[derive(
-	Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen, PartialOrd, Ord,
+	Encode,
+	Decode,
+	Clone,
+	Eq,
+	PartialEq,
+	RuntimeDebug,
+	TypeInfo,
+	MaxEncodedLen,
+	PartialOrd,
+	Ord,
+	serde::Serialize,
+	serde::Deserialize,
 )]
-#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub struct StakeTier<Balance>
 where
 	Balance: MaxEncodedLen + Encode + Decode + Clone + Eq + PartialEq + TypeInfo,

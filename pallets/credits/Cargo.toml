@@ -1,5 +1,5 @@
 [package]
-name = "pallet-cloud-credits"
+name = "pallet-credits"
 description = "Cloud credits module that allows users to earn/claim credits."
 repository = "https://github.com/tangle-network/tangle"
 license = "Apache-2.0"

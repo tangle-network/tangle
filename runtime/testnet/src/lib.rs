@@ -1257,6 +1257,34 @@ impl pallet_rewards::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const TntAssetId: AssetId = 0;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxStakeTiers: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const CreditBurnRecipient: Option<AccountId> = Some(TreasuryPalletId::get().into_account());
+}
+
+impl pallet_credits::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type AssetId = AssetId;
+	type TntAssetId = TntAssetId;
+	type MultiAssetDelegationInfo = MultiAssetDelegation;
+	type BurnConversionRate = ConstU128<1000>;
+	type ClaimWindowBlocks = ConstU64<1000>;
+	type CreditBurnRecipient = CreditBurnRecipient;
+	type MaxOffchainAccountIdLength = ConstU32<100>;
+	type MaxStakeTiers = MaxStakeTiers;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1326,6 +1354,7 @@ construct_runtime!(
 		IsmpGrandpa: ismp_grandpa = 56,
 		Hyperbridge: pallet_hyperbridge = 57,
 		TokenGateway: pallet_token_gateway = 58,
+		Credits: pallet_credits = 59,
 	}
 );
 
