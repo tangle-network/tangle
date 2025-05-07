@@ -104,6 +104,9 @@ fn setup_delegation(delegator: AccountId, operator: AccountId, amount: Balance) 
 	let min_bond = <Runtime as pallet_multi_asset_delegation::Config>::MinOperatorBondAmount::get();
 	Balances::make_free_balance_be(&ALICE, min_bond * 10 + amount * 10);
 
+	Balances::make_free_balance_be(&MultiAssetDelegation::<Runtime>::pallet_account(), 10_000);
+
+	Balances::make_free_balance_be(&delegator, 100_000);
 	create_and_mint_tokens(1000, delegator.clone(), amount);
 
 	assert_ok!(Balances::transfer_allow_death(
