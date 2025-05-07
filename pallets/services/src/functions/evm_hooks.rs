@@ -396,7 +396,9 @@ impl<T: Config> Pallet<T> {
 	/// Hook to be called upon new service request.
 	///
 	/// This function is called when a service request is made. It performs an EVM call
-	/// to the `onRequest` function of the service blueprint's manager contract.
+	/// to the `onRequest` function of the service blueprint's manager contract. The
+	/// native value is passed to the function, but not used - payment is handled
+	/// when the requested service is initialized.
 	///
 	/// # Parameters
 	/// * `blueprint` - The service blueprint.
@@ -424,7 +426,7 @@ impl<T: Config> Pallet<T> {
 		ttl: BlockNumberFor<T>,
 		payment_asset: Asset<T::AssetId>,
 		value: BalanceOf<T>,
-		native_value: BalanceOf<T>,
+		_native_value: BalanceOf<T>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -487,7 +489,7 @@ impl<T: Config> Pallet<T> {
 					Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
 				]),
 			],
-			native_value,
+			Zero::zero(),
 		)
 	}
 

@@ -66,6 +66,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
 		],
+		recommended_resources: Default::default(),
 	}
 }
 

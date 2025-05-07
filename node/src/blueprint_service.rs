@@ -21,15 +21,11 @@ pub async fn create_blueprint_manager_service<P: AsRef<Path>>(
 		ServiceError::Application("Failed to get parent directory for keystore".into())
 	})?;
 	let config = BlueprintManagerConfig {
-		gadget_config: None,
 		keystore_uri: base_dir.join("keystore").to_path_buf().to_string_lossy().into(),
 		data_dir,
 		verbose: 2,
-		pretty: false,
-		instance_id: None,
 		test_mode,
-		podman_host: DEFAULT_DOCKER_HOST.clone(),
-		preferred_source: SourceType::default(),
+		..Default::default()
 	};
 	let mut env = BlueprintEnvironment::default();
 

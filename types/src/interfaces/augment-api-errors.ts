@@ -1644,6 +1644,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidDecayRate: AugmentedError<ApiType>;
       /**
+       * Vault logo exceeds the maximum allowed length.
+       **/
+      LogoTooLong: AugmentedError<ApiType>;
+      /**
+       * Vault name exceeds the maximum allowed length.
+       **/
+      NameTooLong: AugmentedError<ApiType>;
+      /**
        * No rewards available to claim
        **/
       NoRewardsAvailable: AugmentedError<ApiType>;
@@ -1667,6 +1675,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Vault already exists
        **/
       VaultAlreadyExists: AugmentedError<ApiType>;
+      /**
+       * Vault metadata not found for the given vault ID.
+       **/
+      VaultMetadataNotFound: AugmentedError<ApiType>;
       /**
        * The reward vault does not exist
        **/
@@ -1732,7 +1744,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       DuplicateAsset: AugmentedError<ApiType>;
       /**
-       * The caller is registering with a key that is already registered
+       * Duplicate key used for registration.
        **/
       DuplicateKey: AugmentedError<ApiType>;
       /**
@@ -1780,7 +1792,15 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidKey: AugmentedError<ApiType>;
       /**
-       * The caller does not have the requirements to be a operator.
+       * Invalid key for quote
+       **/
+      InvalidKeyForQuote: AugmentedError<ApiType>;
+      /**
+       * Invalid quote signature
+       **/
+      InvalidQuoteSignature: AugmentedError<ApiType>;
+      /**
+       * The Operator is not allowed to register.
        **/
       InvalidRegistrationInput: AugmentedError<ApiType>;
       /**
@@ -1795,6 +1815,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Invalid Security Requirements
        **/
       InvalidSecurityRequirements: AugmentedError<ApiType>;
+      /**
+       * Invalid signature bytes
+       **/
+      InvalidSignatureBytes: AugmentedError<ApiType>;
       /**
        * Invalid slash percentage
        **/
@@ -1862,6 +1886,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       MissingEVMOrigin: AugmentedError<ApiType>;
       /**
+       * Missing quote signature
+       **/
+      MissingQuoteSignature: AugmentedError<ApiType>;
+      /**
        * Native asset exposure is too low
        **/
       NativeAssetExposureTooLow: AugmentedError<ApiType>;
@@ -1886,9 +1914,9 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NotAllowedToUnregister: AugmentedError<ApiType>;
       /**
-       * The Operator is not allowed to update their price targets.
+       * The Operator is not allowed to update their RPC address.
        **/
-      NotAllowedToUpdatePriceTargets: AugmentedError<ApiType>;
+      NotAllowedToUpdateRpcAddress: AugmentedError<ApiType>;
       /**
        * Caller is not an operator of the service
        **/
@@ -1897,10 +1925,6 @@ declare module '@polkadot/api-base/types/errors' {
        * The caller is not registered as a operator.
        **/
       NotRegistered: AugmentedError<ApiType>;
-      /**
-       * Offender is not an active operator.
-       **/
-      OffenderNotActiveOperator: AugmentedError<ApiType>;
       /**
        * Offender is not a registered operator.
        **/
@@ -1942,7 +1966,7 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       OnServiceInitHook: AugmentedError<ApiType>;
       /**
-       * The operator is not active, ensure operator status is ACTIVE in multi-asset-delegation
+       * The Operator is not active in the delegation system.
        **/
       OperatorNotActive: AugmentedError<ApiType>;
       /**
@@ -1969,6 +1993,14 @@ declare module '@polkadot/api-base/types/errors' {
        * The service request was not found.
        **/
       ServiceRequestNotFound: AugmentedError<ApiType>;
+      /**
+       * Mismatched number of signatures
+       **/
+      SignatureCountMismatch: AugmentedError<ApiType>;
+      /**
+       * Signature verification failed
+       **/
+      SignatureVerificationFailed: AugmentedError<ApiType>;
       /**
        * The termination of the service was interrupted.
        **/
