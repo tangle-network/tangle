@@ -408,12 +408,22 @@ pub mod pallet {
 			ensure!(T::Currency::free_balance(who) >= amount, Error::<T>::InsufficientTntBalance);
 
 			match T::CreditBurnRecipient::get() {
-				Some(_) => Err(Error::<T>::BurnTransferNotImplemented.into()),
+				Some(recipient) => {
+					// Transfer to recipient if specified
+					T::Currency::transfer(who, &recipient, amount, ExistenceRequirement::KeepAlive)?
+				},
 				None => {
-					T::Currency::transfer(who, who, amount, ExistenceRequirement::KeepAlive)?;
-					Ok(())
+					// Actually burn the tokens by reducing free balance
+					let imbalance = T::Currency::withdraw(
+						who,
+						amount,
+						frame_support::traits::WithdrawReasons::TRANSFER,
+						ExistenceRequirement::KeepAlive,
+					)?;
+					drop(imbalance); // Explicitly drop to burn
 				},
 			}
+			Ok(())
 		}
 
 		/// Determines the credit emission rate per block based on the staked amount.
