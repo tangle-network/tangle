@@ -39,7 +39,7 @@ use frame_support::{
 	genesis_builder_helper::{build_state, get_preset},
 	ord_parameter_types,
 	traits::{
-		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
+		AsEnsureOriginWithArg, ConstU64, Contains, OnFinalize, WithdrawReasons,
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
 	},
 	weights::ConstantMultiplier,
@@ -1383,7 +1383,7 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const CreditBurnRecipient: Option<AccountId> = Some(TreasuryPalletId::get().into_account());
+	pub CreditBurnRecipient: Option<AccountId> = Some(TreasuryPalletId::get().into_account_truncating());
 }
 
 impl pallet_credits::Config for Runtime {

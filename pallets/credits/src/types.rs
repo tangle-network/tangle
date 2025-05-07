@@ -1,4 +1,4 @@
-use frame_support::pallet_prelude::*;
+use frame_support::{pallet_prelude::*, Deserialize, Serialize};
 use scale_info::TypeInfo;
 /// Defines a staking tier with its minimum stake threshold and credit emission rate per block.
 /// The rates are applied based on the stake amount reported by the `StakingProvider`.
@@ -13,13 +13,12 @@ use scale_info::TypeInfo;
 	MaxEncodedLen,
 	PartialOrd,
 	Ord,
-	serde::Serialize,
-	serde::Deserialize,
+	Serialize,
+	Deserialize,
 )]
-pub struct StakeTier<Balance>
-where
-	Balance: MaxEncodedLen + Encode + Decode + Clone + Eq + PartialEq + TypeInfo,
-{
+pub struct StakeTier<
+	Balance: MaxEncodedLen + Encode + Decode + Clone + Eq + PartialEq + TypeInfo + Serialize,
+> {
 	/// The minimum stake amount required to qualify for this tier.
 	#[codec(compact)]
 	pub threshold: Balance,
