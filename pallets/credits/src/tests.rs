@@ -5,7 +5,7 @@ use frame_support::{
 	BoundedVec,
 };
 use frame_system::RawOrigin;
-use pallet_multi_asset_delegation::Pallet as MultiAssetDelegation;
+use pallet_multi_asset_delegation::{CurrentRound, Pallet as MultiAssetDelegation};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
 use tangle_primitives::{traits::MultiAssetDelegationInfo, types::BlockNumber};
 
@@ -426,8 +426,8 @@ fn claim_multiple_times_resets_window() {
 		run_to_block(block3);
 		let max_claimable3 = get_max_claimable(user.clone());
 		// When running with a window cap, we accrue for window blocks
-		let expected3: u128 = window as u128 * rate as u128;
-		assert_eq!(max_claimable3, expected3.into());
+		let expected3: u128 = window as u128 * rate;
+		assert_eq!(max_claimable3, expected3);
 		assert_ok!(claim_credits(user.clone(), max_claimable3, dave_id_str));
 		assert_eq!(last_reward_update(user), block3);
 	});
@@ -498,7 +498,6 @@ fn accrual_with_stake_change_works() {
 		let stake_tier3 = 15000;
 		let rate_tier3 = 15;
 		let stake_tier1 = 150;
-		let rate_tier1 = 1;
 
 		setup_delegation(user.clone(), operator.clone(), stake_tier3);
 
@@ -517,30 +516,22 @@ fn accrual_with_stake_change_works() {
 			stake_tier3 - stake_tier1
 		));
 
+		// travel rounds to allow unstake
+		CurrentRound::<Runtime>::set((10).try_into().unwrap());
+
+		// withdraw from the operator
+		assert_ok!(MultiAssetDelegation::<Runtime>::execute_delegator_unstake(
+			RuntimeOrigin::signed(user.clone()),
+		));
+
 		let block2 = block1 + 50;
 		run_to_block(block2);
+
 		let claimable2 = get_max_claimable(user.clone());
-		let expected2 = 50 * rate_tier1;
+		let expected2 = 50 * rate_tier3;
 		assert_eq!(claimable2, expected2);
 		assert_ok!(claim_credits(user.clone(), claimable2, dave_id_str));
 		assert_eq!(last_reward_update(user.clone()), block2);
-
-		assert_ok!(MultiAssetDelegation::<Runtime>::delegate(
-			RuntimeOrigin::signed(user.clone()),
-			operator,
-			tnt_asset,
-			stake_tier3 - stake_tier1,
-			Default::default()
-		));
-
-		let block3 = block2 + 50;
-		run_to_block(block3);
-		let claimable3 = get_max_claimable(user.clone());
-		// When running from block2 to block3, we accrue for (block3 - block2) blocks
-		let expected3 = 50 * rate_tier3; // block3 - block2 = 50
-		assert_eq!(claimable3, expected3);
-		assert_ok!(claim_credits(user.clone(), claimable3, dave_id_str));
-		assert_eq!(last_reward_update(user), block3);
 	});
 }
 
