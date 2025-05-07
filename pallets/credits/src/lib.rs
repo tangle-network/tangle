@@ -68,11 +68,15 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+mod weights;
+pub use weights::WeightInfo;
+
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 #[frame_support::pallet(dev_mode)]
 pub mod pallet {
+	use super::WeightInfo;
 	use crate::{types::*, BalanceOf};
 	use core::cmp::max;
 	use frame_support::{
@@ -139,6 +143,9 @@ pub mod pallet {
 		/// The maximum number of stake tiers.
 		#[pallet::constant]
 		type MaxStakeTiers: Get<u32>;
+
+		/// The weight information for the pallet.
+		type WeightInfo: WeightInfo;
 	}
 
 	// --- Storage Items ---
@@ -233,7 +240,7 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Burn TNT for potential off-chain credits. Updates reward tracking block.
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(2, 2))]
+		#[pallet::weight(T::WeightInfo::burn())]
 		pub fn burn(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
@@ -261,7 +268,7 @@ pub mod pallet {
 		/// Claim potential credits accrued within the allowed window. Emits event for off-chain
 		/// processing.
 		#[pallet::call_index(1)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(2, 1))]
+		#[pallet::weight(T::WeightInfo::claim_credits())]
 		pub fn claim_credits(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount_to_claim: BalanceOf<T>,
