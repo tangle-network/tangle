@@ -13,6 +13,15 @@ fn last_reward_update(who: AccountId) -> BlockNumber {
 	CreditsPallet::<Runtime>::last_reward_update_block(who)
 }
 
+pub fn create_and_mint_tokens(
+	asset: AssetId,
+	recipient: <Runtime as frame_system::Config>::AccountId,
+	amount: Balance,
+) {
+	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset, recipient.clone(), false, 1));
+	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset, recipient, amount));
+}
+
 fn expected_accrued(start_block: BlockNumber, end_block: BlockNumber, rate: Balance) -> Balance {
 	if end_block <= start_block {
 		return 0;
@@ -95,6 +104,8 @@ fn setup_delegation(delegator: AccountId, operator: AccountId, amount: Balance) 
 	let min_bond = <Runtime as pallet_multi_asset_delegation::Config>::MinOperatorBondAmount::get();
 	Balances::make_free_balance_be(&ALICE, min_bond * 10 + amount * 10);
 
+	create_and_mint_tokens(1000, delegator.clone(), amount);
+
 	assert_ok!(Balances::transfer_allow_death(
 		RawOrigin::Signed(ALICE).into(),
 		operator.clone(),
@@ -109,6 +120,14 @@ fn setup_delegation(delegator: AccountId, operator: AccountId, amount: Balance) 
 		RawOrigin::Signed(ALICE).into(),
 		delegator.clone(),
 		amount * 2
+	));
+
+	assert_ok!(MultiAssetDelegation::<Runtime>::deposit(
+		RuntimeOrigin::signed(delegator.clone()),
+		tnt_asset,
+		amount,
+		None,
+		None,
 	));
 
 	assert_ok!(MultiAssetDelegation::<Runtime>::delegate(

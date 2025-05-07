@@ -514,7 +514,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 	type OperatorBondLessDelay = ConstU32<1>;
 	type LeaveDelegatorsDelay = ConstU32<1>;
 	type DelegationBondLessDelay = ConstU32<5>;
-	type MinDelegateAmount = ConstU128<100>;
+	type MinDelegateAmount = ConstU128<1>;
 	type Fungibles = Assets;
 	type AssetId = AssetId;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -534,7 +534,7 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const TntAssetId: AssetId = 0;
+	pub const TntAssetId: AssetId = 1000;
 
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
