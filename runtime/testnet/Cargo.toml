@@ -100,6 +100,7 @@ tangle-primitives = { workspace = true, features = ["verifying"] }
 tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
 pallet-tangle-lst-benchmarking = { optional = true, workspace = true }
+pallet-credits = { workspace = true }
 
 # Frontier dependencies
 fp-evm = { workspace = true }
@@ -284,7 +285,7 @@ std = [
     "pallet-evm-precompile-dispatch/std",
     "pallet-evm-precompile-ed25519/std",
     "pallet-hotfix-sufficients/std",
-
+    "pallet-credits/std",
 
     "evm-tracer/std",
     "rpc-primitives-debug/std",

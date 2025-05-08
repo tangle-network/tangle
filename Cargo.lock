@@ -13490,6 +13490,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-credits"
+version = "1.0.0"
+dependencies = [
+ "frame-benchmarking 37.0.0",
+ "frame-election-provider-support 37.0.0",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "pallet-assets 39.0.0",
+ "pallet-balances 38.0.1",
+ "pallet-multi-asset-delegation",
+ "pallet-session 37.0.0",
+ "pallet-staking 37.0.0",
+ "pallet-timestamp 36.0.1",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-weights 31.0.0",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-delegated-staking"
 version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -24666,6 +24693,7 @@ dependencies = [
  "pallet-bounties 36.0.1",
  "pallet-child-bounties 36.0.0",
  "pallet-collective 37.0.0",
+ "pallet-credits",
  "pallet-democracy 37.0.0",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase 36.0.0",
@@ -24817,6 +24845,7 @@ dependencies = [
  "pallet-bounties 36.0.1",
  "pallet-child-bounties 36.0.0",
  "pallet-collective 37.0.0",
+ "pallet-credits",
  "pallet-democracy 37.0.0",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase 36.0.0",

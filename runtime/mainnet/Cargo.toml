@@ -137,6 +137,7 @@ pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-tangle-lst = { workspace = true }
 pallet-evm-precompile-rewards = { workspace = true }
 precompile-utils = { workspace = true }
+pallet-credits = { workspace = true }
 
 evm-tracer = { workspace = true }
 rpc-primitives-debug = { workspace = true }
@@ -232,6 +233,7 @@ std = [
     "pallet-tangle-lst/std",
     "pallet-assets/std",
     "pallet-proxy/std",
+    "pallet-credits/std",
 
      # Tangle dependencies
     "tangle-primitives/std",
