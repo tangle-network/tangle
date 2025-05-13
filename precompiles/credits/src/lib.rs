@@ -12,7 +12,6 @@ use sp_std::marker::PhantomData;
 mod mock;
 #[cfg(test)]
 mod mock_evm;
-
 #[cfg(test)]
 mod tests;
 

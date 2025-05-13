@@ -15,7 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use crate::{
-	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
+	mock::{
+		AccountId, AssetId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
+	},
 	CreditsPrecompile, CreditsPrecompileCall,
 };
 use fp_evm::FeeCalculator;
@@ -27,7 +29,10 @@ use frame_support::{
 };
 use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
-use precompile_utils::precompile_set::{AddressU64, PrecompileAt, PrecompileSetBuilder};
+use precompile_utils::precompile_set::{
+	AddressU64, CallableByContract, CallableByPrecompile, PrecompileAt, PrecompileSetBuilder,
+	PrecompileSetStartingWith,
+};
 use sp_core::{keccak_256, ConstU32, H160, H256, U256};
 use sp_runtime::{
 	traits::{DispatchInfoOf, Dispatchable},
@@ -36,8 +41,60 @@ use sp_runtime::{
 };
 use tangle_primitives::services::EvmRunner;
 
-pub type Precompiles<R> =
-	PrecompileSetBuilder<R, (PrecompileAt<AddressU64<1>, CreditsPrecompile<R>>,)>;
+use pallet_evm_precompile_balances_erc20::{Erc20BalancesPrecompile, Erc20Metadata};
+use pallet_evm_precompileset_assets_erc20::{AddressToAssetId, Erc20AssetsPrecompileSet};
+
+pub struct NativeErc20Metadata;
+
+/// ERC20 metadata for the native token.
+impl Erc20Metadata for NativeErc20Metadata {
+	/// Returns the name of the token.
+	fn name() -> &'static str {
+		"Tangle Testnet Network Token"
+	}
+
+	/// Returns the symbol of the token.
+	fn symbol() -> &'static str {
+		"tTNT"
+	}
+
+	/// Returns the decimals places of the token.
+	fn decimals() -> u8 {
+		18
+	}
+
+	/// Must return `true` only if it represents the main native currency of
+	/// the network. It must be the currency used in `pallet_evm`.
+	fn is_native_currency() -> bool {
+		true
+	}
+}
+
+/// The asset precompile address prefix. Addresses that match against this prefix will be routed
+/// to Erc20AssetsPrecompileSet being marked as foreign
+pub const ASSET_PRECOMPILE_ADDRESS_PREFIX: &[u8] = &[255u8; 4];
+
+parameter_types! {
+	pub ForeignAssetPrefix: &'static [u8] = ASSET_PRECOMPILE_ADDRESS_PREFIX;
+}
+
+pub type Precompiles<R> = PrecompileSetBuilder<
+	R,
+	(
+		PrecompileAt<AddressU64<1>, CreditsPrecompile<R>>,
+		PrecompileAt<
+			AddressU64<2050>,
+			Erc20BalancesPrecompile<R, NativeErc20Metadata>,
+			(CallableByContract, CallableByPrecompile),
+		>,
+		// Prefixed precompile sets (XC20)
+		PrecompileSetStartingWith<
+			ForeignAssetPrefix,
+			Erc20AssetsPrecompileSet<R>,
+			CallableByContract,
+		>,
+	),
+>;
 
 pub type PCall = CreditsPrecompileCall<Runtime>;
 
@@ -50,6 +107,28 @@ impl pallet_timestamp::Config for Runtime {
 	type OnTimestampSet = ();
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
+}
+
+const ASSET_ID_SIZE: usize = core::mem::size_of::<AssetId>();
+
+impl AddressToAssetId<AssetId> for Runtime {
+	fn address_to_asset_id(address: H160) -> Option<AssetId> {
+		let mut data = [0u8; ASSET_ID_SIZE];
+		let address_bytes: [u8; 20] = address.into();
+		if ASSET_PRECOMPILE_ADDRESS_PREFIX.eq(&address_bytes[0..4]) {
+			data.copy_from_slice(&address_bytes[4..ASSET_ID_SIZE + 4]);
+			Some(AssetId::from_be_bytes(data))
+		} else {
+			None
+		}
+	}
+
+	fn asset_id_to_address(asset_id: AssetId) -> H160 {
+		let mut data = [0u8; 20];
+		data[0..4].copy_from_slice(ASSET_PRECOMPILE_ADDRESS_PREFIX);
+		data[4..ASSET_ID_SIZE + 4].copy_from_slice(&asset_id.to_be_bytes());
+		H160::from(data)
+	}
 }
 
 pub struct FixedGasPrice;
@@ -140,51 +219,49 @@ type RuntimeNegativeImbalance =
 	<Balances as Currency<<Runtime as frame_system::Config>::AccountId>>::NegativeImbalance;
 
 /// See: [`pallet_evm::EVMCurrencyAdapter`]
-pub struct CustomEVMCurrencyAdapter;
+// pub struct CustomEVMCurrencyAdapter;
 
-impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
-	type LiquidityInfo = Option<RuntimeNegativeImbalance>;
+// impl OnChargeEVMTransaction<Runtime> for CustomEVMCurrencyAdapter {
+// 	type LiquidityInfo = Option<RuntimeNegativeImbalance>;
 
-	fn withdraw_fee(
-		who: &H160,
-		fee: U256,
-	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
-		let pallet_multi_asset_delegation_address =
-			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
-		// Make pallet services account free to use
-		if who == &pallet_multi_asset_delegation_address {
-			return Ok(None);
-		}
-		// fallback to the default implementation
-		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
-			Runtime,
-		>>::withdraw_fee(who, fee)
-	}
+// 	fn withdraw_fee(
+// 		who: &H160,
+// 		fee: U256,
+// 	) -> Result<Self::LiquidityInfo, pallet_evm::Error<Runtime>> {
+// 		let pallet_credits_address = pallet_credits::Pallet::<Runtime>::pallet_evm_account();
+// 		// Make pallet services account free to use
+// 		if who == &pallet_credits_address {
+// 			return Ok(None);
+// 		}
+// 		// fallback to the default implementation
+// 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
+// 			Runtime,
+// 		>>::withdraw_fee(who, fee)
+// 	}
 
-	fn correct_and_deposit_fee(
-		who: &H160,
-		corrected_fee: U256,
-		base_fee: U256,
-		already_withdrawn: Self::LiquidityInfo,
-	) -> Self::LiquidityInfo {
-		let pallet_multi_asset_delegation_address =
-			pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
-		// Make pallet services account free to use
-		if who == &pallet_multi_asset_delegation_address {
-			return already_withdrawn;
-		}
-		// fallback to the default implementation
-		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
-			Runtime,
-		>>::correct_and_deposit_fee(who, corrected_fee, base_fee, already_withdrawn)
-	}
+// 	fn correct_and_deposit_fee(
+// 		who: &H160,
+// 		corrected_fee: U256,
+// 		base_fee: U256,
+// 		already_withdrawn: Self::LiquidityInfo,
+// 	) -> Self::LiquidityInfo {
+// 		let pallet_credits_address = pallet_credits::Pallet::<Runtime>::pallet_evm_account();
+// 		// Make pallet services account free to use
+// 		if who == &pallet_credits_address {
+// 			return already_withdrawn;
+// 		}
+// 		// fallback to the default implementation
+// 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
+// 			Runtime,
+// 		>>::correct_and_deposit_fee(who, corrected_fee, base_fee, already_withdrawn)
+// 	}
 
-	fn pay_priority_fee(tip: Self::LiquidityInfo) {
-		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
-			Runtime,
-		>>::pay_priority_fee(tip)
-	}
-}
+// 	fn pay_priority_fee(tip: Self::LiquidityInfo) {
+// 		<pallet_evm::EVMCurrencyAdapter<Balances, DealWithFees> as OnChargeEVMTransaction<
+// 			Runtime,
+// 		>>::pay_priority_fee(tip)
+// 	}
+// }
 
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = FixedGasPrice;
@@ -201,7 +278,7 @@ impl pallet_evm::Config for Runtime {
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type OnChargeTransaction = CustomEVMCurrencyAdapter;
+	type OnChargeTransaction = ();
 	type OnCreate = ();
 	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;
@@ -257,9 +334,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -269,9 +345,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<sp_runtime::traits::PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
-				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info))))
-			},
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
+				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info)))),
 			_ => None,
 		}
 	}
