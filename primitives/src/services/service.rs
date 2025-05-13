@@ -449,6 +449,8 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	pub blueprint: BlueprintId,
 	/// The account that owns this service
 	pub owner: AccountId,
+	/// Arguments for service initialization
+	pub args: BoundedVec<Field<C, AccountId>, C::MaxFields>,
 	/// The assets and their security commitments from operators.
 	/// This represents the actual security backing the service.
 	pub operator_security_commitments: OperatorSecurityCommitments<AccountId, AssetId, C>,
