@@ -8,7 +8,7 @@ use sp_core::{H160, U256};
 
 #[test]
 fn test_burn_success() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let caller = H160::from_low_u64_be(1);
 		let amount = U256::from(1000);
 
@@ -20,7 +20,7 @@ fn test_burn_success() {
 
 #[test]
 fn test_claim_credits_fails_on_exceeding_window_allowance() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let caller = H160::from_low_u64_be(1);
 		let amount = U256::from(1); // Using a very small amount to avoid exceeding window allowance
 		let account_id = b"offchain_user".to_vec();
@@ -45,7 +45,7 @@ fn test_claim_credits_fails_on_exceeding_window_allowance() {
 
 #[test]
 fn test_claim_credits_fails_on_long_offchain_id() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let caller = H160::from_low_u64_be(1);
 		// Creating an ID longer than MaxOffchainAccountIdLength (100)
 		let long_id = vec![0u8; 101];
@@ -65,11 +65,11 @@ fn test_claim_credits_fails_on_long_offchain_id() {
 
 #[test]
 fn test_calculate_accrued_credits() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let caller = H160::from_low_u64_be(1);
 
 		// Execute precompile call to calculate accrued credits
-		let mut accrued = U256::zero();
+		let accrued = U256::zero();
 		PrecompilesValue::get()
 			.prepare_test(
 				TestAccount::Alex,
@@ -84,12 +84,12 @@ fn test_calculate_accrued_credits() {
 
 #[test]
 fn test_get_stake_tiers_returns_thresholds_and_rates() {
-	ExtBuilder::default().build().execute_with(|| {
+	ExtBuilder.build().execute_with(|| {
 		let caller = H160::from_low_u64_be(1);
 
 		// Execute precompile call to get stake tiers
-		let mut thresholds = Vec::<U256>::new();
-		let mut rates = Vec::<U256>::new();
+		let thresholds = Vec::<U256>::new();
+		let rates = Vec::<U256>::new();
 		PrecompilesValue::get()
 			.prepare_test(TestAccount::Alex, caller, PCall::get_stake_tiers {})
 			.execute_returns((thresholds.clone(), rates.clone()));

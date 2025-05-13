@@ -20,6 +20,19 @@ use pallet_credits::BalanceOf;
 /// A precompile to wrap the functionality from pallet-credits.
 pub struct CreditsPrecompile<Runtime>(PhantomData<Runtime>);
 
+impl<Runtime> Default for CreditsPrecompile<Runtime>
+where
+	Runtime: pallet_credits::Config + pallet_evm::Config,
+	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+{
+	fn default() -> Self {
+		Self::new()
+	}
+}
+
 impl<Runtime> CreditsPrecompile<Runtime>
 where
 	Runtime: pallet_credits::Config + pallet_evm::Config,
@@ -39,7 +52,7 @@ where
 
 	/// Helper to convert Balance to U256
 	fn balance_to_u256(value: pallet_credits::BalanceOf<Runtime>) -> EvmResult<U256> {
-		value.try_into().map_err(|_| revert("Amount overflow"))
+		Ok(value.into())
 	}
 }
 
@@ -100,7 +113,7 @@ where
 		let staked_amount = Self::u256_to_balance(staked_amount)?;
 		let rate = pallet_credits::Pallet::<Runtime>::get_current_rate(staked_amount);
 
-		Ok(Self::balance_to_u256(rate)?)
+		Self::balance_to_u256(rate)
 	}
 
 	#[precompile::public("calculate_accrued_credits(address)")]
@@ -122,7 +135,7 @@ where
 			)
 			.unwrap_or_else(|_| Default::default());
 
-		Ok(Self::balance_to_u256(accrued_amount)?)
+		Self::balance_to_u256(accrued_amount)
 	}
 
 	#[precompile::public("get_stake_tiers()")]

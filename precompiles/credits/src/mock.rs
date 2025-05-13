@@ -23,19 +23,14 @@ use frame_election_provider_support::{
 };
 use frame_support::{
 	construct_runtime, derive_impl,
-	pallet_prelude::{Hooks, Weight},
+	pallet_prelude::Hooks,
 	parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU128, OneSessionHandler},
-	PalletId,
 };
-use frame_system::EnsureRoot;
-use mock_evm::MockedEvmRunner;
-use pallet_evm::GasWeightMapping;
 use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
@@ -44,11 +39,7 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
-pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::{
-	rewards::UserDepositWithLocks,
-	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
-};
+use tangle_primitives::{rewards::UserDepositWithLocks, services::Asset};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -218,35 +209,6 @@ impl pallet_staking::Config for Runtime {
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
 	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
-}
-
-pub struct PalletEVMGasWeightMapping;
-
-impl EvmGasWeightMapping for PalletEVMGasWeightMapping {
-	fn gas_to_weight(gas: u64, without_base_weight: bool) -> Weight {
-		pallet_evm::FixedGasWeightMapping::<Runtime>::gas_to_weight(gas, without_base_weight)
-	}
-
-	fn weight_to_gas(weight: Weight) -> u64 {
-		pallet_evm::FixedGasWeightMapping::<Runtime>::weight_to_gas(weight)
-	}
-}
-
-pub struct PalletEVMAddressMapping;
-
-impl EvmAddressMapping<AccountId> for PalletEVMAddressMapping {
-	fn into_account_id(address: H160) -> AccountId {
-		use pallet_evm::AddressMapping;
-		<Runtime as pallet_evm::Config>::AddressMapping::into_account_id(address)
-	}
-
-	fn into_address(account_id: AccountId) -> H160 {
-		account_id.using_encoded(|b| {
-			let mut addr = [0u8; 20];
-			addr.copy_from_slice(&b[0..20]);
-			H160(addr)
-		})
-	}
 }
 
 impl pallet_assets::Config for Runtime {
