@@ -21,8 +21,6 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain, SequentialPhragmen,
 };
-use tangle_primitives::services::Asset;
-use sp_runtime::traits::ConstU64;
 use frame_support::{
 	construct_runtime, derive_impl,
 	pallet_prelude::{Hooks, Weight},
@@ -41,13 +39,15 @@ use serde_json::json;
 use sp_core::{self, sr25519, sr25519::Public as sr25519Public, ConstU32, RuntimeDebug, H160};
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
-	testing::UintAuthorityId, traits::ConvertInto, AccountId32, BuildStorage, Perbill,
+	testing::UintAuthorityId,
+	traits::{ConstU64, ConvertInto},
+	AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	rewards::UserDepositWithLocks,
-	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
 };
 
 pub type AccountId = AccountId32;
