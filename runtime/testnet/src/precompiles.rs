@@ -20,6 +20,7 @@ use pallet_evm_precompile_batch::BatchPrecompile;
 use pallet_evm_precompile_blake2::Blake2F;
 use pallet_evm_precompile_bn128::{Bn128Add, Bn128Mul, Bn128Pairing};
 use pallet_evm_precompile_call_permit::CallPermitPrecompile;
+use pallet_evm_precompile_credits::CreditsPrecompile;
 use pallet_evm_precompile_curve25519::{Curve25519Add, Curve25519ScalarMul};
 use pallet_evm_precompile_democracy::DemocracyPrecompile;
 use pallet_evm_precompile_dispatch::Dispatch;
@@ -29,7 +30,6 @@ use pallet_evm_precompile_multi_asset_delegation::MultiAssetDelegationPrecompile
 use pallet_evm_precompile_preimage::PreimagePrecompile;
 use pallet_evm_precompile_registry::PrecompileRegistry;
 use pallet_evm_precompile_rewards::RewardsPrecompile;
-use pallet_evm_precompile_credits::CreditsPrecompile;
 use pallet_evm_precompile_services::ServicesPrecompile;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};

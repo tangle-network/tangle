@@ -408,7 +408,7 @@ pub mod pallet {
 		///
 		/// # Returns
 		/// The calculated potential credits accrued within the window, or `DispatchError`.
-		fn update_reward_block_and_get_accrued_amount(
+		pub fn update_reward_block_and_get_accrued_amount(
 			who: &T::AccountId,
 			current_block: BlockNumberOf<T>,
 		) -> Result<BalanceOf<T>, DispatchError> {
@@ -422,7 +422,7 @@ pub mod pallet {
 		}
 
 		/// Helper to ONLY update the reward block (e.g., for burn).
-		fn update_reward_block(who: &T::AccountId) -> DispatchResult {
+		pub fn update_reward_block(who: &T::AccountId) -> DispatchResult {
 			let current_block = frame_system::Pallet::<T>::block_number();
 			let last_update = LastRewardUpdateBlock::<T>::get(who);
 			if last_update < current_block {
@@ -462,7 +462,7 @@ pub mod pallet {
 		///
 		/// # Returns
 		/// * `BalanceOf<T>`: The appropriate credit emission rate.
-		pub(crate) fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
+		pub fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
 			// Read tiers from storage
 			let tiers = StoredStakeTiers::<T>::get();
 			if tiers.is_empty() {

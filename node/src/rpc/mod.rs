@@ -149,6 +149,7 @@ where
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
+	use pallet_credits_rpc::{CreditsApiServer, CreditsClient};
 	use pallet_rewards_rpc::{RewardsApiServer, RewardsClient};
 	use pallet_services_rpc::{ServicesApiServer, ServicesClient};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
@@ -171,6 +172,7 @@ where
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
+	io.merge(CreditsClient::new(client.clone()).into_rpc())?;
 	io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
 
 	if let Some(babe) = babe {

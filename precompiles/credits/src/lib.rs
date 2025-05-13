@@ -2,17 +2,18 @@
 
 use fp_evm::PrecompileHandle;
 use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
-use pallet_credits::types::{BlockNumberOf, OffchainAccountIdOf, StakeTier};
+use pallet_credits::types::OffchainAccountIdOf;
 use pallet_evm::AddressMapping;
 use precompile_utils::{prelude::*, solidity};
 use sp_core::U256;
-use sp_runtime::traits::{Dispatchable, UniqueSaturatedInto};
-use sp_std::{marker::PhantomData, vec, vec::Vec};
-
+use sp_runtime::{traits::Dispatchable, Vec};
+use sp_std::marker::PhantomData;
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
 mod tests;
+
+use pallet_credits::BalanceOf;
 
 /// A precompile to wrap the functionality from pallet-credits.
 pub struct CreditsPrecompile<Runtime>(PhantomData<Runtime>);
@@ -23,6 +24,7 @@ where
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 {
 	pub fn new() -> Self {
 		Self(PhantomData)
@@ -34,8 +36,8 @@ where
 	}
 
 	/// Helper to convert Balance to U256
-	fn balance_to_u256(value: pallet_credits::BalanceOf<Runtime>) -> U256 {
-		value.unique_saturated_into()
+	fn balance_to_u256(value: pallet_credits::BalanceOf<Runtime>) -> EvmResult<U256> {
+		value.try_into().map_err(|_| revert("Amount overflow"))
 	}
 }
 
@@ -46,6 +48,7 @@ where
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
+	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 {
 	#[precompile::public("burn(uint256)")]
 	fn burn(handle: &mut impl PrecompileHandle, amount: U256) -> EvmResult<bool> {
@@ -64,7 +67,7 @@ where
 	fn claim_credits(
 		handle: &mut impl PrecompileHandle,
 		amount_to_claim: U256,
-		offchain_account_id: BoundedBytes<Runtime::MaxOffchainAccountIdLength>,
+		offchain_account_id: UnboundedBytes,
 	) -> EvmResult<bool> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
@@ -95,7 +98,7 @@ where
 		let staked_amount = Self::u256_to_balance(staked_amount)?;
 		let rate = pallet_credits::Pallet::<Runtime>::get_current_rate(staked_amount);
 
-		Ok(Self::balance_to_u256(rate))
+		Ok(Self::balance_to_u256(rate)?)
 	}
 
 	#[precompile::public("calculate_accrued_credits(address)")]
@@ -117,7 +120,7 @@ where
 			)
 			.unwrap_or_else(|_| Default::default());
 
-		Ok(Self::balance_to_u256(accrued_amount))
+		Ok(Self::balance_to_u256(accrued_amount)?)
 	}
 
 	#[precompile::public("get_stake_tiers()")]
@@ -130,8 +133,8 @@ where
 		let mut rates = Vec::new();
 
 		for tier in tiers.iter() {
-			thresholds.push(Self::balance_to_u256(tier.threshold));
-			rates.push(Self::balance_to_u256(tier.rate_per_block));
+			thresholds.push(Self::balance_to_u256(tier.threshold)?);
+			rates.push(Self::balance_to_u256(tier.rate_per_block)?);
 		}
 
 		Ok((thresholds, rates))
