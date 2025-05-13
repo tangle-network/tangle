@@ -10,7 +10,7 @@
     };
     # EVM dev tools
     foundry = {
-      url = "github:shazow/foundry.nix/monthly";
+      url = "github:shazow/foundry.nix/stable";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
@@ -54,7 +54,7 @@
           buildInputs = [
             # Nodejs for test suite
             pkgs.nodePackages.typescript-language-server
-            pkgs.nodejs_18
+            pkgs.nodejs_22
             pkgs.nodePackages.yarn
             # Finally the toolchain
             toolchain
