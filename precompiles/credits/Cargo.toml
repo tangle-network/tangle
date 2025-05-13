@@ -1,9 +1,9 @@
 [package]
-name = "pallet-evm-precompile-services"
+name = "pallet-evm-precompile-credits"
 version = "0.1.0"
 authors = { workspace = true }
 edition = "2021"
-description = "A Precompile to make pallet-services calls encoding accessible to pallet-evm"
+description = "A Precompile to make pallet-credits calls encoding accessible to pallet-evm"
 
 [dependencies]
 precompile-utils = { workspace = true }
@@ -22,7 +22,7 @@ sp-std = { workspace = true }
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 tangle-primitives = { workspace = true }
-pallet-services = { workspace = true }
+pallet-credits = { workspace = true }
 
 [dev-dependencies]
 derive_more = { workspace = true, features = ["full"] }
@@ -97,7 +97,7 @@ std = [
   "sp-std/std",
   "tangle-primitives/std",
   "pallet-assets/std",
-  "pallet-services/std",
+  "pallet-credits/std",
   "hex/std",
   "scale-info/std",
   "sp-runtime/std",

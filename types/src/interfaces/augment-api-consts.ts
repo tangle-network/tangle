@@ -245,6 +245,36 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       [key: string]: Codec;
     };
+    credits: {
+      /**
+       * The conversion rate for burning TNT to credits.
+       **/
+      burnConversionRate: u128 & AugmentedConst<ApiType>;
+      /**
+       * The maximum window (in blocks) for which credits can be accrued before claiming.
+       **/
+      claimWindowBlocks: u64 & AugmentedConst<ApiType>;
+      /**
+       * Optional: An account to send burned TNT to. If None, `Currency::burn_from` is used.
+       **/
+      creditBurnRecipient: Option<AccountId32> & AugmentedConst<ApiType>;
+      /**
+       * The maximum length allowed for an off-chain account ID string.
+       **/
+      maxOffchainAccountIdLength: u32 & AugmentedConst<ApiType>;
+      /**
+       * The maximum number of stake tiers.
+       **/
+      maxStakeTiers: u32 & AugmentedConst<ApiType>;
+      /**
+       * The specific Asset ID for the TNT token.
+       **/
+      tntAssetId: u128 & AugmentedConst<ApiType>;
+      /**
+       * Generic const
+       **/
+      [key: string]: Codec;
+    };
     democracy: {
       /**
        * Period in blocks where an external proposal may not be re-submitted after being vetoed.

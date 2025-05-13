@@ -14,7 +14,7 @@ dependencies = [
 
 [[package]]
 name = "account-util"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "frame-support 37.1.0",
  "pallet-airdrop-claims",
@@ -8234,7 +8234,7 @@ dependencies = [
 
 [[package]]
 name = "frost-ed448"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "ed448-goldilocks-plus",
  "parity-scale-codec",
@@ -8261,7 +8261,7 @@ dependencies = [
 
 [[package]]
 name = "frost-p384"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "p384",
  "parity-scale-codec",
@@ -8315,7 +8315,7 @@ dependencies = [
 
 [[package]]
 name = "frost-secp256k1-tr"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "k256",
  "parity-scale-codec",
@@ -12682,7 +12682,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-airdrop-claims"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "frame-benchmarking 37.0.0",
  "frame-support 37.1.0",
@@ -13517,6 +13517,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-credits-rpc"
+version = "1.3.4"
+dependencies = [
+ "jsonrpsee 0.23.2",
+ "pallet-credits-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-blockchain",
+ "sp-runtime 39.0.3",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-credits-rpc-runtime-api"
+version = "1.3.4"
+dependencies = [
+ "parity-scale-codec",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-delegated-staking"
 version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13854,6 +13878,68 @@ dependencies = [
  "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+]
+
+[[package]]
+name = "pallet-evm-precompile-credits"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "ethabi",
+ "ethereum",
+ "ethers",
+ "fp-account",
+ "fp-consensus",
+ "fp-dynamic-fee",
+ "fp-ethereum",
+ "fp-evm",
+ "fp-rpc",
+ "fp-self-contained",
+ "fp-storage",
+ "frame-election-provider-support 37.0.0",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "hex",
+ "hex-literal 0.4.1",
+ "k256",
+ "libsecp256k1",
+ "num_enum",
+ "pallet-assets 39.0.0",
+ "pallet-balances 38.0.1",
+ "pallet-base-fee",
+ "pallet-credits",
+ "pallet-dynamic-fee",
+ "pallet-ethereum",
+ "pallet-evm",
+ "pallet-evm-chain-id",
+ "pallet-evm-precompile-balances-erc20",
+ "pallet-evm-precompile-blake2",
+ "pallet-evm-precompile-bn128",
+ "pallet-evm-precompile-curve25519",
+ "pallet-evm-precompile-ed25519",
+ "pallet-evm-precompile-modexp",
+ "pallet-evm-precompile-sha3fips",
+ "pallet-evm-precompile-simple",
+ "pallet-evm-precompileset-assets-erc20",
+ "pallet-multi-asset-delegation",
+ "pallet-session 37.0.0",
+ "pallet-staking 37.0.0",
+ "pallet-timestamp 36.0.1",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "serde_json",
+ "sha3",
+ "smallvec",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-keystore 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-crypto-primitives",
+ "tangle-primitives",
 ]
 
 [[package]]
@@ -14901,7 +14987,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-multi-asset-delegation"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -15501,7 +15587,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -15560,7 +15646,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-rewards-rpc-runtime-api",
@@ -15573,7 +15659,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-rewards-rpc-runtime-api"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "parity-scale-codec",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -15702,7 +15788,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "ethabi",
  "ethereum",
@@ -15764,7 +15850,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "jsonrpsee 0.23.2",
  "pallet-services-rpc-runtime-api",
@@ -15777,7 +15863,7 @@ dependencies = [
 
 [[package]]
 name = "pallet-services-rpc-runtime-api"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "parity-scale-codec",
  "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
@@ -24522,7 +24608,7 @@ checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 
 [[package]]
 name = "tangle"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "alloy 0.9.2",
  "anyhow",
@@ -24554,6 +24640,7 @@ dependencies = [
  "jsonrpsee 0.23.2",
  "log",
  "pallet-airdrop-claims",
+ "pallet-credits-rpc",
  "pallet-im-online 36.0.0",
  "pallet-ismp-rpc",
  "pallet-ismp-runtime-api",
@@ -24624,7 +24711,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-crypto-primitives"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
@@ -24633,7 +24720,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-primitives"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "ark-bn254 0.4.0",
  "ark-crypto-primitives",
@@ -24667,7 +24754,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-runtime"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "evm-tracer",
  "fp-evm",
@@ -24694,6 +24781,7 @@ dependencies = [
  "pallet-child-bounties 36.0.0",
  "pallet-collective 37.0.0",
  "pallet-credits",
+ "pallet-credits-rpc-runtime-api",
  "pallet-democracy 37.0.0",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase 36.0.0",
@@ -24706,6 +24794,7 @@ dependencies = [
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
  "pallet-evm-precompile-call-permit",
+ "pallet-evm-precompile-credits",
  "pallet-evm-precompile-curve25519",
  "pallet-evm-precompile-democracy",
  "pallet-evm-precompile-dispatch",
@@ -24813,7 +24902,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-testnet-runtime"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "anyhow",
  "evm-tracer",
@@ -24846,6 +24935,7 @@ dependencies = [
  "pallet-child-bounties 36.0.0",
  "pallet-collective 37.0.0",
  "pallet-credits",
+ "pallet-credits-rpc-runtime-api",
  "pallet-democracy 37.0.0",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase 36.0.0",
@@ -24858,6 +24948,7 @@ dependencies = [
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
  "pallet-evm-precompile-call-permit",
+ "pallet-evm-precompile-credits",
  "pallet-evm-precompile-curve25519",
  "pallet-evm-precompile-democracy",
  "pallet-evm-precompile-dispatch",
@@ -25032,7 +25123,7 @@ dependencies = [
 
 [[package]]
 name = "tg-frost-core"
-version = "1.3.3"
+version = "1.3.4"
 dependencies = [
  "byteorder",
  "const-crc32-nostd",

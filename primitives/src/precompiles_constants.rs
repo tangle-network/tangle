@@ -57,6 +57,7 @@ pub const PRECOMPILE_MULTI_ASSET_DELEGATION: u64 = 2082;
 pub const PRECOMPILE_SERVICES: u64 = 2083;
 pub const PRECOMPILE_TANGLE_LST: u64 = 2084;
 pub const PRECOMPILE_REWARDS: u64 = 2085;
+pub const PRECOMPILE_CREDITS: u64 = 2086;
 
 #[test]
 fn test_precompile_addresses_match() {
@@ -227,5 +228,9 @@ fn test_precompile_addresses_match() {
 	assert_eq!(
 		AddressU64::<PRECOMPILE_REWARDS>::get(),
 		h160_from_hex("0000000000000000000000000000000000000825")
+	);
+	assert_eq!(
+		AddressU64::<PRECOMPILE_CREDITS>::get(),
+		h160_from_hex("0000000000000000000000000000000000000826")
 	);
 }

@@ -306,7 +306,7 @@ pub mod pallet {
 
 	impl<T: Config> Pallet<T> {
 		/// Calculates potential credits accrued within the allowed window ending now,
-		/// and updates the last reward block.
+		/// without updating the last reward block. This is useful for RPC queries.
 		///
 		/// ## Calculation Logic:
 		/// 1. Determine the relevant time window for accrual:
@@ -323,14 +323,15 @@ pub mod pallet {
 		/// 5. Calculate the accrued credits (using saturating math):
 		///     * `accrued_credits` = `rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window.
 		///       unique_saturated_into::<u32>()))`
-		/// 6. Updates `LastRewardUpdateBlock<T>` for the user to `current_block`.
 		///
 		/// # Returns
 		/// The calculated potential credits accrued within the window, or `DispatchError`.
-		fn update_reward_block_and_get_accrued_amount(
+		pub fn get_accrued_amount(
 			who: &T::AccountId,
-			current_block: BlockNumberOf<T>,
+			current_block: Option<BlockNumberOf<T>>,
 		) -> Result<BalanceOf<T>, DispatchError> {
+			let current_block =
+				current_block.unwrap_or_else(|| frame_system::Pallet::<T>::block_number());
 			let last_update = LastRewardUpdateBlock::<T>::get(who);
 			if last_update >= current_block {
 				return Ok(Zero::zero());
@@ -343,8 +344,6 @@ pub mod pallet {
 			// Ensure we don't calculate for blocks past the current one if window is large
 			let effective_end_block = current_block;
 			if start_block >= effective_end_block {
-				// Also update the block even if no credits accrued this time
-				LastRewardUpdateBlock::<T>::insert(who, current_block);
 				return Ok(Zero::zero());
 			}
 
@@ -369,9 +368,6 @@ pub mod pallet {
 				},
 				None => BalanceOf::<T>::zero(),
 			};
-
-			// Update the block *before* calculation (or after checks)
-			LastRewardUpdateBlock::<T>::insert(who, current_block);
 
 			if staked_amount.is_zero() {
 				return Ok(Zero::zero());
@@ -404,8 +400,29 @@ pub mod pallet {
 			Ok(new_credits)
 		}
 
+		/// Calculates potential credits accrued within the allowed window ending now,
+		/// and updates the last reward block.
+		///
+		/// This function calls `get_accrued_amount` to calculate the credits and then
+		/// updates the `LastRewardUpdateBlock<T>` for the user to `current_block`.
+		///
+		/// # Returns
+		/// The calculated potential credits accrued within the window, or `DispatchError`.
+		pub fn update_reward_block_and_get_accrued_amount(
+			who: &T::AccountId,
+			current_block: BlockNumberOf<T>,
+		) -> Result<BalanceOf<T>, DispatchError> {
+			// Calculate accrued amount using the shared logic
+			let result = Self::get_accrued_amount(who, Some(current_block));
+
+			// Update the block regardless of calculation result
+			LastRewardUpdateBlock::<T>::insert(who, current_block);
+
+			result
+		}
+
 		/// Helper to ONLY update the reward block (e.g., for burn).
-		fn update_reward_block(who: &T::AccountId) -> DispatchResult {
+		pub fn update_reward_block(who: &T::AccountId) -> DispatchResult {
 			let current_block = frame_system::Pallet::<T>::block_number();
 			let last_update = LastRewardUpdateBlock::<T>::get(who);
 			if last_update < current_block {
@@ -445,7 +462,7 @@ pub mod pallet {
 		///
 		/// # Returns
 		/// * `BalanceOf<T>`: The appropriate credit emission rate.
-		pub(crate) fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
+		pub fn get_current_rate(staked_amount: BalanceOf<T>) -> BalanceOf<T> {
 			// Read tiers from storage
 			let tiers = StoredStakeTiers::<T>::get();
 			if tiers.is_empty() {
