@@ -32,14 +32,13 @@ use sp_runtime::{
 use std::sync::Arc;
 use tangle_primitives::Balance;
 
-pub use pallet_rewards_rpc_runtime_api::RewardsApi as RewardsRuntimeApi;
+pub use pallet_credits_rpc_runtime_api::CreditsApi as CreditsRuntimeApi;
 
-/// RewardsClient RPC methods.
+/// CreditsClient RPC methods.
 #[rpc(client, server)]
-pub trait RewardsApi<BlockHash, AccountId, AssetId>
+pub trait CreditsApi<BlockHash, AccountId>
 where
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 {
 	#[method(name = "credits_queryUserCredits")]
 	fn query_user_credits(
@@ -50,27 +49,26 @@ where
 }
 
 /// Provides RPC methods to query a dispatchable's class, weight and fee.
-pub struct RewardsClient<C, P> {
+pub struct CreditsClient<C, P> {
 	/// Shared reference to the client.
 	client: Arc<C>,
 	_marker: std::marker::PhantomData<P>,
 }
 
-impl<C, P> RewardsClient<C, P> {
-	/// Creates a new instance of the RewardsClient Rpc helper.
+impl<C, P> CreditsClient<C, P> {
+	/// Creates a new instance of the CreditsClient Rpc helper.
 	pub fn new(client: Arc<C>) -> Self {
 		Self { client, _marker: Default::default() }
 	}
 }
 
-impl<C, Block, AccountId, AssetId> RewardsApiServer<<Block as BlockT>::Hash, AccountId, AssetId>
-	for RewardsClient<C, Block>
+impl<C, Block, AccountId> CreditsApiServer<<Block as BlockT>::Hash, AccountId>
+	for CreditsClient<C, Block>
 where
 	Block: BlockT,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
-	C::Api: RewardsRuntimeApi<Block, AccountId, AssetId, Balance>,
+	C::Api: CreditsRuntimeApi<Block, AccountId, Balance>,
 {
 	fn query_user_credits(
 		&self,

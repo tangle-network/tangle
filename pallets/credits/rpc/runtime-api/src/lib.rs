@@ -25,10 +25,9 @@ pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
-	pub trait RewardsApi<AccountId, AssetId, Balance>
+	pub trait CreditsApi<AccountId, Balance>
 	where
 		AccountId: Codec + MaybeDisplay + Serialize,
-		AssetId: Codec + MaybeDisplay + Serialize,
 		Balance: Codec + MaybeDisplay + Serialize,
 	{
 		/// Query all the rewards that this operator is providing along with their blueprints.

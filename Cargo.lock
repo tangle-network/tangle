@@ -13517,6 +13517,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-credits-rpc"
+version = "1.3.3"
+dependencies = [
+ "jsonrpsee 0.23.2",
+ "pallet-credits-rpc-runtime-api",
+ "parity-scale-codec",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-blockchain",
+ "sp-runtime 39.0.3",
+ "tangle-primitives",
+]
+
+[[package]]
+name = "pallet-credits-rpc-runtime-api"
+version = "1.3.3"
+dependencies = [
+ "parity-scale-codec",
+ "sp-api 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-primitives",
+]
+
+[[package]]
 name = "pallet-delegated-staking"
 version = "5.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13854,6 +13878,31 @@ dependencies = [
  "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-runtime 39.0.3",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+]
+
+[[package]]
+name = "pallet-evm-precompile-credits"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
+ "fp-evm",
+ "frame-support 37.1.0",
+ "frame-system 37.1.0",
+ "hex-literal 0.4.1",
+ "pallet-balances 38.0.1",
+ "pallet-credits",
+ "pallet-evm",
+ "pallet-multi-asset-delegation",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sha3",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "tangle-primitives",
 ]
 
 [[package]]
@@ -24554,6 +24603,7 @@ dependencies = [
  "jsonrpsee 0.23.2",
  "log",
  "pallet-airdrop-claims",
+ "pallet-credits-rpc",
  "pallet-im-online 36.0.0",
  "pallet-ismp-rpc",
  "pallet-ismp-runtime-api",
@@ -24694,6 +24744,7 @@ dependencies = [
  "pallet-child-bounties 36.0.0",
  "pallet-collective 37.0.0",
  "pallet-credits",
+ "pallet-credits-rpc-runtime-api",
  "pallet-democracy 37.0.0",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase 36.0.0",
@@ -24706,6 +24757,7 @@ dependencies = [
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
  "pallet-evm-precompile-call-permit",
+ "pallet-evm-precompile-credits",
  "pallet-evm-precompile-curve25519",
  "pallet-evm-precompile-democracy",
  "pallet-evm-precompile-dispatch",
@@ -24846,6 +24898,7 @@ dependencies = [
  "pallet-child-bounties 36.0.0",
  "pallet-collective 37.0.0",
  "pallet-credits",
+ "pallet-credits-rpc-runtime-api",
  "pallet-democracy 37.0.0",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase 36.0.0",
@@ -24858,6 +24911,7 @@ dependencies = [
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
  "pallet-evm-precompile-call-permit",
+ "pallet-evm-precompile-credits",
  "pallet-evm-precompile-curve25519",
  "pallet-evm-precompile-democracy",
  "pallet-evm-precompile-dispatch",

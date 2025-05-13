@@ -26,6 +26,8 @@ members = [
     "pallets/services/rpc/runtime-api",
     "pallets/rewards/rpc",
     "pallets/rewards/rpc/runtime-api",
+    "pallets/credits/rpc",
+    "pallets/credits/rpc/runtime-api",
     "pallets/tangle-lst/benchmarking",
     "pallets/multi-asset-delegation/fuzzer",
     "precompiles/pallet-democracy",
@@ -135,6 +137,8 @@ pallet-tangle-lst-benchmarking = { path = "pallets/tangle-lst/benchmarking", def
 pallet-oracle = { path = "pallets/oracle", default-features = false }
 pallet-rewards = { path = "pallets/rewards", default-features = false }
 pallet-credits = { path = "pallets/credits", default-features = false }
+pallet-credits-rpc-runtime-api = { path = "pallets/credits/rpc/runtime-api", default-features = false }
+pallet-credits-rpc = { path = "pallets/credits/rpc" }
 pallet-rewards-rpc-runtime-api = { path = "pallets/rewards/rpc/runtime-api", default-features = false }
 pallet-rewards-rpc = { path = "pallets/rewards/rpc" }
 
@@ -337,6 +341,7 @@ pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
 pallet-evm-precompile-tangle-lst = { path = "precompiles/tangle-lst", default-features = false }
 pallet-evm-precompile-rewards = { path = "precompiles/rewards", default-features = false }
+pallet-evm-precompile-credits = { path = "precompiles/credits", default-features = false }
 
 # Precompiles utils
 postcard = { version = "1", default-features = false }

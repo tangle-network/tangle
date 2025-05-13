@@ -101,6 +101,7 @@ tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
 pallet-tangle-lst-benchmarking = { optional = true, workspace = true }
 pallet-credits = { workspace = true }
+pallet-credits-rpc-runtime-api = { workspace = true }
 
 # Frontier dependencies
 fp-evm = { workspace = true }
@@ -123,7 +124,9 @@ pallet-evm-precompile-ed25519 = { workspace = true }
 pallet-evm-precompile-modexp = { workspace = true }
 pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
+pallet-evm-precompile-credits = { workspace = true }
 pallet-hotfix-sufficients = { workspace = true }
+
 
 # Tangle precompiles
 pallet-evm-precompile-batch = { workspace = true }
@@ -310,6 +313,8 @@ std = [
     "pallet-evm-precompile-services/std",
     "pallet-evm-precompile-tangle-lst/std",
     "pallet-evm-precompile-rewards/std",
+    "pallet-evm-precompile-credits/std",
+    "pallet-credits-rpc-runtime-api/std",
 
     # Hyperbridge
     "pallet-hyperbridge/std",

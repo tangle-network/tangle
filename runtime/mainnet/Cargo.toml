@@ -90,6 +90,7 @@ pallet-airdrop-claims = { workspace = true }
 pallet-services = { workspace = true }
 pallet-services-rpc-runtime-api = { workspace = true }
 pallet-rewards-rpc-runtime-api = { workspace = true }
+pallet-credits-rpc-runtime-api = { workspace = true }
 tangle-primitives = { workspace = true, features = ["verifying"] }
 tangle-crypto-primitives = { workspace = true }
 pallet-multi-asset-delegation = { workspace = true }
@@ -136,6 +137,7 @@ pallet-evm-precompile-multi-asset-delegation = { workspace = true }
 pallet-evm-precompile-services = { workspace = true }
 pallet-evm-precompile-tangle-lst = { workspace = true }
 pallet-evm-precompile-rewards = { workspace = true }
+pallet-evm-precompile-credits = { workspace = true }
 precompile-utils = { workspace = true }
 pallet-credits = { workspace = true }
 
@@ -243,6 +245,7 @@ std = [
     "pallet-services-rpc-runtime-api/std",
     "pallet-rewards-rpc-runtime-api/std",
     "pallet-rewards/std",
+    "pallet-credits-rpc-runtime-api/std",
     "pallet-tangle-lst-benchmarking/std",
 
     # Frontier
@@ -292,6 +295,7 @@ std = [
     "pallet-evm-precompile-services/std",
     "pallet-evm-precompile-tangle-lst/std",
     "pallet-evm-precompile-rewards/std",
+    "pallet-evm-precompile-credits/std",
 ]
 
 try-runtime = [

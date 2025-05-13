@@ -63,6 +63,7 @@ sp-runtime = { workspace = true, features = ["std"] }
 sp-timestamp = { workspace = true, features = ["std"] }
 pallet-services-rpc = { workspace = true }
 pallet-rewards-rpc = { workspace = true }
+pallet-credits-rpc = { workspace = true }
 sp-consensus-grandpa = { workspace = true }
 sp-offchain = { workspace = true }
 pallet-airdrop-claims = { workspace = true }
