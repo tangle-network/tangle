@@ -178,7 +178,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1303, // v1.3.3
+	spec_version: 1304, // v1.3.4
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1705,6 +1705,14 @@ impl_runtime_apis! {
 			asset_id: tangle_primitives::services::Asset<AssetId>,
 		) -> Result<Balance, sp_runtime::DispatchError> {
 			Rewards::calculate_rewards(&account_id, asset_id)
+		}
+	}
+
+	impl pallet_credits_rpc_runtime_api::CreditsApi<Block, AccountId, Balance> for Runtime {
+		fn query_user_credits(
+			account_id: AccountId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount(&account_id, None)
 		}
 	}
 

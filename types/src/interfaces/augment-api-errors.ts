@@ -348,6 +348,40 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       [key: string]: AugmentedError<ApiType>;
     };
+    credits: {
+      /**
+       * Amount specified for burn or claim must be greater than zero.
+       **/
+      AmountZero: AugmentedError<ApiType>;
+      /**
+       * Cannot transfer burned tokens to target account (feature not fully implemented).
+       **/
+      BurnTransferNotImplemented: AugmentedError<ApiType>;
+      /**
+       * The requested claim amount exceeds the maximum calculated within the allowed window.
+       **/
+      ClaimAmountExceedsWindowAllowance: AugmentedError<ApiType>;
+      /**
+       * Insufficient TNT balance to perform the burn operation.
+       **/
+      InsufficientTntBalance: AugmentedError<ApiType>;
+      /**
+       * No staking tiers are configured in the runtime.
+       **/
+      NoStakeTiersConfigured: AugmentedError<ApiType>;
+      /**
+       * The provided off-chain account ID exceeds the maximum allowed length.
+       **/
+      OffchainAccountIdTooLong: AugmentedError<ApiType>;
+      /**
+       * An arithmetic operation resulted in an overflow.
+       **/
+      Overflow: AugmentedError<ApiType>;
+      /**
+       * Generic error
+       **/
+      [key: string]: AugmentedError<ApiType>;
+    };
     democracy: {
       /**
        * Cannot cancel the same proposal twice

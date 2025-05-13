@@ -1204,6 +1204,21 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
     };
+    credits: {
+      /**
+       * Burn TNT for potential off-chain credits. Updates reward tracking block.
+       **/
+      burn: AugmentedSubmittable<(amount: Compact<u128> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>]>;
+      /**
+       * Claim potential credits accrued within the allowed window. Emits event for off-chain
+       * processing.
+       **/
+      claimCredits: AugmentedSubmittable<(amountToClaim: Compact<u128> | AnyNumber | Uint8Array, offchainAccountId: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, Bytes]>;
+      /**
+       * Generic tx
+       **/
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+    };
     democracy: {
       /**
        * Permanently place a proposal into the blacklist. This prevents it from ever being
@@ -3917,7 +3932,7 @@ declare module '@polkadot/api-base/types/submittable' {
        * Returns a `DispatchResultWithPostInfo` which on success emits a
        * [`Event::BlueprintCreated`] event containing the owner and blueprint ID.
        **/
-      createBlueprint: AugmentedSubmittable<(blueprint: TanglePrimitivesServicesServiceServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; sources?: any; supportedMembershipModels?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesServiceServiceBlueprint]>;
+      createBlueprint: AugmentedSubmittable<(blueprint: TanglePrimitivesServicesServiceServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; sources?: any; supportedMembershipModels?: any; recommendedResources?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesServiceServiceBlueprint]>;
       /**
        * Disputes and removes an [UnappliedSlash] from storage.
        * 
