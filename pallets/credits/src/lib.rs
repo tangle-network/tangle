@@ -209,9 +209,8 @@ pub mod pallet {
 		/// [who, amount_burned, credits_granted, offchain_account_id]
 		CreditsGrantedFromBurn {
 			who: T::AccountId,
-			amount_burned: BalanceOf<T>,
+			tnt_burned: BalanceOf<T>,
 			credits_granted: BalanceOf<T>,
-			offchain_account_id: OffchainAccountIdOf<T>,
 		},
 		/// Credits were claimed from staking rewards, within the allowed window.
 		/// [who, amount_claimed, offchain_account_id]
@@ -243,6 +242,8 @@ pub mod pallet {
 		StakeTiersNotSorted,
 		/// There are no stake tiers provided for the update.
 		EmptyStakeTiers,
+		/// Amount overflowed.
+		Overflow,
 	}
 
 	#[pallet::call]
@@ -264,16 +265,12 @@ pub mod pallet {
 
 			let conversion_rate = T::BurnConversionRate::get();
 			let credits_granted = amount.saturating_mul(conversion_rate);
-			ensure!(credits_granted > Zero::zero(), Error::<T>::AmountZero);
-
-			// Create a default offchain account ID for backward compatibility
-			let offchain_account_id = OffchainAccountIdOf::<T>::default();
+			ensure!(credits_granted > Zero::zero(), Error::<T>::Overflow);
 
 			Self::deposit_event(Event::CreditsGrantedFromBurn {
 				who,
-				amount_burned: amount,
+				tnt_burned: amount,
 				credits_granted,
-				offchain_account_id,
 			});
 			Ok(())
 		}
