@@ -434,6 +434,14 @@ pub mod module {
 		SignatureVerificationFailed,
 		/// Invalid signature bytes
 		InvalidSignatureBytes,
+		/// Heartbeat too early
+		HeartbeatTooEarly,
+		/// Heartbeat signature verification failed
+		HeartbeatSignatureVerificationFailed,
+		/// Invalid heartbeat data
+		InvalidHeartbeatData,
+		/// Service not active
+		ServiceNotActive,
 	}
 
 	#[pallet::event]
@@ -557,17 +565,6 @@ pub mod module {
 			/// The ID of the call.
 			call_id: u64,
 			/// The index of the job.
-			job: u8,
-			/// The result of the job.
-			result: Vec<Field<T::Constraints, T::AccountId>>,
-		},
-		/// EVM execution reverted with a reason.
-		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
-		/// An Operator has an unapplied slash.
-		UnappliedSlash {
-			/// The index of the slash.
-			index: u32,
-			/// The account that has an unapplied slash.
 			operator: T::AccountId,
 			/// Service ID
 			service_id: u64,
@@ -615,6 +612,15 @@ pub mod module {
 			blueprint_id: u64,
 			/// The new RPC address.
 			rpc_address: BoundedString<<<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxRpcAddressLength>,
+		},
+		/// A service has sent a heartbeat.
+		HeartbeatReceived {
+			/// The service that sent the heartbeat.
+			service_id: u64,
+			/// The ID of the service blueprint.
+			blueprint_id: u64,
+			/// The block number when the heartbeat was received.
+			block_number: BlockNumberFor<T>,
 		},
 	}
 
@@ -675,6 +681,20 @@ pub mod module {
 		InstanceId,
 		(),
 		ResultQuery<Error<T>::ServiceNotFound>,
+	>;
+
+	/// The heartbeats for services.
+	/// Blueprint ID -> Service ID -> (Last Heartbeat Block, Custom Metrics Data)
+	#[pallet::storage]
+	#[pallet::getter(fn service_heartbeats)]
+	pub type ServiceHeartbeats<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		BlueprintId,
+		Identity,
+		InstanceId,
+		(BlockNumberFor<T>, BoundedVec<u8, T::Constraints::MaxFieldsSize>),
+		ValueQuery,
 	>;
 
 	/// The operators for a specific service blueprint.
@@ -1859,6 +1879,118 @@ pub mod module {
 			}
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+				/// Send a heartbeat for a service.
+		///
+		/// This function allows services to send periodic heartbeats to indicate they are still active.
+		/// Each service must send heartbeats at intervals defined by its blueprint's heartbeat_interval.
+		/// The heartbeat includes custom metrics data that can be used for monitoring and analytics.
+		///
+		/// The heartbeat must be signed by the service to verify its authenticity.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The origin of the call, must be a signed account.
+		/// * `service_id` - The ID of the service sending the heartbeat.
+		/// * `blueprint_id` - The ID of the blueprint the service was created from.
+		/// * `metrics_data` - Custom metrics data from the service (serialized).
+		/// * `signature` - ECDSA signature verifying the heartbeat data.
+		///
+		/// # Errors
+		///
+		/// * [`Error::ServiceNotFound`] - The service does not exist.
+		/// * [`Error::ServiceNotActive`] - The service is not active.
+		/// * [`Error::BlueprintNotFound`] - The blueprint does not exist.
+		/// * [`Error::HeartbeatTooEarly`] - Not enough blocks have passed since the last heartbeat.
+		/// * [`Error::HeartbeatSignatureVerificationFailed`] - The signature verification failed.
+		/// * [`Error::InvalidHeartbeatData`] - The heartbeat data is invalid.
+		#[pallet::call_index(19)]
+		#[pallet::weight(10_000)]
+		pub fn heartbeat(
+			origin: OriginFor<T>,
+			#[pallet::compact] service_id: u64,
+			#[pallet::compact] blueprint_id: u64,
+			metrics_data: Vec<u8>,
+			signature: ecdsa::Signature,
+		) -> DispatchResultWithPostInfo {
+			let caller = ensure_signed(origin)?;
+
+			// Ensure the service exists and is active
+			ensure!(
+				ServiceStatus::<T>::contains_key(blueprint_id, service_id),
+				Error::<T>::ServiceNotFound
+			);
+
+			// let service = Services::<T>::get(service_id)?;
+			let instance = Instances::<T>::get(service_id.into())?;
+
+			// Ensure the service is for the correct blueprint
+			ensure!(instance.blueprint_id == blueprint_id, Error::<T>::ServiceNotFound);
+
+			// Get the blueprint to check the heartbeat interval
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+
+			// Get the current block number
+			let current_block = <frame_system::Pallet<T>>::block_number();
+
+			// Get the last heartbeat block number, or use 0 if this is the first heartbeat
+			let (last_heartbeat_block, _) = ServiceHeartbeats::<T>::get(blueprint_id, service_id);
+
+			// Check if enough blocks have passed since the last heartbeat
+			if last_heartbeat_block != BlockNumberFor::<T>::zero() {
+				let blocks_passed = current_block.saturating_sub(last_heartbeat_block);
+				ensure!(
+					blocks_passed >= blueprint.heartbeat_interval.into(),
+					Error::<T>::HeartbeatTooEarly
+				);
+			}
+
+			// Ensure the metrics data is not too large
+			ensure!(
+				metrics_data.len() <= T::Constraints::MaxFieldsSize::get() as usize,
+				Error::<T>::InvalidHeartbeatData
+			);
+
+			// Create a bounded vector for the metrics data
+			let bounded_metrics_data = BoundedVec::<u8, T::Constraints::MaxFieldsSize>::try_from(metrics_data.clone())
+				.map_err(|_| Error::<T>::InvalidHeartbeatData)?;
+
+			// Create the message to verify
+			// Format: service_id + blueprint_id + metrics_data
+			let mut message = service_id.to_le_bytes().to_vec();
+			message.extend_from_slice(&blueprint_id.to_le_bytes());
+			message.extend_from_slice(&metrics_data);
+			let message_hash = sp_io::hashing::keccak_256(&message);
+
+			// Get the public key from one of the service operators
+			// For simplicity, we use the first operator's key
+			let operator = service.operator_security_commitments.get(0)
+				.ok_or(Error::<T>::InvalidHeartbeatData)?
+				.0.clone();
+			
+			let operator_preferences = Operators::<T>::get(blueprint_id, &operator)?;
+			let public_key = ecdsa::Public::from_full(&operator_preferences.key)
+				.map_err(|_| Error::<T>::InvalidSignatureBytes)?;
+
+			// Verify the signature
+			ensure!(
+				sp_io::crypto::ecdsa_verify(&signature, &message_hash, &public_key),
+				Error::<T>::HeartbeatSignatureVerificationFailed
+			);
+
+			// Update the heartbeat storage
+			ServiceHeartbeats::<T>::insert(blueprint_id, service_id, (current_block, bounded_metrics_data));
+
+			// Emit an event
+			Self::deposit_event(Event::HeartbeatReceived {
+				service_id,
+				blueprint_id,
+				block_number: current_block,
+			});
+
+			// This extrinsic is feeless
+			Ok(Pays::No.into())
 		}
 	}
 }
