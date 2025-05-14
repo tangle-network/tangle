@@ -575,3 +575,93 @@ fn burn_and_claim_interact_correctly_via_last_update_block() {
 		assert_eq!(last_reward_update(user), 150);
 	});
 }
+
+#[test]
+fn set_stake_tiers_works() {
+	new_test_ext(vec![]).execute_with(|| {
+		// Get initial stake tiers
+		let initial_tiers = CreditsPallet::<Runtime>::stake_tiers();
+		assert_eq!(initial_tiers.len(), 3, "Should have 3 initial tiers");
+
+		// Create new stake tiers
+		let new_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: 2 },
+			StakeTier { threshold: 500, rate_per_block: 10 },
+			StakeTier { threshold: 2000, rate_per_block: 25 },
+			StakeTier { threshold: 10000, rate_per_block: 100 },
+		];
+
+		// Verify non-root origin is rejected
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(
+				RuntimeOrigin::signed(ALICE),
+				new_tiers.clone()
+			),
+			frame_support::error::BadOrigin,
+		);
+
+		// Verify empty tiers list is rejected
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), vec![]),
+			Error::<Runtime>::EmptyStakeTiers,
+		);
+
+		// Verify unsorted tiers are rejected
+		let unsorted_tiers = vec![
+			StakeTier { threshold: 500, rate_per_block: 10 },
+			StakeTier {
+				threshold: 100, // This is less than the previous tier threshold
+				rate_per_block: 2,
+			},
+		];
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), unsorted_tiers),
+			Error::<Runtime>::StakeTiersNotSorted,
+		);
+
+		// Update stake tiers with root origin
+		let set_tiers_call =
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), new_tiers.clone());
+		assert_ok!(set_tiers_call);
+
+		// Verify event was emitted
+		System::assert_has_event(Event::StakeTiersUpdated.into());
+
+		// Verify tiers were updated in storage
+		let updated_tiers = CreditsPallet::<Runtime>::stake_tiers();
+		assert_eq!(updated_tiers.len(), 4, "Should now have 4 tiers");
+
+		for (i, tier) in updated_tiers.iter().enumerate() {
+			assert_eq!(tier.threshold, new_tiers[i].threshold, "Tier threshold should match");
+			assert_eq!(tier.rate_per_block, new_tiers[i].rate_per_block, "Tier rate should match");
+		}
+
+		// Set some tiers that have the same threshold but different rates
+		let same_threshold_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: 1 },
+			StakeTier {
+				threshold: 100, // Same threshold as previous tier
+				rate_per_block: 2,
+			},
+		];
+
+		// Should be accepted since thresholds are considered properly sorted if they are <=
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(
+			RuntimeOrigin::root(),
+			same_threshold_tiers.clone()
+		));
+
+		// Verify tiers were updated
+		let final_tiers = CreditsPallet::<Runtime>::stake_tiers();
+		assert_eq!(final_tiers.len(), 2, "Should now have 2 tiers");
+
+		// Test tier-based reward calculation with the new tiers
+		let stake_amount_tier1 = 50; // Below first tier
+		let rate_tier1 = CreditsPallet::<Runtime>::get_current_rate(stake_amount_tier1);
+		assert_eq!(rate_tier1, 0, "Rate should be 0 for stake below lowest tier");
+
+		let stake_amount_tier2 = 100; // At first tier
+		let rate_tier2 = CreditsPallet::<Runtime>::get_current_rate(stake_amount_tier2);
+		assert_eq!(rate_tier2, 2, "Rate should match the tier 2 rate");
+	});
+}

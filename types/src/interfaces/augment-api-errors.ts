@@ -362,21 +362,29 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ClaimAmountExceedsWindowAllowance: AugmentedError<ApiType>;
       /**
+       * There are no stake tiers provided for the update.
+       **/
+      EmptyStakeTiers: AugmentedError<ApiType>;
+      /**
        * Insufficient TNT balance to perform the burn operation.
        **/
       InsufficientTntBalance: AugmentedError<ApiType>;
       /**
-       * No staking tiers are configured in the runtime.
+       * Invalid claim ID (e.g., too long).
        **/
-      NoStakeTiersConfigured: AugmentedError<ApiType>;
+      InvalidClaimId: AugmentedError<ApiType>;
       /**
-       * The provided off-chain account ID exceeds the maximum allowed length.
+       * No stake tiers are configured or the stake amount is below the lowest tier threshold.
        **/
-      OffchainAccountIdTooLong: AugmentedError<ApiType>;
+      NoValidTier: AugmentedError<ApiType>;
       /**
-       * An arithmetic operation resulted in an overflow.
+       * Amount overflowed.
        **/
       Overflow: AugmentedError<ApiType>;
+      /**
+       * The stake tiers are not properly sorted by threshold.
+       **/
+      StakeTiersNotSorted: AugmentedError<ApiType>;
       /**
        * Generic error
        **/
