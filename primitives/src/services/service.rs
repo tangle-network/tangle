@@ -26,6 +26,7 @@ use crate::{Account, BlueprintId};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
 use sp_core::H160;
+use sp_runtime::Percent;
 use sp_std::{vec, vec::Vec};
 
 #[cfg(not(feature = "std"))]
@@ -146,6 +147,10 @@ pub struct ServiceBlueprint<C: Constraints> {
 	pub recommended_resources: BoundedVec<ResourcePricing<C>, C::MaxOperatorsPerService>,
 	/// The interval in blocks at which services created from this blueprint should send heartbeats
 	pub heartbeat_interval: u32,
+	/// The threshold percentage of heartbeats that must be met in order to avoid slashing
+	pub heartbeat_threshold: Percent,
+	/// The window of blocks after which to check for slashing
+	pub slashing_window: u32,
 }
 
 impl<C: Constraints> ServiceBlueprint<C> {

@@ -32,7 +32,9 @@ use sp_runtime::{RuntimeAppPublic, SaturatedConversion, traits::Zero};
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 use tangle_primitives::{
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
-	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
+	services::{
+		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
+	},
 	traits::{MultiAssetDelegationInfo, SlashManager},
 };
 
@@ -69,7 +71,7 @@ pub mod module {
 		traits::fungibles::{Inspect, Mutate},
 	};
 	use sp_core::H160;
-	use sp_runtime::{Percent, traits::MaybeSerializeDeserialize};
+	use sp_runtime::{Percent, Saturating, traits::MaybeSerializeDeserialize};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
 	use tangle_primitives::services::*;
 
@@ -565,6 +567,17 @@ pub mod module {
 			/// The ID of the call.
 			call_id: u64,
 			/// The index of the job.
+			job: u8,
+			/// The result of the job.
+			result: Vec<Field<T::Constraints, T::AccountId>>,
+		},
+		/// EVM execution reverted with a reason.
+		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
+		/// An Operator has an unapplied slash.
+		UnappliedSlash {
+			/// The index of the slash.
+			index: u32,
+			/// The account that has an unapplied slash.
 			operator: T::AccountId,
 			/// Service ID
 			service_id: u64,
@@ -683,6 +696,16 @@ pub mod module {
 		ResultQuery<Error<T>::ServiceNotFound>,
 	>;
 
+	/// The default interval between heartbeats.
+	#[pallet::storage]
+	#[pallet::getter(fn heartbeat_interval)]
+	pub type HeartbeatInterval<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+
+	/// The default threshold of unhealthy heartbeats for slashing.
+	#[pallet::storage]
+	#[pallet::getter(fn default_heartbeat_threshold)]
+	pub type DefaultHeartbeatThreshold<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+
 	/// The heartbeats for services.
 	/// Blueprint ID -> Service ID -> (Last Heartbeat Block, Custom Metrics Data)
 	#[pallet::storage]
@@ -693,9 +716,24 @@ pub mod module {
 		BlueprintId,
 		Identity,
 		InstanceId,
-		(BlockNumberFor<T>, BoundedVec<u8, T::Constraints::MaxFieldsSize>),
+		(BlockNumberFor<T>, BoundedVec<u8, <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize>),
 		ValueQuery,
 	>;
+
+	// /// Heartbeat tracking for service operators
+	// /// (Blueprint ID, Service ID, Operator) -> HeartbeatStats
+	// #[pallet::storage]
+	// #[pallet::getter(fn service_operator_heartbeats)]
+	// pub type ServiceOperatorHeartbeats<T: Config> = StorageNMap<
+	// 	_,
+	// 	(
+	// 		NMapKey<Identity, BlueprintId>,
+	// 		NMapKey<Identity, InstanceId>,
+	// 		NMapKey<Identity, T::AccountId>,
+	// 	),
+	// 	HeartbeatStats<BlockNumberFor<T>>,
+	// 	ValueQuery,
+	// >;
 
 	/// The operators for a specific service blueprint.
 	/// Blueprint ID -> Operator -> Operator Preferences
@@ -1881,13 +1919,14 @@ pub mod module {
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
-				/// Send a heartbeat for a service.
+		/// Send a heartbeat for a service.
 		///
-		/// This function allows services to send periodic heartbeats to indicate they are still active.
-		/// Each service must send heartbeats at intervals defined by its blueprint's heartbeat_interval.
-		/// The heartbeat includes custom metrics data that can be used for monitoring and analytics.
+		/// This function allows operators to send periodic heartbeats to indicate they are still
+		/// active. Each operator must send heartbeats at intervals defined by its blueprint's
+		/// heartbeat_interval. The heartbeat includes custom metrics data that can be used for
+		/// monitoring and analytics.
 		///
-		/// The heartbeat must be signed by the service to verify its authenticity.
+		/// The heartbeat must be signed by the operator to verify its authenticity.
 		///
 		/// # Arguments
 		///
@@ -1922,11 +1961,18 @@ pub mod module {
 				Error::<T>::ServiceNotFound
 			);
 
-			// let service = Services::<T>::get(service_id)?;
-			let instance = Instances::<T>::get(service_id.into())?;
+			// Get the service instance
+			let instance = Instances::<T>::get(service_id)?;
 
 			// Ensure the service is for the correct blueprint
-			ensure!(instance.blueprint_id == blueprint_id, Error::<T>::ServiceNotFound);
+			ensure!(instance.blueprint == blueprint_id, Error::<T>::ServiceNotFound);
+
+			// Verify the caller is an operator for this service
+			let is_operator = instance
+				.operator_security_commitments
+				.iter()
+				.any(|(operator, _)| operator == &caller);
+			ensure!(is_operator, Error::<T>::NotAnOperator);
 
 			// Get the blueprint to check the heartbeat interval
 			let (_, blueprint) = Self::blueprints(blueprint_id)?;
@@ -1937,23 +1983,73 @@ pub mod module {
 			// Get the last heartbeat block number, or use 0 if this is the first heartbeat
 			let (last_heartbeat_block, _) = ServiceHeartbeats::<T>::get(blueprint_id, service_id);
 
-			// Check if enough blocks have passed since the last heartbeat
-			if last_heartbeat_block != BlockNumberFor::<T>::zero() {
-				let blocks_passed = current_block.saturating_sub(last_heartbeat_block);
+			// Get or initialize the operator's heartbeat stats
+			let mut stats =
+				ServiceOperatorHeartbeats::<T>::get((blueprint_id, service_id, caller.clone()));
+
+			// If this is the first heartbeat for this operator, initialize the stats
+			if stats.last_heartbeat_block == BlockNumberFor::<T>::zero() {
+				stats.last_heartbeat_block = current_block;
+				stats.last_check_block = current_block;
+				stats.expected_heartbeats = 1;
+				stats.received_heartbeats = 1;
+			} else {
+				// Check if enough blocks have passed since the last heartbeat
+				let blocks_passed = current_block.saturating_sub(stats.last_heartbeat_block);
 				ensure!(
-					blocks_passed >= blueprint.heartbeat_interval.into(),
+					blocks_passed >= blueprint.heartbeat_interval.saturated_into(),
 					Error::<T>::HeartbeatTooEarly
 				);
+
+				// Calculate how many heartbeats were expected since the last one
+				let expected_since_last = blocks_passed
+					.saturating_div(blueprint.heartbeat_interval.saturated_into())
+					.saturated_into::<u32>();
+
+				// Update the stats
+				stats.expected_heartbeats =
+					stats.expected_heartbeats.saturating_add(expected_since_last);
+				stats.received_heartbeats = stats.received_heartbeats.saturating_add(1);
+				stats.last_heartbeat_block = current_block;
+
+				// If more than one heartbeat interval has passed, we need to check if we should
+				// slash
+				if expected_since_last > 1 {
+					// Calculate the percentage of heartbeats received
+					let heartbeat_percent = Percent::from_rational(
+						stats.received_heartbeats,
+						stats.expected_heartbeats,
+					);
+
+					// If the percentage of heartbeats received is below the threshold, slash
+					if heartbeat_percent < blueprint.heartbeat_threshold {
+						// Calculate the slash percentage based on missed heartbeats
+						let missed_percent = Percent::from_percent(100) - heartbeat_percent;
+						let slash_percent =
+							Percent::from_percent((missed_percent.deconstruct() as u8).min(100));
+
+						// Create and store unapplied slash
+						Self::create_heartbeat_slash(
+							blueprint_id,
+							service_id,
+							caller.clone(),
+							slash_percent,
+						);
+					}
+				}
 			}
+
+			// Update the operator's heartbeat stats
+			ServiceHeartbeats::<T>::insert((blueprint_id, service_id, caller.clone()), stats);
 
 			// Ensure the metrics data is not too large
 			ensure!(
-				metrics_data.len() <= T::Constraints::MaxFieldsSize::get() as usize,
+				metrics_data.len() <= <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize::get() as usize,
 				Error::<T>::InvalidHeartbeatData
 			);
 
 			// Create a bounded vector for the metrics data
-			let bounded_metrics_data = BoundedVec::<u8, T::Constraints::MaxFieldsSize>::try_from(metrics_data.clone())
+			let bounded_metrics_data = BoundedVec::<u8, <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize>::try_from(metrics_data.clone())
 				.map_err(|_| Error::<T>::InvalidHeartbeatData)?;
 
 			// Create the message to verify
@@ -1963,13 +2059,8 @@ pub mod module {
 			message.extend_from_slice(&metrics_data);
 			let message_hash = sp_io::hashing::keccak_256(&message);
 
-			// Get the public key from one of the service operators
-			// For simplicity, we use the first operator's key
-			let operator = service.operator_security_commitments.get(0)
-				.ok_or(Error::<T>::InvalidHeartbeatData)?
-				.0.clone();
-			
-			let operator_preferences = Operators::<T>::get(blueprint_id, &operator)?;
+			// Get the operator's preferences to get their public key
+			let operator_preferences = Operators::<T>::get(blueprint_id, &caller)?;
 			let public_key = ecdsa::Public::from_full(&operator_preferences.key)
 				.map_err(|_| Error::<T>::InvalidSignatureBytes)?;
 
@@ -1980,7 +2071,11 @@ pub mod module {
 			);
 
 			// Update the heartbeat storage
-			ServiceHeartbeats::<T>::insert(blueprint_id, service_id, (current_block, bounded_metrics_data));
+			ServiceHeartbeats::<T>::insert(
+				blueprint_id,
+				service_id,
+				(current_block, bounded_metrics_data),
+			);
 
 			// Emit an event
 			Self::deposit_event(Event::HeartbeatReceived {
@@ -1989,8 +2084,76 @@ pub mod module {
 				block_number: current_block,
 			});
 
-			// This extrinsic is feeless
-			Ok(Pays::No.into())
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
+	}
+
+	/// Updates the default heartbeat threshold for all services.
+	///
+	/// # Permissions
+	///
+	/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+	///
+	/// # Arguments
+	///
+	/// * `origin` - Origin of the call
+	/// * `threshold` - New default heartbeat threshold
+	pub fn update_default_heartbeat_threshold(
+		origin: OriginFor<T>,
+		threshold: BlockNumberFor<T>,
+	) -> DispatchResultWithPostInfo {
+		T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+
+		DefaultHeartbeatThreshold::<T>::set(threshold);
+
+		Self::deposit_event(Event::<T>::DefaultHeartbeatThresholdUpdated { threshold });
+
+		Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+	}
+
+	/// Updates the default heartbeat interval for all services.
+	///
+	/// # Permissions
+	///
+	/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+	///
+	/// # Arguments
+	///
+	/// * `origin` - Origin of the call
+	/// * `interval` - New default heartbeat interval
+	pub fn update_default_heartbeat_interval(
+		origin: OriginFor<T>,
+		interval: BlockNumberFor<T>,
+	) -> DispatchResultWithPostInfo {
+		T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+
+		DefaultHeartbeatInterval::<T>::set(interval);
+
+		Self::deposit_event(Event::<T>::DefaultHeartbeatIntervalUpdated { interval });
+
+		Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+	}
+
+	/// Updates the default heartbeat slashing window for all services.
+	///
+	/// # Permissions
+	///
+	/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+	///
+	/// # Arguments
+	///
+	/// * `origin` - Origin of the call
+	/// * `interval` - New default heartbeat slashing window
+	pub fn update_default_heartbeat_slashing_window(
+		origin: OriginFor<T>,
+		interval: BlockNumberFor<T>,
+	) -> DispatchResultWithPostInfo {
+		T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+
+		DefaultHeartbeatSlashingWindow::<T>::set(interval);
+
+		Self::deposit_event(Event::<T>::DefaultHeartbeatSlashingWindowUpdated { interval });
+
+		Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 	}
 }
