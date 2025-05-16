@@ -14,12 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::{AssetSecurityCommitment, BoundedString, Constraints};
-use educe::Educe;
 use frame_support::pallet_prelude::*;
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
-use sp_core::keccak_256;
 
 /// Statistics for operator heartbeats
 #[derive(
@@ -29,45 +24,13 @@ use sp_core::keccak_256;
 #[codec(encode_bound(skip_type_params(BlockNumber)))]
 #[codec(decode_bound(skip_type_params(BlockNumber)))]
 #[codec(mel_bound(skip_type_params(BlockNumber)))]
-pub struct HeartbeatStats<BlockNumber> {
+pub struct HeartbeatStats {
 	/// Total number of heartbeats expected since the service started
 	pub expected_heartbeats: u32,
 	/// Total number of heartbeats actually received
 	pub received_heartbeats: u32,
 	/// The last block when a slashing check was performed
-	pub last_check_block: BlockNumber,
+	pub last_check_block: u32,
 	/// The last block when a heartbeat was received
-	pub last_heartbeat_block: BlockNumber,
-}
-
-/// Helper function to create and store a heartbeat slash
-fn create_heartbeat_slash(
-	blueprint_id: BlueprintId,
-	service_id: InstanceId,
-	operator: T::AccountId,
-	slash_percent: Percent,
-) {
-	// Create an unapplied slash
-	let unapplied_slash = UnappliedSlash {
-		era: T::OperatorDelegationManager::get_current_round(),
-		blueprint_id,
-		service_id,
-		operator: operator.clone(),
-		slash_percent,
-	};
-
-	// Store the slash for later processing
-	let index = Self::next_unapplied_slash_index();
-	UnappliedSlashes::<T>::insert(unapplied_slash.era, index, unapplied_slash.clone());
-	NextUnappliedSlashIndex::<T>::set(index.saturating_add(1));
-
-	// Emit an event for the unapplied slash
-	Self::deposit_event(Event::<T>::UnappliedSlash {
-		index,
-		operator,
-		blueprint_id,
-		service_id,
-		slash_percent,
-		era: unapplied_slash.era,
-	});
+	pub last_heartbeat_block: u32,
 }

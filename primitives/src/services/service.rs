@@ -145,12 +145,6 @@ pub struct ServiceBlueprint<C: Constraints> {
 	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
 	/// Recommended resources for running this blueprint
 	pub recommended_resources: BoundedVec<ResourcePricing<C>, C::MaxOperatorsPerService>,
-	/// The interval in blocks at which services created from this blueprint should send heartbeats
-	pub heartbeat_interval: u32,
-	/// The threshold percentage of heartbeats that must be met in order to avoid slashing
-	pub heartbeat_threshold: Percent,
-	/// The window of blocks after which to check for slashing
-	pub slashing_window: u32,
 }
 
 impl<C: Constraints> ServiceBlueprint<C> {

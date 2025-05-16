@@ -436,6 +436,12 @@ pub mod module {
 		SignatureVerificationFailed,
 		/// Invalid signature bytes
 		InvalidSignatureBytes,
+		/// Get Heartbeat Interval Failure
+		GetHeartbeatIntervalFailure,
+		/// Get Heartbeat Threshold Failure
+		GetHeartbeatThresholdFailure,
+		/// Get Slashing Window Failure
+		GetSlashingWindowFailure,
 		/// Heartbeat too early
 		HeartbeatTooEarly,
 		/// Heartbeat signature verification failed
@@ -698,13 +704,18 @@ pub mod module {
 
 	/// The default interval between heartbeats.
 	#[pallet::storage]
-	#[pallet::getter(fn heartbeat_interval)]
-	pub type HeartbeatInterval<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+	#[pallet::getter(fn default_heartbeat_interval)]
+	pub type DefaultHeartbeatInterval<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
 
 	/// The default threshold of unhealthy heartbeats for slashing.
 	#[pallet::storage]
 	#[pallet::getter(fn default_heartbeat_threshold)]
-	pub type DefaultHeartbeatThreshold<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
+	pub type DefaultHeartbeatThreshold<T> = StorageValue<_, u8, ValueQuery>;
+
+	/// The default slashing window for services.
+	#[pallet::storage]
+	#[pallet::getter(fn default_slashing_window)]
+	pub type DefaultSlashingWindow<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>;
 
 	/// The heartbeats for services.
 	/// Blueprint ID -> Service ID -> (Last Heartbeat Block, Custom Metrics Data)
@@ -720,20 +731,20 @@ pub mod module {
 		ValueQuery,
 	>;
 
-	// /// Heartbeat tracking for service operators
-	// /// (Blueprint ID, Service ID, Operator) -> HeartbeatStats
-	// #[pallet::storage]
-	// #[pallet::getter(fn service_operator_heartbeats)]
-	// pub type ServiceOperatorHeartbeats<T: Config> = StorageNMap<
-	// 	_,
-	// 	(
-	// 		NMapKey<Identity, BlueprintId>,
-	// 		NMapKey<Identity, InstanceId>,
-	// 		NMapKey<Identity, T::AccountId>,
-	// 	),
-	// 	HeartbeatStats<BlockNumberFor<T>>,
-	// 	ValueQuery,
-	// >;
+	/// Heartbeat tracking for service operators
+	/// (Blueprint ID, Service ID, Operator) -> HeartbeatStats
+	#[pallet::storage]
+	#[pallet::getter(fn service_operator_heartbeats)]
+	pub type ServiceOperatorHeartbeats<T: Config> = StorageNMap<
+		_,
+		(
+			NMapKey<Identity, BlueprintId>,
+			NMapKey<Identity, InstanceId>,
+			NMapKey<Identity, T::AccountId>,
+		),
+		HeartbeatStats,
+		ValueQuery,
+	>;
 
 	/// The operators for a specific service blueprint.
 	/// Blueprint ID -> Operator -> Operator Preferences
@@ -1968,89 +1979,16 @@ pub mod module {
 			ensure!(instance.blueprint == blueprint_id, Error::<T>::ServiceNotFound);
 
 			// Verify the caller is an operator for this service
-			let is_operator = instance
-				.operator_security_commitments
-				.iter()
-				.any(|(operator, _)| operator == &caller);
-			ensure!(is_operator, Error::<T>::NotAnOperator);
-
-			// Get the blueprint to check the heartbeat interval
-			let (_, blueprint) = Self::blueprints(blueprint_id)?;
-
-			// Get the current block number
-			let current_block = <frame_system::Pallet<T>>::block_number();
-
-			// Get the last heartbeat block number, or use 0 if this is the first heartbeat
-			let (last_heartbeat_block, _) = ServiceHeartbeats::<T>::get(blueprint_id, service_id);
-
-			// Get or initialize the operator's heartbeat stats
-			let mut stats =
-				ServiceOperatorHeartbeats::<T>::get((blueprint_id, service_id, caller.clone()));
-
-			// If this is the first heartbeat for this operator, initialize the stats
-			if stats.last_heartbeat_block == BlockNumberFor::<T>::zero() {
-				stats.last_heartbeat_block = current_block;
-				stats.last_check_block = current_block;
-				stats.expected_heartbeats = 1;
-				stats.received_heartbeats = 1;
-			} else {
-				// Check if enough blocks have passed since the last heartbeat
-				let blocks_passed = current_block.saturating_sub(stats.last_heartbeat_block);
-				ensure!(
-					blocks_passed >= blueprint.heartbeat_interval.saturated_into(),
-					Error::<T>::HeartbeatTooEarly
-				);
-
-				// Calculate how many heartbeats were expected since the last one
-				let expected_since_last = blocks_passed
-					.saturating_div(blueprint.heartbeat_interval.saturated_into())
-					.saturated_into::<u32>();
-
-				// Update the stats
-				stats.expected_heartbeats =
-					stats.expected_heartbeats.saturating_add(expected_since_last);
-				stats.received_heartbeats = stats.received_heartbeats.saturating_add(1);
-				stats.last_heartbeat_block = current_block;
-
-				// If more than one heartbeat interval has passed, we need to check if we should
-				// slash
-				if expected_since_last > 1 {
-					// Calculate the percentage of heartbeats received
-					let heartbeat_percent = Percent::from_rational(
-						stats.received_heartbeats,
-						stats.expected_heartbeats,
-					);
-
-					// If the percentage of heartbeats received is below the threshold, slash
-					if heartbeat_percent < blueprint.heartbeat_threshold {
-						// Calculate the slash percentage based on missed heartbeats
-						let missed_percent = Percent::from_percent(100) - heartbeat_percent;
-						let slash_percent =
-							Percent::from_percent((missed_percent.deconstruct() as u8).min(100));
-
-						// Create and store unapplied slash
-						Self::create_heartbeat_slash(
-							blueprint_id,
-							service_id,
-							caller.clone(),
-							slash_percent,
-						);
-					}
-				}
-			}
-
-			// Update the operator's heartbeat stats
-			ServiceHeartbeats::<T>::insert((blueprint_id, service_id, caller.clone()), stats);
-
-			// Ensure the metrics data is not too large
 			ensure!(
-				metrics_data.len() <= <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize::get() as usize,
-				Error::<T>::InvalidHeartbeatData
+				Operators::<T>::contains_key(blueprint_id, caller.clone()),
+				Error::<T>::NotRegistered
 			);
 
-			// Create a bounded vector for the metrics data
+			// Get the blueprint and current block number
+			let (_, blueprint) = Self::blueprints(blueprint_id)?;
+			let current_block = <frame_system::Pallet<T>>::block_number();
 			let bounded_metrics_data = BoundedVec::<u8, <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize>::try_from(metrics_data.clone())
-				.map_err(|_| Error::<T>::InvalidHeartbeatData)?;
+    .map_err(|_| Error::<T>::InvalidHeartbeatData)?;
 
 			// Create the message to verify
 			// Format: service_id + blueprint_id + metrics_data
@@ -2070,90 +2008,145 @@ pub mod module {
 				Error::<T>::HeartbeatSignatureVerificationFailed
 			);
 
-			// Update the heartbeat storage
-			ServiceHeartbeats::<T>::insert(
-				blueprint_id,
-				service_id,
-				(current_block, bounded_metrics_data),
-			);
+			// Get operator's heartbeat stats
+			let mut stats =
+				ServiceOperatorHeartbeats::<T>::get((blueprint_id, service_id, &caller));
 
-			// Emit an event
-			Self::deposit_event(Event::HeartbeatReceived {
-				service_id,
-				blueprint_id,
-				block_number: current_block,
-			});
+			// If this is the first heartbeat for this operator, initialize the stats
+			if stats.last_heartbeat_block.is_zero() {
+				stats.last_heartbeat_block = current_block.try_into().unwrap_or_default();
+				stats.last_check_block = current_block.try_into().unwrap_or_default();
+				stats.expected_heartbeats = 1;
+				stats.received_heartbeats = 1;
+			} else {
+				// Get the heartbeat interval from the QoS function
+				let heartbeat_interval =
+					Self::get_heartbeat_interval(&blueprint, blueprint_id, service_id)?;
+
+				// Check if enough blocks have passed since the last heartbeat
+				let blocks_passed = current_block.saturating_sub(stats.last_heartbeat_block.into());
+				ensure!(blocks_passed >= heartbeat_interval, Error::<T>::HeartbeatTooEarly);
+
+				// Calculate how many heartbeats were expected since the last one
+				let expected_since_last =
+					(blocks_passed / heartbeat_interval).try_into().unwrap_or_default();
+
+				// Update the stats
+				stats.expected_heartbeats =
+					stats.expected_heartbeats.saturating_add(expected_since_last);
+				stats.received_heartbeats = stats.received_heartbeats.saturating_add(1);
+
+				// Get the heartbeat threshold from the QoS function
+				let heartbeat_threshold =
+					Self::get_heartbeat_threshold(&blueprint, blueprint_id, service_id)?;
+				if stats.expected_heartbeats > heartbeat_threshold.into() {
+					// Calculate how many heartbeats were missed
+					let missed =
+						stats.expected_heartbeats.saturating_sub(stats.received_heartbeats);
+					if missed > heartbeat_threshold.into() {
+						// Get the slashing window from the QoS function
+						let slashing_window =
+							Self::get_slashing_window(&blueprint, blueprint_id, service_id)?;
+						let slashing_block = stats
+							.last_heartbeat_block
+							.saturating_add(slashing_window.try_into().unwrap_or_default());
+
+						// If we're within the slashing window, schedule a slash
+						if current_block <= slashing_block.into() {
+							// Calculate slash percentage based on missed heartbeats
+							let slash_percent = Percent::from_percent(50); // TODO: Calculate based on missed heartbeats
+							Self::create_heartbeat_slash(
+								blueprint_id,
+								service_id,
+								caller.clone(),
+								slash_percent,
+							);
+						}
+					}
+				}
+			}
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::No })
+		}
+
+		// // Update the heartbeat storage
+		// ServiceHeartbeats::<T>::insert(
+		//     blueprint_id,
+		//     service_id,
+		//     (current_block, bounded_metrics_data),
+		// );
+
+		// // Update the operator's heartbeat stats
+		// ServiceOperatorHeartbeats::<T>::insert(
+		//     (blueprint_id, service_id, caller.clone()),
+		//     stats,
+		// );
+
+		///
+		/// # Permissions
+		///
+		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `threshold` - New default heartbeat threshold
+		pub fn update_default_heartbeat_threshold(
+			origin: OriginFor<T>,
+			threshold: u8,
+		) -> DispatchResultWithPostInfo {
+			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+
+			DefaultHeartbeatThreshold::<T>::set(threshold);
+
+			// Self::deposit_event(Event::<T>::DefaultHeartbeatThresholdUpdated { threshold });
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
-	}
 
-	/// Updates the default heartbeat threshold for all services.
-	///
-	/// # Permissions
-	///
-	/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
-	///
-	/// # Arguments
-	///
-	/// * `origin` - Origin of the call
-	/// * `threshold` - New default heartbeat threshold
-	pub fn update_default_heartbeat_threshold(
-		origin: OriginFor<T>,
-		threshold: BlockNumberFor<T>,
-	) -> DispatchResultWithPostInfo {
-		T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+		/// Updates the default heartbeat interval for all services.
+		///
+		/// # Permissions
+		///
+		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `interval` - New default heartbeat interval
+		pub fn update_default_heartbeat_interval(
+			origin: OriginFor<T>,
+			interval: BlockNumberFor<T>,
+		) -> DispatchResultWithPostInfo {
+			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
 
-		DefaultHeartbeatThreshold::<T>::set(threshold);
+			DefaultHeartbeatInterval::<T>::set(interval);
 
-		Self::deposit_event(Event::<T>::DefaultHeartbeatThresholdUpdated { threshold });
+			// Self::deposit_event(Event::<T>::DefaultHeartbeatIntervalUpdated { interval });
 
-		Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
-	}
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
 
-	/// Updates the default heartbeat interval for all services.
-	///
-	/// # Permissions
-	///
-	/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
-	///
-	/// # Arguments
-	///
-	/// * `origin` - Origin of the call
-	/// * `interval` - New default heartbeat interval
-	pub fn update_default_heartbeat_interval(
-		origin: OriginFor<T>,
-		interval: BlockNumberFor<T>,
-	) -> DispatchResultWithPostInfo {
-		T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+		/// Updates the default heartbeat slashing window for all services.
+		///
+		/// # Permissions
+		///
+		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		///
+		/// # Arguments
+		///
+		/// * `origin` - Origin of the call
+		/// * `interval` - New default heartbeat slashing window
+		pub fn update_default_heartbeat_slashing_window(
+			origin: OriginFor<T>,
+			interval: BlockNumberFor<T>,
+		) -> DispatchResultWithPostInfo {
+			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
 
-		DefaultHeartbeatInterval::<T>::set(interval);
+			DefaultSlashingWindow::<T>::set(interval);
 
-		Self::deposit_event(Event::<T>::DefaultHeartbeatIntervalUpdated { interval });
+			// Self::deposit_event(Event::<T>::DefaultHeartbeatSlashingWindowUpdated { interval });
 
-		Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
-	}
-
-	/// Updates the default heartbeat slashing window for all services.
-	///
-	/// # Permissions
-	///
-	/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
-	///
-	/// # Arguments
-	///
-	/// * `origin` - Origin of the call
-	/// * `interval` - New default heartbeat slashing window
-	pub fn update_default_heartbeat_slashing_window(
-		origin: OriginFor<T>,
-		interval: BlockNumberFor<T>,
-	) -> DispatchResultWithPostInfo {
-		T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
-
-		DefaultHeartbeatSlashingWindow::<T>::set(interval);
-
-		Self::deposit_event(Event::<T>::DefaultHeartbeatSlashingWindowUpdated { interval });
-
-		Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
 	}
 }
