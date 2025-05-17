@@ -601,3 +601,42 @@ fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 		);
 	});
 }
+
+#[test]
+fn deposit_should_work_for_tnt_without_adding_to_reward_vault() {
+	new_test_ext().execute_with(|| {
+		// Arrange
+		let who: AccountId = Bob.into();
+		let amount = 200;
+
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			Asset::Custom(0),
+			amount,
+			None,
+			None
+		));
+
+		// Assert
+		let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+		let deposit = metadata.deposits.get(&Asset::Custom(0)).unwrap();
+		assert_eq!(deposit.amount, amount);
+
+		assert_eq!(
+			System::events().last().unwrap().event,
+			RuntimeEvent::MultiAssetDelegation(crate::Event::Deposited {
+				who: who.clone(),
+				amount,
+				asset: Asset::Custom(0),
+			})
+		);
+
+		// Verify that rewards manager was called with correct parameters
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
+			who.clone(),
+			Asset::Custom(0),
+			amount,
+			None
+		)]);
+	});
+}

@@ -87,7 +87,7 @@ pub mod pallet {
 	use scale_info::prelude::vec::Vec;
 	use sp_runtime::traits::{MaybeDisplay, Saturating, UniqueSaturatedInto, Zero};
 	use sp_std::fmt::Debug;
-	use tangle_primitives::traits::MultiAssetDelegationInfo;
+	use tangle_primitives::{rewards::AssetType, traits::MultiAssetDelegationInfo};
 
 	// Move STORAGE_VERSION inside the pallet mod
 	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
@@ -123,6 +123,7 @@ pub mod pallet {
 			BalanceOf<Self>,
 			BlockNumberOf<Self>,
 			Self::AssetId,
+			AssetType,
 		>;
 
 		/// The conversion rate for burning TNT to credits.
@@ -403,24 +404,9 @@ pub mod pallet {
 			// Fetch stake *once* for the current block (simplification: assumes stake is constant
 			// during window) A more complex approach could sample stake at intervals, but adds
 			// significant complexity.
-			let tnt_asset_id = T::TntAssetId::get();
-			let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
-			let maybe_deposit_info =
-				T::MultiAssetDelegationInfo::get_user_deposit_with_locks(who, tnt_asset);
-
-			// Calculate total staked amount from the deposit info (unlocked + sum of locks)
-			let staked_amount = match maybe_deposit_info {
-				Some(deposit_info) => {
-					let locked_total =
-						deposit_info.amount_with_locks.map_or(BalanceOf::<T>::zero(), |locks| {
-							locks.iter().fold(BalanceOf::<T>::zero(), |acc, lock| {
-								acc.saturating_add(lock.amount)
-							})
-						});
-					deposit_info.unlocked_amount.saturating_add(locked_total)
-				},
-				None => BalanceOf::<T>::zero(),
-			};
+			let staked_amount =
+				T::MultiAssetDelegationInfo::get_user_deposit_by_asset_type(who, AssetType::Tnt)
+					.unwrap_or(Zero::zero());
 
 			if staked_amount.is_zero() {
 				return Ok(Zero::zero());

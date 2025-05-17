@@ -19,12 +19,14 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 use tangle_primitives::{
-	RoundIndex, services::Asset, traits::MultiAssetDelegationInfo,
-	types::rewards::UserDepositWithLocks,
+	RoundIndex,
+	services::Asset,
+	traits::MultiAssetDelegationInfo,
+	types::rewards::{AssetType, UserDepositWithLocks},
 };
 
 impl<T: crate::Config>
-	MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>, T::AssetId>
+	MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>, T::AssetId, AssetType>
 	for crate::Pallet<T>
 {
 	fn get_current_round() -> RoundIndex {
@@ -78,6 +80,27 @@ impl<T: crate::Config>
 				unlocked_amount: deposit.amount,
 				amount_with_locks: deposit.locks.as_ref().map(|locks| locks.to_vec()),
 			})
+		})
+	}
+
+	fn get_user_deposit_by_asset_type(
+		who: &T::AccountId,
+		asset_type: AssetType,
+	) -> Option<BalanceOf<T>> {
+		Delegators::<T>::get(who).and_then(|metadata| {
+			let is_matching = |asset: &Asset<T::AssetId>| match asset_type {
+				AssetType::Evm => matches!(asset, Asset::Erc20(_)),
+				AssetType::Tnt => matches!(asset, Asset::Custom(_)),
+			};
+
+			let total = metadata
+				.deposits
+				.iter()
+				.filter(|(asset, _)| is_matching(asset))
+				.map(|(_, deposit)| deposit.amount)
+				.fold(Zero::zero(), |acc: BalanceOf<T>, amount| acc + amount);
+
+			if total.is_zero() { None } else { Some(total) }
 		})
 	}
 }

@@ -6,6 +6,14 @@ use scale_info::TypeInfo;
 use services::AssetIdT;
 use sp_std::vec::Vec;
 
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+pub enum AssetType {
+	/// This includes all lstTNT assets
+	Tnt,
+	/// This includes all EVM assets
+	Evm,
+}
+
 /// Represents different types of rewards a user can earn
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
 pub struct UserRewards<Balance, BlockNumber, AssetId: AssetIdT, MaxServiceRewards: Get<u32>> {

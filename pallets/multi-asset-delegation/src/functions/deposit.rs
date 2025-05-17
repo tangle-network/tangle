@@ -13,15 +13,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
 use crate::{Config, Delegators, Error, Pallet, types::*};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
 	sp_runtime::traits::AccountIdConversion,
-	traits::{Get, fungibles::Mutate, tokens::Preservation},
+	traits::{Currency, Get, fungibles::Mutate, tokens::Preservation},
 };
 use sp_core::H160;
+use sp_runtime::traits::Zero;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping},
 	traits::RewardsManager,
@@ -51,17 +51,30 @@ impl<T: Config> Pallet<T> {
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		match asset {
-			Asset::Custom(asset) => {
-				T::Fungibles::transfer(
-					asset,
-					sender,
-					&Self::pallet_account(),
-					amount,
-					Preservation::Expendable,
-				)?;
+			Asset::Custom(asset_id) => {
+				if asset_id == Zero::zero() {
+					// Use native currency transfer
+					T::Currency::transfer(
+						sender,
+						&Self::pallet_account(),
+						amount,
+						frame_support::traits::ExistenceRequirement::AllowDeath,
+					)?;
+				} else {
+					// Use multi-asset transfer (fungibles)
+					T::Fungibles::transfer(
+						asset_id,
+						sender,
+						&Self::pallet_account(),
+						amount,
+						Preservation::Expendable,
+					)?;
+				}
 			},
 			Asset::Erc20(_) => {
-				// Handled by the Precompile
+				// ERC20 is expected to be handled by the precompile,
+				// you might want to return an error if called directly.
+				// For now, just silently accept.
 			},
 		}
 		Ok(())
@@ -211,14 +224,28 @@ impl<T: Config> Pallet<T> {
 			metadata.withdraw_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
 					let transfer_success = match request.asset {
-						Asset::Custom(asset) => T::Fungibles::transfer(
-							asset,
-							&Self::pallet_account(),
-							&who,
-							request.amount,
-							Preservation::Expendable,
-						)
-						.is_ok(),
+						Asset::Custom(asset_id) => {
+							if asset_id == Zero::zero() {
+								// Use native currency transfer
+								T::Currency::transfer(
+									&Self::pallet_account(),
+									&who,
+									request.amount,
+									frame_support::traits::ExistenceRequirement::AllowDeath,
+								)
+								.is_ok()
+							} else {
+								T::Fungibles::transfer(
+									asset_id,
+									&Self::pallet_account(),
+									&who,
+									request.amount,
+									Preservation::Expendable,
+								)
+								.is_ok()
+							}
+						},
+
 						Asset::Erc20(_) => {
 							// Handled by the Precompile, always return true
 							//

@@ -94,7 +94,7 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::{Perbill, traits::AccountIdConversion};
-	use tangle_primitives::rewards::LockMultiplier;
+	use tangle_primitives::rewards::{AssetType, LockMultiplier};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -128,6 +128,7 @@ pub mod pallet {
 				BalanceOf<Self>,
 				BlockNumberFor<Self>,
 				Self::AssetId,
+				AssetType,
 			>;
 
 		/// The origin that can manage reward assets

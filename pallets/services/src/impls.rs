@@ -94,6 +94,7 @@ impl<T: crate::Config, Balance: Default>
 		Balance,
 		BlockNumberFor<T>,
 		T::AssetId,
+		AssetType,
 	> for BenchmarkingOperatorDelegationManager<T, Balance>
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
@@ -129,6 +130,13 @@ impl<T: crate::Config, Balance: Default>
 		_who: &T::AccountId,
 		_asset: Asset<T::AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumberFor<T>>> {
+		None
+	}
+
+	fn get_user_deposit_by_asset_type(
+		_who: &T::AccountId,
+		_asset_type: tangle_primitives::rewards::AssetType,
+	) -> Option<Balance> {
 		None
 	}
 }

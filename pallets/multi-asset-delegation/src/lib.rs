@@ -809,10 +809,11 @@ pub mod pallet {
 					evm_account_id
 				},
 			};
-			// ensure the caps have not been exceeded
-			let remaining = T::RewardsManager::get_asset_deposit_cap_remaining(asset)
-				.map_err(|_| Error::<T>::AssetConfigNotFound)?;
-			ensure!(amount <= remaining, Error::<T>::DepositExceedsCapForAsset);
+			// ensure the caps have not been exceeded if the asset is part of a reward vault
+			if let Ok(remaining) = T::RewardsManager::get_asset_deposit_cap_remaining(asset) {
+				ensure!(amount <= remaining, Error::<T>::DepositExceedsCapForAsset);
+			}
+
 			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset });
 			Ok(())
