@@ -150,6 +150,55 @@ fn setup_delegation(delegator: AccountId, operator: AccountId, amount: Balance) 
 	));
 }
 
+fn setup_delegation_with_asset(
+    delegator: AccountId,
+    operator: AccountId,
+    amount: Balance,
+    asset_id: AssetId,
+) {
+    let asset = tangle_primitives::services::Asset::Custom(asset_id);
+
+    let min_bond = <Runtime as pallet_multi_asset_delegation::Config>::MinOperatorBondAmount::get();
+    Balances::make_free_balance_be(&ALICE, min_bond * 10 + amount * 10);
+
+    Balances::make_free_balance_be(&MultiAssetDelegation::<Runtime>::pallet_account(), 10_000);
+
+    Balances::make_free_balance_be(&delegator, 100_000);
+    create_and_mint_tokens(asset_id, delegator.clone(), amount);
+
+    assert_ok!(Balances::transfer_allow_death(
+        RawOrigin::Signed(ALICE).into(),
+        operator.clone(),
+        min_bond * 2
+    ));
+    assert_ok!(MultiAssetDelegation::<Runtime>::join_operators(
+        RuntimeOrigin::signed(operator.clone()),
+        min_bond
+    ));
+
+    assert_ok!(Balances::transfer_allow_death(
+        RawOrigin::Signed(ALICE).into(),
+        delegator.clone(),
+        amount * 2
+    ));
+
+    assert_ok!(MultiAssetDelegation::<Runtime>::deposit(
+        RuntimeOrigin::signed(delegator.clone()),
+        asset,
+        amount,
+        None,
+        None,
+    ));
+
+    assert_ok!(MultiAssetDelegation::<Runtime>::delegate(
+        RuntimeOrigin::signed(delegator),
+        operator,
+        asset,
+        amount,
+        Default::default()
+    ));
+}
+
 #[test]
 fn genesis_config_works() {
 	new_test_ext(vec![]).execute_with(|| {
@@ -316,14 +365,14 @@ fn claim_basic_tier2() {
 
 #[test]
 fn claim_basic_tier3() {
-	new_test_ext(vec![]).execute_with(|| {
-		let user = DAVE;
-		let operator = EVE;
-		let dave_id_str = b"dave_tier3";
-		let bounded_id: OffchainAccountIdOf<Runtime> = dave_id_str.to_vec().try_into().unwrap();
-		let stake_amount = 15000;
-		let rate = 15;
-		setup_delegation(user.clone(), operator, stake_amount);
+        new_test_ext(vec![]).execute_with(|| {
+                let user = DAVE;
+                let operator = EVE;
+                let dave_id_str = b"dave_tier3";
+                let bounded_id: OffchainAccountIdOf<Runtime> = dave_id_str.to_vec().try_into().unwrap();
+                let stake_amount = 15000;
+                let rate = 15;
+                setup_delegation(user.clone(), operator, stake_amount);
 
 		run_to_block(100);
 		let max_claimable = get_max_claimable(user.clone());
@@ -340,8 +389,39 @@ fn claim_basic_tier3() {
 			}
 			.into(),
 		);
-		assert_eq!(last_reward_update(user), 100);
-	});
+                assert_eq!(last_reward_update(user), 100);
+        });
+}
+
+#[test]
+fn claim_with_custom_asset_behaves_like_tnt() {
+        new_test_ext(vec![]).execute_with(|| {
+                let user = DAVE;
+                let operator = EVE;
+                let lst_asset_id: AssetId = 2000;
+                let id_str = b"dave_lst";
+                let bounded_id: OffchainAccountIdOf<Runtime> = id_str.to_vec().try_into().unwrap();
+                let stake_amount = 1200;
+                let rate = 5;
+
+                setup_delegation_with_asset(user.clone(), operator, stake_amount, lst_asset_id);
+
+                run_to_block(100);
+                let max_claimable = get_max_claimable(user.clone());
+                let expected = 100 * rate;
+                assert_eq!(max_claimable, expected);
+
+                assert_ok!(claim_credits(user.clone(), max_claimable, id_str));
+                System::assert_last_event(
+                        Event::CreditsClaimed {
+                                who: user.clone(),
+                                amount_claimed: max_claimable,
+                                offchain_account_id: bounded_id,
+                        }
+                        .into(),
+                );
+                assert_eq!(last_reward_update(user), 100);
+        });
 }
 
 #[test]
