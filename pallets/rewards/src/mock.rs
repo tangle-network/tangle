@@ -36,7 +36,10 @@ use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
 };
-use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
+use tangle_primitives::{
+	services::Asset,
+	types::rewards::{AssetType, UserDepositWithLocks},
+};
 
 use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
@@ -279,8 +282,14 @@ pub struct MockDelegationData {
 }
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId>
-	for MockDelegationManager
+impl
+	tangle_primitives::traits::MultiAssetDelegationInfo<
+		AccountId,
+		Balance,
+		BlockNumber,
+		AssetId,
+		AssetType,
+	> for MockDelegationManager
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
@@ -319,6 +328,10 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
 			delegation_info.borrow().deposits.get(&(who.clone(), asset)).cloned()
 		})
+	}
+
+	fn get_user_deposit_by_asset_type(_who: &AccountId, _asset_type: AssetType) -> Option<Balance> {
+		None
 	}
 }
 

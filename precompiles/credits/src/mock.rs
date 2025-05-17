@@ -39,7 +39,10 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 };
 use std::{collections::BTreeMap, sync::Arc};
-use tangle_primitives::{rewards::UserDepositWithLocks, services::Asset};
+use tangle_primitives::{
+	rewards::{AssetType, UserDepositWithLocks},
+	services::Asset,
+};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -358,7 +361,8 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 pub type AssetId = u128;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId>
+impl
+	tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId, AssetType>
 	for MockDelegationManager
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
@@ -395,6 +399,10 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 		_who: &AccountId,
 		_asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, u64>> {
+		None
+	}
+
+	fn get_user_deposit_by_asset_type(_who: &AccountId, _asset_type: AssetType) -> Option<Balance> {
 		None
 	}
 }
