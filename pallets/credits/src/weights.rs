@@ -44,8 +44,10 @@ use sp_std::marker::PhantomData;
 pub trait WeightInfo {
 	/// Weight for the `burn` extrinsic
 	fn burn() -> Weight;
-	/// Weight for the `claim_credits` extrinsic
-	fn claim_credits() -> Weight;
+        /// Weight for the `claim_credits` extrinsic
+        fn claim_credits() -> Weight;
+        /// Weight for the `set_stake_tiers` extrinsic
+        fn set_stake_tiers() -> Weight;
 }
 
 /// Weights for credits pallet using the Substrate node and recommended hardware.
@@ -75,28 +77,44 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: `Credits::CreditsClaimed` (`max_values`: None, `max_size`: Some(128), mode: `Measured`)
 	/// Storage: `Credits::ClaimedCredits` (r:1 w:1)
 	/// Proof: `Credits::ClaimedCredits` (`max_values`: None, `max_size`: Some(128), mode: `Measured`)
-	fn claim_credits() -> Weight {
-		// Proof Size summary in bytes:
-		//  Measured:  `640`
-		//  Estimated: `1280`
-		// Minimum execution time: 35_000 nanoseconds.
-		Weight::from_parts(36_000_000, 1280)
-			.saturating_add(T::DbWeight::get().reads(4_u64))
-			.saturating_add(T::DbWeight::get().writes(2_u64))
-	}
+        fn claim_credits() -> Weight {
+                // Proof Size summary in bytes:
+                //  Measured:  `640`
+                //  Estimated: `1280`
+                // Minimum execution time: 35_000 nanoseconds.
+                Weight::from_parts(36_000_000, 1280)
+                        .saturating_add(T::DbWeight::get().reads(4_u64))
+                        .saturating_add(T::DbWeight::get().writes(2_u64))
+        }
+
+        /// Storage: `Credits::StakeTiers` (r:0 w:1)
+        /// Proof: `Credits::StakeTiers` (`max_values`: None, `max_size`: Some(256), mode: `Measured`)
+        fn set_stake_tiers() -> Weight {
+                // Proof Size summary in bytes:
+                //  Measured:  `0`
+                //  Estimated: `0`
+                // Minimum execution time: 5_000_000 picoseconds.
+                Weight::from_parts(5_000_000, 0)
+                        .saturating_add(T::DbWeight::get().writes(1_u64))
+        }
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn burn() -> Weight {
-		Weight::from_parts(26_000_000, 0)
-			.saturating_add(RocksDbWeight::get().reads(3_u64))
-			.saturating_add(RocksDbWeight::get().writes(2_u64))
-	}
+        fn burn() -> Weight {
+                Weight::from_parts(26_000_000, 0)
+                        .saturating_add(RocksDbWeight::get().reads(3_u64))
+                        .saturating_add(RocksDbWeight::get().writes(2_u64))
+        }
 
-	fn claim_credits() -> Weight {
-		Weight::from_parts(36_000_000, 0)
-			.saturating_add(RocksDbWeight::get().reads(4_u64))
-			.saturating_add(RocksDbWeight::get().writes(2_u64))
-	}
+        fn claim_credits() -> Weight {
+                Weight::from_parts(36_000_000, 0)
+                        .saturating_add(RocksDbWeight::get().reads(4_u64))
+                        .saturating_add(RocksDbWeight::get().writes(2_u64))
+        }
+
+        fn set_stake_tiers() -> Weight {
+                Weight::from_parts(5_000_000, 0)
+                        .saturating_add(RocksDbWeight::get().writes(1_u64))
+        }
 }
