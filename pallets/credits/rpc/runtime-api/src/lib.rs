@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Runtime API definition for rewards pallet.
+//! Runtime API definition for the credits pallet.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::type_complexity)]
