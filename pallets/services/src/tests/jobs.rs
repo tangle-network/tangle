@@ -465,11 +465,11 @@ fn test_invalid_result_formats() {
 			Services::submit_result(RuntimeOrigin::signed(bob.clone()), 0, 0, bounded_vec![
 				Field::String("invalid".try_into().unwrap())
 			],),
-			Error::<Runtime>::TypeCheck(TypeCheckError::ArgumentTypeMismatch {
-				index: 0,
-				expected: FieldType::List(Box::new(FieldType::String)),
-				actual: FieldType::String,
-			}),
+                        Error::<Runtime>::TypeCheck(TypeCheckError::ResultTypeMismatch {
+                                index: 0,
+                                expected: FieldType::List(Box::new(FieldType::String)),
+                                actual: FieldType::String,
+                        }),
 		);
 	});
 }

@@ -133,15 +133,15 @@ pub enum JobResultVerifier {
 
 /// Type checks the supplied arguments against the parameters.
 pub fn type_checker<C: Constraints, AccountId: Encode + Clone>(
-	params: &[FieldType],
-	args: &[Field<C, AccountId>],
+        params: &[FieldType],
+        args: &[Field<C, AccountId>],
 ) -> Result<(), TypeCheckError> {
-	if params.len() != args.len() {
-		return Err(TypeCheckError::NotEnoughArguments {
-			expected: params.len() as u8,
-			actual: args.len() as u8,
-		});
-	}
+        if params.len() != args.len() {
+                return Err(TypeCheckError::NotEnoughArguments {
+                        expected: params.len() as u8,
+                        actual: args.len() as u8,
+                });
+        }
 	for i in 0..args.len() {
 		let arg = &args[i];
 		let expected = &params[i];
@@ -156,6 +156,31 @@ pub fn type_checker<C: Constraints, AccountId: Encode + Clone>(
 	Ok(())
 }
 
+/// Type checks result fields against the expected result types.
+pub fn result_type_checker<C: Constraints, AccountId: Encode + Clone>(
+        result: &[FieldType],
+        fields: &[Field<C, AccountId>],
+) -> Result<(), TypeCheckError> {
+        if result.len() != fields.len() {
+                return Err(TypeCheckError::NotEnoughArguments {
+                        expected: result.len() as u8,
+                        actual: fields.len() as u8,
+                });
+        }
+        for i in 0..fields.len() {
+                let field = &fields[i];
+                let expected = &result[i];
+                if field != expected {
+                        return Err(TypeCheckError::ResultTypeMismatch {
+                                index: i as u8,
+                                expected: expected.clone(),
+                                actual: field.clone().into(),
+                        });
+                }
+        }
+        Ok(())
+}
+
 impl<C: Constraints, AccountId: Encode + Clone> JobCall<C, AccountId> {
 	/// Check if the supplied arguments match the job definition types.
 	pub fn type_check(&self, job_def: &JobDefinition<C>) -> Result<(), TypeCheckError> {
@@ -164,8 +189,8 @@ impl<C: Constraints, AccountId: Encode + Clone> JobCall<C, AccountId> {
 }
 
 impl<C: Constraints, AccountId: Encode + Clone> JobCallResult<C, AccountId> {
-	/// Check if the supplied result match the job definition types.
-	pub fn type_check(&self, job_def: &JobDefinition<C>) -> Result<(), TypeCheckError> {
-		type_checker(&job_def.result, &self.result)
-	}
+        /// Check if the supplied result match the job definition types.
+        pub fn type_check(&self, job_def: &JobDefinition<C>) -> Result<(), TypeCheckError> {
+                result_type_checker(&job_def.result, &self.result)
+        }
 }
