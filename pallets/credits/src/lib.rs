@@ -146,6 +146,9 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxStakeTiers: Get<u32>;
 
+		/// Type for the origin that is allowed to update stake tiers.
+		type ForceOrigin: frame_support::traits::EnsureOrigin<Self::RuntimeOrigin>;
+
 		/// The weight information for the pallet.
 		type WeightInfo: WeightInfo;
 	}
@@ -203,20 +206,22 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// TNT tokens were successfully burned, granting potential off-chain credits.
-		/// \[who, tnt_burned, credits_granted]
+		/// Credits granted = amount_burned * conversion_rate.
+		/// [who, amount_burned, credits_granted, offchain_account_id]
 		CreditsGrantedFromBurn {
 			who: T::AccountId,
 			tnt_burned: BalanceOf<T>,
 			credits_granted: BalanceOf<T>,
 		},
-		/// A user successfully claimed credits, emitting details for off-chain processing.
-		/// The amount is the value requested by the user, verified against the claimable window.
-		/// \[who, amount_claimed, offchain_account_id]
+		/// Credits were claimed from staking rewards, within the allowed window.
+		/// [who, amount_claimed, offchain_account_id]
 		CreditsClaimed {
 			who: T::AccountId,
 			amount_claimed: BalanceOf<T>,
 			offchain_account_id: OffchainAccountIdOf<T>,
 		},
+		/// Stake tiers were updated.
+		StakeTiersUpdated,
 	}
 
 	// --- Errors ---
@@ -226,16 +231,20 @@ pub mod pallet {
 		InsufficientTntBalance,
 		/// The requested claim amount exceeds the maximum calculated within the allowed window.
 		ClaimAmountExceedsWindowAllowance,
-		/// The provided off-chain account ID exceeds the maximum allowed length.
-		OffchainAccountIdTooLong,
-		/// An arithmetic operation resulted in an overflow.
-		Overflow,
-		/// No staking tiers are configured in the runtime.
-		NoStakeTiersConfigured,
+		/// Invalid claim ID (e.g., too long).
+		InvalidClaimId,
+		/// No stake tiers are configured or the stake amount is below the lowest tier threshold.
+		NoValidTier,
 		/// Amount specified for burn or claim must be greater than zero.
 		AmountZero,
 		/// Cannot transfer burned tokens to target account (feature not fully implemented).
 		BurnTransferNotImplemented,
+		/// The stake tiers are not properly sorted by threshold.
+		StakeTiersNotSorted,
+		/// There are no stake tiers provided for the update.
+		EmptyStakeTiers,
+		/// Amount overflowed.
+		Overflow,
 	}
 
 	#[pallet::call]
@@ -280,7 +289,7 @@ pub mod pallet {
 			ensure!(amount_to_claim > Zero::zero(), Error::<T>::AmountZero);
 			ensure!(
 				offchain_account_id.len() <= T::MaxOffchainAccountIdLength::get() as usize,
-				Error::<T>::OffchainAccountIdTooLong
+				Error::<T>::InvalidClaimId
 			);
 
 			let current_block = frame_system::Pallet::<T>::block_number();
@@ -301,6 +310,50 @@ pub mod pallet {
 				amount_claimed: amount_to_claim,
 				offchain_account_id,
 			});
+			Ok(())
+		}
+
+		/// Update the stake tiers. This function can only be called by the configured ForceOrigin.
+		/// Stake tiers must be provided in ascending order by threshold.
+		///
+		/// Parameters:
+		/// - `origin`: Must be the ForceOrigin
+		/// - `new_tiers`: A vector of StakeTier structs representing the new tiers configuration
+		///
+		/// Emits `StakeTiersUpdated` on success.
+		///
+		/// Weight: O(n) where n is the number of tiers
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::burn())]
+		pub fn set_stake_tiers(
+			origin: OriginFor<T>,
+			new_tiers: Vec<StakeTier<BalanceOf<T>>>,
+		) -> DispatchResult {
+			// Ensure the call is from the configured ForceOrigin
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Check that we have at least one tier
+			ensure!(!new_tiers.is_empty(), Error::<T>::EmptyStakeTiers);
+
+			// Ensure tiers are properly sorted by threshold in ascending order
+			for i in 1..new_tiers.len() {
+				ensure!(
+					new_tiers[i - 1].threshold <= new_tiers[i].threshold,
+					Error::<T>::StakeTiersNotSorted
+				);
+			}
+
+			// Try to create a bounded vector
+			let bounded_tiers =
+				BoundedVec::<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>::try_from(new_tiers)
+					.map_err(|_| Error::<T>::EmptyStakeTiers)?; // Reusing error since we don't have a specific one for exceeding max tiers
+
+			// Update storage
+			StoredStakeTiers::<T>::set(bounded_tiers);
+
+			// Emit event
+			Self::deposit_event(Event::<T>::StakeTiersUpdated);
+
 			Ok(())
 		}
 	}
