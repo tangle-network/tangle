@@ -324,8 +324,8 @@ pub mod pallet {
 		///
 		/// Weight: O(n) where n is the number of tiers
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::burn())]
-		pub fn set_stake_tiers(
+               #[pallet::weight(T::WeightInfo::set_stake_tiers())]
+               pub fn set_stake_tiers(
 			origin: OriginFor<T>,
 			new_tiers: Vec<StakeTier<BalanceOf<T>>>,
 		) -> DispatchResult {
