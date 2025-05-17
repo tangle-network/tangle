@@ -224,14 +224,28 @@ impl<T: Config> Pallet<T> {
 			metadata.withdraw_requests.retain(|request| {
 				if current_round >= delay + request.requested_round {
 					let transfer_success = match request.asset {
-						Asset::Custom(asset) => T::Fungibles::transfer(
-							asset,
-							&Self::pallet_account(),
-							&who,
-							request.amount,
-							Preservation::Expendable,
-						)
-						.is_ok(),
+						Asset::Custom(asset_id) => {
+							if asset_id == Zero::zero() {
+								// Use native currency transfer
+								T::Currency::transfer(
+									&Self::pallet_account(),
+									&who,
+									request.amount,
+									frame_support::traits::ExistenceRequirement::AllowDeath,
+								)
+								.is_ok()
+							} else {
+								T::Fungibles::transfer(
+									asset_id,
+									&Self::pallet_account(),
+									&who,
+									request.amount,
+									Preservation::Expendable,
+								)
+								.is_ok()
+							}
+						},
+
 						Asset::Erc20(_) => {
 							// Handled by the Precompile, always return true
 							//
