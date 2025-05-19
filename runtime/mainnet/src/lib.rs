@@ -1397,6 +1397,7 @@ impl pallet_credits::Config for Runtime {
 	type CreditBurnRecipient = CreditBurnRecipient;
 	type MaxOffchainAccountIdLength = ConstU32<100>;
 	type MaxStakeTiers = MaxStakeTiers;
+	type ForceOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 

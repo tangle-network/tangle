@@ -199,6 +199,7 @@ pub mod module {
 				BalanceOf<Self>,
 				BlockNumberFor<Self>,
 				Self::AssetId,
+				AssetType,
 			>;
 
 		/// Manager for slashing that dispatches slash operations to
