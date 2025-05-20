@@ -3,11 +3,12 @@
 ## Overview
 
 The Cloud Credits pallet provides an on-chain mechanism for tracking potential usage credits
-earned through staking TNT or burning TNT. It is designed to work with an off-chain system
-that listens to events to manage actual user credit balances.
+earned through staking TNT or liquid staked TNT (pool tokens) or by burning TNT. It is
+designed to work with an off-chain system that listens to events to manage actual user credit
+balances.
 
 It integrates with a staking system (like `pallet-multi-asset-delegation`) to reward
-users who stake TNT tokens by tracking passively accrued potential credits within a defined time window.
+users who stake TNT or its liquid staked pool tokens by tracking passively accrued potential credits within a defined time window.
 
 ### Key Features:
 
@@ -31,7 +32,8 @@ users who stake TNT tokens by tracking passively accrued potential credits withi
 This pallet relies on:
 
 -   An implementation of `tangle_primitives::traits::MultiAssetDelegationInfo` (`Config::MultiAssetDelegationInfo`)
-    to query the active TNT stake for users.
+    to query the active TNT stake for users. The pallet calls `get_user_deposit_by_asset_type`
+    with `AssetType::Tnt`, which sums both direct TNT deposits and any liquid staked TNT pool tokens.
 -   An implementation of `frame_support::traits::Currency` (`Config::Currency`) to handle
     TNT token balance checks and burning.
 -   `frame_system` for basic system types and block numbers.
