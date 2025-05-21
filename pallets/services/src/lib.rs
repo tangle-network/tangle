@@ -32,6 +32,7 @@ use sp_runtime::{RuntimeAppPublic, SaturatedConversion, traits::Zero};
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 use tangle_primitives::{
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
+	rewards::AssetType,
 	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
 	traits::{MultiAssetDelegationInfo, SlashManager},
 };
@@ -197,6 +198,7 @@ pub mod module {
 				BalanceOf<Self>,
 				BlockNumberFor<Self>,
 				Self::AssetId,
+				AssetType,
 			>;
 
 		/// Manager for slashing that dispatches slash operations to

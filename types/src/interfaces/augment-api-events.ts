@@ -365,16 +365,20 @@ declare module '@polkadot/api-base/types/events' {
     };
     credits: {
       /**
-       * A user successfully claimed credits, emitting details for off-chain processing.
-       * The amount is the value requested by the user, verified against the claimable window.
-       * \[who, amount_claimed, offchain_account_id]
+       * Credits were claimed from staking rewards, within the allowed window.
+       * [who, amount_claimed, offchain_account_id]
        **/
       CreditsClaimed: AugmentedEvent<ApiType, [who: AccountId32, amountClaimed: u128, offchainAccountId: Bytes], { who: AccountId32, amountClaimed: u128, offchainAccountId: Bytes }>;
       /**
        * TNT tokens were successfully burned, granting potential off-chain credits.
-       * \[who, tnt_burned, credits_granted]
+       * Credits granted = amount_burned * conversion_rate.
+       * [who, amount_burned, credits_granted, offchain_account_id]
        **/
       CreditsGrantedFromBurn: AugmentedEvent<ApiType, [who: AccountId32, tntBurned: u128, creditsGranted: u128], { who: AccountId32, tntBurned: u128, creditsGranted: u128 }>;
+      /**
+       * Stake tiers were updated.
+       **/
+      StakeTiersUpdated: AugmentedEvent<ApiType, []>;
       /**
        * Generic event
        **/

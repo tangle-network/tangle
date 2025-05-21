@@ -178,7 +178,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1304, // v1.3.4
+	spec_version: 1306, // v1.3.6
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1282,6 +1282,7 @@ impl pallet_credits::Config for Runtime {
 	type CreditBurnRecipient = CreditBurnRecipient;
 	type MaxOffchainAccountIdLength = ConstU32<100>;
 	type MaxStakeTiers = MaxStakeTiers;
+	type ForceOrigin = EnsureRoot<AccountId>;
 	type WeightInfo = ();
 }
 
