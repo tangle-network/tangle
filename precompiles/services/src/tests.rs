@@ -67,6 +67,9 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 			MembershipModelType::Dynamic,
 		],
 		recommended_resources: Default::default(),
+		heartbeat_interval: Default::default(),
+		heartbeat_threshold: Default::default(),
+		slashing_window: Default::default(),
 	}
 }
 
