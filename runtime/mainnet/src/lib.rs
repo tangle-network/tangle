@@ -1375,10 +1375,6 @@ impl pallet_rewards::Config for Runtime {
 parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const TntAssetId: AssetId = 0;
-
-	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxStakeTiers: u32 = 10;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -1390,7 +1386,6 @@ impl pallet_credits::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type AssetId = AssetId;
-	type TntAssetId = TntAssetId;
 	type MultiAssetDelegationInfo = MultiAssetDelegation;
 	type BurnConversionRate = ConstU128<1000>;
 	type ClaimWindowBlocks = ConstU64<1000>;
