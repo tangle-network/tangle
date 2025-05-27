@@ -165,8 +165,8 @@ pub trait RewardRecorder<AccountId, ServiceId, Balance> {
 /// A no-operation implementation of `RewardRecorder`.
 /// This can be used in runtime configurations where reward recording is not needed
 /// or handled by a different mechanism.
-impl<AccountId, ServiceId, Balance, PM> RewardRecorder<AccountId, ServiceId, Balance> for () {
-    type PricingModel = PM;
+impl<AccountId, ServiceId, Balance> RewardRecorder<AccountId, ServiceId, Balance> for () {
+    type PricingModel = ();
 
     fn record_reward(
         _operator: &AccountId,
@@ -176,17 +176,4 @@ impl<AccountId, ServiceId, Balance, PM> RewardRecorder<AccountId, ServiceId, Bal
     ) -> DispatchResult {
         Ok(())
     }
-}
-
-/// Trait for recording rewards to be claimed later.
-///
-/// This allows decoupling the reward calculation (e.g., in the Services pallet)
-/// from the actual payout mechanism (handled by the Rewards pallet).
-pub trait RewardRecorder<AccountId, ServiceId, Balance, BlockNumber> {
-	fn record_reward(
-		operator: &AccountId,
-		service_id: ServiceId,
-		amount: Balance,
-		model: &PricingModel<BlockNumber, Balance>,
-	);
 }
