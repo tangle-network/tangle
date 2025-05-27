@@ -202,4 +202,6 @@ impl pallet_services::Config for Runtime {
 		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
 	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
+	type RewardRecorder = Rewards;
+	type RewardsManager = Rewards;
 }

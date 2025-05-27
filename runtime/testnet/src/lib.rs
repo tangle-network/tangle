@@ -1255,6 +1255,7 @@ impl pallet_rewards::Config for Runtime {
 	type MaxVaultNameLength = MaxVaultNameLen;
 	type MaxVaultLogoLength = MaxVaultLogoLen;
 	type VaultMetadataOrigin = EnsureRootOrHalfCouncil;
+	type MaxPendingRewardsPerOperator = ConstU32<100>;
 	type WeightInfo = ();
 }
 

@@ -159,6 +159,8 @@ impl pallet_services::Config for Runtime {
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
 	type Fungibles = Assets;
+	type RewardRecorder = Rewards;
+	type RewardsManager = Rewards;
 	type PalletEvmAccount = ServicesPalletEvmAccount;
 	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;
