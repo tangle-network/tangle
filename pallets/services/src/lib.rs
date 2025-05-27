@@ -849,13 +849,29 @@ pub mod module {
 			// Validate and store the blueprint
 			let blueprint_id = NextBlueprintId::<T>::get();
 
+			let membership_model_type = match membership_model {
+				MembershipModel::Fixed { .. } => MembershipModelType::Fixed,
+				MembershipModel::Dynamic { .. } => MembershipModelType::Dynamic,
+			};
+
 			let blueprint = ServiceBlueprint {
-				metadata,
+				metadata: ServiceMetadata {
+					name: BoundedString(metadata.clone()),
+					description: Some(BoundedString(metadata)),
+					author: None,
+					category: None,
+					code_repository: None,
+					logo: None,
+					website: None,
+					license: None,
+				},
 				jobs: typedef.jobs,
-				registration_hook: typedef.registration_hook,
-				request_hook: typedef.request_hook,
+				registration_params: typedef.registration_params,
+				request_params: typedef.request_params,
+				manager: typedef.manager,
+				master_manager_revision: typedef.master_manager_revision,
 				gadget: typedef.gadget,
-				supported_membership_models: vec![membership_model.clone().into()].try_into().unwrap(),
+				supported_membership_models: vec![membership_model_type].try_into().unwrap(),
 			};
 
 			let (allowed, _weight) =
