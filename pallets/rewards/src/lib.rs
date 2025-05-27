@@ -82,6 +82,7 @@ pub mod migrations;
 
 use sp_std::vec::Vec;
 use tangle_primitives::BlueprintId;
+use tangle_primitives::services::types::{ServiceId, PricingModel};
 
 /// The pallet's account ID.
 #[frame_support::pallet]
@@ -90,10 +91,10 @@ pub mod pallet {
 	use frame_support::{
 		PalletId,
 		pallet_prelude::*,
-		traits::{Currency, LockableCurrency, ReservableCurrency},
+		traits::{Currency, LockableCurrency, ReservableCurrency, ExistenceRequirement},
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::{Perbill, traits::AccountIdConversion};
+	use sp_runtime::{Perbill, traits::{AccountIdConversion, Zero, Saturating}};
 	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
@@ -327,10 +328,10 @@ pub mod pallet {
 		},
 		/// Metadata for a vault was removed.
 		VaultMetadataRemoved { vault_id: T::VaultId },
-		/// An operator has claimed their rewards.
-		RewardsClaimed { operator: T::AccountId, amount: BalanceOf<T> },
-		/// A reward has been recorded for an operator.
+		/// Reward recorded
 		RewardRecorded { operator: T::AccountId, service_id: ServiceId, amount: BalanceOf<T> },
+		/// Operator rewards claimed
+		OperatorRewardsClaimed { operator: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -401,18 +402,6 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Claim rewards for a specific asset and reward type
-		#[pallet::call_index(1)]
-		#[pallet::weight(<T as Config>::WeightInfo::claim_rewards())]
-		pub fn claim_rewards(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-
-			// calculate and payout rewards
-			Self::calculate_and_payout_rewards(&who, asset)?;
-
-			Ok(())
-		}
-
 		/// Claim rewards for another account
 		///
 		/// The dispatch origin must be signed.
@@ -683,7 +672,7 @@ pub mod pallet {
 			).map_err(|_| Error::<T>::TransferFailed)?;
 
 			// Emit an event.
-			Self::deposit_event(Event::RewardsClaimed { operator, amount: total_reward });
+			Self::deposit_event(Event::OperatorRewardsClaimed { operator, amount: total_reward });
 
 			Ok(())
 		}
@@ -696,15 +685,17 @@ pub mod pallet {
 		}
 	}
 
-	impl<T: Config> tangle_primitives::traits::RewardRecorder<T::AccountId, ServiceId, BalanceOf<T>, BlockNumberFor<T>> for Pallet<T> {
+	impl<T: Config> tangle_primitives::traits::RewardRecorder<T::AccountId, ServiceId, BalanceOf<T>> for Pallet<T> {
+		type PricingModel = PricingModel<BlockNumberFor<T>, BalanceOf<T>>;
+
 		fn record_reward(
 			operator: &T::AccountId,
 			service_id: ServiceId,
 			amount: BalanceOf<T>,
-			_model: &PricingModel<BlockNumberFor<T>, BalanceOf<T>>, // Model might be used later
-		) {
+			_model: &Self::PricingModel, // Model might be used later
+		) -> DispatchResult {
 			if amount == BalanceOf::<T>::zero() {
-				return; // No need to record zero rewards
+				return Ok(()); // No need to record zero rewards
 			}
 
 			// Attempt to append the new reward.
@@ -717,6 +708,7 @@ pub mod pallet {
 				Ok(_) => {
 					// Emit event only if successful
 					Self::deposit_event(Event::RewardRecorded { operator: operator.clone(), service_id, amount });
+					Ok(())
 				},
 				Err(_) => {
 					// Log an error or handle the case where the operator has too many pending rewards.
@@ -726,6 +718,7 @@ pub mod pallet {
 						"Failed to record reward for operator {:?}: Too many pending rewards.",
 						operator
 					);
+					Ok(())
 				}
 			}
 		}
