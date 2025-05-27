@@ -75,7 +75,7 @@ benchmarks! {
 		};
 		let asset = Asset::Custom(1_u32.into());
 		UserServiceReward::<T>::insert(caller.clone(), asset, deposit);
-	}: _(RawOrigin::Signed(caller.clone()), asset)
+	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
 		assert!(UserClaimedReward::<T>::contains_key(&caller, vault_id));
 	}

@@ -386,6 +386,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       StakeTiersNotSorted: AugmentedError<ApiType>;
       /**
+       * The stake tiers are too large to fit into the storage.
+       **/
+      StakeTiersOverflow: AugmentedError<ApiType>;
+      /**
        * Generic error
        **/
       [key: string]: AugmentedError<ApiType>;
@@ -1618,6 +1622,10 @@ declare module '@polkadot/api-base/types/errors' {
     };
     rewards: {
       /**
+       * An arithmetic operation resulted in an overflow.
+       **/
+      ArithmeticOverflow: AugmentedError<ApiType>;
+      /**
        * Asset already exists in a reward vault
        **/
       AssetAlreadyInVault: AugmentedError<ApiType>;
@@ -1698,6 +1706,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoRewardsAvailable: AugmentedError<ApiType>;
       /**
+       * Operator has no pending rewards to claim.
+       **/
+      NoRewardsToClaim: AugmentedError<ApiType>;
+      /**
        * Pot account not found
        **/
       PotAccountNotFound: AugmentedError<ApiType>;
@@ -1710,9 +1722,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       RewardConfigNotFound: AugmentedError<ApiType>;
       /**
+       * Operator has too many pending rewards.
+       **/
+      TooManyPendingRewards: AugmentedError<ApiType>;
+      /**
        * Total deposit is less than incentive cap
        **/
       TotalDepositLessThanIncentiveCap: AugmentedError<ApiType>;
+      /**
+       * Failed to transfer funds.
+       **/
+      TransferFailed: AugmentedError<ApiType>;
       /**
        * Vault already exists
        **/

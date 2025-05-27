@@ -1,5 +1,5 @@
-use crate::{Config, Error, Instances, Pallet};
-use frame_support::pallet_prelude::*;
+use crate::{BalanceOf, BlockNumberFor, Config, Error, Instances, Pallet};
+use frame_support::{dispatch::DispatchResult, ensure, pallet_prelude::*};
 use sp_std::vec::Vec;
 use tangle_primitives::services::{
 	AssetSecurityCommitment, MembershipModel, OperatorPreferences, ServiceBlueprint,
@@ -8,7 +8,7 @@ use tangle_primitives::services::{
 impl<T: Config> Pallet<T> {
 	/// Implementation of join_service extrinsic
 	pub(crate) fn do_join_service(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
@@ -78,7 +78,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Implementation of leave_service extrinsic
 	pub(crate) fn do_leave_service(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
