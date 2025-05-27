@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	BalanceOf, BlockNumberFor, Config, Event, Error, NextInstanceId, ServiceRequests, Instances, UserServices, StagingServicePayments, OperatorsProfile, ServiceStatus, Pallet,
+	BalanceOf, Config, Event, Error, NextInstanceId, ServiceRequests, Instances, UserServices, StagingServicePayments, OperatorsProfile, ServiceStatus, Pallet,
 };
 use frame_support::{
 	dispatch::DispatchResult,
@@ -23,6 +23,7 @@ use frame_support::{
 	traits::{fungibles::Mutate, ExistenceRequirement, tokens::Preservation, Currency},
 	BoundedVec,
 };
+use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::{Zero, Saturating, SaturatedConversion};
 use sp_std::vec::Vec;
 use tangle_primitives::{
