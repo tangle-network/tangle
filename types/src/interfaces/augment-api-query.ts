@@ -1181,6 +1181,11 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       decayStartPeriod: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
       /**
+       * Storage map from Operator AccountId to a list of pending rewards.
+       * Each reward entry is a tuple of (ServiceId, Amount).
+       **/
+      pendingOperatorRewards: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<Vec<ITuple<[u64, u128]>>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
        * Storage for the reward configuration, which includes APY, cap for assets
        **/
       rewardConfigStorage: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Option<PalletRewardsRewardConfigForAssetVault>>, [u32]> & QueryableStorageEntry<ApiType, [u32]>;
