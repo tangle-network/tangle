@@ -18,9 +18,13 @@
 
 use sp_runtime::traits::{Zero, Saturating, CheckedMul, CheckedAdd};
 use sp_std::ops::Div;
+use frame_support::pallet_prelude::*;
+use sp_runtime::DispatchResult;
+use sp_std::vec::Vec;
 
 use super::super::types::PricingModel;
 use super::types::{BillingCalculation, ServiceBillingState};
+use crate::services::types::ServiceId;
 
 /// Helper trait for billing operations
 pub trait BillingOperations<BlockNumber, Balance> {

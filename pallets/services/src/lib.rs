@@ -45,6 +45,7 @@ use tangle_primitives::{
 	traits::MultiAssetDelegationInfo,
 	traits::RewardRecorder as RewardRecorderTrait,
 };
+use sp_std::{collections::btree_set::BTreeSet, vec::Vec, vec, string::String};
 
 pub mod functions;
 mod impls;
@@ -854,10 +855,11 @@ pub mod module {
 				MembershipModel::Dynamic { .. } => MembershipModelType::Dynamic,
 			};
 
+			let metadata_string = String::from_utf8(metadata.clone().into_inner()).unwrap_or_default();
 			let blueprint = ServiceBlueprint {
 				metadata: ServiceMetadata {
-					name: BoundedString(metadata.clone()),
-					description: Some(BoundedString(metadata)),
+					name: BoundedString::try_from(metadata_string.clone()).unwrap(),
+					description: Some(BoundedString::try_from(metadata_string).unwrap()),
 					author: None,
 					category: None,
 					code_repository: None,

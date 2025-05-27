@@ -67,7 +67,14 @@ where
 			Decode::decode(&mut &blueprint_data[..])
 				.map_err(|_| revert("Invalid blueprint data"))?;
 
-		let call = pallet_services::Call::<Runtime>::create_blueprint { blueprint };
+		let call = pallet_services::Call::<Runtime>::create_blueprint {
+			metadata: blueprint.metadata.name.0.clone().try_into().unwrap(),
+			typedef: blueprint,
+			membership_model: MembershipModel::Fixed { min_operators: 1 },
+			security_requirements: vec![],
+			price_targets: None,
+			pricing_model: tangle_primitives::services::PricingModel::PayOnce { amount: 0u32.into() },
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
