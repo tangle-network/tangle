@@ -73,7 +73,7 @@ pub mod module {
 	use sp_core::H160;
 	use sp_runtime::{Percent, Saturating, traits::MaybeSerializeDeserialize};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
-	use tangle_primitives::services::*;
+	use tangle_primitives::{rewards::AssetType, services::*};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -1995,7 +1995,7 @@ pub mod module {
 			// Format: service_id + blueprint_id + metrics_data
 			let mut message = service_id.to_le_bytes().to_vec();
 			message.extend_from_slice(&blueprint_id.to_le_bytes());
-			message.extend_from_slice(&metrics_data);
+			message.extend_from_slice(&bounded_metrics_data);
 			let message_hash = sp_io::hashing::keccak_256(&message);
 
 			// Get the operator's preferences to get their public key

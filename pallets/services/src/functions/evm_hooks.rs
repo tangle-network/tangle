@@ -431,7 +431,7 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::View,
 		};
-		let mbsm = Self::mbsm_address_of(&blueprint)?;
+		let mbsm = Self::mbsm_address_of(blueprint)?;
 		let (info, _weight) = Self::dispatch_evm_call(
 			mbsm,
 			query.clone(),
@@ -500,7 +500,7 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::View,
 		};
-		let mbsm = Self::mbsm_address_of(&blueprint)?;
+		let mbsm = Self::mbsm_address_of(blueprint)?;
 		let (info, _weight) = Self::dispatch_evm_call(
 			mbsm,
 			query.clone(),
@@ -572,7 +572,7 @@ impl<T: Config> Pallet<T> {
 			constant: None,
 			state_mutability: StateMutability::View,
 		};
-		let mbsm = Self::mbsm_address_of(&blueprint)?;
+		let mbsm = Self::mbsm_address_of(blueprint)?;
 		let (info, _weight) = Self::dispatch_evm_call(
 			mbsm,
 			query.clone(),
@@ -1645,7 +1645,7 @@ impl<T: Config> Pallet<T> {
 	/// * `blueprint_id` - The ID of the blueprint
 	/// * `service_id` - The ID of the service
 	/// * `operator` - The account ID of the operator being slashed
-	/// * `slash_percent` - The percentage being slashed (0-100)
+	/// * `amount` - The amount being slashed
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean

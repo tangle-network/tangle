@@ -26,7 +26,6 @@ use crate::{Account, BlueprintId};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::Percent;
 use sp_std::{vec, vec::Vec};
 
 #[cfg(not(feature = "std"))]

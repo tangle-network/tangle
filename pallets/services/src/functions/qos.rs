@@ -31,7 +31,7 @@ impl<T: Config> Pallet<T> {
 
 		// Call EVM hook
 		let (use_default, interval) =
-			Self::get_heartbeat_interval_hook(&blueprint, blueprint_id, service_id).map_err(
+			Self::get_heartbeat_interval_hook(blueprint, blueprint_id, service_id).map_err(
 				|e| {
 					log::error!("Get heartbeat interval hook failed: {:?}", e);
 					Error::<T>::GetHeartbeatIntervalFailure
@@ -68,7 +68,7 @@ impl<T: Config> Pallet<T> {
 
 		// Call EVM hook
 		let (use_default, threshold) =
-			Self::get_heartbeat_threshold_hook(&blueprint, blueprint_id, service_id).map_err(
+			Self::get_heartbeat_threshold_hook(blueprint, blueprint_id, service_id).map_err(
 				|e| {
 					log::error!("Get heartbeat threshold hook failed: {:?}", e);
 					Error::<T>::GetHeartbeatThresholdFailure
@@ -76,7 +76,7 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 		// If use_default is true, return the default threshold
-		if use_default { Ok(DefaultHeartbeatThreshold::<T>::get()) } else { Ok(threshold as u8) }
+		if use_default { Ok(DefaultHeartbeatThreshold::<T>::get()) } else { Ok(threshold) }
 	}
 
 	/// Gets the slashing window for a service instance.
@@ -101,7 +101,7 @@ impl<T: Config> Pallet<T> {
 
 		// Call EVM hook
 		let (use_default, window) =
-			Self::get_slashing_window_hook(&blueprint, blueprint_id, service_id).map_err(|e| {
+			Self::get_slashing_window_hook(blueprint, blueprint_id, service_id).map_err(|e| {
 				log::error!("Get slashing window hook failed: {:?}", e);
 				Error::<T>::GetSlashingWindowFailure
 			})?;
