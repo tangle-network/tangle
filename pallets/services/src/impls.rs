@@ -2,7 +2,9 @@ use super::*;
 use crate::types::BalanceOf;
 use frame_support::traits::OneSessionHandler;
 use sp_std::{vec, vec::Vec};
-use tangle_primitives::{BlueprintId, services::Constraints, traits::ServiceManager};
+use tangle_primitives::{
+	BlueprintId, rewards::AssetType, services::Constraints, traits::ServiceManager,
+};
 
 #[cfg(feature = "runtime-benchmarks")]
 use tangle_primitives::rewards::UserDepositWithLocks;
