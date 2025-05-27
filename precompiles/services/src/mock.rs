@@ -45,7 +45,9 @@ use std::{collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	rewards::{AssetType, UserDepositWithLocks},
-	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, PricingModel},
+	traits::{RewardRecorder, RewardsManager},
+	types::rewards::LockMultiplier,
 };
 
 pub type AccountId = AccountId32;
@@ -553,6 +555,58 @@ parameter_types! {
 	]);
 }
 
+pub struct MockRewardsManager;
+
+impl RewardsManager<AccountId, AssetId, Balance, u64> for MockRewardsManager {
+	type Error = sp_runtime::DispatchError;
+
+	fn record_deposit(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+		_lock_multiplier: Option<LockMultiplier>,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_withdrawal(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_service_reward(
+		_account_id: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn get_asset_deposit_cap_remaining(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(100_000_u32.into())
+	}
+
+	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
+		Ok(0_u32.into())
+	}
+}
+
+impl RewardRecorder<AccountId, u64, Balance> for MockRewardsManager {
+	type PricingModel = PricingModel<u64, Balance>;
+
+	fn record_reward(
+		_operator: &AccountId,
+		_service_id: u64,
+		_amount: Balance,
+		_model: &Self::PricingModel,
+	) -> sp_runtime::DispatchResult {
+		Ok(())
+	}
+}
+
 impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -562,8 +616,8 @@ impl pallet_services::Config for Runtime {
 	type PalletEvmAccount = ServicesPalletEvmAccount;
 	type SlashManager = ();
 	type EvmRunner = MockedEvmRunner;
-	type EvmAddressMapping = PalletEVMAddressMapping;
 	type EvmGasWeightMapping = PalletEVMGasWeightMapping;
+	type EvmAddressMapping = PalletEVMAddressMapping;
 	type MaxFields = MaxFields;
 	type MaxFieldsSize = MaxFieldsSize;
 	type MaxMetadataLength = MaxMetadataLength;
@@ -593,6 +647,8 @@ impl pallet_services::Config for Runtime {
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
 	type RoleKeyId = RoleKeyId;
+	type RewardRecorder = MockRewardsManager;
+	type RewardsManager = MockRewardsManager;
 	type WeightInfo = ();
 }
 
