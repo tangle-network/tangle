@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::CurrentRound;
-use frame_support::assert_noop;
-use frame_support::{assert_ok, traits::OnInitialize};
+use frame_support::{assert_noop, assert_ok, traits::OnInitialize};
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
 use tangle_primitives::services::Asset;
 

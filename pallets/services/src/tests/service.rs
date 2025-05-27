@@ -30,7 +30,13 @@ fn request_service() {
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -38,13 +44,19 @@ fn request_service() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let dave = mock_pub_key(DAVE);
 		let dave_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			dave.clone(),
+			0,
+			dave_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let eve = mock_pub_key(EVE);
 
@@ -90,15 +102,11 @@ fn request_service() {
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -115,15 +123,11 @@ fn request_service() {
 		})));
 
 		// Charlie approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 15),
-				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 15),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+			get_security_commitment(USDC, 15),
+			get_security_commitment(WETH, 15),
+			get_security_commitment(TNT, 15),
+		],));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -143,28 +147,20 @@ fn request_service() {
 		// because the security commitments are misordered. They must be in the same order as the
 		// security requirements.
 		assert_err!(
-			Services::approve(
-				RuntimeOrigin::signed(dave.clone()),
-				0,
-				vec![
-					get_security_commitment(TNT, 20),
-					get_security_commitment(USDC, 20),
-					get_security_commitment(WETH, 20),
-				],
-			),
+			Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+				get_security_commitment(TNT, 20),
+				get_security_commitment(USDC, 20),
+				get_security_commitment(WETH, 20),
+			],),
 			Error::<Runtime>::InvalidSecurityCommitments,
 		);
 
 		// Dave approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 20),
-				get_security_commitment(WETH, 20),
-				get_security_commitment(TNT, 20),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+			get_security_commitment(USDC, 20),
+			get_security_commitment(WETH, 20),
+			get_security_commitment(TNT, 20),
+		],));
 
 		let service = Services::services(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
@@ -217,7 +213,13 @@ fn request_service_with_no_assets() {
 		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 		let eve = mock_pub_key(EVE);
 		assert_err!(
 			Services::request(
@@ -252,7 +254,13 @@ fn request_service_with_payment_asset() {
 		));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -283,15 +291,11 @@ fn request_service_with_payment_asset() {
 		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
 
 		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -321,7 +325,13 @@ fn request_service_with_payment_erc20_token() {
 			blueprint.clone()
 		));
 		let bob = mock_pub_key(BOB);
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -353,15 +363,11 @@ fn request_service_with_payment_erc20_token() {
 		);
 
 		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 10)
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -398,7 +404,13 @@ fn reject_service_with_payment_token() {
 		));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie_address = mock_address(CHARLIE);
@@ -470,7 +482,13 @@ fn reject_service_with_payment_asset() {
 		));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -535,8 +553,8 @@ fn test_service_creation_dynamic_max_operators() {
 				operator.clone(),
 				0,
 				test_ecdsa_key(),
-				Default::default(),
 				1000,
+				Some("https://example.com/rpc")
 			));
 			operators.push(operator);
 		}
@@ -566,8 +584,8 @@ fn test_service_creation_dynamic_max_operators() {
 			extra_operator.clone(),
 			0,
 			test_ecdsa_key(),
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 		operators.push(extra_operator);
 
@@ -604,7 +622,13 @@ fn test_service_creation_fixed_min_operators() {
 		// Register some operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -612,8 +636,8 @@ fn test_service_creation_fixed_min_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -685,7 +709,13 @@ fn test_service_creation_invalid_operators() {
 		// Register one valid operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create an unregistered operator
 		let unregistered = mock_pub_key(CHARLIE);
@@ -725,7 +755,13 @@ fn test_service_creation_duplicate_operators() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -733,8 +769,8 @@ fn test_service_creation_duplicate_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let eve = mock_pub_key(EVE);
@@ -773,7 +809,13 @@ fn test_service_creation_inactive_operators() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -781,8 +823,8 @@ fn test_service_creation_inactive_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		// Deactivate one operator
@@ -839,7 +881,13 @@ fn test_termination_with_partial_approvals() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -847,13 +895,19 @@ fn test_termination_with_partial_approvals() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
 			1000,
+			Some("https://example.com/rpc")
 		));
 
 		let dave = mock_pub_key(DAVE);
 		let dave_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(dave.clone(), 0, dave_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			dave.clone(),
+			0,
+			dave_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create service request
 		let eve = mock_pub_key(EVE);
@@ -872,17 +926,15 @@ fn test_termination_with_partial_approvals() {
 		));
 
 		// Only two operators approve
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 15)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+			get_security_commitment(USDC, 15),
+			get_security_commitment(TNT, 15)
+		],));
 
 		// Attempt to terminate service with partial approvals - should fail
 		assert_err!(
@@ -891,11 +943,10 @@ fn test_termination_with_partial_approvals() {
 		);
 
 		// Complete the approvals
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(dave.clone()),
-			0,
-			vec![get_security_commitment(USDC, 20), get_security_commitment(TNT, 20)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+			get_security_commitment(USDC, 20),
+			get_security_commitment(TNT, 20)
+		],));
 
 		// Now termination should succeed
 		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
@@ -919,7 +970,13 @@ fn test_operator_offline_during_active_service() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Create service
 		let eve = mock_pub_key(EVE);
@@ -938,11 +995,10 @@ fn test_operator_offline_during_active_service() {
 		));
 
 		// Approve service request
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		// Verify service is active
 		assert!(Instances::<Runtime>::contains_key(0));

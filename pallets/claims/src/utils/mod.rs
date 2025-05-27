@@ -45,9 +45,8 @@ impl Hash for MultiAddress {
 impl MultiAddress {
 	pub fn to_account_id_32(&self) -> AccountId32 {
 		match self {
-			MultiAddress::EVM(ethereum_address) => {
-				HashedAddressMapping::<BlakeTwo256>::into_account_id(H160::from(ethereum_address.0))
-			},
+			MultiAddress::EVM(ethereum_address) =>
+				HashedAddressMapping::<BlakeTwo256>::into_account_id(H160::from(ethereum_address.0)),
 			MultiAddress::Native(substrate_address) => substrate_address.clone(),
 		}
 	}

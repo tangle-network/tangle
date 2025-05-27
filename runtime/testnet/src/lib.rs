@@ -37,12 +37,12 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain,
 };
-use frame_support::ord_parameter_types;
 use frame_support::{
 	derive_impl,
 	genesis_builder_helper::{build_state, get_preset},
+	ord_parameter_types,
 	traits::{
-		AsEnsureOriginWithArg, Contains, OnFinalize, WithdrawReasons,
+		AsEnsureOriginWithArg, ConstU64, Contains, OnFinalize, WithdrawReasons,
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
 	},
 	weights::ConstantMultiplier,
@@ -76,16 +76,15 @@ use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{H160, H256, OpaqueMetadata, U256, crypto::KeyTypeId};
 use sp_genesis_builder::PresetId;
-use sp_runtime::traits::AccountIdConversion;
 use sp_runtime::{
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion, create_runtime_str,
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto, DispatchInfoOf,
-		Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf, StaticLookup,
-		UniqueSaturatedInto,
+		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
+		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
+		StaticLookup, UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
@@ -179,7 +178,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1302, // v1.3.2
+	spec_version: 1306, // v1.3.6
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -673,8 +672,8 @@ impl Get<Option<BalancingConfig>> for OffchainRandomBalancing {
 			max => {
 				let seed = sp_io::offchain::random_seed();
 				let random = <u32>::decode(&mut TrailingZeroInput::new(&seed))
-					.expect("input is padded with zeroes; qed")
-					% max.saturating_add(1);
+					.expect("input is padded with zeroes; qed") %
+					max.saturating_add(1);
 				random as usize
 			},
 		};
@@ -1157,15 +1156,15 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
 			ProxyType::Any => true,
 			ProxyType::NonTransfer => !matches!(
 				c,
-				RuntimeCall::Balances(..)
-					| RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
+				RuntimeCall::Balances(..) |
+					RuntimeCall::Vesting(pallet_vesting::Call::vested_transfer { .. })
 			),
 			ProxyType::Governance => matches!(
 				c,
-				RuntimeCall::Democracy(..)
-					| RuntimeCall::Council(..)
-					| RuntimeCall::Elections(..)
-					| RuntimeCall::Treasury(..)
+				RuntimeCall::Democracy(..) |
+					RuntimeCall::Council(..) |
+					RuntimeCall::Elections(..) |
+					RuntimeCall::Treasury(..)
 			),
 			ProxyType::Staking => {
 				matches!(c, RuntimeCall::Staking(..))
@@ -1259,6 +1258,30 @@ impl pallet_rewards::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxStakeTiers: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub CreditBurnRecipient: Option<AccountId> = Some(TreasuryPalletId::get().into_account_truncating());
+}
+
+impl pallet_credits::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type AssetId = AssetId;
+	type MultiAssetDelegationInfo = MultiAssetDelegation;
+	type BurnConversionRate = ConstU128<1000>;
+	type ClaimWindowBlocks = ConstU64<1000>;
+	type CreditBurnRecipient = CreditBurnRecipient;
+	type MaxOffchainAccountIdLength = ConstU32<100>;
+	type MaxStakeTiers = MaxStakeTiers;
+	type ForceOrigin = EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1328,6 +1351,7 @@ construct_runtime!(
 		IsmpGrandpa: ismp_grandpa = 56,
 		Hyperbridge: pallet_hyperbridge = 57,
 		TokenGateway: pallet_token_gateway = 58,
+		Credits: pallet_credits = 59,
 	}
 );
 
@@ -1429,9 +1453,8 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		len: usize,
 	) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			RuntimeCall::Ethereum(call) => {
-				call.pre_dispatch_self_contained(info, dispatch_info, len)
-			},
+			RuntimeCall::Ethereum(call) =>
+				call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -1441,11 +1464,10 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 		info: Self::SignedInfo,
 	) -> Option<sp_runtime::DispatchResultWithInfo<PostDispatchInfoOf<Self>>> {
 		match self {
-			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) => {
+			call @ RuntimeCall::Ethereum(pallet_ethereum::Call::transact { .. }) =>
 				Some(call.dispatch(RuntimeOrigin::from(
 					pallet_ethereum::RawOrigin::EthereumTransaction(info),
-				)))
-			},
+				))),
 			_ => None,
 		}
 	}
@@ -1601,6 +1623,7 @@ mod benches {
 		[pallet_tangle_lst_benchmarking, crate::benches::LstBench::<Runtime>]
 		[pallet_multi_asset_delegation, MultiAssetDelegation]
 		[pallet_rewards, Rewards]
+		[pallet_credits, Credits]
 	);
 }
 
@@ -1680,6 +1703,14 @@ impl_runtime_apis! {
 			asset_id: tangle_primitives::services::Asset<AssetId>,
 		) -> Result<Balance, sp_runtime::DispatchError> {
 			Rewards::calculate_rewards(&account_id, asset_id)
+		}
+	}
+
+	impl pallet_credits_rpc_runtime_api::CreditsApi<Block, AccountId, Balance> for Runtime {
+		fn query_user_credits(
+			account_id: AccountId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount(&account_id, None)
 		}
 	}
 
@@ -2269,6 +2300,8 @@ impl_runtime_apis! {
 			vec![]
 		}
 	}
+
+
 
 	impl pallet_ismp_runtime_api::IsmpRuntimeApi<Block, <Block as BlockT>::Hash> for Runtime {
 		fn host_state_machine() -> StateMachine {

@@ -26,9 +26,8 @@ use frame_support::{
 };
 use parity_scale_codec::Encode;
 use sp_runtime::{DispatchError, traits::CheckedSub};
-use tangle_primitives::services::EvmAddressMapping;
 use tangle_primitives::{
-	services::{Asset, UnappliedSlash},
+	services::{Asset, EvmAddressMapping, UnappliedSlash},
 	traits::SlashManager,
 };
 
@@ -101,8 +100,8 @@ impl<T: Config> Pallet<T> {
 				.delegations
 				.iter_mut()
 				.find(|d| {
-					d.operator == unapplied_slash.operator
-						&& d.blueprint_selection.contains(&unapplied_slash.blueprint_id)
+					d.operator == unapplied_slash.operator &&
+						d.blueprint_selection.contains(&unapplied_slash.blueprint_id)
 				})
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 

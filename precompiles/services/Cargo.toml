@@ -6,8 +6,6 @@ edition = "2021"
 description = "A Precompile to make pallet-services calls encoding accessible to pallet-evm"
 
 [dependencies]
-
-
 precompile-utils = { workspace = true }
 
 # Substrate
@@ -40,8 +38,6 @@ k256 = { workspace = true }
 serde_json = { workspace = true }
 smallvec = { workspace = true }
 sp-keystore = { workspace = true }
-
-
 precompile-utils = { workspace = true, features = ["std", "testing"] }
 
 # Substrate

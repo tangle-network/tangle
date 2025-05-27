@@ -21,8 +21,7 @@
 //! # Debugging a panic
 //! Once a panic is found, it can be debugged with
 //! `cargo hfuzz run-debug mad-fuzzer hfuzz_workspace/mad-fuzzer/*.fuzz`.
-use fp_evm::Context;
-use fp_evm::PrecompileSet;
+use fp_evm::{Context, PrecompileSet};
 use frame_support::traits::{Currency, Get};
 use honggfuzz::fuzz;
 use pallet_evm::AddressMapping;
@@ -34,12 +33,10 @@ use pallet_multi_asset_delegation::{
 	pallet as mad,
 	types::*,
 };
-use precompile_utils::prelude::*;
-use precompile_utils::testing::*;
+use precompile_utils::{prelude::*, testing::*};
 use rand::{Rng, seq::SliceRandom};
 use sp_core::U256;
-use sp_runtime::DispatchResult;
-use sp_runtime::traits::Scale;
+use sp_runtime::{DispatchResult, traits::Scale};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
@@ -234,22 +231,16 @@ fn main() {
 			ext.execute_with(|| {
 				System::set_block_number(block_number);
 				for (call, who) in random_calls(&mut rng) {
-					let mut handle = MockHandle::new(
-						to,
-						Context {
-							address: to,
-							caller: who.into(),
-							apparent_value: Default::default(),
-						},
-					);
-					let mut handle_clone = MockHandle::new(
-						to,
-						Context {
-							address: to,
-							caller: who.into(),
-							apparent_value: Default::default(),
-						},
-					);
+					let mut handle = MockHandle::new(to, Context {
+						address: to,
+						caller: who.into(),
+						apparent_value: Default::default(),
+					});
+					let mut handle_clone = MockHandle::new(to, Context {
+						address: to,
+						caller: who.into(),
+						apparent_value: Default::default(),
+					});
 					let encoded = call.encode();
 					handle.input = encoded.clone();
 					let call_clone = PCall::parse_call_data(&mut handle).unwrap();
@@ -278,9 +269,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 	match call {
 		PCall::deposit { asset_id, amount, token_address, lock_multiplier: 0 } => {
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			match deposit_asset {
@@ -309,9 +299,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		},
 		PCall::schedule_withdraw { asset_id, amount, token_address } => {
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			let round = MultiAssetDelegation::current_round();
@@ -340,9 +329,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			let round = MultiAssetDelegation::current_round();
 
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			assert!(
@@ -359,9 +347,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		},
 		PCall::delegate { operator, asset_id, amount, token_address, .. } => {
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			let operator_account = AccountId::from(operator.0);

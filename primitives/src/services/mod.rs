@@ -19,17 +19,19 @@
 pub mod constraints;
 pub mod evm;
 pub mod field;
-pub mod gadget;
 pub mod jobs;
+pub mod pricing;
 pub mod service;
+pub mod sources;
 pub mod types;
 pub mod payments;
 
 pub use constraints::*;
 pub use evm::*;
 pub use field::*;
-pub use gadget::*;
 pub use jobs::*;
+pub use pricing::*;
 pub use service::*;
+pub use sources::*;
 pub use types::*;
 pub use payments::*;

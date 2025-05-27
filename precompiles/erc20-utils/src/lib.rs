@@ -28,7 +28,8 @@ use sp_std::prelude::*;
 #[cfg(not(feature = "std"))]
 use alloc::format;
 
-/// Executes an ERC20 token transfer by calling the `transfer` function on the specified ERC20 contract
+/// Executes an ERC20 token transfer by calling the `transfer` function on the specified ERC20
+/// contract
 ///
 /// # Arguments
 ///

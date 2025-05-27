@@ -181,6 +181,7 @@ impl<T: Config> Pallet<T> {
 			id: service_id,
 			blueprint: request.blueprint,
 			owner: request.owner.clone(),
+			args: request.args,
 			operator_security_commitments: operator_security_commitments.clone(),
 			security_requirements: request.security_requirements,
 			permitted_callers: request.permitted_callers.clone(),

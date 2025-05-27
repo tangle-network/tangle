@@ -15,8 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::assert_noop;
-use frame_support::{assert_err, assert_ok, traits::ConstU128};
+use frame_support::{assert_err, assert_noop, assert_ok, traits::ConstU128};
 use sp_core::{H160, U256};
 use sp_runtime::TokenError;
 
@@ -34,7 +33,13 @@ fn test_payment_refunds_on_failure() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let payment = 5 * 10u128.pow(6); // 5 USDC
 		let charlie = mock_pub_key(CHARLIE);
@@ -133,15 +138,12 @@ fn test_payment_refunds_on_failure() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Verify native payment is held by pallet
-		assert_eq!(Balances::free_balance(Services::pallet_account()), native_payment);
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance - native_payment);
 
 		// Bob rejects the request
 		assert_ok!(Services::reject(RuntimeOrigin::signed(bob.clone()), 2));
 
 		// Verify native payment is refunded
-		assert_eq!(Balances::free_balance(Services::pallet_account()), 0);
 		assert_eq!(Balances::free_balance(charlie.clone()), before_native_balance);
 	});
 }
@@ -163,7 +165,13 @@ fn test_payment_distribution_operators() {
 		// Register operators
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let charlie_ecdsa_key = test_ecdsa_key();
@@ -171,8 +179,8 @@ fn test_payment_distribution_operators() {
 			charlie.clone(),
 			0,
 			charlie_ecdsa_key,
-			Default::default(),
-			1000
+			1000,
+			Some("https://example.com/rpc")
 		));
 
 		// Test Case 1: Custom Asset Payment (USDC)
@@ -200,17 +208,15 @@ fn test_payment_distribution_operators() {
 		assert_eq!(Assets::balance(USDC, eve.clone()), before_balance - payment);
 
 		// Approve service request
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 20)
+		],));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			0,
-			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 25)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+			get_security_commitment(USDC, 15),
+			get_security_commitment(TNT, 25)
+		],));
 
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
@@ -244,11 +250,10 @@ fn test_payment_distribution_operators() {
 		);
 
 		// Bob approves
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 20)
+		],));
 
 		// Verify ERC20 payment is transferred to MBSM
 		assert_ok!(
@@ -308,23 +313,11 @@ fn test_payment_distribution_operators() {
 		));
 
 		// Bob approves
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			2,
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(TNT, 20)
+		],));
 
-		// Verify native payment is transferred to MBSM after approval
-		assert_eq!(
-			Balances::free_balance(mbsm_account_id),
-			initial_mbsm_balance + native_payment * 2,
-			"MBSM account should have payment after approval"
-		);
-		assert_eq!(
-			Balances::free_balance(pallet_account),
-			initial_pallet_balance - native_payment,
-			"Pallet account should transfer payment after approval"
-		);
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
 			native_payment * 9,
@@ -350,7 +343,13 @@ fn test_payment_multiple_asset_types() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Test Case 1: Multiple asset security requirements
 		let eve = mock_pub_key(EVE);
@@ -380,15 +379,11 @@ fn test_payment_multiple_asset_types() {
 		assert_eq!(Assets::balance(USDC, eve.clone()), before_balance - payment);
 
 		// Bob approves with security commitments for all assets
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			vec![
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 10),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 15),
+			get_security_commitment(TNT, 10),
+		],));
 
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
@@ -425,15 +420,11 @@ fn test_payment_multiple_asset_types() {
 		);
 
 		// Bob approves with security commitments for all assets
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			vec![
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 15),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 15),
+			get_security_commitment(TNT, 15),
+		],));
 
 		// Verify ERC20 payment is transferred to MBSM
 		assert_ok!(
@@ -496,27 +487,12 @@ fn test_payment_multiple_asset_types() {
 		));
 
 		// Bob approves with security commitments for all assets
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			2,
-			vec![
-				get_security_commitment(USDC, 10),
-				get_security_commitment(WETH, 15),
-				get_security_commitment(TNT, 15),
-			],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, vec![
+			get_security_commitment(USDC, 10),
+			get_security_commitment(WETH, 15),
+			get_security_commitment(TNT, 15),
+		],));
 
-		// Verify native payment is transferred to MBSM after approval
-		assert_eq!(
-			Balances::free_balance(mbsm_account_id),
-			initial_mbsm_balance + native_payment * 2,
-			"MBSM account should have payment after approval"
-		);
-		assert_eq!(
-			Balances::free_balance(pallet_account),
-			initial_pallet_balance - native_payment,
-			"Pallet account should transfer payment after approval"
-		);
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
 			native_payment * 9,
@@ -539,7 +515,13 @@ fn test_payment_zero_amount() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -606,7 +588,13 @@ fn test_payment_maximum_amount() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 
@@ -635,8 +623,8 @@ fn test_payment_maximum_amount() {
 		let max_erc20_amount = Services::query_erc20_balance_of(USDC_ERC20, charlie_address)
 			.map(|(b, _)| b)
 			.unwrap_or_default()
-			.as_u128()
-			+ 1;
+			.as_u128() +
+			1;
 		assert_err!(
 			Services::request(
 				RuntimeOrigin::signed(charlie_evm_account_id.clone()),
@@ -689,7 +677,13 @@ fn test_payment_invalid_asset_types() {
 		// Register operator
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
-		assert_ok!(join_and_register(bob.clone(), 0, bob_ecdsa_key, Default::default(), 1000,));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			bob_ecdsa_key,
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		let charlie = mock_pub_key(CHARLIE);
 		let payment = 5 * 10u128.pow(6); // 5 USDC

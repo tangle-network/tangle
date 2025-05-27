@@ -129,6 +129,7 @@ pub mod pallet {
 				BalanceOf<Self>,
 				BlockNumberFor<Self>,
 				Self::AssetId,
+				AssetType,
 			>;
 
 		/// The origin that can manage reward assets

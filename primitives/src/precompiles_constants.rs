@@ -57,12 +57,12 @@ pub const PRECOMPILE_MULTI_ASSET_DELEGATION: u64 = 2082;
 pub const PRECOMPILE_SERVICES: u64 = 2083;
 pub const PRECOMPILE_TANGLE_LST: u64 = 2084;
 pub const PRECOMPILE_REWARDS: u64 = 2085;
+pub const PRECOMPILE_CREDITS: u64 = 2086;
 
 #[test]
 fn test_precompile_addresses_match() {
 	use precompile_utils::precompile_set::AddressU64;
-	use sp_core::Get;
-	use sp_core::H160;
+	use sp_core::{Get, H160};
 
 	// Helper function to create H160 address from hex string
 	fn h160_from_hex(hex_str: &str) -> H160 {
@@ -228,5 +228,9 @@ fn test_precompile_addresses_match() {
 	assert_eq!(
 		AddressU64::<PRECOMPILE_REWARDS>::get(),
 		h160_from_hex("0000000000000000000000000000000000000825")
+	);
+	assert_eq!(
+		AddressU64::<PRECOMPILE_CREDITS>::get(),
+		h160_from_hex("0000000000000000000000000000000000000826")
 	);
 }

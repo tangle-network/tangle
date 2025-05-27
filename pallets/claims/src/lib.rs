@@ -48,9 +48,8 @@ use sp_io::{
 	crypto::{secp256k1_ecdsa_recover, sr25519_verify},
 	hashing::keccak_256,
 };
-use sp_runtime::Saturating;
 use sp_runtime::{
-	AccountId32, RuntimeDebug,
+	AccountId32, RuntimeDebug, Saturating,
 	traits::{CheckedSub, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
 };
@@ -649,10 +648,9 @@ impl<T: Config> Pallet<T> {
 		statement: Vec<u8>,
 	) -> Result<MultiAddress, Error<T>> {
 		let signer = match signature {
-			MultiAddressSignature::EVM(ethereum_signature) => {
+			MultiAddressSignature::EVM(ethereum_signature) =>
 				Self::eth_recover(&ethereum_signature, &data, &statement[..])
-					.ok_or(Error::<T>::InvalidEthereumSignature)?
-			},
+					.ok_or(Error::<T>::InvalidEthereumSignature)?,
 			MultiAddressSignature::Native(sr25519_signature) => {
 				ensure!(!signer.is_none(), Error::<T>::InvalidNativeAccount);
 				Self::sr25519_recover(signer.unwrap(), &sr25519_signature, &data, &statement[..])

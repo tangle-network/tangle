@@ -36,7 +36,10 @@ use sp_runtime::{
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
 };
-use tangle_primitives::{services::Asset, types::rewards::UserDepositWithLocks};
+use tangle_primitives::{
+	services::Asset,
+	types::rewards::{AssetType, UserDepositWithLocks},
+};
 
 use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
@@ -279,8 +282,14 @@ pub struct MockDelegationData {
 }
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId>
-	for MockDelegationManager
+impl
+	tangle_primitives::traits::MultiAssetDelegationInfo<
+		AccountId,
+		Balance,
+		BlockNumber,
+		AssetId,
+		AssetType,
+	> for MockDelegationManager
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
@@ -319,6 +328,10 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, Blo
 		MOCK_DELEGATION_INFO.with(|delegation_info| {
 			delegation_info.borrow().deposits.get(&(who.clone(), asset)).cloned()
 		})
+	}
+
+	fn get_user_deposit_by_asset_type(_who: &AccountId, _asset_type: AssetType) -> Option<Balance> {
+		None
 	}
 }
 
@@ -411,27 +424,21 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let mut evm_accounts = BTreeMap::new();
 
 	for i in 1..=authorities.len() {
-		evm_accounts.insert(
-			mock_address(i as u8),
-			fp_evm::GenesisAccount {
-				code: vec![],
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-			},
-		);
+		evm_accounts.insert(mock_address(i as u8), fp_evm::GenesisAccount {
+			code: vec![],
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+		});
 	}
 
 	for a in &authorities {
-		evm_accounts.insert(
-			account_id_to_address(a.clone()),
-			fp_evm::GenesisAccount {
-				code: vec![],
-				storage: Default::default(),
-				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-			},
-		);
+		evm_accounts.insert(account_id_to_address(a.clone()), fp_evm::GenesisAccount {
+			code: vec![],
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+		});
 	}
 
 	let evm_config =

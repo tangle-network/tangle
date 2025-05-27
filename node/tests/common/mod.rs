@@ -132,8 +132,7 @@ impl TestAccount {
 	}
 
 	pub fn account_id(&self) -> subxt::utils::AccountId32 {
-		use subxt::PolkadotConfig;
-		use subxt::tx::Signer;
+		use subxt::{PolkadotConfig, tx::Signer};
 
 		let signer = self.substrate_signer();
 		Signer::<PolkadotConfig>::account_id(&signer)
@@ -289,6 +288,8 @@ where
 					eth_config: cli.eth,
 					debug_output: cli.output_path,
 					auto_insert_keys: cli.auto_insert_keys,
+					#[cfg(feature = "blueprint-manager")]
+					manager_test_mode: cli.manager_test_mode,
 					#[cfg(feature = "manual-seal")]
 					sealing: cli.sealing,
 				})

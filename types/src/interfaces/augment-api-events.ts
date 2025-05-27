@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPriceTargets, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesOperatorPreferences, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -358,6 +358,27 @@ declare module '@polkadot/api-base/types/events' {
        * a tally (yes votes and no votes given respectively as `MemberCount`).
        **/
       Voted: AugmentedEvent<ApiType, [account: AccountId32, proposalHash: H256, voted: bool, yes: u32, no: u32], { account: AccountId32, proposalHash: H256, voted: bool, yes: u32, no: u32 }>;
+      /**
+       * Generic event
+       **/
+      [key: string]: AugmentedEvent<ApiType>;
+    };
+    credits: {
+      /**
+       * Credits were claimed from staking rewards, within the allowed window.
+       * [who, amount_claimed, offchain_account_id]
+       **/
+      CreditsClaimed: AugmentedEvent<ApiType, [who: AccountId32, amountClaimed: u128, offchainAccountId: Bytes], { who: AccountId32, amountClaimed: u128, offchainAccountId: Bytes }>;
+      /**
+       * TNT tokens were successfully burned, granting potential off-chain credits.
+       * Credits granted = amount_burned * conversion_rate.
+       * [who, amount_burned, credits_granted, offchain_account_id]
+       **/
+      CreditsGrantedFromBurn: AugmentedEvent<ApiType, [who: AccountId32, tntBurned: u128, creditsGranted: u128], { who: AccountId32, tntBurned: u128, creditsGranted: u128 }>;
+      /**
+       * Stake tiers were updated.
+       **/
+      StakeTiersUpdated: AugmentedEvent<ApiType, []>;
       /**
        * Generic event
        **/
@@ -845,9 +866,8 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * A member has unbonded from their pool.
        * 
-       * - `balance` is the corresponding balance of the number of points that has been
-       * requested to be unbonded (the argument of the `unbond` transaction) from the bonded
-       * pool.
+       * - `balance` is the corresponding balance of the number of points that has been requested
+       * to be unbonded (the argument of the `unbond` transaction) from the bonded pool.
        * - `points` is the number of points that are issued as a result of `balance` being
        * dissolved into the corresponding unbonding pool.
        * - `era` is the era in which the balance will be unbonded.
@@ -1197,6 +1217,14 @@ declare module '@polkadot/api-base/types/events' {
        **/
       TotalScoreUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier>], { vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier> }>;
       /**
+       * Metadata for a vault was removed.
+       **/
+      VaultMetadataRemoved: AugmentedEvent<ApiType, [vaultId: u32], { vaultId: u32 }>;
+      /**
+       * Metadata for a vault was set or updated.
+       **/
+      VaultMetadataSet: AugmentedEvent<ApiType, [vaultId: u32, name: Bytes, logo: Bytes], { vaultId: u32, name: Bytes, logo: Bytes }>;
+      /**
        * Vault reward config updated
        **/
       VaultRewardConfigUpdated: AugmentedEvent<ApiType, [vaultId: u32, newConfig: PalletRewardsRewardConfigForAssetVault], { vaultId: u32, newConfig: PalletRewardsRewardConfigForAssetVault }>;
@@ -1274,13 +1302,17 @@ declare module '@polkadot/api-base/types/events' {
        **/
       PreRegistration: AugmentedEvent<ApiType, [operator: AccountId32, blueprintId: u64], { operator: AccountId32, blueprintId: u64 }>;
       /**
-       * The price targets for an operator has been updated.
-       **/
-      PriceTargetsUpdated: AugmentedEvent<ApiType, [operator: AccountId32, blueprintId: u64, priceTargets: TanglePrimitivesServicesTypesPriceTargets], { operator: AccountId32, blueprintId: u64, priceTargets: TanglePrimitivesServicesTypesPriceTargets }>;
-      /**
        * An new operator has been registered.
        **/
       Registered: AugmentedEvent<ApiType, [provider: AccountId32, blueprintId: u64, preferences: TanglePrimitivesServicesTypesOperatorPreferences, registrationArgs: Vec<TanglePrimitivesServicesField>], { provider: AccountId32, blueprintId: u64, preferences: TanglePrimitivesServicesTypesOperatorPreferences, registrationArgs: Vec<TanglePrimitivesServicesField> }>;
+      /**
+       * A request for a pricing quote has been made.
+       **/
+      RequestForQuote: AugmentedEvent<ApiType, [requester: AccountId32, blueprintId: u64], { requester: AccountId32, blueprintId: u64 }>;
+      /**
+       * RPC address updated.
+       **/
+      RpcAddressUpdated: AugmentedEvent<ApiType, [operator: AccountId32, blueprintId: u64, rpcAddress: Bytes], { operator: AccountId32, blueprintId: u64, rpcAddress: Bytes }>;
       /**
        * A service has been initiated.
        **/

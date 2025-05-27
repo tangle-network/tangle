@@ -4,12 +4,15 @@ use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use parity_scale_codec::Decode;
 use scale_info::prelude::boxed::Box;
-use sp_core::Pair;
-use sp_core::{H160, ecdsa};
-use sp_runtime::KeyTypeId;
-use sp_runtime::Percent;
-use sp_std::vec;
-use tangle_primitives::services::*;
+use sp_core::{H160, Pair};
+use sp_runtime::{KeyTypeId, Percent};
+use sp_std::{prelude::*, vec};
+use tangle_primitives::services::{
+	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
+	BoundedString, Field, FieldType, JobDefinition, JobMetadata,
+	MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelType,
+	OperatorPreferences, ServiceBlueprint, ServiceMetadata,
+};
 
 pub type AssetId = u32;
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
@@ -51,24 +54,36 @@ fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 	T::AccountId::decode(&mut &[id; 32][..]).unwrap()
 }
 
-fn operator_preferences<T: Config>() -> OperatorPreferences {
-	OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() }
+fn operator_preferences<T: Config>() -> OperatorPreferences<T::Constraints> {
+	OperatorPreferences {
+		key: test_ecdsa_key(),
+		rpc_address: BoundedString::try_from("https://example.com/rpc".to_owned()).unwrap(),
+	}
 }
 
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints> {
 	#[allow(deprecated)]
 	ServiceBlueprint {
-		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
+		metadata: ServiceMetadata {
+			name: "CGGMP21 TSS".to_owned().try_into().unwrap(),
+			..Default::default()
+		},
 		manager: BlueprintServiceManager::Evm(CGGMP21_BLUEPRINT),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
 		jobs: vec![
 			JobDefinition {
-				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
+				metadata: JobMetadata {
+					name: "keygen".to_owned().try_into().unwrap(),
+					..Default::default()
+				},
 				params: vec![FieldType::Uint8].try_into().unwrap(),
 				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
 			},
 			JobDefinition {
-				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
+				metadata: JobMetadata {
+					name: "sign".to_owned().try_into().unwrap(),
+					..Default::default()
+				},
 				params: vec![FieldType::Uint64, FieldType::List(Box::new(FieldType::Uint8))]
 					.try_into()
 					.unwrap(),
@@ -79,10 +94,11 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints
 		.unwrap(),
 		registration_params: Default::default(),
 		request_params: Default::default(),
-		gadget: Default::default(),
+		sources: Default::default(),
 		supported_membership_models: vec![MembershipModelType::Fixed, MembershipModelType::Dynamic]
 			.try_into()
 			.unwrap(),
+		recommended_resources: Default::default(),
 	}
 }
 
@@ -116,7 +132,7 @@ benchmarks! {
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preference, Default::default(), 0_u32.into())
+	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preference.clone(), Default::default(), 0_u32.into())
 
 
 	unregister {
@@ -127,22 +143,34 @@ benchmarks! {
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
 
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 	}: _(RawOrigin::Signed(bob.clone()), 0)
 
-	update_price_targets {
+	update_rpc_address {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
-		let price_targets = Default::default();
+		let rpc_address = BoundedString::try_from("https://example.com/rpc".to_owned()).unwrap();
 
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, price_targets)
+	}: _(RawOrigin::Signed(bob.clone()), 0, rpc_address)
 
 
 	request {
@@ -152,16 +180,40 @@ benchmarks! {
 
 		let operator_preference = operator_preferences::<T>();
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(eve.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(eve.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 	}: _(
 		RawOrigin::Signed(bob.clone()),
@@ -191,16 +243,28 @@ benchmarks! {
 		let _= Pallet::<T>::register(
 			RawOrigin::Signed(bob.clone()).into(),
 			0,
-			operator_preference,
+			operator_preference.clone(),
 			Default::default(),
 			0_u32.into()
 		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
@@ -236,16 +300,28 @@ benchmarks! {
 		let _= Pallet::<T>::register(
 			RawOrigin::Signed(bob.clone()).into(),
 			0,
-			operator_preference,
+			operator_preference.clone(),
 			Default::default(),
 			0_u32.into()
 		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
@@ -276,13 +352,31 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
@@ -314,13 +408,31 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
@@ -357,13 +469,31 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(dave.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		let eve: T::AccountId =  mock_account_id::<T>(5u8);
 		let _= Pallet::<T>::request(
@@ -409,7 +539,13 @@ benchmarks! {
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		// Create a service instance for bob
 		let _= Pallet::<T>::request(
@@ -436,7 +572,13 @@ benchmarks! {
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+		let _= Pallet::<T>::register(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			operator_preference.clone(),
+			Default::default(),
+			0_u32.into()
+		);
 
 		// Create a service instance and slash bob
 		let _= Pallet::<T>::request(

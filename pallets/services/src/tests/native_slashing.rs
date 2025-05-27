@@ -18,6 +18,7 @@ use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_runtime::Percent;
 use sp_staking::StakingAccount;
+use tangle_primitives::services::BoundedString;
 
 #[test]
 fn test_basic_native_restaking_slash() {
@@ -176,7 +177,11 @@ fn test_native_restaking_slash_with_multiple_services() {
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			OperatorPreferences { key: test_ecdsa_key(), price_targets: Default::default() },
+			OperatorPreferences {
+				key: test_ecdsa_key(),
+				rpc_address: BoundedString::try_from("https://example.com/rpc".to_string())
+					.unwrap()
+			},
 			Default::default(),
 			0,
 		));
@@ -198,11 +203,10 @@ fn test_native_restaking_slash_with_multiple_services() {
 		));
 
 		// Approve second service
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
+			get_security_commitment(WETH, 10),
+			get_security_commitment(TNT, 10)
+		],));
 
 		let delegator = mock_pub_key(CHARLIE);
 		let stake_amount = 1000;

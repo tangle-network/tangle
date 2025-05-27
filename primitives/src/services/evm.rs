@@ -15,8 +15,9 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::Weight;
-use fp_evm::CallInfo;
+use fp_evm::{CallInfo, ExitReason, ExitSucceed, UsedGas};
 use frame_system::Config;
+use scale_info::prelude::vec;
 use sp_core::{H160, U256};
 use sp_std::vec::Vec;
 
@@ -39,6 +40,28 @@ pub trait EvmRunner<T: Config> {
 		is_transactional: bool,
 		validate: bool,
 	) -> Result<CallInfo, RunnerError<Self::Error>>;
+}
+
+impl<T: Config> EvmRunner<T> for () {
+	type Error = sp_runtime::DispatchError;
+
+	fn call(
+		_source: H160,
+		_target: H160,
+		_input: Vec<u8>,
+		_value: U256,
+		_gas_limit: u64,
+		_is_transactional: bool,
+		_validate: bool,
+	) -> Result<CallInfo, RunnerError<Self::Error>> {
+		Ok(CallInfo {
+			exit_reason: ExitReason::Succeed(ExitSucceed::Returned),
+			value: vec![],
+			used_gas: UsedGas { standard: U256::from(0), effective: U256::from(0) },
+			weight_info: None,
+			logs: vec![],
+		})
+	}
 }
 
 /// A mapping function that converts EVM gas to Substrate weight and vice versa

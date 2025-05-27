@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
-	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BoundedString, Gadget,
+	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintSource, BoundedString,
 	MembershipModelType, TypeCheckError,
 	constraints::Constraints,
 	jobs::{JobDefinition, type_checker},
@@ -140,8 +140,8 @@ where
 	/// If not sure what to use, use `MasterBlueprintServiceManagerRevision::default()` which will
 	/// use the latest revision available.
 	pub master_manager_revision: MasterBlueprintServiceManagerRevision,
-	/// The gadget that will be executed for the service.
-	pub gadget: Gadget<C>,
+	/// The binary sources for the blueprint.
+	pub sources: BoundedVec<BlueprintSource<C>, C::MaxFields>,
 	/// The membership models supported by this blueprint
 	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
 	/// The pricing model for this blueprint
@@ -264,12 +264,10 @@ where
 			},
 			// Master Manager Revision
 			match self.master_manager_revision {
-				MasterBlueprintServiceManagerRevision::Latest => {
-					ethabi::Token::Uint(ethabi::Uint::MAX)
-				},
-				MasterBlueprintServiceManagerRevision::Specific(rev) => {
-					ethabi::Token::Uint(rev.into())
-				},
+				MasterBlueprintServiceManagerRevision::Latest =>
+					ethabi::Token::Uint(ethabi::Uint::MAX),
+				MasterBlueprintServiceManagerRevision::Specific(rev) =>
+					ethabi::Token::Uint(rev.into()),
 			},
 			// Gadget ?
 		])
@@ -336,9 +334,8 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 
 		match self.membership_model {
 			MembershipModel::Fixed { min_operators } => approved_count >= min_operators as usize,
-			MembershipModel::Dynamic { min_operators, max_operators: _ } => {
-				approved_count >= min_operators as usize
-			},
+			MembershipModel::Dynamic { min_operators, max_operators: _ } =>
+				approved_count >= min_operators as usize,
 		}
 	}
 
@@ -383,9 +380,9 @@ pub fn validate_security<AssetId: AssetIdT>(
 	security_requirements.iter().enumerate().all(|(i, req)| {
 		let commit = &asset_commitments[i];
 		// Check asset matches and exposure percent is within bounds
-		commit.asset == req.asset
-			&& commit.exposure_percent >= req.min_exposure_percent
-			&& commit.exposure_percent <= req.max_exposure_percent
+		commit.asset == req.asset &&
+			commit.exposure_percent >= req.min_exposure_percent &&
+			commit.exposure_percent <= req.max_exposure_percent
 	})
 }
 
@@ -453,6 +450,8 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	pub blueprint: BlueprintId,
 	/// The account that owns this service
 	pub owner: AccountId,
+	/// Arguments for service initialization
+	pub args: BoundedVec<Field<C, AccountId>, C::MaxFields>,
 	/// The assets and their security commitments from operators.
 	/// This represents the actual security backing the service.
 	pub operator_security_commitments: OperatorSecurityCommitments<AccountId, AssetId, C>,

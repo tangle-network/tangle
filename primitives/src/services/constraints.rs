@@ -58,4 +58,8 @@ pub trait Constraints {
 	type MaxContainerImageTagLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 	/// Maximum number of assets per service.
 	type MaxAssetsPerService: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum length of an rpc address.
+	type MaxRpcAddressLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+	/// Maximum number of resource types for pricing.
+	type MaxResourceNameLength: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
 }

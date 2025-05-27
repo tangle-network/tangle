@@ -235,11 +235,21 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub auto_insert_keys: bool,
+	#[cfg(feature = "blueprint-manager")]
+	pub manager_test_mode: bool,
 }
 
 /// Builds a new service for a full client.
 pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
-	RunFullParams { mut config, eth_config, rpc_config, debug_output: _, auto_insert_keys }: RunFullParams,
+	RunFullParams {
+		mut config,
+		eth_config,
+		rpc_config,
+		debug_output: _,
+		auto_insert_keys,
+		#[cfg(feature = "blueprint-manager")]
+		manager_test_mode,
+	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -262,8 +272,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	} = new_partial(&config, &eth_config)?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development
-			|| config.chain_spec.chain_type() == ChainType::Local
+		if config.chain_spec.chain_type() == ChainType::Development ||
+			config.chain_spec.chain_type() == ChainType::Local
 		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(
@@ -280,8 +290,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		// finally check if keys are inserted correctly
 		if crate::utils::ensure_all_keys_exist_in_keystore(keystore_container.keystore()).is_err() {
-			if config.chain_spec.chain_type() == ChainType::Development
-				|| config.chain_spec.chain_type() == ChainType::Local
+			if config.chain_spec.chain_type() == ChainType::Development ||
+				config.chain_spec.chain_type() == ChainType::Local
 			{
 				println!("
 			++++++++++++++++++++++++++++++++++++++++++++++++
@@ -526,6 +536,12 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	)
 	.await;
 
+	#[cfg(feature = "blueprint-manager")]
+	let config_data_path = config.data_path.clone();
+	#[cfg(feature = "blueprint-manager")]
+	let rpc_port = config.rpc_port;
+	#[cfg(feature = "blueprint-manager")]
+	let chain_type = config.chain_spec.chain_type();
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -645,6 +661,28 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			None,
 			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
+	}
+
+	#[cfg(feature = "blueprint-manager")]
+	{
+		let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
+			rpc_port,
+			config_data_path.join("blueprints"),
+			keystore_container.local_keystore(),
+			manager_test_mode,
+		)
+		.await?;
+
+		task_manager
+			.spawn_essential_handle()
+			.spawn("blueprint-manager", None, async move {
+				match bp_mngr.await {
+					Ok(()) => (),
+					Err(e) => {
+						log::error!("Blueprint manager failed: {}", e);
+					},
+				}
+			});
 	}
 
 	network_starter.start_network();

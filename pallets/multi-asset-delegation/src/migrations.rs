@@ -18,13 +18,14 @@ use crate::{
 	Config, Delegators,
 	types::{DelegatorMetadata, delegator::*},
 };
-use frame_support::storage::unhashed;
-use frame_support::traits::Currency;
-use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
-use frame_system;
-use frame_system::pallet_prelude::BlockNumberFor;
-use sp_std::collections::btree_map::BTreeMap;
-use sp_std::marker::PhantomData;
+use frame_support::{
+	pallet_prelude::*,
+	storage::unhashed,
+	traits::{Currency, OnRuntimeUpgrade},
+	weights::Weight,
+};
+use frame_system::{self, pallet_prelude::BlockNumberFor};
+use sp_std::{collections::btree_map::BTreeMap, marker::PhantomData};
 use tangle_primitives::{RoundIndex, services::Asset};
 
 /// Migration to update DelegatorMetadata structure with new field names and add is_nomination field

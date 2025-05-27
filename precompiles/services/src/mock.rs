@@ -43,8 +43,10 @@ use sp_runtime::{
 };
 use std::{collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::rewards::UserDepositWithLocks;
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner};
+use tangle_primitives::{
+	rewards::{AssetType, UserDepositWithLocks},
+	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -396,7 +398,8 @@ impl From<TestAccount> for sp_core::sr25519::Public {
 pub type AssetId = u128;
 
 pub struct MockDelegationManager;
-impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId>
+impl
+	tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId, AssetType>
 	for MockDelegationManager
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
@@ -433,6 +436,10 @@ impl tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64
 		_who: &AccountId,
 		_asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, u64>> {
+		None
+	}
+
+	fn get_user_deposit_by_asset_type(_who: &AccountId, _asset_type: AssetType) -> Option<Balance> {
 		None
 	}
 }
@@ -520,6 +527,14 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxRpcAddressLength: u32 = 256;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxResourceNameLength: u32 = 16;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MaxMasterBlueprintServiceManagerRevisions: u32 = u32::MAX;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
@@ -569,6 +584,8 @@ impl pallet_services::Config for Runtime {
 	type MaxContainerImageNameLength = MaxContainerImageNameLength;
 	type MaxContainerImageTagLength = MaxContainerImageTagLength;
 	type MaxAssetsPerService = MaxAssetsPerService;
+	type MaxRpcAddressLength = MaxRpcAddressLength;
+	type MaxResourceNameLength = MaxResourceNameLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;

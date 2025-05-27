@@ -1,5 +1,7 @@
-use crate::types::rewards::UserDepositWithLocks;
-use crate::{services::Asset, types::RoundIndex};
+use crate::{
+	services::Asset,
+	types::{RoundIndex, rewards::UserDepositWithLocks},
+};
 use sp_std::prelude::*;
 
 /// A trait to provide information about multi-asset delegation.
@@ -14,7 +16,7 @@ use sp_std::prelude::*;
 /// * `AssetId`: The type representing an asset identifier.
 /// * `Balance`: The type representing a balance or amount.
 /// * `BlockNumber`: The type representing a block number.
-pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
+pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId, AssetType> {
 	/// Get the current round index.
 	///
 	/// This method returns the current round index, which may be used to track
@@ -74,7 +76,8 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 	/// # Parameters
 	///
 	/// * `operator`: A reference to the account identifier of the operator.
-	/// * `asset`: A reference to the asset identifier for which the total delegation amount is requested.
+	/// * `asset`: A reference to the asset identifier for which the total delegation amount is
+	///   requested.
 	///
 	/// # Returns
 	///
@@ -117,4 +120,20 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId> {
 		who: &AccountId,
 		asset: Asset<AssetId>,
 	) -> Option<UserDepositWithLocks<Balance, BlockNumber>>;
+
+	/// Get a user's deposit by asset type.
+	///
+	/// This method retrieves information about a user's deposit for a given asset type,
+	/// including both the unlocked amount and any time-locked portions.
+	///
+	/// # Parameters
+	///
+	/// * `who`: A reference to the account identifier of the user.
+	/// * `asset_type`: The type of asset for which to get deposit information.
+	///
+	/// # Returns
+	///
+	/// An `Option` containing the user's deposit information if it exists:
+	/// - `Some(UserDepositWithLocks)` containing the unlocked amount and any time-locks
+	fn get_user_deposit_by_asset_type(who: &AccountId, asset_type: AssetType) -> Option<Balance>;
 }

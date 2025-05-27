@@ -186,9 +186,8 @@ where
 				}
 				(Asset::Custom(other_asset_id.into()), amount)
 			},
-			(_other_asset_id, _erc20_token) => {
-				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20))
-			},
+			(_other_asset_id, _erc20_token) =>
+				return Err(revert_custom_error(Self::PAYMENT_ASSET_SHOULD_BE_CUSTOM_OR_ERC20)),
 		};
 
 		let membership_model = if max_operators == 0 {

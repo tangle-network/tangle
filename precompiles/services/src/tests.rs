@@ -12,9 +12,9 @@ use precompile_utils::{prelude::UnboundedBytes, testing::*};
 use sp_core::{ecdsa, Pair, H160, U256};
 use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
-	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager, FieldType,
-	JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, MembershipModelType,
-	OperatorPreferences, PriceTargets, ServiceBlueprint, ServiceMetadata,
+	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
+	BoundedString, FieldType, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision,
+	MembershipModelType, OperatorPreferences, ServiceBlueprint, ServiceMetadata,
 };
 
 fn get_security_requirement(a: AssetId, p: &[u8; 2]) -> AssetSecurityRequirement<AssetId> {
@@ -36,37 +36,6 @@ fn test_ecdsa_key() -> [u8; 65] {
 	let verifying_key = VerifyingKey::from(secret);
 	let public_key = verifying_key.to_encoded_point(false);
 	public_key.to_bytes().to_vec().try_into().unwrap()
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum MachineKind {
-	Large,
-	Medium,
-	Small,
-}
-
-/// All prices are specified in USD/hr (in u64, so 1e6 = 1$)
-fn price_targets(kind: MachineKind) -> PriceTargets {
-	match kind {
-		MachineKind::Large => PriceTargets {
-			cpu: 2_000,
-			mem: 1_000,
-			storage_hdd: 100,
-			storage_ssd: 200,
-			storage_nvme: 300,
-		},
-		MachineKind::Medium => PriceTargets {
-			cpu: 1_000,
-			mem: 500,
-			storage_hdd: 50,
-			storage_ssd: 100,
-			storage_nvme: 150,
-		},
-		MachineKind::Small => {
-			PriceTargets { cpu: 500, mem: 250, storage_hdd: 25, storage_ssd: 50, storage_nvme: 75 }
-		},
-	}
 }
 
 fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
@@ -92,11 +61,12 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 		],
 		registration_params: bounded_vec![],
 		request_params: bounded_vec![],
-		gadget: Default::default(),
+		sources: Default::default(),
 		supported_membership_models: bounded_vec![
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
 		],
+		recommended_resources: Default::default(),
 	}
 }
 
@@ -150,7 +120,8 @@ fn test_request_service() {
 			0,
 			OperatorPreferences {
 				key: test_ecdsa_key(),
-				price_targets: price_targets(MachineKind::Large),
+				rpc_address: BoundedString::try_from("https://example.com/rpc".to_string())
+					.unwrap()
 			},
 			Default::default(),
 			0,
@@ -219,7 +190,8 @@ fn test_request_service_with_erc20() {
 			0,
 			OperatorPreferences {
 				key: test_ecdsa_key(),
-				price_targets: price_targets(MachineKind::Large),
+				rpc_address: BoundedString::try_from("https://example.com/rpc".to_string())
+					.unwrap()
 			},
 			Default::default(),
 			0,
@@ -302,7 +274,8 @@ fn test_request_service_with_asset() {
 			0,
 			OperatorPreferences {
 				key: test_ecdsa_key(),
-				price_targets: price_targets(MachineKind::Large),
+				rpc_address: BoundedString::try_from("https://example.com/rpc".to_string())
+					.unwrap()
 			},
 			Default::default(),
 			0,
@@ -377,7 +350,8 @@ fn test_terminate_service() {
 			0,
 			OperatorPreferences {
 				key: test_ecdsa_key(),
-				price_targets: price_targets(MachineKind::Large),
+				rpc_address: BoundedString::try_from("https://example.com/rpc".to_string())
+					.unwrap()
 			},
 			Default::default(),
 			0,

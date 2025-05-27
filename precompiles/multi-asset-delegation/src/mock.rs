@@ -21,9 +21,10 @@ use super::*;
 use crate::mock_evm::*;
 use core::ops::Mul;
 use ethabi::Uint;
-use frame_election_provider_support::bounds::{ElectionBounds, ElectionBoundsBuilder};
-use frame_election_provider_support::onchain;
-use frame_election_provider_support::SequentialPhragmen;
+use frame_election_provider_support::{
+	bounds::{ElectionBounds, ElectionBoundsBuilder},
+	onchain, SequentialPhragmen,
+};
 use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU64, OneSessionHandler},
@@ -40,14 +41,15 @@ use serde_json::json;
 use sp_core::{self, sr25519::Public as sr25519Public, ConstU32, H160};
 use sp_keyring::AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
-use sp_runtime::curve::PiecewiseLinear;
-use sp_runtime::testing::UintAuthorityId;
-use sp_runtime::DispatchError;
-use sp_runtime::{AccountId32, BuildStorage, Perbill};
+use sp_runtime::{
+	curve::PiecewiseLinear, testing::UintAuthorityId, AccountId32, BuildStorage, DispatchError,
+	Perbill,
+};
 use sp_staking::{EraIndex, SessionIndex};
-use tangle_primitives::services::EvmRunner;
-use tangle_primitives::services::{EvmAddressMapping, EvmGasWeightMapping};
-use tangle_primitives::traits::{RewardsManager, ServiceManager};
+use tangle_primitives::{
+	services::{EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
+	traits::{RewardsManager, ServiceManager},
+};
 
 pub type AccountId = AccountId32;
 pub type Balance = u64;

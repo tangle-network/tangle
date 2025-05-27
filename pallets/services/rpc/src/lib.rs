@@ -86,21 +86,6 @@ where
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	C::Api: ServicesRuntimeApi<Block, X, AccountId, AssetId>,
 {
-	// fn query_services_with_blueprints_by_operator(
-	// 	&self,
-	// 	operator: AccountId,
-	// 	at: Option<<Block as BlockT>::Hash>,
-	// ) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumberOf<Block>, AssetId>>> {
-	// 	let api = self.client.runtime_api();
-	// 	let at = at.unwrap_or_else(|| self.client.info().best_hash);
-	//
-	// 	match api.query_services_with_blueprints_by_operator(at, operator) {
-	// 		Ok(Ok(res)) => Ok(res),
-	// 		Ok(Err(e)) => Err(custom_error_into_rpc_err(Error::CustomDispatchError(e))),
-	// 		Err(e) => Err(custom_error_into_rpc_err(Error::RuntimeError(e))),
-	// 	}
-	// }
-
 	fn query_service_requests_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,
@@ -135,16 +120,11 @@ impl From<Error> for i32 {
 
 fn custom_error_into_rpc_err(err: Error) -> ErrorObjectOwned {
 	match err {
-		Error::RuntimeError(api_error) => ErrorObject::owned(
-			RUNTIME_ERROR,
-			"Runtime error",
-			Some(format!("{:?}", api_error)),
-		),
-		Error::CustomDispatchError(dispatch_error) => ErrorObject::owned(
-			RUNTIME_ERROR,
-			"Runtime dispatch error",
-			Some(format!("{:?}", dispatch_error)),
-		),
+		Error::RuntimeError(e) =>
+			ErrorObject::owned(RUNTIME_ERROR, "Runtime error", Some(format!("{e}"))),
+		Error::DecodeError =>
+			ErrorObject::owned(2, "Decode error", Some("Transaction was not decodable")),
+		Error::CustomDispatchError(msg) => ErrorObject::owned(3, "Dispatch error", Some(msg)),
 	}
 }
 

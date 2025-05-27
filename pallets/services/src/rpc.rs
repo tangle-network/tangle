@@ -24,7 +24,8 @@ impl<T: Config> Pallet<T> {
 		Vec<(u64, ServiceRequest<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>)>,
 		Error<T>,
 	> {
-		// First we need to get the operator's profile to know which blueprints they're registered for
+		// First we need to get the operator's profile to know which blueprints they're registered
+		// for
 		let profile = Self::operator_profile(&operator)?;
 
 		// Get the operator's blueprints
@@ -40,7 +41,8 @@ impl<T: Config> Pallet<T> {
 			if blueprint_ids.contains(&request.blueprint) {
 				// Check if the operator is one of the requested operators with approval state
 				if request.operators_with_approval_state.iter().any(|(op, _)| op == &operator) {
-					// Only include pending requests (those that haven't been approved by all operators yet)
+					// Only include pending requests (those that haven't been approved by all
+					// operators yet)
 					if !request.is_approved() {
 						result.push((request_id, request));
 					}

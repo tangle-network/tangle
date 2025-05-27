@@ -30,7 +30,7 @@ use sc_consensus_babe::BabeWorkerHandle;
 use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
 pub use sc_executor::WasmExecutor;
-use sc_service::{Configuration, TaskManager, error::Error as ServiceError};
+use sc_service::{ChainType, Configuration, TaskManager, error::Error as ServiceError};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;
@@ -98,9 +98,9 @@ where
 		GrandpaBlockImport,
 	) -> Result<(BasicQueue<Block>, BoxBlockImport), ServiceError>,
 {
-	println!("    ++++++++++++++++++++++++                                                                          
-	+++++++++++++++++++++++++++                                                                        
-	+++++++++++++++++++++++++++                                                                        
+	println!("    ++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
+	+++++++++++++++++++++++++++
 	+++        ++++++      +++         @%%%%%%%%%%%                                     %%%
 	++++++      ++++      +++++        %%%%%%%%%%%%                                     %%%@
 	++++++++++++++++++++++++++            %%%%      %%%%@     %%% %%@       @%%%%%%%   %%%@    %%%%@
@@ -109,8 +109,8 @@ where
 	++++++++++++++++++++++++++            %%%%    %%%%%%%%%   %%%   %%%%  %%%   @%%%   %%%@ @%%%%%  %%%%%
 	++++++      ++++      ++++++          %%%%    %%%%%%%%%   %%%   %%%%  %%%%%%%%%%   %%%@  %%%%%%%%%@
 	+++        ++++++        +++          %%%%    %%%%%%%%%   %%%   %%%@   %%%%%%%%%   %%%    %%%%%%%@
-	++++      +++++++++      +++                                           %%%%  %%%%               
-	++++++++++++++++++++++++++++                                           %%%%%%%%%         
+	++++      +++++++++      +++                                           %%%%  %%%%
+	++++++++++++++++++++++++++++                                           %%%%%%%%%
 	  +++++++++++++++++++++++                                                 %%%%% \n");
 
 	let telemetry = config
@@ -236,6 +236,8 @@ pub struct RunFullParams {
 	pub rpc_config: RpcConfig,
 	pub debug_output: Option<std::path::PathBuf>,
 	pub auto_insert_keys: bool,
+	#[cfg(feature = "blueprint-manager")]
+	pub manager_test_mode: bool,
 	pub sealing: Sealing,
 }
 
@@ -266,6 +268,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		rpc_config,
 		debug_output: _,
 		auto_insert_keys,
+		#[cfg(feature = "blueprint-manager")]
+		manager_test_mode,
 		sealing,
 	}: RunFullParams,
 ) -> Result<TaskManager, ServiceError> {
@@ -337,6 +341,23 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			metrics,
 		})?;
 
+	if config.role.is_authority() {
+		if config.chain_spec.chain_type() == ChainType::Development ||
+			config.chain_spec.chain_type() == ChainType::Local
+		{
+			if auto_insert_keys {
+				crate::utils::insert_controller_account_keys_into_keystore(
+					&config,
+					Some(keystore_container.local_keystore()),
+				);
+			} else {
+				crate::utils::insert_dev_controller_account_keys_into_keystore(
+					&config,
+					Some(keystore_container.local_keystore()),
+				);
+			}
+		}
+	}
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
 	let name = config.network.node_name.clone();
@@ -506,6 +527,12 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	)
 	.await;
 
+	#[cfg(feature = "blueprint-manager")]
+	let config_data_path = config.data_path.clone();
+	#[cfg(feature = "blueprint-manager")]
+	let rpc_port = config.rpc_port;
+	#[cfg(feature = "blueprint-manager")]
+	let chain_type = config.chain_spec.chain_type();
 	let params = sc_service::SpawnTasksParams {
 		network: network.clone(),
 		client: client.clone(),
@@ -600,6 +627,29 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		network_starter.start_network();
 		log::info!("Manual Seal Ready");
+
+		#[cfg(feature = "blueprint-manager")]
+		{
+			log::info!("Blueprint Manager is enabled.");
+			let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
+				rpc_port,
+				config_data_path.join("blueprints"),
+				keystore_container.local_keystore(),
+				manager_test_mode,
+			)
+			.await?;
+
+			task_manager
+				.spawn_essential_handle()
+				.spawn("blueprint-manager", None, async move {
+					match bp_mngr.await {
+						Ok(()) => (),
+						Err(e) => {
+							log::error!("Blueprint manager failed: {}", e);
+						},
+					}
+				});
+		}
 		return Ok(task_manager);
 	}
 
@@ -642,6 +692,30 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			None,
 			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
+	}
+
+	#[cfg(feature = "blueprint-manager")]
+	{
+		log::info!("Blueprint Manager is enabled.");
+		let test_mode = chain_type == ChainType::Development || chain_type == ChainType::Local;
+		let bp_mngr = crate::blueprint_service::create_blueprint_manager_service(
+			rpc_port,
+			config_data_path.join("blueprints"),
+			keystore_container.local_keystore(),
+			test_mode,
+		)
+		.await?;
+
+		task_manager
+			.spawn_essential_handle()
+			.spawn("blueprint-manager", None, async move {
+				match bp_mngr.await {
+					Ok(()) => (),
+					Err(e) => {
+						log::error!("Blueprint manager failed: {}", e);
+					},
+				}
+			});
 	}
 
 	network_starter.start_network();
