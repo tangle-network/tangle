@@ -22,27 +22,6 @@ use sp_std::ops::Div;
 use super::super::types::PricingModel;
 use super::types::{BillingCalculation, ServiceBillingState};
 
-/// Trait for recording rewards that will be paid out to operators.
-/// 
-/// This trait abstracts the reward recording mechanism, allowing the Services pallet
-/// to delegate payment handling to the Rewards pallet. The Services pallet calculates
-/// the reward amount based on the pricing model and calls this trait to record it.
-pub trait RewardRecorder<AccountId, ServiceId, Balance, PricingModel> {
-    /// Records a reward for an operator that will be paid out later.
-    ///
-    /// # Arguments
-    /// * `operator` - The account ID of the operator receiving the reward
-    /// * `service_id` - The ID of the service for which the reward is being recorded
-    /// * `amount` - The amount of the reward to be recorded
-    /// * `model` - The pricing model used to calculate this reward
-    fn record_reward(
-        operator: &AccountId,
-        service_id: ServiceId,
-        amount: Balance,
-        model: &PricingModel,
-    );
-}
-
 /// Helper trait for billing operations
 pub trait BillingOperations<BlockNumber, Balance> {
     /// Calculate the billing amount based on the pricing model and current state
@@ -99,15 +78,6 @@ where
                         should_bill: false,
                         skip_reason: Some(BillingSkipReason::NoEvents),
                     })
-            }
-            PricingModel::UsageBased { .. } => {
-                // Usage-based billing is not supported in this simplified version
-                BillingCalculation {
-                    amount: Balance::zero(),
-                    trigger: BillingTrigger::EventSubmission,
-                    should_bill: false,
-                    skip_reason: Some(BillingSkipReason::NotActivated),
-                }
             }
         }
     }

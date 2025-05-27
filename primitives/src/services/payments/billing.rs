@@ -151,7 +151,6 @@ where
             PricingModel::PayOnce { .. } => BillingTrigger::Activation,
             PricingModel::Subscription { .. } => BillingTrigger::BlockInterval,
             PricingModel::EventDriven { .. } => BillingTrigger::EventSubmission,
-            PricingModel::UsageBased { .. } => BillingTrigger::EventSubmission, // Treat as event-driven for now
         }
     }
 
@@ -160,8 +159,8 @@ where
         matches!(self, PricingModel::Subscription { .. })
     }
 
-    /// Check if this pricing model is usage-based
-    pub fn is_usage_based(&self) -> bool {
+    /// Check if this pricing model is event-based
+    pub fn is_event_based(&self) -> bool {
         matches!(self, PricingModel::EventDriven { .. })
     }
 
@@ -206,10 +205,6 @@ where
             PricingModel::EventDriven { .. } => {
                 billing_state.event_log.pending_events() > 0
             }
-            PricingModel::UsageBased { .. } => {
-                // Usage-based billing is not supported in this simplified version
-                false
-            }
         }
     }
 
@@ -219,7 +214,6 @@ where
             PricingModel::PayOnce { .. } => "Pay-once service with upfront payment",
             PricingModel::Subscription { .. } => "Subscription service with recurring payments",
             PricingModel::EventDriven { .. } => "Event-driven service with per-event billing",
-            PricingModel::UsageBased { .. } => "Usage-based service (not supported)",
         }
     }
 } 
