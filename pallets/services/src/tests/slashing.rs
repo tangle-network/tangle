@@ -15,8 +15,12 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{assert_err, assert_ok};
-use sp_runtime::Percent;
+use frame_support::{assert_err, assert_ok, traits::Get};
+use sp_runtime::{
+	DispatchError, Percent,
+	traits::{BlakeTwo256, Hash},
+};
+use tangle_primitives::services::Asset;
 
 #[test]
 fn test_zero_percentage_slash() {
@@ -496,10 +500,14 @@ fn test_slash_with_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service2_id, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service2_id,
+			security_commitment_hash
+		));
 
 		// Create slashes for both services
 		let service1 = Services::services(service_id).unwrap();

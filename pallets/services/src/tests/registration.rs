@@ -16,6 +16,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
+use sp_runtime::traits::{BlakeTwo256, Hash};
 use tangle_primitives::services::BoundedString;
 
 #[test]
@@ -26,7 +27,7 @@ fn register_on_blueprint() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
@@ -102,7 +103,7 @@ fn pre_register_on_blueprint() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 		let pre_registration_call = Services::pre_register(RuntimeOrigin::signed(bob.clone()), 0);
@@ -128,7 +129,7 @@ fn unregister_from_blueprint() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 		assert_ok!(join_and_register(
@@ -180,7 +181,7 @@ fn test_registration_max_blueprints() {
 		// Create maximum number of blueprints
 		for i in 0..MaxBlueprintsPerOperator::get() {
 			let blueprint = cggmp21_blueprint();
-			assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+			assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 			// Register for each blueprint
 			assert_ok!(Services::register(
@@ -197,7 +198,7 @@ fn test_registration_max_blueprints() {
 
 		// Create one more blueprint
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Try to register for one more blueprint - should fail
 		assert_err!(
@@ -223,7 +224,7 @@ fn test_registration_invalid_preferences() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 
@@ -253,7 +254,7 @@ fn test_registration_duplicate_keys() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
@@ -298,7 +299,7 @@ fn test_registration_during_active_services() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
@@ -340,10 +341,14 @@ fn test_registration_during_active_services() {
 		assert!(!UserServices::<Runtime>::get(eve.clone()).contains(&0));
 
 		// Approve the service request
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments =
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash
+		));
 
 		// Verify service is active and in instances storage
 		// Check service instance exists

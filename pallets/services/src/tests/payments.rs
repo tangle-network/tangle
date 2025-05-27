@@ -17,7 +17,10 @@
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::ConstU128};
 use sp_core::{H160, U256};
-use sp_runtime::TokenError;
+use sp_runtime::{
+	TokenError,
+	traits::{BlakeTwo256, Hash},
+};
 
 #[test]
 fn test_payment_refunds_on_failure() {
@@ -28,7 +31,7 @@ fn test_payment_refunds_on_failure() {
 		// Create blueprint
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
@@ -157,10 +160,7 @@ fn test_payment_distribution_operators() {
 		// Create blueprint
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(
-			RuntimeOrigin::signed(alice.clone()),
-			blueprint.clone()
-		));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint.clone()));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -208,15 +208,23 @@ fn test_payment_distribution_operators() {
 		assert_eq!(Assets::balance(USDC, eve.clone()), before_balance - payment);
 
 		// Approve service request
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 20)
-		],));
+		let security_commitments_bob =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)];
+		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash_bob
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
-			get_security_commitment(USDC, 15),
-			get_security_commitment(TNT, 25)
-		],));
+		let security_commitments_charlie =
+			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 25)];
+		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitment_hash_charlie
+		));
 
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
@@ -250,10 +258,14 @@ fn test_payment_distribution_operators() {
 		);
 
 		// Bob approves
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 20)
-		],));
+		let security_commitments_bob2 =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)];
+		let security_commitment_hash_bob2 = BlakeTwo256::hash_of(&security_commitments_bob2);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			1,
+			security_commitment_hash_bob2
+		));
 
 		// Verify ERC20 payment is transferred to MBSM
 		assert_ok!(
@@ -313,10 +325,14 @@ fn test_payment_distribution_operators() {
 		));
 
 		// Bob approves
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 20)
-		],));
+		let security_commitments_bob3 =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)];
+		let security_commitment_hash_bob3 = BlakeTwo256::hash_of(&security_commitments_bob3);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			2,
+			security_commitment_hash_bob3
+		));
 
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
@@ -335,10 +351,7 @@ fn test_payment_multiple_asset_types() {
 		// Create blueprint
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(
-			RuntimeOrigin::signed(alice.clone()),
-			blueprint.clone()
-		));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint.clone()));
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
@@ -379,11 +392,17 @@ fn test_payment_multiple_asset_types() {
 		assert_eq!(Assets::balance(USDC, eve.clone()), before_balance - payment);
 
 		// Bob approves with security commitments for all assets
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+		let security_commitments = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(TNT, 10),
-		],));
+		];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash
+		));
 
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
@@ -420,11 +439,17 @@ fn test_payment_multiple_asset_types() {
 		);
 
 		// Bob approves with security commitments for all assets
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
+		let security_commitments2 = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(TNT, 15),
-		],));
+		];
+		let security_commitment_hash2 = BlakeTwo256::hash_of(&security_commitments2);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			1,
+			security_commitment_hash2
+		));
 
 		// Verify ERC20 payment is transferred to MBSM
 		assert_ok!(
@@ -487,11 +512,17 @@ fn test_payment_multiple_asset_types() {
 		));
 
 		// Bob approves with security commitments for all assets
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, vec![
+		let security_commitments3 = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(TNT, 15),
-		],));
+		];
+		let security_commitment_hash3 = BlakeTwo256::hash_of(&security_commitments3);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			2,
+			security_commitment_hash3
+		));
 
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
@@ -510,7 +541,7 @@ fn test_payment_zero_amount() {
 		// Create blueprint
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
@@ -583,7 +614,7 @@ fn test_payment_maximum_amount() {
 		// Create blueprint
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
@@ -672,7 +703,7 @@ fn test_payment_invalid_asset_types() {
 		// Create blueprint
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
@@ -812,8 +843,8 @@ fn create_blueprint_with_pricing(
 ) -> ServiceBlueprint<ConstraintsOf<Runtime>, u64, u128> {
 	use frame_support::BoundedVec;
 	use tangle_primitives::services::{
-		BlueprintServiceManager, Gadget, MasterBlueprintServiceManagerRevision,
-		MembershipModelType, ServiceBlueprint, ServiceMetadata,
+		BlueprintServiceManager, MasterBlueprintServiceManagerRevision, MembershipModelType,
+		ServiceBlueprint, ServiceMetadata,
 	};
 
 	ServiceBlueprint {
@@ -823,7 +854,7 @@ fn create_blueprint_with_pricing(
 		request_params: BoundedVec::default(),
 		manager: BlueprintServiceManager::default(),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::default(),
-		gadget: Gadget::default(),
+		sources: Default::default(),
 		supported_membership_models: vec![MembershipModelType::Fixed].try_into().unwrap(),
 		pricing_model,
 	}
