@@ -951,15 +951,23 @@ fn test_termination_with_partial_approvals() {
 		));
 
 		// Only two operators approve
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments_bob =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash_bob
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
-			get_security_commitment(USDC, 15),
-			get_security_commitment(TNT, 15)
-		],));
+		let security_commitments_charlie =
+			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 15)];
+		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitment_hash_charlie
+		));
 
 		// Attempt to terminate service with partial approvals - should fail
 		assert_err!(
@@ -968,10 +976,14 @@ fn test_termination_with_partial_approvals() {
 		);
 
 		// Complete the approvals
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
-			get_security_commitment(USDC, 20),
-			get_security_commitment(TNT, 20)
-		],));
+		let security_commitments_dave =
+			vec![get_security_commitment(USDC, 20), get_security_commitment(TNT, 20)];
+		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitment_hash_dave
+		));
 
 		// Now termination should succeed
 		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
@@ -1020,10 +1032,14 @@ fn test_operator_offline_during_active_service() {
 		));
 
 		// Approve service request
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash
+		));
 
 		// Verify service is active
 		assert!(Instances::<Runtime>::contains_key(0));
