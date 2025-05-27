@@ -19,7 +19,7 @@ use frame_support::pallet_prelude::*;
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize};
-use sp_core::{H160, RuntimeDebug};
+use sp_core::{H160, RuntimeDebug, Get};
 use sp_runtime::{Percent, traits::AtLeast32BitUnsigned};
 use sp_staking::EraIndex;
 use sp_std::fmt::Display;
@@ -482,7 +482,7 @@ pub enum PricingModel<BlockNumber, Balance> {
 
 /// Blueprint data.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct BlueprintData<AccountId, AssetId, BlockNumber, Balance, C: Constraints> {
+pub struct BlueprintData<AccountId, AssetId: AssetIdT, BlockNumber, Balance, C: Constraints> {
 	/// The owner of the service blueprint.
 	pub owner: AccountId,
 	/// The metadata for the service blueprint.
@@ -501,7 +501,7 @@ pub struct BlueprintData<AccountId, AssetId, BlockNumber, Balance, C: Constraint
 
 /// Represents an instance of a service.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance> {
+pub struct Instance<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>, MaxOperators: Get<u32>, BlockNumber, Balance> {
 	/// The owner of the service instance.
 	pub owner: AccountId,
 	/// The blueprint ID from which this service instance was created.
@@ -519,7 +519,7 @@ pub struct Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, Block
 	pub last_billed: Option<BlockNumber>,
 }
 
-impl<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
+impl<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>, MaxOperators: Get<u32>, BlockNumber, Balance>
 	Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
 {
 	/// Validates the security commitments against the blueprint's requirements.

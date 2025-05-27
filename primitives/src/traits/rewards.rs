@@ -16,7 +16,7 @@
 
 use crate::services::Asset;
 use crate::types::rewards::LockMultiplier;
-use sp_runtime::traits::Zero;
+use sp_runtime::{traits::Zero, DispatchResult};
 
 /// Trait for managing rewards in the Tangle network.
 /// This trait provides functionality to record deposits, withdrawals, and service rewards,
@@ -125,10 +125,6 @@ where
 		Ok(Balance::zero())
 	}
 }
-
-use super::{*};
-use crate::services::types::PricingModel;
-use sp_runtime::{DispatchError, DispatchResult};
 
 /// Defines the interface for managing reward distributions and contributions.
 pub trait RewardDistributor<AccountId, Balance> {
