@@ -54,7 +54,7 @@ fn get_max_claimable(who: AccountId) -> Balance {
 		return 0;
 	}
 
-	let tnt_asset_id = <Runtime as crate::Config>::TntAssetId::get();
+	let tnt_asset_id = 0;
 	let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
 
 	let maybe_deposit_info =
@@ -106,7 +106,7 @@ fn run_to_block(n: BlockNumber) {
 }
 
 fn setup_delegation(delegator: AccountId, operator: AccountId, amount: Balance) {
-	let tnt_asset_id = <Runtime as crate::Config>::TntAssetId::get();
+	let tnt_asset_id = 0;
 	let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
 
 	let min_bond = <Runtime as pallet_multi_asset_delegation::Config>::MinOperatorBondAmount::get();
@@ -492,7 +492,7 @@ fn accrual_with_stake_change_works() {
 		let user = DAVE;
 		let operator = EVE;
 		let dave_id_str = b"dave_stake_change";
-		let tnt_asset_id = <Runtime as crate::Config>::TntAssetId::get();
+		let tnt_asset_id = 0;
 		let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
 
 		let stake_tier3 = 15000;
