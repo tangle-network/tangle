@@ -458,6 +458,7 @@ pub type ServiceId = u64;
 
 /// Defines the different pricing models for services.
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum PricingModel<BlockNumber, Balance> {
     /// A one-time payment for the service.
     PayOnce {
@@ -478,6 +479,14 @@ pub enum PricingModel<BlockNumber, Balance> {
         /// The reward amount per reported event.
         reward_per_event: Balance,
     },
+}
+
+impl<BlockNumber, Balance: Default> Default for PricingModel<BlockNumber, Balance> {
+    fn default() -> Self {
+        PricingModel::PayOnce {
+            amount: Balance::default(),
+        }
+    }
 }
 
 /// Blueprint data.

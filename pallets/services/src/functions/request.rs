@@ -52,6 +52,10 @@ impl<T: Config> Pallet<T> {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;
 
 		blueprint.type_check_request(&request_args).map_err(Error::<T>::TypeCheck)?;
+		
+		// Validate payment amount against pricing model
+		Self::validate_payment_amount(&blueprint, value)?;
+		
 		// ensure we at least have one asset and all assets are unique
 		ensure!(!security_requirements.is_empty(), Error::<T>::NoAssetsProvided);
 

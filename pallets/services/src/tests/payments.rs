@@ -754,3 +754,79 @@ fn test_payment_invalid_asset_types() {
 		);
 	});
 }
+
+// Payment Processing Tests for different pricing models
+
+#[test]
+fn test_validate_payment_amount_pay_once() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		let blueprint = create_blueprint_with_pricing(PricingModel::PayOnce { amount: 1000 });
+		
+		// Valid payment amount (equal to required)
+		assert_ok!(Services::validate_payment_amount(&blueprint, 1000));
+		
+		// Valid payment amount (more than required)
+		assert_ok!(Services::validate_payment_amount(&blueprint, 1500));
+		
+		// Invalid payment amount (less than required)
+		assert_err!(
+			Services::validate_payment_amount(&blueprint, 500),
+			Error::<Runtime>::InvalidRequestInput
+		);
+	});
+}
+
+#[test]
+fn test_validate_payment_amount_subscription() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		let blueprint = create_blueprint_with_pricing(PricingModel::Subscription {
+			rate_per_interval: 100,
+			interval: 10,
+			maybe_end: None,
+		});
+		
+		// Valid payment amount (equal to rate)
+		assert_ok!(Services::validate_payment_amount(&blueprint, 100));
+		
+		// Valid payment amount (more than rate)
+		assert_ok!(Services::validate_payment_amount(&blueprint, 200));
+		
+		// Invalid payment amount (less than rate)
+		assert_err!(
+			Services::validate_payment_amount(&blueprint, 50),
+			Error::<Runtime>::InvalidRequestInput
+		);
+	});
+}
+
+#[test]
+fn test_validate_payment_amount_event_driven() {
+	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
+		let blueprint = create_blueprint_with_pricing(PricingModel::EventDriven {
+			reward_per_event: 10,
+		});
+		
+		// Any payment amount should be valid for event-driven services
+		assert_ok!(Services::validate_payment_amount(&blueprint, 0));
+		assert_ok!(Services::validate_payment_amount(&blueprint, 100));
+		assert_ok!(Services::validate_payment_amount(&blueprint, 1000));
+	});
+}
+
+// Helper functions for payment processing tests
+fn create_blueprint_with_pricing(pricing_model: PricingModel<u64, u128>) -> ServiceBlueprint<ConstraintsOf<Runtime>, u64, u128> {
+	use tangle_primitives::services::{ServiceBlueprint, ServiceMetadata, BlueprintServiceManager, MasterBlueprintServiceManagerRevision, Gadget, MembershipModelType};
+	use frame_support::BoundedVec;
+	
+	ServiceBlueprint {
+		metadata: ServiceMetadata::default(),
+		jobs: BoundedVec::default(),
+		registration_params: BoundedVec::default(),
+		request_params: BoundedVec::default(),
+		manager: BlueprintServiceManager::default(),
+		master_manager_revision: MasterBlueprintServiceManagerRevision::default(),
+		gadget: Gadget::default(),
+		supported_membership_models: vec![MembershipModelType::Fixed].try_into().unwrap(),
+		pricing_model,
+	}
+}

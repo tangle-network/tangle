@@ -56,6 +56,7 @@ pub mod functions;
 mod impls;
 mod rpc;
 pub mod types;
+mod payment_processing;
 use types::*;
 
 #[cfg(test)]
@@ -262,7 +263,8 @@ pub mod module {
 		}
 
 		/// On initialize, we should check for any unapplied slashes and apply them.
-		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
+		/// Also process subscription payments for active services.
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
 			let mut weight = Zero::zero();
 			let current_era = T::OperatorDelegationManager::get_current_round();
 			let slash_defer_duration = T::SlashDeferDuration::get();
@@ -296,6 +298,11 @@ pub mod module {
 					);
 				}
 			}
+
+			// Process subscription payments
+			let subscription_weight = Self::process_subscription_payments_on_block(n);
+			weight = weight.saturating_add(subscription_weight);
+
 			weight
 		}
 	}
@@ -668,7 +675,7 @@ pub mod module {
 		_,
 		Identity,
 		u64,
-		(T::AccountId, ServiceBlueprint<T::Constraints>),
+		(T::AccountId, ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>),
 		ResultQuery<Error<T>::BlueprintNotFound>,
 	>;
 
@@ -844,7 +851,7 @@ pub mod module {
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
 			metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
-			typedef: ServiceBlueprint<T::Constraints>,
+			typedef: ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 			membership_model: MembershipModel,
 			security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
 			price_targets: Option<PriceTargets>,
@@ -879,6 +886,7 @@ pub mod module {
 				master_manager_revision: typedef.master_manager_revision,
 				gadget: typedef.gadget,
 				supported_membership_models: vec![membership_model_type].try_into().unwrap(),
+				pricing_model,
 			};
 
 			let (allowed, _weight) =

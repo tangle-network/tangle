@@ -187,6 +187,7 @@ impl<T: Config> Pallet<T> {
 			permitted_callers: request.permitted_callers.clone(),
 			ttl: request.ttl,
 			membership_model: request.membership_model,
+			last_billed: None, // Initialize as None for new services
 		};
 
 		UserServices::<T>::try_mutate(&request.owner, |service_ids| {
@@ -200,44 +201,10 @@ impl<T: Config> Pallet<T> {
 
 		// Process payment if it exists - Distribute reward instead of immediate payout
 		if let Some(payment) = Self::service_payment(request_id) {
-			let num_operators = operator_security_commitments.len();
-			// Ensure there are operators to distribute rewards to (should always be true if approved)
-			ensure!(num_operators > 0, Error::<T>::TooFewOperators); // Or a more specific error if needed
-
-			// Calculate reward per operator (integer division, remainder is effectively lost/kept by pallet)
-			// Consider adding specific handling for remainders if necessary (e.g., send to treasury)
-			let reward_per_operator: BalanceOf<T> = payment.amount / (num_operators as u64).saturated_into();
-
-			// Ensure reward is not zero if payment amount is non-zero (protect against edge cases)
-			if !reward_per_operator.is_zero() || payment.amount.is_zero() {
-				// TODO: Get pricing model from blueprint/service data when available
-				// For now, assume PayOnce for calculation demonstration
-				let mock_model = tangle_primitives::services::PricingModel::PayOnce { amount: payment.amount };
-
-				// Record reward for each operator
-				for (operator, _) in operator_security_commitments.iter() {
-					T::RewardRecorder::record_reward(
-						operator,
-						service_id,
-						reward_per_operator,
-						&mock_model, // Pass the actual model when available
-					)?;
-				}
-			} else {
-				// Handle the case where the reward per operator rounds down to zero
-				// This could happen if payment.amount < num_operators
-				// Option 1: Log a warning/event
-				// Option 2: Send the total payment to a default beneficiary (e.g., treasury)
-				// Option 3: Distribute remaining amount to the first operator(s)
-				// For now, we'll just skip recording if the per-operator amount is zero.
-				// Consider adding more robust handling based on requirements.
-				log::warn!(
-					"Reward per operator is zero for service_id {}. Total payment: {:?}, Num operators: {}. No reward recorded.",
-					service_id, payment.amount, num_operators
-				);
-			}
-
-			// Remove the payment from staging - This remains necessary
+			// Process the payment using the new payment processing logic
+			Self::process_pay_once_payment(service_id, &request.owner, payment.amount)?;
+			
+			// Remove the payment from staging
 			StagingServicePayments::<T>::remove(request_id);
 		}
 
@@ -279,7 +246,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	///
 	/// Returns a DispatchResult indicating success or the specific error that occurred
-	pub(crate) fn process_service_payment(
+	pub(crate) fn transfer_payment_to_mbsm(
 		blueprint_id: u64,
 		payment: &StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>,
 	) -> DispatchResult {

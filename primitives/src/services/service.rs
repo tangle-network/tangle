@@ -19,7 +19,7 @@ use super::{
 	MembershipModelType, TypeCheckError,
 	constraints::Constraints,
 	jobs::{JobDefinition, type_checker},
-	types::{ApprovalState, Asset, MembershipModel},
+	types::{ApprovalState, Asset, MembershipModel, PricingModel},
 };
 use crate::{Account, BlueprintId};
 use educe::Educe;
@@ -114,12 +114,15 @@ pub enum MasterBlueprintServiceManagerRevision {
 /// gadget that will be executed when one of the jobs is calling this service.
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(Default(bound()), Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
-#[scale_info(skip_type_params(C))]
-#[codec(encode_bound(skip_type_params(C)))]
-#[codec(decode_bound(skip_type_params(C)))]
-#[codec(mel_bound(skip_type_params(C)))]
-#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize), serde(bound = ""))]
-pub struct ServiceBlueprint<C: Constraints> {
+#[scale_info(skip_type_params(C, BlockNumber, Balance))]
+#[codec(encode_bound(skip_type_params(C, BlockNumber, Balance)))]
+#[codec(decode_bound(skip_type_params(C, BlockNumber, Balance)))]
+#[codec(mel_bound(skip_type_params(C, BlockNumber, Balance)))]
+pub struct ServiceBlueprint<C: Constraints, BlockNumber = u32, Balance = u128> 
+where
+	BlockNumber: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+	Balance: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+{
 	/// The metadata of the service.
 	pub metadata: ServiceMetadata<C>,
 	/// The job definitions that are available in this service.
@@ -141,9 +144,15 @@ pub struct ServiceBlueprint<C: Constraints> {
 	pub gadget: Gadget<C>,
 	/// The membership models supported by this blueprint
 	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
+	/// The pricing model for this blueprint
+	pub pricing_model: PricingModel<BlockNumber, Balance>,
 }
 
-impl<C: Constraints> ServiceBlueprint<C> {
+impl<C: Constraints, BlockNumber, Balance> ServiceBlueprint<C, BlockNumber, Balance> 
+where
+	BlockNumber: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+	Balance: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+{
 	/// Check if the supplied arguments match the registration parameters.
 	pub fn type_check_registration<AccountId: Encode + Clone>(
 		&self,
@@ -435,11 +444,6 @@ pub type OperatorSecurityCommitments<AccountId, AssetId, C> = BoundedVec<
 #[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
 #[cfg_attr(
     feature = "std",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(bound(
-        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT",
-    )),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT)))
 )]
 pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
@@ -461,6 +465,8 @@ pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
 	pub ttl: BlockNumber,
 	/// The membership model of the service
 	pub membership_model: MembershipModel,
+	/// The block number when the last payment was processed for subscription services
+	pub last_billed: Option<BlockNumber>,
 }
 
 impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
@@ -475,32 +481,28 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 }
 
 /// RPC Response for query the blueprint along with the services instances of that blueprint.
-#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[derive(Educe, TypeInfo)]
 #[educe(
     Default(bound(AccountId: Default, BlockNumber: Default, AssetId: Default)),
     Clone(bound(AccountId: Clone, BlockNumber: Clone, AssetId: Clone)),
     PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq, AssetId: PartialEq)),
     Eq
 )]
-#[scale_info(skip_type_params(C))]
-#[codec(encode_bound(skip_type_params(C)))]
-#[codec(decode_bound(skip_type_params(C)))]
-#[codec(mel_bound(skip_type_params(C)))]
+#[scale_info(skip_type_params(C, AccountId, BlockNumber, AssetId))]
 #[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
 #[cfg_attr(
     feature = "std",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(bound(
-        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
-        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT",
-    )),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
+pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT, Balance = u128> 
+where
+	BlockNumber: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+	Balance: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+{
 	/// The blueprint ID.
 	pub blueprint_id: u64,
 	/// The service blueprint.
-	pub blueprint: ServiceBlueprint<C>,
+	pub blueprint: ServiceBlueprint<C, BlockNumber, Balance>,
 	/// The services instances of that blueprint.
 	pub services: Vec<Service<C, AccountId, BlockNumber, AssetId>>,
 }

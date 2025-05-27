@@ -12,7 +12,7 @@ use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec, vec};
 use tangle_primitives::services::{
-	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
+	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint, PricingModel,
 };
 
 #[cfg(test)]
@@ -69,11 +69,25 @@ where
 
 		let call = pallet_services::Call::<Runtime>::create_blueprint {
 			metadata: blueprint.metadata.name.as_str().as_bytes().to_vec().try_into().unwrap(),
-			typedef: blueprint,
+			typedef: ServiceBlueprint {
+				metadata: blueprint.metadata.clone(),
+				jobs: blueprint.jobs.clone(),
+				registration_params: blueprint.registration_params.clone(),
+				request_params: blueprint.request_params.clone(),
+				manager: blueprint.manager.clone(),
+				master_manager_revision: blueprint.master_manager_revision.clone(),
+				gadget: blueprint.gadget.clone(),
+				supported_membership_models: blueprint.supported_membership_models.clone(),
+				pricing_model: tangle_primitives::services::PricingModel::PayOnce { 
+					amount: Default::default()
+				},
+			},
 			membership_model: MembershipModel::Fixed { min_operators: 1 },
 			security_requirements: vec![],
 			price_targets: None,
-			pricing_model: tangle_primitives::services::PricingModel::PayOnce { amount: 0u32.into() },
+			pricing_model: tangle_primitives::services::PricingModel::PayOnce { 
+				amount: Default::default()
+			},
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
