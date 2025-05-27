@@ -302,7 +302,7 @@ impl<T: Config> Pallet<T> {
 	pub fn on_update_price_targets(
 		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
-		preferences: &OperatorPreferences,
+		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
 		#[allow(deprecated)]
 		Self::dispatch_hook(
@@ -315,7 +315,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Uint(64),
 						internal_type: None,
 					},
-					OperatorPreferences::to_ethabi_param(),
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
 				],
 				outputs: Default::default(),
 				constant: None,
@@ -848,7 +848,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the RPC address update is allowed and the weight of the operation.
 	pub fn on_update_rpc_address_hook(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -867,7 +867,7 @@ impl<T: Config> Pallet<T> {
 				],
 				outputs: Default::default(),
 				constant: None,
-				state_mutability: StateMutability::Payable,
+				state_mutability: StateMutability::NonPayable,
 			},
 			&[Token::Uint(ethabi::Uint::from(blueprint_id)), preferences.to_ethabi()],
 			Zero::zero(),

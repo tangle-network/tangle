@@ -446,6 +446,19 @@ impl<BlockNumber, Balance: Default> Default for PricingModel<BlockNumber, Balanc
 	}
 }
 
+/// Price targets for service pricing (placeholder type)
+#[derive(Clone, Debug, PartialEq, Eq, Encode, Decode, TypeInfo, MaxEncodedLen)]
+pub struct PriceTargets {
+	/// Placeholder field - this type is not currently used
+	pub _placeholder: u8,
+}
+
+impl Default for PriceTargets {
+	fn default() -> Self {
+		Self { _placeholder: 0 }
+	}
+}
+
 /// Blueprint data.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
 pub struct BlueprintData<AccountId, AssetId: AssetIdT, BlockNumber, Balance, C: Constraints> {

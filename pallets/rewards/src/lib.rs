@@ -84,6 +84,7 @@ use sp_std::vec::Vec;
 use tangle_primitives::{
 	BlueprintId,
 	services::types::{PricingModel, ServiceId},
+	types::rewards::AssetType,
 };
 
 /// The pallet's account ID.

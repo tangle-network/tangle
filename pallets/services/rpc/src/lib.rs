@@ -114,6 +114,7 @@ where
 #[derive(Debug)]
 pub enum Error {
 	RuntimeError(sp_api::ApiError),
+	DecodeError,
 	CustomDispatchError(sp_runtime::DispatchError),
 }
 
@@ -121,6 +122,7 @@ impl From<Error> for i32 {
 	fn from(e: Error) -> i32 {
 		match e {
 			Error::RuntimeError(_) => 1,
+			Error::DecodeError => 2,
 			Error::CustomDispatchError(_) => 3,
 		}
 	}

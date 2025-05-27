@@ -900,7 +900,7 @@ pub mod module {
 				request_params: typedef.request_params,
 				manager: typedef.manager,
 				master_manager_revision: typedef.master_manager_revision,
-				gadget: typedef.gadget,
+				sources: typedef.sources,
 				supported_membership_models: vec![membership_model_type].try_into().unwrap(),
 				pricing_model,
 			};

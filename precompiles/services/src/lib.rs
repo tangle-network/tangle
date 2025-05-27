@@ -76,7 +76,7 @@ where
 				request_params: blueprint.request_params.clone(),
 				manager: blueprint.manager.clone(),
 				master_manager_revision: blueprint.master_manager_revision.clone(),
-				gadget: blueprint.gadget.clone(),
+				sources: blueprint.sources.clone(),
 				supported_membership_models: blueprint.supported_membership_models.clone(),
 				pricing_model: tangle_primitives::services::PricingModel::PayOnce {
 					amount: Default::default(),
