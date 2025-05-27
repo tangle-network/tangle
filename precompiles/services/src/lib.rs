@@ -12,7 +12,7 @@ use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
 use sp_std::{marker::PhantomData, vec::Vec, vec};
 use tangle_primitives::services::{
-	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint, PricingModel,
+	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
 };
 
 #[cfg(test)]

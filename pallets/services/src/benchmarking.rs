@@ -502,6 +502,48 @@ benchmarks! {
 		let operator_preference = operator_preferences::<T>();
 		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
 
+		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create a service instance with dynamic membership
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(3) }
+		);
+
+	}: _(RawOrigin::Signed(charlie.clone()), 0)
+
+	// Benchmark payment validation for pay-once services
+	validate_payment_amount_pay_once {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		
+		let (_, blueprint) = Pallet::<T>::blueprints(0).unwrap();
+		let amount = 1000_u32.into();
+	}: {
+		let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
+	}
+
+	// Benchmark payment processing for subscription services
+	process_subscription_payment {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
 		// Create a service instance
 		let _= Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
@@ -517,8 +559,75 @@ benchmarks! {
 			MembershipModel::Fixed { min_operators: 1 }
 		);
 
-	}: _(RawOrigin::Signed(bob.clone()), 0)
+		let service_id = 0;
+		let current_block = 100_u32.into();
+	}: {
+		let _ = Pallet::<T>::process_service_payment(service_id, current_block);
+	}
 
+	// Benchmark event-driven payment processing
+	process_event_driven_payment {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create a service instance
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+		let service_id = 0;
+		let event_count = 5;
+	}: {
+		let _ = Pallet::<T>::process_event_driven_payment(service_id, event_count);
+	}
+
+	// Benchmark subscription payments processing on block
+	process_subscription_payments_on_block {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference, Default::default(), 0_u32.into());
+
+		// Create multiple service instances to test batch processing
+		for i in 0..5 {
+			let requester: T::AccountId = mock_account_id::<T>((10 + i) as u8);
+			let _= Pallet::<T>::request(
+				RawOrigin::Signed(requester).into(),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone()],
+				Default::default(),
+				vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+				100_u32.into(),
+				Asset::Custom(USDC.into()),
+				0_u32.into(),
+				MembershipModel::Fixed { min_operators: 1 }
+			);
+		}
+
+		let current_block = 100_u32.into();
+	}: {
+		let _ = Pallet::<T>::process_subscription_payments_on_block(current_block);
+	}
 }
 
 // Define the module and associated types for the benchmarks

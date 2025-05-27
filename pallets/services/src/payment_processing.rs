@@ -9,7 +9,7 @@ use frame_support::{
 	pallet_prelude::*,
 };
 use sp_runtime::{
-	traits::{Saturating, CheckedMul, Zero},
+	traits::{Saturating, CheckedMul},
 };
 use tangle_primitives::{
 	services::{Asset, PricingModel, ServiceBlueprint, StagingServicePayment},
@@ -52,7 +52,7 @@ impl<T: Config> Pallet<T> {
 	/// Process a one-time payment for a service
 	pub fn process_pay_once_payment(
 		service_id: u64,
-		payer: &T::AccountId,
+		_payer: &T::AccountId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
 		// Check if payment has already been processed

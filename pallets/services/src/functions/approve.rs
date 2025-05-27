@@ -24,11 +24,10 @@ use frame_support::{
 	BoundedVec,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::traits::{Zero, Saturating, SaturatedConversion};
+use sp_runtime::traits::{Zero};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	services::{Asset, AssetSecurityCommitment, Service, ServiceRequest, StagingServicePayment, ApprovalState, EvmAddressMapping},
-	traits::{RewardsManager, RewardRecorder},
 };
 
 impl<T: Config> Pallet<T> {

@@ -33,8 +33,6 @@ use sp_runtime::RuntimeAppPublic;
 use sp_runtime::{
 	DispatchResult,
 	traits::{Get, Zero},
-	Percent,
-	traits::MaybeSerializeDeserialize,
 };
 use tangle_primitives::traits::SlashManager;
 use tangle_primitives::{
@@ -43,7 +41,6 @@ use tangle_primitives::{
 		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
 	},
 	traits::MultiAssetDelegationInfo,
-	traits::RewardRecorder as RewardRecorderTrait,
 };
 use sp_std::{vec};
 
@@ -853,8 +850,8 @@ pub mod module {
 			metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
 			typedef: ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 			membership_model: MembershipModel,
-			security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
-			price_targets: Option<PriceTargets>,
+			_security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
+			_price_targets: Option<PriceTargets>,
 			pricing_model: PricingModel<BlockNumberFor<T>, BalanceOf<T>>,
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
@@ -1244,7 +1241,7 @@ pub mod module {
 		pub fn approve(
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
-			security_commitment: T::Hash,
+			_security_commitment: T::Hash,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
