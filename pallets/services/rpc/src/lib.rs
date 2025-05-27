@@ -24,13 +24,11 @@ use parity_scale_codec::{Codec, MaxEncodedLen};
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
-	traits::{Block as BlockT, MaybeDisplay},
 	Serialize,
+	traits::{Block as BlockT, MaybeDisplay},
 };
 use std::sync::Arc;
-use tangle_primitives::services::{
-	AssetIdT, Constraints, ServiceRequest,
-};
+use tangle_primitives::services::{AssetIdT, Constraints, ServiceRequest};
 
 pub use pallet_services_rpc_runtime_api::ServicesApi as ServicesRuntimeApi;
 
@@ -43,7 +41,17 @@ pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber, AssetId>
 where
 	X: Constraints,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	BlockNumber: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Clone + PartialEq + Eq + MaxEncodedLen + Default,
+	BlockNumber: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Clone
+		+ PartialEq
+		+ Eq
+		+ MaxEncodedLen
+		+ Default,
 	AssetId: AssetIdT,
 {
 	// /// Query services with blueprints by operator

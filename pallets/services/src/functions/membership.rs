@@ -1,12 +1,5 @@
-use crate::{
-	Config, Error, Pallet, Instances,
-	BalanceOf, BlockNumberFor,
-};
-use frame_support::{
-	dispatch::DispatchResult,
-	ensure,
-	pallet_prelude::*,
-};
+use crate::{BalanceOf, BlockNumberFor, Config, Error, Instances, Pallet};
+use frame_support::{dispatch::DispatchResult, ensure, pallet_prelude::*};
 use sp_std::vec::Vec;
 use tangle_primitives::services::{
 	AssetSecurityCommitment, MembershipModel, OperatorPreferences, ServiceBlueprint,

@@ -20,26 +20,25 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 use frame_support::{
-	dispatch::{DispatchResult, DispatchResultWithPostInfo, Pays},
+	dispatch::{DispatchResult, DispatchResultWithPostInfo, Pays, PostDispatchInfo},
 	ensure,
 	pallet_prelude::*,
 	storage::TransactionOutcome,
-	traits::{Currency, ReservableCurrency},
-	dispatch::PostDispatchInfo,
-	traits::fungibles::{Inspect, Mutate},
-	ensure,
+	traits::{
+		Currency, ReservableCurrency,
+		fungibles::{Inspect, Mutate},
+	},
 };
 use frame_system::pallet_prelude::{BlockNumberFor, OriginFor, ensure_signed};
 use sp_core::ecdsa;
 use sp_runtime::{RuntimeAppPublic, SaturatedConversion, traits::Zero};
-use sp_std::{collections::btree_map::BTreeMap, prelude::*};
+use sp_std::{collections::btree_map::BTreeMap, prelude::*, vec};
 use tangle_primitives::{
 	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 	rewards::AssetType,
 	services::{AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel},
 	traits::{MultiAssetDelegationInfo, SlashManager},
 };
-use sp_std::{vec};
 
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
@@ -48,9 +47,9 @@ use std::string::String;
 
 pub mod functions;
 mod impls;
+mod payment_processing;
 mod rpc;
 pub mod types;
-mod payment_processing;
 use types::*;
 
 #[cfg(test)]
@@ -78,10 +77,7 @@ pub mod module {
 	use sp_core::H160;
 	use sp_runtime::{Percent, traits::MaybeSerializeDeserialize};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
-	use tangle_primitives::{
-		services::*,
-		traits::RewardRecorder as RewardRecorderTrait,
-	};
+	use tangle_primitives::{services::*, traits::RewardRecorder as RewardRecorderTrait};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -97,11 +93,11 @@ pub mod module {
 
 		/// A type that implements the `RewardRecorder` trait for recording service rewards.
 		type RewardRecorder: RewardRecorderTrait<
-			Self::AccountId,
-			ServiceId,
-			BalanceOf<Self>,
-			PricingModel = PricingModel<BlockNumberFor<Self>, BalanceOf<Self>>
-		>;
+				Self::AccountId,
+				ServiceId,
+				BalanceOf<Self>,
+				PricingModel = PricingModel<BlockNumberFor<Self>, BalanceOf<Self>>,
+			>;
 
 		/// PalletId used for deriving the AccountId and EVM address.
 		/// This account receives slashed assets upon slash event processing.
@@ -224,11 +220,11 @@ pub mod module {
 
 		/// Interface for recording rewards.
 		type RewardsManager: tangle_primitives::traits::RewardsManager<
-			Self::AccountId,
-			Self::AssetId,
-			BalanceOf<Self>,
-			BlockNumberFor<Self>,
-		>;
+				Self::AccountId,
+				Self::AssetId,
+				BalanceOf<Self>,
+				BlockNumberFor<Self>,
+			>;
 
 		/// Number of eras that slashes are deferred by, after computation.
 		///
@@ -846,7 +842,8 @@ pub mod module {
 		///
 		/// # Arguments
 		///
-		/// * `origin` - The origin of the call, must be signed by the account creating the blueprint
+		/// * `origin` - The origin of the call, must be signed by the account creating the
+		///   blueprint
 		/// * `metadata` - The metadata of the service blueprint.
 		/// * `typedef` - The type definition of the service blueprint.
 		/// * `membership_model` - The membership model of the service blueprint.
@@ -885,7 +882,8 @@ pub mod module {
 				MembershipModel::Dynamic { .. } => MembershipModelType::Dynamic,
 			};
 
-			let metadata_string = String::from_utf8(metadata.clone().into_inner()).unwrap_or_default();
+			let metadata_string =
+				String::from_utf8(metadata.clone().into_inner()).unwrap_or_default();
 			let blueprint = ServiceBlueprint {
 				metadata: ServiceMetadata {
 					name: BoundedString::try_from(metadata_string.clone()).unwrap(),

@@ -118,10 +118,26 @@ pub enum MasterBlueprintServiceManagerRevision {
 #[codec(encode_bound(skip_type_params(C, BlockNumber, Balance)))]
 #[codec(decode_bound(skip_type_params(C, BlockNumber, Balance)))]
 #[codec(mel_bound(skip_type_params(C, BlockNumber, Balance)))]
-pub struct ServiceBlueprint<C: Constraints, BlockNumber = u32, Balance = u128> 
+pub struct ServiceBlueprint<C: Constraints, BlockNumber = u32, Balance = u128>
 where
-	BlockNumber: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
-	Balance: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+	BlockNumber: Clone
+		+ PartialEq
+		+ Eq
+		+ core::fmt::Debug
+		+ Encode
+		+ Decode
+		+ MaxEncodedLen
+		+ TypeInfo
+		+ Default,
+	Balance: Clone
+		+ PartialEq
+		+ Eq
+		+ core::fmt::Debug
+		+ Encode
+		+ Decode
+		+ MaxEncodedLen
+		+ TypeInfo
+		+ Default,
 {
 	/// The metadata of the service.
 	pub metadata: ServiceMetadata<C>,
@@ -148,10 +164,26 @@ where
 	pub pricing_model: PricingModel<BlockNumber, Balance>,
 }
 
-impl<C: Constraints, BlockNumber, Balance> ServiceBlueprint<C, BlockNumber, Balance> 
+impl<C: Constraints, BlockNumber, Balance> ServiceBlueprint<C, BlockNumber, Balance>
 where
-	BlockNumber: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
-	Balance: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+	BlockNumber: Clone
+		+ PartialEq
+		+ Eq
+		+ core::fmt::Debug
+		+ Encode
+		+ Decode
+		+ MaxEncodedLen
+		+ TypeInfo
+		+ Default,
+	Balance: Clone
+		+ PartialEq
+		+ Eq
+		+ core::fmt::Debug
+		+ Encode
+		+ Decode
+		+ MaxEncodedLen
+		+ TypeInfo
+		+ Default,
 {
 	/// Check if the supplied arguments match the registration parameters.
 	pub fn type_check_registration<AccountId: Encode + Clone>(
@@ -493,10 +525,31 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
     feature = "std",
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT, Balance = u128> 
-where
-	BlockNumber: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
-	Balance: Clone + PartialEq + Eq + core::fmt::Debug + Encode + Decode + MaxEncodedLen + TypeInfo + Default,
+pub struct RpcServicesWithBlueprint<
+	C: Constraints,
+	AccountId,
+	BlockNumber,
+	AssetId: AssetIdT,
+	Balance = u128,
+> where
+	BlockNumber: Clone
+		+ PartialEq
+		+ Eq
+		+ core::fmt::Debug
+		+ Encode
+		+ Decode
+		+ MaxEncodedLen
+		+ TypeInfo
+		+ Default,
+	Balance: Clone
+		+ PartialEq
+		+ Eq
+		+ core::fmt::Debug
+		+ Encode
+		+ Decode
+		+ MaxEncodedLen
+		+ TypeInfo
+		+ Default,
 {
 	/// The blueprint ID.
 	pub blueprint_id: u64,

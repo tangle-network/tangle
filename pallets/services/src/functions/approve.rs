@@ -15,19 +15,21 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	BalanceOf, Config, Event, Error, NextInstanceId, ServiceRequests, Instances, UserServices, StagingServicePayments, OperatorsProfile, ServiceStatus, Pallet,
+	BalanceOf, Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet,
+	ServiceRequests, ServiceStatus, StagingServicePayments, UserServices,
 };
 use frame_support::{
+	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
-	traits::{fungibles::Mutate, ExistenceRequirement, tokens::Preservation, Currency},
-	BoundedVec,
+	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::traits::{Zero};
+use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
-use tangle_primitives::{
-	services::{Asset, AssetSecurityCommitment, Service, ServiceRequest, StagingServicePayment, ApprovalState, EvmAddressMapping},
+use tangle_primitives::services::{
+	ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
+	StagingServicePayment,
 };
 
 impl<T: Config> Pallet<T> {
@@ -203,7 +205,7 @@ impl<T: Config> Pallet<T> {
 		if let Some(payment) = Self::service_payment(request_id) {
 			// Process the payment using the new payment processing logic
 			Self::process_pay_once_payment(service_id, &request.owner, payment.amount)?;
-			
+
 			// Remove the payment from staging
 			StagingServicePayments::<T>::remove(request_id);
 		}

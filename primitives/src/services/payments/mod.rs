@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Payment system for the Services pallet.
-//! 
+//!
 //! This module provides a comprehensive payment system that supports multiple pricing models:
 //! - PayOnce: One-time payment services
 //! - Subscription: Recurring payment services
@@ -26,13 +26,13 @@
 //! - `billing`: Billing calculation logic and state management
 //! - `traits`: Traits for payment operations and reward recording
 
-pub mod types;
 pub mod billing;
 pub mod traits;
+pub mod types;
 
 // Re-export commonly used types and traits
-pub use types::*;
 pub use traits::*;
+pub use types::*;
 
 // Re-export pricing models from parent types module for convenience
-pub use super::types::PricingModel; 
+pub use super::types::PricingModel;

@@ -669,7 +669,7 @@ benchmarks! {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
-		
+
 		let (_, blueprint) = Pallet::<T>::blueprints(0).unwrap();
 		let amount = 1000_u32.into();
 	}: {

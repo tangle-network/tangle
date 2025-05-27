@@ -10,7 +10,7 @@ use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
-use sp_std::{marker::PhantomData, vec::Vec, vec};
+use sp_std::{marker::PhantomData, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
 };
@@ -78,15 +78,15 @@ where
 				master_manager_revision: blueprint.master_manager_revision.clone(),
 				gadget: blueprint.gadget.clone(),
 				supported_membership_models: blueprint.supported_membership_models.clone(),
-				pricing_model: tangle_primitives::services::PricingModel::PayOnce { 
-					amount: Default::default()
+				pricing_model: tangle_primitives::services::PricingModel::PayOnce {
+					amount: Default::default(),
 				},
 			},
 			membership_model: MembershipModel::Fixed { min_operators: 1 },
 			security_requirements: vec![],
 			price_targets: None,
-			pricing_model: tangle_primitives::services::PricingModel::PayOnce { 
-				amount: Default::default()
+			pricing_model: tangle_primitives::services::PricingModel::PayOnce {
+				amount: Default::default(),
 			},
 		};
 

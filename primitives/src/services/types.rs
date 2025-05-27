@@ -20,7 +20,7 @@ use frame_support::pallet_prelude::*;
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize};
-use sp_core::{H160, RuntimeDebug, Get};
+use sp_core::{Get, H160, RuntimeDebug};
 use sp_runtime::{Percent, traits::AtLeast32BitUnsigned};
 use sp_staking::EraIndex;
 use sp_std::fmt::Display;
@@ -28,8 +28,8 @@ use sp_std::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, string::ToString, vec, vec::Vec};
 
-use super::{Constraints, field::FieldType, ServiceBlueprint};
-use crate::{BlueprintId};
+use super::{Constraints, ServiceBlueprint, field::FieldType};
+use crate::BlueprintId;
 
 /// Maximum length for metadata fields
 pub const MAX_METADATA_LENGTH: u32 = 1024;
@@ -419,33 +419,31 @@ pub type ServiceId = u64;
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum PricingModel<BlockNumber, Balance> {
-    /// A one-time payment for the service.
-    PayOnce {
-        /// The total amount to be paid.
-        amount: Balance,
-    },
-    /// A subscription-based model with recurring payments.
-    Subscription {
-        /// The amount to be paid per interval.
-        rate_per_interval: Balance,
-        /// The duration of each billing interval.
-        interval: BlockNumber,
-        /// An optional end block for the subscription.
-        maybe_end: Option<BlockNumber>,
-    },
-    /// An event-driven model where rewards are based on reported events.
-    EventDriven {
-        /// The reward amount per reported event.
-        reward_per_event: Balance,
-    },
+	/// A one-time payment for the service.
+	PayOnce {
+		/// The total amount to be paid.
+		amount: Balance,
+	},
+	/// A subscription-based model with recurring payments.
+	Subscription {
+		/// The amount to be paid per interval.
+		rate_per_interval: Balance,
+		/// The duration of each billing interval.
+		interval: BlockNumber,
+		/// An optional end block for the subscription.
+		maybe_end: Option<BlockNumber>,
+	},
+	/// An event-driven model where rewards are based on reported events.
+	EventDriven {
+		/// The reward amount per reported event.
+		reward_per_event: Balance,
+	},
 }
 
 impl<BlockNumber, Balance: Default> Default for PricingModel<BlockNumber, Balance> {
-    fn default() -> Self {
-        PricingModel::PayOnce {
-            amount: Balance::default(),
-        }
-    }
+	fn default() -> Self {
+		PricingModel::PayOnce { amount: Balance::default() }
+	}
 }
 
 /// Blueprint data.
@@ -469,7 +467,14 @@ pub struct BlueprintData<AccountId, AssetId: AssetIdT, BlockNumber, Balance, C: 
 
 /// Represents an instance of a service.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct Instance<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>, MaxOperators: Get<u32>, BlockNumber, Balance> {
+pub struct Instance<
+	AccountId,
+	AssetId: AssetIdT,
+	MaxPermittedCallers: Get<u32>,
+	MaxOperators: Get<u32>,
+	BlockNumber,
+	Balance,
+> {
 	/// The owner of the service instance.
 	pub owner: AccountId,
 	/// The blueprint ID from which this service instance was created.
@@ -487,8 +492,14 @@ pub struct Instance<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>,
 	pub last_billed: Option<BlockNumber>,
 }
 
-impl<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>, MaxOperators: Get<u32>, BlockNumber, Balance>
-	Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
+impl<
+	AccountId,
+	AssetId: AssetIdT,
+	MaxPermittedCallers: Get<u32>,
+	MaxOperators: Get<u32>,
+	BlockNumber,
+	Balance,
+> Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
 {
 	/// Validates the security commitments against the blueprint's requirements.
 	pub fn validate_security_commitments(

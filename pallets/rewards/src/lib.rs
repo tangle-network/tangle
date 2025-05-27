@@ -81,8 +81,10 @@ pub use weights::*;
 pub mod migrations;
 
 use sp_std::vec::Vec;
-use tangle_primitives::BlueprintId;
-use tangle_primitives::services::types::{ServiceId, PricingModel};
+use tangle_primitives::{
+	BlueprintId,
+	services::types::{PricingModel, ServiceId},
+};
 
 /// The pallet's account ID.
 #[frame_support::pallet]
@@ -91,10 +93,13 @@ pub mod pallet {
 	use frame_support::{
 		PalletId,
 		pallet_prelude::*,
-		traits::{Currency, LockableCurrency, ReservableCurrency, ExistenceRequirement},
+		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::{Perbill, traits::{AccountIdConversion, Zero, Saturating}};
+	use sp_runtime::{
+		Perbill,
+		traits::{AccountIdConversion, Saturating, Zero},
+	};
 	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
@@ -670,7 +675,8 @@ pub mod pallet {
 				&operator,
 				total_reward,
 				ExistenceRequirement::KeepAlive, // Or AllowDeath depending on requirements
-			).map_err(|_| Error::<T>::TransferFailed)?;
+			)
+			.map_err(|_| Error::<T>::TransferFailed)?;
 
 			// Emit an event.
 			Self::deposit_event(Event::OperatorRewardsClaimed { operator, amount: total_reward });
@@ -686,7 +692,9 @@ pub mod pallet {
 		}
 	}
 
-	impl<T: Config> tangle_primitives::traits::RewardRecorder<T::AccountId, ServiceId, BalanceOf<T>> for Pallet<T> {
+	impl<T: Config> tangle_primitives::traits::RewardRecorder<T::AccountId, ServiceId, BalanceOf<T>>
+		for Pallet<T>
+	{
 		type PricingModel = PricingModel<BlockNumberFor<T>, BalanceOf<T>>;
 
 		fn record_reward(
@@ -708,19 +716,23 @@ pub mod pallet {
 			match result {
 				Ok(_) => {
 					// Emit event only if successful
-					Self::deposit_event(Event::RewardRecorded { operator: operator.clone(), service_id, amount });
+					Self::deposit_event(Event::RewardRecorded {
+						operator: operator.clone(),
+						service_id,
+						amount,
+					});
 					Ok(())
 				},
 				Err(_) => {
-					// Log an error or handle the case where the operator has too many pending rewards.
-					// For now, we simply don't record the reward if the limit is reached.
-					// Optionally, emit a specific event or error.
+					// Log an error or handle the case where the operator has too many pending
+					// rewards. For now, we simply don't record the reward if the limit is
+					// reached. Optionally, emit a specific event or error.
 					log::warn!(
 						"Failed to record reward for operator {:?}: Too many pending rewards.",
 						operator
 					);
 					Ok(())
-				}
+				},
 			}
 		}
 	}

@@ -21,9 +21,7 @@
 use parity_scale_codec::Codec;
 use sp_runtime::{Serialize, traits::MaybeDisplay};
 use sp_std::vec::Vec;
-use tangle_primitives::services::{
-	AssetIdT, Constraints, ServiceRequest,
-};
+use tangle_primitives::services::{AssetIdT, Constraints, ServiceRequest};
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
