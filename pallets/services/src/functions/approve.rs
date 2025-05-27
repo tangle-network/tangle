@@ -28,7 +28,7 @@ use sp_runtime::traits::{Zero, Saturating, SaturatedConversion};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	services::{Asset, AssetSecurityCommitment, Service, ServiceRequest, StagingServicePayment, ApprovalState, EvmAddressMapping},
-	traits::RewardsManager,
+	traits::{RewardsManager, RewardRecorder},
 };
 
 impl<T: Config> Pallet<T> {
@@ -206,8 +206,7 @@ impl<T: Config> Pallet<T> {
 
 			// Calculate reward per operator (integer division, remainder is effectively lost/kept by pallet)
 			// Consider adding specific handling for remainders if necessary (e.g., send to treasury)
-			let reward_per_operator: BalanceOf<T> = payment.amount
-				.saturating_div((num_operators as u64).saturated_into());
+			let reward_per_operator: BalanceOf<T> = payment.amount / (num_operators as u64).saturated_into();
 
 			// Ensure reward is not zero if payment amount is non-zero (protect against edge cases)
 			if !reward_per_operator.is_zero() || payment.amount.is_zero() {
@@ -222,7 +221,7 @@ impl<T: Config> Pallet<T> {
 						service_id,
 						reward_per_operator,
 						&mock_model, // Pass the actual model when available
-					);
+					)?;
 				}
 			} else {
 				// Handle the case where the reward per operator rounds down to zero

@@ -215,10 +215,10 @@ pub mod module {
 
 		/// Interface for recording rewards.
 		type RewardsManager: tangle_primitives::traits::RewardsManager<
-			AccountId = Self::AccountId,
-			AssetId = Self::AssetId,
-			Balance = BalanceOf<Self>,
-			BlockNumber = BlockNumberFor<Self>,
+			Self::AccountId,
+			Self::AssetId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
 		>;
 
 		/// Number of eras that slashes are deferred by, after computation.
@@ -849,14 +849,13 @@ pub mod module {
 			// Validate and store the blueprint
 			let blueprint_id = NextBlueprintId::<T>::get();
 
-			let blueprint = BlueprintData {
-				owner: owner.clone(),
+			let blueprint = ServiceBlueprint {
 				metadata,
-				typedef,
-				membership_model,
-				security_requirements,
-				price_targets,
-				pricing_model,
+				jobs: typedef.jobs,
+				registration_hook: typedef.registration_hook,
+				request_hook: typedef.request_hook,
+				gadget: typedef.gadget,
+				supported_membership_models: vec![membership_model.clone().into()].try_into().unwrap(),
 			};
 
 			let (allowed, _weight) =
@@ -1460,38 +1459,6 @@ pub mod module {
 			ensure!(allowed, Error::<T>::InvalidJobResult);
 
 			JobResults::<T>::insert(service_id, call_id, job_result);
-
-			// --- Pay-Once Reward Logic --- 
-			let mut instance = Instances::<T>::get(service_id).map_err(|_| Error::<T>::ServiceNotFound)?;
-			match instance.pricing_model {
-				PricingModel::PayOnce { amount } => {
-					if instance.last_billed.is_none() {
-						let current_block = <frame_system::Pallet<T>>::block_number();
-						// Iterate over operators and record reward for each
-						// Assuming 'amount' is per operator for now.
-						// The RewardRecorder will handle the specifics of how rewards are accrued.
-						for (operator_id, _commitment) in instance.operator_security_commitments.iter() {
-							T::RewardRecorder::record_reward(
-								operator_id.clone(), 
-								service_id, 
-								amount, 
-								&instance.pricing_model
-							).map_err(|e| {
-								log::error!("Failed to record reward for operator {:?} and service {}: {:?}", operator_id, service_id, e);
-								// Decide if this should be a hard error or just a log
-								// For now, let's assume it's not a fatal error for the submit_result itself
-								// but we should consider the implications.
-								// Error::<T>::RewardRecordingFailed // Example, if we add this error
-								()
-							});
-						}
-						instance.last_billed = Some(current_block);
-						Instances::<T>::insert(service_id, instance.clone());
-					}
-				},
-				_ => { /* Not a PayOnce model, or already billed */ }
-			}
-			// --- End Pay-Once Reward Logic ---
 
 			Self::deposit_event(Event::JobResultSubmitted {
 				operator: caller.clone(),
