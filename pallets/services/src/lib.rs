@@ -45,7 +45,12 @@ use tangle_primitives::{
 	traits::MultiAssetDelegationInfo,
 	traits::RewardRecorder as RewardRecorderTrait,
 };
-use sp_std::{collections::btree_set::BTreeSet, vec::Vec, vec, string::String};
+use sp_std::{vec};
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+#[cfg(feature = "std")]
+use std::string::String;
 
 pub mod functions;
 mod impls;
