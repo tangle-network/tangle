@@ -8,7 +8,7 @@
 //
 // Tangle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR a PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
@@ -27,7 +27,11 @@ use sp_std::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, vec, vec::Vec};
 
-use super::{Constraints, field::FieldType};
+use super::{Constraints, field::FieldType, ServiceBlueprint};
+use crate::{BlueprintId};
+
+/// Maximum length for metadata fields
+pub const MAX_METADATA_LENGTH: u32 = 1024;
 
 /// An error that can occur during type checking.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -474,41 +478,17 @@ pub enum PricingModel<BlockNumber, Balance> {
         /// The reward amount per reported event.
         reward_per_event: Balance,
     },
-    /// A usage-based model where rewards are based on reported usage.
-    UsageBased {
-        /// The price per unit of usage.
-        unit_price: Balance,
-        /// The unit of measurement for usage.
-        unit: UsageUnit,
-    },
-}
-
-/// Defines the units for usage-based pricing.
-#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
-pub enum UsageUnit {
-    /// Billing based on the number of API calls.
-    ApiCall,
-    /// Billing based on the number of bytes processed or transferred.
-    Byte,
-    /// Billing based on the number of transactions processed.
-    Transaction,
-}
-
-/// Represents the status of a service.
-#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
-pub enum ServiceStatus {
-
 }
 
 /// Blueprint data.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct BlueprintData<AccountId, AssetId, BlockNumber, Balance> {
+pub struct BlueprintData<AccountId, AssetId, BlockNumber, Balance, C: Constraints> {
 	/// The owner of the service blueprint.
 	pub owner: AccountId,
 	/// The metadata for the service blueprint.
 	pub metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
 	/// The type definition of the service blueprint.
-	pub typedef: TypeDefinition<AccountId>,
+	pub typedef: ServiceBlueprint<C>,
 	/// The membership model for the service blueprint.
 	pub membership_model: MembershipModel,
 	/// The security requirements for the service blueprint.
