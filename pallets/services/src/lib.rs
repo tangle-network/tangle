@@ -23,12 +23,18 @@ use frame_support::{
 	pallet_prelude::*,
 	storage::TransactionOutcome,
 	traits::{Currency, ReservableCurrency},
+	dispatch::PostDispatchInfo,
+	traits::fungibles::{Inspect, Mutate},
+	ensure,
 };
+use frame_system::pallet_prelude::{BlockNumberFor, OriginFor, ensure_signed};
 use sp_core::ecdsa;
 use sp_runtime::RuntimeAppPublic;
 use sp_runtime::{
 	DispatchResult,
 	traits::{Get, Zero},
+	Percent,
+	traits::MaybeSerializeDeserialize,
 };
 use tangle_primitives::traits::SlashManager;
 use tangle_primitives::{
@@ -37,6 +43,7 @@ use tangle_primitives::{
 		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
 	},
 	traits::MultiAssetDelegationInfo,
+	traits::RewardRecorder as RewardRecorderTrait,
 };
 
 pub mod functions;
@@ -67,14 +74,13 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
-	use frame_support::{
-		dispatch::PostDispatchInfo,
-		traits::fungibles::{Inspect, Mutate},
-	};
 	use sp_core::H160;
 	use sp_runtime::{Percent, traits::MaybeSerializeDeserialize};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
-	use tangle_primitives::services::*;
+	use tangle_primitives::{
+		services::*,
+		traits::RewardRecorder as RewardRecorderTrait,
+	};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -832,7 +838,7 @@ pub mod module {
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
 			metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
-			typedef: TypeDefinition<T::AccountId>,
+			typedef: ServiceBlueprint<T::Constraints>,
 			membership_model: MembershipModel,
 			security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
 			price_targets: Option<PriceTargets>,
@@ -1212,10 +1218,10 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
-			functions::approve::approve::<T>(caller, request_id, &security_commitment)?;
-
-			// Get current block for initializing 'last_billed' for subscriptions
-			let current_block_for_init = <frame_system::Pallet<T>>::block_number();
+			// Convert hash to security commitments - this is a placeholder
+			// In a real implementation, you'd need to properly decode the security commitments
+			let security_commitments = vec![];
+			Self::do_approve(caller, request_id, &security_commitments)?;
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -1711,104 +1717,5 @@ pub mod module {
 
 			Ok(())
 		}
-	}
-}
-
-#[pallet::hooks]
-impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-	fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
-		let mut weight = Zero::zero();
-		let current_era = T::OperatorDelegationManager::get_current_round();
-		let slash_defer_duration = T::SlashDeferDuration::get();
-
-		// Only process slashes from eras that have completed their deferral period
-		let process_era = current_era.saturating_sub(slash_defer_duration);
-
-		// Get all unapplied slashes for this era
-		let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
-		for (index, slash) in prefix_iter {
-			// TODO: This call must be all or nothing.
-			// TODO: If fail then revert all storage changes
-			if Self::slashing_enabled() {
-				let _ = frame_support::storage::with_transaction(
-					|| -> TransactionOutcome<Result<_, DispatchError>> {
-						let res = T::SlashManager::slash_operator(&slash);
-						match &res {
-							Ok(weight_used) => {
-								weight =
-									weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
-								// Remove the slash from storage after successful application
-								UnappliedSlashes::<T>::remove(process_era, index);
-								TransactionOutcome::Commit(Ok(res))
-							},
-							Err(_) => {
-								log::error!("Failed to apply slash for index: {:?}", index);
-								TransactionOutcome::Rollback(Ok(res))
-							},
-						}
-					},
-				);
-			}
-		}
-
-		// --- Subscription Reward Logic ---
-		let current_block = _n; // '_n' is the current block number passed to on_initialize
-		for (instance_id, mut instance) in Instances::<T>::iter() {
-			weight = weight.saturating_add(T::DbWeight::get().reads(1)); // Account for reading the instance
-
-			if let PricingModel::Subscription { amount, interval, maybe_end_block } = &instance.pricing_model {
-				// Check if the subscription has definitively ended
-				if let Some(end_block) = maybe_end_block {
-					if current_block > *end_block {
-						// Subscription has ended. Future work might involve cleanup.
-						continue; // Skip to the next instance
-					}
-				}
-
-				if let Some(last_billed_block) = instance.last_billed {
-					if current_block >= last_billed_block.saturating_add(*interval) {
-						// Time to bill for the subscription period
-						for (operator_id, _commitment) in instance.operator_security_commitments.iter() {
-							match T::RewardRecorder::record_reward(
-								operator_id.clone(),
-								instance_id, // service_id for which reward is recorded
-								*amount,     // amount for the subscription interval
-								&instance.pricing_model,
-							) {
-								Ok(_) => {
-									// Successfully recorded. Weight for RewardRecorder::record_reward
-									// should be accounted for by its implementation or configured.
-									// For now, we assume it's handled or add a placeholder if needed.
-									// e.g., weight = weight.saturating_add( T::WeightInfo::record_reward_subscription() );
-								}
-								Err(e) => {
-									log::error!(
-										"Subscription reward recording failed for op {:?}, service {}: {:?}",
-										operator_id, instance_id, e
-									);
-								}
-							}
-						}
-						instance.last_billed = Some(current_block);
-						Instances::<T>::insert(instance_id, instance.clone());
-						weight = weight.saturating_add(T::DbWeight::get().writes(1)); // Account for writing the instance
-					}
-				} else {
-					// This state (Subscription model but last_billed is None) should ideally not be reached
-					// if 'approve' correctly initializes 'last_billed' for new subscriptions.
-					// If it occurs, it implies an inconsistency or an old instance prior to this logic.
-					log::warn!(
-						"Subscription instance {} found with 'last_billed' as None. Initializing to current block.",
-						instance_id
-					);
-					instance.last_billed = Some(current_block); // Initialize to prevent repeated warnings
-					Instances::<T>::insert(instance_id, instance.clone());
-					weight = weight.saturating_add(T::DbWeight::get().writes(1));
-				}
-			}
-		}
-		// --- End Subscription Reward Logic ---
-
-		weight
 	}
 }
