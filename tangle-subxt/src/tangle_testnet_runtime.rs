@@ -4087,9 +4087,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				178u8, 100u8, 236u8, 188u8, 37u8, 141u8, 129u8, 250u8, 214u8, 76u8, 104u8, 138u8,
-				20u8, 225u8, 138u8, 177u8, 61u8, 218u8, 13u8, 61u8, 197u8, 7u8, 202u8, 21u8, 243u8,
-				65u8, 60u8, 66u8, 53u8, 219u8, 178u8, 17u8,
+				227u8, 179u8, 171u8, 94u8, 55u8, 223u8, 96u8, 217u8, 118u8, 246u8, 39u8, 101u8,
+				49u8, 236u8, 100u8, 35u8, 150u8, 148u8, 80u8, 20u8, 137u8, 61u8, 30u8, 86u8, 27u8,
+				39u8, 114u8, 45u8, 126u8, 114u8, 99u8, 207u8,
 			]
 	}
 	pub mod system {
@@ -5225,9 +5225,10 @@ pub mod api {
 						"Events",
 						(),
 						[
-							42u8, 188u8, 107u8, 6u8, 56u8, 44u8, 139u8, 29u8, 132u8, 111u8, 106u8,
-							162u8, 175u8, 51u8, 143u8, 97u8, 246u8, 77u8, 219u8, 6u8, 34u8, 187u8,
-							152u8, 202u8, 194u8, 193u8, 70u8, 161u8, 173u8, 90u8, 42u8, 15u8,
+							204u8, 187u8, 51u8, 66u8, 244u8, 236u8, 50u8, 128u8, 252u8, 76u8, 13u8,
+							165u8, 103u8, 230u8, 250u8, 208u8, 101u8, 47u8, 171u8, 248u8, 99u8,
+							141u8, 105u8, 244u8, 211u8, 72u8, 165u8, 174u8, 160u8, 229u8, 76u8,
+							90u8,
 						],
 					)
 				}
@@ -5884,9 +5885,10 @@ pub mod api {
 						"sudo",
 						types::Sudo { call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							145u8, 193u8, 159u8, 226u8, 169u8, 189u8, 30u8, 177u8, 103u8, 229u8,
-							84u8, 173u8, 137u8, 21u8, 248u8, 20u8, 42u8, 126u8, 89u8, 86u8, 226u8,
-							185u8, 164u8, 37u8, 5u8, 33u8, 112u8, 105u8, 234u8, 5u8, 196u8, 233u8,
+							116u8, 138u8, 49u8, 214u8, 28u8, 108u8, 26u8, 187u8, 58u8, 47u8, 21u8,
+							156u8, 136u8, 234u8, 32u8, 125u8, 43u8, 191u8, 238u8, 131u8, 213u8,
+							42u8, 3u8, 178u8, 206u8, 125u8, 110u8, 14u8, 185u8, 179u8, 163u8,
+							165u8,
 						],
 					)
 				}
@@ -5908,9 +5910,10 @@ pub mod api {
 							weight,
 						},
 						[
-							124u8, 50u8, 30u8, 5u8, 16u8, 66u8, 92u8, 103u8, 188u8, 140u8, 85u8,
-							201u8, 41u8, 184u8, 97u8, 24u8, 117u8, 93u8, 175u8, 210u8, 235u8, 86u8,
-							132u8, 76u8, 113u8, 231u8, 212u8, 197u8, 30u8, 237u8, 197u8, 134u8,
+							14u8, 104u8, 123u8, 165u8, 178u8, 213u8, 21u8, 135u8, 29u8, 150u8,
+							97u8, 73u8, 101u8, 206u8, 141u8, 131u8, 167u8, 161u8, 137u8, 106u8,
+							215u8, 85u8, 221u8, 158u8, 153u8, 38u8, 213u8, 114u8, 134u8, 222u8,
+							134u8, 229u8,
 						],
 					)
 				}
@@ -5946,10 +5949,9 @@ pub mod api {
 						"sudo_as",
 						types::SudoAs { who, call: ::subxt_core::alloc::boxed::Box::new(call) },
 						[
-							162u8, 134u8, 129u8, 216u8, 247u8, 82u8, 122u8, 235u8, 118u8, 15u8,
-							168u8, 206u8, 44u8, 101u8, 84u8, 247u8, 201u8, 219u8, 199u8, 55u8,
-							146u8, 233u8, 2u8, 223u8, 189u8, 10u8, 3u8, 213u8, 196u8, 56u8, 97u8,
-							81u8,
+							125u8, 20u8, 234u8, 1u8, 237u8, 143u8, 206u8, 99u8, 235u8, 4u8, 244u8,
+							97u8, 57u8, 128u8, 239u8, 110u8, 84u8, 36u8, 106u8, 152u8, 184u8, 51u8,
+							138u8, 40u8, 191u8, 28u8, 117u8, 66u8, 243u8, 140u8, 62u8, 196u8,
 						],
 					)
 				}
@@ -16355,10 +16357,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							120u8, 47u8, 8u8, 241u8, 182u8, 28u8, 93u8, 52u8, 137u8, 187u8, 102u8,
-							140u8, 129u8, 134u8, 196u8, 252u8, 202u8, 182u8, 74u8, 205u8, 239u8,
-							199u8, 212u8, 138u8, 111u8, 224u8, 152u8, 180u8, 187u8, 10u8, 141u8,
-							150u8,
+							224u8, 69u8, 91u8, 57u8, 155u8, 254u8, 111u8, 222u8, 250u8, 128u8,
+							145u8, 130u8, 2u8, 30u8, 201u8, 80u8, 197u8, 99u8, 187u8, 107u8, 139u8,
+							116u8, 178u8, 196u8, 212u8, 58u8, 167u8, 220u8, 139u8, 53u8, 177u8,
+							186u8,
 						],
 					)
 				}
@@ -16391,10 +16393,10 @@ pub mod api {
 							length_bound,
 						},
 						[
-							82u8, 253u8, 97u8, 103u8, 181u8, 26u8, 243u8, 230u8, 252u8, 89u8,
-							217u8, 233u8, 210u8, 161u8, 79u8, 140u8, 225u8, 124u8, 169u8, 254u8,
-							247u8, 4u8, 18u8, 183u8, 15u8, 154u8, 191u8, 83u8, 19u8, 196u8, 135u8,
-							194u8,
+							187u8, 212u8, 123u8, 214u8, 108u8, 62u8, 247u8, 189u8, 102u8, 252u8,
+							52u8, 14u8, 36u8, 83u8, 206u8, 103u8, 188u8, 249u8, 12u8, 65u8, 99u8,
+							254u8, 194u8, 232u8, 189u8, 231u8, 60u8, 14u8, 12u8, 231u8, 168u8,
+							185u8,
 						],
 					)
 				}
@@ -16783,10 +16785,10 @@ pub mod api {
 						"ProposalOf",
 						(),
 						[
-							211u8, 58u8, 187u8, 104u8, 208u8, 209u8, 80u8, 187u8, 230u8, 70u8,
-							100u8, 26u8, 74u8, 31u8, 98u8, 112u8, 145u8, 10u8, 88u8, 241u8, 198u8,
-							200u8, 221u8, 240u8, 116u8, 223u8, 137u8, 111u8, 171u8, 20u8, 55u8,
-							211u8,
+							69u8, 255u8, 138u8, 64u8, 9u8, 208u8, 189u8, 212u8, 112u8, 231u8,
+							177u8, 244u8, 62u8, 233u8, 142u8, 75u8, 12u8, 163u8, 69u8, 163u8,
+							231u8, 90u8, 35u8, 255u8, 112u8, 232u8, 41u8, 90u8, 68u8, 158u8, 85u8,
+							248u8,
 						],
 					)
 				}
@@ -16806,10 +16808,10 @@ pub mod api {
 						"ProposalOf",
 						::subxt_core::storage::address::StaticStorageKey::new(_0.borrow()),
 						[
-							211u8, 58u8, 187u8, 104u8, 208u8, 209u8, 80u8, 187u8, 230u8, 70u8,
-							100u8, 26u8, 74u8, 31u8, 98u8, 112u8, 145u8, 10u8, 88u8, 241u8, 198u8,
-							200u8, 221u8, 240u8, 116u8, 223u8, 137u8, 111u8, 171u8, 20u8, 55u8,
-							211u8,
+							69u8, 255u8, 138u8, 64u8, 9u8, 208u8, 189u8, 212u8, 112u8, 231u8,
+							177u8, 244u8, 62u8, 233u8, 142u8, 75u8, 12u8, 163u8, 69u8, 163u8,
+							231u8, 90u8, 35u8, 255u8, 112u8, 232u8, 41u8, 90u8, 68u8, 158u8, 85u8,
+							248u8,
 						],
 					)
 				}
@@ -32402,9 +32404,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							204u8, 16u8, 50u8, 11u8, 74u8, 55u8, 163u8, 45u8, 231u8, 37u8, 247u8,
-							107u8, 98u8, 198u8, 109u8, 237u8, 67u8, 155u8, 139u8, 247u8, 126u8,
-							236u8, 116u8, 72u8, 244u8, 82u8, 42u8, 91u8, 52u8, 152u8, 219u8, 71u8,
+							141u8, 210u8, 20u8, 198u8, 182u8, 248u8, 35u8, 220u8, 182u8, 225u8,
+							168u8, 113u8, 155u8, 24u8, 43u8, 156u8, 100u8, 237u8, 91u8, 154u8,
+							116u8, 239u8, 23u8, 8u8, 121u8, 76u8, 219u8, 205u8, 95u8, 250u8, 76u8,
+							54u8,
 						],
 					)
 				}
@@ -32446,10 +32449,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							2u8, 140u8, 181u8, 170u8, 167u8, 158u8, 187u8, 24u8, 136u8, 222u8,
-							167u8, 37u8, 188u8, 180u8, 171u8, 250u8, 85u8, 225u8, 251u8, 133u8,
-							184u8, 50u8, 0u8, 69u8, 212u8, 18u8, 208u8, 211u8, 162u8, 160u8, 32u8,
-							192u8,
+							198u8, 132u8, 158u8, 110u8, 121u8, 44u8, 163u8, 238u8, 250u8, 83u8,
+							87u8, 242u8, 133u8, 34u8, 45u8, 18u8, 147u8, 125u8, 90u8, 158u8, 152u8,
+							57u8, 146u8, 170u8, 248u8, 125u8, 40u8, 125u8, 166u8, 254u8, 45u8,
+							104u8,
 						],
 					)
 				}
@@ -32487,9 +32490,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							225u8, 149u8, 84u8, 203u8, 37u8, 244u8, 91u8, 146u8, 216u8, 208u8,
-							177u8, 175u8, 211u8, 164u8, 141u8, 7u8, 13u8, 85u8, 56u8, 107u8, 22u8,
-							225u8, 58u8, 83u8, 123u8, 141u8, 25u8, 0u8, 176u8, 229u8, 15u8, 26u8,
+							212u8, 8u8, 148u8, 132u8, 199u8, 145u8, 64u8, 111u8, 99u8, 236u8,
+							194u8, 83u8, 214u8, 131u8, 227u8, 243u8, 68u8, 137u8, 137u8, 194u8,
+							187u8, 145u8, 188u8, 14u8, 159u8, 5u8, 45u8, 49u8, 196u8, 220u8, 216u8,
+							85u8,
 						],
 					)
 				}
@@ -32513,9 +32517,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							44u8, 90u8, 140u8, 187u8, 211u8, 71u8, 231u8, 52u8, 159u8, 97u8, 49u8,
-							191u8, 85u8, 55u8, 114u8, 228u8, 135u8, 236u8, 47u8, 154u8, 140u8,
-							50u8, 25u8, 102u8, 250u8, 248u8, 126u8, 6u8, 53u8, 159u8, 120u8, 56u8,
+							61u8, 20u8, 133u8, 176u8, 133u8, 192u8, 171u8, 220u8, 125u8, 13u8,
+							251u8, 56u8, 215u8, 10u8, 110u8, 112u8, 43u8, 78u8, 137u8, 128u8,
+							254u8, 202u8, 110u8, 132u8, 210u8, 53u8, 1u8, 213u8, 176u8, 33u8, 7u8,
+							0u8,
 						],
 					)
 				}
@@ -37231,9 +37236,9 @@ pub mod api {
 						"batch",
 						types::Batch { calls },
 						[
-							221u8, 225u8, 89u8, 77u8, 18u8, 68u8, 140u8, 203u8, 64u8, 135u8, 138u8,
-							138u8, 193u8, 196u8, 58u8, 71u8, 222u8, 86u8, 102u8, 168u8, 136u8,
-							233u8, 173u8, 18u8, 195u8, 33u8, 163u8, 169u8, 192u8, 48u8, 51u8, 41u8,
+							213u8, 9u8, 178u8, 245u8, 0u8, 140u8, 216u8, 222u8, 33u8, 228u8, 183u8,
+							207u8, 216u8, 69u8, 245u8, 186u8, 104u8, 27u8, 234u8, 219u8, 87u8,
+							230u8, 114u8, 36u8, 1u8, 23u8, 247u8, 143u8, 84u8, 78u8, 100u8, 18u8,
 						],
 					)
 				}
@@ -37263,9 +37268,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							45u8, 141u8, 27u8, 62u8, 141u8, 4u8, 161u8, 34u8, 203u8, 236u8, 9u8,
-							118u8, 218u8, 120u8, 191u8, 169u8, 111u8, 185u8, 131u8, 17u8, 167u8,
-							163u8, 145u8, 146u8, 3u8, 168u8, 59u8, 35u8, 170u8, 60u8, 1u8, 190u8,
+							158u8, 91u8, 242u8, 141u8, 96u8, 112u8, 133u8, 189u8, 243u8, 182u8,
+							170u8, 143u8, 227u8, 232u8, 204u8, 12u8, 151u8, 41u8, 245u8, 167u8,
+							104u8, 213u8, 141u8, 142u8, 180u8, 59u8, 243u8, 249u8, 182u8, 109u8,
+							54u8, 230u8,
 						],
 					)
 				}
@@ -37291,9 +37297,10 @@ pub mod api {
 						"batch_all",
 						types::BatchAll { calls },
 						[
-							108u8, 66u8, 193u8, 102u8, 160u8, 96u8, 70u8, 19u8, 182u8, 70u8, 81u8,
-							6u8, 144u8, 239u8, 162u8, 240u8, 97u8, 40u8, 101u8, 55u8, 209u8, 116u8,
-							56u8, 105u8, 218u8, 66u8, 100u8, 139u8, 197u8, 74u8, 247u8, 201u8,
+							250u8, 190u8, 145u8, 145u8, 16u8, 252u8, 183u8, 13u8, 204u8, 142u8,
+							82u8, 78u8, 105u8, 34u8, 165u8, 124u8, 27u8, 245u8, 5u8, 128u8, 193u8,
+							21u8, 107u8, 173u8, 158u8, 87u8, 96u8, 236u8, 79u8, 168u8, 243u8,
+							146u8,
 						],
 					)
 				}
@@ -37316,9 +37323,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							189u8, 32u8, 246u8, 63u8, 89u8, 110u8, 80u8, 76u8, 140u8, 202u8, 31u8,
-							214u8, 221u8, 215u8, 65u8, 132u8, 181u8, 9u8, 75u8, 141u8, 89u8, 88u8,
-							31u8, 153u8, 199u8, 0u8, 121u8, 238u8, 10u8, 68u8, 105u8, 62u8,
+							214u8, 153u8, 215u8, 190u8, 167u8, 4u8, 185u8, 219u8, 102u8, 5u8, 2u8,
+							85u8, 139u8, 173u8, 240u8, 81u8, 151u8, 135u8, 248u8, 14u8, 43u8,
+							168u8, 24u8, 57u8, 92u8, 47u8, 234u8, 115u8, 165u8, 182u8, 104u8, 51u8,
 						],
 					)
 				}
@@ -37344,10 +37351,9 @@ pub mod api {
 						"force_batch",
 						types::ForceBatch { calls },
 						[
-							43u8, 94u8, 103u8, 180u8, 138u8, 82u8, 240u8, 161u8, 113u8, 220u8,
-							73u8, 27u8, 219u8, 186u8, 175u8, 50u8, 50u8, 34u8, 81u8, 159u8, 68u8,
-							184u8, 83u8, 171u8, 236u8, 104u8, 234u8, 127u8, 211u8, 55u8, 189u8,
-							19u8,
+							42u8, 21u8, 61u8, 183u8, 132u8, 242u8, 233u8, 143u8, 217u8, 229u8,
+							136u8, 44u8, 19u8, 74u8, 52u8, 217u8, 173u8, 169u8, 71u8, 149u8, 62u8,
+							192u8, 153u8, 64u8, 104u8, 18u8, 119u8, 172u8, 38u8, 12u8, 201u8, 63u8,
 						],
 					)
 				}
@@ -37370,9 +37376,9 @@ pub mod api {
 							weight,
 						},
 						[
-							51u8, 33u8, 86u8, 127u8, 140u8, 156u8, 52u8, 192u8, 223u8, 54u8, 145u8,
-							15u8, 231u8, 159u8, 210u8, 5u8, 7u8, 29u8, 211u8, 58u8, 149u8, 148u8,
-							111u8, 227u8, 52u8, 42u8, 91u8, 186u8, 191u8, 5u8, 246u8, 118u8,
+							138u8, 193u8, 97u8, 222u8, 92u8, 81u8, 186u8, 77u8, 80u8, 173u8, 212u8,
+							222u8, 73u8, 230u8, 129u8, 154u8, 43u8, 194u8, 81u8, 8u8, 172u8, 254u8,
+							187u8, 198u8, 163u8, 187u8, 32u8, 20u8, 123u8, 67u8, 221u8, 242u8,
 						],
 					)
 				}
@@ -37823,9 +37829,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							130u8, 214u8, 108u8, 150u8, 86u8, 160u8, 31u8, 87u8, 191u8, 106u8, 1u8,
-							214u8, 24u8, 129u8, 103u8, 224u8, 118u8, 219u8, 180u8, 87u8, 118u8,
-							16u8, 245u8, 33u8, 165u8, 87u8, 27u8, 214u8, 195u8, 146u8, 35u8, 144u8,
+							89u8, 197u8, 147u8, 60u8, 48u8, 60u8, 87u8, 172u8, 183u8, 151u8, 252u8,
+							123u8, 246u8, 229u8, 129u8, 36u8, 127u8, 152u8, 219u8, 27u8, 148u8,
+							128u8, 140u8, 0u8, 110u8, 66u8, 145u8, 133u8, 240u8, 145u8, 203u8,
+							103u8,
 						],
 					)
 				}
@@ -37887,9 +37894,9 @@ pub mod api {
 							max_weight,
 						},
 						[
-							230u8, 213u8, 51u8, 60u8, 138u8, 91u8, 196u8, 169u8, 159u8, 110u8,
-							52u8, 70u8, 177u8, 91u8, 207u8, 162u8, 158u8, 149u8, 68u8, 79u8, 45u8,
-							76u8, 2u8, 77u8, 19u8, 182u8, 201u8, 9u8, 187u8, 19u8, 140u8, 107u8,
+							59u8, 103u8, 163u8, 37u8, 236u8, 164u8, 48u8, 73u8, 56u8, 6u8, 220u8,
+							57u8, 56u8, 150u8, 121u8, 109u8, 253u8, 197u8, 125u8, 216u8, 0u8,
+							192u8, 51u8, 58u8, 153u8, 53u8, 1u8, 94u8, 103u8, 241u8, 142u8, 13u8,
 						],
 					)
 				}
@@ -40848,9 +40855,10 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							164u8, 4u8, 196u8, 239u8, 93u8, 48u8, 50u8, 73u8, 198u8, 113u8, 217u8,
-							149u8, 140u8, 128u8, 104u8, 138u8, 112u8, 248u8, 25u8, 8u8, 138u8,
-							128u8, 76u8, 11u8, 242u8, 124u8, 30u8, 107u8, 129u8, 33u8, 31u8, 222u8,
+							119u8, 163u8, 194u8, 121u8, 255u8, 122u8, 13u8, 101u8, 227u8, 125u8,
+							83u8, 21u8, 109u8, 27u8, 76u8, 188u8, 239u8, 235u8, 37u8, 178u8, 62u8,
+							120u8, 239u8, 17u8, 30u8, 175u8, 243u8, 99u8, 25u8, 211u8, 235u8,
+							231u8,
 						],
 					)
 				}
@@ -41106,9 +41114,9 @@ pub mod api {
 							call: ::subxt_core::alloc::boxed::Box::new(call),
 						},
 						[
-							148u8, 240u8, 191u8, 117u8, 219u8, 48u8, 10u8, 88u8, 46u8, 40u8, 195u8,
-							253u8, 247u8, 243u8, 115u8, 221u8, 201u8, 19u8, 106u8, 199u8, 237u8,
-							226u8, 46u8, 12u8, 5u8, 105u8, 241u8, 16u8, 252u8, 83u8, 175u8, 199u8,
+							234u8, 211u8, 118u8, 44u8, 221u8, 84u8, 20u8, 70u8, 50u8, 194u8, 19u8,
+							97u8, 10u8, 47u8, 22u8, 180u8, 132u8, 21u8, 67u8, 210u8, 43u8, 228u8,
+							39u8, 19u8, 135u8, 75u8, 194u8, 130u8, 102u8, 240u8, 239u8, 137u8,
 						],
 					)
 				}
@@ -45460,6 +45468,7 @@ pub mod api {
 				#[codec(dumb_trait_bound)]
 				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				#[doc = "Updates the default heartbeat threshold for all services."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -45538,13 +45547,13 @@ pub mod api {
 				#[doc = "# Arguments"]
 				#[doc = ""]
 				#[doc = "* `origin` - Origin of the call"]
-				#[doc = "* `interval` - New default heartbeat slashing window"]
+				#[doc = "* `window` - New default heartbeat slashing window"]
 				pub struct UpdateDefaultHeartbeatSlashingWindow {
-					pub interval: update_default_heartbeat_slashing_window::Interval,
+					pub window: update_default_heartbeat_slashing_window::Window,
 				}
 				pub mod update_default_heartbeat_slashing_window {
 					use super::runtime_types;
-					pub type Interval = ::core::primitive::u64;
+					pub type Window = ::core::primitive::u64;
 				}
 				impl ::subxt_core::blocks::StaticExtrinsic for UpdateDefaultHeartbeatSlashingWindow {
 					const PALLET: &'static str = "Services";
@@ -46286,6 +46295,7 @@ pub mod api {
 						],
 					)
 				}
+				#[doc = "Updates the default heartbeat threshold for all services."]
 				#[doc = ""]
 				#[doc = "# Permissions"]
 				#[doc = ""]
@@ -46346,21 +46356,22 @@ pub mod api {
 				#[doc = "# Arguments"]
 				#[doc = ""]
 				#[doc = "* `origin` - Origin of the call"]
-				#[doc = "* `interval` - New default heartbeat slashing window"]
+				#[doc = "* `window` - New default heartbeat slashing window"]
 				pub fn update_default_heartbeat_slashing_window(
 					&self,
-					interval: types::update_default_heartbeat_slashing_window::Interval,
+					window: types::update_default_heartbeat_slashing_window::Window,
 				) -> ::subxt_core::tx::payload::StaticPayload<
 					types::UpdateDefaultHeartbeatSlashingWindow,
 				> {
 					::subxt_core::tx::payload::StaticPayload::new_static(
 						"Services",
 						"update_default_heartbeat_slashing_window",
-						types::UpdateDefaultHeartbeatSlashingWindow { interval },
+						types::UpdateDefaultHeartbeatSlashingWindow { window },
 						[
-							154u8, 225u8, 237u8, 142u8, 63u8, 87u8, 43u8, 166u8, 94u8, 218u8, 92u8,
-							89u8, 35u8, 67u8, 8u8, 126u8, 241u8, 142u8, 134u8, 117u8, 26u8, 29u8,
-							189u8, 237u8, 202u8, 233u8, 64u8, 114u8, 141u8, 177u8, 149u8, 192u8,
+							71u8, 174u8, 186u8, 137u8, 110u8, 75u8, 211u8, 126u8, 138u8, 177u8,
+							66u8, 144u8, 139u8, 138u8, 179u8, 70u8, 220u8, 239u8, 78u8, 22u8,
+							216u8, 84u8, 28u8, 136u8, 183u8, 179u8, 12u8, 60u8, 225u8, 25u8, 7u8,
+							190u8,
 						],
 					)
 				}
@@ -46947,17 +46958,97 @@ pub mod api {
 			pub struct HeartbeatReceived {
 				pub service_id: heartbeat_received::ServiceId,
 				pub blueprint_id: heartbeat_received::BlueprintId,
+				pub operator: heartbeat_received::Operator,
 				pub block_number: heartbeat_received::BlockNumber,
 			}
 			pub mod heartbeat_received {
 				use super::runtime_types;
 				pub type ServiceId = ::core::primitive::u64;
 				pub type BlueprintId = ::core::primitive::u64;
+				pub type Operator = ::subxt_core::utils::AccountId32;
 				pub type BlockNumber = ::core::primitive::u64;
 			}
 			impl ::subxt_core::events::StaticEvent for HeartbeatReceived {
 				const PALLET: &'static str = "Services";
 				const EVENT: &'static str = "HeartbeatReceived";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Default heartbeat threshold updated."]
+			pub struct DefaultHeartbeatThresholdUpdated {
+				pub threshold: default_heartbeat_threshold_updated::Threshold,
+			}
+			pub mod default_heartbeat_threshold_updated {
+				use super::runtime_types;
+				pub type Threshold = ::core::primitive::u8;
+			}
+			impl ::subxt_core::events::StaticEvent for DefaultHeartbeatThresholdUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "DefaultHeartbeatThresholdUpdated";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Default heartbeat interval updated."]
+			pub struct DefaultHeartbeatIntervalUpdated {
+				pub interval: default_heartbeat_interval_updated::Interval,
+			}
+			pub mod default_heartbeat_interval_updated {
+				use super::runtime_types;
+				pub type Interval = ::core::primitive::u64;
+			}
+			impl ::subxt_core::events::StaticEvent for DefaultHeartbeatIntervalUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "DefaultHeartbeatIntervalUpdated";
+			}
+			#[derive(
+				:: subxt_core :: ext :: codec :: Decode,
+				:: subxt_core :: ext :: codec :: Encode,
+				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+				:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+				Clone,
+				Debug,
+				Eq,
+				PartialEq,
+			)]
+			# [codec (crate = :: subxt_core :: ext :: codec)]
+			#[codec(dumb_trait_bound)]
+			#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+			#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+			#[doc = "Default heartbeat slashing window updated."]
+			pub struct DefaultHeartbeatSlashingWindowUpdated {
+				pub window: default_heartbeat_slashing_window_updated::Window,
+			}
+			pub mod default_heartbeat_slashing_window_updated {
+				use super::runtime_types;
+				pub type Window = ::core::primitive::u64;
+			}
+			impl ::subxt_core::events::StaticEvent for DefaultHeartbeatSlashingWindowUpdated {
+				const PALLET: &'static str = "Services";
+				const EVENT: &'static str = "DefaultHeartbeatSlashingWindowUpdated";
 			}
 		}
 		pub mod storage {
@@ -68409,7 +68500,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
 				pub enum Call {
-					# [codec (index = 0)] # [doc = "Create a new service blueprint."] # [doc = ""] # [doc = "A Service Blueprint is a template for a service that can be instantiated by users. The"] # [doc = "blueprint defines the service's constraints, requirements and behavior, including the"] # [doc = "master blueprint service manager revision to use."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The origin must be signed by the account that will own the blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be signed by the account creating the"] # [doc = "  blueprint"] # [doc = "* `blueprint` - The service blueprint containing:"] # [doc = "  - Service constraints and requirements"] # [doc = "  - Master blueprint service manager revision (Latest or Specific)"] # [doc = "  - Template configuration for service instantiation"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - Origin is not signed"] # [doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision"] # [doc = "  does not exist"] # [doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"] # [doc = ""] # [doc = "# Returns"] # [doc = ""] # [doc = "Returns a `DispatchResultWithPostInfo` which on success emits a"] # [doc = "[`Event::BlueprintCreated`] event containing the owner and blueprint ID."] create_blueprint { blueprint : runtime_types :: tangle_primitives :: services :: service :: ServiceBlueprint , } , # [codec (index = 1)] # [doc = "Pre-register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to signal intent to become an operator for a blueprint"] # [doc = "by emitting a `PreRegistration` event. The operator node can listen for this event to"] # [doc = "execute any custom registration logic defined in the blueprint."] # [doc = ""] # [doc = "Pre-registration is the first step in the operator registration flow. After"] # [doc = "pre-registering, operators must complete the full registration process by calling"] # [doc = "`register()` with their preferences and registration arguments."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that"] # [doc = "  wants to become an operator."] # [doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for."] # [doc = "  Must refer to an existing blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account."] # [doc = ""] # [doc = "# Events"] # [doc = ""] # [doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"] # [doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"] # [doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - The origin was not signed."] pre_register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "Register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to register as an operator for a blueprint by providing"] # [doc = "their service preferences, registration arguments, and staking the required tokens."] # [doc = "The operator must be active in the delegation system and may require approval before"] # [doc = "accepting service requests."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account"] # [doc = "* The caller must be an active operator in the delegation system"] # [doc = "* The caller must not already be registered for this blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to register for"] # [doc = "* `preferences` - The operator's service preferences and configuration"] # [doc = "* `registration_args` - Registration arguments required by the blueprint"] # [doc = "* `value` - Amount of tokens to stake for registration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation"] # [doc = "  system"] # [doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"] # [doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"] # [doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"] # [doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services"] # [doc = "  limit"] register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , # [codec (compact)] value : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "Unregisters a service provider from a specific service blueprint."] # [doc = ""] # [doc = "Can only be called if the no services are active for the blueprint."] # [doc = "After unregistering, the provider will no longer receive new service"] # [doc = "assignments for this blueprint."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered service provider"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"] # [doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"] unregister { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "Request a new service using a blueprint and specified operators."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."] # [doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."] # [doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If"] # [doc = "  empty, only owner can call."] # [doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."] # [doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization"] # [doc = "  arguments."] # [doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."] # [doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value: BalanceOf<T>` - Payment amount for the service."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by an account with sufficient balance to pay for the service."] # [doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] request { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , # [codec (compact)] value : :: core :: primitive :: u128 , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , } , # [codec (index = 5)] # [doc = "Approve a service request, allowing it to be initiated once all required approvals are"] # [doc = "received."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the service blueprint"] # [doc = "* Caller must be in the pending approvals list for this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to approve"] # [doc = "* `native_exposure_percent` - Percentage of native token stake to expose"] # [doc = "* `asset_exposure` - Vector of asset-specific exposure commitments"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"] # [doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"] # [doc = "* [`Error::InvalidRequestInput`] - Asset exposure commitments don't meet requirements"] approve { # [codec (compact)] request_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 6)] # [doc = "Reject a service request, preventing its initiation."] # [doc = ""] # [doc = "The service request will remain in the system but marked as rejected. The requester will"] # [doc = "need to update the service request to proceed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the blueprint associated with this request"] # [doc = "* Caller must be one of the operators required to approve this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to reject"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to"] # [doc = "  approve this request"] # [doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when"] # [doc = "  refunding payment"] # [doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"] reject { # [codec (compact)] request_id : :: core :: primitive :: u64 , } , # [codec (index = 7)] # [doc = "Terminates a running service instance."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The identifier of the service to terminate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::NotRegistered`] - Service operator not registered"] # [doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"] terminate { # [codec (compact)] service_id : :: core :: primitive :: u64 , } , # [codec (index = 8)] # [doc = "Call a job in the service with the provided arguments."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner or a permitted caller"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The service identifier"] # [doc = "* `job` - The job index to call"] # [doc = "* `args` - The arguments to pass to the job"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"] # [doc = "* [`Error::TypeCheck`] - Arguments fail type checking"] # [doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"] call { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 9)] # [doc = "Submit a result for a previously called job."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `service_id` - ID of the service"] # [doc = "* `call_id` - ID of the job call"] # [doc = "* `result` - Vector of result fields"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an operator of the service"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"] # [doc = "* [`Error::TypeCheck`] - Result fields fail type checking"] # [doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"] submit_result { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] call_id : :: core :: primitive :: u64 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."] # [doc = ""] # [doc = "This function schedules a deferred slashing action against an operator's stake for a"] # [doc = "specific service. The slash is not applied immediately, but rather queued to be"] # [doc = "executed by another entity later."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"] # [doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match,"] # [doc = "  the call will fail."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."] # [doc = "* `offender` - The account ID of the operator to be slashed."] # [doc = "* `service_id` - The ID of the service for which to slash the operator."] # [doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a"] # [doc = "  `Percent` value."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"] # [doc = "* `BadOrigin` - Caller is not the authorized slashing origin"] # [doc = "* `OffenderNotOperator` - Target account is not an operator for this service"] # [doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"] slash { offender : :: subxt_core :: utils :: AccountId32 , # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , } , # [codec (index = 11)] # [doc = "Disputes and removes an [UnappliedSlash] from storage."] # [doc = ""] # [doc = "The slash will not be applied once disputed and is permanently removed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be the authorized dispute origin for the service"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `era` - Era containing the slash to dispute"] # [doc = "* `index` - Index of the slash within the era"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"] # [doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"] dispute { # [codec (compact)] era : :: core :: primitive :: u32 , # [codec (compact)] index : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Updates the Master Blueprint Service Manager by adding a new revision."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `address` - New manager address to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of"] # [doc = "  revisions reached"] update_master_blueprint_service_manager { address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "Join a service instance as an operator"] join_service { instance_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 16)] # [doc = "Leave a service instance as an operator"] leave_service { instance_id : :: core :: primitive :: u64 , } , # [codec (index = 17)] # [doc = "Updates the RPC address for a registered operator's service blueprint."] # [doc = ""] # [doc = "Allows an operator to modify their RPC address for a specific blueprint they are"] # [doc = "registered for. The operator must already be registered for the blueprint to update"] # [doc = "the RPC address."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to update the RPC address for."] # [doc = "* `rpc_address: BoundedString<T::Constraints::MaxRpcAddressLength>` - The new RPC"] # [doc = "  address to set for the blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered operator for this blueprint."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] update_rpc_address { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , rpc_address : runtime_types :: tangle_primitives :: services :: field :: BoundedString , } , # [codec (index = 18)] # [doc = "Request a service with a pre-approved quote from operators."] # [doc = ""] # [doc = "This function creates a service request using a quote that has already been approved by"] # [doc = "the operators. Unlike the regular `request` method, this doesn't require operator"] # [doc = "approval after submission since the operators have already agreed to the terms via the"] # [doc = "quote."] # [doc = ""] # [doc = "The quote is obtained externally through a gRPC server, and this function accepts the"] # [doc = "necessary signatures from the operators to verify their approval."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Anyone can call this function"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account."] # [doc = "* `evm_origin` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id` - The ID of the blueprint to use."] # [doc = "* `permitted_callers` - Accounts allowed to call the service. If empty, only owner can"] # [doc = "  call."] # [doc = "* `operators` - List of operators that will run the service."] # [doc = "* `request_args` - Blueprint initialization arguments."] # [doc = "* `asset_security_requirements` - Security requirements for assets."] # [doc = "* `ttl` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value` - Amount to pay for the service."] # [doc = "* `membership_model` - Membership model for the service."] # [doc = "* `operator_signatures` - Signatures from operators confirming the quote."] # [doc = "* `security_commitments` - Security commitments from operators."] # [doc = "* `pricing_quote` - Pricing quote details."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] # [doc = "* [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid."] request_with_signed_price_quotes { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , pricing_quotes : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: pricing :: PricingQuote > , operator_signatures : :: subxt_core :: alloc :: vec :: Vec < [:: core :: primitive :: u8 ; 65usize] > , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 19)] # [doc = "Send a heartbeat for a service."] # [doc = ""] # [doc = "This function allows operators to send periodic heartbeats to indicate they are still"] # [doc = "active. Each operator must send heartbeats at intervals defined by its blueprint's"] # [doc = "heartbeat_interval. The heartbeat includes custom metrics data that can be used for"] # [doc = "monitoring and analytics."] # [doc = ""] # [doc = "The heartbeat must be signed by the operator to verify its authenticity."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account."] # [doc = "* `service_id` - The ID of the service sending the heartbeat."] # [doc = "* `blueprint_id` - The ID of the blueprint the service was created from."] # [doc = "* `metrics_data` - Custom metrics data from the service (serialized)."] # [doc = "* `signature` - ECDSA signature verifying the heartbeat data."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service does not exist."] # [doc = "* [`Error::ServiceNotActive`] - The service is not active."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint does not exist."] # [doc = "* [`Error::HeartbeatTooEarly`] - Not enough blocks have passed since the last heartbeat."] # [doc = "* [`Error::HeartbeatSignatureVerificationFailed`] - The signature verification failed."] # [doc = "* [`Error::InvalidHeartbeatData`] - The heartbeat data is invalid."] heartbeat { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , metrics_data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , signature : [:: core :: primitive :: u8 ; 65usize] , } , # [codec (index = 20)] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `threshold` - New default heartbeat threshold"] update_default_heartbeat_threshold { threshold : :: core :: primitive :: u8 , } , # [codec (index = 21)] # [doc = "Updates the default heartbeat interval for all services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `interval` - New default heartbeat interval"] update_default_heartbeat_interval { interval : :: core :: primitive :: u64 , } , # [codec (index = 22)] # [doc = "Updates the default heartbeat slashing window for all services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `interval` - New default heartbeat slashing window"] update_default_heartbeat_slashing_window { interval : :: core :: primitive :: u64 , } , }
+					# [codec (index = 0)] # [doc = "Create a new service blueprint."] # [doc = ""] # [doc = "A Service Blueprint is a template for a service that can be instantiated by users. The"] # [doc = "blueprint defines the service's constraints, requirements and behavior, including the"] # [doc = "master blueprint service manager revision to use."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The origin must be signed by the account that will own the blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be signed by the account creating the"] # [doc = "  blueprint"] # [doc = "* `blueprint` - The service blueprint containing:"] # [doc = "  - Service constraints and requirements"] # [doc = "  - Master blueprint service manager revision (Latest or Specific)"] # [doc = "  - Template configuration for service instantiation"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - Origin is not signed"] # [doc = "* [`Error::MasterBlueprintServiceManagerRevisionNotFound`] - Specified MBSM revision"] # [doc = "  does not exist"] # [doc = "* [`Error::BlueprintCreationInterrupted`] - Blueprint creation is interrupted by hooks"] # [doc = ""] # [doc = "# Returns"] # [doc = ""] # [doc = "Returns a `DispatchResultWithPostInfo` which on success emits a"] # [doc = "[`Event::BlueprintCreated`] event containing the owner and blueprint ID."] create_blueprint { blueprint : runtime_types :: tangle_primitives :: services :: service :: ServiceBlueprint , } , # [codec (index = 1)] # [doc = "Pre-register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to signal intent to become an operator for a blueprint"] # [doc = "by emitting a `PreRegistration` event. The operator node can listen for this event to"] # [doc = "execute any custom registration logic defined in the blueprint."] # [doc = ""] # [doc = "Pre-registration is the first step in the operator registration flow. After"] # [doc = "pre-registering, operators must complete the full registration process by calling"] # [doc = "`register()` with their preferences and registration arguments."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the account that"] # [doc = "  wants to become an operator."] # [doc = "* `blueprint_id: u64` - The identifier of the service blueprint to pre-register for."] # [doc = "  Must refer to an existing blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account."] # [doc = ""] # [doc = "# Events"] # [doc = ""] # [doc = "* [`Event::PreRegistration`] - Emitted when pre-registration is successful, containing:"] # [doc = "  - `operator: T::AccountId` - The account ID of the pre-registering operator"] # [doc = "  - `blueprint_id: u64` - The ID of the blueprint being pre-registered for"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::BadOrigin`] - The origin was not signed."] pre_register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "Register the caller as an operator for a specific blueprint."] # [doc = ""] # [doc = "This function allows an account to register as an operator for a blueprint by providing"] # [doc = "their service preferences, registration arguments, and staking the required tokens."] # [doc = "The operator must be active in the delegation system and may require approval before"] # [doc = "accepting service requests."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be a signed account"] # [doc = "* The caller must be an active operator in the delegation system"] # [doc = "* The caller must not already be registered for this blueprint"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to register for"] # [doc = "* `preferences` - The operator's service preferences and configuration"] # [doc = "* `registration_args` - Registration arguments required by the blueprint"] # [doc = "* `value` - Amount of tokens to stake for registration"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::OperatorNotActive`] - Caller is not an active operator in the delegation"] # [doc = "  system"] # [doc = "* [`Error::AlreadyRegistered`] - Caller is already registered for this blueprint"] # [doc = "* [`Error::TypeCheck`] - Registration arguments failed type checking"] # [doc = "* [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration"] # [doc = "* [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services"] # [doc = "  limit"] register { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , # [codec (compact)] value : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "Unregisters a service provider from a specific service blueprint."] # [doc = ""] # [doc = "Can only be called if the no services are active for the blueprint."] # [doc = "After unregistering, the provider will no longer receive new service"] # [doc = "assignments for this blueprint."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed."] # [doc = "* `blueprint_id` - The identifier of the service blueprint to unregister from."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered service provider"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint"] # [doc = "* [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted"] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist"] unregister { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "Request a new service using a blueprint and specified operators."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed."] # [doc = "* `evm_origin: Option<H160>` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to use."] # [doc = "* `permitted_callers: Vec<T::AccountId>` - Accounts allowed to call the service. If"] # [doc = "  empty, only owner can call."] # [doc = "* `operators: Vec<T::AccountId>` - List of operators that will run the service."] # [doc = "* `request_args: Vec<Field<T::Constraints, T::AccountId>>` - Blueprint initialization"] # [doc = "  arguments."] # [doc = "* `assets: Vec<T::AssetId>` - Required assets for the service."] # [doc = "* `ttl: BlockNumberFor<T>` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset: Asset<T::AssetId>` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value: BalanceOf<T>` - Payment amount for the service."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by an account with sufficient balance to pay for the service."] # [doc = "* For ERC20 payments, the EVM origin must match the caller's mapped account."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] request { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , # [codec (compact)] value : :: core :: primitive :: u128 , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , } , # [codec (index = 5)] # [doc = "Approve a service request, allowing it to be initiated once all required approvals are"] # [doc = "received."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the service blueprint"] # [doc = "* Caller must be in the pending approvals list for this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to approve"] # [doc = "* `native_exposure_percent` - Percentage of native token stake to expose"] # [doc = "* `asset_exposure` - Vector of asset-specific exposure commitments"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list"] # [doc = "* [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook"] # [doc = "* [`Error::InvalidRequestInput`] - Asset exposure commitments don't meet requirements"] approve { # [codec (compact)] request_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 6)] # [doc = "Reject a service request, preventing its initiation."] # [doc = ""] # [doc = "The service request will remain in the system but marked as rejected. The requester will"] # [doc = "need to update the service request to proceed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be a registered operator for the blueprint associated with this request"] # [doc = "* Caller must be one of the operators required to approve this request"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account"] # [doc = "* `request_id` - The ID of the service request to reject"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ApprovalNotRequested`] - Caller is not one of the operators required to"] # [doc = "  approve this request"] # [doc = "* [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when"] # [doc = "  refunding payment"] # [doc = "* [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook"] reject { # [codec (compact)] request_id : :: core :: primitive :: u64 , } , # [codec (index = 7)] # [doc = "Terminates a running service instance."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The identifier of the service to terminate"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::NotRegistered`] - Service operator not registered"] # [doc = "* [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not the service owner"] terminate { # [codec (compact)] service_id : :: core :: primitive :: u64 , } , # [codec (index = 8)] # [doc = "Call a job in the service with the provided arguments."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by the service owner or a permitted caller"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call"] # [doc = "* `service_id` - The service identifier"] # [doc = "* `job` - The job index to call"] # [doc = "* `args` - The arguments to pass to the job"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many arguments provided"] # [doc = "* [`Error::TypeCheck`] - Arguments fail type checking"] # [doc = "* [`Error::InvalidJobCallInput`] - Job call was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller"] call { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 9)] # [doc = "Submit a result for a previously called job."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `service_id` - ID of the service"] # [doc = "* `call_id` - ID of the job call"] # [doc = "* `result` - Vector of result fields"] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an operator of the service"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service_id does not exist"] # [doc = "* [`Error::JobCallNotFound`] - The call_id does not exist"] # [doc = "* [`Error::JobDefinitionNotFound`] - The job index is invalid"] # [doc = "* [`Error::MaxFieldsExceeded`] - Too many result fields provided"] # [doc = "* [`Error::TypeCheck`] - Result fields fail type checking"] # [doc = "* [`Error::InvalidJobResult`] - Job result was rejected by hooks"] # [doc = "* [`DispatchError::BadOrigin`] - Caller is not an operator"] submit_result { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] call_id : :: core :: primitive :: u64 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "Slash an operator's stake for a service by scheduling a deferred slashing action."] # [doc = ""] # [doc = "This function schedules a deferred slashing action against an operator's stake for a"] # [doc = "specific service. The slash is not applied immediately, but rather queued to be"] # [doc = "executed by another entity later."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* The caller must be an authorized Slash Origin for the target service, as determined by"] # [doc = "  `query_slashing_origin`. If no slashing origin is set, or the caller does not match,"] # [doc = "  the call will fail."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call. Must be signed by an authorized Slash Origin."] # [doc = "* `offender` - The account ID of the operator to be slashed."] # [doc = "* `service_id` - The ID of the service for which to slash the operator."] # [doc = "* `slash_percent` - The percentage of the operator's exposed stake to slash, as a"] # [doc = "  `Percent` value."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* `NoSlashingOrigin` - No slashing origin is set for the service"] # [doc = "* `BadOrigin` - Caller is not the authorized slashing origin"] # [doc = "* `OffenderNotOperator` - Target account is not an operator for this service"] # [doc = "* `OffenderNotActiveOperator` - Target operator is not currently active"] slash { offender : :: subxt_core :: utils :: AccountId32 , # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , } , # [codec (index = 11)] # [doc = "Disputes and removes an [UnappliedSlash] from storage."] # [doc = ""] # [doc = "The slash will not be applied once disputed and is permanently removed."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be the authorized dispute origin for the service"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `era` - Era containing the slash to dispute"] # [doc = "* `index` - Index of the slash within the era"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::NoDisputeOrigin] - Service has no dispute origin configured"] # [doc = "* [DispatchError::BadOrigin] - Caller is not the authorized dispute origin"] dispute { # [codec (compact)] era : :: core :: primitive :: u32 , # [codec (compact)] index : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Updates the Master Blueprint Service Manager by adding a new revision."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `address` - New manager address to add"] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of"] # [doc = "  revisions reached"] update_master_blueprint_service_manager { address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "Join a service instance as an operator"] join_service { instance_id : :: core :: primitive :: u64 , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 16)] # [doc = "Leave a service instance as an operator"] leave_service { instance_id : :: core :: primitive :: u64 , } , # [codec (index = 17)] # [doc = "Updates the RPC address for a registered operator's service blueprint."] # [doc = ""] # [doc = "Allows an operator to modify their RPC address for a specific blueprint they are"] # [doc = "registered for. The operator must already be registered for the blueprint to update"] # [doc = "the RPC address."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin: OriginFor<T>` - The origin of the call. Must be signed by the operator."] # [doc = "* `blueprint_id: u64` - The identifier of the blueprint to update the RPC address for."] # [doc = "* `rpc_address: BoundedString<T::Constraints::MaxRpcAddressLength>` - The new RPC"] # [doc = "  address to set for the blueprint."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Must be signed by a registered operator for this blueprint."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::NotRegistered`] - The caller is not registered for this blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] update_rpc_address { # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , rpc_address : runtime_types :: tangle_primitives :: services :: field :: BoundedString , } , # [codec (index = 18)] # [doc = "Request a service with a pre-approved quote from operators."] # [doc = ""] # [doc = "This function creates a service request using a quote that has already been approved by"] # [doc = "the operators. Unlike the regular `request` method, this doesn't require operator"] # [doc = "approval after submission since the operators have already agreed to the terms via the"] # [doc = "quote."] # [doc = ""] # [doc = "The quote is obtained externally through a gRPC server, and this function accepts the"] # [doc = "necessary signatures from the operators to verify their approval."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Anyone can call this function"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account."] # [doc = "* `evm_origin` - Optional EVM address for ERC20 payments."] # [doc = "* `blueprint_id` - The ID of the blueprint to use."] # [doc = "* `permitted_callers` - Accounts allowed to call the service. If empty, only owner can"] # [doc = "  call."] # [doc = "* `operators` - List of operators that will run the service."] # [doc = "* `request_args` - Blueprint initialization arguments."] # [doc = "* `asset_security_requirements` - Security requirements for assets."] # [doc = "* `ttl` - Time-to-live in blocks for the service request."] # [doc = "* `payment_asset` - Asset used for payment (native, custom or ERC20)."] # [doc = "* `value` - Amount to pay for the service."] # [doc = "* `membership_model` - Membership model for the service."] # [doc = "* `operator_signatures` - Signatures from operators confirming the quote."] # [doc = "* `security_commitments` - Security commitments from operators."] # [doc = "* `pricing_quote` - Pricing quote details."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::TypeCheck`] - Request arguments fail blueprint type checking."] # [doc = "* [`Error::NoAssetsProvided`] - No assets were specified."] # [doc = "* [`Error::MissingEVMOrigin`] - EVM origin required but not provided for ERC20 payment."] # [doc = "* [`Error::ERC20TransferFailed`] - ERC20 token transfer failed."] # [doc = "* [`Error::NotRegistered`] - One or more operators not registered for blueprint."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint_id does not exist."] # [doc = "* [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid."] request_with_signed_price_quotes { evm_origin : :: core :: option :: Option < :: subxt_core :: utils :: H160 > , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , permitted_callers : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , operators : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , request_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , asset_security_requirements : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , # [codec (compact)] ttl : :: core :: primitive :: u64 , payment_asset : runtime_types :: tangle_primitives :: services :: types :: Asset < :: core :: primitive :: u128 > , membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , pricing_quotes : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: pricing :: PricingQuote > , operator_signatures : :: subxt_core :: alloc :: vec :: Vec < [:: core :: primitive :: u8 ; 65usize] > , security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > , } , # [codec (index = 19)] # [doc = "Send a heartbeat for a service."] # [doc = ""] # [doc = "This function allows operators to send periodic heartbeats to indicate they are still"] # [doc = "active. Each operator must send heartbeats at intervals defined by its blueprint's"] # [doc = "heartbeat_interval. The heartbeat includes custom metrics data that can be used for"] # [doc = "monitoring and analytics."] # [doc = ""] # [doc = "The heartbeat must be signed by the operator to verify its authenticity."] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - The origin of the call, must be a signed account."] # [doc = "* `service_id` - The ID of the service sending the heartbeat."] # [doc = "* `blueprint_id` - The ID of the blueprint the service was created from."] # [doc = "* `metrics_data` - Custom metrics data from the service (serialized)."] # [doc = "* `signature` - ECDSA signature verifying the heartbeat data."] # [doc = ""] # [doc = "# Errors"] # [doc = ""] # [doc = "* [`Error::ServiceNotFound`] - The service does not exist."] # [doc = "* [`Error::ServiceNotActive`] - The service is not active."] # [doc = "* [`Error::BlueprintNotFound`] - The blueprint does not exist."] # [doc = "* [`Error::HeartbeatTooEarly`] - Not enough blocks have passed since the last heartbeat."] # [doc = "* [`Error::HeartbeatSignatureVerificationFailed`] - The signature verification failed."] # [doc = "* [`Error::InvalidHeartbeatData`] - The heartbeat data is invalid."] heartbeat { # [codec (compact)] service_id : :: core :: primitive :: u64 , # [codec (compact)] blueprint_id : :: core :: primitive :: u64 , metrics_data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , signature : [:: core :: primitive :: u8 ; 65usize] , } , # [codec (index = 20)] # [doc = "Updates the default heartbeat threshold for all services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `threshold` - New default heartbeat threshold"] update_default_heartbeat_threshold { threshold : :: core :: primitive :: u8 , } , # [codec (index = 21)] # [doc = "Updates the default heartbeat interval for all services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `interval` - New default heartbeat interval"] update_default_heartbeat_interval { interval : :: core :: primitive :: u64 , } , # [codec (index = 22)] # [doc = "Updates the default heartbeat slashing window for all services."] # [doc = ""] # [doc = "# Permissions"] # [doc = ""] # [doc = "* Caller must be an authorized Master Blueprint Service Manager Update Origin"] # [doc = ""] # [doc = "# Arguments"] # [doc = ""] # [doc = "* `origin` - Origin of the call"] # [doc = "* `window` - New default heartbeat slashing window"] update_default_heartbeat_slashing_window { window : :: core :: primitive :: u64 , } , }
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
 					:: subxt_core :: ext :: codec :: Encode,
@@ -68697,7 +68788,7 @@ pub mod api {
 				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 				#[doc = "The `Event` enum of this pallet"]
 				pub enum Event {
-					# [codec (index = 0)] # [doc = "A new service blueprint has been created."] BlueprintCreated { owner : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 1)] # [doc = "An operator has pre-registered for a service blueprint."] PreRegistration { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "An new operator has been registered."] Registered { provider : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 3)] # [doc = "An operator has been unregistered."] Unregistered { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "A new service has been requested."] ServiceRequested { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , security_requirements : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , } , # [codec (index = 5)] # [doc = "A service request has been approved."] ServiceRequestApproved { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 6)] # [doc = "A service request has been rejected."] ServiceRequestRejected { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 7)] # [doc = "A service has been initiated."] ServiceInitiated { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , operator_security_commitments : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < (:: subxt_core :: utils :: AccountId32 , runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > ,) > , } , # [codec (index = 8)] # [doc = "A service has been terminated."] ServiceTerminated { owner : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 9)] # [doc = "A job has been called."] JobCalled { caller : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "A job result has been submitted."] JobResultSubmitted { operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 11)] # [doc = "EVM execution reverted with a reason."] EvmReverted { from : :: subxt_core :: utils :: H160 , to : :: subxt_core :: utils :: H160 , data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , reason : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 12)] # [doc = "An Operator has an unapplied slash."] UnappliedSlash { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 13)] # [doc = "An Unapplied Slash got discarded."] SlashDiscarded { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "The Master Blueprint Service Manager has been revised."] MasterBlueprintServiceManagerRevised { revision : :: core :: primitive :: u32 , address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "A request for a pricing quote has been made."] RequestForQuote { requester : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 16)] # [doc = "RPC address updated."] RpcAddressUpdated { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , rpc_address : runtime_types :: tangle_primitives :: services :: field :: BoundedString , } , # [codec (index = 17)] # [doc = "A service has sent a heartbeat."] HeartbeatReceived { service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , block_number : :: core :: primitive :: u64 , } , }
+					# [codec (index = 0)] # [doc = "A new service blueprint has been created."] BlueprintCreated { owner : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 1)] # [doc = "An operator has pre-registered for a service blueprint."] PreRegistration { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 2)] # [doc = "An new operator has been registered."] Registered { provider : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , preferences : runtime_types :: tangle_primitives :: services :: types :: OperatorPreferences , registration_args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 3)] # [doc = "An operator has been unregistered."] Unregistered { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 4)] # [doc = "A new service has been requested."] ServiceRequested { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , security_requirements : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < :: core :: primitive :: u128 > > , } , # [codec (index = 5)] # [doc = "A service request has been approved."] ServiceRequestApproved { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , pending_approvals : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , approved : :: subxt_core :: alloc :: vec :: Vec < :: subxt_core :: utils :: AccountId32 > , } , # [codec (index = 6)] # [doc = "A service request has been rejected."] ServiceRequestRejected { operator : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 7)] # [doc = "A service has been initiated."] ServiceInitiated { owner : :: subxt_core :: utils :: AccountId32 , request_id : :: core :: primitive :: u64 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , operator_security_commitments : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < (:: subxt_core :: utils :: AccountId32 , runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < :: core :: primitive :: u128 > > ,) > , } , # [codec (index = 8)] # [doc = "A service has been terminated."] ServiceTerminated { owner : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 9)] # [doc = "A job has been called."] JobCalled { caller : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , args : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 10)] # [doc = "A job result has been submitted."] JobResultSubmitted { operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , call_id : :: core :: primitive :: u64 , job : :: core :: primitive :: u8 , result : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: field :: Field < :: subxt_core :: utils :: AccountId32 > > , } , # [codec (index = 11)] # [doc = "EVM execution reverted with a reason."] EvmReverted { from : :: subxt_core :: utils :: H160 , to : :: subxt_core :: utils :: H160 , data : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , reason : :: subxt_core :: alloc :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 12)] # [doc = "An Operator has an unapplied slash."] UnappliedSlash { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 13)] # [doc = "An Unapplied Slash got discarded."] SlashDiscarded { index : :: core :: primitive :: u32 , operator : :: subxt_core :: utils :: AccountId32 , service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , slash_percent : runtime_types :: sp_arithmetic :: per_things :: Percent , era : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "The Master Blueprint Service Manager has been revised."] MasterBlueprintServiceManagerRevised { revision : :: core :: primitive :: u32 , address : :: subxt_core :: utils :: H160 , } , # [codec (index = 15)] # [doc = "A request for a pricing quote has been made."] RequestForQuote { requester : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , } , # [codec (index = 16)] # [doc = "RPC address updated."] RpcAddressUpdated { operator : :: subxt_core :: utils :: AccountId32 , blueprint_id : :: core :: primitive :: u64 , rpc_address : runtime_types :: tangle_primitives :: services :: field :: BoundedString , } , # [codec (index = 17)] # [doc = "A service has sent a heartbeat."] HeartbeatReceived { service_id : :: core :: primitive :: u64 , blueprint_id : :: core :: primitive :: u64 , operator : :: subxt_core :: utils :: AccountId32 , block_number : :: core :: primitive :: u64 , } , # [codec (index = 18)] # [doc = "Default heartbeat threshold updated."] DefaultHeartbeatThresholdUpdated { threshold : :: core :: primitive :: u8 , } , # [codec (index = 19)] # [doc = "Default heartbeat interval updated."] DefaultHeartbeatIntervalUpdated { interval : :: core :: primitive :: u64 , } , # [codec (index = 20)] # [doc = "Default heartbeat slashing window updated."] DefaultHeartbeatSlashingWindowUpdated { window : :: core :: primitive :: u64 , } , }
 			}
 		}
 		pub mod pallet_session {
