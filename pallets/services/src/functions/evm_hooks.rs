@@ -393,6 +393,216 @@ impl<T: Config> Pallet<T> {
 		)
 	}
 
+	/// Gets the heartbeat interval for a service instance by calling the blueprint's EVM contract.
+	///
+	/// This function dispatches a call to the `getHeartbeatInterval` function of the service
+	/// blueprint's manager contract to retrieve the heartbeat interval for a service.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `blueprint_id` - The ID of the service blueprint.
+	/// * `service_id` - The ID of the service instance.
+	///
+	/// # Returns
+	/// * `Result<(bool, u64), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the default value should be used
+	///   - The heartbeat interval in blocks
+	pub fn get_heartbeat_interval_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		service_id: u64,
+	) -> Result<(bool, u32), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let query = Function {
+			name: String::from("getHeartbeatInterval"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("blueprintId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("serviceId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+			],
+			outputs: Default::default(),
+			constant: None,
+			state_mutability: StateMutability::View,
+		};
+		let mbsm = Self::mbsm_address_of(blueprint)?;
+		let (info, _weight) = Self::dispatch_evm_call(
+			mbsm,
+			query.clone(),
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(service_id)),
+			],
+			Zero::zero(),
+		)?;
+
+		// Decode the result and return it, falling back on the default value if it fails
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		if let Some(data) = maybe_value {
+			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let use_default = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
+			let interval = result.get(1).ok_or(Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Bool(use_default) = use_default {
+				if let ethabi::Token::Uint(interval) = interval {
+					Ok((*use_default, interval.as_u32()))
+				} else {
+					Ok((true, 0))
+				}
+			} else {
+				Ok((true, 0))
+			}
+		} else {
+			Ok((true, 0))
+		}
+	}
+
+	/// Gets the heartbeat threshold for a service instance by calling the blueprint's EVM contract.
+	///
+	/// This function dispatches a call to the `getHeartbeatThreshold` function of the service
+	/// blueprint's manager contract to retrieve the heartbeat threshold percentage for a service.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `blueprint_id` - The ID of the service blueprint.
+	/// * `service_id` - The ID of the service instance.
+	///
+	/// # Returns
+	/// * `Result<(bool, u64), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the default value should be used
+	///   - The heartbeat threshold percentage
+	pub fn get_heartbeat_threshold_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		service_id: u64,
+	) -> Result<(bool, u8), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let query = Function {
+			name: String::from("getHeartbeatThreshold"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("blueprintId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("serviceId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+			],
+			outputs: Default::default(),
+			constant: None,
+			state_mutability: StateMutability::View,
+		};
+		let mbsm = Self::mbsm_address_of(blueprint)?;
+		let (info, _weight) = Self::dispatch_evm_call(
+			mbsm,
+			query.clone(),
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(service_id)),
+			],
+			Zero::zero(),
+		)?;
+
+		// Decode the result and return it, falling back on the default value if it fails
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		if let Some(data) = maybe_value {
+			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let use_default = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
+			let threshold = result.get(1).ok_or(Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Bool(use_default) = use_default {
+				if let ethabi::Token::Uint(threshold) = threshold {
+					Ok((
+						*use_default,
+						threshold.as_u64().try_into().map_err(|_| Error::<T>::EVMAbiDecode)?,
+					))
+				} else {
+					Ok((true, 0))
+				}
+			} else {
+				Ok((true, 0))
+			}
+		} else {
+			Ok((true, 0))
+		}
+	}
+
+	/// Gets the slashing window for a service instance by calling the blueprint's EVM contract.
+	///
+	/// This function dispatches a call to the `getSlashingWindow` function of the service
+	/// blueprint's manager contract to retrieve the slashing window in blocks for a service.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `blueprint_id` - The ID of the service blueprint.
+	/// * `service_id` - The ID of the service instance.
+	///
+	/// # Returns
+	/// * `Result<(bool, u64), DispatchErrorWithPostInfo>` - A tuple containing:
+	///   - A boolean indicating if the default value should be used
+	///   - The slashing window in blocks
+	pub fn get_slashing_window_hook(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		service_id: u64,
+	) -> Result<(bool, u32), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		let query = Function {
+			name: String::from("getSlashingWindow"),
+			inputs: vec![
+				ethabi::Param {
+					name: String::from("blueprintId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("serviceId"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+			],
+			outputs: Default::default(),
+			constant: None,
+			state_mutability: StateMutability::View,
+		};
+		let mbsm = Self::mbsm_address_of(blueprint)?;
+		let (info, _weight) = Self::dispatch_evm_call(
+			mbsm,
+			query.clone(),
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(service_id)),
+			],
+			Zero::zero(),
+		)?;
+
+		// Decode the result and return it, falling back on the default value if it fails
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		if let Some(data) = maybe_value {
+			let result = query.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let use_default = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
+			let window = result.get(1).ok_or(Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Bool(use_default) = use_default {
+				if let ethabi::Token::Uint(window) = window {
+					Ok((*use_default, window.as_u32()))
+				} else {
+					Ok((true, 0))
+				}
+			} else {
+				Ok((true, 0))
+			}
+		} else {
+			Ok((true, 0))
+		}
+	}
+
 	/// Hook to be called upon new service request.
 	///
 	/// This function is called when a service request is made. It performs an EVM call
@@ -1435,7 +1645,7 @@ impl<T: Config> Pallet<T> {
 	/// * `blueprint_id` - The ID of the blueprint
 	/// * `service_id` - The ID of the service
 	/// * `operator` - The account ID of the operator being slashed
-	/// * `slash_percent` - The percentage being slashed (0-100)
+	/// * `amount` - The amount being slashed
 	///
 	/// # Returns
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
