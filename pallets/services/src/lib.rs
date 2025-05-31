@@ -640,7 +640,24 @@ pub mod module {
 			/// The ID of the service blueprint.
 			blueprint_id: u64,
 			/// The block number when the heartbeat was received.
+			operator: T::AccountId,
+			/// The block number when the heartbeat was received.
 			block_number: BlockNumberFor<T>,
+		},
+		/// Default heartbeat threshold updated.
+		DefaultHeartbeatThresholdUpdated {
+			/// The new default heartbeat threshold.
+			threshold: u8,
+		},
+		/// Default heartbeat interval updated.
+		DefaultHeartbeatIntervalUpdated {
+			/// The new default heartbeat interval.
+			interval: BlockNumberFor<T>,
+		},
+		/// Default heartbeat slashing window updated.
+		DefaultHeartbeatSlashingWindowUpdated {
+			/// The new default heartbeat slashing window.
+			window: BlockNumberFor<T>,
 		},
 	}
 
@@ -2036,6 +2053,7 @@ pub mod module {
 				stats.expected_heartbeats =
 					stats.expected_heartbeats.saturating_add(expected_since_last);
 				stats.received_heartbeats = stats.received_heartbeats.saturating_add(1);
+				stats.last_heartbeat_block = current_block.try_into().unwrap_or_default();
 
 				// Get the heartbeat threshold from the QoS function
 				let heartbeat_threshold =
@@ -2066,22 +2084,32 @@ pub mod module {
 					}
 				}
 			}
+
+			// Update the heartbeat storage
+			ServiceHeartbeats::<T>::insert(
+				blueprint_id,
+				service_id,
+				(current_block, bounded_metrics_data),
+			);
+
+			// Update the operator's heartbeat stats
+			ServiceOperatorHeartbeats::<T>::insert(
+				(blueprint_id, service_id, caller.clone()),
+				stats,
+			);
+
+			// Emit event for heartbeat received
+			Self::deposit_event(Event::<T>::HeartbeatReceived {
+				blueprint_id,
+				service_id,
+				operator: caller,
+				block_number: current_block,
+			});
+
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::No })
 		}
 
-		// // Update the heartbeat storage
-		// ServiceHeartbeats::<T>::insert(
-		//     blueprint_id,
-		//     service_id,
-		//     (current_block, bounded_metrics_data),
-		// );
-
-		// // Update the operator's heartbeat stats
-		// ServiceOperatorHeartbeats::<T>::insert(
-		//     (blueprint_id, service_id, caller.clone()),
-		//     stats,
-		// );
-
+		/// Updates the default heartbeat threshold for all services.
 		///
 		/// # Permissions
 		///
@@ -2099,7 +2127,7 @@ pub mod module {
 
 			DefaultHeartbeatThreshold::<T>::set(threshold);
 
-			// Self::deposit_event(Event::<T>::DefaultHeartbeatThresholdUpdated { threshold });
+			Self::deposit_event(Event::<T>::DefaultHeartbeatThresholdUpdated { threshold });
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -2122,7 +2150,7 @@ pub mod module {
 
 			DefaultHeartbeatInterval::<T>::set(interval);
 
-			// Self::deposit_event(Event::<T>::DefaultHeartbeatIntervalUpdated { interval });
+			Self::deposit_event(Event::<T>::DefaultHeartbeatIntervalUpdated { interval });
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
@@ -2136,16 +2164,16 @@ pub mod module {
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
-		/// * `interval` - New default heartbeat slashing window
+		/// * `window` - New default heartbeat slashing window
 		pub fn update_default_heartbeat_slashing_window(
 			origin: OriginFor<T>,
-			interval: BlockNumberFor<T>,
+			window: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
 			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
 
-			DefaultSlashingWindow::<T>::set(interval);
+			DefaultSlashingWindow::<T>::set(window);
 
-			// Self::deposit_event(Event::<T>::DefaultHeartbeatSlashingWindowUpdated { interval });
+			Self::deposit_event(Event::<T>::DefaultHeartbeatSlashingWindowUpdated { window });
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
