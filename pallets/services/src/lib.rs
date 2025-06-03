@@ -215,6 +215,9 @@ pub mod module {
 
 		/// The origin which can manage Add a new Master Blueprint Service Manager revision.
 		type MasterBlueprintServiceManagerUpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+		/// The origin which may update default service parameters like heartbeat interval,
+		/// threshold, and slashing window.
+		type DefaultParameterUpdateOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 
 		/// The minimum percentage of native token stake that operators must expose for slashing.
 		#[pallet::constant]
@@ -2113,17 +2116,19 @@ pub mod module {
 		///
 		/// # Permissions
 		///
-		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		/// * Can only be called by the DefaultParameterUpdateOrigin
 		///
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
 		/// * `threshold` - New default heartbeat threshold
+		#[pallet::call_index(20)]
+		#[pallet::weight(10_000)]
 		pub fn update_default_heartbeat_threshold(
 			origin: OriginFor<T>,
 			threshold: u8,
 		) -> DispatchResultWithPostInfo {
-			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+			T::DefaultParameterUpdateOrigin::ensure_origin(origin)?;
 
 			DefaultHeartbeatThreshold::<T>::set(threshold);
 
@@ -2136,17 +2141,19 @@ pub mod module {
 		///
 		/// # Permissions
 		///
-		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		/// * Can only be called by the DefaultParameterUpdateOrigin
 		///
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
 		/// * `interval` - New default heartbeat interval
+		#[pallet::call_index(21)]
+		#[pallet::weight(10_000)]
 		pub fn update_default_heartbeat_interval(
 			origin: OriginFor<T>,
 			interval: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
-			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+			T::DefaultParameterUpdateOrigin::ensure_origin(origin)?;
 
 			DefaultHeartbeatInterval::<T>::set(interval);
 
@@ -2159,17 +2166,19 @@ pub mod module {
 		///
 		/// # Permissions
 		///
-		/// * Caller must be an authorized Master Blueprint Service Manager Update Origin
+		/// * Can only be called by the DefaultParameterUpdateOrigin
 		///
 		/// # Arguments
 		///
 		/// * `origin` - Origin of the call
 		/// * `window` - New default heartbeat slashing window
+		#[pallet::call_index(22)]
+		#[pallet::weight(10_000)]
 		pub fn update_default_heartbeat_slashing_window(
 			origin: OriginFor<T>,
 			window: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
-			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
+			T::DefaultParameterUpdateOrigin::ensure_origin(origin)?;
 
 			DefaultSlashingWindow::<T>::set(window);
 

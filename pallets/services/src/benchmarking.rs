@@ -542,14 +542,12 @@ benchmarks! {
 		let blueprint_id = 0u64;
 		let service_id = Pallet::<T>::next_service_request_id();
 
-		// Create Blueprint with heartbeat config in request_params
 		let mut blueprint = cggmp21_blueprint::<T>();
 		blueprint.request_params = vec![
-			FieldType::Uint32, // For heartbeat_interval
+			FieldType::Uint32,
 		].try_into().expect("Request params vec too large for blueprint");
 		Pallet::<T>::create_blueprint(RawOrigin::Signed(creator.clone()).into(), blueprint.clone()).unwrap();
 
-		// Register Operator
 		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
 		let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
 		let op_preferences = operator_preferences::<T>();
@@ -563,7 +561,6 @@ benchmarks! {
 			0u32.into()
 		).unwrap();
 
-		// Request Service
 		frame_system::Pallet::<T>::set_block_number(1u32.into());
 		let request_args = vec![
 			Field::Uint32(HEARTBEAT_INTERVAL_VALUE)
@@ -583,25 +580,18 @@ benchmarks! {
 			MembershipModel::Fixed { min_operators: 1u32.into() }
 		).unwrap();
 
-		// Set block for service activation
 		frame_system::Pallet::<T>::set_block_number(2u32.into());
 
-		// Advance to valid heartbeat block
 		frame_system::Pallet::<T>::set_block_number((HEARTBEAT_INTERVAL_VALUE + 2).into());
 
-		// Create metrics data as a Vec since the extrinsic requires Vec<u8>
 		let metrics_data: Vec<u8> = vec![1,2,3];
 
-		// Format the message the same way as in the pallet implementation
 		let mut message = service_id.to_le_bytes().to_vec();
 		message.extend_from_slice(&blueprint_id.to_le_bytes());
 		message.extend_from_slice(&metrics_data);
 
-		// Hash the message with keccak_256
 		let message_hash = sp_core::hashing::keccak_256(&message);
 
-		// For benchmarking, we can use a dummy signature of all zeros
-		// In a real scenario, this would be properly signed by the operator's key
 		let signature_bytes = [0u8; 65];
 		let signature = ecdsa::Signature::from_raw(signature_bytes);
 

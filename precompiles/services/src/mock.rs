@@ -592,6 +592,7 @@ impl pallet_services::Config for Runtime {
 	type OperatorDelegationManager = MockDelegationManager;
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
+	type DefaultParameterUpdateOrigin = EnsureRoot<AccountId>;
 	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
 }
