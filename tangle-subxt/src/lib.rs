@@ -4,8 +4,7 @@
 	stable_features,
 	non_shorthand_field_patterns,
 	renamed_and_removed_lints,
-	unsafe_code,
-	clippy::exhaustive_enums
+	unsafe_code
 )]
 
 pub use parity_scale_codec;
@@ -20,7 +19,7 @@ pub use subxt_signer;
 
 // #[cfg_attr(rustfmt, rustfmt::skip)]
 // pub mod tangle_mainnet_runtime;
-#[cfg_attr(rustfmt, rustfmt::skip)]
+#[rustfmt::skip]
 pub mod tangle_testnet_runtime;
 
 mod field_ext;
