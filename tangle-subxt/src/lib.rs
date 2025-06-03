@@ -1,15 +1,12 @@
 #![deny(
-	// trivial_casts,
-	// trivial_numeric_casts,
+	trivial_casts,
+	trivial_numeric_casts,
 	stable_features,
 	non_shorthand_field_patterns,
 	renamed_and_removed_lints,
 	unsafe_code,
 	clippy::exhaustive_enums
 )]
-#![allow(clippy::all, clippy::exhaustive_enums)]
-#![allow(trivial_numeric_casts)]
-#![allow(clippy::trivial_numeric_casts)]
 
 pub use parity_scale_codec;
 pub use scale_info;
