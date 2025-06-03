@@ -5,7 +5,7 @@ use sp_std::{vec, vec::Vec};
 use tangle_primitives::{BlueprintId, services::Constraints, traits::ServiceManager};
 
 #[cfg(feature = "runtime-benchmarks")]
-use tangle_primitives::rewards::UserDepositWithLocks;
+use tangle_primitives::rewards::{AssetType, UserDepositWithLocks};
 #[cfg(feature = "runtime-benchmarks")]
 use tangle_primitives::services::Asset;
 

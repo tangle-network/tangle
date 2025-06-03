@@ -203,6 +203,7 @@ impl pallet_services::Config for Runtime {
 	type Constraints = PalletServicesConstraints;
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
+	type DefaultParameterUpdateOrigin = EnsureRootOrHalfCouncil;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]
