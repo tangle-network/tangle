@@ -543,9 +543,6 @@ benchmarks! {
 		let service_id = Pallet::<T>::next_service_request_id();
 
 		let mut blueprint = cggmp21_blueprint::<T>();
-		blueprint.request_params = vec![
-			FieldType::Uint32,
-		].try_into().expect("Request params vec too large for blueprint");
 		Pallet::<T>::create_blueprint(RawOrigin::Signed(creator.clone()).into(), blueprint.clone()).unwrap();
 
 		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
@@ -562,9 +559,6 @@ benchmarks! {
 		).unwrap();
 
 		frame_system::Pallet::<T>::set_block_number(1u32.into());
-		let request_args = vec![
-			Field::Uint32(HEARTBEAT_INTERVAL_VALUE)
-		].try_into().expect("Request args vec too large for request");
 
 		Pallet::<T>::request(
 			RawOrigin::Signed(service_requester.clone()).into(),
@@ -572,7 +566,7 @@ benchmarks! {
 			blueprint_id,
 			vec![operator_account.clone()].try_into().unwrap(),
 			vec![operator_account.clone()].try_into().unwrap(),
-			request_args,
+			Default::default(),
 			Default::default(),
 			100u32.into(),
 			Asset::Custom(T::AssetId::from(USDC)),
