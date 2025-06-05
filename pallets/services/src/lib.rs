@@ -882,6 +882,12 @@ pub mod module {
 				MembershipModel::Dynamic { .. } => MembershipModelType::Dynamic,
 			};
 
+			// Validate that the blueprint supports the requested membership model
+			ensure!(
+				typedef.supported_membership_models.contains(&membership_model_type),
+				Error::<T>::UnsupportedMembershipModel
+			);
+
 			let metadata_string =
 				String::from_utf8(metadata.clone().into_inner()).unwrap_or_default();
 			let blueprint = ServiceBlueprint {
@@ -899,9 +905,15 @@ pub mod module {
 				registration_params: typedef.registration_params,
 				request_params: typedef.request_params,
 				manager: typedef.manager,
-				master_manager_revision: typedef.master_manager_revision,
+				master_manager_revision: match typedef.master_manager_revision {
+					MasterBlueprintServiceManagerRevision::Latest =>
+						MasterBlueprintServiceManagerRevision::Specific(Self::mbsm_latest_revision()),
+					MasterBlueprintServiceManagerRevision::Specific(revision) =>
+						MasterBlueprintServiceManagerRevision::Specific(revision),
+					_ => typedef.master_manager_revision, // Fallback for future variants
+				},
 				sources: typedef.sources,
-				supported_membership_models: vec![membership_model_type].try_into().unwrap(),
+				supported_membership_models: typedef.supported_membership_models,
 				pricing_model,
 			};
 

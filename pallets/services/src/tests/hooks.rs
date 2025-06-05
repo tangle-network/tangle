@@ -29,7 +29,11 @@ fn test_hooks() {
 		let mut blueprint = cggmp21_blueprint();
 		blueprint.manager = BlueprintServiceManager::Evm(HOOKS_TEST);
 
-		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
@@ -43,16 +47,15 @@ fn test_hooks() {
 
 		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(alice.clone()),
 			None,
 			0,
 			vec![alice.clone()],
 			vec![bob.clone()],
 			Default::default(),
 			vec![
-				get_security_requirement(USDC, &[10, 20]),
-				get_security_requirement(WETH, &[10, 20]),
-				get_security_requirement(TNT, &[10, 20])
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20])
 			],
 			100,
 			Asset::Custom(USDC),
@@ -63,11 +66,8 @@ fn test_hooks() {
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 		// Bob approves the request with security commitments
-		let security_commitments = vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10),
-		];
+		let security_commitments =
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
 		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),

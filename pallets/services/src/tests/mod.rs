@@ -145,7 +145,10 @@ fn deploy() -> Deployment {
 		vec![alice.clone()],
 		vec![bob.clone()],
 		Default::default(),
-		vec![get_security_requirement(WETH, &[10, 20])],
+		vec![
+			get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+			get_security_requirement(WETH, &[10, 20])
+		],
 		100,
 		Asset::Custom(USDC),
 		0,
@@ -155,7 +158,7 @@ fn deploy() -> Deployment {
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 	let security_commitments =
-		vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+		vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
 	let security_commitment_map = security_commitments
 		.iter()
 		.map(|c| (c.asset, c.clone()))

@@ -25,7 +25,11 @@ fn test_security_requirements_validation() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 		// Register operator
@@ -127,7 +131,11 @@ fn test_security_commitment_validation() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
 		// Register operator
@@ -146,7 +154,10 @@ fn test_security_commitment_validation() {
 			vec![alice.clone()],
 			vec![bob.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20]),],
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
@@ -182,7 +193,7 @@ fn test_security_commitment_validation() {
 		);
 		// Test Case 4: Valid commitment
 		let security_commitments_5 =
-			vec![get_security_commitment(WETH, 15), get_security_commitment(TNT, 15)];
+			vec![get_security_commitment(TNT, 15), get_security_commitment(WETH, 15)];
 		let security_commitment_hash_5 = BlakeTwo256::hash_of(&security_commitments_5);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
@@ -199,7 +210,11 @@ fn test_exposure_calculations() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
@@ -226,6 +241,7 @@ fn test_exposure_calculations() {
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
+				get_security_requirement(TNT, &[10, 30]), // Include native asset requirement
 				get_security_requirement(WETH, &[10, 30]),
 				get_security_requirement(USDC, &[15, 25]),
 			],
@@ -237,9 +253,9 @@ fn test_exposure_calculations() {
 
 		// Test different exposure combinations
 		let security_commitments_bob = vec![
+			get_security_commitment(TNT, 20),
 			get_security_commitment(WETH, 20),
 			get_security_commitment(USDC, 20),
-			get_security_commitment(TNT, 20),
 		];
 		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
@@ -249,9 +265,9 @@ fn test_exposure_calculations() {
 		));
 
 		let security_commitments_charlie = vec![
+			get_security_commitment(TNT, 10),
 			get_security_commitment(WETH, 25),
 			get_security_commitment(USDC, 15),
-			get_security_commitment(TNT, 10),
 		];
 		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
@@ -261,9 +277,9 @@ fn test_exposure_calculations() {
 		));
 
 		let security_commitments_dave = vec![
+			get_security_commitment(TNT, 10),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(USDC, 20),
-			get_security_commitment(TNT, 10),
 		];
 		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
 		assert_ok!(Services::approve(
@@ -300,7 +316,11 @@ fn test_exposure_limits() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);

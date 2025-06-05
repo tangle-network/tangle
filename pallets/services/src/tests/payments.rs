@@ -196,7 +196,10 @@ fn test_payment_distribution_operators() {
 			vec![],
 			vec![bob.clone(), charlie.clone()],
 			Default::default(),
-			vec![get_security_requirement(USDC, &[10, 20])],
+			vec![
+				get_security_requirement(TNT, &[10, 30]), // Include native asset requirement
+				get_security_requirement(USDC, &[10, 20])
+			],
 			100,
 			Asset::Custom(USDC),
 			payment,
@@ -209,7 +212,7 @@ fn test_payment_distribution_operators() {
 
 		// Approve service request
 		let security_commitments_bob =
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)];
+			vec![get_security_commitment(TNT, 20), get_security_commitment(USDC, 10)];
 		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
@@ -218,7 +221,7 @@ fn test_payment_distribution_operators() {
 		));
 
 		let security_commitments_charlie =
-			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 25)];
+			vec![get_security_commitment(TNT, 25), get_security_commitment(USDC, 15)];
 		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
