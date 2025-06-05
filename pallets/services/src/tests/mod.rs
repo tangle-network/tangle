@@ -82,7 +82,7 @@ pub(crate) fn cggmp21_blueprint()
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
 		],
-		pricing_model: PricingModel::PayOnce { amount: 100 },
+		pricing_model: PricingModel::PayOnce { amount: 100 * 10u128.pow(6) },
 	}
 }
 
@@ -137,6 +137,9 @@ fn deploy() -> Deployment {
 	));
 
 	let eve = mock_pub_key(EVE);
+	// Give EVE some USDC tokens to pay for the service (need 100 USDC with 6 decimals = 100_000_000
+	// units)
+	mint_tokens(USDC, mock_pub_key(ALICE), eve.clone(), 200 * 10u128.pow(6));
 	let service_id = Services::next_instance_id();
 	assert_ok!(Services::request(
 		RuntimeOrigin::signed(eve.clone()),
@@ -151,7 +154,8 @@ fn deploy() -> Deployment {
 		],
 		100,
 		Asset::Custom(USDC),
-		0,
+		100 * 10u128.pow(6), /* Payment amount should match the blueprint's pricing model amount
+		                      * (100 USDC with 6 decimals) */
 		MembershipModel::Fixed { min_operators: 1 },
 	));
 
@@ -236,12 +240,12 @@ pub fn create_test_blueprint(
 ) -> Result<(), sp_runtime::DispatchError> {
 	Services::create_blueprint(
 		origin,
-		bounded_vec![],                              // metadata
-		blueprint,                                   // typedef
-		MembershipModel::Fixed { min_operators: 1 }, // membership_model
-		vec![],                                      // security_requirements
-		None,                                        // price_targets
-		PricingModel::PayOnce { amount: 100 },       // pricing_model
+		bounded_vec![],                                        // metadata
+		blueprint,                                             // typedef
+		MembershipModel::Fixed { min_operators: 1 },           // membership_model
+		vec![],                                                // security_requirements
+		None,                                                  // price_targets
+		PricingModel::PayOnce { amount: 100 * 10u128.pow(6) }, // pricing_model
 	)
 	.map(|_| ())
 	.map_err(|e| e.error)

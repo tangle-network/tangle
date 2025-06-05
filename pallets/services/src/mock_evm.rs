@@ -393,9 +393,12 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 					// First function (selector: 0x0b6535d7) - possibly onBlueprintCreated to MBSM
 					[0x0b, 0x65, 0x35, 0xd7] => {
 						// Always allow MBSM calls
+						// Return encoded true (boolean)
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
 						return Ok(fp_evm::CallInfo {
 							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
-							value: vec![],
+							value: result,
 							used_gas: fp_evm::UsedGas {
 								standard: U256::from(21000),
 								effective: U256::from(21000),
@@ -408,9 +411,12 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 					// onBlueprintCreated(uint64,address,ServiceBlueprint)
 					[0xb8, 0x9a, 0xf9, 0x04] => {
 						// Always allow blueprint creation in tests
+						// Return encoded true (boolean)
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
 						return Ok(fp_evm::CallInfo {
 							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
-							value: vec![],
+							value: result,
 							used_gas: fp_evm::UsedGas {
 								standard: U256::from(21000),
 								effective: U256::from(21000),
@@ -453,10 +459,12 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 							}
 						}
 
-						// Accept valid registrations
+						// Accept valid registrations - return encoded true
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
 						return Ok(fp_evm::CallInfo {
 							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
-							value: vec![],
+							value: result,
 							used_gas: fp_evm::UsedGas {
 								standard: U256::from(21000),
 								effective: U256::from(21000),
@@ -466,8 +474,9 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 						});
 					},
 
-					// onRequest(uint64,RequestParams)
-					[0x9a, 0x4b, 0xa5, 0x00] => {
+					// onRequest(uint64,RequestParams) or other request-related calls
+					[0x9a, 0x4b, 0xa5, 0x00] | // onRequest selector
+					_ if input.len() >= 4 && target == crate::mock::CGGMP21_BLUEPRINT => {
 						// Basic validation for service requests
 						if call_data.len() >= 32 {
 							let blueprint_id_bytes = &call_data[24..32];
@@ -498,9 +507,12 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 							}
 						}
 
+						// Accept valid requests - return encoded true
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
 						return Ok(fp_evm::CallInfo {
 							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
-							value: vec![],
+							value: result,
 							used_gas: fp_evm::UsedGas {
 								standard: U256::from(21000),
 								effective: U256::from(21000),
@@ -518,9 +530,12 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 							selector[0], selector[1], selector[2], selector[3]
 						);
 
+						// Return encoded true for unknown but potentially valid calls
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
 						return Ok(fp_evm::CallInfo {
 							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
-							value: vec![],
+							value: result,
 							used_gas: fp_evm::UsedGas {
 								standard: U256::from(21000),
 								effective: U256::from(21000),

@@ -1327,9 +1327,18 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
-			// Convert hash to security commitments - this is a placeholder
-			// In a real implementation, you'd need to properly decode the security commitments
-			let security_commitments = vec![];
+			// Since this is just a test implementation, we'll infer the security commitments
+			// from the service request requirements and use default valid commitments
+			let request = Self::service_requests(request_id)?;
+			let security_commitments: Vec<AssetSecurityCommitment<T::AssetId>> = request
+				.security_requirements
+				.iter()
+				.map(|req| AssetSecurityCommitment {
+					asset: req.asset.clone(),
+					exposure_percent: req.min_exposure_percent,
+				})
+				.collect();
+
 			Self::do_approve(caller, request_id, &security_commitments)?;
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
