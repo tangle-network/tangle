@@ -199,6 +199,7 @@ impl pallet_services::Config for Runtime {
 	type SlashDeferDuration = SlashDeferDuration;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
+	type DefaultParameterUpdateOrigin = EnsureRootOrHalfCouncil;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;

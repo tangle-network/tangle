@@ -3,8 +3,11 @@ use crate::{BalanceOf, BlockNumberFor, OriginFor};
 use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
 use frame_support::{BoundedVec, dispatch::DispatchResult};
 use frame_system::RawOrigin;
-use sp_core::{H160, Pair};
-use sp_runtime::{KeyTypeId, Percent, traits::Hash};
+use parity_scale_codec::{Decode, Encode};
+use scale_info::prelude::boxed::Box;
+use sp_core::{ByteArray, H160, crypto::Pair, ecdsa};
+use sp_runtime::{KeyTypeId, Percent};
+use sp_std::{prelude::*, vec};
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
 	BoundedString, Field, FieldType, JobDefinition, JobMetadata,
@@ -13,12 +16,12 @@ use tangle_primitives::services::{
 };
 
 pub type AssetId = u32;
-
+pub type AssetIdOf<T> = <T as Config>::AssetId;
+const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
 pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
 pub const WBTC: AssetId = 3;
-
 pub(crate) fn get_security_requirement<T: Config>(
 	a: T::AssetId,
 	p: &[u8; 2],
@@ -547,6 +550,67 @@ benchmarks! {
 			keygen_job_call_id,
 			vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())].try_into().unwrap()
 		)
+
+	heartbeat {
+		const HEARTBEAT_INTERVAL_VALUE: u32 = 10;
+		const DUMMY_OPERATOR_ADDRESS_BYTES: [u8; 20] = [1u8; 20];
+
+		let creator: T::AccountId = mock_account_id::<T>(0u8);
+		let operator_account: T::AccountId = mock_account_id::<T>(1u8);
+		let service_requester: T::AccountId = mock_account_id::<T>(2u8);
+
+		let blueprint_id = 0u64;
+		let service_id = Pallet::<T>::next_service_request_id();
+
+		let mut blueprint = cggmp21_blueprint::<T>();
+		Pallet::<T>::create_blueprint(RawOrigin::Signed(creator.clone()).into(), blueprint.clone()).unwrap();
+
+		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
+		let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
+		let op_preferences = operator_preferences::<T>();
+		let registration_args = Vec::<Field<T::Constraints, T::AccountId>>::new();
+
+		Pallet::<T>::register(
+			RawOrigin::Signed(operator_account.clone()).into(),
+			blueprint_id,
+			op_preferences,
+			registration_args,
+			0u32.into()
+		).unwrap();
+
+		frame_system::Pallet::<T>::set_block_number(1u32.into());
+
+		Pallet::<T>::request(
+			RawOrigin::Signed(service_requester.clone()).into(),
+			None,
+			blueprint_id,
+			vec![operator_account.clone()].try_into().unwrap(),
+			vec![operator_account.clone()].try_into().unwrap(),
+			Default::default(),
+			Default::default(),
+			100u32.into(),
+			Asset::Custom(T::AssetId::from(USDC)),
+			0u32.into(),
+			MembershipModel::Fixed { min_operators: 1u32.into() }
+		).unwrap();
+
+		frame_system::Pallet::<T>::set_block_number(2u32.into());
+
+		frame_system::Pallet::<T>::set_block_number((HEARTBEAT_INTERVAL_VALUE + 2).into());
+
+		let metrics_data: Vec<u8> = vec![1,2,3];
+
+		let mut message = service_id.to_le_bytes().to_vec();
+		message.extend_from_slice(&blueprint_id.to_le_bytes());
+		message.extend_from_slice(&metrics_data);
+
+		let message_hash = sp_core::hashing::keccak_256(&message);
+
+		let signature_bytes = [0u8; 65];
+		let signature = ecdsa::Signature::from_raw(signature_bytes);
+
+
+	}: _(RawOrigin::Signed(operator_account.clone()), blueprint_id, service_id, metrics_data, signature)
 
 	// Slash an operator's stake for a service
 	slash {
