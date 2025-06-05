@@ -450,7 +450,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the default value should be used
 	///   - The heartbeat interval in blocks
 	pub fn get_heartbeat_interval_hook(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<(bool, u32), DispatchErrorWithPostInfo> {
@@ -519,7 +519,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the default value should be used
 	///   - The heartbeat threshold percentage
 	pub fn get_heartbeat_threshold_hook(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<(bool, u8), DispatchErrorWithPostInfo> {
@@ -591,7 +591,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the default value should be used
 	///   - The slashing window in blocks
 	pub fn get_slashing_window_hook(
-		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<(bool, u32), DispatchErrorWithPostInfo> {

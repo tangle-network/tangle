@@ -22,15 +22,15 @@ impl<T: Config> Pallet<T> {
 
 		match &blueprint.pricing_model {
 			PricingModel::PayOnce { amount } => {
-				Self::process_pay_once_payment(service_id, &service.owner, amount.clone())?;
+				Self::process_pay_once_payment(service_id, &service.owner, *amount)?;
 			},
 			PricingModel::Subscription { rate_per_interval, interval, maybe_end } => {
 				Self::process_subscription_payment(
 					service_id,
 					&service.owner,
-					rate_per_interval.clone(),
-					interval.clone(),
-					maybe_end.clone(),
+					*rate_per_interval,
+					*interval,
+					*maybe_end,
 					current_block,
 				)?;
 			},
@@ -127,7 +127,7 @@ impl<T: Config> Pallet<T> {
 
 		if let PricingModel::EventDriven { reward_per_event } = &blueprint.pricing_model {
 			let total_reward = reward_per_event
-				.checked_mul(&(event_count as u32).into())
+				.checked_mul(&event_count.into())
 				.ok_or(Error::<T>::InvalidRequestInput)?;
 
 			// Record the reward with the rewards pallet
@@ -234,9 +234,9 @@ impl<T: Config> Pallet<T> {
 						let _ = Self::process_subscription_payment(
 							service_id,
 							&service.owner,
-							rate_per_interval.clone(),
-							interval.clone(),
-							maybe_end.clone(),
+							*rate_per_interval,
+							*interval,
+							*maybe_end,
 							current_block,
 						);
 

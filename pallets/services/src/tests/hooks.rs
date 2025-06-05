@@ -15,9 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{assert_err, assert_ok};
+use frame_support::assert_ok;
 use sp_runtime::traits::{BlakeTwo256, Hash};
-use tangle_primitives::services::BoundedString;
 
 #[test]
 fn test_hooks() {

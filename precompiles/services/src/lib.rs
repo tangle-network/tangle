@@ -74,8 +74,8 @@ where
 				jobs: blueprint.jobs.clone(),
 				registration_params: blueprint.registration_params.clone(),
 				request_params: blueprint.request_params.clone(),
-				manager: blueprint.manager.clone(),
-				master_manager_revision: blueprint.master_manager_revision.clone(),
+				manager: blueprint.manager,
+				master_manager_revision: blueprint.master_manager_revision,
 				sources: blueprint.sources.clone(),
 				supported_membership_models: blueprint.supported_membership_models.clone(),
 				pricing_model: tangle_primitives::services::PricingModel::PayOnce {

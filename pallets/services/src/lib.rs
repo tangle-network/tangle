@@ -78,7 +78,9 @@ pub mod module {
 	use sp_core::H160;
 	use sp_runtime::{Percent, Saturating, traits::MaybeSerializeDeserialize};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
-	use tangle_primitives::{rewards::AssetType, services::*};
+	use tangle_primitives::{
+		rewards::AssetType, services::*, traits::RewardRecorder as RewardRecorderTrait,
+	};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {

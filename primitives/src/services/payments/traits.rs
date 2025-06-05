@@ -92,11 +92,8 @@ where
 			billing_state.mark_billed(current_block);
 
 			// Reset counters based on pricing model
-			match self {
-				PricingModel::EventDriven { .. } => {
-					billing_state.clear_events();
-				},
-				_ => {},
+			if let PricingModel::EventDriven { .. } = self {
+				billing_state.clear_events();
 			}
 
 			Some(calculation.amount)

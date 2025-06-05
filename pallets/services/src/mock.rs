@@ -40,7 +40,7 @@ use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
 	AccountId32, BuildStorage, DispatchError, DispatchResult, Perbill, Percent,
 	testing::UintAuthorityId,
-	traits::{ConvertInto, IdentityLookup, Zero},
+	traits::{ConvertInto, IdentityLookup},
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
