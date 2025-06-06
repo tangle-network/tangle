@@ -26,6 +26,7 @@ use serde::{Deserialize, Serialize};
 use super::{
 	BoundedString,
 	field::{Field, FieldType},
+	types::PricingModel,
 };
 
 /// A Job Definition is a definition of a job that can be called.
@@ -46,6 +47,9 @@ pub struct JobDefinition<C: Constraints> {
 	/// These are the result, the return values of this job.
 	/// i.e. the output.
 	pub result: BoundedVec<FieldType, C::MaxFields>,
+	/// The pricing model for this specific job.
+	/// Using concrete types u32 and u128 for simplicity
+	pub pricing_model: PricingModel<u32, u128>,
 }
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
@@ -116,6 +120,66 @@ pub struct JobCallResult<C: Constraints, AccountId> {
 	pub call_id: u64,
 	/// The result of the job call.
 	pub result: BoundedVec<Field<C, AccountId>, C::MaxFields>,
+}
+
+/// Tracks billing information for job-level subscription models
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default, BlockNumber: Default)),
+    Clone(bound(AccountId: Clone, BlockNumber: Clone)),
+    PartialEq(bound(AccountId: PartialEq, BlockNumber: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(AccountId, BlockNumber))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+    feature = "std",
+    derive(Serialize, Deserialize),
+    serde(bound(serialize = "AccountId: Serialize, BlockNumber: Serialize", deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>")),
+    educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
+)]
+pub struct JobSubscriptionBilling<AccountId, BlockNumber> {
+	/// The service ID
+	pub service_id: u64,
+	/// The job index within the service
+	pub job_index: u8,
+	/// The subscriber (caller) account
+	pub subscriber: AccountId,
+	/// The block number when the subscription was last billed
+	pub last_billed: BlockNumber,
+	/// The block number when the subscription ends (if any)
+	pub end_block: Option<BlockNumber>,
+}
+
+/// Tracks payment information for a specific job call
+#[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
+#[educe(
+    Default(bound(AccountId: Default)),
+    Clone(bound(AccountId: Clone)),
+    PartialEq(bound(AccountId: PartialEq)),
+    Eq
+)]
+#[scale_info(skip_type_params(AccountId))]
+#[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
+#[cfg_attr(
+    feature = "std",
+    derive(Serialize, Deserialize),
+    serde(bound(serialize = "AccountId: Serialize", deserialize = "AccountId: Deserialize<'de>")),
+    educe(Debug(bound(AccountId: core::fmt::Debug)))
+)]
+pub struct JobPayment<AccountId> {
+	/// The service ID
+	pub service_id: u64,
+	/// The job index within the service
+	pub job_index: u8,
+	/// The call ID for this specific job call
+	pub call_id: u64,
+	/// The account that made the payment
+	pub payer: AccountId,
+	/// The asset used for payment (using u32 as concrete AssetId type)
+	pub asset: super::types::Asset<u32>,
+	/// The amount paid (using u128 as concrete Balance type)
+	pub amount: u128,
 }
 
 /// A Job Result verifier is a verifier that will verify the result of a job call

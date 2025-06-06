@@ -189,7 +189,7 @@ impl<T: Config> Pallet<T> {
 			permitted_callers: request.permitted_callers.clone(),
 			ttl: request.ttl,
 			membership_model: request.membership_model,
-			last_billed: None, // Initialize as None for new services
+
 		};
 
 		UserServices::<T>::try_mutate(&request.owner, |service_ids| {

@@ -75,7 +75,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<H160, Error<T>>` - The address of the master blueprint service manager.
 	/// * `Error<T>` - The error type.
 	pub fn mbsm_address_of(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 	) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
@@ -99,7 +99,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the blueprint creation is allowed and the weight of the operation.
 	pub fn on_blueprint_created_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		owner: &T::AccountId,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -170,7 +170,7 @@ impl<T: Config> Pallet<T> {
 						kind: ethabi::ParamType::Address,
 						internal_type: None,
 					},
-					ServiceBlueprint::<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>::to_ethabi_param(),
+					ServiceBlueprint::<T::Constraints>::to_ethabi_param(),
 				],
 				outputs: Default::default(),
 				constant: None,
@@ -209,7 +209,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the registration is allowed and the weight of the operation.
 	pub fn on_register_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 		registration_args: &[Field<T::Constraints, T::AccountId>],
@@ -260,7 +260,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the unregistration is allowed and the weight of the operation.
 	pub fn on_unregister_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -300,7 +300,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the price targets update is allowed and the weight of the operation.
 	pub fn on_update_price_targets(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -342,7 +342,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the approve is allowed and the weight of the operation.
 	pub fn on_approve_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 		request_id: u64,
@@ -399,7 +399,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the reject is allowed and the weight of the operation.
 	pub fn on_reject_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 		request_id: u64,
@@ -450,7 +450,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the default value should be used
 	///   - The heartbeat interval in blocks
 	pub fn get_heartbeat_interval_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<(bool, u32), DispatchErrorWithPostInfo> {
@@ -519,7 +519,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the default value should be used
 	///   - The heartbeat threshold percentage
 	pub fn get_heartbeat_threshold_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<(bool, u8), DispatchErrorWithPostInfo> {
@@ -591,7 +591,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the default value should be used
 	///   - The slashing window in blocks
 	pub fn get_slashing_window_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<(bool, u32), DispatchErrorWithPostInfo> {
@@ -668,7 +668,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the request is allowed and the weight of the operation.
 	pub fn on_request_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		requester: &T::AccountId,
 		request_id: u64,
@@ -762,7 +762,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the request is allowed and the weight of the operation.
 	pub fn on_service_init_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		request_id: u64,
 		service_id: u64,
@@ -849,7 +849,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the request is allowed and the weight of the operation.
 	pub fn on_service_termination_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 		owner: &T::AccountId,
@@ -906,7 +906,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the job call is allowed and the weight of the operation.
 	pub fn on_job_call_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 		job: u8,
@@ -979,7 +979,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the job result is allowed and the weight of the operation.
 	pub fn on_job_result_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 		job: u8,
@@ -1058,7 +1058,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the RPC address update is allowed and the weight of the operation.
 	pub fn on_update_rpc_address_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		preferences: &OperatorPreferences<T::Constraints>,
 	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
@@ -1101,7 +1101,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the operator can join
 	///   - The weight of the EVM operation
 	pub fn can_join_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
@@ -1161,7 +1161,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the notification was successful
 	///   - The weight of the EVM operation
 	pub fn on_operator_joined_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
@@ -1220,7 +1220,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the operator can leave
 	///   - The weight of the EVM operation
 	pub fn can_leave_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
@@ -1276,7 +1276,7 @@ impl<T: Config> Pallet<T> {
 	///   - A boolean indicating if the notification was successful
 	///   - The weight of the EVM operation
 	pub fn on_operator_left_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		instance_id: u64,
 		operator: &T::AccountId,
@@ -1331,7 +1331,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the slash is allowed and the weight of the operation.
 	pub fn on_slash_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
 		offender: &T::AccountId,
 		slash_percent: u8,
@@ -1386,7 +1386,7 @@ impl<T: Config> Pallet<T> {
 	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
 	///   indicating whether the unslash is allowed and the weight of the operation.
 	pub fn on_unapplied_slash_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		service_id: u64,
 		offender: &T::AccountId,
 		slash_percent: u8,
@@ -1744,7 +1744,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Dispatches a hook to the EVM and returns if the call was successful with the used weight.
 	fn dispatch_hook(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		f: Function,
 		args: &[ethabi::Token],
 		value: BalanceOf<T>,

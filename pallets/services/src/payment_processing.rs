@@ -1,4 +1,4 @@
-use crate::{BalanceOf, BlockNumberFor, Config, Error, Instances, Pallet, StagingServicePayments};
+use crate::{BalanceOf, BlockNumberFor, Config, Error, JobPayments, JobSubscriptionBillings, Pallet};
 use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
@@ -7,27 +7,36 @@ use frame_support::{
 };
 use sp_runtime::traits::{CheckedMul, Saturating};
 use tangle_primitives::{
-	services::{Asset, PricingModel, ServiceBlueprint, StagingServicePayment},
+	services::{Asset, JobPayment, JobSubscriptionBilling, PricingModel, ServiceBlueprint},
 	traits::RewardRecorder as RewardRecorderTrait,
 };
 
 impl<T: Config> Pallet<T> {
-	/// Process payment for a service based on its pricing model
-	pub fn process_service_payment(
+	/// Process payment for a specific job call
+	pub fn process_job_payment(
 		service_id: u64,
+		job_id: u8,
+		call_id: u64,
+		caller: &T::AccountId,
 		current_block: BlockNumberFor<T>,
 	) -> DispatchResult {
 		let service = Self::services(service_id)?;
 		let (_, blueprint) = Self::blueprints(service.blueprint)?;
+		
+		// Find the job definition
+		let job_def = blueprint.jobs.get(job_id as usize)
+			.ok_or(Error::<T>::InvalidJobId)?;
 
-		match &blueprint.pricing_model {
+		match &job_def.pricing_model {
 			PricingModel::PayOnce { amount } => {
-				Self::process_pay_once_payment(service_id, &service.owner, *amount)?;
+				Self::process_job_pay_once_payment(service_id, job_id, call_id, caller, *amount)?;
 			},
 			PricingModel::Subscription { rate_per_interval, interval, maybe_end } => {
-				Self::process_subscription_payment(
+				Self::process_job_subscription_payment(
 					service_id,
-					&service.owner,
+					job_id,
+					call_id,
+					caller,
 					*rate_per_interval,
 					*interval,
 					*maybe_end,
@@ -35,35 +44,58 @@ impl<T: Config> Pallet<T> {
 				)?;
 			},
 			PricingModel::EventDriven { reward_per_event } => {
-				// Event-driven payments are processed when events are reported
-				// This is handled separately in the event reporting logic
-				log::debug!(
-					"Event-driven service {}, reward per event: {:?}",
+				Self::process_job_event_driven_payment(
 					service_id,
-					reward_per_event
-				);
+					job_id,
+					call_id,
+					caller,
+					*reward_per_event,
+					1, // Default to 1 event for this job call
+				)?;
 			},
 		}
 
 		Ok(())
 	}
 
-	/// Process a one-time payment for a service
-	pub fn process_pay_once_payment(
+	/// Process a one-time payment for a job call
+	pub fn process_job_pay_once_payment(
 		service_id: u64,
-		_payer: &T::AccountId,
+		job_id: u8,
+		call_id: u64,
+		payer: &T::AccountId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
-		// Check if payment has already been processed
-		if let Some(staging_payment) = StagingServicePayments::<T>::get(service_id) {
-			// Transfer the staged payment to the rewards pallet
-			Self::transfer_payment_to_rewards(service_id, &staging_payment)?;
-
-			// Remove the staging payment
-			StagingServicePayments::<T>::remove(service_id);
-
-			log::debug!("Processed pay-once payment for service {}: {:?}", service_id, amount);
+		// Check if payment has already been processed for this call
+		if JobPayments::<T>::contains_key(call_id) {
+			return Err(Error::<T>::PaymentAlreadyProcessed.into());
 		}
+
+		// Charge the payment
+		Self::charge_job_payment(payer, &amount)?;
+
+		// Record the payment
+		let payment = JobPayment {
+			service_id,
+			job_id,
+			call_id,
+			payer: payer.clone(),
+			amount,
+			processed_at: frame_system::Pallet::<T>::block_number(),
+		};
+
+		JobPayments::<T>::insert(call_id, &payment);
+
+		// Record the reward with the rewards pallet
+		T::RewardRecorder::record_job_reward(payer, service_id, job_id, call_id, amount)?;
+
+		log::debug!(
+			"Processed pay-once payment for job call {}-{}-{}: {:?}",
+			service_id,
+			job_id,
+			call_id,
+			amount
+		);
 
 		Ok(())
 	}
@@ -253,7 +285,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Validate payment amount against pricing model
 	pub fn validate_payment_amount(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		        blueprint: &ServiceBlueprint<T::Constraints>,
 		provided_amount: BalanceOf<T>,
 	) -> DispatchResult {
 		match &blueprint.pricing_model {

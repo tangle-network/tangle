@@ -22,7 +22,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// * `Result<u64, DispatchError>` - The heartbeat interval in blocks
 	pub(crate) fn get_heartbeat_interval(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<BlockNumberFor<T>, DispatchError> {
@@ -59,7 +59,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// * `Result<u8, DispatchError>` - The heartbeat threshold percentage (0-100)
 	pub(crate) fn get_heartbeat_threshold(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<u8, DispatchError> {
@@ -92,7 +92,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// * `Result<BlockNumberFor<T>, DispatchError>` - The slashing window in blocks
 	pub(crate) fn get_slashing_window(
-		blueprint: &ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+		blueprint: &ServiceBlueprint<T::Constraints>,
 		blueprint_id: u64,
 		service_id: u64,
 	) -> Result<BlockNumberFor<T>, DispatchError> {

@@ -455,7 +455,7 @@ pub struct PriceTargets {
 
 /// Blueprint data.
 #[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
-pub struct BlueprintData<AccountId, AssetId: AssetIdT, BlockNumber, Balance, C: Constraints> {
+pub struct BlueprintData<AccountId, AssetId: AssetIdT, C: Constraints> {
 	/// The owner of the service blueprint.
 	pub owner: AccountId,
 	/// The metadata for the service blueprint.
@@ -468,8 +468,7 @@ pub struct BlueprintData<AccountId, AssetId: AssetIdT, BlockNumber, Balance, C: 
 	pub security_requirements: Vec<AssetSecurityRequirement<AssetId>>,
 	/// The price targets for the service blueprint.
 	pub price_targets: Option<PriceTargets>,
-	/// The pricing model for services created from this blueprint.
-	pub pricing_model: PricingModel<BlockNumber, Balance>,
+	// Note: pricing_model removed since pricing is now handled at the job level
 }
 
 /// Represents an instance of a service.
@@ -479,8 +478,6 @@ pub struct Instance<
 	AssetId: AssetIdT,
 	MaxPermittedCallers: Get<u32>,
 	MaxOperators: Get<u32>,
-	BlockNumber,
-	Balance,
 > {
 	/// The owner of the service instance.
 	pub owner: AccountId,
@@ -492,11 +489,7 @@ pub struct Instance<
 	/// commitments.
 	pub operator_security_commitments:
 		BoundedVec<(AccountId, Vec<AssetSecurityCommitment<AssetId>>), MaxOperators>,
-	/// The pricing model for this service instance, copied from the blueprint.
-	pub pricing_model: PricingModel<BlockNumber, Balance>,
-	/// The block number when the last reward was recorded for this service.
-	/// Used for PayOnce and Subscription models to prevent double-billing.
-	pub last_billed: Option<BlockNumber>,
+	// Note: pricing_model and last_billed removed since payments are now handled per job call
 }
 
 impl<
@@ -504,9 +497,7 @@ impl<
 	AssetId: AssetIdT,
 	MaxPermittedCallers: Get<u32>,
 	MaxOperators: Get<u32>,
-	BlockNumber,
-	Balance,
-> Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators, BlockNumber, Balance>
+> Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators>
 {
 	/// Validates the security commitments against the blueprint's requirements.
 	pub fn validate_security_commitments(

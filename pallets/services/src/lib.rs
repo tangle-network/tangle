@@ -734,7 +734,7 @@ pub mod module {
 		_,
 		Identity,
 		u64,
-		(T::AccountId, ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>),
+		(T::AccountId, ServiceBlueprint<T::Constraints>),
 		ResultQuery<Error<T>::BlueprintNotFound>,
 	>;
 
@@ -918,6 +918,35 @@ pub mod module {
 	pub type StagingServicePayments<T: Config> =
 		StorageMap<_, Identity, u64, StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>>;
 
+	/// Tracks job-level subscription billing information
+	/// (Service ID, Job Index, Subscriber) -> JobSubscriptionBilling
+	#[pallet::storage]
+	#[pallet::getter(fn job_subscription_billings)]
+	pub type JobSubscriptionBillings<T: Config> = StorageNMap<
+		_,
+		(
+			NMapKey<Identity, u64>, // service_id
+			NMapKey<Identity, u8>,  // job_index
+			NMapKey<Identity, T::AccountId>, // subscriber
+		),
+		tangle_primitives::services::JobSubscriptionBilling<T::AccountId, BlockNumberFor<T>>,
+		OptionQuery,
+	>;
+
+	/// Tracks individual job payments
+	/// (Service ID, Call ID) -> JobPayment
+	#[pallet::storage]
+	#[pallet::getter(fn job_payments)]
+	pub type JobPayments<T: Config> = StorageDoubleMap<
+		_,
+		Identity,
+		u64, // service_id
+		Identity,
+		u64, // call_id
+		tangle_primitives::services::JobPayment<T::AccountId>,
+		OptionQuery,
+	>;
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
@@ -939,7 +968,6 @@ pub mod module {
 		/// * `membership_model` - The membership model of the service blueprint.
 		/// * `security_requirements` - The security requirements of the service blueprint.
 		/// * `price_targets` - The price targets of the service blueprint.
-		/// * `pricing_model` - The pricing model of the service blueprint.
 		///
 		/// # Errors
 		///
@@ -956,11 +984,10 @@ pub mod module {
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
 			metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
-			typedef: ServiceBlueprint<T::Constraints, BlockNumberFor<T>, BalanceOf<T>>,
+			typedef: ServiceBlueprint<T::Constraints>,
 			membership_model: MembershipModel,
 			_security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
 			_price_targets: Option<PriceTargets>,
-			pricing_model: PricingModel<BlockNumberFor<T>, BalanceOf<T>>,
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
 
@@ -1004,12 +1031,11 @@ pub mod module {
 				},
 				sources: typedef.sources,
 				supported_membership_models: typedef.supported_membership_models,
-				pricing_model,
 			};
 
 			let (allowed, _weight) =
 				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;
-			ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
+				ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
 
 			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
