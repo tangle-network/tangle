@@ -20,18 +20,17 @@ use jsonrpsee::{
 	proc_macros::rpc,
 	types::error::{ErrorObject, ErrorObjectOwned},
 };
-pub use pallet_services_rpc_runtime_api::ServicesApi as ServicesRuntimeApi;
-use parity_scale_codec::Codec;
-use sp_api::{ApiError, ProvideRuntimeApi};
+use parity_scale_codec::{Codec, MaxEncodedLen};
+use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
-	DispatchError, Serialize,
+	Serialize,
 	traits::{Block as BlockT, MaybeDisplay},
 };
 use std::sync::Arc;
-use tangle_primitives::services::{
-	AssetIdT, Constraints, RpcServicesWithBlueprint, ServiceRequest,
-};
+use tangle_primitives::services::{AssetIdT, Constraints, ServiceRequest};
+
+pub use pallet_services_rpc_runtime_api::ServicesApi as ServicesRuntimeApi;
 
 type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
@@ -42,15 +41,26 @@ pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber, AssetId>
 where
 	X: Constraints,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	BlockNumber: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	BlockNumber: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Clone
+		+ PartialEq
+		+ Eq
+		+ MaxEncodedLen
+		+ Default,
 	AssetId: AssetIdT,
 {
-	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
-	fn query_services_with_blueprints_by_operator(
-		&self,
-		operator: AccountId,
-		at: Option<BlockHash>,
-	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber, AssetId>>>;
+	// /// Query services with blueprints by operator
+	// #[method(name = "services_queryServicesWithBlueprintsByOperator")]
+	// fn query_services_with_blueprints_by_operator(
+	// 	&self,
+	// 	operator: AccountId,
+	// 	at: Option<BlockHash>,
+	// ) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber, AssetId>>>;
 
 	#[method(name = "services_queryServiceRequestsWithBlueprintsByOperator")]
 	fn query_service_requests_with_blueprints_by_operator(
@@ -84,21 +94,6 @@ where
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	C::Api: ServicesRuntimeApi<Block, X, AccountId, AssetId>,
 {
-	fn query_services_with_blueprints_by_operator(
-		&self,
-		operator: AccountId,
-		at: Option<<Block as BlockT>::Hash>,
-	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumberOf<Block>, AssetId>>> {
-		let api = self.client.runtime_api();
-		let at = at.unwrap_or_else(|| self.client.info().best_hash);
-
-		match api.query_services_with_blueprints_by_operator(at, operator) {
-			Ok(Ok(res)) => Ok(res),
-			Ok(Err(e)) => Err(custom_error_into_rpc_err(Error::CustomDispatchError(e))),
-			Err(e) => Err(custom_error_into_rpc_err(Error::RuntimeError(e))),
-		}
-	}
-
 	fn query_service_requests_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,
@@ -116,13 +111,11 @@ where
 }
 
 /// Error type of this RPC api.
+#[derive(Debug)]
 pub enum Error {
-	/// The transaction was not decodable.
+	RuntimeError(sp_api::ApiError),
 	DecodeError,
-	/// The call to runtime failed.
-	RuntimeError(ApiError),
-	/// Custom pallet error.
-	CustomDispatchError(DispatchError),
+	CustomDispatchError(sp_runtime::DispatchError),
 }
 
 impl From<Error> for i32 {

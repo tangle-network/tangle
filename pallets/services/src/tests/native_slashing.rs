@@ -16,7 +16,10 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_runtime::Percent;
+use sp_runtime::{
+	Percent,
+	traits::{BlakeTwo256, Hash},
+};
 use sp_staking::StakingAccount;
 use tangle_primitives::services::BoundedString;
 
@@ -172,7 +175,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		// Deploy second service
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
@@ -202,11 +205,15 @@ fn test_native_restaking_slash_with_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Approve second service
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		// Bob approves the request with security commitments
+		let security_commitments =
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			1,
+			security_commitment_hash
+		));
 
 		let delegator = mock_pub_key(CHARLIE);
 		let stake_amount = 1000;

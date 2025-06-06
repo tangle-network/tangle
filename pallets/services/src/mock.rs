@@ -38,7 +38,7 @@ use serde_json::json;
 use sp_core::{H160, RuntimeDebug, sr25519};
 use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
-	AccountId32, BuildStorage, DispatchError, Perbill, Percent,
+	AccountId32, BuildStorage, DispatchError, DispatchResult, Perbill, Percent,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
 };
@@ -47,8 +47,8 @@ use sp_weights::Weight;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
-	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner},
-	traits::RewardsManager,
+	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, PricingModel},
+	traits::{RewardRecorder, RewardsManager},
 	types::{BlockNumber, rewards::LockMultiplier},
 };
 
@@ -421,6 +421,8 @@ impl pallet_services::Config for Runtime {
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRoot<AccountId>;
 	type DefaultParameterUpdateOrigin = EnsureRoot<AccountId>;
 	type RoleKeyId = RoleKeyId;
+	type RewardRecorder = MockRewardsManager;
+	type RewardsManager = MockRewardsManager;
 	type WeightInfo = ();
 }
 
@@ -489,6 +491,19 @@ impl MockRewardsManager {
 	pub fn clear_all() {
 		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
 		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
+	}
+}
+
+impl RewardRecorder<AccountId, u64, Balance> for MockRewardsManager {
+	type PricingModel = PricingModel<BlockNumber, Balance>;
+
+	fn record_reward(
+		_operator: &AccountId,
+		_service_id: u64,
+		_amount: Balance,
+		_model: &Self::PricingModel,
+	) -> DispatchResult {
+		Ok(())
 	}
 }
 

@@ -17,15 +17,21 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_core::{ByteArray, offchain::KeyTypeId};
+use sp_runtime::traits::{BlakeTwo256, Hash};
 
 #[test]
 fn job_calls() {
+	// This test verifies job calling functionality
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
@@ -63,7 +69,10 @@ fn job_calls() {
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20])],
+			vec![
+				get_security_requirement(TNT, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
@@ -72,21 +81,33 @@ fn job_calls() {
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
-		// All operators approve with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		// All operators approve with security commitments (fixed order: TNT, WETH)
+		let security_commitments_bob =
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash_bob
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments_charlie =
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitment_hash_charlie
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments_dave =
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitment_hash_dave
+		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
@@ -105,7 +126,7 @@ fn job_calls() {
 			operator_security_commitments,
 		})));
 
-		// now we can call the jobs
+		// now we can call the jobs (job_calls test)
 		let job_call_id = 0;
 		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
 			Field::Uint8(2)
@@ -135,7 +156,11 @@ fn job_result() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
@@ -173,7 +198,10 @@ fn job_result() {
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20])],
+			vec![
+				get_security_requirement(TNT, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
@@ -182,21 +210,33 @@ fn job_result() {
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
-		// All operators approve with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		// All operators approve with security commitments (job_result test - fixed order)
+		let security_commitments_bob =
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash_bob
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments_charlie =
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitment_hash_charlie
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments_dave =
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitment_hash_dave
+		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
@@ -276,7 +316,11 @@ fn test_concurrent_job_execution() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -302,7 +346,10 @@ fn test_concurrent_job_execution() {
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20])],
+			vec![
+				get_security_requirement(TNT, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
@@ -310,10 +357,14 @@ fn test_concurrent_job_execution() {
 		));
 
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
-			assert_ok!(Services::approve(RuntimeOrigin::signed(operator), 0, vec![
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			],));
+			let security_commitments =
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+			let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(operator),
+				0,
+				security_commitment_hash
+			));
 		}
 
 		// Submit multiple concurrent job calls
@@ -356,7 +407,11 @@ fn test_result_submission_non_operators() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -382,7 +437,10 @@ fn test_result_submission_non_operators() {
 			vec![alice.clone()],
 			vec![bob.clone(), charlie.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20])],
+			vec![
+				get_security_requirement(TNT, &[10, 20]),
+				get_security_requirement(WETH, &[10, 20])
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
@@ -390,10 +448,14 @@ fn test_result_submission_non_operators() {
 		));
 
 		for operator in [bob.clone(), charlie.clone()] {
-			assert_ok!(Services::approve(RuntimeOrigin::signed(operator), 0, vec![
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			],));
+			let security_commitments =
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+			let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(operator),
+				0,
+				security_commitment_hash
+			));
 		}
 
 		// Submit job call
@@ -421,7 +483,11 @@ fn test_invalid_result_formats() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -450,10 +516,14 @@ fn test_invalid_result_formats() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments =
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash
+		));
 
 		// Submit job call
 		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
@@ -481,7 +551,11 @@ fn test_result_submission_after_termination() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -510,10 +584,14 @@ fn test_result_submission_after_termination() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		let security_commitments =
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitment_hash
+		));
 
 		// Submit job call
 		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![

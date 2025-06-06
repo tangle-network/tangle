@@ -1,5 +1,5 @@
 use crate::{
-	BlueprintId, Config, DefaultHeartbeatInterval, DefaultHeartbeatThreshold,
+	BalanceOf, BlueprintId, Config, DefaultHeartbeatInterval, DefaultHeartbeatThreshold,
 	DefaultSlashingWindow, Error, Event, InstanceId, Instances, NextUnappliedSlashIndex, Pallet,
 	UnappliedSlash, UnappliedSlashes,
 };

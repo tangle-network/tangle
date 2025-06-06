@@ -74,7 +74,9 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// * `Result<H160, Error<T>>` - The address of the master blueprint service manager.
 	/// * `Error<T>` - The error type.
-	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
+	pub fn mbsm_address_of(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+	) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
 			MasterBlueprintServiceManagerRevision::Latest =>
@@ -278,6 +280,46 @@ impl<T: Config> Pallet<T> {
 				outputs: Default::default(),
 				constant: None,
 				state_mutability: StateMutability::NonPayable,
+			},
+			&[Token::Uint(ethabi::Uint::from(blueprint_id)), preferences.to_ethabi()],
+			Zero::zero(),
+		)
+	}
+
+	/// Hook to be called upon a new price targets update on a blueprint.
+	/// This function is called when the price targets are updated. It performs an EVM call
+	/// to the `onUpdatePriceTargets` function of the service blueprint's manager contract.
+	///
+	/// # Parameters
+	/// * `blueprint` - The service blueprint.
+	/// * `blueprint_id` - The blueprint ID.
+	/// * `preferences` - The operator preferences.
+	///
+	/// # Returns
+	///
+	/// * `Result<(bool, Weight), DispatchErrorWithPostInfo>` - A tuple containing a boolean
+	///   indicating whether the price targets update is allowed and the weight of the operation.
+	pub fn on_update_price_targets(
+		blueprint: &ServiceBlueprint<T::Constraints>,
+		blueprint_id: u64,
+		preferences: &OperatorPreferences<T::Constraints>,
+	) -> Result<(bool, Weight), DispatchErrorWithPostInfo> {
+		#[allow(deprecated)]
+		Self::dispatch_hook(
+			blueprint,
+			Function {
+				name: String::from("onUpdatePriceTargets"),
+				inputs: vec![
+					ethabi::Param {
+						name: String::from("blueprintId"),
+						kind: ethabi::ParamType::Uint(64),
+						internal_type: None,
+					},
+					OperatorPreferences::<T::Constraints>::to_ethabi_param(),
+				],
+				outputs: Default::default(),
+				constant: None,
+				state_mutability: StateMutability::Payable,
 			},
 			&[Token::Uint(ethabi::Uint::from(blueprint_id)), preferences.to_ethabi()],
 			Zero::zero(),
@@ -1035,7 +1077,7 @@ impl<T: Config> Pallet<T> {
 				],
 				outputs: Default::default(),
 				constant: None,
-				state_mutability: StateMutability::Payable,
+				state_mutability: StateMutability::NonPayable,
 			},
 			&[Token::Uint(ethabi::Uint::from(blueprint_id)), preferences.to_ethabi()],
 			Zero::zero(),
