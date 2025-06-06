@@ -112,10 +112,6 @@ pub mod pallet {
 		/// The Asset ID type used by the Currency trait and MultiAssetDelegationInfo.
 		type AssetId: Parameter + Member + MaybeDisplay + Ord + MaxEncodedLen + Copy + Debug;
 
-		/// The specific Asset ID for the TNT token.
-		#[pallet::constant]
-		type TntAssetId: Get<Self::AssetId>;
-
 		/// The provider for checking the active TNT stake.
 		/// Ensure BalanceOf<Self> here resolves correctly to T::Currency::Balance.
 		type MultiAssetDelegationInfo: MultiAssetDelegationInfo<
@@ -245,6 +241,8 @@ pub mod pallet {
 		EmptyStakeTiers,
 		/// Amount overflowed.
 		Overflow,
+		/// The stake tiers are too large to fit into the storage.
+		StakeTiersOverflow,
 	}
 
 	#[pallet::call]
@@ -324,7 +322,7 @@ pub mod pallet {
 		///
 		/// Weight: O(n) where n is the number of tiers
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::burn())]
+		#[pallet::weight(T::WeightInfo::set_stake_tiers())]
 		pub fn set_stake_tiers(
 			origin: OriginFor<T>,
 			new_tiers: Vec<StakeTier<BalanceOf<T>>>,
@@ -346,7 +344,7 @@ pub mod pallet {
 			// Try to create a bounded vector
 			let bounded_tiers =
 				BoundedVec::<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>::try_from(new_tiers)
-					.map_err(|_| Error::<T>::EmptyStakeTiers)?; // Reusing error since we don't have a specific one for exceeding max tiers
+					.map_err(|_| Error::<T>::StakeTiersOverflow)?;
 
 			// Update storage
 			StoredStakeTiers::<T>::set(bounded_tiers);

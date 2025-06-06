@@ -60,7 +60,6 @@ This pallet relies on:
 -   `RuntimeEvent`: The overarching event type.
 -   `Currency`: The currency trait for TNT.
 -   `AssetId`: The Asset ID type.
--   `TntAssetId`: The specific Asset ID for TNT.
 -   `MultiAssetDelegationInfo`: Provides staking information (`get_user_deposit_with_locks`).
 -   `BurnConversionRate`: Rate for converting burned TNT to potential credits.
 -   `ClaimWindowBlocks`: The maximum accrual window duration in blocks.

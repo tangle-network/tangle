@@ -19,7 +19,7 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-use crate::{BalanceOf, Config, LastRewardUpdateBlock, Pallet as Credits};
+use crate::{types::StakeTier, BalanceOf, Config, LastRewardUpdateBlock, Pallet as Credits};
 use frame_benchmarking::{v2::*, BenchmarkError};
 use frame_support::{
 	traits::{Currency, Get},
@@ -54,6 +54,19 @@ fn setup_delegation<T: Config>(
 	LastRewardUpdateBlock::<T>::insert(delegator, current_block);
 
 	Ok(())
+}
+
+/// Create stake tiers for benchmarking
+fn create_stake_tiers<T: Config>(tiers_count: u32) -> Vec<StakeTier<BalanceOf<T>>> {
+	let mut tiers = Vec::new();
+	for i in 0..tiers_count {
+		// Create increasing thresholds and rates
+		let threshold: BalanceOf<T> = ((i + 1) * 1000u32).into();
+		let rate: BalanceOf<T> = ((i + 1) * 10u32).into();
+
+		tiers.push(StakeTier { threshold, rate_per_block: rate });
+	}
+	tiers
 }
 
 #[benchmarks]
@@ -104,6 +117,20 @@ mod benchmarks {
 
 		#[extrinsic_call]
 		claim_credits(RawOrigin::Signed(account.clone()), claim_amount, bounded_id.clone());
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn set_stake_tiers() -> Result<(), BenchmarkError> {
+		// Use the maximum allowed number of tiers to benchmark worst-case scenario
+		let max_tiers = T::MaxStakeTiers::get() as u32;
+
+		// Create a set of stake tiers with increasing thresholds and rates
+		let new_tiers = create_stake_tiers::<T>(max_tiers);
+
+		#[extrinsic_call]
+		set_stake_tiers(RawOrigin::Root, new_tiers);
 
 		Ok(())
 	}
