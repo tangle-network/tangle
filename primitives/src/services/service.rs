@@ -481,12 +481,8 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
     feature = "std",
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
-pub struct RpcServicesWithBlueprint<
-	C: Constraints,
-	AccountId,
-	BlockNumber,
-	AssetId: AssetIdT,
-> where
+pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
+where
 	BlockNumber: Clone
 		+ PartialEq
 		+ Eq

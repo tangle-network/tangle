@@ -1,12 +1,15 @@
 use crate::{
-	BalanceOf, BlueprintId, Config, DefaultHeartbeatInterval, DefaultHeartbeatThreshold,
+	BlueprintId, Config, DefaultHeartbeatInterval, DefaultHeartbeatThreshold,
 	DefaultSlashingWindow, Error, Event, InstanceId, Instances, NextUnappliedSlashIndex, Pallet,
-	UnappliedSlash, UnappliedSlashes,
+	UnappliedSlashes,
 };
 use frame_support::pallet_prelude::*;
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::Percent;
-use tangle_primitives::{services::ServiceBlueprint, traits::MultiAssetDelegationInfo};
+use tangle_primitives::{
+	services::{ServiceBlueprint, UnappliedSlash},
+	traits::MultiAssetDelegationInfo,
+};
 
 impl<T: Config> Pallet<T> {
 	/// Gets the heartbeat interval for a service instance.

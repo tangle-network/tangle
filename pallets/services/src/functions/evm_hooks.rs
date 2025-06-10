@@ -74,9 +74,7 @@ impl<T: Config> Pallet<T> {
 	/// # Returns
 	/// * `Result<H160, Error<T>>` - The address of the master blueprint service manager.
 	/// * `Error<T>` - The error type.
-	pub fn mbsm_address_of(
-		blueprint: &ServiceBlueprint<T::Constraints>,
-	) -> Result<H160, Error<T>> {
+	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
 			MasterBlueprintServiceManagerRevision::Latest =>

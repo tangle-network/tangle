@@ -492,12 +492,8 @@ pub struct Instance<
 	// Note: pricing_model and last_billed removed since payments are now handled per job call
 }
 
-impl<
-	AccountId,
-	AssetId: AssetIdT,
-	MaxPermittedCallers: Get<u32>,
-	MaxOperators: Get<u32>,
-> Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators>
+impl<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>, MaxOperators: Get<u32>>
+	Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators>
 {
 	/// Validates the security commitments against the blueprint's requirements.
 	pub fn validate_security_commitments(

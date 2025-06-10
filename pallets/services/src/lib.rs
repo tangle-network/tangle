@@ -483,6 +483,10 @@ pub mod module {
 		InvalidHeartbeatData,
 		/// Service not active
 		ServiceNotActive,
+		/// Invalid Job ID provided
+		InvalidJobId,
+		/// Payment has already been processed for this call
+		PaymentAlreadyProcessed,
 	}
 
 	#[pallet::event]
@@ -925,8 +929,8 @@ pub mod module {
 	pub type JobSubscriptionBillings<T: Config> = StorageNMap<
 		_,
 		(
-			NMapKey<Identity, u64>, // service_id
-			NMapKey<Identity, u8>,  // job_index
+			NMapKey<Identity, u64>,          // service_id
+			NMapKey<Identity, u8>,           // job_index
 			NMapKey<Identity, T::AccountId>, // subscriber
 		),
 		tangle_primitives::services::JobSubscriptionBilling<T::AccountId, BlockNumberFor<T>>,
@@ -1035,7 +1039,7 @@ pub mod module {
 
 			let (allowed, _weight) =
 				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;
-				ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
+			ensure!(allowed, Error::<T>::BlueprintCreationInterrupted);
 
 			Blueprints::<T>::insert(blueprint_id, (owner.clone(), blueprint));
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));

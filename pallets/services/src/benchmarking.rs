@@ -95,7 +95,7 @@ fn cggmp21_blueprint<T: Config>()
 
 fn create_test_blueprint<T: Config>(
 	origin: OriginFor<T>,
-				blueprint: ServiceBlueprint<T::Constraints>,
+	blueprint: ServiceBlueprint<T::Constraints>,
 ) -> Result<(), sp_runtime::DispatchError> {
 	Pallet::<T>::create_blueprint(
 		origin,

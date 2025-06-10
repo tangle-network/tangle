@@ -189,7 +189,6 @@ impl<T: Config> Pallet<T> {
 			permitted_callers: request.permitted_callers.clone(),
 			ttl: request.ttl,
 			membership_model: request.membership_model,
-
 		};
 
 		UserServices::<T>::try_mutate(&request.owner, |service_ids| {

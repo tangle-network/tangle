@@ -78,16 +78,10 @@ where
 				master_manager_revision: blueprint.master_manager_revision,
 				sources: blueprint.sources.clone(),
 				supported_membership_models: blueprint.supported_membership_models.clone(),
-				pricing_model: tangle_primitives::services::PricingModel::PayOnce {
-					amount: Default::default(),
-				},
 			},
 			membership_model: MembershipModel::Fixed { min_operators: 1 },
 			security_requirements: vec![],
 			price_targets: None,
-			pricing_model: tangle_primitives::services::PricingModel::PayOnce {
-				amount: Default::default(),
-			},
 		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;

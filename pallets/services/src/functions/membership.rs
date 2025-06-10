@@ -1,4 +1,4 @@
-use crate::{BalanceOf, BlockNumberFor, Config, Error, Instances, Pallet};
+use crate::{Config, Error, Instances, Pallet};
 use frame_support::{dispatch::DispatchResult, ensure, pallet_prelude::*};
 use sp_std::vec::Vec;
 use tangle_primitives::services::{
@@ -128,6 +128,4 @@ impl<T: Config> Pallet<T> {
 
 		Ok(())
 	}
-
-
 }
