@@ -2,7 +2,7 @@ use std::{path::Path, sync::Arc};
 
 use blueprint_keystore::{Keystore, KeystoreConfig};
 use blueprint_manager::{
-	config::{BlueprintManagerConfig, DEFAULT_DOCKER_HOST, SourceType},
+	config::BlueprintManagerConfig,
 	executor::{BlueprintManagerHandle, run_blueprint_manager_with_keystore},
 };
 use blueprint_runner::config::BlueprintEnvironment;
@@ -20,6 +20,7 @@ pub async fn create_blueprint_manager_service<P: AsRef<Path>>(
 	let base_dir = data_dir.parent().ok_or_else(|| {
 		ServiceError::Application("Failed to get parent directory for keystore".into())
 	})?;
+
 	let config = BlueprintManagerConfig {
 		keystore_uri: base_dir.join("keystore").to_path_buf().to_string_lossy().into(),
 		data_dir,
