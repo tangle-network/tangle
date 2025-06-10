@@ -2,12 +2,20 @@ use std::{path::Path, sync::Arc};
 
 use blueprint_keystore::{Keystore, KeystoreConfig};
 use blueprint_manager::{
-	config::BlueprintManagerConfig,
+	config::{BlueprintManagerConfig, DEFAULT_DOCKER_HOST, SourceType},
 	executor::{BlueprintManagerHandle, run_blueprint_manager_with_keystore},
 };
 use blueprint_runner::config::BlueprintEnvironment;
 use sc_keystore::LocalKeystore;
 use sc_service::error::Error as ServiceError;
+use std::path::PathBuf;
+
+fn default_cache_dir() -> PathBuf {
+	match dirs::cache_dir() {
+		Some(dir) => dir.join("blueprint-manager"),
+		None => PathBuf::from("./blueprint-manager-cache"),
+	}
+}
 
 /// Runs the blueprint manager service.
 pub async fn create_blueprint_manager_service<P: AsRef<Path>>(
@@ -26,7 +34,13 @@ pub async fn create_blueprint_manager_service<P: AsRef<Path>>(
 		data_dir,
 		verbose: 2,
 		test_mode,
-		..Default::default()
+		instance_id: None,
+		allow_unchecked_attestations: false,
+		preferred_source: SourceType::default(),
+		podman_host: DEFAULT_DOCKER_HOST.clone(),
+		cache_dir: default_cache_dir(),
+		pretty: true,
+		blueprint_config: None,
 	};
 	let mut env = BlueprintEnvironment::default();
 

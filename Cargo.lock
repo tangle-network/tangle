@@ -24579,6 +24579,7 @@ dependencies = [
  "blueprint-manager",
  "blueprint-runner",
  "clap",
+ "dirs 6.0.0",
  "fc-api",
  "fc-cli",
  "fc-consensus",
