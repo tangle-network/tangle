@@ -115,7 +115,7 @@ sc-consensus-slots = { workspace = true }
 sc-consensus-manual-seal = { workspace = true }
 sp-consensus = { workspace = true }
 sp-transaction-storage-proof = { workspace = true }
-
+dirs = { version = "6.0.0", default-features = false }
 tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["std"] }
 tangle-runtime = { workspace = true, features = ["std"] }
