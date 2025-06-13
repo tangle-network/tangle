@@ -81,7 +81,7 @@ fn setup_vault(
 	Ok(())
 }
 
-#[test]
+	#[test]
 fn test_claim_rewards_zero_deposit() {
 	new_test_ext().execute_with(|| {
 		let account: AccountId = AccountId::new([1u8; 32]);
@@ -98,12 +98,15 @@ fn test_claim_rewards_zero_deposit() {
 			});
 		});
 
-		// Try to claim rewards for the account
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())),);
-
-		// Try to claim rewards with zero deposit
+		// Try to claim rewards for the account with zero deposit - should fail
 		assert_noop!(
-			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())),
+			RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset),
+			Error::<Runtime>::NoRewardsAvailable
+		);
+
+		// Try to claim rewards again with zero deposit - should still fail
+		assert_noop!(
+			RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset),
 			Error::<Runtime>::NoRewardsAvailable
 		);
 	});
@@ -134,7 +137,7 @@ fn test_claim_rewards_only_unlocked() {
 		run_to_block(1000);
 
 		// Try to claim rewards for the account
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())),);
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset));
 
 		// Check that rewards were received
 		let balance = Balances::free_balance(&account);
@@ -177,7 +180,7 @@ fn test_claim_rewards_with_expired_lock() {
 		run_to_block(1000);
 
 		// Try to claim rewards for the account
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())),);
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset));
 
 		// Verify rewards
 		let balance = Balances::free_balance(&account);
@@ -241,7 +244,7 @@ fn test_claim_rewards_with_active_locks() {
 		run_to_block(1000);
 
 		// Try to claim rewards for the account
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())),);
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset));
 
 		// Check rewards
 		let balance = Balances::free_balance(&account);
@@ -297,19 +300,19 @@ fn test_claim_rewards_multiple_claims() {
 
 		// First claim at block 1000
 		run_to_block(1000);
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())));
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset));
 		let first_claim_balance = Balances::free_balance(&account);
 
 		// Second claim at block 1500
 		run_to_block(1500);
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())));
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset));
 		let second_claim_balance = Balances::free_balance(&account);
 
 		// Verify that second claim added more rewards
 		assert!(second_claim_balance > first_claim_balance);
 
 		// Verify that claiming in the same block gives no rewards
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())));
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset));
 		assert_eq!(Balances::free_balance(&account), second_claim_balance);
 	});
 }
@@ -356,7 +359,7 @@ fn test_claim_rewards_with_zero_cap() {
 
 		// Should not be able to claim rewards with zero incentive cap
 		assert_noop!(
-			RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(account.clone())),
+			RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(account.clone()), account.clone(), asset),
 			Error::<Runtime>::CannotCalculateRewardPerBlock
 		);
 	});
@@ -450,9 +453,9 @@ fn test_claim_frequency_with_decay() {
 			System::set_block_number(current_block + blocks_per_month);
 			current_block += blocks_per_month;
 
-			assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(
+			assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(
 				frequent_claimer.clone()
-			)));
+			), frequent_claimer.clone(), asset));
 
 			// simulate inflation, 1% per month
 			let supply = pallet_balances::TotalIssuance::<Runtime>::get();
@@ -465,9 +468,9 @@ fn test_claim_frequency_with_decay() {
 		// Infrequent claimer claims after 10 months
 		let infrequent_starting_balance = Balances::free_balance(&infrequent_claimer);
 		System::set_block_number(blocks_per_month * total_months);
-		assert_ok!(RewardsPallet::<Runtime>::claim_rewards(RuntimeOrigin::signed(
+		assert_ok!(RewardsPallet::<Runtime>::claim_rewards_other(RuntimeOrigin::signed(
 			infrequent_claimer.clone()
-		)));
+		), infrequent_claimer.clone(), asset));
 		let infrequent_total_rewards =
 			Balances::free_balance(&infrequent_claimer) - infrequent_starting_balance;
 
