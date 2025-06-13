@@ -200,10 +200,10 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 		})?;
 
-		// Process payment if it exists - Distribute reward instead of immediate payout
+		// Process payment if it exists - Transfer payment to MBSM
 		if let Some(payment) = Self::service_payment(request_id) {
-			// Process the payment using the new payment processing logic
-			Self::process_pay_once_payment(service_id, &request.owner, payment.amount)?;
+			// Transfer the payment to the MBSM
+			Self::transfer_payment_to_mbsm(request.blueprint, &payment)?;
 
 			// Remove the payment from staging
 			StagingServicePayments::<T>::remove(request_id);
@@ -242,6 +242,7 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Arguments
 	///
+	/// * `blueprint_id` - The blueprint ID to get the MBSM address
 	/// * `payment` - The payment details including asset type and amount
 	///
 	/// # Returns
