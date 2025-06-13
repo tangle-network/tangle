@@ -21,6 +21,7 @@ use sp_runtime::{
 	TokenError,
 	traits::{BlakeTwo256, Hash},
 };
+use tangle_primitives::services::PricingModel;
 
 #[test]
 fn test_payment_refunds_on_failure() {
@@ -788,7 +789,7 @@ fn test_payment_invalid_asset_types() {
 #[test]
 fn test_validate_payment_amount_pay_once() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
-		let blueprint = create_blueprint_with_pricing(PricingModel::PayOnce { amount: 1000 });
+		let blueprint = create_blueprint_with_pricing(PricingModel::PayOnce { amount: 1000u128 });
 
 		// Valid payment amount (equal to required)
 		assert_ok!(Services::validate_payment_amount(&blueprint, 1000));
@@ -808,8 +809,8 @@ fn test_validate_payment_amount_pay_once() {
 fn test_validate_payment_amount_subscription() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		let blueprint = create_blueprint_with_pricing(PricingModel::Subscription {
-			rate_per_interval: 100,
-			interval: 10,
+			rate_per_interval: 100u128,
+			interval: 10u32,
 			maybe_end: None,
 		});
 
@@ -831,7 +832,7 @@ fn test_validate_payment_amount_subscription() {
 fn test_validate_payment_amount_event_driven() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		let blueprint =
-			create_blueprint_with_pricing(PricingModel::EventDriven { reward_per_event: 10 });
+			create_blueprint_with_pricing(PricingModel::EventDriven { reward_per_event: 10u128 });
 
 		// Any payment amount should be valid for event-driven services
 		assert_ok!(Services::validate_payment_amount(&blueprint, 0));
@@ -842,23 +843,30 @@ fn test_validate_payment_amount_event_driven() {
 
 // Helper functions for payment processing tests
 fn create_blueprint_with_pricing(
-	pricing_model: PricingModel<u64, u128>,
-) -> ServiceBlueprint<ConstraintsOf<Runtime>, u64, u128> {
+	_pricing_model: PricingModel<u32, u128>,
+) -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	use frame_support::BoundedVec;
 	use tangle_primitives::services::{
-		BlueprintServiceManager, MasterBlueprintServiceManagerRevision, MembershipModelType,
-		ServiceBlueprint, ServiceMetadata,
+		BlueprintServiceManager, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, 
+		MembershipModelType, ServiceBlueprint, ServiceMetadata,
 	};
+	use sp_core::bounded_vec;
 
 	ServiceBlueprint {
 		metadata: ServiceMetadata::default(),
-		jobs: BoundedVec::default(),
+		jobs: bounded_vec![
+			JobDefinition {
+				metadata: JobMetadata::default(),
+				params: BoundedVec::default(),
+				result: BoundedVec::default(),
+				pricing_model: _pricing_model.clone(),
+			}
+		],
 		registration_params: BoundedVec::default(),
 		request_params: BoundedVec::default(),
 		manager: BlueprintServiceManager::default(),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::default(),
 		sources: Default::default(),
 		supported_membership_models: vec![MembershipModelType::Fixed].try_into().unwrap(),
-		pricing_model,
 	}
 }

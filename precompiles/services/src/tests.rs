@@ -15,7 +15,7 @@ use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
 	BoundedString, FieldType, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision,
-	MembershipModelType, OperatorPreferences, ServiceBlueprint, ServiceMetadata,
+	MembershipModelType, OperatorPreferences, PricingModel, ServiceBlueprint, ServiceMetadata,
 };
 
 fn get_security_requirement(a: AssetId, p: &[u8; 2]) -> AssetSecurityRequirement<AssetId> {
@@ -55,6 +55,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
 				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				pricing_model: PricingModel::PayOnce { amount: 100 },
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
@@ -63,6 +64,7 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 					FieldType::List(Box::new(FieldType::Uint8))
 				],
 				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				pricing_model: PricingModel::PayOnce { amount: 200 },
 			},
 		],
 		registration_params: bounded_vec![],
@@ -72,7 +74,6 @@ fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
 		],
-		pricing_model: Default::default(),
 	}
 }
 
@@ -144,13 +145,13 @@ fn test_request_service() {
 				H160::from_low_u64_be(1),
 				PCall::request_service {
 					blueprint_id: U256::from(0),
-					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
-					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
-					request_args_data: UnboundedBytes::from(request_args_data),
 					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
 						.into_iter()
 						.map(|r| r.encode().into())
 						.collect(),
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
 					payment_token_address: Default::default(),
@@ -224,13 +225,13 @@ fn test_request_service_with_erc20() {
 				H160::from_low_u64_be(1),
 				PCall::request_service {
 					blueprint_id: U256::from(0),
-					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
-					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
-					request_args_data: UnboundedBytes::from(request_args_data),
 					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
 						.into_iter()
 						.map(|r| r.encode().into())
 						.collect(),
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
 					payment_token_address: USDC_ERC20.into(),
@@ -307,13 +308,13 @@ fn test_request_service_with_asset() {
 				H160::from_low_u64_be(1),
 				PCall::request_service {
 					blueprint_id: U256::from(0),
-					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
-					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
-					request_args_data: UnboundedBytes::from(request_args_data),
 					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
 						.into_iter()
 						.map(|r| r.encode().into())
 						.collect(),
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(USDC),
 					payment_token_address: Default::default(),
@@ -382,13 +383,13 @@ fn test_terminate_service() {
 				H160::from_low_u64_be(1),
 				PCall::request_service {
 					blueprint_id: U256::from(0),
-					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
-					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
-					request_args_data: UnboundedBytes::from(request_args_data),
 					asset_security_requirements: vec![get_security_requirement(WETH, &[10, 20])]
 						.into_iter()
 						.map(|r| r.encode().into())
 						.collect(),
+					permitted_callers_data: UnboundedBytes::from(permitted_callers_data.encode()),
+					service_providers_data: UnboundedBytes::from(service_providers_data.encode()),
+					request_args_data: UnboundedBytes::from(request_args_data),
 					ttl: U256::from(1000),
 					payment_asset_id: U256::from(0),
 					payment_token_address: Default::default(),
@@ -424,3 +425,5 @@ fn test_terminate_service() {
 		assert!(!Instances::<Runtime>::contains_key(0));
 	});
 }
+
+

@@ -54,7 +54,7 @@ pub fn mint_tokens(
 
 // Common test utilities and setup
 pub(crate) fn cggmp21_blueprint()
--> ServiceBlueprint<ConstraintsOf<Runtime>, BlockNumberFor<Runtime>, BalanceOf<Runtime>> {
+-> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
@@ -65,6 +65,7 @@ pub(crate) fn cggmp21_blueprint()
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
 				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				pricing_model: PricingModel::PayOnce { amount: 100 },
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
@@ -73,6 +74,7 @@ pub(crate) fn cggmp21_blueprint()
 					FieldType::List(Box::new(FieldType::Uint8))
 				],
 				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				pricing_model: PricingModel::PayOnce { amount: 200 },
 			},
 		],
 		registration_params: bounded_vec![],
@@ -82,7 +84,6 @@ pub(crate) fn cggmp21_blueprint()
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
 		],
-		pricing_model: PricingModel::PayOnce { amount: 100 * 10u128.pow(6) },
 	}
 }
 
@@ -232,33 +233,7 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 
 pub fn create_test_blueprint(
 	origin: RuntimeOrigin,
-	blueprint: ServiceBlueprint<
-		ConstraintsOf<Runtime>,
-		BlockNumberFor<Runtime>,
-		BalanceOf<Runtime>,
-	>,
-) -> Result<(), sp_runtime::DispatchError> {
-	Services::create_blueprint(
-		origin,
-		bounded_vec![],                                        // metadata
-		blueprint,                                             // typedef
-		MembershipModel::Fixed { min_operators: 1 },           // membership_model
-		vec![],                                                // security_requirements
-		None,                                                  // price_targets
-		PricingModel::PayOnce { amount: 100 * 10u128.pow(6) }, // pricing_model
-	)
-	.map(|_| ())
-	.map_err(|e| e.error)
-}
-
-pub fn create_test_blueprint_with_pricing(
-	origin: RuntimeOrigin,
-	blueprint: ServiceBlueprint<
-		ConstraintsOf<Runtime>,
-		BlockNumberFor<Runtime>,
-		BalanceOf<Runtime>,
-	>,
-	pricing_model: PricingModel<BlockNumberFor<Runtime>, BalanceOf<Runtime>>,
+	blueprint: ServiceBlueprint<ConstraintsOf<Runtime>>,
 ) -> Result<(), sp_runtime::DispatchError> {
 	Services::create_blueprint(
 		origin,
@@ -267,7 +242,23 @@ pub fn create_test_blueprint_with_pricing(
 		MembershipModel::Fixed { min_operators: 1 }, // membership_model
 		vec![],                                      // security_requirements
 		None,                                        // price_targets
-		pricing_model,
+	)
+	.map(|_| ())
+	.map_err(|e| e.error)
+}
+
+pub fn create_test_blueprint_with_pricing(
+	origin: RuntimeOrigin,
+	blueprint: ServiceBlueprint<ConstraintsOf<Runtime>>,
+	_pricing_model: PricingModel<u32, u128>,
+) -> Result<(), sp_runtime::DispatchError> {
+	Services::create_blueprint(
+		origin,
+		bounded_vec![],                              // metadata
+		blueprint,                                   // typedef
+		MembershipModel::Fixed { min_operators: 1 }, // membership_model
+		vec![],                                      // security_requirements
+		None,                                        // price_targets
 	)
 	.map(|_| ())
 	.map_err(|e| e.error)

@@ -380,27 +380,66 @@ impl<T: Config> Pallet<T> {
 		blueprint: &ServiceBlueprint<T::Constraints>,
 		provided_amount: BalanceOf<T>,
 	) -> DispatchResult {
-		// For service-level validation, we could check against all job pricing models
-		// For now, we'll accept any positive amount
-		ensure!(!provided_amount.is_zero(), Error::<T>::InvalidRequestInput);
+		// Allow zero payments (no upfront payment, payments will be handled at job level)
+		if provided_amount.is_zero() {
+			return Ok(());
+		}
 
-		// Validate against each job's pricing model if needed
+		// If payment is provided, validate it makes sense for the blueprint's jobs
+		let mut has_pay_once_jobs = false;
+		let mut has_subscription_jobs = false;
+		let mut min_pay_once_amount: Option<BalanceOf<T>> = None;
+		let mut min_subscription_rate: Option<BalanceOf<T>> = None;
+
 		for job_def in &blueprint.jobs {
 			match &job_def.pricing_model {
 				PricingModel::PayOnce { amount } => {
-					// Individual job validation would happen at job call time
-					log::debug!("Job has pay-once pricing: {:?}", amount);
+					has_pay_once_jobs = true;
+					let amount_converted: BalanceOf<T> = (*amount).saturated_into();
+					match min_pay_once_amount {
+						Some(current_min) => {
+							if amount_converted < current_min {
+								min_pay_once_amount = Some(amount_converted);
+							}
+						},
+						None => {
+							min_pay_once_amount = Some(amount_converted);
+						},
+					}
 				},
 				PricingModel::Subscription { rate_per_interval, .. } => {
-					// Individual job validation would happen at job call time
-					log::debug!("Job has subscription pricing: {:?}", rate_per_interval);
+					has_subscription_jobs = true;
+					let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
+					match min_subscription_rate {
+						Some(current_min) => {
+							if rate_converted < current_min {
+								min_subscription_rate = Some(rate_converted);
+							}
+						},
+						None => {
+							min_subscription_rate = Some(rate_converted);
+						},
+					}
 				},
-				PricingModel::EventDriven { reward_per_event } => {
-					// For event-driven, any amount is acceptable as it's paid per event
-					log::debug!("Job has event-driven pricing: {:?}", reward_per_event);
+				PricingModel::EventDriven { .. } => {
+					// Event-driven jobs don't require upfront payment validation
 				},
 			}
 		}
+
+		// Validate based on the job types present
+		if has_pay_once_jobs {
+			// For pay-once jobs, the upfront payment should be at least the minimum required
+			if let Some(min_amount) = min_pay_once_amount {
+				ensure!(provided_amount >= min_amount, Error::<T>::InvalidRequestInput);
+			}
+		} else if has_subscription_jobs {
+			// For subscription-only services, payment should cover at least one interval
+			if let Some(min_rate) = min_subscription_rate {
+				ensure!(provided_amount >= min_rate, Error::<T>::InvalidRequestInput);
+			}
+		}
+		// If only event-driven jobs exist, any amount is acceptable
 
 		Ok(())
 	}
