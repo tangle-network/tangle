@@ -20,7 +20,9 @@ jobs:
         id: commit_info
         run: |
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "commit_message='$(git log -1 --pretty=%B)'" >> $GITHUB_OUTPUT
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       # Generating a GitHub token, so that tags created by the action
       # triggers the other workflows

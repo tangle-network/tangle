@@ -1,11 +1,4 @@
-#![deny(
-	trivial_casts,
-	trivial_numeric_casts,
-	stable_features,
-	non_shorthand_field_patterns,
-	renamed_and_removed_lints,
-	unsafe_code
-)]
+#![deny(stable_features, non_shorthand_field_patterns, renamed_and_removed_lints, unsafe_code)]
 
 pub use parity_scale_codec;
 pub use scale_info;
