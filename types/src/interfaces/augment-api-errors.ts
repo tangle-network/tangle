@@ -1842,9 +1842,37 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ExpectedEVMAddress: AugmentedError<ApiType>;
       /**
+       * Get Heartbeat Interval Failure
+       **/
+      GetHeartbeatIntervalFailure: AugmentedError<ApiType>;
+      /**
+       * Get Heartbeat Threshold Failure
+       **/
+      GetHeartbeatThresholdFailure: AugmentedError<ApiType>;
+      /**
+       * Get Slashing Window Failure
+       **/
+      GetSlashingWindowFailure: AugmentedError<ApiType>;
+      /**
+       * Heartbeat signature verification failed
+       **/
+      HeartbeatSignatureVerificationFailed: AugmentedError<ApiType>;
+      /**
+       * Heartbeat too early
+       **/
+      HeartbeatTooEarly: AugmentedError<ApiType>;
+      /**
+       * Invalid heartbeat data
+       **/
+      InvalidHeartbeatData: AugmentedError<ApiType>;
+      /**
        * The caller does not have the requirements to call a job.
        **/
       InvalidJobCallInput: AugmentedError<ApiType>;
+      /**
+       * Invalid Job ID provided
+       **/
+      InvalidJobId: AugmentedError<ApiType>;
       /**
        * The caller provided an invalid job result.
        **/
@@ -2036,6 +2064,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       OperatorProfileNotFound: AugmentedError<ApiType>;
       /**
+       * Payment has already been processed for this call
+       **/
+      PaymentAlreadyProcessed: AugmentedError<ApiType>;
+      /**
        * Rejection Process is interrupted.
        **/
       RejectionInterrupted: AugmentedError<ApiType>;
@@ -2043,6 +2075,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Service Initialization interrupted.
        **/
       ServiceInitializationInterrupted: AugmentedError<ApiType>;
+      /**
+       * Service not active
+       **/
+      ServiceNotActive: AugmentedError<ApiType>;
       /**
        * The service was not found.
        **/
