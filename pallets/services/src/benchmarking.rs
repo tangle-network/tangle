@@ -1,13 +1,12 @@
 use super::*;
-use crate::{BalanceOf, BlockNumberFor, OriginFor};
+use crate::OriginFor;
 use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
-use frame_support::{BoundedVec, dispatch::DispatchResult};
+use frame_support::BoundedVec;
 use frame_system::RawOrigin;
-use parity_scale_codec::{Decode, Encode};
 use scale_info::prelude::boxed::Box;
 use sp_core::{ByteArray, H160, crypto::Pair, ecdsa};
 use sp_runtime::{KeyTypeId, Percent};
-use sp_std::{prelude::*, vec};
+use sp_std::vec;
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
 	BoundedString, Field, FieldType, JobDefinition, JobMetadata,
@@ -61,8 +60,7 @@ fn operator_preferences<T: Config>() -> OperatorPreferences<T::Constraints> {
 	}
 }
 
-fn cggmp21_blueprint<T: Config>()
--> ServiceBlueprint<<T as Config>::Constraints, BlockNumberFor<T>, BalanceOf<T>> {
+fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
 		manager: BlueprintServiceManager::Evm(H160::from_slice(&[0u8; 20])),
@@ -72,6 +70,7 @@ fn cggmp21_blueprint<T: Config>()
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: vec![FieldType::Uint8].try_into().unwrap(),
 				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
+				pricing_model: PricingModel::PayOnce { amount: 100u128 },
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
@@ -79,6 +78,7 @@ fn cggmp21_blueprint<T: Config>()
 					.try_into()
 					.unwrap(),
 				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
+				pricing_model: PricingModel::PayOnce { amount: 50u128 },
 			},
 		]
 		.try_into()
@@ -89,7 +89,6 @@ fn cggmp21_blueprint<T: Config>()
 		supported_membership_models: vec![MembershipModelType::Fixed, MembershipModelType::Dynamic]
 			.try_into()
 			.unwrap(),
-		pricing_model: PricingModel::PayOnce { amount: 100u32.into() },
 	}
 }
 
@@ -99,12 +98,11 @@ fn create_test_blueprint<T: Config>(
 ) -> Result<(), sp_runtime::DispatchError> {
 	Pallet::<T>::create_blueprint(
 		origin,
-		Default::default(),                              // metadata
-		blueprint,                                       // typedef
-		MembershipModel::Fixed { min_operators: 1 },     // membership_model
-		vec![],                                          // security_requirements
-		None,                                            // price_targets
-		PricingModel::PayOnce { amount: 100u32.into() }, // pricing_model
+		Default::default(),                          // metadata
+		blueprint,                                   // typedef
+		MembershipModel::Fixed { min_operators: 1 }, // membership_model
+		vec![],                                      // security_requirements
+		None,                                        // price_targets
 	)
 	.map(|_| ())
 	.map_err(|e| e.error)
@@ -126,8 +124,7 @@ benchmarks! {
 		blueprint,           // typedef
 		MembershipModel::Fixed { min_operators: 1 }, // membership_model
 		vec![],              // security_requirements
-		None,                // price_targets
-		PricingModel::PayOnce { amount: 100u32.into() } // pricing_model
+		None                 // price_targets
 	)
 
 	pre_register {
@@ -304,10 +301,8 @@ benchmarks! {
 			get_security_commitment::<T>(USDC.into(), 10),
 			get_security_commitment::<T>(WETH.into(), 10),
 		];
-		use sp_runtime::traits::Hash;
-		let security_commitment_hash = T::Hashing::hash_of(&security_commitments);
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0, security_commitment_hash)
+	}: _(RawOrigin::Signed(charlie.clone()), 0, security_commitments)
 
 
 	reject {
@@ -480,8 +475,6 @@ benchmarks! {
 		)
 
 	submit_result {
-		use sp_core::ByteArray;
-
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
@@ -548,7 +541,7 @@ benchmarks! {
 			RawOrigin::Signed(bob.clone()),
 			0,
 			keygen_job_call_id,
-			vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())].try_into().unwrap()
+			vec![Field::from(BoundedVec::try_from(dkg.to_raw().to_vec()).unwrap())].try_into().unwrap()
 		)
 
 	heartbeat {
@@ -562,8 +555,8 @@ benchmarks! {
 		let blueprint_id = 0u64;
 		let service_id = Pallet::<T>::next_service_request_id();
 
-		let mut blueprint = cggmp21_blueprint::<T>();
-		Pallet::<T>::create_blueprint(RawOrigin::Signed(creator.clone()).into(), blueprint.clone()).unwrap();
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint);
 
 		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
 		let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
@@ -783,9 +776,24 @@ benchmarks! {
 		);
 
 		let service_id = 0;
-		let current_block = 100_u32.into();
+		let job_index = 0;
+		let call_id = 0;
+		let subscriber = alice.clone();
+		let rate_per_interval = 100u32.into();
+		let interval = 10u32.into();
+		let maybe_end = None;
+		let current_block = frame_system::Pallet::<T>::block_number();
 	}: {
-		let _ = Pallet::<T>::process_service_payment(service_id, current_block);
+		let _ = Pallet::<T>::process_job_subscription_payment(
+			service_id,
+			job_index,
+			call_id,
+			&subscriber,
+			rate_per_interval,
+			interval,
+			maybe_end,
+			current_block
+		);
 	}
 
 	// Benchmark event-driven payment processing
@@ -814,9 +822,20 @@ benchmarks! {
 		);
 
 		let service_id = 0;
+		let job_index = 0;
+		let call_id = 0;
+		let subscriber = alice.clone();
+		let reward_per_event = 10u32.into();
 		let event_count = 5;
 	}: {
-		let _ = Pallet::<T>::process_event_driven_payment(service_id, event_count);
+		let _ = Pallet::<T>::process_job_event_driven_payment(
+			service_id,
+			job_index,
+			call_id,
+			&subscriber,
+			reward_per_event,
+			event_count
+		);
 	}
 
 	// Benchmark subscription payments processing on block
