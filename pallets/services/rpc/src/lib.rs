@@ -25,10 +25,13 @@ use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
 	Serialize,
+	scale_info::TypeInfo,
 	traits::{Block as BlockT, MaybeDisplay},
 };
 use std::sync::Arc;
-use tangle_primitives::services::{AssetIdT, Constraints, ServiceRequest};
+use tangle_primitives::services::{
+	AssetIdT, Constraints, RpcServicesWithBlueprint, ServiceRequest,
+};
 
 pub use pallet_services_rpc_runtime_api::ServicesApi as ServicesRuntimeApi;
 
@@ -40,7 +43,16 @@ type BlockNumberOf<Block> =
 pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber, AssetId>
 where
 	X: Constraints,
-	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AccountId: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Serialize
+		+ Clone
+		+ PartialEq
+		+ Eq,
 	BlockNumber: Codec
 		+ MaybeDisplay
 		+ core::fmt::Debug
@@ -51,16 +63,17 @@ where
 		+ PartialEq
 		+ Eq
 		+ MaxEncodedLen
-		+ Default,
-	AssetId: AssetIdT,
+		+ Default
+		+ TypeInfo,
+	AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 {
 	// /// Query services with blueprints by operator
-	// #[method(name = "services_queryServicesWithBlueprintsByOperator")]
-	// fn query_services_with_blueprints_by_operator(
-	// 	&self,
-	// 	operator: AccountId,
-	// 	at: Option<BlockHash>,
-	// ) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber, AssetId>>>;
+	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
+	fn query_services_with_blueprints_by_operator(
+		&self,
+		operator: AccountId,
+		at: Option<BlockHash>,
+	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumber, AssetId>>>;
 
 	#[method(name = "services_queryServiceRequestsWithBlueprintsByOperator")]
 	fn query_service_requests_with_blueprints_by_operator(
@@ -88,12 +101,36 @@ impl<C, X, Block, AccountId, AssetId>
 	for ServicesClient<C, Block, AccountId>
 where
 	Block: BlockT,
-	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: AssetIdT,
+	AccountId: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Serialize
+		+ Clone
+		+ PartialEq
+		+ Eq,
+	AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 	X: Constraints,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	C::Api: ServicesRuntimeApi<Block, X, AccountId, AssetId>,
 {
+	fn query_services_with_blueprints_by_operator(
+		&self,
+		operator: AccountId,
+		at: Option<<Block as BlockT>::Hash>,
+	) -> RpcResult<Vec<RpcServicesWithBlueprint<X, AccountId, BlockNumberOf<Block>, AssetId>>> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_services_with_blueprints_by_operator(at, operator) {
+			Ok(Ok(res)) => Ok(res),
+			Ok(Err(e)) => Err(custom_error_into_rpc_err(Error::CustomDispatchError(e))),
+			Err(e) => Err(custom_error_into_rpc_err(Error::RuntimeError(e))),
+		}
+	}
+
 	fn query_service_requests_with_blueprints_by_operator(
 		&self,
 		operator: AccountId,

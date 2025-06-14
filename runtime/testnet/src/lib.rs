@@ -96,7 +96,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
-use tangle_primitives::services::ServiceRequest;
+use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
 
 pub use frame_support::{
 	PalletId, StorageValue, construct_runtime,
@@ -1678,14 +1678,14 @@ impl_runtime_apis! {
 	}
 
 	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId, AssetId> for Runtime {
-		// fn query_services_with_blueprints_by_operator(
-		// 	operator: AccountId,
-		// ) -> Result<
-		// 	Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>>,
-		// 	sp_runtime::DispatchError,
-		// > {
-		// 	Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
-		// }
+		fn query_services_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>>,
+			sp_runtime::DispatchError,
+		> {
+			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
 
 		fn query_service_requests_with_blueprints_by_operator(
 			operator: AccountId,

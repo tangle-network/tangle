@@ -118,6 +118,7 @@ pub enum MasterBlueprintServiceManagerRevision {
 #[codec(encode_bound(skip_type_params(C)))]
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
+#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize), serde(bound = ""))]
 pub struct ServiceBlueprint<C: Constraints> {
 	/// The metadata of the service.
 	pub metadata: ServiceMetadata<C>,
@@ -431,6 +432,11 @@ pub type OperatorSecurityCommitments<AccountId, AssetId, C> = BoundedVec<
 #[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
 #[cfg_attr(
     feature = "std",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(bound(
+        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT"
+    )),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT)))
 )]
 pub struct Service<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT> {
@@ -468,7 +474,7 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 }
 
 /// RPC Response for query the blueprint along with the services instances of that blueprint.
-#[derive(Educe, TypeInfo)]
+#[derive(Educe, Encode, Decode, TypeInfo)]
 #[educe(
     Default(bound(AccountId: Default, BlockNumber: Default, AssetId: Default)),
     Clone(bound(AccountId: Clone, BlockNumber: Clone, AssetId: Clone)),
@@ -476,9 +482,16 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
     Eq
 )]
 #[scale_info(skip_type_params(C, AccountId, BlockNumber, AssetId))]
+#[codec(encode_bound(skip_type_params(C, AccountId, BlockNumber, AssetId)))]
+#[codec(decode_bound(skip_type_params(C, AccountId, BlockNumber, AssetId)))]
 #[cfg_attr(not(feature = "std"), derive(RuntimeDebugNoBound))]
 #[cfg_attr(
     feature = "std",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(bound(
+        serialize = "AccountId: Serialize, BlockNumber: Serialize, AssetId: Serialize",
+        deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>, AssetId: AssetIdT"
+    )),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: core::fmt::Debug)))
 )]
 pub struct RpcServicesWithBlueprint<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
@@ -492,6 +505,8 @@ where
 		+ MaxEncodedLen
 		+ TypeInfo
 		+ Default,
+	AccountId: Encode + Decode + Clone + PartialEq + Eq + core::fmt::Debug,
+	AssetId: Encode + Decode + Clone + PartialEq + Eq + core::fmt::Debug,
 {
 	/// The blueprint ID.
 	pub blueprint_id: u64,

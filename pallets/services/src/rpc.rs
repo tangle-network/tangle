@@ -7,14 +7,49 @@ use super::*;
 impl<T: Config> Pallet<T> {
 	#[allow(clippy::type_complexity)]
 	pub fn services_with_blueprints_by_operator(
-		_operator: T::AccountId,
+		operator: T::AccountId,
 	) -> Result<
 		Vec<RpcServicesWithBlueprint<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>>,
 		Error<T>,
 	> {
-		// TODO: Implement proper RPC response with correct type handling
-		// For now, return empty result to avoid type mismatch issues
-		Ok(Vec::new())
+		// First get the operator's profile to know which blueprints they're registered for
+		let profile = Self::operator_profile(&operator)?;
+
+		// Get the operator's blueprints
+		let blueprint_ids = profile.blueprints;
+
+		// Create a map to group services by blueprint
+		let mut blueprint_services_map: sp_std::collections::btree_map::BTreeMap<
+			u64,
+			Vec<Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>>,
+		> = sp_std::collections::btree_map::BTreeMap::new();
+
+		// Iterate through all active service instances to find ones where the operator is
+		// participating
+		for (_service_id, service) in Instances::<T>::iter() {
+			// Check if this service is for a blueprint the operator is registered for
+			if blueprint_ids.contains(&service.blueprint) {
+				// Check if the operator is one of the operators providing security for this service
+				if service.operator_security_commitments.iter().any(|(op, _)| op == &operator) {
+					// Add this service to the appropriate blueprint group
+					blueprint_services_map
+						.entry(service.blueprint)
+						.or_insert_with(Vec::new)
+						.push(service);
+				}
+			}
+		}
+
+		// Convert the map to the expected result format
+		let mut result = Vec::new();
+		for (blueprint_id, services) in blueprint_services_map {
+			// Get the blueprint details
+			let (_blueprint_id, blueprint) = Self::blueprints(blueprint_id)?;
+
+			result.push(RpcServicesWithBlueprint { blueprint_id, blueprint, services });
+		}
+
+		Ok(result)
 	}
 
 	#[allow(clippy::type_complexity)]
