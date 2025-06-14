@@ -386,6 +386,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       StakeTiersNotSorted: AugmentedError<ApiType>;
       /**
+       * The stake tiers are too large to fit into the storage.
+       **/
+      StakeTiersOverflow: AugmentedError<ApiType>;
+      /**
        * Generic error
        **/
       [key: string]: AugmentedError<ApiType>;
@@ -1618,6 +1622,10 @@ declare module '@polkadot/api-base/types/errors' {
     };
     rewards: {
       /**
+       * An arithmetic operation resulted in an overflow.
+       **/
+      ArithmeticOverflow: AugmentedError<ApiType>;
+      /**
        * Asset already exists in a reward vault
        **/
       AssetAlreadyInVault: AugmentedError<ApiType>;
@@ -1698,6 +1706,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NoRewardsAvailable: AugmentedError<ApiType>;
       /**
+       * Operator has no pending rewards to claim.
+       **/
+      NoRewardsToClaim: AugmentedError<ApiType>;
+      /**
        * Pot account not found
        **/
       PotAccountNotFound: AugmentedError<ApiType>;
@@ -1710,9 +1722,17 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       RewardConfigNotFound: AugmentedError<ApiType>;
       /**
+       * Operator has too many pending rewards.
+       **/
+      TooManyPendingRewards: AugmentedError<ApiType>;
+      /**
        * Total deposit is less than incentive cap
        **/
       TotalDepositLessThanIncentiveCap: AugmentedError<ApiType>;
+      /**
+       * Failed to transfer funds.
+       **/
+      TransferFailed: AugmentedError<ApiType>;
       /**
        * Vault already exists
        **/
@@ -1822,9 +1842,37 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ExpectedEVMAddress: AugmentedError<ApiType>;
       /**
+       * Get Heartbeat Interval Failure
+       **/
+      GetHeartbeatIntervalFailure: AugmentedError<ApiType>;
+      /**
+       * Get Heartbeat Threshold Failure
+       **/
+      GetHeartbeatThresholdFailure: AugmentedError<ApiType>;
+      /**
+       * Get Slashing Window Failure
+       **/
+      GetSlashingWindowFailure: AugmentedError<ApiType>;
+      /**
+       * Heartbeat signature verification failed
+       **/
+      HeartbeatSignatureVerificationFailed: AugmentedError<ApiType>;
+      /**
+       * Heartbeat too early
+       **/
+      HeartbeatTooEarly: AugmentedError<ApiType>;
+      /**
+       * Invalid heartbeat data
+       **/
+      InvalidHeartbeatData: AugmentedError<ApiType>;
+      /**
        * The caller does not have the requirements to call a job.
        **/
       InvalidJobCallInput: AugmentedError<ApiType>;
+      /**
+       * Invalid Job ID provided
+       **/
+      InvalidJobId: AugmentedError<ApiType>;
       /**
        * The caller provided an invalid job result.
        **/
@@ -2016,6 +2064,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       OperatorProfileNotFound: AugmentedError<ApiType>;
       /**
+       * Payment has already been processed for this call
+       **/
+      PaymentAlreadyProcessed: AugmentedError<ApiType>;
+      /**
        * Rejection Process is interrupted.
        **/
       RejectionInterrupted: AugmentedError<ApiType>;
@@ -2023,6 +2075,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Service Initialization interrupted.
        **/
       ServiceInitializationInterrupted: AugmentedError<ApiType>;
+      /**
+       * Service not active
+       **/
+      ServiceNotActive: AugmentedError<ApiType>;
       /**
        * The service was not found.
        **/

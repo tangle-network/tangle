@@ -1,6 +1,5 @@
-use itertools::Itertools;
-use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-
+use frame_system::pallet_prelude::BlockNumberFor;
+use sp_std::vec::Vec;
 use tangle_primitives::services::*;
 
 use super::*;
@@ -13,32 +12,43 @@ impl<T: Config> Pallet<T> {
 		Vec<RpcServicesWithBlueprint<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>>,
 		Error<T>,
 	> {
-		let profile = Self::operator_profile(operator)?;
-		let mut result = Vec::with_capacity(profile.services.len());
-		let services = profile
-			.services
-			.into_iter()
-			.flat_map(Self::services)
-			.chunk_by(|service| service.blueprint);
+		// First get the operator's profile to know which blueprints they're registered for
+		let profile = Self::operator_profile(&operator)?;
 
-		let blueprints = profile
-			.blueprints
-			.into_iter()
-			.flat_map(|id| Self::blueprints(id).map(|(_, b)| (id, b)))
-			.collect::<BTreeMap<_, _>>();
+		// Get the operator's blueprints
+		let blueprint_ids = profile.blueprints;
 
-		for (blueprint_id, services) in services.into_iter() {
-			match blueprints.get(&blueprint_id) {
-				Some(blueprint) => {
-					result.push(RpcServicesWithBlueprint {
-						blueprint_id,
-						blueprint: blueprint.clone(),
-						services: services.collect(),
-					});
-				},
-				None => return Err(Error::<T>::BlueprintNotFound),
+		// Create a map to group services by blueprint
+		let mut blueprint_services_map: sp_std::collections::btree_map::BTreeMap<
+			u64,
+			Vec<Service<T::Constraints, T::AccountId, BlockNumberFor<T>, T::AssetId>>,
+		> = sp_std::collections::btree_map::BTreeMap::new();
+
+		// Iterate through all active service instances to find ones where the operator is
+		// participating
+		for (_service_id, service) in Instances::<T>::iter() {
+			// Check if this service is for a blueprint the operator is registered for
+			if blueprint_ids.contains(&service.blueprint) {
+				// Check if the operator is one of the operators providing security for this service
+				if service.operator_security_commitments.iter().any(|(op, _)| op == &operator) {
+					// Add this service to the appropriate blueprint group
+					blueprint_services_map
+						.entry(service.blueprint)
+						.or_insert_with(Vec::new)
+						.push(service);
+				}
 			}
 		}
+
+		// Convert the map to the expected result format
+		let mut result = Vec::new();
+		for (blueprint_id, services) in blueprint_services_map {
+			// Get the blueprint details
+			let (_blueprint_id, blueprint) = Self::blueprints(blueprint_id)?;
+
+			result.push(RpcServicesWithBlueprint { blueprint_id, blueprint, services });
+		}
+
 		Ok(result)
 	}
 

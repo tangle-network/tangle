@@ -25,7 +25,7 @@ fn request_service() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Register multiple operators
 		let bob = mock_pub_key(BOB);
@@ -101,12 +101,14 @@ fn request_service() {
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
-		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+		// Bob approves the request (must match requirements order: USDC, WETH, TNT)
+		// Note: TNT (native asset) is automatically added by the system if not present
+		let security_commitments = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+			get_security_commitment(TNT, 10),
+		];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -122,12 +124,17 @@ fn request_service() {
 			pending_approvals: vec![charlie.clone(), dave.clone()],
 		})));
 
-		// Charlie approves the request with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+		// Charlie approves the request with different security commitments (order: USDC, WETH, TNT)
+		let security_commitments_charlie = vec![
 			get_security_commitment(USDC, 15),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(TNT, 15),
-		],));
+		];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitments_charlie
+		));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -143,24 +150,30 @@ fn request_service() {
 			pending_approvals: vec![dave.clone()],
 		})));
 
-		// Dave should not be able to approve the request with an invalid security commitment
+		// Now let's try to approve with misordered security commitments for Dave. This should fail
 		// because the security commitments are misordered. They must be in the same order as the
 		// security requirements.
+		let invalid_security_commitments = vec![
+			get_security_commitment(TNT, 20),
+			get_security_commitment(USDC, 20),
+			get_security_commitment(WETH, 20),
+		];
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
-				get_security_commitment(TNT, 20),
-				get_security_commitment(USDC, 20),
-				get_security_commitment(WETH, 20),
-			],),
+			Services::approve(RuntimeOrigin::signed(dave.clone()), 0, invalid_security_commitments),
 			Error::<Runtime>::InvalidSecurityCommitments,
 		);
 
-		// Dave approves the request with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+		// Dave approves the request with security commitments (order: USDC, WETH, TNT)
+		let security_commitments_dave = vec![
 			get_security_commitment(USDC, 20),
 			get_security_commitment(WETH, 20),
 			get_security_commitment(TNT, 20),
-		],));
+		];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitments_dave
+		));
 
 		let service = Services::services(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
@@ -210,7 +223,7 @@ fn request_service_with_no_assets() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
 		assert_ok!(join_and_register(
@@ -248,10 +261,7 @@ fn request_service_with_payment_asset() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(
-			RuntimeOrigin::signed(alice.clone()),
-			blueprint.clone()
-		));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint.clone()));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
 		assert_ok!(join_and_register(
@@ -290,12 +300,13 @@ fn request_service_with_payment_asset() {
 		// Charlie Balance should be decreased by 5 USDC
 		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
 
-		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+		// Bob approves the request (must match requirements order: TNT, USDC, WETH)
+		let security_commitments = vec![
 			get_security_commitment(TNT, 10),
 			get_security_commitment(USDC, 10),
-			get_security_commitment(WETH, 10)
-		],));
+			get_security_commitment(WETH, 10),
+		];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -320,10 +331,7 @@ fn request_service_with_payment_erc20_token() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(
-			RuntimeOrigin::signed(alice.clone()),
-			blueprint.clone()
-		));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint.clone()));
 		let bob = mock_pub_key(BOB);
 		assert_ok!(join_and_register(
 			bob.clone(),
@@ -362,12 +370,13 @@ fn request_service_with_payment_erc20_token() {
 			U256::from(payment)
 		);
 
-		// Bob approves the request with security commitments
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+		// Bob approves the request (must match requirements order: TNT, USDC, WETH)
+		let security_commitments = vec![
 			get_security_commitment(TNT, 10),
 			get_security_commitment(USDC, 10),
-			get_security_commitment(WETH, 10)
-		],));
+			get_security_commitment(WETH, 10),
+		];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -398,10 +407,7 @@ fn reject_service_with_payment_token() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(
-			RuntimeOrigin::signed(alice.clone()),
-			blueprint.clone()
-		));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint.clone()));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
 		assert_ok!(join_and_register(
@@ -476,10 +482,7 @@ fn reject_service_with_payment_asset() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(
-			RuntimeOrigin::signed(alice.clone()),
-			blueprint.clone()
-		));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint.clone()));
 		let bob = mock_pub_key(BOB);
 		let bob_ecdsa_key = test_ecdsa_key();
 		assert_ok!(join_and_register(
@@ -535,16 +538,21 @@ fn test_service_creation_dynamic_max_operators() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator validation, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register maximum number of operators (using mock accounts)
 		let max_operators = 10;
 		let mut operators = Vec::new();
 
-		// Create 11 operators with sequential keys
+		// Create 10 operators with sequential keys
 		for i in 1..=10 {
 			let operator = mock_pub_key_from_fixed_bytes([i as u8; 32]);
 			// Give operator sufficient balance to join
@@ -559,11 +567,9 @@ fn test_service_creation_dynamic_max_operators() {
 			operators.push(operator);
 		}
 
-		let eve = mock_pub_key(EVE);
-
 		// Try to create service with exactly 10 operators - should succeed
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(alice.clone()),
 			None,
 			0,
 			vec![alice.clone()],
@@ -591,7 +597,7 @@ fn test_service_creation_dynamic_max_operators() {
 
 		assert_err!(
 			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
+				RuntimeOrigin::signed(alice.clone()),
 				None,
 				0,
 				vec![alice.clone()],
@@ -614,10 +620,15 @@ fn test_service_creation_fixed_min_operators() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator validation, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register some operators
 		let bob = mock_pub_key(BOB);
@@ -640,12 +651,10 @@ fn test_service_creation_fixed_min_operators() {
 			Some("https://example.com/rpc")
 		));
 
-		let eve = mock_pub_key(EVE);
-
 		// Try to create service with zero operators - should fail
 		assert_err!(
 			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
+				RuntimeOrigin::signed(alice.clone()),
 				None,
 				0,
 				vec![alice.clone()],
@@ -663,7 +672,7 @@ fn test_service_creation_fixed_min_operators() {
 		// Try to create service with fewer operators than min_operators - should fail
 		assert_err!(
 			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
+				RuntimeOrigin::signed(alice.clone()),
 				None,
 				0,
 				vec![alice.clone()],
@@ -680,7 +689,7 @@ fn test_service_creation_fixed_min_operators() {
 
 		// Try to create service with exactly min_operators - should succeed
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(alice.clone()),
 			None,
 			0,
 			vec![alice.clone()],
@@ -701,10 +710,15 @@ fn test_service_creation_invalid_operators() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator validation, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register one valid operator
 		let bob = mock_pub_key(BOB);
@@ -719,12 +733,11 @@ fn test_service_creation_invalid_operators() {
 
 		// Create an unregistered operator
 		let unregistered = mock_pub_key(CHARLIE);
-		let eve = mock_pub_key(EVE);
 
 		// Try to create service with an unregistered operator - should fail
 		assert_err!(
 			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
+				RuntimeOrigin::signed(alice.clone()),
 				None,
 				0,
 				vec![alice.clone()],
@@ -747,10 +760,15 @@ fn test_service_creation_duplicate_operators() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator validation, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -773,12 +791,10 @@ fn test_service_creation_duplicate_operators() {
 			Some("https://example.com/rpc")
 		));
 
-		let eve = mock_pub_key(EVE);
-
 		// Try to create service with duplicate operators - should fail
 		assert_err!(
 			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
+				RuntimeOrigin::signed(alice.clone()),
 				None,
 				0,
 				vec![alice.clone()],
@@ -801,10 +817,15 @@ fn test_service_creation_inactive_operators() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator validation, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -830,12 +851,10 @@ fn test_service_creation_inactive_operators() {
 		// Deactivate one operator
 		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(charlie.clone())));
 
-		let eve = mock_pub_key(EVE);
-
 		// Try to create service with an inactive operator - should fail
 		assert_err!(
 			Services::request(
-				RuntimeOrigin::signed(eve.clone()),
+				RuntimeOrigin::signed(alice.clone()),
 				None,
 				0,
 				vec![alice.clone()],
@@ -852,7 +871,7 @@ fn test_service_creation_inactive_operators() {
 
 		// Service creation with only active operators should succeed
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(alice.clone()),
 			None,
 			0,
 			vec![alice.clone()],
@@ -873,10 +892,15 @@ fn test_termination_with_partial_approvals() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about termination logic, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operators
 		let bob = mock_pub_key(BOB);
@@ -910,9 +934,8 @@ fn test_termination_with_partial_approvals() {
 		));
 
 		// Create service request
-		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(alice.clone()),
 			None,
 			0,
 			vec![alice.clone()],
@@ -925,31 +948,40 @@ fn test_termination_with_partial_approvals() {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
-		// Only two operators approve
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		// Only two operators approve (must include TNT as system auto-adds it)
+		let security_commitments_bob =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitments_bob
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
-			get_security_commitment(USDC, 15),
-			get_security_commitment(TNT, 15)
-		],));
+		let security_commitments_charlie =
+			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 15)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitments_charlie
+		));
 
 		// Attempt to terminate service with partial approvals - should fail
 		assert_err!(
-			Services::terminate(RuntimeOrigin::signed(eve.clone()), 0),
+			Services::terminate(RuntimeOrigin::signed(alice.clone()), 0),
 			Error::<Runtime>::ServiceNotFound
 		);
 
 		// Complete the approvals
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
-			get_security_commitment(USDC, 20),
-			get_security_commitment(TNT, 20)
-		],));
+		let security_commitments_dave =
+			vec![get_security_commitment(USDC, 20), get_security_commitment(TNT, 20)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitments_dave
+		));
 
-		// Now termination should succeed
-		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+		// Now termination should succeed - service owner (alice) terminates
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(alice.clone()), 0));
 
 		// Verify service is terminated
 		assert!(!Instances::<Runtime>::contains_key(0));
@@ -962,10 +994,15 @@ fn test_operator_offline_during_active_service() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator offline logic, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register operator
 		let bob = mock_pub_key(BOB);
@@ -979,9 +1016,8 @@ fn test_operator_offline_during_active_service() {
 		));
 
 		// Create service
-		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(eve.clone()),
+			RuntimeOrigin::signed(alice.clone()),
 			None,
 			0,
 			vec![alice.clone()],
@@ -994,11 +1030,10 @@ fn test_operator_offline_during_active_service() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Approve service request
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(USDC, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		// Approve service request (must include TNT as system auto-adds it)
+		let security_commitments =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Verify service is active
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -1009,8 +1044,8 @@ fn test_operator_offline_during_active_service() {
 			pallet_multi_asset_delegation::Error::<Runtime>::CannotGoOfflineWithActiveServices
 		);
 
-		// Terminate the service
-		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+		// Terminate the service - service owner (alice) terminates
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(alice.clone()), 0));
 
 		// Now operator should be able to go offline
 		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(bob.clone())));
