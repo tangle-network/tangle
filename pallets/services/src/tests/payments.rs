@@ -211,23 +211,21 @@ fn test_payment_distribution_operators() {
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), payment);
 		assert_eq!(Assets::balance(USDC, eve.clone()), before_balance - payment);
 
-		// Approve service request
+		// Bob and Charlie approve the request with security commitments
 		let security_commitments_bob =
 			vec![get_security_commitment(TNT, 20), get_security_commitment(USDC, 10)];
-		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			security_commitment_hash_bob
+			security_commitments_bob
 		));
 
 		let security_commitments_charlie =
 			vec![get_security_commitment(TNT, 25), get_security_commitment(USDC, 15)];
-		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie
+			security_commitments_charlie
 		));
 
 		// Verify payment is transferred to MBSM
@@ -261,15 +259,10 @@ fn test_payment_distribution_operators() {
 			U256::from(payment)
 		);
 
-		// Bob approves
-		let security_commitments_bob2 =
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)];
-		let security_commitment_hash_bob2 = BlakeTwo256::hash_of(&security_commitments_bob2);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			security_commitment_hash_bob2
-		));
+		// Bob approves with security commitments (USDC + TNT auto-added by system)
+		let security_commitments2 =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, security_commitments2));
 
 		// Verify ERC20 payment is transferred to MBSM
 		assert_ok!(
@@ -328,15 +321,10 @@ fn test_payment_distribution_operators() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Bob approves
-		let security_commitments_bob3 =
-			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 20)];
-		let security_commitment_hash_bob3 = BlakeTwo256::hash_of(&security_commitments_bob3);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			2,
-			security_commitment_hash_bob3
-		));
+		// Bob approves with security commitments (USDC + TNT auto-added by system)
+		let security_commitments3 =
+			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, security_commitments3));
 
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
@@ -395,18 +383,13 @@ fn test_payment_multiple_asset_types() {
 		assert_eq!(Assets::balance(USDC, Services::pallet_account()), payment);
 		assert_eq!(Assets::balance(USDC, eve.clone()), before_balance - payment);
 
-		// Bob approves with security commitments for all assets
+		// Bob approves with security commitments for all assets (USDC, WETH + TNT auto-added)
 		let security_commitments = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(TNT, 10),
 		];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Verify payment is transferred to MBSM
 		let mbsm_address = Services::mbsm_address_of(&blueprint).unwrap();
@@ -442,18 +425,13 @@ fn test_payment_multiple_asset_types() {
 			U256::from(payment)
 		);
 
-		// Bob approves with security commitments for all assets
+		// Bob approves with security commitments for all assets (USDC, WETH + TNT auto-added)
 		let security_commitments2 = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 15),
-			get_security_commitment(TNT, 15),
+			get_security_commitment(TNT, 10),
 		];
-		let security_commitment_hash2 = BlakeTwo256::hash_of(&security_commitments2);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			1,
-			security_commitment_hash2
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, security_commitments2));
 
 		// Verify ERC20 payment is transferred to MBSM
 		assert_ok!(
@@ -515,18 +493,13 @@ fn test_payment_multiple_asset_types() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Bob approves with security commitments for all assets
+		// Bob approves with security commitments for all assets (USDC, WETH + TNT auto-added)
 		let security_commitments3 = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 15),
-			get_security_commitment(TNT, 15),
+			get_security_commitment(TNT, 10),
 		];
-		let security_commitment_hash3 = BlakeTwo256::hash_of(&security_commitments3);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			2,
-			security_commitment_hash3
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, security_commitments3));
 
 		assert_eq!(
 			Balances::free_balance(eve.clone()),
@@ -846,22 +819,20 @@ fn create_blueprint_with_pricing(
 	_pricing_model: PricingModel<u32, u128>,
 ) -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	use frame_support::BoundedVec;
+	use sp_core::bounded_vec;
 	use tangle_primitives::services::{
-		BlueprintServiceManager, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision, 
+		BlueprintServiceManager, JobDefinition, JobMetadata, MasterBlueprintServiceManagerRevision,
 		MembershipModelType, ServiceBlueprint, ServiceMetadata,
 	};
-	use sp_core::bounded_vec;
 
 	ServiceBlueprint {
 		metadata: ServiceMetadata::default(),
-		jobs: bounded_vec![
-			JobDefinition {
-				metadata: JobMetadata::default(),
-				params: BoundedVec::default(),
-				result: BoundedVec::default(),
-				pricing_model: _pricing_model.clone(),
-			}
-		],
+		jobs: bounded_vec![JobDefinition {
+			metadata: JobMetadata::default(),
+			params: BoundedVec::default(),
+			result: BoundedVec::default(),
+			pricing_model: _pricing_model.clone(),
+		}],
 		registration_params: BoundedVec::default(),
 		request_params: BoundedVec::default(),
 		manager: BlueprintServiceManager::default(),

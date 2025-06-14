@@ -53,8 +53,7 @@ pub fn mint_tokens(
 }
 
 // Common test utilities and setup
-pub(crate) fn cggmp21_blueprint()
--> ServiceBlueprint<ConstraintsOf<Runtime>> {
+pub(crate) fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	#[allow(deprecated)]
 	ServiceBlueprint {
 		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
@@ -164,24 +163,20 @@ fn deploy() -> Deployment {
 
 	let security_commitments =
 		vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-	let security_commitment_map = security_commitments
+	let security_commitments_map = security_commitments
 		.iter()
 		.map(|c| (c.asset, c.clone()))
 		.collect::<BTreeMap<_, _>>();
 
-	// Create a hash from the security commitments for the approve function
-	use sp_runtime::traits::{BlakeTwo256, Hash};
-	let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-
 	assert_ok!(Services::approve(
 		RuntimeOrigin::signed(bob.clone()),
 		service_id,
-		security_commitment_hash,
+		security_commitments.clone(),
 	));
 
 	assert!(Instances::<Runtime>::contains_key(service_id));
 
-	Deployment { blueprint_id, service_id, security_commitments: security_commitment_map }
+	Deployment { blueprint_id, service_id, security_commitments: security_commitments_map }
 }
 
 pub fn join_and_register(

@@ -32,9 +32,18 @@ fn test_security_requirements_validation() {
 		));
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
-		// Register operator
+		// Register operators
 		assert_ok!(join_and_register(
 			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
+
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
 			test_ecdsa_key(),
 			1000,
@@ -138,9 +147,18 @@ fn test_security_commitment_validation() {
 		));
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
-		// Register operator
+		// Register operators
 		assert_ok!(join_and_register(
 			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
+
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
 			test_ecdsa_key(),
 			1000,
@@ -165,41 +183,109 @@ fn test_security_commitment_validation() {
 		));
 		// Test Case 1: Commitment below minimum exposure
 		let security_commitments_1 = vec![get_security_commitment(WETH, 5)];
-		let security_commitment_hash_1 = BlakeTwo256::hash_of(&security_commitments_1);
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitment_hash_1),
+			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments_1),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
+
+		// Create second service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
 		// Test Case 2: Commitment above maximum exposure
 		let security_commitments_2 = vec![get_security_commitment(WETH, 25)];
-		let security_commitment_hash_2 = BlakeTwo256::hash_of(&security_commitments_2);
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitment_hash_2),
+			Services::approve(RuntimeOrigin::signed(bob.clone()), 1, security_commitments_2),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-		// Test Case 3: Missing required asset commitment (native asset)
-		let security_commitments_3 = vec![get_security_commitment(WETH, 15)];
-		let security_commitment_hash_3 = BlakeTwo256::hash_of(&security_commitments_3);
-		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitment_hash_3),
-			Error::<Runtime>::InvalidSecurityCommitments
-		);
-		// Test Case 4: Wrong asset provided
-		let security_commitments_4 = vec![get_security_commitment(USDC, 15)];
-		let security_commitment_hash_4 = BlakeTwo256::hash_of(&security_commitments_4);
-		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitment_hash_4),
-			Error::<Runtime>::InvalidSecurityCommitments
-		);
-		// Test Case 4: Valid commitment
-		let security_commitments_5 =
+
+		// Create third service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+		// Test Case 3: Commitment with correct exposure for both required assets
+		let security_commitments_3 =
 			vec![get_security_commitment(TNT, 15), get_security_commitment(WETH, 15)];
-		let security_commitment_hash_5 = BlakeTwo256::hash_of(&security_commitments_5);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash_5
+			2,
+			security_commitments_3
 		));
+
+		// Create fourth service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+		// Test Case 4: Missing asset commitment
+		let security_commitments_4 = vec![get_security_commitment(USDC, 15)];
+		assert_err!(
+			Services::approve(RuntimeOrigin::signed(charlie.clone()), 3, security_commitments_4),
+			Error::<Runtime>::InvalidSecurityCommitments
+		);
+
+		// Create fifth service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+		// Test Case 5: Extra asset commitment
+		let security_commitments_5 =
+			vec![get_security_commitment(WETH, 15), get_security_commitment(TNT, 15)];
+		assert_err!(
+			Services::approve(RuntimeOrigin::signed(charlie.clone()), 4, security_commitments_5),
+			Error::<Runtime>::InvalidSecurityCommitments
+		);
 	});
 }
 
@@ -257,11 +343,10 @@ fn test_exposure_calculations() {
 			get_security_commitment(WETH, 20),
 			get_security_commitment(USDC, 20),
 		];
-		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			security_commitment_hash_bob
+			security_commitments_bob
 		));
 
 		let security_commitments_charlie = vec![
@@ -269,11 +354,10 @@ fn test_exposure_calculations() {
 			get_security_commitment(WETH, 25),
 			get_security_commitment(USDC, 15),
 		];
-		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie
+			security_commitments_charlie
 		));
 
 		let security_commitments_dave = vec![
@@ -281,11 +365,10 @@ fn test_exposure_calculations() {
 			get_security_commitment(WETH, 15),
 			get_security_commitment(USDC, 20),
 		];
-		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			security_commitment_hash_dave
+			security_commitments_dave
 		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
@@ -354,30 +437,26 @@ fn test_exposure_limits() {
 
 		let security_commitments_bob_1 =
 			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_bob_1 = BlakeTwo256::hash_of(&security_commitments_bob_1);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			security_commitment_hash_bob_1
+			security_commitments_bob_1
 		));
 
 		let security_commitments_charlie_1 =
 			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_charlie_1 =
-			BlakeTwo256::hash_of(&security_commitments_charlie_1);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie_1
+			security_commitments_charlie_1
 		));
 
 		let security_commitments_dave_1 =
 			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_dave_1 = BlakeTwo256::hash_of(&security_commitments_dave_1);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			security_commitment_hash_dave_1
+			security_commitments_dave_1
 		));
 
 		// Create second service that shares the same security (overlapping exposures)
@@ -397,21 +476,18 @@ fn test_exposure_limits() {
 
 		let security_commitments_bob_2 =
 			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_bob_2 = BlakeTwo256::hash_of(&security_commitments_bob_2);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			1,
-			security_commitment_hash_bob_2
+			security_commitments_bob_2
 		));
 
 		let security_commitments_charlie_2 =
 			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_charlie_2 =
-			BlakeTwo256::hash_of(&security_commitments_charlie_2);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			1,
-			security_commitment_hash_charlie_2
+			security_commitments_charlie_2
 		));
 
 		// Create third service with different asset (USDC)
@@ -431,21 +507,18 @@ fn test_exposure_limits() {
 
 		let security_commitments_bob_3 =
 			vec![get_security_commitment(USDC, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_bob_3 = BlakeTwo256::hash_of(&security_commitments_bob_3);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			2,
-			security_commitment_hash_bob_3
+			security_commitments_bob_3
 		));
 
 		let security_commitments_charlie_3 =
 			vec![get_security_commitment(USDC, 50), get_security_commitment(TNT, 50)];
-		let security_commitment_hash_charlie_3 =
-			BlakeTwo256::hash_of(&security_commitments_charlie_3);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			2,
-			security_commitment_hash_charlie_3
+			security_commitments_charlie_3
 		));
 
 		// Verify all services are active

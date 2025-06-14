@@ -428,8 +428,8 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 
 					// onRegister(uint64,OperatorPreferences,bytes)
 					[0x95, 0x24, 0xcf, 0x20] => {
-						// Basic validation: ensure blueprint_id is reasonable (< 1000 for test
-						// purposes)
+						// Basic validation: ensure blueprint_id is reasonable (< 10000 for test
+						// purposes, well above the actual MaxBlueprintsPerOperator limit of 1024)
 						if call_data.len() >= 32 {
 							let blueprint_id_bytes = &call_data[24..32]; // uint64 is in the last 8 bytes of the 32-byte word
 							let blueprint_id = u64::from_be_bytes([
@@ -444,8 +444,8 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 							]);
 
 							// Only reject registrations for extremely high blueprint IDs (which
-							// would be invalid in tests)
-							if blueprint_id > 1000 {
+							// would be invalid in tests) - set well above MaxBlueprintsPerOperator (1024)
+							if blueprint_id > 10000 {
 								return Ok(fp_evm::CallInfo {
 									exit_reason: ExitReason::Revert(ExitRevert::Reverted),
 									value: "Invalid blueprint ID".as_bytes().to_vec(),
@@ -492,8 +492,8 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 							]);
 
 							// Only reject requests for extremely high blueprint IDs (which would be
-							// invalid in tests)
-							if blueprint_id > 1000 {
+							// invalid in tests) - set well above MaxBlueprintsPerOperator (1024)
+							if blueprint_id > 10000 {
 								return Ok(fp_evm::CallInfo {
 									exit_reason: ExitReason::Revert(ExitRevert::Reverted),
 									value: "Blueprint not found".as_bytes().to_vec(),

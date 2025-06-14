@@ -500,13 +500,13 @@ fn test_slash_with_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
+		// Bob approves the request with security commitments
 		let security_commitments =
 			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service2_id,
-			security_commitment_hash
+			security_commitments
 		));
 
 		// Create slashes for both services

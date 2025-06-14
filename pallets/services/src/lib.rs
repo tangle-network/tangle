@@ -1341,36 +1341,21 @@ pub mod module {
 		///
 		/// * `origin` - The origin of the call, must be a signed account
 		/// * `request_id` - The ID of the service request to approve
-		/// * `native_exposure_percent` - Percentage of native token stake to expose
-		/// * `asset_exposure` - Vector of asset-specific exposure commitments
+		/// * `security_commitments` - The security commitments provided by the operator
 		///
 		/// # Errors
 		///
 		/// * [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list
-		/// * [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hook
-		/// * [`Error::InvalidRequestInput`] - Asset exposure commitments don't meet requirements
+		/// * [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hooks
+		/// * [`Error::InvalidSecurityCommitments`] - Security commitments don't meet requirements
 		#[pallet::weight(T::WeightInfo::approve())]
 		pub fn approve(
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
-			_security_commitment: T::Hash,
+			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
-
-			// Since this is just a test implementation, we'll infer the security commitments
-			// from the service request requirements and use default valid commitments
-			let request = Self::service_requests(request_id)?;
-			let security_commitments: Vec<AssetSecurityCommitment<T::AssetId>> = request
-				.security_requirements
-				.iter()
-				.map(|req| AssetSecurityCommitment {
-					asset: req.asset.clone(),
-					exposure_percent: req.min_exposure_percent,
-				})
-				.collect();
-
 			Self::do_approve(caller, request_id, &security_commitments)?;
-
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 

@@ -17,6 +17,7 @@
 use super::*;
 use frame_support::assert_ok;
 use sp_runtime::traits::{BlakeTwo256, Hash};
+use tangle_primitives::services::PricingModel;
 
 #[test]
 fn test_hooks() {
@@ -64,15 +65,11 @@ fn test_hooks() {
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
-		// Bob approves the request with security commitments
+		// Bob approves the request with security commitments (order must match requirements: TNT,
+		// WETH)
 		let security_commitments =
-			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);

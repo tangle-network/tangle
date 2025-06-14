@@ -340,15 +340,10 @@ fn test_registration_during_active_services() {
 		assert!(!Instances::<Runtime>::contains_key(0));
 		assert!(!UserServices::<Runtime>::get(eve.clone()).contains(&0));
 
-		// Approve the service request
+		// Approve the service to start it (WETH + TNT auto-added by system)
 		let security_commitments =
-			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+			vec![get_security_commitment(WETH, 15), get_security_commitment(TNT, 15)];
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Verify service is active and in instances storage
 		// Check service instance exists

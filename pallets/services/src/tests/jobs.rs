@@ -16,8 +16,9 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_core::{ByteArray, offchain::KeyTypeId};
+use sp_core::{ByteArray, bounded_vec, crypto::KeyTypeId};
 use sp_runtime::traits::{BlakeTwo256, Hash};
+use tangle_primitives::services::PricingModel;
 
 #[test]
 fn job_calls() {
@@ -84,29 +85,26 @@ fn job_calls() {
 		// All operators approve with security commitments (fixed order: TNT, WETH)
 		let security_commitments_bob =
 			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			security_commitment_hash_bob
+			security_commitments_bob
 		));
 
 		let security_commitments_charlie =
 			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie
+			security_commitments_charlie
 		));
 
 		let security_commitments_dave =
 			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			security_commitment_hash_dave
+			security_commitments_dave
 		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
@@ -213,29 +211,26 @@ fn job_result() {
 		// All operators approve with security commitments (job_result test - fixed order)
 		let security_commitments_bob =
 			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			security_commitment_hash_bob
+			security_commitments_bob
 		));
 
 		let security_commitments_charlie =
 			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie
+			security_commitments_charlie
 		));
 
 		let security_commitments_dave =
 			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			security_commitment_hash_dave
+			security_commitments_dave
 		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
@@ -359,12 +354,7 @@ fn test_concurrent_job_execution() {
 		for operator in [bob.clone(), charlie.clone(), dave.clone()] {
 			let security_commitments =
 				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-			let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-			assert_ok!(Services::approve(
-				RuntimeOrigin::signed(operator),
-				0,
-				security_commitment_hash
-			));
+			assert_ok!(Services::approve(RuntimeOrigin::signed(operator), 0, security_commitments));
 		}
 
 		// Submit multiple concurrent job calls
@@ -450,12 +440,7 @@ fn test_result_submission_non_operators() {
 		for operator in [bob.clone(), charlie.clone()] {
 			let security_commitments =
 				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
-			let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-			assert_ok!(Services::approve(
-				RuntimeOrigin::signed(operator),
-				0,
-				security_commitment_hash
-			));
+			assert_ok!(Services::approve(RuntimeOrigin::signed(operator), 0, security_commitments));
 		}
 
 		// Submit job call
@@ -518,12 +503,7 @@ fn test_invalid_result_formats() {
 
 		let security_commitments =
 			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Submit job call
 		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
@@ -586,12 +566,7 @@ fn test_result_submission_after_termination() {
 
 		let security_commitments =
 			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Submit job call
 		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![

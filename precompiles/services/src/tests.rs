@@ -9,8 +9,7 @@ use k256::ecdsa::{SigningKey, VerifyingKey};
 use pallet_services::{types::ConstraintsOf, Instances};
 use parity_scale_codec::Encode;
 use precompile_utils::{prelude::UnboundedBytes, testing::*};
-use sp_core::{ecdsa, Pair, H160, H256, U256};
-use sp_io::hashing::keccak_256;
+use sp_core::{ecdsa, Pair, H160, U256};
 use sp_runtime::{bounded_vec, AccountId32, Percent};
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
@@ -37,11 +36,6 @@ fn test_ecdsa_key() -> [u8; 65] {
 	let verifying_key = VerifyingKey::from(secret);
 	let public_key = verifying_key.to_encoded_point(false);
 	public_key.to_bytes().to_vec().try_into().unwrap()
-}
-
-fn compute_security_commitment_hash(commitments: Vec<AssetSecurityCommitment<AssetId>>) -> H256 {
-	let encoded = commitments.encode();
-	H256::from(keccak_256(&encoded))
 }
 
 fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
@@ -166,10 +160,7 @@ fn test_request_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			compute_security_commitment_hash(vec![
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			]),
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Ensure the service instance is created
@@ -253,10 +244,7 @@ fn test_request_service_with_erc20() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			compute_security_commitment_hash(vec![
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			]),
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Ensure the service instance is created
@@ -332,10 +320,7 @@ fn test_request_service_with_asset() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			compute_security_commitment_hash(vec![
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			]),
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		// Ensure the service instance is created
@@ -404,10 +389,7 @@ fn test_terminate_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			compute_security_commitment_hash(vec![
-				get_security_commitment(WETH, 10),
-				get_security_commitment(TNT, 10)
-			]),
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)],
 		));
 
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -425,5 +407,3 @@ fn test_terminate_service() {
 		assert!(!Instances::<Runtime>::contains_key(0));
 	});
 }
-
-

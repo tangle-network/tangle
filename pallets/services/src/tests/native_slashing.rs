@@ -205,14 +205,13 @@ fn test_native_restaking_slash_with_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Bob approves the request with security commitments
+		// Bob approves the request with security commitments (WETH + TNT auto-added by system)
 		let security_commitments =
 			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
-			1,
-			security_commitment_hash
+			1, // This is the second service request (request ID 1, not service ID 1)
+			security_commitments
 		));
 
 		let delegator = mock_pub_key(CHARLIE);

@@ -102,18 +102,14 @@ fn request_service() {
 
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
-		// Bob approves the request with security commitments
-		let security_commitments_bob = vec![
+		// Bob approves the request (must match requirements order: USDC, WETH, TNT)
+		// Note: TNT (native asset) is automatically added by the system if not present
+		let security_commitments = vec![
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 10),
 			get_security_commitment(TNT, 10),
 		];
-		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash_bob
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		let events: Vec<RuntimeEvent> = System::events()
 			.into_iter()
@@ -129,17 +125,16 @@ fn request_service() {
 			pending_approvals: vec![charlie.clone(), dave.clone()],
 		})));
 
-		// Charlie approves the request with security commitments
+		// Charlie approves the request with different security commitments (order: USDC, WETH, TNT)
 		let security_commitments_charlie = vec![
 			get_security_commitment(USDC, 15),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(TNT, 15),
 		];
-		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie
+			security_commitments_charlie
 		));
 
 		let events: Vec<RuntimeEvent> = System::events()
@@ -156,7 +151,7 @@ fn request_service() {
 			pending_approvals: vec![dave.clone()],
 		})));
 
-		// Dave should not be able to approve the request with an invalid security commitment
+		// Now let's try to approve with misordered security commitments for Dave. This should fail
 		// because the security commitments are misordered. They must be in the same order as the
 		// security requirements.
 		let invalid_security_commitments = vec![
@@ -164,27 +159,21 @@ fn request_service() {
 			get_security_commitment(USDC, 20),
 			get_security_commitment(WETH, 20),
 		];
-		let invalid_security_commitment_hash = BlakeTwo256::hash_of(&invalid_security_commitments);
 		assert_err!(
-			Services::approve(
-				RuntimeOrigin::signed(dave.clone()),
-				0,
-				invalid_security_commitment_hash
-			),
+			Services::approve(RuntimeOrigin::signed(dave.clone()), 0, invalid_security_commitments),
 			Error::<Runtime>::InvalidSecurityCommitments,
 		);
 
-		// Dave approves the request with security commitments
+		// Dave approves the request with security commitments (order: USDC, WETH, TNT)
 		let security_commitments_dave = vec![
 			get_security_commitment(USDC, 20),
 			get_security_commitment(WETH, 20),
 			get_security_commitment(TNT, 20),
 		];
-		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			security_commitment_hash_dave
+			security_commitments_dave
 		));
 
 		let service = Services::services(0).unwrap();
@@ -312,18 +301,13 @@ fn request_service_with_payment_asset() {
 		// Charlie Balance should be decreased by 5 USDC
 		assert_eq!(Assets::balance(USDC, charlie.clone()), before_balance - payment);
 
-		// Bob approves the request with security commitments
+		// Bob approves the request (must match requirements order: TNT, USDC, WETH)
 		let security_commitments = vec![
 			get_security_commitment(TNT, 10),
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 10),
 		];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -387,18 +371,13 @@ fn request_service_with_payment_erc20_token() {
 			U256::from(payment)
 		);
 
-		// Bob approves the request with security commitments
+		// Bob approves the request (must match requirements order: TNT, USDC, WETH)
 		let security_commitments = vec![
 			get_security_commitment(TNT, 10),
 			get_security_commitment(USDC, 10),
 			get_security_commitment(WETH, 10),
 		];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// The request is now fully approved
 		assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 0);
@@ -560,16 +539,21 @@ fn test_service_creation_dynamic_max_operators() {
 		System::set_block_number(1);
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 
-		// Create blueprint
+		// Create blueprint with free pricing since this test is about operator validation, not
+		// payment
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		// Register maximum number of operators (using mock accounts)
 		let max_operators = 10;
 		let mut operators = Vec::new();
 
-		// Create 11 operators with sequential keys
+		// Create 10 operators with sequential keys
 		for i in 1..=10 {
 			let operator = mock_pub_key_from_fixed_bytes([i as u8; 32]);
 			// Give operator sufficient balance to join
@@ -587,7 +571,6 @@ fn test_service_creation_dynamic_max_operators() {
 		let eve = mock_pub_key(EVE);
 
 		// Try to create service with exactly 10 operators - should succeed
-		// Use Alice since she already has USDC balance
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(alice.clone()),
 			None,
@@ -598,7 +581,7 @@ fn test_service_creation_dynamic_max_operators() {
 			vec![get_security_requirement(USDC, &[10, 20])],
 			100,
 			Asset::Custom(USDC),
-			100,
+			0,
 			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(max_operators) },
 		));
 
@@ -626,7 +609,7 @@ fn test_service_creation_dynamic_max_operators() {
 				vec![get_security_requirement(USDC, &[10, 20])],
 				100,
 				Asset::Custom(USDC),
-				100,
+				0,
 				MembershipModel::Dynamic { min_operators: 1, max_operators: Some(max_operators) },
 			),
 			Error::<Runtime>::TooManyOperators
@@ -976,43 +959,40 @@ fn test_termination_with_partial_approvals() {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
-		// Only two operators approve
+		// Only two operators approve (must include TNT as system auto-adds it)
 		let security_commitments_bob =
 			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash_bob = BlakeTwo256::hash_of(&security_commitments_bob);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			0,
-			security_commitment_hash_bob
+			security_commitments_bob
 		));
 
 		let security_commitments_charlie =
 			vec![get_security_commitment(USDC, 15), get_security_commitment(TNT, 15)];
-		let security_commitment_hash_charlie = BlakeTwo256::hash_of(&security_commitments_charlie);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(charlie.clone()),
 			0,
-			security_commitment_hash_charlie
+			security_commitments_charlie
 		));
 
 		// Attempt to terminate service with partial approvals - should fail
 		assert_err!(
-			Services::terminate(RuntimeOrigin::signed(eve.clone()), 0),
+			Services::terminate(RuntimeOrigin::signed(alice.clone()), 0),
 			Error::<Runtime>::ServiceNotFound
 		);
 
 		// Complete the approvals
 		let security_commitments_dave =
 			vec![get_security_commitment(USDC, 20), get_security_commitment(TNT, 20)];
-		let security_commitment_hash_dave = BlakeTwo256::hash_of(&security_commitments_dave);
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(dave.clone()),
 			0,
-			security_commitment_hash_dave
+			security_commitments_dave
 		));
 
-		// Now termination should succeed
-		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+		// Now termination should succeed - service owner (alice) terminates
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(alice.clone()), 0));
 
 		// Verify service is terminated
 		assert!(!Instances::<Runtime>::contains_key(0));
@@ -1062,15 +1042,10 @@ fn test_operator_offline_during_active_service() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Approve service request
+		// Approve service request (must include TNT as system auto-adds it)
 		let security_commitments =
 			vec![get_security_commitment(USDC, 10), get_security_commitment(TNT, 10)];
-		let security_commitment_hash = BlakeTwo256::hash_of(&security_commitments);
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			0,
-			security_commitment_hash
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Verify service is active
 		assert!(Instances::<Runtime>::contains_key(0));
@@ -1081,8 +1056,8 @@ fn test_operator_offline_during_active_service() {
 			pallet_multi_asset_delegation::Error::<Runtime>::CannotGoOfflineWithActiveServices
 		);
 
-		// Terminate the service
-		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
+		// Terminate the service - service owner (alice) terminates
+		assert_ok!(Services::terminate(RuntimeOrigin::signed(alice.clone()), 0));
 
 		// Now operator should be able to go offline
 		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(bob.clone())));

@@ -397,11 +397,10 @@ impl<T: Config> Pallet<T> {
 					has_pay_once_jobs = true;
 					let amount_converted: BalanceOf<T> = (*amount).saturated_into();
 					match min_pay_once_amount {
-						Some(current_min) => {
+						Some(current_min) =>
 							if amount_converted < current_min {
 								min_pay_once_amount = Some(amount_converted);
-							}
-						},
+							},
 						None => {
 							min_pay_once_amount = Some(amount_converted);
 						},
@@ -411,11 +410,10 @@ impl<T: Config> Pallet<T> {
 					has_subscription_jobs = true;
 					let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
 					match min_subscription_rate {
-						Some(current_min) => {
+						Some(current_min) =>
 							if rate_converted < current_min {
 								min_subscription_rate = Some(rate_converted);
-							}
-						},
+							},
 						None => {
 							min_subscription_rate = Some(rate_converted);
 						},
