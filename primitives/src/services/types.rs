@@ -491,18 +491,3 @@ pub struct Instance<
 		BoundedVec<(AccountId, Vec<AssetSecurityCommitment<AssetId>>), MaxOperators>,
 	// Note: pricing_model and last_billed removed since payments are now handled per job call
 }
-
-impl<AccountId, AssetId: AssetIdT, MaxPermittedCallers: Get<u32>, MaxOperators: Get<u32>>
-	Instance<AccountId, AssetId, MaxPermittedCallers, MaxOperators>
-{
-	/// Validates the security commitments against the blueprint's requirements.
-	pub fn validate_security_commitments(
-		&self,
-		_security_commitments: &[AssetSecurityCommitment<AssetId>],
-	) -> bool {
-		// TODO: Implement actual validation logic based on blueprint requirements.
-		// This likely involves fetching the blueprint's `security_requirements`
-		// and comparing them against the provided `security_commitments`.
-		true
-	}
-}
