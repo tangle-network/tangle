@@ -15,22 +15,21 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet, ServiceRequests,
-	ServiceStatus, StagingServicePayments, UserServices, types::*,
+	BalanceOf, Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet,
+	ServiceRequests, ServiceStatus, StagingServicePayments, UserServices,
 };
 use frame_support::{
-	pallet_prelude::*,
+	BoundedVec,
+	dispatch::DispatchResult,
+	ensure,
 	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
 };
-use frame_system::pallet_prelude::*;
+use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
-use tangle_primitives::{
-	BlueprintId,
-	services::{
-		ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
-		StagingServicePayment,
-	},
+use tangle_primitives::services::{
+	ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
+	StagingServicePayment,
 };
 
 impl<T: Config> Pallet<T> {
@@ -201,9 +200,12 @@ impl<T: Config> Pallet<T> {
 				.map_err(|_| Error::<T>::MaxServicesPerUserExceeded)
 		})?;
 
-		// Process payment if it exists
+		// Process payment if it exists - Transfer payment to MBSM
 		if let Some(payment) = Self::service_payment(request_id) {
-			Self::process_service_payment(request.blueprint, &payment)?;
+			// Transfer the payment to the MBSM
+			Self::transfer_payment_to_mbsm(request.blueprint, &payment)?;
+
+			// Remove the payment from staging
 			StagingServicePayments::<T>::remove(request_id);
 		}
 
@@ -240,13 +242,14 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Arguments
 	///
+	/// * `blueprint_id` - The blueprint ID to get the MBSM address
 	/// * `payment` - The payment details including asset type and amount
 	///
 	/// # Returns
 	///
 	/// Returns a DispatchResult indicating success or the specific error that occurred
-	pub(crate) fn process_service_payment(
-		blueprint_id: BlueprintId,
+	pub(crate) fn transfer_payment_to_mbsm(
+		blueprint_id: u64,
 		payment: &StagingServicePayment<T::AccountId, T::AssetId, BalanceOf<T>>,
 	) -> DispatchResult {
 		let (_, blueprint) = Self::blueprints(blueprint_id)?;

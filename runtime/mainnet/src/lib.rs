@@ -35,9 +35,7 @@ use frame_election_provider_support::{
 	onchain,
 };
 use frame_support::{
-	derive_impl,
-	genesis_builder_helper::{build_state, get_preset},
-	ord_parameter_types,
+	derive_impl, ord_parameter_types,
 	traits::{
 		AsEnsureOriginWithArg, ConstU64, Contains, OnFinalize, WithdrawReasons,
 		tokens::{PayFromAccount, UnityAssetBalanceConversion},
@@ -65,7 +63,6 @@ use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
 use sp_core::{H160, H256, OpaqueMetadata, U256, crypto::KeyTypeId};
-use sp_genesis_builder::PresetId;
 use sp_runtime::{
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
 	SaturatedConversion, create_runtime_str,
@@ -344,6 +341,7 @@ impl pallet_scheduler::Config for Runtime {
 }
 
 parameter_types! {
+	// 1e18 / 1e8 = 1e10 existential balance
 	pub const PreimageBaseDeposit: Balance = 100 * UNIT;
 	// One cent: $10,000 / MB
 	pub const PreimageByteDeposit: Balance = 10 * MILLIUNIT;
@@ -1117,9 +1115,7 @@ impl pallet_airdrop_claims::Config for Runtime {
 }
 
 parameter_types! {
-	// One storage item; key size 32, value size 8; .
 	pub const ProxyDepositBase: Balance = deposit(1, 8);
-	// Additional storage item size of 33 bytes.
 	pub const ProxyDepositFactor: Balance = deposit(0, 33);
 	pub const AnnouncementDepositBase: Balance = deposit(1, 8);
 	pub const AnnouncementDepositFactor: Balance = deposit(0, 66);
@@ -1246,72 +1242,6 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 }
 
 parameter_types! {
-	// Min operator bond amount to `join_operators`
-	pub const MinOperatorBondAmount: Balance = 10 * UNIT;
-	// Min delegate amount to `delegate`
-	pub const MinDelegateAmount : Balance = 10 * UNIT;
-	// Time delay for leaving operators, time between `schedule_leave_operators` and `execute_leave_operators`
-	pub const LeaveOperatorsDelay: u32 = 14;
-	// Time delay for reducing operator bond
-	pub const OperatorBondLessDelay: u32 = 14;
-	// Time delay for leaving delegators, time between `schedule_withdraw` and `execute_withdraw`
-	pub const LeaveDelegatorsDelay: u32 = 7;
-	// Time delay for reducing delegation bond, time between `schedule_delegator_unstake` and `execute_delegator_unstake`
-	pub const DelegationBondLessDelay: u32 = 7;
-
-	pub PID: PalletId = PalletId(*b"PotStake");
-
-	// Max number of blueprints a delegator can have in Fixed mode per operator
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegatorBlueprints : u32 = 16;
-
-	// Max number of blueprints an operator can support
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxOperatorBlueprints : u32 = 16;
-
-	// Max number of withdraw requests a delegator can have
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxWithdrawRequests: u32 = 8;
-
-	// Max number of unstake requests a delegator can have
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxUnstakeRequests: u32 = 8;
-
-	// Max number of delegations a delegator can have
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegations: u32 = 64;
-}
-
-impl pallet_multi_asset_delegation::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-	type SlashRecipient = TreasuryAccount;
-	type MinOperatorBondAmount = MinOperatorBondAmount;
-	type CurrencyToVote = U128CurrencyToVote;
-	type StakingInterface = Staking;
-	type ServiceManager = Services;
-	type LeaveOperatorsDelay = LeaveOperatorsDelay;
-	type OperatorBondLessDelay = OperatorBondLessDelay;
-	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
-	type DelegationBondLessDelay = DelegationBondLessDelay;
-	type MinDelegateAmount = MinDelegateAmount;
-	type Fungibles = Assets;
-	type AssetId = AssetId;
-	type ForceOrigin = EnsureRootOrHalfCouncil;
-	type PalletId = PID;
-	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
-	type MaxOperatorBlueprints = MaxOperatorBlueprints;
-	type MaxWithdrawRequests = MaxWithdrawRequests;
-	type MaxUnstakeRequests = MaxUnstakeRequests;
-	type MaxDelegations = MaxDelegations;
-	type EvmRunner = crate::tangle_services::PalletEvmRunner;
-	type RewardsManager = Rewards;
-	type EvmGasWeightMapping = crate::tangle_services::PalletEVMGasWeightMapping;
-	type EvmAddressMapping = crate::tangle_services::PalletEVMAddressMapping;
-	type WeightInfo = ();
-}
-
-parameter_types! {
 	// `PostUnbondingPoolsWindow` taken from polkadot runtime
 	pub const PostUnbondingPoolsWindow: u32 = 2;
 	pub const MaxMetadataLen: u32 = 256;
@@ -1369,6 +1299,85 @@ impl pallet_rewards::Config for Runtime {
 	type MaxVaultNameLength = MaxVaultNameLen;
 	type MaxVaultLogoLength = MaxVaultLogoLen;
 	type VaultMetadataOrigin = EnsureRootOrHalfCouncil;
+	type MaxPendingRewardsPerOperator = ConstU32<100>;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub const MinOperatorBondAmount: Balance = 100;
+
+	pub const MinDelegateAmount : Balance = 1;
+	pub PID: PalletId = PalletId(*b"PotStake");
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxOperatorBlueprints : u32 = 50;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxWithdrawRequests: u32 = 5;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxUnstakeRequests: u32 = 5;
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = 50;
+
+}
+
+#[cfg(feature = "fast-runtime")]
+parameter_types! {
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveOperatorsDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveDelegatorsDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const DelegationBondLessDelay: u32 = 1;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const OperatorBondLessDelay: u32 = 1;
+}
+
+#[cfg(not(feature = "fast-runtime"))]
+parameter_types! {
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveOperatorsDelay: u32 = 10;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const LeaveDelegatorsDelay: u32 = 10;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const DelegationBondLessDelay: u32 = 5;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const OperatorBondLessDelay: u32 = 5;
+}
+
+impl pallet_multi_asset_delegation::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type SlashRecipient = TreasuryAccount;
+	type MinOperatorBondAmount = MinOperatorBondAmount;
+
+	type CurrencyToVote = U128CurrencyToVote;
+	type StakingInterface = Staking;
+	type ServiceManager = Services;
+	type LeaveOperatorsDelay = LeaveOperatorsDelay;
+	type OperatorBondLessDelay = OperatorBondLessDelay;
+	type LeaveDelegatorsDelay = LeaveDelegatorsDelay;
+	type DelegationBondLessDelay = DelegationBondLessDelay;
+	type MinDelegateAmount = MinDelegateAmount;
+	type Fungibles = Assets;
+	type AssetId = AssetId;
+	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
+	type PalletId = PID;
+	type RewardsManager = Rewards;
+	type MaxDelegatorBlueprints = MaxDelegatorBlueprints;
+	type MaxOperatorBlueprints = MaxOperatorBlueprints;
+	type MaxWithdrawRequests = MaxWithdrawRequests;
+	type MaxUnstakeRequests = MaxUnstakeRequests;
+	type MaxDelegations = MaxDelegations;
+	type EvmRunner = crate::tangle_services::PalletEvmRunner;
+	type EvmGasWeightMapping = crate::tangle_services::PalletEVMGasWeightMapping;
+	type EvmAddressMapping = crate::tangle_services::PalletEVMAddressMapping;
 	type WeightInfo = ();
 }
 
@@ -1651,6 +1660,143 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
+		fn validate_transaction(
+			source: TransactionSource,
+			tx: <Block as BlockT>::Extrinsic,
+			block_hash: <Block as BlockT>::Hash,
+		) -> TransactionValidity {
+			Executive::validate_transaction(source, tx, block_hash)
+		}
+	}
+
+	impl sp_offchain::OffchainWorkerApi<Block> for Runtime {
+		fn offchain_worker(header: &<Block as BlockT>::Header) {
+			Executive::offchain_worker(header)
+		}
+	}
+
+	impl sp_session::SessionKeys<Block> for Runtime {
+		fn decode_session_keys(
+			encoded: Vec<u8>,
+		) -> Option<Vec<(Vec<u8>, KeyTypeId)>> {
+			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
+		}
+
+		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
+			opaque::SessionKeys::generate(seed)
+		}
+	}
+
+	impl sp_consensus_babe::BabeApi<Block> for Runtime {
+		fn configuration() -> sp_consensus_babe::BabeConfiguration {
+			let epoch_config = Babe::epoch_config().unwrap_or(BABE_GENESIS_EPOCH_CONFIG);
+			sp_consensus_babe::BabeConfiguration {
+				slot_duration: Babe::slot_duration(),
+				epoch_length: EpochDuration::get(),
+				c: epoch_config.c,
+				authorities: Babe::authorities().to_vec(),
+				randomness: Babe::randomness(),
+				allowed_slots: epoch_config.allowed_slots,
+			}
+		}
+
+		fn current_epoch_start() -> sp_consensus_babe::Slot {
+			Babe::current_epoch_start()
+		}
+
+		fn current_epoch() -> sp_consensus_babe::Epoch {
+			Babe::current_epoch()
+		}
+
+		fn next_epoch() -> sp_consensus_babe::Epoch {
+			Babe::next_epoch()
+		}
+
+		fn generate_key_ownership_proof(
+			_slot: sp_consensus_babe::Slot,
+			authority_id: sp_consensus_babe::AuthorityId,
+		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
+			use parity_scale_codec::Encode;
+
+			Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: sp_consensus_babe::EquivocationProof<<Block as BlockT>::Header>,
+			key_owner_proof: sp_consensus_babe::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Babe::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
+		}
+	}
+
+	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
+		fn account_nonce(account: AccountId) -> Nonce {
+			System::account_nonce(account)
+		}
+	}
+
+	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<
+		Block,
+		Balance,
+	> for Runtime {
+		fn query_info(uxt: <Block as BlockT>::Extrinsic, len: u32) -> RuntimeDispatchInfo<Balance> {
+			TransactionPayment::query_info(uxt, len)
+		}
+		fn query_fee_details(uxt: <Block as BlockT>::Extrinsic, len: u32) -> FeeDetails<Balance> {
+			TransactionPayment::query_fee_details(uxt, len)
+		}
+		fn query_weight_to_fee(weight: Weight) -> Balance {
+			TransactionPayment::weight_to_fee(weight)
+		}
+		fn query_length_to_fee(length: u32) -> Balance {
+			TransactionPayment::length_to_fee(length)
+		}
+	}
+
+	impl fg_primitives::GrandpaApi<Block> for Runtime {
+		fn grandpa_authorities() -> GrandpaAuthorityList {
+			Grandpa::grandpa_authorities()
+		}
+
+		fn current_set_id() -> fg_primitives::SetId {
+			Grandpa::current_set_id()
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: fg_primitives::EquivocationProof<
+				<Block as BlockT>::Hash,
+				NumberFor<Block>,
+			>,
+			key_owner_proof: fg_primitives::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Grandpa::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
+		}
+
+		fn generate_key_ownership_proof(
+			_set_id: fg_primitives::SetId,
+			authority_id: GrandpaId,
+		) -> Option<fg_primitives::OpaqueKeyOwnershipProof> {
+			use parity_scale_codec::Encode;
+
+			Historical::prove((fg_primitives::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(fg_primitives::OpaqueKeyOwnershipProof::new)
+		}
+	}
+
 	impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
 		fn chain_id() -> u64 {
 			<Runtime as pallet_evm::Config>::ChainId::get()
@@ -1892,172 +2038,6 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
-		fn validate_transaction(
-			source: TransactionSource,
-			tx: <Block as BlockT>::Extrinsic,
-			block_hash: <Block as BlockT>::Hash,
-		) -> TransactionValidity {
-			Executive::validate_transaction(source, tx, block_hash)
-		}
-	}
-
-	impl sp_offchain::OffchainWorkerApi<Block> for Runtime {
-		fn offchain_worker(header: &<Block as BlockT>::Header) {
-			Executive::offchain_worker(header)
-		}
-	}
-
-	impl sp_session::SessionKeys<Block> for Runtime {
-		fn decode_session_keys(
-			encoded: Vec<u8>,
-		) -> Option<Vec<(Vec<u8>, KeyTypeId)>> {
-			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
-		}
-
-		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-			opaque::SessionKeys::generate(seed)
-		}
-	}
-
-	impl sp_consensus_babe::BabeApi<Block> for Runtime {
-		fn configuration() -> sp_consensus_babe::BabeConfiguration {
-			let epoch_config = Babe::epoch_config().unwrap_or(BABE_GENESIS_EPOCH_CONFIG);
-			sp_consensus_babe::BabeConfiguration {
-				slot_duration: Babe::slot_duration(),
-				epoch_length: EpochDuration::get(),
-				c: epoch_config.c,
-				authorities: Babe::authorities().to_vec(),
-				randomness: Babe::randomness(),
-				allowed_slots: epoch_config.allowed_slots,
-			}
-		}
-
-		fn current_epoch_start() -> sp_consensus_babe::Slot {
-			Babe::current_epoch_start()
-		}
-
-		fn current_epoch() -> sp_consensus_babe::Epoch {
-			Babe::current_epoch()
-		}
-
-		fn next_epoch() -> sp_consensus_babe::Epoch {
-			Babe::next_epoch()
-		}
-
-		fn generate_key_ownership_proof(
-			_slot: sp_consensus_babe::Slot,
-			authority_id: sp_consensus_babe::AuthorityId,
-		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
-			use parity_scale_codec::Encode;
-
-			Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
-				.map(|p| p.encode())
-				.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
-		}
-
-		fn submit_report_equivocation_unsigned_extrinsic(
-			equivocation_proof: sp_consensus_babe::EquivocationProof<<Block as BlockT>::Header>,
-			key_owner_proof: sp_consensus_babe::OpaqueKeyOwnershipProof,
-		) -> Option<()> {
-			let key_owner_proof = key_owner_proof.decode()?;
-
-			Babe::submit_unsigned_equivocation_report(
-				equivocation_proof,
-				key_owner_proof,
-			)
-		}
-	}
-
-	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
-		fn account_nonce(account: AccountId) -> Nonce {
-			System::account_nonce(account)
-		}
-	}
-
-	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<
-		Block,
-		Balance,
-	> for Runtime {
-		fn query_info(uxt: <Block as BlockT>::Extrinsic, len: u32) -> RuntimeDispatchInfo<Balance> {
-			TransactionPayment::query_info(uxt, len)
-		}
-		fn query_fee_details(uxt: <Block as BlockT>::Extrinsic, len: u32) -> FeeDetails<Balance> {
-			TransactionPayment::query_fee_details(uxt, len)
-		}
-		fn query_weight_to_fee(weight: Weight) -> Balance {
-			TransactionPayment::weight_to_fee(weight)
-		}
-		fn query_length_to_fee(length: u32) -> Balance {
-			TransactionPayment::length_to_fee(length)
-		}
-	}
-
-	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId, AssetId> for Runtime {
-		fn query_services_with_blueprints_by_operator(
-			operator: AccountId,
-		) -> Result<
-			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>>,
-			sp_runtime::DispatchError,
-		> {
-			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
-		}
-
-		fn query_service_requests_with_blueprints_by_operator(
-			operator: AccountId,
-		) -> Result<
-			Vec<(u64, ServiceRequest<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>)>,
-			sp_runtime::DispatchError,
-		> {
-			Services::service_requests_with_blueprints_by_operator(operator).map_err(Into::into)
-		}
-	}
-
-	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
-		fn query_user_rewards(
-			account_id: AccountId,
-			asset_id: tangle_primitives::services::Asset<AssetId>,
-		) -> Result<Balance, sp_runtime::DispatchError> {
-			Rewards::calculate_rewards(&account_id, asset_id)
-		}
-	}
-
-	impl fg_primitives::GrandpaApi<Block> for Runtime {
-		fn grandpa_authorities() -> GrandpaAuthorityList {
-			Grandpa::grandpa_authorities()
-		}
-
-		fn current_set_id() -> fg_primitives::SetId {
-			Grandpa::current_set_id()
-		}
-
-		fn submit_report_equivocation_unsigned_extrinsic(
-			equivocation_proof: fg_primitives::EquivocationProof<
-				<Block as BlockT>::Hash,
-				NumberFor<Block>,
-			>,
-			key_owner_proof: fg_primitives::OpaqueKeyOwnershipProof,
-		) -> Option<()> {
-			let key_owner_proof = key_owner_proof.decode()?;
-
-			Grandpa::submit_unsigned_equivocation_report(
-				equivocation_proof,
-				key_owner_proof,
-			)
-		}
-
-		fn generate_key_ownership_proof(
-			_set_id: fg_primitives::SetId,
-			authority_id: GrandpaId,
-		) -> Option<fg_primitives::OpaqueKeyOwnershipProof> {
-			use parity_scale_codec::Encode;
-
-			Historical::prove((fg_primitives::KEY_TYPE, authority_id))
-				.map(|p| p.encode())
-				.map(fg_primitives::OpaqueKeyOwnershipProof::new)
-		}
-	}
-
 	impl rpc_primitives_debug::DebugRuntimeApi<Block> for Runtime {
 		fn trace_transaction(
 			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
@@ -2168,37 +2148,14 @@ impl_runtime_apis! {
 					let validate = true;
 					let without_base_extrinsic_weight = true;
 
-
-					// Estimated encoded transaction size must be based on the heaviest transaction
-					// type (EIP1559Transaction) to be compatible with all transaction types.
-					let mut estimated_transaction_len = data.len() +
-					// pallet ethereum index: 1
-					// transact call index: 1
-					// Transaction enum variant: 1
-					// chain_id 8 bytes
-					// nonce: 32
-					// max_priority_fee_per_gas: 32
-					// max_fee_per_gas: 32
-					// gas_limit: 32
-					// action: 21 (enum varianrt + call address)
-					// value: 32
-					// access_list: 1 (empty vec size)
-					// 65 bytes signature
-					258;
-
-					if access_list.is_some() {
-						estimated_transaction_len += access_list.encoded_size();
-					}
-
 					let gas_limit = gas_limit.min(u64::MAX.into()).low_u64();
-
 					let (weight_limit, proof_size_base_cost) =
 						match <Runtime as pallet_evm::Config>::GasWeightMapping::gas_to_weight(
 							gas_limit,
 							without_base_extrinsic_weight
 						) {
 							weight_limit if weight_limit.proof_size() > 0 => {
-								(Some(weight_limit), Some(estimated_transaction_len as u64))
+								(Some(weight_limit), Some(0))
 							}
 							_ => (None, None),
 						};
@@ -2220,6 +2177,7 @@ impl_runtime_apis! {
 						<Runtime as pallet_evm::Config>::config(),
 					);
 				});
+
 				Ok(())
 			}
 			#[cfg(not(feature = "evm-tracing"))]
@@ -2253,57 +2211,23 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
-		fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
-			build_state::<RuntimeGenesisConfig>(config)
+	impl pallet_services_rpc_runtime_api::ServicesApi<Block, PalletServicesConstraints, AccountId, AssetId> for Runtime {
+		fn query_services_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<RpcServicesWithBlueprint<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>>,
+			sp_runtime::DispatchError,
+		> {
+			Services::services_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
 
-		fn get_preset(id: &Option<PresetId>) -> Option<Vec<u8>> {
-			get_preset::<RuntimeGenesisConfig>(id, |_| None)
-		}
-
-		fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
-			vec![]
-		}
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	impl frame_benchmarking::Benchmark<Block> for Runtime {
-		fn benchmark_metadata(extra: bool) -> (
-			Vec<frame_benchmarking::BenchmarkList>,
-			Vec<frame_support::traits::StorageInfo>,
-		) {
-			use frame_benchmarking::{baseline, Benchmarking, BenchmarkList};
-			use frame_support::traits::StorageInfoTrait;
-			use frame_system_benchmarking::Pallet as SystemBench;
-			use baseline::Pallet as BaselineBench;
-
-			let mut list = Vec::<BenchmarkList>::new();
-			list_benchmarks!(list, extra);
-
-			let storage_info = AllPalletsWithSystem::storage_info();
-
-			(list, storage_info)
-		}
-
-		fn dispatch_benchmark(
-			config: frame_benchmarking::BenchmarkConfig
-		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use frame_benchmarking::{baseline, Benchmarking, BenchmarkBatch};
-			use sp_storage::TrackedStorageKey;
-			use frame_system_benchmarking::Pallet as SystemBench;
-			use baseline::Pallet as BaselineBench;
-			impl frame_system_benchmarking::Config for Runtime {}
-			impl baseline::Config for Runtime {}
-
-			use frame_support::traits::WhitelistedStorageKeys;
-			let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();
-
-			let mut batches = Vec::<BenchmarkBatch>::new();
-			let params = (&config, &whitelist);
-			add_benchmarks!(params, batches);
-
-			Ok(batches)
+		fn query_service_requests_with_blueprints_by_operator(
+			operator: AccountId,
+		) -> Result<
+			Vec<(u64, ServiceRequest<PalletServicesConstraints, AccountId, BlockNumberOf<Block>, AssetId>)>,
+			sp_runtime::DispatchError,
+		> {
+			Services::service_requests_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
 	}
 }
