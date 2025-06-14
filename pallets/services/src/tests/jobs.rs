@@ -17,7 +17,6 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_core::{ByteArray, bounded_vec, crypto::KeyTypeId};
-use sp_runtime::traits::{BlakeTwo256, Hash};
 use tangle_primitives::services::PricingModel;
 
 #[test]

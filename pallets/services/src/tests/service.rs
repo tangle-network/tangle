@@ -17,7 +17,6 @@
 use super::*;
 use frame_support::{assert_err, assert_ok};
 use sp_core::U256;
-use sp_runtime::traits::{BlakeTwo256, Hash};
 
 #[test]
 fn request_service() {
@@ -568,8 +567,6 @@ fn test_service_creation_dynamic_max_operators() {
 			operators.push(operator);
 		}
 
-		let eve = mock_pub_key(EVE);
-
 		// Try to create service with exactly 10 operators - should succeed
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(alice.clone()),
@@ -654,8 +651,6 @@ fn test_service_creation_fixed_min_operators() {
 			Some("https://example.com/rpc")
 		));
 
-		let eve = mock_pub_key(EVE);
-
 		// Try to create service with zero operators - should fail
 		assert_err!(
 			Services::request(
@@ -738,7 +733,6 @@ fn test_service_creation_invalid_operators() {
 
 		// Create an unregistered operator
 		let unregistered = mock_pub_key(CHARLIE);
-		let eve = mock_pub_key(EVE);
 
 		// Try to create service with an unregistered operator - should fail
 		assert_err!(
@@ -796,8 +790,6 @@ fn test_service_creation_duplicate_operators() {
 			1000,
 			Some("https://example.com/rpc")
 		));
-
-		let eve = mock_pub_key(EVE);
 
 		// Try to create service with duplicate operators - should fail
 		assert_err!(
@@ -858,8 +850,6 @@ fn test_service_creation_inactive_operators() {
 
 		// Deactivate one operator
 		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(charlie.clone())));
-
-		let eve = mock_pub_key(EVE);
 
 		// Try to create service with an inactive operator - should fail
 		assert_err!(
@@ -944,7 +934,6 @@ fn test_termination_with_partial_approvals() {
 		));
 
 		// Create service request
-		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(alice.clone()),
 			None,
@@ -1027,7 +1016,6 @@ fn test_operator_offline_during_active_service() {
 		));
 
 		// Create service
-		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(alice.clone()),
 			None,

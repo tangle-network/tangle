@@ -15,11 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{assert_err, assert_ok, traits::Get};
-use sp_runtime::{
-	DispatchError, Percent,
-	traits::{BlakeTwo256, Hash},
-};
+use frame_support::{assert_err, assert_ok};
+use sp_runtime::{DispatchError, Percent};
 use tangle_primitives::services::Asset;
 
 #[test]

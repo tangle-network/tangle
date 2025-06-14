@@ -852,12 +852,14 @@ macro_rules! evm_log {
 
 /// Asserts that the EVM logs are as expected.
 #[track_caller]
+#[allow(dead_code)]
 pub fn assert_evm_logs(expected: &[fp_evm::Log]) {
 	assert_evm_events_contains(expected.iter().cloned().collect())
 }
 
 /// Asserts that the EVM events are as expected.
 #[track_caller]
+#[allow(dead_code)]
 fn assert_evm_events_contains(expected: Vec<fp_evm::Log>) {
 	let actual: Vec<fp_evm::Log> = System::events()
 		.iter()

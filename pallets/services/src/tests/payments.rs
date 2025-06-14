@@ -17,10 +17,7 @@
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::ConstU128};
 use sp_core::{H160, U256};
-use sp_runtime::{
-	TokenError,
-	traits::{BlakeTwo256, Hash},
-};
+use sp_runtime::TokenError;
 use tangle_primitives::services::PricingModel;
 
 #[test]

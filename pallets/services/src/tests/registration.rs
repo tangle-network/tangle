@@ -16,7 +16,6 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_runtime::traits::{BlakeTwo256, Hash};
 use tangle_primitives::services::BoundedString;
 
 #[test]

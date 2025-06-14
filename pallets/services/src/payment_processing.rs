@@ -164,6 +164,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Process subscription payment for a job
+	#[allow(clippy::too_many_arguments)]
 	pub fn process_job_subscription_payment(
 		service_id: u64,
 		job_index: u8,

@@ -16,10 +16,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_runtime::{
-	Percent,
-	traits::{BlakeTwo256, Hash},
-};
+use sp_runtime::Percent;
 use sp_staking::StakingAccount;
 use tangle_primitives::services::BoundedString;
 

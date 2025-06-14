@@ -16,7 +16,6 @@
 
 use super::*;
 use frame_support::assert_ok;
-use sp_runtime::traits::{BlakeTwo256, Hash};
 use tangle_primitives::services::PricingModel;
 
 #[test]
@@ -45,7 +44,6 @@ fn test_hooks() {
 			Some("https://example.com/rpc")
 		));
 
-		let eve = mock_pub_key(EVE);
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(alice.clone()),
 			None,
