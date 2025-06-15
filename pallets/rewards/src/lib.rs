@@ -81,7 +81,11 @@ pub use weights::*;
 pub mod migrations;
 
 use sp_std::vec::Vec;
-use tangle_primitives::BlueprintId;
+use tangle_primitives::{
+	BlueprintId,
+	services::types::{PricingModel, ServiceId},
+	types::rewards::AssetType,
+};
 
 /// The pallet's account ID.
 #[frame_support::pallet]
@@ -90,11 +94,14 @@ pub mod pallet {
 	use frame_support::{
 		PalletId,
 		pallet_prelude::*,
-		traits::{Currency, LockableCurrency, ReservableCurrency},
+		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
 	};
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::{Perbill, traits::AccountIdConversion};
-	use tangle_primitives::rewards::{AssetType, LockMultiplier};
+	use sp_runtime::{
+		Perbill,
+		traits::{AccountIdConversion, Saturating, Zero},
+	};
+	use tangle_primitives::rewards::LockMultiplier;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -162,6 +169,10 @@ pub mod pallet {
 
 		/// The origin that is allowed to set vault metadata.
 		type VaultMetadataOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The maximum number of pending reward entries an operator can have.
+		#[pallet::constant]
+		type MaxPendingRewardsPerOperator: Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -265,6 +276,18 @@ pub mod pallet {
 	pub type VaultMetadataStore<T: Config> =
 		StorageMap<_, Blake2_128Concat, T::VaultId, VaultMetadata<T>, OptionQuery>;
 
+	/// Storage map from Operator AccountId to a list of pending rewards.
+	/// Each reward entry is a tuple of (ServiceId, Amount).
+	#[pallet::storage]
+	#[pallet::getter(fn pending_operator_rewards)]
+	pub type PendingOperatorRewards<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId, // Operator AccountId
+		BoundedVec<(ServiceId, BalanceOf<T>), T::MaxPendingRewardsPerOperator>,
+		ValueQuery,
+	>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -312,6 +335,10 @@ pub mod pallet {
 		},
 		/// Metadata for a vault was removed.
 		VaultMetadataRemoved { vault_id: T::VaultId },
+		/// Reward recorded
+		RewardRecorded { operator: T::AccountId, service_id: ServiceId, amount: BalanceOf<T> },
+		/// Operator rewards claimed
+		OperatorRewardsClaimed { operator: T::AccountId, amount: BalanceOf<T> },
 	}
 
 	#[pallet::error]
@@ -370,54 +397,18 @@ pub mod pallet {
 		LogoTooLong,
 		/// Vault metadata not found for the given vault ID.
 		VaultMetadataNotFound,
-	}
-
-	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config> {
-		/// The number of blocks used for APY calculation
-		pub apy_blocks: BlockNumberFor<T>,
-		/// Number of blocks after which decay starts
-		pub decay_start_period: BlockNumberFor<T>,
-		/// Per-block decay rate in basis points
-		pub decay_rate: Perbill,
-	}
-
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> Self {
-			Self {
-				// Default to 1 year worth of blocks (assuming 6s block time)
-				apy_blocks: BlockNumberFor::<T>::from(5_256_000u32),
-				// Default to 30 days worth of blocks
-				decay_start_period: BlockNumberFor::<T>::from(432000u32),
-				// Default to 1% per block
-				decay_rate: Perbill::from_percent(1),
-			}
-		}
-	}
-
-	#[pallet::genesis_build]
-	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
-		fn build(&self) {
-			ApyBlocks::<T>::put(self.apy_blocks);
-			DecayStartPeriod::<T>::put(self.decay_start_period);
-			DecayRate::<T>::put(self.decay_rate);
-		}
+		/// Operator has no pending rewards to claim.
+		NoRewardsToClaim,
+		/// An arithmetic operation resulted in an overflow.
+		ArithmeticOverflow,
+		/// Failed to transfer funds.
+		TransferFailed,
+		/// Operator has too many pending rewards.
+		TooManyPendingRewards,
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Claim rewards for a specific asset and reward type
-		#[pallet::call_index(1)]
-		#[pallet::weight(<T as Config>::WeightInfo::claim_rewards())]
-		pub fn claim_rewards(origin: OriginFor<T>, asset: Asset<T::AssetId>) -> DispatchResult {
-			let who = ensure_signed(origin)?;
-
-			// calculate and payout rewards
-			Self::calculate_and_payout_rewards(&who, asset)?;
-
-			Ok(())
-		}
-
 		/// Claim rewards for another account
 		///
 		/// The dispatch origin must be signed.
@@ -662,12 +653,88 @@ pub mod pallet {
 			Self::deposit_event(Event::VaultMetadataRemoved { vault_id });
 			Ok(())
 		}
+
+		/// Allows an operator to claim all their currently pending rewards.
+		#[pallet::call_index(10)]
+		#[pallet::weight(T::DbWeight::get().reads_writes(1, 1))]
+		pub fn claim_rewards(origin: OriginFor<T>) -> DispatchResult {
+			let operator = ensure_signed(origin)?;
+
+			// Retrieve and clear pending rewards for the operator.
+			let pending_rewards = PendingOperatorRewards::<T>::take(&operator);
+			ensure!(!pending_rewards.is_empty(), Error::<T>::NoRewardsToClaim);
+
+			// Calculate the total amount to be claimed.
+			let mut total_reward = BalanceOf::<T>::zero();
+			for (_, amount) in pending_rewards.iter() {
+				total_reward = total_reward.saturating_add(*amount);
+			}
+
+			// Transfer the total reward from the pallet account to the operator.
+			T::Currency::transfer(
+				&Self::account_id(),
+				&operator,
+				total_reward,
+				ExistenceRequirement::KeepAlive, // Or AllowDeath depending on requirements
+			)
+			.map_err(|_| Error::<T>::TransferFailed)?;
+
+			// Emit an event.
+			Self::deposit_event(Event::OperatorRewardsClaimed { operator, amount: total_reward });
+
+			Ok(())
+		}
 	}
 
 	impl<T: Config> Pallet<T> {
-		/// The account ID of the rewards pot.
+		/// The account ID of the Rewards Pallet.
 		pub fn account_id() -> T::AccountId {
 			T::PalletId::get().into_account_truncating()
+		}
+	}
+
+	impl<T: Config> tangle_primitives::traits::RewardRecorder<T::AccountId, ServiceId, BalanceOf<T>>
+		for Pallet<T>
+	{
+		type PricingModel = PricingModel<BlockNumberFor<T>, BalanceOf<T>>;
+
+		fn record_reward(
+			operator: &T::AccountId,
+			service_id: ServiceId,
+			amount: BalanceOf<T>,
+			_model: &Self::PricingModel, // Model might be used later
+		) -> DispatchResult {
+			if amount == BalanceOf::<T>::zero() {
+				return Ok(()); // No need to record zero rewards
+			}
+
+			// Attempt to append the new reward.
+			// This handles the BoundedVec limit implicitly.
+			let result = PendingOperatorRewards::<T>::try_mutate(operator, |rewards| {
+				rewards.try_push((service_id, amount))
+			});
+
+			match result {
+				Ok(_) => {
+					// Emit event only if successful
+					Self::deposit_event(Event::RewardRecorded {
+						operator: operator.clone(),
+						service_id,
+						amount,
+					});
+					Ok(())
+				},
+				Err(_) => {
+					// Log an error or handle the case where the operator has too many pending
+					// rewards. For now, we simply don't record the reward if the limit is
+					// reached. Optionally, emit a specific event or error.
+					log::warn!(
+						"Failed to record reward for operator {:?}: Too many pending rewards.",
+						operator
+					);
+					Ok(())
+				},
+			}
 		}
 	}
 }

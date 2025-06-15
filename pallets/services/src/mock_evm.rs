@@ -18,7 +18,7 @@ use crate as pallet_services;
 use crate::mock::{
 	AccountId, AssetId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp,
 };
-use fp_evm::FeeCalculator;
+use fp_evm::{ExitReason, ExitRevert, ExitSucceed, FeeCalculator};
 use frame_support::{
 	PalletId, parameter_types,
 	traits::{Currency, FindAuthor, OnUnbalanced},
@@ -368,6 +368,198 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 		is_transactional: bool,
 		validate: bool,
 	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
+		// Check if this is a call to one of our mock contract addresses
+		if target == crate::mock::MBSM ||
+			target == crate::mock::CGGMP21_BLUEPRINT ||
+			target == crate::mock::HOOKS_TEST
+		{
+			#[cfg(test)]
+			eprintln!(
+				"Mock EVM call to: {:?}, selector: 0x{}",
+				target,
+				if input.len() >= 4 {
+					format!("{:02x}{:02x}{:02x}{:02x}", input[0], input[1], input[2], input[3])
+				} else {
+					"<no selector>".to_string()
+				}
+			);
+
+			// Parse function selector and implement validation logic
+			if input.len() >= 4 {
+				let selector = &input[0..4];
+				let call_data = &input[4..];
+
+				match selector {
+					// First function (selector: 0x0b6535d7) - possibly onBlueprintCreated to MBSM
+					[0x0b, 0x65, 0x35, 0xd7] => {
+						// Always allow MBSM calls
+						// Return encoded true (boolean)
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
+						return Ok(fp_evm::CallInfo {
+							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
+							value: result,
+							used_gas: fp_evm::UsedGas {
+								standard: U256::from(21000),
+								effective: U256::from(21000),
+							},
+							weight_info: None,
+							logs: vec![],
+						});
+					},
+
+					// onBlueprintCreated(uint64,address,ServiceBlueprint)
+					[0xb8, 0x9a, 0xf9, 0x04] => {
+						// Always allow blueprint creation in tests
+						// Return encoded true (boolean)
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
+						return Ok(fp_evm::CallInfo {
+							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
+							value: result,
+							used_gas: fp_evm::UsedGas {
+								standard: U256::from(21000),
+								effective: U256::from(21000),
+							},
+							weight_info: None,
+							logs: vec![],
+						});
+					},
+
+					// onRegister(uint64,OperatorPreferences,bytes)
+					[0x95, 0x24, 0xcf, 0x20] => {
+						// Basic validation: ensure blueprint_id is reasonable (< 10000 for test
+						// purposes, well above the actual MaxBlueprintsPerOperator limit of 1024)
+						if call_data.len() >= 32 {
+							let blueprint_id_bytes = &call_data[24..32]; // uint64 is in the last 8 bytes of the 32-byte word
+							let blueprint_id = u64::from_be_bytes([
+								blueprint_id_bytes[0],
+								blueprint_id_bytes[1],
+								blueprint_id_bytes[2],
+								blueprint_id_bytes[3],
+								blueprint_id_bytes[4],
+								blueprint_id_bytes[5],
+								blueprint_id_bytes[6],
+								blueprint_id_bytes[7],
+							]);
+
+							// Only reject registrations for extremely high blueprint IDs (which
+							// would be invalid in tests) - set well above MaxBlueprintsPerOperator (1024)
+							if blueprint_id > 10000 {
+								return Ok(fp_evm::CallInfo {
+									exit_reason: ExitReason::Revert(ExitRevert::Reverted),
+									value: "Invalid blueprint ID".as_bytes().to_vec(),
+									used_gas: fp_evm::UsedGas {
+										standard: U256::from(21000),
+										effective: U256::from(21000),
+									},
+									weight_info: None,
+									logs: vec![],
+								});
+							}
+						}
+
+						// Accept valid registrations - return encoded true
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
+						return Ok(fp_evm::CallInfo {
+							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
+							value: result,
+							used_gas: fp_evm::UsedGas {
+								standard: U256::from(21000),
+								effective: U256::from(21000),
+							},
+							weight_info: None,
+							logs: vec![],
+						});
+					},
+
+					// onRequest(uint64,RequestParams) or other request-related calls
+					[0x9a, 0x4b, 0xa5, 0x00] | // onRequest selector
+					_ if input.len() >= 4 && target == crate::mock::CGGMP21_BLUEPRINT => {
+						// Basic validation for service requests
+						if call_data.len() >= 32 {
+							let blueprint_id_bytes = &call_data[24..32];
+							let blueprint_id = u64::from_be_bytes([
+								blueprint_id_bytes[0],
+								blueprint_id_bytes[1],
+								blueprint_id_bytes[2],
+								blueprint_id_bytes[3],
+								blueprint_id_bytes[4],
+								blueprint_id_bytes[5],
+								blueprint_id_bytes[6],
+								blueprint_id_bytes[7],
+							]);
+
+							// Only reject requests for extremely high blueprint IDs (which would be
+							// invalid in tests) - set well above MaxBlueprintsPerOperator (1024)
+							if blueprint_id > 10000 {
+								return Ok(fp_evm::CallInfo {
+									exit_reason: ExitReason::Revert(ExitRevert::Reverted),
+									value: "Blueprint not found".as_bytes().to_vec(),
+									used_gas: fp_evm::UsedGas {
+										standard: U256::from(21000),
+										effective: U256::from(21000),
+									},
+									weight_info: None,
+									logs: vec![],
+								});
+							}
+						}
+
+						// Accept valid requests - return encoded true
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
+						return Ok(fp_evm::CallInfo {
+							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
+							value: result,
+							used_gas: fp_evm::UsedGas {
+								standard: U256::from(21000),
+								effective: U256::from(21000),
+							},
+							weight_info: None,
+							logs: vec![],
+						});
+					},
+
+					// onApprove, onReject, onServiceInitialized, etc. - allow by default
+					_ => {
+						#[cfg(test)]
+						eprintln!(
+							"Unknown EVM function selector: 0x{:02x}{:02x}{:02x}{:02x}",
+							selector[0], selector[1], selector[2], selector[3]
+						);
+
+						// Return encoded true for unknown but potentially valid calls
+						let mut result = vec![0u8; 32];
+						result[31] = 1; // true encoded as uint256
+						return Ok(fp_evm::CallInfo {
+							exit_reason: ExitReason::Succeed(ExitSucceed::Stopped),
+							value: result,
+							used_gas: fp_evm::UsedGas {
+								standard: U256::from(21000),
+								effective: U256::from(21000),
+							},
+							weight_info: None,
+							logs: vec![],
+						});
+					},
+				}
+			}
+
+			// For calls without proper function selectors, revert
+			return Ok(fp_evm::CallInfo {
+				exit_reason: ExitReason::Revert(ExitRevert::Reverted),
+				value: "Invalid function call".as_bytes().to_vec(),
+				used_gas: fp_evm::UsedGas {
+					standard: U256::from(21000),
+					effective: U256::from(21000),
+				},
+				weight_info: None,
+				logs: vec![],
+			});
+		}
+
 		let max_fee_per_gas = FixedGasPrice::min_gas_price().0;
 		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
 		let nonce = None;

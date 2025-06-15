@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{services::Asset, types::rewards::LockMultiplier};
-use sp_runtime::traits::Zero;
+use sp_runtime::{DispatchResult, traits::Zero};
 
 /// Trait for managing rewards in the Tangle network.
 /// This trait provides functionality to record deposits, withdrawals, and service rewards,
@@ -122,5 +122,53 @@ where
 
 	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(Balance::zero())
+	}
+}
+
+/// Defines the interface for managing reward distributions and contributions.
+pub trait RewardDistributor<AccountId, Balance> {
+	fn distribute_reward(operator: &AccountId, amount: Balance) -> DispatchResult;
+}
+
+/// A trait for recording rewards for services.
+///
+/// This trait is intended to be implemented by a rewards management pallet,
+/// allowing other pallets (like a services pallet) to record that a reward
+/// should be credited to an operator for a specific service.
+pub trait RewardRecorder<AccountId, ServiceId, Balance> {
+	/// The type of pricing model associated with the reward.
+	type PricingModel;
+
+	/// Records a reward for a given operator and service.
+	///
+	/// This function should handle the accumulation of rewards, which can then
+	/// be claimed by the operator at a later time.
+	///
+	/// # Parameters
+	/// - `operator`: The account ID of the operator who earned the reward.
+	/// - `service_id`: The unique identifier of the service for which the reward is being recorded.
+	/// - `amount`: The amount of the reward to be recorded.
+	/// - `model`: A reference to the pricing model that determined this reward.
+	fn record_reward(
+		operator: &AccountId,
+		service_id: ServiceId,
+		amount: Balance,
+		model: &Self::PricingModel,
+	) -> DispatchResult;
+}
+
+/// A no-operation implementation of `RewardRecorder`.
+/// This can be used in runtime configurations where reward recording is not needed
+/// or handled by a different mechanism.
+impl<AccountId, ServiceId, Balance> RewardRecorder<AccountId, ServiceId, Balance> for () {
+	type PricingModel = ();
+
+	fn record_reward(
+		_operator: &AccountId,
+		_service_id: ServiceId,
+		_amount: Balance,
+		_model: &Self::PricingModel,
+	) -> DispatchResult {
+		Ok(())
 	}
 }
