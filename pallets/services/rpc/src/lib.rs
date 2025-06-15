@@ -67,7 +67,7 @@ where
 		+ TypeInfo,
 	AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 {
-	// /// Query services with blueprints by operator
+	/// Query services with blueprints by operator
 	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
 	fn query_services_with_blueprints_by_operator(
 		&self,
@@ -167,10 +167,12 @@ impl From<Error> for i32 {
 
 fn custom_error_into_rpc_err(err: Error) -> ErrorObjectOwned {
 	match err {
-		Error::RuntimeError(e) =>
-			ErrorObject::owned(RUNTIME_ERROR, "Runtime error", Some(format!("{e}"))),
-		Error::DecodeError =>
-			ErrorObject::owned(2, "Decode error", Some("Transaction was not decodable")),
+		Error::RuntimeError(e) => {
+			ErrorObject::owned(RUNTIME_ERROR, "Runtime error", Some(format!("{e}")))
+		},
+		Error::DecodeError => {
+			ErrorObject::owned(2, "Decode error", Some("Transaction was not decodable"))
+		},
 		Error::CustomDispatchError(msg) => ErrorObject::owned(3, "Dispatch error", Some(msg)),
 	}
 }
