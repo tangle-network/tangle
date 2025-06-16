@@ -13,53 +13,55 @@ jobs:
       matrix:
         chain: ["testnet", "mainnet"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-      - name: Srtool build
-        if: matrix.chain == 'mainnet'
+      - name: Run Srtool build
         id: srtool_build
-        uses: chevdor/srtool-actions@v0.8.0
-        with:
-          chain: ${{ matrix.chain }}
-          runtime_dir: runtime/${{ matrix.chain }}
-          package: tangle-runtime
-        
-      - name: Srtool build testnet
-        if: matrix.chain == 'testnet'
-        uses: chevdor/srtool-actions@v0.8.0
-        with:
-          chain: ${{ matrix.chain }}
-          runtime_dir: runtime/${{ matrix.chain }}
-          package: tangle-testnet-runtime
+        shell: bash
+        run: |
+          git config --global --add safe.directory /build
+
+          if [ "${{ matrix.chain }}" == "mainnet" ]; then
+            PACKAGE="tangle-runtime"
+          else
+            PACKAGE="tangle-testnet-runtime"
+          fi
+
+          docker run --user $(id -u):$(id -g) \
+            -e PACKAGE=$PACKAGE \
+            -e RUNTIME_DIR=runtime/${{ matrix.chain }} \
+            -e BUILD_OPTS="--features on-chain-release-build" \
+            -v $(pwd):/build \
+            paritytech/srtool:1.84.1 build
 
       - name: Summary
         run: |
-          echo '${{ steps.srtool_build.outputs.json }}' | jq . > ${{ matrix.chain }}-srtool-digest.json
+          if [ "${{ matrix.chain }}" == "mainnet" ]; then
+            WASM_PATH="runtime/mainnet/target/srtool/release/wbuild/tangle-runtime/tangle_runtime.compact.wasm"
+            WASM_COMPRESSED_PATH="runtime/mainnet/target/srtool/release/wbuild/tangle-runtime/tangle_runtime.compact.compressed.wasm"
+          else
+            WASM_PATH="runtime/testnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_testnet_runtime.compact.wasm"
+            WASM_COMPRESSED_PATH="runtime/testnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_testnet_runtime.compact.compressed.wasm"
+          fi
+
+          echo "wasm=$WASM_PATH" >> "$GITHUB_ENV"
+          echo "wasm_compressed=$WASM_COMPRESSED_PATH" >> "$GITHUB_ENV"
+
+          echo "{\"wasm\":\"$WASM_PATH\",\"wasm_compressed\":\"$WASM_COMPRESSED_PATH\"}" > ${{ matrix.chain }}-srtool-digest.json
           cat ${{ matrix.chain }}-srtool-digest.json
-          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+          echo "Runtime location: $WASM_PATH"
 
           echo Summary:
-          echo - version: ${{ steps.srtool_build.outputs.version }}
-          echo - info: ${{ steps.srtool_build.outputs.info }}
-          echo - prop: ${{ steps.srtool_build.outputs.proposal_hash }}
-          echo - json: ${{ steps.srtool_build.outputs.json }}
+          echo - wasm: $WASM_PATH
+          echo - wasm_compressed: $WASM_COMPRESSED_PATH
 
       - name: Upload ${{ matrix.chain }} wasm to release
-        if: matrix.chain == 'mainnet'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: runtime/mainnet/target/srtool/release/wbuild/tangle-runtime/tangle_runtime.compact.compressed.wasm
-          asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
-          tag: ${{ github.ref }}
-          overwrite: true
-
-      - name: Upload ${{ matrix.chain }} wasm to release
-        if: matrix.chain == 'testnet'
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: runtime/testnet/target/srtool/release/wbuild/tangle-testnet-runtime/tangle_testnet_runtime.compact.compressed.wasm
+          file: ${{ env.wasm_compressed }}
           asset_name: tangle-${{ matrix.chain }}-srtool-compact.compressed.wasm
           tag: ${{ github.ref }}
           overwrite: true
