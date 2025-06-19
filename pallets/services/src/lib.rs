@@ -487,6 +487,12 @@ pub mod module {
 		InvalidJobId,
 		/// Payment has already been processed for this call
 		PaymentAlreadyProcessed,
+		/// Payment calculation overflow
+		PaymentCalculationOverflow,
+		/// Too many subscriptions per user
+		TooManySubscriptions,
+		/// Custom asset transfer failed
+		CustomAssetTransferFailed,
 	}
 
 	#[pallet::event]
@@ -990,6 +996,13 @@ pub mod module {
 		tangle_primitives::services::JobPayment<T::AccountId>,
 		OptionQuery,
 	>;
+
+	/// Tracks subscription count per user to prevent spam
+	/// User -> Subscription Count
+	#[pallet::storage]
+	#[pallet::getter(fn user_subscription_count)]
+	pub type UserSubscriptionCount<T: Config> =
+		StorageMap<_, Identity, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {

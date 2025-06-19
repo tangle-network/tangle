@@ -13,13 +13,13 @@ fn test_subscription_billing_initialization_logic() {
 		let job_index = 0u8;
 		let charlie = mock_pub_key(CHARLIE);
 
-		let rate_per_interval = 100000000000000000u128; // 0.1 ETH
+		let rate_per_interval: u128 = 100000000000000000u128; // 0.1 ETH
 		let interval = 10u64; // 10 blocks
 
 		// Test Case 1: current_block > interval (normal case)
 		let current_block = 15u64;
 
-		// ✅ TEST: Verify proper last_billed initialization for new subscription
+		// Verify proper last_billed initialization for new subscription
 		let billing_key = (service_id, job_index, charlie.clone());
 
 		// Simulate the fixed logic for billing initialization
@@ -56,7 +56,7 @@ fn test_subscription_billing_initialization_logic() {
 		let expected_last_billed_2 = if small_current_block >= interval {
 			small_current_block - interval
 		} else {
-			0u64 // ✅ FIXED: This ensures immediate payment for new subscriptions
+			0u64 // Fixed: This ensures immediate payment for new subscriptions
 		};
 
 		let billing_2 = JobSubscriptionBilling {
@@ -75,7 +75,7 @@ fn test_subscription_billing_initialization_logic() {
 			"For current_block < interval, last_billed should be 0 to ensure immediate payment"
 		);
 
-		// ✅ TEST: Verify payment timing logic
+		// Verify payment timing logic
 		// Case 1: Should trigger payment (enough blocks passed)
 		let blocks_since_last = current_block - stored_billing.last_billed; // 15 - 5 = 10
 		assert!(
@@ -103,7 +103,7 @@ fn test_subscription_billing_timing_logic() {
 
 		let interval = 10u64;
 
-		// ✅ TEST: Subscription billing after interval should work
+		// Subscription billing after interval should work
 		let billing = JobSubscriptionBilling {
 			service_id,
 			job_index,
@@ -124,7 +124,7 @@ fn test_subscription_billing_timing_logic() {
 			"Payment should be triggered when enough blocks have passed"
 		);
 
-		// ✅ TEST: Subscription billing before interval should not work
+		// Subscription billing before interval should not work
 		let early_block = 12u64; // Only 7 blocks later
 		let blocks_since_last_early = early_block - stored_billing.last_billed; // 12 - 5 = 7
 
@@ -146,7 +146,7 @@ fn test_subscription_billing_end_block_logic() {
 
 		let end_block = Some(20u64);
 
-		// ✅ TEST: Billing before end block should work
+		// Billing before end block should work
 		let billing = JobSubscriptionBilling {
 			service_id,
 			job_index,
@@ -163,7 +163,7 @@ fn test_subscription_billing_end_block_logic() {
 
 		assert!(should_process, "Should process payment before end block");
 
-		// ✅ TEST: Billing after end block should not work
+		// Billing after end block should not work
 		let after_end_block = 25u64; // After end block 20
 		let should_not_process =
 			if let Some(end) = end_block { after_end_block <= end } else { true };
@@ -179,7 +179,7 @@ fn test_subscription_billing_authorization_logic() {
 		let alice = mock_pub_key(ALICE);
 		let bob = mock_pub_key(BOB);
 
-		// ✅ TEST: Authorization check - caller must equal payer for direct payments
+		// Authorization check - caller must equal payer for direct payments
 		// This simulates the authorization check in our fixed charge_payment function
 
 		// Case 1: Authorized (caller == payer)
@@ -194,9 +194,9 @@ fn test_subscription_billing_authorization_logic() {
 		let is_unauthorized = caller_unauthorized == payer_unauthorized;
 		assert!(!is_unauthorized, "Payment should NOT be authorized when caller != payer");
 
-		// ✅ TEST: This demonstrates the security fix
+		// This demonstrates the security fix
 		// Before fix: charge_payment only checked balance, not authorization
 		// After fix: charge_payment requires caller authorization
-		println!("✅ Authorization logic verified: caller must equal payer for direct payments");
+		println!("Authorization logic verified: caller must equal payer for direct payments");
 	});
 }

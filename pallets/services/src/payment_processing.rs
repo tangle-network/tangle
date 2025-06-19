@@ -1,12 +1,12 @@
 use crate::{
-	BalanceOf, BlockNumberFor, Config, Error, Instances, JobPayments, JobSubscriptionBillings,
-	Pallet,
+	BalanceOf, BlockNumberFor, Config, Error, JobPayments, JobSubscriptionBillings, Pallet,
+	UserSubscriptionCount,
 };
 use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ReservableCurrency},
+	traits::{Currency, ReservableCurrency, fungibles::Mutate},
 };
 use sp_runtime::traits::{CheckedMul, SaturatedConversion, Saturating, Zero};
 use tangle_primitives::{
@@ -194,8 +194,17 @@ impl<T: Config> Pallet<T> {
 			}
 		}
 
-		// Get or create billing information for this subscription
+		// Check subscription limits for new subscriptions
 		let billing_key = (service_id, job_index, payer.clone());
+		let is_new_subscription = !JobSubscriptionBillings::<T>::contains_key(&billing_key);
+
+		if is_new_subscription {
+			let current_count = UserSubscriptionCount::<T>::get(payer);
+			ensure!(current_count < 100, Error::<T>::TooManySubscriptions); // Max 100 subscriptions per user
+			UserSubscriptionCount::<T>::insert(payer, current_count + 1);
+		}
+
+		// Get or create billing information for this subscription
 		let mut billing = JobSubscriptionBillings::<T>::get(&billing_key).unwrap_or_else(|| {
 			// Set last_billed to a past block so the first payment is due immediately
 			let initial_last_billed = if current_block >= interval {
@@ -219,7 +228,7 @@ impl<T: Config> Pallet<T> {
 				service_id,
 				job_index,
 				subscriber: payer.clone(),
-				last_billed: initial_last_billed, // ✅ FIXED: Now ensures first payment is due
+				last_billed: initial_last_billed, // Fixed: Now ensures first payment is due
 				end_block: maybe_end,
 			}
 		});
@@ -263,7 +272,7 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 			log::debug!(
-				"✅ Processed subscription payment for service {} job {}: {:?} at block {:?}",
+				"Processed subscription payment for service {} job {}: {:?} at block {:?}",
 				service_id,
 				job_index,
 				rate_per_interval,
@@ -271,7 +280,7 @@ impl<T: Config> Pallet<T> {
 			);
 		} else {
 			log::debug!(
-				"⏸️  Subscription payment not due for service {} job {}: {} blocks since last < {} interval",
+				"Subscription payment not due for service {} job {}: {:?} blocks since last < {:?} interval",
 				service_id,
 				job_index,
 				blocks_since_last,
@@ -298,7 +307,7 @@ impl<T: Config> Pallet<T> {
 
 		let total_reward = reward_per_event
 			.checked_mul(&event_count.into())
-			.ok_or(Error::<T>::InvalidRequestInput)?;
+			.ok_or(Error::<T>::PaymentCalculationOverflow)?;
 
 		// Charge the payment with authorization check
 		Self::charge_payment(caller, payer, total_reward)?;
@@ -319,41 +328,57 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Charge payment from a user account with proper authorization checks
-	///
-	/// # Security Note
-	/// This function now requires explicit authorization validation to prevent unauthorized
-	/// payments. The caller must be either the payer themselves or an authorized account that can
-	/// spend on their behalf.
-	///
-	/// # Arguments
-	/// * `caller` - The account initiating the payment transaction (must be authorized)
-	/// * `payer` - The account from which funds will be charged
-	/// * `amount` - The amount to charge
+	fn charge_payment_with_asset(
+		caller: &T::AccountId,
+		payer: &T::AccountId,
+		amount: BalanceOf<T>,
+		asset: &Asset<T::AssetId>,
+	) -> DispatchResult {
+		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
+		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
+
+		match asset {
+			Asset::Custom(asset_id) => {
+				if *asset_id == T::AssetId::default() {
+					// Native currency
+					let free_balance = T::Currency::free_balance(payer);
+					ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+					T::Currency::reserve(payer, amount)?;
+				} else {
+					// Custom asset
+					T::Fungibles::transfer(
+						asset_id.clone(),
+						payer,
+						&Self::pallet_account(),
+						amount,
+						frame_support::traits::tokens::Preservation::Expendable,
+					)
+					.map_err(|_| Error::<T>::CustomAssetTransferFailed)?;
+				}
+			},
+			Asset::Erc20(_) => {
+				// ERC20 handled separately
+				let free_balance = T::Currency::free_balance(payer);
+				ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+				T::Currency::reserve(payer, amount)?;
+			},
+		}
+
+		Ok(())
+	}
+
+	/// Charge payment from a user account with proper authorization checks (native currency)
 	fn charge_payment(
 		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
-		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
-		// For now, we only allow self-payments. In the future, this could be extended
-		// to support authorized spending accounts or delegation mechanisms.
-		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
-
-		// Check sufficient balance
-		let free_balance = T::Currency::free_balance(payer);
-		ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
-
-		// Reserve the payment amount
-		T::Currency::reserve(payer, amount)?;
-
-		log::debug!(
-			"Charged payment of {:?} from account {:?} authorized by {:?}",
-			amount,
+		Self::charge_payment_with_asset(
+			caller,
 			payer,
-			caller
-		);
-
-		Ok(())
+			amount,
+			&Asset::Custom(T::AssetId::default()),
+		)
 	}
 
 	/// Transfer staged payment to the rewards pallet
@@ -372,8 +397,20 @@ impl<T: Config> Pallet<T> {
 						.map_err(|_| Error::<T>::ExpectedAccountId)?;
 					T::Currency::unreserve(&account_id, staging_payment.amount);
 				} else {
-					// Custom asset - would need proper implementation based on fungibles trait
-					log::debug!("Processing custom asset payment for service {}", service_id);
+					// Custom asset - properly handle via fungibles trait
+					let account_id = staging_payment
+						.refund_to
+						.clone()
+						.try_into_account_id()
+						.map_err(|_| Error::<T>::ExpectedAccountId)?;
+					T::Fungibles::transfer(
+						asset_id.clone(),
+						&account_id,
+						&Self::pallet_account(),
+						staging_payment.amount,
+						frame_support::traits::tokens::Preservation::Expendable,
+					)
+					.map_err(|_| Error::<T>::CustomAssetTransferFailed)?;
 				}
 			},
 			Asset::Erc20(_contract_address) => {
@@ -393,64 +430,74 @@ impl<T: Config> Pallet<T> {
 	/// subscriber as both caller and payer for automated billing.
 	pub fn process_subscription_payments_on_block(current_block: BlockNumberFor<T>) -> Weight {
 		let mut total_weight = Weight::zero();
+		let mut processed_count = 0u32;
+		const MAX_SUBSCRIPTIONS_PER_BLOCK: u32 = 50; // Limit processing to prevent spam attacks
 
-		// Iterate through all active services and check for subscription payments
-		for (service_id, _service) in Instances::<T>::iter() {
-			if let Ok((_, blueprint)) = Self::blueprints(_service.blueprint) {
-				for (job_index, job_def) in blueprint.jobs.iter().enumerate() {
-					if let PricingModel::Subscription { rate_per_interval, interval, maybe_end } =
-						&job_def.pricing_model
-					{
-						// Process subscription payments for all subscribers to this job
-						let job_index = job_index as u8;
+		// Iterate through subscription billings directly to avoid nested loops
+		for ((service_id, job_index, subscriber), billing) in JobSubscriptionBillings::<T>::iter() {
+			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
+				break; // Early termination to prevent excessive processing
+			}
 
-						// Convert types for runtime compatibility
-						let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
-						let interval_converted: BlockNumberFor<T> = (*interval).saturated_into();
-						let maybe_end_converted: Option<BlockNumberFor<T>> =
-							maybe_end.map(|end| end.saturated_into());
-
-						// Iterate through all job subscription billings
-						for ((s_id, j_idx, subscriber), billing) in
-							JobSubscriptionBillings::<T>::iter()
+			// Get service and blueprint info
+			if let Ok(service_instance) = Self::services(service_id) {
+				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) {
+					if let Some(job_def) = blueprint.jobs.get(job_index as usize) {
+						if let PricingModel::Subscription {
+							rate_per_interval,
+							interval,
+							maybe_end,
+						} = &job_def.pricing_model
 						{
-							if s_id == service_id && j_idx == job_index {
-								// Check if payment is due
-								let blocks_since_last =
-									current_block.saturating_sub(billing.last_billed);
-								if blocks_since_last >= interval_converted {
-									// Check if subscription hasn't ended
-									if let Some(end_block) = maybe_end_converted {
-										if current_block > end_block {
-											continue;
-										}
-									}
+							// Convert types for runtime compatibility
+							let rate_converted: BalanceOf<T> =
+								(*rate_per_interval).saturated_into();
+							let interval_converted: BlockNumberFor<T> =
+								(*interval).saturated_into();
+							let maybe_end_converted: Option<BlockNumberFor<T>> =
+								maybe_end.map(|end| end.saturated_into());
 
-									// Process payment - subscriber is both caller and payer for
-									// automated billing
-									let _ = Self::process_job_subscription_payment(
-										service_id,
-										job_index,
-										0,           /* call_id not relevant for subscription
-										              * processing */
-										&subscriber, /* subscriber authorizes their own
-										              * automated payment */
-										&subscriber,
-										rate_converted,
-										interval_converted,
-										maybe_end_converted,
-										current_block,
-									);
+							// Check if payment is due
+							let blocks_since_last =
+								current_block.saturating_sub(billing.last_billed);
+							if blocks_since_last >= interval_converted {
+								// Check if subscription hasn't ended
+								if let Some(end_block) = maybe_end_converted {
+									if current_block > end_block {
+										continue;
+									}
 								}
+
+								// Process payment with early termination on failure
+								if Self::process_job_subscription_payment(
+									service_id,
+									job_index,
+									0,           /* call_id not relevant for subscription
+									              * processing */
+									&subscriber, /* subscriber authorizes their own automated
+									              * payment */
+									&subscriber,
+									rate_converted,
+									interval_converted,
+									maybe_end_converted,
+									current_block,
+								)
+								.is_err()
+								{
+									// Early termination on payment failure to prevent further
+									// processing issues
+									break;
+								}
+
+								processed_count += 1;
 							}
 						}
-
-						// Add weight for processing
-						total_weight =
-							total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
 					}
 				}
 			}
+
+			// Add weight for processing
+			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
 		}
 
 		total_weight
