@@ -601,6 +601,46 @@ pub mod module {
 			args: Vec<Field<T::Constraints, T::AccountId>>,
 		},
 
+		/// A PayOnce payment has been processed for a job call.
+		PayOncePaymentProcessed {
+			/// The account that made the payment.
+			payer: T::AccountId,
+			/// The ID of the service.
+			service_id: u64,
+			/// The ID of the job call.
+			call_id: u64,
+			/// The index of the job.
+			job_index: u8,
+			/// The payment amount.
+			amount: BalanceOf<T>,
+		},
+
+		/// A subscription billing cycle has been processed.
+		SubscriptionBillingProcessed {
+			/// The account that was charged.
+			subscriber: T::AccountId,
+			/// The ID of the service.
+			service_id: u64,
+			/// The index of the job.
+			job_index: u8,
+			/// The billing amount.
+			amount: BalanceOf<T>,
+			/// The block number when billing was processed.
+			block_number: BlockNumberFor<T>,
+		},
+
+		/// A reward has been distributed to an operator.
+		RewardDistributed {
+			/// The operator receiving the reward.
+			operator: T::AccountId,
+			/// The ID of the service.
+			service_id: u64,
+			/// The reward amount.
+			amount: BalanceOf<T>,
+			/// The pricing model type that generated this reward.
+			pricing_model: PricingModel<BlockNumberFor<T>, BalanceOf<T>>,
+		},
+
 		/// A job result has been submitted.
 		JobResultSubmitted {
 			/// The account that submitted the job result.
@@ -1524,6 +1564,7 @@ pub mod module {
 
 			JobCalls::<T>::insert(service_id, call_id, job_call);
 			NextJobCallId::<T>::set(call_id.saturating_add(1));
+
 			Self::deposit_event(Event::JobCalled {
 				caller: caller.clone(),
 				service_id,

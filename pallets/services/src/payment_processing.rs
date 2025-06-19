@@ -21,11 +21,12 @@ impl<T: Config> Pallet<T> {
 	/// Process a one-time payment for a service (not job-specific)
 	pub fn process_pay_once_payment(
 		service_id: u64,
+		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
-		// Charge the payment from the payer
-		Self::charge_payment(payer, amount)?;
+		// Charge the payment from the payer with authorization check
+		Self::charge_payment(caller, payer, amount)?;
 
 		// For service-level payments, we can record a generic reward
 		// This would typically be handled by the MBSM or service initialization
@@ -59,6 +60,7 @@ impl<T: Config> Pallet<T> {
 					job_index,
 					call_id,
 					caller,
+					caller,  // caller is both authorizer and payer for job calls
 					amount_converted,
 				)?;
 			},
@@ -72,6 +74,7 @@ impl<T: Config> Pallet<T> {
 					job_index,
 					call_id,
 					caller,
+					caller,  // caller is both authorizer and payer for subscriptions
 					rate_converted,
 					interval_converted,
 					maybe_end_converted,
@@ -85,6 +88,7 @@ impl<T: Config> Pallet<T> {
 					job_index,
 					call_id,
 					caller,
+					caller,  // caller is both authorizer and payer for events
 					reward_converted,
 					1, // Default to 1 event for this job call
 				)?;
@@ -99,6 +103,7 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		job_index: u8,
 		call_id: u64,
+		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,
 	) -> DispatchResult {
@@ -107,8 +112,8 @@ impl<T: Config> Pallet<T> {
 			return Err(Error::<T>::PaymentAlreadyProcessed.into());
 		}
 
-		// Charge the payment from the payer
-		Self::charge_payment(payer, amount)?;
+		// Charge the payment from the payer with authorization check
+		Self::charge_payment(caller, payer, amount)?;
 
 		// Record the payment
 		let payment = JobPayment {
@@ -169,6 +174,7 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		job_index: u8,
 		_call_id: u64,
+		caller: &T::AccountId,
 		payer: &T::AccountId,
 		rate_per_interval: BalanceOf<T>,
 		interval: BlockNumberFor<T>,
@@ -205,8 +211,8 @@ impl<T: Config> Pallet<T> {
 		let payment_due = blocks_since_last >= interval;
 
 		if payment_due {
-			// Process the subscription payment
-			Self::charge_payment(payer, rate_per_interval)?;
+			// Process the subscription payment with authorization check
+			Self::charge_payment(caller, payer, rate_per_interval)?;
 
 			// Update last billed block
 			billing.last_billed = current_block;
@@ -246,6 +252,7 @@ impl<T: Config> Pallet<T> {
 		service_id: u64,
 		job_index: u8,
 		_call_id: u64,
+		caller: &T::AccountId,
 		payer: &T::AccountId,
 		reward_per_event: BalanceOf<T>,
 		event_count: u32,
@@ -257,6 +264,9 @@ impl<T: Config> Pallet<T> {
 		let total_reward = reward_per_event
 			.checked_mul(&event_count.into())
 			.ok_or(Error::<T>::InvalidRequestInput)?;
+
+		// Charge the payment with authorization check
+		Self::charge_payment(caller, payer, total_reward)?;
 
 		// Record the reward with the rewards pallet
 		let runtime_pricing_model = PricingModel::EventDriven { reward_per_event };
@@ -273,14 +283,42 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Charge payment from a user account
-	fn charge_payment(payer: &T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
-		// For now, we'll use the native currency
+	/// Charge payment from a user account with proper authorization checks
+	/// 
+	/// # Security Note
+	/// This function now requires explicit authorization validation to prevent unauthorized payments.
+	/// The caller must be either the payer themselves or an authorized account that can spend on their behalf.
+	/// 
+	/// # Arguments
+	/// * `caller` - The account initiating the payment transaction (must be authorized)
+	/// * `payer` - The account from which funds will be charged
+	/// * `amount` - The amount to charge
+	fn charge_payment(
+		caller: &T::AccountId,
+		payer: &T::AccountId,
+		amount: BalanceOf<T>,
+	) -> DispatchResult {
+		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
+		// For now, we only allow self-payments. In the future, this could be extended
+		// to support authorized spending accounts or delegation mechanisms.
+		ensure!(
+			caller == payer,
+			Error::<T>::InvalidRequestInput
+		);
+
+		// Check sufficient balance
 		let free_balance = T::Currency::free_balance(payer);
 		ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
 
 		// Reserve the payment amount
 		T::Currency::reserve(payer, amount)?;
+
+		log::debug!(
+			"Charged payment of {:?} from account {:?} authorized by {:?}",
+			amount,
+			payer,
+			caller
+		);
 
 		Ok(())
 	}
@@ -315,6 +353,11 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Hook called on every block to process subscription payments
+	/// 
+	/// # Security Note
+	/// This function processes automatic subscription payments. Since these are
+	/// pre-authorized through the service registration process, we use the
+	/// subscriber as both caller and payer for automated billing.
 	pub fn process_subscription_payments_on_block(current_block: BlockNumberFor<T>) -> Weight {
 		let mut total_weight = Weight::zero();
 
@@ -350,11 +393,12 @@ impl<T: Config> Pallet<T> {
 										}
 									}
 
-									// Process payment
+									// Process payment - subscriber is both caller and payer for automated billing
 									let _ = Self::process_job_subscription_payment(
 										service_id,
 										job_index,
 										0, // call_id not relevant for subscription processing
+										&subscriber, // subscriber authorizes their own automated payment
 										&subscriber,
 										rate_converted,
 										interval_converted,
