@@ -2,7 +2,6 @@
 // Verifies that the first payment cycle is not skipped for new subscriptions
 
 use super::*;
-use frame_support::assert_ok;
 use tangle_primitives::services::JobSubscriptionBilling;
 
 #[test]
@@ -13,7 +12,6 @@ fn test_subscription_billing_initialization_logic() {
 		let job_index = 0u8;
 		let charlie = mock_pub_key(CHARLIE);
 
-		let rate_per_interval: u128 = 100000000000000000u128; // 0.1 ETH
 		let interval = 10u64; // 10 blocks
 
 		// Test Case 1: current_block > interval (normal case)
@@ -23,11 +21,7 @@ fn test_subscription_billing_initialization_logic() {
 		let billing_key = (service_id, job_index, charlie.clone());
 
 		// Simulate the fixed logic for billing initialization
-		let expected_last_billed = if current_block >= interval {
-			current_block - interval
-		} else {
-			0u64 // This is the fix - start from 0 when current_block < interval
-		};
+		let expected_last_billed = current_block.saturating_sub(interval);
 
 		// Create and store billing record with fixed initialization
 		let billing = JobSubscriptionBilling {
@@ -53,11 +47,7 @@ fn test_subscription_billing_initialization_logic() {
 		let small_current_block = 5u64; // smaller than interval (10)
 		let billing_key_2 = (service_id + 1, job_index, charlie.clone());
 
-		let expected_last_billed_2 = if small_current_block >= interval {
-			small_current_block - interval
-		} else {
-			0u64 // Fixed: This ensures immediate payment for new subscriptions
-		};
+		let expected_last_billed_2 = small_current_block.saturating_sub(interval);
 
 		let billing_2 = JobSubscriptionBilling {
 			service_id: service_id + 1,
@@ -81,13 +71,6 @@ fn test_subscription_billing_initialization_logic() {
 		assert!(
 			blocks_since_last >= interval,
 			"Payment should be triggered when blocks_since_last >= interval"
-		);
-
-		// Case 2: Should trigger immediate payment for new subscription (current_block < interval)
-		let blocks_since_last_2 = small_current_block - stored_billing_2.last_billed; // 5 - 0 = 5
-		assert!(
-			blocks_since_last_2 >= 0, // Always true for new subscriptions starting from 0
-			"New subscriptions should always trigger immediate payment when last_billed = 0"
 		);
 	});
 }
