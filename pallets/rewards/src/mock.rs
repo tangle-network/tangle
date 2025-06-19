@@ -216,6 +216,7 @@ impl pallet_staking::Config for Runtime {
 
 parameter_types! {
 	pub const ServicesEVMAddress: H160 = H160([0x11; 20]);
+	pub const MaxPendingRewardsPerOperator: u32 = 100;
 }
 
 impl pallet_assets::Config for Runtime {
@@ -263,12 +264,10 @@ impl pallet_rewards::Config for Runtime {
 	type MaxIncentiveCap = MaxIncentiveCap;
 	type MinIncentiveCap = MinIncentiveCap;
 	type MinDepositCap = MinDepositCap;
-	// Add constants for metadata lengths
 	type MaxVaultNameLength = ConstU32<64>;
 	type MaxVaultLogoLength = ConstU32<256>;
-	// Use EnsureSigned for mock origin
 	type VaultMetadataOrigin = frame_system::EnsureSigned<AccountId>;
-
+	type MaxPendingRewardsPerOperator = MaxPendingRewardsPerOperator;
 	type WeightInfo = ();
 }
 

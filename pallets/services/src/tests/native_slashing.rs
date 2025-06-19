@@ -172,7 +172,7 @@ fn test_native_restaking_slash_with_multiple_services() {
 		// Deploy second service
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		let bob = mock_pub_key(BOB);
 		assert_ok!(Services::register(
 			RuntimeOrigin::signed(bob.clone()),
@@ -202,11 +202,14 @@ fn test_native_restaking_slash_with_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		// Approve second service
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
-			get_security_commitment(WETH, 10),
-			get_security_commitment(TNT, 10)
-		],));
+		// Bob approves the request with security commitments (WETH + TNT auto-added by system)
+		let security_commitments =
+			vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			1, // This is the second service request (request ID 1, not service ID 1)
+			security_commitments
+		));
 
 		let delegator = mock_pub_key(CHARLIE);
 		let stake_amount = 1000;

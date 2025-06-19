@@ -1201,6 +1201,14 @@ declare module '@polkadot/api-base/types/events' {
        **/
       IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [vaultId: u32, apy: Perbill, cap: u128], { vaultId: u32, apy: Perbill, cap: u128 }>;
       /**
+       * Operator rewards claimed
+       **/
+      OperatorRewardsClaimed: AugmentedEvent<ApiType, [operator: AccountId32, amount: u128], { operator: AccountId32, amount: u128 }>;
+      /**
+       * Reward recorded
+       **/
+      RewardRecorded: AugmentedEvent<ApiType, [operator: AccountId32, serviceId: u64, amount: u128], { operator: AccountId32, serviceId: u64, amount: u128 }>;
+      /**
        * Rewards have been claimed by an account
        **/
       RewardsClaimed: AugmentedEvent<ApiType, [account: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128], { account: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128 }>;

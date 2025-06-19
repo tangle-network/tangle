@@ -10,7 +10,7 @@ use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
-use sp_std::{marker::PhantomData, vec::Vec};
+use sp_std::{marker::PhantomData, vec, vec::Vec};
 use tangle_primitives::services::{
 	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
 };
@@ -67,7 +67,22 @@ where
 			Decode::decode(&mut &blueprint_data[..])
 				.map_err(|_| revert("Invalid blueprint data"))?;
 
-		let call = pallet_services::Call::<Runtime>::create_blueprint { blueprint };
+		let call = pallet_services::Call::<Runtime>::create_blueprint {
+			metadata: blueprint.metadata.name.as_str().as_bytes().to_vec().try_into().unwrap(),
+			typedef: ServiceBlueprint {
+				metadata: blueprint.metadata.clone(),
+				jobs: blueprint.jobs.clone(),
+				registration_params: blueprint.registration_params.clone(),
+				request_params: blueprint.request_params.clone(),
+				manager: blueprint.manager,
+				master_manager_revision: blueprint.master_manager_revision,
+				sources: blueprint.sources.clone(),
+				supported_membership_models: blueprint.supported_membership_models.clone(),
+			},
+			membership_model: MembershipModel::Fixed { min_operators: 1 },
+			security_requirements: vec![],
+			price_targets: None,
+		};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
 
@@ -182,9 +197,9 @@ where
 			blueprint_id,
 			permitted_callers,
 			operators,
-			ttl,
-			asset_security_requirements,
 			request_args,
+			asset_security_requirements,
+			ttl,
 			payment_asset,
 			value: amount,
 			membership_model,

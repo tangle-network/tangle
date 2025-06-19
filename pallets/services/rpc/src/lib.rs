@@ -20,18 +20,20 @@ use jsonrpsee::{
 	proc_macros::rpc,
 	types::error::{ErrorObject, ErrorObjectOwned},
 };
-pub use pallet_services_rpc_runtime_api::ServicesApi as ServicesRuntimeApi;
-use parity_scale_codec::Codec;
-use sp_api::{ApiError, ProvideRuntimeApi};
+use parity_scale_codec::{Codec, MaxEncodedLen};
+use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
-	DispatchError, Serialize,
+	Serialize,
+	scale_info::TypeInfo,
 	traits::{Block as BlockT, MaybeDisplay},
 };
 use std::sync::Arc;
 use tangle_primitives::services::{
 	AssetIdT, Constraints, RpcServicesWithBlueprint, ServiceRequest,
 };
+
+pub use pallet_services_rpc_runtime_api::ServicesApi as ServicesRuntimeApi;
 
 type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
@@ -41,10 +43,31 @@ type BlockNumberOf<Block> =
 pub trait ServicesApi<BlockHash, X, AccountId, BlockNumber, AssetId>
 where
 	X: Constraints,
-	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	BlockNumber: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: AssetIdT,
+	AccountId: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Serialize
+		+ Clone
+		+ PartialEq
+		+ Eq,
+	BlockNumber: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Clone
+		+ PartialEq
+		+ Eq
+		+ MaxEncodedLen
+		+ Default
+		+ TypeInfo,
+	AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 {
+	/// Query services with blueprints by operator
 	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
 	fn query_services_with_blueprints_by_operator(
 		&self,
@@ -78,8 +101,17 @@ impl<C, X, Block, AccountId, AssetId>
 	for ServicesClient<C, Block, AccountId>
 where
 	Block: BlockT,
-	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
-	AssetId: AssetIdT,
+	AccountId: Codec
+		+ MaybeDisplay
+		+ core::fmt::Debug
+		+ Send
+		+ Sync
+		+ 'static
+		+ Serialize
+		+ Clone
+		+ PartialEq
+		+ Eq,
+	AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 	X: Constraints,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
 	C::Api: ServicesRuntimeApi<Block, X, AccountId, AssetId>,
@@ -116,13 +148,11 @@ where
 }
 
 /// Error type of this RPC api.
+#[derive(Debug)]
 pub enum Error {
-	/// The transaction was not decodable.
+	RuntimeError(sp_api::ApiError),
 	DecodeError,
-	/// The call to runtime failed.
-	RuntimeError(ApiError),
-	/// Custom pallet error.
-	CustomDispatchError(DispatchError),
+	CustomDispatchError(sp_runtime::DispatchError),
 }
 
 impl From<Error> for i32 {

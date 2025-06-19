@@ -32,6 +32,7 @@ mod payments;
 mod registration;
 mod service;
 mod slashing;
+mod subscription_billing;
 mod type_checking;
 
 pub const ALICE: u8 = 1;
@@ -64,6 +65,7 @@ pub(crate) fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: bounded_vec![FieldType::Uint8],
 				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				pricing_model: PricingModel::PayOnce { amount: 100 },
 			},
 			JobDefinition {
 				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
@@ -72,6 +74,7 @@ pub(crate) fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 					FieldType::List(Box::new(FieldType::Uint8))
 				],
 				result: bounded_vec![FieldType::List(Box::new(FieldType::Uint8))],
+				pricing_model: PricingModel::PayOnce { amount: 200 },
 			},
 		],
 		registration_params: bounded_vec![],
@@ -81,7 +84,6 @@ pub(crate) fn cggmp21_blueprint() -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 			MembershipModelType::Fixed,
 			MembershipModelType::Dynamic,
 		],
-		recommended_resources: Default::default(),
 	}
 }
 
@@ -122,7 +124,7 @@ fn deploy() -> Deployment {
 	let blueprint = cggmp21_blueprint();
 	let blueprint_id = Services::next_blueprint_id();
 	assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
-	assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+	assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 	let alice = mock_pub_key(ALICE);
 	let bob = mock_pub_key(BOB);
@@ -136,6 +138,9 @@ fn deploy() -> Deployment {
 	));
 
 	let eve = mock_pub_key(EVE);
+	// Give EVE some USDC tokens to pay for the service (need 100 USDC with 6 decimals = 100_000_000
+	// units)
+	mint_tokens(USDC, mock_pub_key(ALICE), eve.clone(), 200 * 10u128.pow(6));
 	let service_id = Services::next_instance_id();
 	assert_ok!(Services::request(
 		RuntimeOrigin::signed(eve.clone()),
@@ -144,30 +149,35 @@ fn deploy() -> Deployment {
 		vec![alice.clone()],
 		vec![bob.clone()],
 		Default::default(),
-		vec![get_security_requirement(WETH, &[10, 20])],
+		vec![
+			get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+			get_security_requirement(WETH, &[10, 20])
+		],
 		100,
 		Asset::Custom(USDC),
-		0,
+		100 * 10u128.pow(6), /* Payment amount should match the blueprint's pricing model amount
+		                      * (100 USDC with 6 decimals) */
 		MembershipModel::Fixed { min_operators: 1 },
 	));
 
 	assert_eq!(ServiceRequests::<Runtime>::iter_keys().collect::<Vec<_>>().len(), 1);
 
 	let security_commitments =
-		vec![get_security_commitment(WETH, 10), get_security_commitment(TNT, 10)];
-	let security_commitment_map = security_commitments
+		vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)];
+	let security_commitments_map = security_commitments
 		.iter()
 		.map(|c| (c.asset, c.clone()))
 		.collect::<BTreeMap<_, _>>();
+
 	assert_ok!(Services::approve(
 		RuntimeOrigin::signed(bob.clone()),
 		service_id,
-		security_commitments,
+		security_commitments.clone(),
 	));
 
 	assert!(Instances::<Runtime>::contains_key(service_id));
 
-	Deployment { blueprint_id, service_id, security_commitments: security_commitment_map }
+	Deployment { blueprint_id, service_id, security_commitments: security_commitments_map }
 }
 
 pub fn join_and_register(
@@ -215,4 +225,37 @@ pub fn assert_events(mut expected: Vec<RuntimeEvent>) {
 		assert_eq!(next, evt, "Events don't match");
 	}
 	assert!(actual.is_empty(), "More events than expected");
+}
+
+pub fn create_test_blueprint(
+	origin: RuntimeOrigin,
+	blueprint: ServiceBlueprint<ConstraintsOf<Runtime>>,
+) -> Result<(), sp_runtime::DispatchError> {
+	Services::create_blueprint(
+		origin,
+		bounded_vec![],                              // metadata
+		blueprint,                                   // typedef
+		MembershipModel::Fixed { min_operators: 1 }, // membership_model
+		vec![],                                      // security_requirements
+		None,                                        // price_targets
+	)
+	.map(|_| ())
+	.map_err(|e| e.error)
+}
+
+pub fn create_test_blueprint_with_pricing(
+	origin: RuntimeOrigin,
+	blueprint: ServiceBlueprint<ConstraintsOf<Runtime>>,
+	_pricing_model: PricingModel<u32, u128>,
+) -> Result<(), sp_runtime::DispatchError> {
+	Services::create_blueprint(
+		origin,
+		bounded_vec![],                              // metadata
+		blueprint,                                   // typedef
+		MembershipModel::Fixed { min_operators: 1 }, // membership_model
+		vec![],                                      // security_requirements
+		None,                                        // price_targets
+	)
+	.map(|_| ())
+	.map_err(|e| e.error)
 }
