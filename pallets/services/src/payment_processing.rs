@@ -60,7 +60,7 @@ impl<T: Config> Pallet<T> {
 					job_index,
 					call_id,
 					caller,
-					caller,  // caller is both authorizer and payer for job calls
+					caller, // caller is both authorizer and payer for job calls
 					amount_converted,
 				)?;
 			},
@@ -74,7 +74,7 @@ impl<T: Config> Pallet<T> {
 					job_index,
 					call_id,
 					caller,
-					caller,  // caller is both authorizer and payer for subscriptions
+					caller, // caller is both authorizer and payer for subscriptions
 					rate_converted,
 					interval_converted,
 					maybe_end_converted,
@@ -88,7 +88,7 @@ impl<T: Config> Pallet<T> {
 					job_index,
 					call_id,
 					caller,
-					caller,  // caller is both authorizer and payer for events
+					caller, // caller is both authorizer and payer for events
 					reward_converted,
 					1, // Default to 1 event for this job call
 				)?;
@@ -197,11 +197,29 @@ impl<T: Config> Pallet<T> {
 		// Get or create billing information for this subscription
 		let billing_key = (service_id, job_index, payer.clone());
 		let mut billing = JobSubscriptionBillings::<T>::get(&billing_key).unwrap_or_else(|| {
+			// Set last_billed to a past block so the first payment is due immediately
+			let initial_last_billed = if current_block >= interval {
+				current_block.saturating_sub(interval)
+			} else {
+				// If current_block < interval, start from block 0 to ensure immediate payment
+				BlockNumberFor::<T>::zero()
+			};
+
+			log::debug!(
+				"Creating new subscription billing for service {} job {} subscriber {:?}: last_billed set to {:?} (current: {:?}, interval: {:?})",
+				service_id,
+				job_index,
+				payer,
+				initial_last_billed,
+				current_block,
+				interval
+			);
+
 			JobSubscriptionBilling {
 				service_id,
 				job_index,
 				subscriber: payer.clone(),
-				last_billed: current_block,
+				last_billed: initial_last_billed, // ✅ FIXED: Now ensures first payment is due
 				end_block: maybe_end,
 			}
 		});
@@ -209,6 +227,15 @@ impl<T: Config> Pallet<T> {
 		// Determine if payment is due
 		let blocks_since_last = current_block.saturating_sub(billing.last_billed);
 		let payment_due = blocks_since_last >= interval;
+
+		log::debug!(
+			"Subscription billing check for service {} job {}: blocks_since_last={:?}, interval={:?}, payment_due={}",
+			service_id,
+			job_index,
+			blocks_since_last,
+			interval,
+			payment_due
+		);
 
 		if payment_due {
 			// Process the subscription payment with authorization check
@@ -236,11 +263,19 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 			log::debug!(
-				"Processed subscription payment for service {} job {}: {:?} at block {:?}",
+				"✅ Processed subscription payment for service {} job {}: {:?} at block {:?}",
 				service_id,
 				job_index,
 				rate_per_interval,
 				current_block
+			);
+		} else {
+			log::debug!(
+				"⏸️  Subscription payment not due for service {} job {}: {} blocks since last < {} interval",
+				service_id,
+				job_index,
+				blocks_since_last,
+				interval
 			);
 		}
 
@@ -284,11 +319,12 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Charge payment from a user account with proper authorization checks
-	/// 
+	///
 	/// # Security Note
-	/// This function now requires explicit authorization validation to prevent unauthorized payments.
-	/// The caller must be either the payer themselves or an authorized account that can spend on their behalf.
-	/// 
+	/// This function now requires explicit authorization validation to prevent unauthorized
+	/// payments. The caller must be either the payer themselves or an authorized account that can
+	/// spend on their behalf.
+	///
 	/// # Arguments
 	/// * `caller` - The account initiating the payment transaction (must be authorized)
 	/// * `payer` - The account from which funds will be charged
@@ -301,10 +337,7 @@ impl<T: Config> Pallet<T> {
 		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
 		// For now, we only allow self-payments. In the future, this could be extended
 		// to support authorized spending accounts or delegation mechanisms.
-		ensure!(
-			caller == payer,
-			Error::<T>::InvalidRequestInput
-		);
+		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
 
 		// Check sufficient balance
 		let free_balance = T::Currency::free_balance(payer);
@@ -353,7 +386,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Hook called on every block to process subscription payments
-	/// 
+	///
 	/// # Security Note
 	/// This function processes automatic subscription payments. Since these are
 	/// pre-authorized through the service registration process, we use the
@@ -393,12 +426,15 @@ impl<T: Config> Pallet<T> {
 										}
 									}
 
-									// Process payment - subscriber is both caller and payer for automated billing
+									// Process payment - subscriber is both caller and payer for
+									// automated billing
 									let _ = Self::process_job_subscription_payment(
 										service_id,
 										job_index,
-										0, // call_id not relevant for subscription processing
-										&subscriber, // subscriber authorizes their own automated payment
+										0,           /* call_id not relevant for subscription
+										              * processing */
+										&subscriber, /* subscriber authorizes their own
+										              * automated payment */
 										&subscriber,
 										rate_converted,
 										interval_converted,

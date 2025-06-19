@@ -32,6 +32,7 @@ mod payments;
 mod registration;
 mod service;
 mod slashing;
+mod subscription_billing_fix;
 mod type_checking;
 
 pub const ALICE: u8 = 1;
