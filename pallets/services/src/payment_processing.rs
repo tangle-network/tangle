@@ -472,8 +472,8 @@ impl<T: Config> Pallet<T> {
 								if Self::process_job_subscription_payment(
 									service_id,
 									job_index,
-									0,           /* call_id not relevant for subscription
-									              * processing */
+									0, /* call_id not relevant for subscription
+									    * processing */
 									&subscriber, /* subscriber authorizes their own automated
 									              * payment */
 									&subscriber,
