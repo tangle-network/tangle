@@ -788,7 +788,8 @@ benchmarks! {
 			service_id,
 			job_index,
 			call_id,
-			&subscriber,
+			&subscriber, // caller (subscriber authorizes their own payment)
+			&subscriber, // payer
 			rate_per_interval,
 			interval,
 			maybe_end,
@@ -832,7 +833,8 @@ benchmarks! {
 			service_id,
 			job_index,
 			call_id,
-			&subscriber,
+			&subscriber, // caller (subscriber authorizes their own payment)
+			&subscriber, // payer
 			reward_per_event,
 			event_count
 		);

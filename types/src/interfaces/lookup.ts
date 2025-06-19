@@ -4449,6 +4449,7 @@ export default {
         membershipModel: 'TanglePrimitivesServicesTypesMembershipModel',
         securityRequirements: 'Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement>',
         priceTargets: 'Option<TanglePrimitivesServicesTypesPriceTargets>',
+        pricingModel: 'TanglePrimitivesServicesTypesPricingModel',
       },
       pre_register: {
         blueprintId: 'Compact<u64>',
@@ -4476,7 +4477,7 @@ export default {
       },
       approve: {
         requestId: 'Compact<u64>',
-        securityCommitments: 'Vec<TanglePrimitivesServicesTypesAssetSecurityCommitment>',
+        securityCommitment: 'H256',
       },
       reject: {
         requestId: 'Compact<u64>',
@@ -4551,7 +4552,7 @@ export default {
     }
   },
   /**
-   * Lookup431: tangle_primitives::services::service::ServiceBlueprint<C>
+   * Lookup431: tangle_primitives::services::service::ServiceBlueprint<C, BlockNumber, Balance>
    **/
   TanglePrimitivesServicesServiceServiceBlueprint: {
     metadata: 'TanglePrimitivesServicesServiceServiceMetadata',
@@ -4561,7 +4562,8 @@ export default {
     manager: 'TanglePrimitivesServicesServiceBlueprintServiceManager',
     masterManagerRevision: 'TanglePrimitivesServicesServiceMasterBlueprintServiceManagerRevision',
     sources: 'Vec<TanglePrimitivesServicesSourcesBlueprintSource>',
-    supportedMembershipModels: 'Vec<TanglePrimitivesServicesTypesMembershipModelType>'
+    supportedMembershipModels: 'Vec<TanglePrimitivesServicesTypesMembershipModelType>',
+    pricingModel: 'TanglePrimitivesServicesTypesPricingModel'
   },
   /**
    * Lookup432: tangle_primitives::services::service::ServiceMetadata<C>
@@ -4593,25 +4595,7 @@ export default {
     description: 'Option<Bytes>'
   },
   /**
-   * Lookup441: tangle_primitives::services::types::PricingModel<BlockNumber, Balance>
-   **/
-  TanglePrimitivesServicesTypesPricingModel: {
-    _enum: {
-      PayOnce: {
-        amount: 'u128',
-      },
-      Subscription: {
-        ratePerInterval: 'u128',
-        interval: 'u32',
-        maybeEnd: 'Option<u32>',
-      },
-      EventDriven: {
-        rewardPerEvent: 'u128'
-      }
-    }
-  },
-  /**
-   * Lookup443: tangle_primitives::services::service::BlueprintServiceManager
+   * Lookup442: tangle_primitives::services::service::BlueprintServiceManager
    **/
   TanglePrimitivesServicesServiceBlueprintServiceManager: {
     _enum: {
@@ -4619,7 +4603,7 @@ export default {
     }
   },
   /**
-   * Lookup444: tangle_primitives::services::service::MasterBlueprintServiceManagerRevision
+   * Lookup443: tangle_primitives::services::service::MasterBlueprintServiceManagerRevision
    **/
   TanglePrimitivesServicesServiceMasterBlueprintServiceManagerRevision: {
     _enum: {
@@ -4628,7 +4612,7 @@ export default {
     }
   },
   /**
-   * Lookup446: tangle_primitives::services::sources::BlueprintSource<C>
+   * Lookup445: tangle_primitives::services::sources::BlueprintSource<C>
    **/
   TanglePrimitivesServicesSourcesBlueprintSource: {
     _enum: {
@@ -4642,13 +4626,13 @@ export default {
     }
   },
   /**
-   * Lookup447: tangle_primitives::services::sources::WasmRuntime
+   * Lookup446: tangle_primitives::services::sources::WasmRuntime
    **/
   TanglePrimitivesServicesSourcesWasmRuntime: {
     _enum: ['Wasmtime', 'Wasmer']
   },
   /**
-   * Lookup448: tangle_primitives::services::sources::WasmFetcher<C>
+   * Lookup447: tangle_primitives::services::sources::WasmFetcher<C>
    **/
   TanglePrimitivesServicesSourcesWasmFetcher: {
     _enum: {
@@ -4657,7 +4641,7 @@ export default {
     }
   },
   /**
-   * Lookup450: tangle_primitives::services::sources::GithubFetcher<C>
+   * Lookup449: tangle_primitives::services::sources::GithubFetcher<C>
    **/
   TanglePrimitivesServicesSourcesGithubFetcher: {
     owner: 'Bytes',
@@ -4666,7 +4650,7 @@ export default {
     binaries: 'Vec<TanglePrimitivesServicesSourcesBlueprintBinary>'
   },
   /**
-   * Lookup458: tangle_primitives::services::sources::BlueprintBinary<C>
+   * Lookup457: tangle_primitives::services::sources::BlueprintBinary<C>
    **/
   TanglePrimitivesServicesSourcesBlueprintBinary: {
     arch: 'TanglePrimitivesServicesSourcesArchitecture',
@@ -4675,19 +4659,19 @@ export default {
     sha256: '[u8;32]'
   },
   /**
-   * Lookup459: tangle_primitives::services::sources::Architecture
+   * Lookup458: tangle_primitives::services::sources::Architecture
    **/
   TanglePrimitivesServicesSourcesArchitecture: {
     _enum: ['Wasm', 'Wasm64', 'Wasi', 'Wasi64', 'Amd', 'Amd64', 'Arm', 'Arm64', 'RiscV', 'RiscV64']
   },
   /**
-   * Lookup460: tangle_primitives::services::sources::OperatingSystem
+   * Lookup459: tangle_primitives::services::sources::OperatingSystem
    **/
   TanglePrimitivesServicesSourcesOperatingSystem: {
     _enum: ['Unknown', 'Linux', 'Windows', 'MacOS', 'BSD']
   },
   /**
-   * Lookup464: tangle_primitives::services::sources::NativeFetcher<C>
+   * Lookup463: tangle_primitives::services::sources::NativeFetcher<C>
    **/
   TanglePrimitivesServicesSourcesNativeFetcher: {
     _enum: {
@@ -4696,7 +4680,7 @@ export default {
     }
   },
   /**
-   * Lookup465: tangle_primitives::services::sources::ImageRegistryFetcher<C>
+   * Lookup464: tangle_primitives::services::sources::ImageRegistryFetcher<C>
    **/
   TanglePrimitivesServicesSourcesImageRegistryFetcher: {
     _alias: {
@@ -4707,7 +4691,7 @@ export default {
     tag: 'Bytes'
   },
   /**
-   * Lookup472: tangle_primitives::services::sources::TestFetcher<C>
+   * Lookup471: tangle_primitives::services::sources::TestFetcher<C>
    **/
   TanglePrimitivesServicesSourcesTestFetcher: {
     cargoPackage: 'Bytes',
@@ -4715,10 +4699,28 @@ export default {
     basePath: 'Bytes'
   },
   /**
-   * Lookup475: tangle_primitives::services::types::MembershipModelType
+   * Lookup474: tangle_primitives::services::types::MembershipModelType
    **/
   TanglePrimitivesServicesTypesMembershipModelType: {
     _enum: ['Fixed', 'Dynamic']
+  },
+  /**
+   * Lookup476: tangle_primitives::services::types::PricingModel<BlockNumber, Balance>
+   **/
+  TanglePrimitivesServicesTypesPricingModel: {
+    _enum: {
+      PayOnce: {
+        amount: 'u128',
+      },
+      Subscription: {
+        ratePerInterval: 'u128',
+        interval: 'u64',
+        maybeEnd: 'Option<u64>',
+      },
+      EventDriven: {
+        rewardPerEvent: 'u128'
+      }
+    }
   },
   /**
    * Lookup477: tangle_primitives::services::types::MembershipModel
@@ -6496,16 +6498,7 @@ export default {
     _enum: ['AlreadyOperator', 'BondTooLow', 'InvalidAmount', 'NotAnOperator', 'CannotExit', 'AlreadyLeaving', 'NotLeavingOperator', 'LeavingRoundNotReached', 'NoScheduledBondLess', 'BondLessRequestNotSatisfied', 'NotActiveOperator', 'NotOfflineOperator', 'AlreadyDelegator', 'NotDelegator', 'WithdrawRequestAlreadyExists', 'InsufficientBalance', 'NoWithdrawRequest', 'NoBondLessRequest', 'BondLessNotReady', 'BondLessRequestAlreadyExists', 'ActiveServicesUsingAsset', 'NoActiveDelegation', 'AssetNotWhitelisted', 'NotAuthorized', 'MaxBlueprintsExceeded', 'AssetNotFound', 'BlueprintAlreadyWhitelisted', 'NoWithdrawRequests', 'NoMatchingwithdrawRequest', 'AssetAlreadyInVault', 'AssetNotInVault', 'VaultNotFound', 'DuplicateBlueprintId', 'BlueprintIdNotFound', 'NotInFixedMode', 'MaxDelegationsExceeded', 'MaxUnstakeRequestsExceeded', 'MaxWithdrawRequestsExceeded', 'DepositOverflow', 'UnstakeAmountTooLarge', 'StakeOverflow', 'InsufficientStakeRemaining', 'APYExceedsMaximum', 'CapCannotBeZero', 'CapExceedsTotalSupply', 'PendingUnstakeRequestExists', 'BlueprintNotSelected', 'ERC20TransferFailed', 'SlashAlertFailed', 'EVMAbiEncode', 'EVMAbiDecode', 'LockViolation', 'DepositExceedsCapForAsset', 'OverflowRisk', 'AssetConfigNotFound', 'CannotGoOfflineWithActiveServices', 'NotNominator']
   },
   /**
-   * Lookup819: tangle_primitives::services::qos::HeartbeatStats
-   **/
-  TanglePrimitivesServicesQosHeartbeatStats: {
-    expectedHeartbeats: 'u32',
-    receivedHeartbeats: 'u32',
-    lastCheckBlock: 'u32',
-    lastHeartbeatBlock: 'u32'
-  },
-  /**
-   * Lookup821: tangle_primitives::services::service::ServiceRequest<C, sp_core::crypto::AccountId32, BlockNumber, AssetId>
+   * Lookup818: tangle_primitives::services::service::ServiceRequest<C, sp_core::crypto::AccountId32, BlockNumber, AssetId>
    **/
   TanglePrimitivesServicesServiceServiceRequest: {
     blueprint: 'u64',
@@ -6518,7 +6511,7 @@ export default {
     membershipModel: 'TanglePrimitivesServicesTypesMembershipModel'
   },
   /**
-   * Lookup826: tangle_primitives::services::types::ApprovalState<AssetId>
+   * Lookup823: tangle_primitives::services::types::ApprovalState<AssetId>
    **/
   TanglePrimitivesServicesTypesApprovalState: {
     _enum: {
@@ -6530,7 +6523,7 @@ export default {
     }
   },
   /**
-   * Lookup828: tangle_primitives::services::service::Service<C, sp_core::crypto::AccountId32, BlockNumber, AssetId>
+   * Lookup825: tangle_primitives::services::service::Service<C, sp_core::crypto::AccountId32, BlockNumber, AssetId>
    **/
   TanglePrimitivesServicesService: {
     id: 'u64',
@@ -6541,10 +6534,11 @@ export default {
     securityRequirements: 'Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement>',
     permittedCallers: 'Vec<AccountId32>',
     ttl: 'u64',
-    membershipModel: 'TanglePrimitivesServicesTypesMembershipModel'
+    membershipModel: 'TanglePrimitivesServicesTypesMembershipModel',
+    lastBilled: 'Option<u64>'
   },
   /**
-   * Lookup831: tangle_primitives::services::jobs::JobCall<C, sp_core::crypto::AccountId32>
+   * Lookup828: tangle_primitives::services::jobs::JobCall<C, sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesServicesJobsJobCall: {
     serviceId: 'u64',
@@ -6552,7 +6546,7 @@ export default {
     args: 'Vec<TanglePrimitivesServicesField>'
   },
   /**
-   * Lookup832: tangle_primitives::services::jobs::JobCallResult<C, sp_core::crypto::AccountId32>
+   * Lookup829: tangle_primitives::services::jobs::JobCallResult<C, sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesServicesJobsJobCallResult: {
     serviceId: 'u64',
@@ -6560,7 +6554,7 @@ export default {
     result: 'Vec<TanglePrimitivesServicesField>'
   },
   /**
-   * Lookup833: tangle_primitives::services::types::UnappliedSlash<sp_core::crypto::AccountId32>
+   * Lookup830: tangle_primitives::services::types::UnappliedSlash<sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesServicesTypesUnappliedSlash: {
     era: 'u32',
@@ -6570,14 +6564,14 @@ export default {
     slashPercent: 'Percent'
   },
   /**
-   * Lookup835: tangle_primitives::services::types::OperatorProfile<C>
+   * Lookup832: tangle_primitives::services::types::OperatorProfile<C>
    **/
   TanglePrimitivesServicesTypesOperatorProfile: {
     services: 'BTreeSet<u64>',
     blueprints: 'BTreeSet<u64>'
   },
   /**
-   * Lookup838: tangle_primitives::services::service::StagingServicePayment<sp_core::crypto::AccountId32, AssetId, Balance>
+   * Lookup835: tangle_primitives::services::service::StagingServicePayment<sp_core::crypto::AccountId32, AssetId, Balance>
    **/
   TanglePrimitivesServicesServiceStagingServicePayment: {
     requestId: 'u64',
@@ -6586,7 +6580,7 @@ export default {
     amount: 'u128'
   },
   /**
-   * Lookup839: tangle_primitives::types::Account<sp_core::crypto::AccountId32>
+   * Lookup836: tangle_primitives::types::Account<sp_core::crypto::AccountId32>
    **/
   TanglePrimitivesAccount: {
     _enum: {
@@ -6595,37 +6589,7 @@ export default {
     }
   },
   /**
-   * Lookup841: tangle_primitives::services::jobs::JobSubscriptionBilling<AccountId, BlockNumber>
-   **/
-  TanglePrimitivesServicesJobsJobSubscriptionBilling: {
-    serviceId: 'u64',
-    jobIndex: 'u8',
-    subscriber: 'AccountId32',
-    lastBilled: 'u64',
-    endBlock: 'Option<u64>'
-  },
-  /**
-   * Lookup842: tangle_primitives::services::jobs::JobPayment<AccountId>
-   **/
-  TanglePrimitivesServicesJobsJobPayment: {
-    serviceId: 'u64',
-    jobIndex: 'u8',
-    callId: 'u64',
-    payer: 'AccountId32',
-    asset: 'TanglePrimitivesServicesTypesAssetU32',
-    amount: 'u128'
-  },
-  /**
-   * Lookup843: tangle_primitives::services::types::Asset<AssetId>
-   **/
-  TanglePrimitivesServicesTypesAssetU32: {
-    _enum: {
-      Custom: 'u32',
-      Erc20: 'H160'
-    }
-  },
-  /**
-   * Lookup844: pallet_services::module::Error<T>
+   * Lookup837: pallet_services::module::Error<T>
    **/
   PalletServicesModuleError: {
     _enum: {
@@ -6718,7 +6682,7 @@ export default {
     }
   },
   /**
-   * Lookup845: tangle_primitives::services::types::TypeCheckError
+   * Lookup838: tangle_primitives::services::types::TypeCheckError
    **/
   TanglePrimitivesServicesTypesTypeCheckError: {
     _enum: {
@@ -6739,7 +6703,7 @@ export default {
     }
   },
   /**
-   * Lookup846: pallet_tangle_lst::types::bonded_pool::BondedPoolInner<T>
+   * Lookup839: pallet_tangle_lst::types::bonded_pool::BondedPoolInner<T>
    **/
   PalletTangleLstBondedPoolBondedPoolInner: {
     commission: 'PalletTangleLstCommission',
@@ -6748,7 +6712,7 @@ export default {
     metadata: 'PalletTangleLstBondedPoolPoolMetadata'
   },
   /**
-   * Lookup847: pallet_tangle_lst::types::commission::Commission<T>
+   * Lookup840: pallet_tangle_lst::types::commission::Commission<T>
    **/
   PalletTangleLstCommission: {
     current: 'Option<(Perbill,AccountId32)>',
@@ -6758,7 +6722,7 @@ export default {
     claimPermission: 'Option<PalletTangleLstCommissionCommissionClaimPermission>'
   },
   /**
-   * Lookup849: pallet_tangle_lst::types::pools::PoolRoles<sp_core::crypto::AccountId32>
+   * Lookup842: pallet_tangle_lst::types::pools::PoolRoles<sp_core::crypto::AccountId32>
    **/
   PalletTangleLstPoolsPoolRoles: {
     depositor: 'AccountId32',
@@ -6767,14 +6731,14 @@ export default {
     bouncer: 'Option<AccountId32>'
   },
   /**
-   * Lookup850: pallet_tangle_lst::types::bonded_pool::PoolMetadata<T>
+   * Lookup843: pallet_tangle_lst::types::bonded_pool::PoolMetadata<T>
    **/
   PalletTangleLstBondedPoolPoolMetadata: {
     name: 'Option<Bytes>',
     icon: 'Option<Bytes>'
   },
   /**
-   * Lookup851: pallet_tangle_lst::types::sub_pools::RewardPool<T>
+   * Lookup844: pallet_tangle_lst::types::sub_pools::RewardPool<T>
    **/
   PalletTangleLstSubPoolsRewardPool: {
     lastRecordedRewardCounter: 'u128',
@@ -6784,33 +6748,33 @@ export default {
     totalCommissionClaimed: 'u128'
   },
   /**
-   * Lookup852: pallet_tangle_lst::types::sub_pools::SubPools<T>
+   * Lookup845: pallet_tangle_lst::types::sub_pools::SubPools<T>
    **/
   PalletTangleLstSubPools: {
     noEra: 'PalletTangleLstSubPoolsUnbondPool',
     withEra: 'BTreeMap<u32, PalletTangleLstSubPoolsUnbondPool>'
   },
   /**
-   * Lookup853: pallet_tangle_lst::types::sub_pools::UnbondPool<T>
+   * Lookup846: pallet_tangle_lst::types::sub_pools::UnbondPool<T>
    **/
   PalletTangleLstSubPoolsUnbondPool: {
     points: 'u128',
     balance: 'u128'
   },
   /**
-   * Lookup859: pallet_tangle_lst::types::pools::PoolMember<T>
+   * Lookup852: pallet_tangle_lst::types::pools::PoolMember<T>
    **/
   PalletTangleLstPoolsPoolMember: {
     unbondingEras: 'BTreeMap<u32, (u32,u128)>'
   },
   /**
-   * Lookup864: pallet_tangle_lst::types::ClaimPermission
+   * Lookup857: pallet_tangle_lst::types::ClaimPermission
    **/
   PalletTangleLstClaimPermission: {
     _enum: ['Permissioned', 'PermissionlessCompound', 'PermissionlessWithdraw', 'PermissionlessAll']
   },
   /**
-   * Lookup865: pallet_tangle_lst::pallet::Error<T>
+   * Lookup858: pallet_tangle_lst::pallet::Error<T>
    **/
   PalletTangleLstError: {
     _enum: {
@@ -6850,92 +6814,92 @@ export default {
     }
   },
   /**
-   * Lookup866: pallet_tangle_lst::pallet::DefensiveError
+   * Lookup859: pallet_tangle_lst::pallet::DefensiveError
    **/
   PalletTangleLstDefensiveError: {
     _enum: ['NotEnoughSpaceInUnbondPool', 'PoolNotFound', 'RewardPoolNotFound', 'SubPoolsNotFound', 'BondedStashKilledPrematurely']
   },
   /**
-   * Lookup870: pallet_rewards::pallet::VaultMetadata<T>
+   * Lookup863: pallet_rewards::pallet::VaultMetadata<T>
    **/
   PalletRewardsVaultMetadata: {
     name: 'Bytes',
     logo: 'Bytes'
   },
   /**
-   * Lookup873: pallet_rewards::pallet::Error<T>
+   * Lookup866: pallet_rewards::pallet::Error<T>
    **/
   PalletRewardsError: {
     _enum: ['NoRewardsAvailable', 'InsufficientRewardsBalance', 'AssetNotWhitelisted', 'AssetAlreadyWhitelisted', 'InvalidAPY', 'AssetAlreadyInVault', 'AssetNotInVault', 'VaultNotFound', 'DuplicateBlueprintId', 'BlueprintIdNotFound', 'RewardConfigNotFound', 'CannotCalculatePropotionalApy', 'CannotCalculateRewardPerBlock', 'IncentiveCapGreaterThanDepositCap', 'BoostMultiplierMustBeOne', 'VaultAlreadyExists', 'TotalDepositLessThanIncentiveCap', 'PotAlreadyExists', 'PotAccountNotFound', 'InvalidDecayRate', 'IncentiveCapGreaterThanMaxIncentiveCap', 'DepositCapGreaterThanMaxDepositCap', 'IncentiveCapLessThanMinIncentiveCap', 'DepositCapLessThanMinDepositCap', 'NameTooLong', 'LogoTooLong', 'VaultMetadataNotFound', 'NoRewardsToClaim', 'ArithmeticOverflow', 'TransferFailed', 'TooManyPendingRewards']
   },
   /**
-   * Lookup874: pallet_ismp::pallet::Error<T>
+   * Lookup867: pallet_ismp::pallet::Error<T>
    **/
   PalletIsmpError: {
     _enum: ['InvalidMessage', 'MessageNotFound', 'ConsensusClientCreationFailed', 'UnbondingPeriodUpdateFailed', 'ChallengePeriodUpdateFailed']
   },
   /**
-   * Lookup875: pallet_hyperbridge::pallet::Error<T>
+   * Lookup868: pallet_hyperbridge::pallet::Error<T>
    **/
   PalletHyperbridgeError: 'Null',
   /**
-   * Lookup877: pallet_token_gateway::pallet::Error<T>
+   * Lookup870: pallet_token_gateway::pallet::Error<T>
    **/
   PalletTokenGatewayError: {
     _enum: ['UnregisteredAsset', 'AssetTeleportError', 'CoprocessorNotConfigured', 'DispatchError', 'AssetCreationError', 'AssetDecimalsNotFound', 'NotInitialized', 'UnknownAsset', 'NotAssetOwner']
   },
   /**
-   * Lookup879: pallet_credits::pallet::Error<T>
+   * Lookup872: pallet_credits::pallet::Error<T>
    **/
   PalletCreditsError: {
     _enum: ['InsufficientTntBalance', 'ClaimAmountExceedsWindowAllowance', 'InvalidClaimId', 'NoValidTier', 'AmountZero', 'BurnTransferNotImplemented', 'StakeTiersNotSorted', 'EmptyStakeTiers', 'Overflow', 'StakeTiersOverflow']
   },
   /**
-   * Lookup882: frame_system::extensions::check_non_zero_sender::CheckNonZeroSender<T>
+   * Lookup875: frame_system::extensions::check_non_zero_sender::CheckNonZeroSender<T>
    **/
   FrameSystemExtensionsCheckNonZeroSender: 'Null',
   /**
-   * Lookup883: frame_system::extensions::check_spec_version::CheckSpecVersion<T>
+   * Lookup876: frame_system::extensions::check_spec_version::CheckSpecVersion<T>
    **/
   FrameSystemExtensionsCheckSpecVersion: 'Null',
   /**
-   * Lookup884: frame_system::extensions::check_tx_version::CheckTxVersion<T>
+   * Lookup877: frame_system::extensions::check_tx_version::CheckTxVersion<T>
    **/
   FrameSystemExtensionsCheckTxVersion: 'Null',
   /**
-   * Lookup885: frame_system::extensions::check_genesis::CheckGenesis<T>
+   * Lookup878: frame_system::extensions::check_genesis::CheckGenesis<T>
    **/
   FrameSystemExtensionsCheckGenesis: 'Null',
   /**
-   * Lookup888: frame_system::extensions::check_nonce::CheckNonce<T>
+   * Lookup881: frame_system::extensions::check_nonce::CheckNonce<T>
    **/
   FrameSystemExtensionsCheckNonce: 'Compact<u32>',
   /**
-   * Lookup889: frame_system::extensions::check_weight::CheckWeight<T>
+   * Lookup882: frame_system::extensions::check_weight::CheckWeight<T>
    **/
   FrameSystemExtensionsCheckWeight: 'Null',
   /**
-   * Lookup890: pallet_transaction_payment::ChargeTransactionPayment<T>
+   * Lookup883: pallet_transaction_payment::ChargeTransactionPayment<T>
    **/
   PalletTransactionPaymentChargeTransactionPayment: 'Compact<u128>',
   /**
-   * Lookup891: frame_metadata_hash_extension::CheckMetadataHash<T>
+   * Lookup884: frame_metadata_hash_extension::CheckMetadataHash<T>
    **/
   FrameMetadataHashExtensionCheckMetadataHash: {
     mode: 'FrameMetadataHashExtensionMode'
   },
   /**
-   * Lookup892: frame_metadata_hash_extension::Mode
+   * Lookup885: frame_metadata_hash_extension::Mode
    **/
   FrameMetadataHashExtensionMode: {
     _enum: ['Disabled', 'Enabled']
   },
   /**
-   * Lookup893: tangle_testnet_runtime::extension::CheckNominatedRestaked<T>
+   * Lookup886: tangle_testnet_runtime::extension::CheckNominatedRestaked<T>
    **/
   TangleTestnetRuntimeExtensionCheckNominatedRestaked: 'Null',
   /**
-   * Lookup895: tangle_testnet_runtime::Runtime
+   * Lookup888: tangle_testnet_runtime::Runtime
    **/
   TangleTestnetRuntimeRuntime: 'Null'
 };

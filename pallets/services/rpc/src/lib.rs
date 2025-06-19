@@ -67,7 +67,7 @@ where
 		+ TypeInfo,
 	AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 {
-	// /// Query services with blueprints by operator
+	/// Query services with blueprints by operator
 	#[method(name = "services_queryServicesWithBlueprintsByOperator")]
 	fn query_services_with_blueprints_by_operator(
 		&self,
