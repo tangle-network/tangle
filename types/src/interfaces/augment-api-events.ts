@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAsset, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesOperatorPreferences, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPricingModelU64, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -898,31 +898,31 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * An withdraw has been cancelled.
        **/
-      CancelledWithdraw: AugmentedEvent<ApiType, [who: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128], { who: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128 }>;
+      CancelledWithdraw: AugmentedEvent<ApiType, [who: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128], { who: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128 }>;
       /**
        * A delegation has been made.
        **/
-      Delegated: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset], { who: AccountId32, operator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset }>;
+      Delegated: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128], { who: AccountId32, operator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128 }>;
       /**
        * A Delegator has been slashed.
        **/
-      DelegatorSlashed: AugmentedEvent<ApiType, [delegator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset, serviceId: u64, blueprintId: u64, era: u32], { delegator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset, serviceId: u64, blueprintId: u64, era: u32 }>;
+      DelegatorSlashed: AugmentedEvent<ApiType, [delegator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128, serviceId: u64, blueprintId: u64, era: u32], { delegator: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128, serviceId: u64, blueprintId: u64, era: u32 }>;
       /**
        * A delegator unstake request has been cancelled.
        **/
-      DelegatorUnstakeCancelled: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128], { who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128 }>;
+      DelegatorUnstakeCancelled: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128], { who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128 }>;
       /**
        * A delegator unstake request has been executed.
        **/
-      DelegatorUnstakeExecuted: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128], { who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128 }>;
+      DelegatorUnstakeExecuted: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128], { who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128 }>;
       /**
        * A delegator unstake request has been scheduled.
        **/
-      DelegatorUnstakeScheduled: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128, when: u32], { who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128, when: u32 }>;
+      DelegatorUnstakeScheduled: AugmentedEvent<ApiType, [who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128, when: u32], { who: AccountId32, operator: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128, when: u32 }>;
       /**
        * A deposit has been made.
        **/
-      Deposited: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset], { who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset }>;
+      Deposited: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128], { who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128 }>;
       /**
        * EVM execution reverted with a reason.
        **/
@@ -998,7 +998,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * An withdraw has been scheduled.
        **/
-      ScheduledWithdraw: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset, when: u32], { who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAsset, when: u32 }>;
+      ScheduledWithdraw: AugmentedEvent<ApiType, [who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128, when: u32], { who: AccountId32, amount: u128, asset: TanglePrimitivesServicesTypesAssetU128, when: u32 }>;
       /**
        * Generic event
        **/
@@ -1187,7 +1187,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Asset has been updated to reward vault
        **/
-      AssetUpdatedInVault: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, action: PalletRewardsAssetAction], { vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, action: PalletRewardsAssetAction }>;
+      AssetUpdatedInVault: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAssetU128, action: PalletRewardsAssetAction], { vaultId: u32, asset: TanglePrimitivesServicesTypesAssetU128, action: PalletRewardsAssetAction }>;
       /**
        * Event emitted when a blueprint is whitelisted for rewards
        **/
@@ -1211,7 +1211,7 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Rewards have been claimed by an account
        **/
-      RewardsClaimed: AugmentedEvent<ApiType, [account: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128], { account: AccountId32, asset: TanglePrimitivesServicesTypesAsset, amount: u128 }>;
+      RewardsClaimed: AugmentedEvent<ApiType, [account: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128], { account: AccountId32, asset: TanglePrimitivesServicesTypesAssetU128, amount: u128 }>;
       /**
        * Vault created
        **/
@@ -1219,11 +1219,11 @@ declare module '@polkadot/api-base/types/events' {
       /**
        * Total deposit in vault updated
        **/
-      TotalDepositUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, totalDeposit: u128], { vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, totalDeposit: u128 }>;
+      TotalDepositUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAssetU128, totalDeposit: u128], { vaultId: u32, asset: TanglePrimitivesServicesTypesAssetU128, totalDeposit: u128 }>;
       /**
        * Total score in vault updated
        **/
-      TotalScoreUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier>], { vaultId: u32, asset: TanglePrimitivesServicesTypesAsset, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier> }>;
+      TotalScoreUpdated: AugmentedEvent<ApiType, [vaultId: u32, asset: TanglePrimitivesServicesTypesAssetU128, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier>], { vaultId: u32, asset: TanglePrimitivesServicesTypesAssetU128, totalScore: u128, lockMultiplier: Option<TanglePrimitivesRewardsLockMultiplier> }>;
       /**
        * Metadata for a vault was removed.
        **/
@@ -1290,9 +1290,25 @@ declare module '@polkadot/api-base/types/events' {
        **/
       BlueprintCreated: AugmentedEvent<ApiType, [owner: AccountId32, blueprintId: u64], { owner: AccountId32, blueprintId: u64 }>;
       /**
+       * Default heartbeat interval updated.
+       **/
+      DefaultHeartbeatIntervalUpdated: AugmentedEvent<ApiType, [interval: u64], { interval: u64 }>;
+      /**
+       * Default heartbeat slashing window updated.
+       **/
+      DefaultHeartbeatSlashingWindowUpdated: AugmentedEvent<ApiType, [window: u64], { window: u64 }>;
+      /**
+       * Default heartbeat threshold updated.
+       **/
+      DefaultHeartbeatThresholdUpdated: AugmentedEvent<ApiType, [threshold: u8], { threshold: u8 }>;
+      /**
        * EVM execution reverted with a reason.
        **/
       EvmReverted: AugmentedEvent<ApiType, [from: H160, to: H160, data: Bytes, reason: Bytes], { from: H160, to: H160, data: Bytes, reason: Bytes }>;
+      /**
+       * A service has sent a heartbeat.
+       **/
+      HeartbeatReceived: AugmentedEvent<ApiType, [serviceId: u64, blueprintId: u64, operator: AccountId32, blockNumber: u64], { serviceId: u64, blueprintId: u64, operator: AccountId32, blockNumber: u64 }>;
       /**
        * A job has been called.
        **/
@@ -1306,6 +1322,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       MasterBlueprintServiceManagerRevised: AugmentedEvent<ApiType, [revision: u32, address: H160], { revision: u32, address: H160 }>;
       /**
+       * A PayOnce payment has been processed for a job call.
+       **/
+      PayOncePaymentProcessed: AugmentedEvent<ApiType, [payer: AccountId32, serviceId: u64, callId: u64, jobIndex: u8, amount: u128], { payer: AccountId32, serviceId: u64, callId: u64, jobIndex: u8, amount: u128 }>;
+      /**
        * An operator has pre-registered for a service blueprint.
        **/
       PreRegistration: AugmentedEvent<ApiType, [operator: AccountId32, blueprintId: u64], { operator: AccountId32, blueprintId: u64 }>;
@@ -1317,6 +1337,10 @@ declare module '@polkadot/api-base/types/events' {
        * A request for a pricing quote has been made.
        **/
       RequestForQuote: AugmentedEvent<ApiType, [requester: AccountId32, blueprintId: u64], { requester: AccountId32, blueprintId: u64 }>;
+      /**
+       * A reward has been distributed to an operator.
+       **/
+      RewardDistributed: AugmentedEvent<ApiType, [operator: AccountId32, serviceId: u64, amount: u128, pricingModel: TanglePrimitivesServicesTypesPricingModelU64], { operator: AccountId32, serviceId: u64, amount: u128, pricingModel: TanglePrimitivesServicesTypesPricingModelU64 }>;
       /**
        * RPC address updated.
        **/
@@ -1345,6 +1369,10 @@ declare module '@polkadot/api-base/types/events' {
        * An Unapplied Slash got discarded.
        **/
       SlashDiscarded: AugmentedEvent<ApiType, [index: u32, operator: AccountId32, serviceId: u64, blueprintId: u64, slashPercent: Percent, era: u32], { index: u32, operator: AccountId32, serviceId: u64, blueprintId: u64, slashPercent: Percent, era: u32 }>;
+      /**
+       * A subscription billing cycle has been processed.
+       **/
+      SubscriptionBillingProcessed: AugmentedEvent<ApiType, [subscriber: AccountId32, serviceId: u64, jobIndex: u8, amount: u128, blockNumber: u64], { subscriber: AccountId32, serviceId: u64, jobIndex: u8, amount: u128, blockNumber: u64 }>;
       /**
        * An Operator has an unapplied slash.
        **/
