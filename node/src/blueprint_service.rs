@@ -35,12 +35,10 @@ pub async fn create_blueprint_manager_service<P: AsRef<Path>>(
 		verbose: 2,
 		test_mode,
 		instance_id: None,
-		allow_unchecked_attestations: false,
 		preferred_source: SourceType::default(),
 		podman_host: DEFAULT_DOCKER_HOST.clone(),
-		cache_dir: default_cache_dir(),
 		pretty: true,
-		blueprint_config: None,
+		gadget_config: None,
 	};
 	let mut env = BlueprintEnvironment::default();
 
