@@ -1802,6 +1802,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
       /**
+       * Custom asset transfer failed
+       **/
+      CustomAssetTransferFailed: AugmentedError<ApiType>;
+      /**
        * Duplicate assets provided
        **/
       DuplicateAsset: AugmentedError<ApiType>;
@@ -2068,6 +2072,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       PaymentAlreadyProcessed: AugmentedError<ApiType>;
       /**
+       * Payment calculation overflow
+       **/
+      PaymentCalculationOverflow: AugmentedError<ApiType>;
+      /**
        * Rejection Process is interrupted.
        **/
       RejectionInterrupted: AugmentedError<ApiType>;
@@ -2111,6 +2119,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Too many operators provided for the service's membership model
        **/
       TooManyOperators: AugmentedError<ApiType>;
+      /**
+       * Too many subscriptions per user
+       **/
+      TooManySubscriptions: AugmentedError<ApiType>;
       /**
        * An error occurred while type checking the provided input input.
        **/

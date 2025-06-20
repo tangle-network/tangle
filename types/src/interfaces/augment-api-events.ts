@@ -9,7 +9,7 @@ import type { ApiTypes, AugmentedEvent } from '@polkadot/api-base/types';
 import type { Bytes, Null, Option, Result, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesOperatorPreferences, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
+import type { EthereumLog, EvmCoreErrorExitReason, FrameSupportDispatchDispatchInfo, FrameSupportTokensMiscBalanceStatus, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpEventsRequestResponseHandled, IsmpEventsTimeoutHandled, IsmpHostStateMachine, PalletAirdropClaimsUtilsMultiAddress, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletDemocracyVoteThreshold, PalletElectionProviderMultiPhaseElectionCompute, PalletElectionProviderMultiPhasePhase, PalletHyperbridgeVersionedHostParams, PalletImOnlineSr25519AppSr25519Public, PalletIsmpErrorsHandlingError, PalletMultisigTimepoint, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingForcing, PalletStakingRewardDestination, PalletStakingValidatorPrefs, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstPoolsPoolState, SpConsensusGrandpaAppPublic, SpNposElectionsElectionScore, SpRuntimeDispatchError, SpStakingExposure, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPricingModelU64, TangleTestnetRuntimeProxyType } from '@polkadot/types/lookup';
 
 export type __AugmentedEvent<ApiType extends ApiTypes> = AugmentedEvent<ApiType>;
 
@@ -1322,6 +1322,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       MasterBlueprintServiceManagerRevised: AugmentedEvent<ApiType, [revision: u32, address: H160], { revision: u32, address: H160 }>;
       /**
+       * A PayOnce payment has been processed for a job call.
+       **/
+      PayOncePaymentProcessed: AugmentedEvent<ApiType, [payer: AccountId32, serviceId: u64, callId: u64, jobIndex: u8, amount: u128], { payer: AccountId32, serviceId: u64, callId: u64, jobIndex: u8, amount: u128 }>;
+      /**
        * An operator has pre-registered for a service blueprint.
        **/
       PreRegistration: AugmentedEvent<ApiType, [operator: AccountId32, blueprintId: u64], { operator: AccountId32, blueprintId: u64 }>;
@@ -1333,6 +1337,10 @@ declare module '@polkadot/api-base/types/events' {
        * A request for a pricing quote has been made.
        **/
       RequestForQuote: AugmentedEvent<ApiType, [requester: AccountId32, blueprintId: u64], { requester: AccountId32, blueprintId: u64 }>;
+      /**
+       * A reward has been distributed to an operator.
+       **/
+      RewardDistributed: AugmentedEvent<ApiType, [operator: AccountId32, serviceId: u64, amount: u128, pricingModel: TanglePrimitivesServicesTypesPricingModelU64], { operator: AccountId32, serviceId: u64, amount: u128, pricingModel: TanglePrimitivesServicesTypesPricingModelU64 }>;
       /**
        * RPC address updated.
        **/
@@ -1361,6 +1369,10 @@ declare module '@polkadot/api-base/types/events' {
        * An Unapplied Slash got discarded.
        **/
       SlashDiscarded: AugmentedEvent<ApiType, [index: u32, operator: AccountId32, serviceId: u64, blueprintId: u64, slashPercent: Percent, era: u32], { index: u32, operator: AccountId32, serviceId: u64, blueprintId: u64, slashPercent: Percent, era: u32 }>;
+      /**
+       * A subscription billing cycle has been processed.
+       **/
+      SubscriptionBillingProcessed: AugmentedEvent<ApiType, [subscriber: AccountId32, serviceId: u64, jobIndex: u8, amount: u128, blockNumber: u64], { subscriber: AccountId32, serviceId: u64, jobIndex: u8, amount: u128, blockNumber: u64 }>;
       /**
        * An Operator has an unapplied slash.
        **/

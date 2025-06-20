@@ -1364,6 +1364,11 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       userServices: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<BTreeSet<u64>>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
       /**
+       * Tracks subscription count per user to prevent spam
+       * User -> Subscription Count
+       **/
+      userSubscriptionCount: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<u32>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
        * Generic query
        **/
       [key: string]: QueryableStorageEntry<ApiType>;
