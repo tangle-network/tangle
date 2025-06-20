@@ -17,9 +17,10 @@
 use super::BoundedString;
 use educe::Educe;
 use frame_support::pallet_prelude::*;
+use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize};
-use sp_core::{H160, RuntimeDebug};
+use sp_core::{Get, H160, RuntimeDebug};
 use sp_runtime::{Percent, traits::AtLeast32BitUnsigned};
 use sp_staking::EraIndex;
 use sp_std::fmt::Display;
@@ -27,7 +28,11 @@ use sp_std::fmt::Display;
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, string::ToString, vec, vec::Vec};
 
-use super::{Constraints, field::FieldType};
+use super::{Constraints, ServiceBlueprint, field::FieldType};
+use crate::BlueprintId;
+
+/// Maximum length for metadata fields
+pub const MAX_METADATA_LENGTH: u32 = 1024;
 
 /// An error that can occur during type checking.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
@@ -406,4 +411,83 @@ pub struct UnappliedSlash<AccountId> {
 	pub operator: AccountId,
 	/// The slash percentage
 	pub slash_percent: Percent,
+}
+
+pub type ServiceId = u64;
+
+/// Defines the different pricing models for services.
+#[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum PricingModel<BlockNumber, Balance> {
+	/// A one-time payment for the service.
+	PayOnce {
+		/// The total amount to be paid.
+		amount: Balance,
+	},
+	/// A subscription-based model with recurring payments.
+	Subscription {
+		/// The amount to be paid per interval.
+		rate_per_interval: Balance,
+		/// The duration of each billing interval.
+		interval: BlockNumber,
+		/// An optional end block for the subscription.
+		maybe_end: Option<BlockNumber>,
+	},
+	/// An event-driven model where rewards are based on reported events.
+	EventDriven {
+		/// The reward amount per reported event.
+		reward_per_event: Balance,
+	},
+}
+
+impl<BlockNumber, Balance: Default> Default for PricingModel<BlockNumber, Balance> {
+	fn default() -> Self {
+		PricingModel::PayOnce { amount: Balance::default() }
+	}
+}
+
+/// Price targets for service pricing (placeholder type)
+#[derive(Clone, Debug, PartialEq, Eq, Encode, Decode, TypeInfo, MaxEncodedLen, Default)]
+pub struct PriceTargets {
+	/// Placeholder field - this type is not currently used
+	pub _placeholder: u8,
+}
+
+/// Blueprint data.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub struct BlueprintData<AccountId, AssetId: AssetIdT, C: Constraints> {
+	/// The owner of the service blueprint.
+	pub owner: AccountId,
+	/// The metadata for the service blueprint.
+	pub metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
+	/// The type definition of the service blueprint.
+	pub typedef: ServiceBlueprint<C>,
+	/// The membership model for the service blueprint.
+	pub membership_model: MembershipModel,
+	/// The security requirements for the service blueprint.
+	pub security_requirements: Vec<AssetSecurityRequirement<AssetId>>,
+	/// The price targets for the service blueprint.
+	pub price_targets: Option<PriceTargets>,
+	// Note: pricing_model removed since pricing is now handled at the job level
+}
+
+/// Represents an instance of a service.
+#[derive(Encode, Decode, TypeInfo, Clone, PartialEq, Eq, RuntimeDebug)]
+pub struct Instance<
+	AccountId,
+	AssetId: AssetIdT,
+	MaxPermittedCallers: Get<u32>,
+	MaxOperators: Get<u32>,
+> {
+	/// The owner of the service instance.
+	pub owner: AccountId,
+	/// The blueprint ID from which this service instance was created.
+	pub blueprint: BlueprintId,
+	/// The set of permitted callers for this service instance.
+	pub permitted_callers: BoundedBTreeSet<AccountId, MaxPermittedCallers>,
+	/// The list of operators currently servicing this instance, along with their security
+	/// commitments.
+	pub operator_security_commitments:
+		BoundedVec<(AccountId, Vec<AssetSecurityCommitment<AssetId>>), MaxOperators>,
+	// Note: pricing_model and last_billed removed since payments are now handled per job call
 }

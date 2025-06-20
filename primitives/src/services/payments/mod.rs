@@ -14,26 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Services primitives.
+//! Payment system for the Services pallet.
+//!
+//! This module provides a comprehensive payment system that supports multiple pricing models:
+//! - PayOnce: One-time payment services
+//! - Subscription: Recurring payment services
+//! - EventDriven: Payment based on events processed
+//!
+//! The system is organized into several modules:
+//! - `types`: Core payment types and enums
+//! - `billing`: Billing calculation logic and state management
+//! - `traits`: Traits for payment operations and reward recording
 
-pub mod constraints;
-pub mod evm;
-pub mod field;
-pub mod jobs;
-pub mod payments;
-pub mod pricing;
-pub mod qos;
-pub mod service;
-pub mod sources;
+pub mod billing;
+pub mod traits;
 pub mod types;
 
-pub use constraints::*;
-pub use evm::*;
-pub use field::*;
-pub use jobs::*;
-pub use payments::*;
-pub use pricing::*;
-pub use qos::*;
-pub use service::*;
-pub use sources::*;
+// Re-export commonly used types and traits
+pub use traits::*;
 pub use types::*;
+
+// Re-export pricing models from parent types module for convenience
+pub use super::types::PricingModel;

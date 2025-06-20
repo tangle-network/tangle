@@ -68,7 +68,7 @@ fn create_service_blueprint() {
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
 
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint,));
+		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		let next_id = Services::next_blueprint_id();
 		assert_eq!(next_id, 1);

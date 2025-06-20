@@ -1,17 +1,17 @@
-use crate::{Call, Config, Pallet};
-use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
+use super::*;
+use crate::OriginFor;
+use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
-use parity_scale_codec::{Decode, Encode};
 use scale_info::prelude::boxed::Box;
 use sp_core::{ByteArray, H160, crypto::Pair, ecdsa};
 use sp_runtime::{KeyTypeId, Percent};
-use sp_std::{prelude::*, vec};
+use sp_std::vec;
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
 	BoundedString, Field, FieldType, JobDefinition, JobMetadata,
 	MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelType,
-	OperatorPreferences, ServiceBlueprint, ServiceMetadata,
+	OperatorPreferences, PricingModel, ServiceBlueprint, ServiceMetadata,
 };
 
 pub type AssetId = u32;
@@ -40,9 +40,8 @@ pub(crate) fn get_security_commitment<T: Config>(
 }
 
 pub(crate) fn test_ecdsa_key() -> [u8; 65] {
-	let seed = b"benchmarking_deterministic_key_seed_123";
-	let ecdsa_key = sp_core::ecdsa::Pair::from_seed_slice(seed)
-		.expect("Should be able to create key from seed");
+	let seed = [1u8; 32];
+	let ecdsa_key = sp_core::ecdsa::Pair::from_seed(&seed);
 	let secret = k256::ecdsa::SigningKey::from_slice(&ecdsa_key.seed())
 		.expect("Should be able to create a secret key from a seed");
 	let verifying_key = k256::ecdsa::VerifyingKey::from(secret);
@@ -51,7 +50,7 @@ pub(crate) fn test_ecdsa_key() -> [u8; 65] {
 }
 
 fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
-	T::AccountId::decode(&mut &[id; 32][..]).unwrap()
+	frame_benchmarking::account("account", id as u32, 0)
 }
 
 fn operator_preferences<T: Config>() -> OperatorPreferences<T::Constraints> {
@@ -61,33 +60,25 @@ fn operator_preferences<T: Config>() -> OperatorPreferences<T::Constraints> {
 	}
 }
 
-fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints> {
-	#[allow(deprecated)]
+fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
 	ServiceBlueprint {
-		metadata: ServiceMetadata {
-			name: "CGGMP21 TSS".to_owned().try_into().unwrap(),
-			..Default::default()
-		},
-		manager: BlueprintServiceManager::Evm(CGGMP21_BLUEPRINT),
+		metadata: ServiceMetadata { name: "CGGMP21 TSS".try_into().unwrap(), ..Default::default() },
+		manager: BlueprintServiceManager::Evm(H160::from_slice(&[0u8; 20])),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
 		jobs: vec![
 			JobDefinition {
-				metadata: JobMetadata {
-					name: "keygen".to_owned().try_into().unwrap(),
-					..Default::default()
-				},
+				metadata: JobMetadata { name: "keygen".try_into().unwrap(), ..Default::default() },
 				params: vec![FieldType::Uint8].try_into().unwrap(),
 				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
+				pricing_model: PricingModel::PayOnce { amount: 100u128 },
 			},
 			JobDefinition {
-				metadata: JobMetadata {
-					name: "sign".to_owned().try_into().unwrap(),
-					..Default::default()
-				},
+				metadata: JobMetadata { name: "sign".try_into().unwrap(), ..Default::default() },
 				params: vec![FieldType::Uint64, FieldType::List(Box::new(FieldType::Uint8))]
 					.try_into()
 					.unwrap(),
 				result: vec![FieldType::List(Box::new(FieldType::Uint8))].try_into().unwrap(),
+				pricing_model: PricingModel::PayOnce { amount: 50u128 },
 			},
 		]
 		.try_into()
@@ -98,8 +89,23 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<<T as Config>::Constraints
 		supported_membership_models: vec![MembershipModelType::Fixed, MembershipModelType::Dynamic]
 			.try_into()
 			.unwrap(),
-		recommended_resources: Default::default(),
 	}
+}
+
+fn create_test_blueprint<T: Config>(
+	origin: OriginFor<T>,
+	blueprint: ServiceBlueprint<T::Constraints>,
+) -> Result<(), sp_runtime::DispatchError> {
+	Pallet::<T>::create_blueprint(
+		origin,
+		Default::default(),                          // metadata
+		blueprint,                                   // typedef
+		MembershipModel::Fixed { min_operators: 1 }, // membership_model
+		vec![],                                      // security_requirements
+		None,                                        // price_targets
+	)
+	.map(|_| ())
+	.map_err(|e| e.error)
 }
 
 benchmarks! {
@@ -112,12 +118,19 @@ benchmarks! {
 	create_blueprint {
 		let alice = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-	}: _(RawOrigin::Signed(alice.clone()), blueprint)
+	}: _(
+		RawOrigin::Signed(alice.clone()),
+		Default::default(),  // metadata
+		blueprint,           // typedef
+		MembershipModel::Fixed { min_operators: 1 }, // membership_model
+		vec![],              // security_requirements
+		None                 // price_targets
+	)
 
 	pre_register {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 
@@ -127,7 +140,7 @@ benchmarks! {
 	register {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
@@ -138,7 +151,7 @@ benchmarks! {
 	unregister {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
@@ -156,7 +169,7 @@ benchmarks! {
 	update_rpc_address {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
@@ -176,7 +189,7 @@ benchmarks! {
 	request {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let operator_preference = operator_preferences::<T>();
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
@@ -235,7 +248,7 @@ benchmarks! {
 	approve {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 
@@ -284,16 +297,18 @@ benchmarks! {
 			MembershipModel::Fixed { min_operators: 3 },
 		);
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0, vec![
-		get_security_commitment::<T>(USDC.into(), 10),
-		get_security_commitment::<T>(WETH.into(), 10),
-	])
+		let security_commitments = vec![
+			get_security_commitment::<T>(USDC.into(), 10),
+			get_security_commitment::<T>(WETH.into(), 10),
+		];
+
+	}: _(RawOrigin::Signed(charlie.clone()), 0, security_commitments)
 
 
 	reject {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let operator_preference = operator_preferences::<T>();
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
@@ -347,7 +362,7 @@ benchmarks! {
 	terminate {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let operator_preference = operator_preferences::<T>();
 
@@ -402,7 +417,7 @@ benchmarks! {
 	call {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 
 		let operator_preference = operator_preferences::<T>();
@@ -460,11 +475,9 @@ benchmarks! {
 		)
 
 	submit_result {
-		use sp_core::ByteArray;
-
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let operator_preference = operator_preferences::<T>();
 
@@ -528,7 +541,7 @@ benchmarks! {
 			RawOrigin::Signed(bob.clone()),
 			0,
 			keygen_job_call_id,
-			vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())].try_into().unwrap()
+			vec![Field::from(BoundedVec::try_from(dkg.to_raw().to_vec()).unwrap())].try_into().unwrap()
 		)
 
 	heartbeat {
@@ -542,8 +555,8 @@ benchmarks! {
 		let blueprint_id = 0u64;
 		let service_id = Pallet::<T>::next_service_request_id();
 
-		let mut blueprint = cggmp21_blueprint::<T>();
-		Pallet::<T>::create_blueprint(RawOrigin::Signed(creator.clone()).into(), blueprint.clone()).unwrap();
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint);
 
 		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
 		let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
@@ -596,7 +609,7 @@ benchmarks! {
 	slash {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
@@ -629,7 +642,7 @@ benchmarks! {
 	dispute {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= Pallet::<T>::create_blueprint(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob: T::AccountId =  mock_account_id::<T>(2u8);
 		let operator_preference = operator_preferences::<T>();
@@ -665,6 +678,200 @@ benchmarks! {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 	}: _(RawOrigin::Root, H160::zero())
 
+	// Join a service as an operator
+	join_service {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+		// Create a service instance
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+	}: _(RawOrigin::Signed(charlie.clone()), 0, vec![get_security_commitment::<T>(USDC.into(), 10)])
+
+	// Leave a service as an operator
+	leave_service {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
+		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+		// Create a service instance with dynamic membership
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(3) }
+		);
+
+	}: _(RawOrigin::Signed(charlie.clone()), 0)
+
+	// Benchmark payment validation for pay-once services
+	validate_payment_amount_pay_once {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let (_, blueprint) = Pallet::<T>::blueprints(0).unwrap();
+		let amount = 1000_u32.into();
+	}: {
+		let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
+	}
+
+	// Benchmark payment processing for subscription services
+	process_subscription_payment {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+		// Create a service instance
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+		let service_id = 0;
+		let job_index = 0;
+		let call_id = 0;
+		let subscriber = alice.clone();
+		let rate_per_interval = 100u32.into();
+		let interval = 10u32.into();
+		let maybe_end = None;
+		let current_block = frame_system::Pallet::<T>::block_number();
+	}: {
+		let _ = Pallet::<T>::process_job_subscription_payment(
+			service_id,
+			job_index,
+			call_id,
+			&subscriber, // caller (subscriber authorizes their own payment)
+			&subscriber, // payer
+			rate_per_interval,
+			interval,
+			maybe_end,
+			current_block
+		);
+	}
+
+	// Benchmark event-driven payment processing
+	process_event_driven_payment {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+		// Create a service instance
+		let _= Pallet::<T>::request(
+			RawOrigin::Signed(alice.clone()).into(),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 1 }
+		);
+
+		let service_id = 0;
+		let job_index = 0;
+		let call_id = 0;
+		let subscriber = alice.clone();
+		let reward_per_event = 10u32.into();
+		let event_count = 5;
+	}: {
+		let _ = Pallet::<T>::process_job_event_driven_payment(
+			service_id,
+			job_index,
+			call_id,
+			&subscriber, // caller (subscriber authorizes their own payment)
+			&subscriber, // payer
+			reward_per_event,
+			event_count
+		);
+	}
+
+	// Benchmark subscription payments processing on block
+	process_subscription_payments_on_block {
+		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let blueprint = cggmp21_blueprint::<T>();
+		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+
+		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let operator_preference = operator_preferences::<T>();
+		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+
+		// Create multiple service instances to test batch processing
+		for i in 0..5 {
+			let requester: T::AccountId = mock_account_id::<T>((10 + i) as u8);
+			let _= Pallet::<T>::request(
+				RawOrigin::Signed(requester).into(),
+				None,
+				0,
+				vec![alice.clone()],
+				vec![bob.clone()],
+				Default::default(),
+				vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+				100_u32.into(),
+				Asset::Custom(USDC.into()),
+				0_u32.into(),
+				MembershipModel::Fixed { min_operators: 1 }
+			);
+		}
+
+		let current_block = 100_u32.into();
+	}: {
+		let _ = Pallet::<T>::process_subscription_payments_on_block(current_block);
+	}
 }
 
 // Define the module and associated types for the benchmarks

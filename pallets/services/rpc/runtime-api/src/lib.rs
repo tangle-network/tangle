@@ -32,8 +32,8 @@ sp_api::decl_runtime_apis! {
 	pub trait ServicesApi<C, AccountId, AssetId>
 	where
 		C: Constraints,
-		AccountId: Codec + MaybeDisplay + Serialize,
-		AssetId: AssetIdT,
+		AccountId: Codec + MaybeDisplay + Serialize + Clone + PartialEq + Eq + core::fmt::Debug,
+		AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 	{
 		/// Query all the services that this operator is providing along with their blueprints.
 		///

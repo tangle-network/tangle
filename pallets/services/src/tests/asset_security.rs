@@ -24,12 +24,25 @@ fn test_security_requirements_validation() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
-		// Register operator
+		// Register operators
 		assert_ok!(join_and_register(
 			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
+
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
 			test_ecdsa_key(),
 			1000,
@@ -126,12 +139,25 @@ fn test_security_commitment_validation() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 		let bob = mock_pub_key(BOB);
 		let eve = mock_pub_key(EVE);
-		// Register operator
+		// Register operators
 		assert_ok!(join_and_register(
 			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
+
+		let charlie = mock_pub_key(CHARLIE);
+		assert_ok!(join_and_register(
+			charlie.clone(),
 			0,
 			test_ecdsa_key(),
 			1000,
@@ -145,45 +171,120 @@ fn test_security_commitment_validation() {
 			vec![alice.clone()],
 			vec![bob.clone()],
 			Default::default(),
-			vec![get_security_requirement(WETH, &[10, 20]),],
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
 			100,
 			Asset::Custom(USDC),
 			0,
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 		// Test Case 1: Commitment below minimum exposure
+		let security_commitments_1 = vec![get_security_commitment(WETH, 5)];
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-				get_security_commitment(WETH, 5)
-			],),
+			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments_1),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
+
+		// Create second service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
 		// Test Case 2: Commitment above maximum exposure
+		let security_commitments_2 = vec![get_security_commitment(WETH, 25)];
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-				get_security_commitment(WETH, 25)
-			],),
+			Services::approve(RuntimeOrigin::signed(bob.clone()), 1, security_commitments_2),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-		// Test Case 3: Missing required asset commitment (native asset)
+
+		// Create third service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+		// Test Case 3: Commitment with correct exposure for both required assets
+		let security_commitments_3 =
+			vec![get_security_commitment(TNT, 15), get_security_commitment(WETH, 15)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			2,
+			security_commitments_3
+		));
+
+		// Create fourth service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+		// Test Case 4: Missing asset commitment
+		let security_commitments_4 = vec![get_security_commitment(USDC, 15)];
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-				get_security_commitment(WETH, 15)
-			],),
+			Services::approve(RuntimeOrigin::signed(charlie.clone()), 3, security_commitments_4),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-		// Test Case 4: Wrong asset provided
+
+		// Create fifth service request
+		assert_ok!(Services::request(
+			RuntimeOrigin::signed(eve.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement(TNT, &[10, 20]), // Include native asset requirement
+				get_security_requirement(WETH, &[10, 20]),
+			],
+			100,
+			Asset::Custom(USDC),
+			0,
+			MembershipModel::Fixed { min_operators: 1 },
+		));
+		// Test Case 5: Extra asset commitment
+		let security_commitments_5 =
+			vec![get_security_commitment(WETH, 15), get_security_commitment(TNT, 15)];
 		assert_err!(
-			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-				get_security_commitment(USDC, 15)
-			],),
+			Services::approve(RuntimeOrigin::signed(charlie.clone()), 4, security_commitments_5),
 			Error::<Runtime>::InvalidSecurityCommitments
 		);
-		// Test Case 4: Valid commitment
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 15),
-			get_security_commitment(TNT, 15)
-		],));
 	});
 }
 
@@ -194,7 +295,11 @@ fn test_exposure_calculations() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
@@ -221,6 +326,7 @@ fn test_exposure_calculations() {
 			vec![bob.clone(), charlie.clone(), dave.clone()],
 			Default::default(),
 			vec![
+				get_security_requirement(TNT, &[10, 30]), // Include native asset requirement
 				get_security_requirement(WETH, &[10, 30]),
 				get_security_requirement(USDC, &[15, 25]),
 			],
@@ -231,23 +337,38 @@ fn test_exposure_calculations() {
 		));
 
 		// Test different exposure combinations
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
+		let security_commitments_bob = vec![
+			get_security_commitment(TNT, 20),
 			get_security_commitment(WETH, 20),
 			get_security_commitment(USDC, 20),
-			get_security_commitment(TNT, 20)
-		],));
+		];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitments_bob
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
+		let security_commitments_charlie = vec![
+			get_security_commitment(TNT, 10),
 			get_security_commitment(WETH, 25),
 			get_security_commitment(USDC, 15),
-			get_security_commitment(TNT, 10),
-		],));
+		];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitments_charlie
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
+		let security_commitments_dave = vec![
+			get_security_commitment(TNT, 10),
 			get_security_commitment(WETH, 15),
 			get_security_commitment(USDC, 20),
-			get_security_commitment(TNT, 10),
-		],));
+		];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitments_dave
+		));
 
 		let service = Instances::<Runtime>::get(0).unwrap();
 		let operator_security_commitments = service.operator_security_commitments;
@@ -277,7 +398,11 @@ fn test_exposure_limits() {
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		let alice = mock_pub_key(ALICE);
 		let blueprint = cggmp21_blueprint();
-		assert_ok!(Services::create_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
+		assert_ok!(create_test_blueprint_with_pricing(
+			RuntimeOrigin::signed(alice.clone()),
+			blueprint,
+			PricingModel::PayOnce { amount: 0 }
+		));
 
 		let bob = mock_pub_key(BOB);
 		let charlie = mock_pub_key(CHARLIE);
@@ -309,20 +434,29 @@ fn test_exposure_limits() {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(WETH, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_bob_1 =
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			security_commitments_bob_1
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 0, vec![
-			get_security_commitment(WETH, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_charlie_1 =
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			0,
+			security_commitments_charlie_1
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(dave.clone()), 0, vec![
-			get_security_commitment(WETH, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_dave_1 =
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(dave.clone()),
+			0,
+			security_commitments_dave_1
+		));
 
 		// Create second service that shares the same security (overlapping exposures)
 		assert_ok!(Services::request(
@@ -339,15 +473,21 @@ fn test_exposure_limits() {
 			MembershipModel::Fixed { min_operators: 2 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 1, vec![
-			get_security_commitment(WETH, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_bob_2 =
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			1,
+			security_commitments_bob_2
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 1, vec![
-			get_security_commitment(WETH, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_charlie_2 =
+			vec![get_security_commitment(WETH, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			1,
+			security_commitments_charlie_2
+		));
 
 		// Create third service with different asset (USDC)
 		assert_ok!(Services::request(
@@ -364,15 +504,21 @@ fn test_exposure_limits() {
 			MembershipModel::Fixed { min_operators: 2 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 2, vec![
-			get_security_commitment(USDC, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_bob_3 =
+			vec![get_security_commitment(USDC, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			2,
+			security_commitments_bob_3
+		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), 2, vec![
-			get_security_commitment(USDC, 50),
-			get_security_commitment(TNT, 50)
-		],));
+		let security_commitments_charlie_3 =
+			vec![get_security_commitment(USDC, 50), get_security_commitment(TNT, 50)];
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(charlie.clone()),
+			2,
+			security_commitments_charlie_3
+		));
 
 		// Verify all services are active
 		let service0 = Instances::<Runtime>::get(0).unwrap();

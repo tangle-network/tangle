@@ -267,10 +267,6 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxStakeTiers: u32 & AugmentedConst<ApiType>;
       /**
-       * The specific Asset ID for the TNT token.
-       **/
-      tntAssetId: u128 & AugmentedConst<ApiType>;
-      /**
        * Generic const
        **/
       [key: string]: Codec;
@@ -749,6 +745,10 @@ declare module '@polkadot/api-base/types/consts' {
       [key: string]: Codec;
     };
     rewards: {
+      /**
+       * The maximum number of pending reward entries an operator can have.
+       **/
+      maxPendingRewardsPerOperator: u32 & AugmentedConst<ApiType>;
       /**
        * Max length for vault logo URL/data
        **/

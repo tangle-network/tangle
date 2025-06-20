@@ -1,5 +1,5 @@
 use crate::{Config, Error, Instances, Pallet};
-use frame_support::pallet_prelude::*;
+use frame_support::{dispatch::DispatchResult, ensure, pallet_prelude::*};
 use sp_std::vec::Vec;
 use tangle_primitives::services::{
 	AssetSecurityCommitment, MembershipModel, OperatorPreferences, ServiceBlueprint,

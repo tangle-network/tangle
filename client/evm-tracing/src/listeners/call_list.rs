@@ -67,9 +67,8 @@ pub struct Listener {
 	/// (in legacy mode).
 	skip_next_context: bool,
 
-	// /// To handle EvmEvent::Exit no emitted by previous runtimes versions,
-	// /// entries are not inserted directly in `self.entries`.
-	// pending_entries: Vec<(u32, Call)>,
+	/// To handle EvmEvent::Exit no emitted by previous runtimes versions,
+	/// entries are not inserted directly in `self.entries`.
 	/// See `RuntimeEvent::StepResult` event explanatioins.
 	step_result_entry: Option<(u32, Call)>,
 
