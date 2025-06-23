@@ -1706,11 +1706,18 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_credits_rpc_runtime_api::CreditsApi<Block, AccountId, Balance> for Runtime {
+	impl pallet_credits_rpc_runtime_api::CreditsApi<Block, AccountId, Balance, AssetId> for Runtime {
 		fn query_user_credits(
 			account_id: AccountId,
 		) -> Result<Balance, sp_runtime::DispatchError> {
 			Credits::get_accrued_amount(&account_id, None)
+		}
+
+		fn query_user_credits_with_asset(
+			account_id: AccountId,
+			asset_id: AssetId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount_for_asset(&account_id, None, asset_id)
 		}
 	}
 

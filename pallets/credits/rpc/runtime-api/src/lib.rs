@@ -25,10 +25,11 @@ pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;
 
 sp_api::decl_runtime_apis! {
-	pub trait CreditsApi<AccountId, Balance>
+	pub trait CreditsApi<AccountId, Balance, AssetId>
 	where
 		AccountId: Codec + MaybeDisplay + Serialize,
 		Balance: Codec + MaybeDisplay + Serialize,
+		AssetId: Codec + MaybeDisplay + Serialize,
 	{
 		/// Query all the rewards that this operator is providing along with their blueprints.
 		///
@@ -38,6 +39,21 @@ sp_api::decl_runtime_apis! {
 		/// - [`Balance`]: The credits of the account.
 		fn query_user_credits(
 			account_id: AccountId,
+		) -> Result<
+			Balance,
+			sp_runtime::DispatchError,
+		>;
+
+		/// Query credits for a specific asset.
+		///
+		/// ## Arguments
+		/// - `account_id`: The account id.
+		/// - `asset_id`: The asset id to query credits for.
+		/// ## Return
+		/// - [`Balance`]: The credits of the account for the specified asset.
+		fn query_user_credits_with_asset(
+			account_id: AccountId,
+			asset_id: AssetId,
 		) -> Result<
 			Balance,
 			sp_runtime::DispatchError,

@@ -36,14 +36,23 @@ pub use pallet_credits_rpc_runtime_api::CreditsApi as CreditsRuntimeApi;
 
 /// CreditsClient RPC methods.
 #[rpc(client, server)]
-pub trait CreditsApi<BlockHash, AccountId>
+pub trait CreditsApi<BlockHash, AccountId, AssetId>
 where
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 {
 	#[method(name = "credits_queryUserCredits")]
 	fn query_user_credits(
 		&self,
 		account_id: AccountId,
+		at: Option<BlockHash>,
+	) -> RpcResult<Balance>;
+
+	#[method(name = "credits_queryUserCreditsWithAsset")]
+	fn query_user_credits_with_asset(
+		&self,
+		account_id: AccountId,
+		asset_id: AssetId,
 		at: Option<BlockHash>,
 	) -> RpcResult<Balance>;
 }
@@ -62,13 +71,14 @@ impl<C, P> CreditsClient<C, P> {
 	}
 }
 
-impl<C, Block, AccountId> CreditsApiServer<<Block as BlockT>::Hash, AccountId>
+impl<C, Block, AccountId, AssetId> CreditsApiServer<<Block as BlockT>::Hash, AccountId, AssetId>
 	for CreditsClient<C, Block>
 where
 	Block: BlockT,
 	AccountId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
+	AssetId: Codec + MaybeDisplay + core::fmt::Debug + Send + Sync + 'static + Serialize,
 	C: HeaderBackend<Block> + ProvideRuntimeApi<Block> + Send + Sync + 'static,
-	C::Api: CreditsRuntimeApi<Block, AccountId, Balance>,
+	C::Api: CreditsRuntimeApi<Block, AccountId, Balance, AssetId>,
 {
 	fn query_user_credits(
 		&self,
@@ -82,6 +92,23 @@ where
 			Ok(Ok(res)) => Ok(res),
 			Ok(Err(e)) => Err(map_err(format!("{:?}", e), "Unable to query user credits")),
 			Err(e) => Err(map_err(format!("{:?}", e), "Unable to query user credits")),
+		}
+	}
+
+	fn query_user_credits_with_asset(
+		&self,
+		account_id: AccountId,
+		asset_id: AssetId,
+		at: Option<<Block as BlockT>::Hash>,
+	) -> RpcResult<Balance> {
+		let api = self.client.runtime_api();
+		let at = at.unwrap_or_else(|| self.client.info().best_hash);
+
+		match api.query_user_credits_with_asset(at, account_id, asset_id) {
+			Ok(Ok(res)) => Ok(res),
+			Ok(Err(e)) =>
+				Err(map_err(format!("{:?}", e), "Unable to query user credits with asset")),
+			Err(e) => Err(map_err(format!("{:?}", e), "Unable to query user credits with asset")),
 		}
 	}
 }

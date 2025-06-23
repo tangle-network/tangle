@@ -110,7 +110,14 @@ pub mod pallet {
 			+ LockableCurrency<Self::AccountId>;
 
 		/// The Asset ID type used by the Currency trait and MultiAssetDelegationInfo.
-		type AssetId: Parameter + Member + MaybeDisplay + Ord + MaxEncodedLen + Copy + Debug + Default;
+		type AssetId: Parameter
+			+ Member
+			+ MaybeDisplay
+			+ Ord
+			+ MaxEncodedLen
+			+ Copy
+			+ Debug
+			+ Default;
 
 		/// The provider for checking the active TNT stake.
 		/// Ensure BalanceOf<Self> here resolves correctly to T::Currency::Balance.
@@ -327,7 +334,7 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Claim potential credits accrued within the allowed window for a specific asset. 
+		/// Claim potential credits accrued within the allowed window for a specific asset.
 		/// Emits event for off-chain processing.
 		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::claim_credits_with_asset())]
@@ -348,7 +355,11 @@ pub mod pallet {
 
 			// Calculate maximum claimable amount for the specified asset
 			let max_claimable_in_window =
-				Self::update_reward_block_and_get_accrued_amount_for_asset(&who, current_block, asset_id)?;
+				Self::update_reward_block_and_get_accrued_amount_for_asset(
+					&who,
+					current_block,
+					asset_id,
+				)?;
 
 			// Verify requested amount against the calculated allowance
 			ensure!(
@@ -409,13 +420,14 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Set stake tiers for a specific asset. This function can only be called by the configured ForceOrigin.
-		/// Stake tiers must be provided in ascending order by threshold.
+		/// Set stake tiers for a specific asset. This function can only be called by the configured
+		/// ForceOrigin. Stake tiers must be provided in ascending order by threshold.
 		///
 		/// Parameters:
 		/// - `origin`: Must be the ForceOrigin
 		/// - `asset_id`: The asset ID to configure stake tiers for
-		/// - `new_tiers`: A vector of StakeTier structs representing the new tiers configuration for this asset
+		/// - `new_tiers`: A vector of StakeTier structs representing the new tiers configuration
+		///   for this asset
 		///
 		/// Emits `AssetStakeTiersUpdated` on success.
 		///
@@ -632,7 +644,8 @@ pub mod pallet {
 				return Ok(BalanceOf::<T>::zero());
 			}
 
-			// If no asset-specific tiers, check if it's TNT (use global tiers for backward compatibility)
+			// If no asset-specific tiers, check if it's TNT (use global tiers for backward
+			// compatibility)
 			let native_asset_id = Default::default(); // Native asset ID (TNT)
 			if asset_id == native_asset_id {
 				return Ok(Self::get_current_rate(staked_amount));

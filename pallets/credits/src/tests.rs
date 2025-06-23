@@ -4,6 +4,7 @@ use frame_support::{
 	traits::{Currency, Get},
 	BoundedVec,
 };
+
 use frame_system::RawOrigin;
 use pallet_multi_asset_delegation::{CurrentRound, Pallet as MultiAssetDelegation};
 use sp_runtime::traits::{UniqueSaturatedInto, Zero};
@@ -666,8 +667,6 @@ fn set_stake_tiers_works() {
 	});
 }
 
-
-
 #[test]
 fn set_asset_stake_tiers_works() {
 	new_test_ext(vec![]).execute_with(|| {
@@ -677,7 +676,11 @@ fn set_asset_stake_tiers_works() {
 			StakeTier { threshold: 500, rate_per_block: 10 },
 		];
 
-		assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(RuntimeOrigin::root(), custom_asset_id, tiers.clone()));
+		assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+			RuntimeOrigin::root(),
+			custom_asset_id,
+			tiers.clone()
+		));
 
 		// Verify the tiers were stored
 		let stored_tiers = CreditsPallet::<Runtime>::asset_stake_tiers(custom_asset_id).unwrap();
@@ -696,8 +699,365 @@ fn set_asset_stake_tiers_fails_with_non_root() {
 		let tiers = vec![StakeTier { threshold: 100, rate_per_block: 5 }];
 
 		assert_noop!(
-			CreditsPallet::<Runtime>::set_asset_stake_tiers(RuntimeOrigin::signed(ALICE), custom_asset_id, tiers),
+			CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::signed(ALICE),
+				custom_asset_id,
+				tiers
+			),
 			frame_support::error::BadOrigin
 		);
 	});
+}
+
+#[test]
+fn claim_credits_with_asset_fails_for_unconfigured_asset() {
+	new_test_ext(vec![]).execute_with(|| {
+		let alice = ALICE;
+		let operator = BOB;
+		let offchain_account_id: OffchainAccountIdOf<Runtime> =
+			b"alice_account".to_vec().try_into().unwrap();
+		let unconfigured_asset_id = 999u128;
+
+		// Set up delegation so user has some stake and potential credits
+		setup_delegation(alice.clone(), operator.clone(), 2000u128);
+
+		// Advance blocks to accumulate credits
+		run_to_block(10);
+
+		// Get the actual max claimable to use a valid amount
+		let max_claimable = get_max_claimable(alice.clone());
+		let claim_amount = if max_claimable > 0 { max_claimable / 2 } else { 1 };
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::claim_credits_with_asset(
+				RuntimeOrigin::signed(alice),
+				claim_amount,
+				offchain_account_id,
+				unconfigured_asset_id
+			),
+			Error::<Runtime>::AssetRatesNotConfigured
+		);
+	});
+}
+
+/// Tests for assets with different decimal places
+mod decimal_precision_tests {
+	use super::*;
+
+	// Helper function to create an asset with specific decimal places
+	fn create_asset_with_decimals(asset_id: AssetId, admin: AccountId, decimals: u8) {
+		// Ensure the admin has enough balance for asset creation deposits
+		Balances::make_free_balance_be(&admin, 100_000_000);
+
+		// Create the asset
+		assert_ok!(Assets::create(
+			RuntimeOrigin::signed(admin.clone()),
+			asset_id,
+			admin.clone(),
+			1 // min_balance
+		));
+
+		// Set metadata with specific decimals
+		assert_ok!(Assets::set_metadata(
+			RuntimeOrigin::signed(admin),
+			asset_id,
+			format!("Asset{}", asset_id).into_bytes(),
+			format!("AST{}", asset_id).into_bytes(),
+			decimals
+		));
+	}
+
+	// Helper function to calculate amount with decimals (e.g., 1000 tokens with 6 decimals = 1000 *
+	// 10^6)
+	fn amount_with_decimals(base_amount: u128, decimals: u8) -> u128 {
+		base_amount * 10_u128.pow(decimals as u32)
+	}
+
+	#[test]
+	fn credits_work_with_different_decimal_assets() {
+		new_test_ext(vec![]).execute_with(|| {
+			let alice = ALICE;
+
+			// Asset IDs for different tokens
+			let usdc_asset_id = 1u128; // 6 decimals (like real USDC)
+			let btc_asset_id = 2u128; // 8 decimals (like real BTC)
+			let eth_asset_id = 3u128; // 18 decimals (like real ETH)
+
+			// Create assets with different decimal precision
+			create_asset_with_decimals(usdc_asset_id, alice.clone(), 6);
+			create_asset_with_decimals(btc_asset_id, alice.clone(), 8);
+			create_asset_with_decimals(eth_asset_id, alice.clone(), 18);
+
+			// Set up stake tiers for USDC (6 decimals)
+			// 1000 USDC, 5000 USDC, 10000 USDC thresholds
+			let usdc_tiers = vec![
+				StakeTier { threshold: amount_with_decimals(1000, 6), rate_per_block: 5 },
+				StakeTier { threshold: amount_with_decimals(5000, 6), rate_per_block: 15 },
+				StakeTier { threshold: amount_with_decimals(10000, 6), rate_per_block: 25 },
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				usdc_asset_id,
+				usdc_tiers
+			));
+
+			// Set up stake tiers for BTC (8 decimals)
+			// 0.1 BTC, 0.5 BTC, 1 BTC thresholds (scaled for equivalent value to USDC)
+			let btc_tiers = vec![
+				StakeTier { threshold: amount_with_decimals(1, 7), rate_per_block: 5 }, // 0.1 BTC
+				StakeTier { threshold: amount_with_decimals(5, 7), rate_per_block: 15 }, // 0.5 BTC
+				StakeTier { threshold: amount_with_decimals(1, 8), rate_per_block: 25 }, // 1 BTC
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				btc_asset_id,
+				btc_tiers
+			));
+
+			// Set up stake tiers for ETH (18 decimals)
+			// 1 ETH, 5 ETH, 10 ETH thresholds
+			let eth_tiers = vec![
+				StakeTier { threshold: amount_with_decimals(1, 18), rate_per_block: 5 },
+				StakeTier { threshold: amount_with_decimals(5, 18), rate_per_block: 15 },
+				StakeTier { threshold: amount_with_decimals(10, 18), rate_per_block: 25 },
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				eth_asset_id,
+				eth_tiers
+			));
+
+			// Test that asset-specific tiers are configured correctly
+			// This is the main point - ensuring decimal precision doesn't break configuration
+			assert!(CreditsPallet::<Runtime>::asset_stake_tiers(usdc_asset_id).is_some());
+			assert!(CreditsPallet::<Runtime>::asset_stake_tiers(btc_asset_id).is_some());
+			assert!(CreditsPallet::<Runtime>::asset_stake_tiers(eth_asset_id).is_some());
+
+			// Test that rate calculations work with different decimal assets
+			let large_stake = amount_with_decimals(5000, 6); // 5000 USDC
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(large_stake, usdc_asset_id);
+			assert_eq!(rate, Ok(15u128), "USDC tier 2 rate should be 15");
+
+			let btc_stake = amount_with_decimals(6, 7); // 0.6 BTC (should hit tier 2)
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(btc_stake, btc_asset_id);
+			assert_eq!(rate, Ok(15u128), "BTC tier 2 rate should be 15");
+
+			let eth_stake = amount_with_decimals(7, 18); // 7 ETH
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(eth_stake, eth_asset_id);
+			assert_eq!(rate, Ok(15u128), "ETH tier 2 rate should be 15");
+		});
+	}
+
+	#[test]
+	fn asset_tiers_handle_large_decimal_differences() {
+		new_test_ext(vec![]).execute_with(|| {
+			let alice = ALICE;
+
+			// Create assets with extreme decimal differences
+			let low_decimal_asset = 10u128; // 2 decimals (like some old tokens)
+			let high_decimal_asset = 11u128; // 24 decimals (theoretical extreme)
+
+			create_asset_with_decimals(low_decimal_asset, alice.clone(), 2);
+			create_asset_with_decimals(high_decimal_asset, alice.clone(), 24);
+
+			// Set up stake tiers for low decimal asset (2 decimals)
+			// Thresholds: 100, 500, 1000 tokens
+			let low_decimal_tiers = vec![
+				StakeTier { threshold: amount_with_decimals(100, 2), rate_per_block: 10 },
+				StakeTier { threshold: amount_with_decimals(500, 2), rate_per_block: 20 },
+				StakeTier { threshold: amount_with_decimals(1000, 2), rate_per_block: 30 },
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				low_decimal_asset,
+				low_decimal_tiers
+			));
+
+			// Set up stake tiers for high decimal asset (24 decimals)
+			// Thresholds: 100, 500, 1000 tokens
+			let high_decimal_tiers = vec![
+				StakeTier { threshold: amount_with_decimals(100, 24), rate_per_block: 10 },
+				StakeTier { threshold: amount_with_decimals(500, 24), rate_per_block: 20 },
+				StakeTier { threshold: amount_with_decimals(1000, 24), rate_per_block: 30 },
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				high_decimal_asset,
+				high_decimal_tiers
+			));
+
+			// Test that asset-specific tiers are configured
+			assert!(CreditsPallet::<Runtime>::asset_stake_tiers(low_decimal_asset).is_some());
+			assert!(CreditsPallet::<Runtime>::asset_stake_tiers(high_decimal_asset).is_some());
+
+			// Test rate calculations with extreme decimal differences
+			let low_decimal_stake = amount_with_decimals(750, 2); // Should hit tier 2 (rate 20)
+			let rate = CreditsPallet::<Runtime>::get_current_rate_for_asset(
+				low_decimal_stake,
+				low_decimal_asset,
+			);
+			assert_eq!(rate, Ok(20u128), "Low decimal asset tier 2 rate should be 20");
+
+			let high_decimal_stake = amount_with_decimals(750, 24); // Should hit tier 2 (rate 20)
+			let rate = CreditsPallet::<Runtime>::get_current_rate_for_asset(
+				high_decimal_stake,
+				high_decimal_asset,
+			);
+			assert_eq!(rate, Ok(20u128), "High decimal asset tier 2 rate should be 20");
+		});
+	}
+
+	#[test]
+	fn stake_tier_boundaries_work_with_decimals() {
+		new_test_ext(vec![]).execute_with(|| {
+			let alice = ALICE;
+
+			let token_asset_id = 20u128; // 6 decimals
+			create_asset_with_decimals(token_asset_id, alice.clone(), 6);
+
+			// Set up tiers with precise boundaries
+			let tiers = vec![
+				StakeTier { threshold: amount_with_decimals(1000, 6), rate_per_block: 5 }, /* 1000.000000 */
+				StakeTier { threshold: amount_with_decimals(5000, 6), rate_per_block: 10 }, /* 5000.000000 */
+				StakeTier { threshold: amount_with_decimals(10000, 6), rate_per_block: 15 }, /* 10000.000000 */
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				token_asset_id,
+				tiers
+			));
+
+			// For this test, we'll verify the asset-specific tier logic directly
+			// without mocking complex staking scenarios
+
+			// Test rate calculation for different stake amounts at tier boundaries
+			let stake_exact = amount_with_decimals(1000, 6); // Exactly 1000.000000 tokens
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(stake_exact, token_asset_id);
+			assert_eq!(rate, Ok(5u128));
+
+			let stake_above = amount_with_decimals(1000, 6) + 1; // 1000.000001 tokens
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(stake_above, token_asset_id);
+			assert_eq!(rate, Ok(5u128));
+
+			let stake_tier2 = amount_with_decimals(7500, 6); // 7500.000000 tokens
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(stake_tier2, token_asset_id);
+			assert_eq!(rate, Ok(10u128));
+
+			let stake_tier3 = amount_with_decimals(15000, 6); // 15000.000000 tokens
+			let rate =
+				CreditsPallet::<Runtime>::get_current_rate_for_asset(stake_tier3, token_asset_id);
+			assert_eq!(rate, Ok(15u128));
+		});
+	}
+
+	#[test]
+	fn zero_decimal_asset_works() {
+		new_test_ext(vec![]).execute_with(|| {
+			let alice = ALICE;
+
+			let zero_decimal_asset = 30u128;
+			create_asset_with_decimals(zero_decimal_asset, alice.clone(), 0);
+
+			// Set up tiers for zero decimal asset (whole numbers only)
+			let tiers = vec![
+				StakeTier { threshold: 100, rate_per_block: 8 },
+				StakeTier { threshold: 500, rate_per_block: 16 },
+				StakeTier { threshold: 1000, rate_per_block: 24 },
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				zero_decimal_asset,
+				tiers
+			));
+
+			// Test rate calculation directly for 750 tokens (should hit tier 2)
+			let stake_amount = 750u128;
+			let rate = CreditsPallet::<Runtime>::get_current_rate_for_asset(
+				stake_amount,
+				zero_decimal_asset,
+			);
+			assert_eq!(rate, Ok(16u128));
+
+			// Set up delegation for testing claim functionality
+			let operator = BOB;
+			setup_delegation(alice.clone(), operator.clone(), stake_amount);
+
+			// Advance blocks and claim credits
+			run_to_block(10);
+
+			let claim_amount = 80u128;
+			let offchain_account_id: OffchainAccountIdOf<Runtime> =
+				b"alice_zero_decimal".to_vec().try_into().unwrap();
+			assert_ok!(CreditsPallet::<Runtime>::claim_credits_with_asset(
+				RuntimeOrigin::signed(alice.clone()),
+				claim_amount,
+				offchain_account_id.clone(),
+				zero_decimal_asset
+			));
+
+			System::assert_has_event(
+				Event::CreditsClaimed {
+					who: alice,
+					amount_claimed: claim_amount,
+					offchain_account_id,
+				}
+				.into(),
+			);
+		});
+	}
+
+	#[test]
+	fn fractional_token_amounts_work_with_high_decimals() {
+		new_test_ext(vec![]).execute_with(|| {
+			let alice = ALICE;
+
+			let high_precision_asset = 40u128; // 18 decimals like ETH
+			create_asset_with_decimals(high_precision_asset, alice.clone(), 18);
+
+			// Set up tiers with fractional thresholds
+			let tiers = vec![
+				StakeTier { threshold: 1_500_000_000_000_000_000, rate_per_block: 12 }, /* 1.5 tokens */
+				StakeTier { threshold: 3_750_000_000_000_000_000, rate_per_block: 24 }, /* 3.75 tokens */
+				StakeTier { threshold: 10_000_000_000_000_000_000, rate_per_block: 36 }, /* 10 tokens */
+			];
+			assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				high_precision_asset,
+				tiers
+			));
+
+			// Test that asset-specific tiers are configured
+			assert!(CreditsPallet::<Runtime>::asset_stake_tiers(high_precision_asset).is_some());
+
+			// Test rate calculation for 2.5 tokens (should hit tier 1: rate 12)
+			let stake_amount = 2_500_000_000_000_000_000u128;
+			let rate = CreditsPallet::<Runtime>::get_current_rate_for_asset(
+				stake_amount,
+				high_precision_asset,
+			);
+			assert_eq!(rate, Ok(12u128), "2.5 token stake should hit tier 1 with rate 12");
+
+			// Test with stake that hits tier 2
+			let stake_tier2 = 5_000_000_000_000_000_000u128; // 5.0 tokens
+			let rate = CreditsPallet::<Runtime>::get_current_rate_for_asset(
+				stake_tier2,
+				high_precision_asset,
+			);
+			assert_eq!(rate, Ok(24u128), "5.0 token stake should hit tier 2 with rate 24");
+
+			// Test with stake that hits tier 3
+			let stake_tier3 = 15_000_000_000_000_000_000u128; // 15.0 tokens
+			let rate = CreditsPallet::<Runtime>::get_current_rate_for_asset(
+				stake_tier3,
+				high_precision_asset,
+			);
+			assert_eq!(rate, Ok(36u128), "15.0 token stake should hit tier 3 with rate 36");
+		});
+	}
 }

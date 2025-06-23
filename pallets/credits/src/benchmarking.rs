@@ -26,10 +26,7 @@ use frame_support::{
 	BoundedVec,
 };
 use frame_system::RawOrigin;
-use sp_runtime::{
-	traits::Zero,
-	Saturating,
-};
+use sp_runtime::{traits::Zero, Saturating};
 use sp_std::prelude::*;
 
 const SEED: u32 = 0;
@@ -156,11 +153,12 @@ mod benchmarks {
 		frame_system::Pallet::<T>::set_block_number(end_block);
 
 		// Calculate a reasonable claim amount based on asset-specific rate
-		let rate = Credits::<T>::get_current_rate_for_asset(stake_amount, asset_id).unwrap_or_else(|_| 1u32.into());
+		let rate = Credits::<T>::get_current_rate_for_asset(stake_amount, asset_id)
+			.unwrap_or_else(|_| 1u32.into());
 		let claim_amount = if rate.is_zero() {
 			1u32.into()
 		} else {
-			// Convert blocks to the appropriate balance type  
+			// Convert blocks to the appropriate balance type
 			let blocks_as_balance: BalanceOf<T> = blocks_to_advance.into();
 			rate.saturating_mul(blocks_as_balance)
 		};
@@ -171,7 +169,12 @@ mod benchmarks {
 			id_str.try_into().expect("ID should not be too long");
 
 		#[extrinsic_call]
-		claim_credits_with_asset(RawOrigin::Signed(account.clone()), claim_amount, bounded_id.clone(), asset_id);
+		claim_credits_with_asset(
+			RawOrigin::Signed(account.clone()),
+			claim_amount,
+			bounded_id.clone(),
+			asset_id,
+		);
 
 		Ok(())
 	}
