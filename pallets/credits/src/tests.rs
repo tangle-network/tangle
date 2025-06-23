@@ -665,3 +665,39 @@ fn set_stake_tiers_works() {
 		assert_eq!(rate_tier2, 2, "Rate should match the tier 2 rate");
 	});
 }
+
+
+
+#[test]
+fn set_asset_stake_tiers_works() {
+	new_test_ext(vec![]).execute_with(|| {
+		let custom_asset_id = 1u128;
+		let tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: 5 },
+			StakeTier { threshold: 500, rate_per_block: 10 },
+		];
+
+		assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(RuntimeOrigin::root(), custom_asset_id, tiers.clone()));
+
+		// Verify the tiers were stored
+		let stored_tiers = CreditsPallet::<Runtime>::asset_stake_tiers(custom_asset_id).unwrap();
+		assert_eq!(stored_tiers.into_inner(), tiers);
+
+		System::assert_last_event(
+			Event::AssetStakeTiersUpdated { asset_id: custom_asset_id }.into(),
+		);
+	});
+}
+
+#[test]
+fn set_asset_stake_tiers_fails_with_non_root() {
+	new_test_ext(vec![]).execute_with(|| {
+		let custom_asset_id = 1u128;
+		let tiers = vec![StakeTier { threshold: 100, rate_per_block: 5 }];
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_asset_stake_tiers(RuntimeOrigin::signed(ALICE), custom_asset_id, tiers),
+			frame_support::error::BadOrigin
+		);
+	});
+}

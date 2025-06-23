@@ -110,7 +110,7 @@ pub mod pallet {
 			+ LockableCurrency<Self::AccountId>;
 
 		/// The Asset ID type used by the Currency trait and MultiAssetDelegationInfo.
-		type AssetId: Parameter + Member + MaybeDisplay + Ord + MaxEncodedLen + Copy + Debug;
+		type AssetId: Parameter + Member + MaybeDisplay + Ord + MaxEncodedLen + Copy + Debug + Default;
 
 		/// The provider for checking the active TNT stake.
 		/// Ensure BalanceOf<Self> here resolves correctly to T::Currency::Balance.
@@ -161,6 +161,18 @@ pub mod pallet {
 	#[pallet::getter(fn stake_tiers)]
 	pub type StoredStakeTiers<T: Config> =
 		StorageValue<_, BoundedVec<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>, ValueQuery>;
+
+	/// Storage for asset-specific staking tiers.
+	/// Each asset can have its own set of stake tiers and rates.
+	#[pallet::storage]
+	#[pallet::getter(fn asset_stake_tiers)]
+	pub type AssetStakeTiers<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AssetId,
+		BoundedVec<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>,
+		OptionQuery,
+	>;
 
 	// --- Genesis Configuration ---
 
@@ -218,6 +230,8 @@ pub mod pallet {
 		},
 		/// Stake tiers were updated.
 		StakeTiersUpdated,
+		/// Asset-specific stake tiers were updated.
+		AssetStakeTiersUpdated { asset_id: T::AssetId },
 	}
 
 	// --- Errors ---
@@ -243,6 +257,8 @@ pub mod pallet {
 		Overflow,
 		/// The stake tiers are too large to fit into the storage.
 		StakeTiersOverflow,
+		/// No stake tiers configured for this asset.
+		AssetRatesNotConfigured,
 	}
 
 	#[pallet::call]
@@ -311,6 +327,44 @@ pub mod pallet {
 			Ok(())
 		}
 
+		/// Claim potential credits accrued within the allowed window for a specific asset. 
+		/// Emits event for off-chain processing.
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::claim_credits())]
+		pub fn claim_credits_with_asset(
+			origin: OriginFor<T>,
+			#[pallet::compact] amount_to_claim: BalanceOf<T>,
+			offchain_account_id: OffchainAccountIdOf<T>,
+			asset_id: T::AssetId,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			ensure!(amount_to_claim > Zero::zero(), Error::<T>::AmountZero);
+			ensure!(
+				offchain_account_id.len() <= T::MaxOffchainAccountIdLength::get() as usize,
+				Error::<T>::InvalidClaimId
+			);
+
+			let current_block = frame_system::Pallet::<T>::block_number();
+
+			// Calculate maximum claimable amount for the specified asset
+			let max_claimable_in_window =
+				Self::update_reward_block_and_get_accrued_amount_for_asset(&who, current_block, asset_id)?;
+
+			// Verify requested amount against the calculated allowance
+			ensure!(
+				amount_to_claim <= max_claimable_in_window,
+				Error::<T>::ClaimAmountExceedsWindowAllowance
+			);
+
+			// Emit event with the *requested* amount
+			Self::deposit_event(Event::CreditsClaimed {
+				who,
+				amount_claimed: amount_to_claim,
+				offchain_account_id,
+			});
+			Ok(())
+		}
+
 		/// Update the stake tiers. This function can only be called by the configured ForceOrigin.
 		/// Stake tiers must be provided in ascending order by threshold.
 		///
@@ -321,7 +375,7 @@ pub mod pallet {
 		/// Emits `StakeTiersUpdated` on success.
 		///
 		/// Weight: O(n) where n is the number of tiers
-		#[pallet::call_index(2)]
+		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::set_stake_tiers())]
 		pub fn set_stake_tiers(
 			origin: OriginFor<T>,
@@ -351,6 +405,52 @@ pub mod pallet {
 
 			// Emit event
 			Self::deposit_event(Event::<T>::StakeTiersUpdated);
+
+			Ok(())
+		}
+
+		/// Set stake tiers for a specific asset. This function can only be called by the configured ForceOrigin.
+		/// Stake tiers must be provided in ascending order by threshold.
+		///
+		/// Parameters:
+		/// - `origin`: Must be the ForceOrigin
+		/// - `asset_id`: The asset ID to configure stake tiers for
+		/// - `new_tiers`: A vector of StakeTier structs representing the new tiers configuration for this asset
+		///
+		/// Emits `AssetStakeTiersUpdated` on success.
+		///
+		/// Weight: O(n) where n is the number of tiers
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::set_stake_tiers())]
+		pub fn set_asset_stake_tiers(
+			origin: OriginFor<T>,
+			asset_id: T::AssetId,
+			new_tiers: Vec<StakeTier<BalanceOf<T>>>,
+		) -> DispatchResult {
+			// Ensure the call is from the configured ForceOrigin
+			T::ForceOrigin::ensure_origin(origin)?;
+
+			// Check that we have at least one tier
+			ensure!(!new_tiers.is_empty(), Error::<T>::EmptyStakeTiers);
+
+			// Ensure tiers are properly sorted by threshold in ascending order
+			for i in 1..new_tiers.len() {
+				ensure!(
+					new_tiers[i - 1].threshold <= new_tiers[i].threshold,
+					Error::<T>::StakeTiersNotSorted
+				);
+			}
+
+			// Try to create a bounded vector
+			let bounded_tiers =
+				BoundedVec::<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>::try_from(new_tiers)
+					.map_err(|_| Error::<T>::StakeTiersOverflow)?;
+
+			// Update storage for the specific asset
+			AssetStakeTiers::<T>::insert(asset_id, bounded_tiers);
+
+			// Emit event
+			Self::deposit_event(Event::<T>::AssetStakeTiersUpdated { asset_id });
 
 			Ok(())
 		}
@@ -515,6 +615,118 @@ pub mod pallet {
 			}
 			// If staked amount is below the lowest threshold, rate is zero.
 			BalanceOf::<T>::zero()
+		}
+
+		/// Get credit emission rate for a specific asset and staked amount
+		pub fn get_current_rate_for_asset(
+			staked_amount: BalanceOf<T>,
+			asset_id: T::AssetId,
+		) -> Result<BalanceOf<T>, DispatchError> {
+			// Try to get asset-specific tiers first
+			if let Some(tiers) = AssetStakeTiers::<T>::get(asset_id) {
+				for tier in tiers.iter().rev() {
+					if staked_amount >= tier.threshold {
+						return Ok(tier.rate_per_block);
+					}
+				}
+				return Ok(BalanceOf::<T>::zero());
+			}
+
+			// If no asset-specific tiers, check if it's TNT (use global tiers for backward compatibility)
+			let native_asset_id = Default::default(); // Native asset ID (TNT)
+			if asset_id == native_asset_id {
+				return Ok(Self::get_current_rate(staked_amount));
+			}
+
+			// No rates configured for this asset
+			Err(Error::<T>::AssetRatesNotConfigured.into())
+		}
+
+		/// Calculate accrued credits for a specific asset
+		pub fn get_accrued_amount_for_asset(
+			who: &T::AccountId,
+			current_block: Option<BlockNumberOf<T>>,
+			asset_id: T::AssetId,
+		) -> Result<BalanceOf<T>, DispatchError> {
+			let current_block =
+				current_block.unwrap_or_else(|| frame_system::Pallet::<T>::block_number());
+			let last_update = LastRewardUpdateBlock::<T>::get(who);
+			if last_update >= current_block {
+				return Ok(Zero::zero());
+			}
+
+			let window = T::ClaimWindowBlocks::get();
+			let start_block = max(last_update, current_block.saturating_sub(window));
+			let effective_end_block = current_block;
+
+			if start_block >= effective_end_block {
+				return Ok(Zero::zero());
+			}
+
+			// Get staked amount for the specified asset
+			let staked_amount = Self::get_staked_amount_for_asset(who, asset_id)?;
+
+			if staked_amount.is_zero() {
+				return Ok(Zero::zero());
+			}
+
+			// Use asset-specific rate calculation
+			let rate = Self::get_current_rate_for_asset(staked_amount, asset_id)?;
+
+			if rate.is_zero() {
+				return Ok(Zero::zero());
+			}
+
+			let blocks_in_window = effective_end_block.saturating_sub(start_block);
+			if blocks_in_window.is_zero() {
+				return Ok(Zero::zero());
+			}
+
+			let blocks_in_window_u32: u32 = blocks_in_window.unique_saturated_into();
+			if blocks_in_window_u32 == 0 {
+				return Ok(Zero::zero());
+			}
+
+			let new_credits = rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window_u32));
+			Ok(new_credits)
+		}
+
+		/// Get staked amount for a specific asset
+		fn get_staked_amount_for_asset(
+			who: &T::AccountId,
+			asset_id: T::AssetId,
+		) -> Result<BalanceOf<T>, DispatchError> {
+			let asset_type = Self::asset_id_to_asset_type(asset_id)?;
+
+			let staked_amount =
+				T::MultiAssetDelegationInfo::get_user_deposit_by_asset_type(who, asset_type)
+					.unwrap_or(Zero::zero());
+
+			Ok(staked_amount)
+		}
+
+		/// Convert AssetId to AssetType
+		fn asset_id_to_asset_type(asset_id: T::AssetId) -> Result<AssetType, DispatchError> {
+			let native_asset_id = Default::default(); // Create default AssetId (should be 0 for TNT)
+			if asset_id == native_asset_id {
+				// Native asset ID (TNT)
+				Ok(AssetType::Tnt)
+			} else {
+				// For custom assets, we need to map them appropriately
+				// This might need to be extended based on your asset system
+				Ok(AssetType::Tnt) // Placeholder - you may need to implement proper mapping
+			}
+		}
+
+		/// Update reward block and get accrued amount for a specific asset
+		pub fn update_reward_block_and_get_accrued_amount_for_asset(
+			who: &T::AccountId,
+			current_block: BlockNumberOf<T>,
+			asset_id: T::AssetId,
+		) -> Result<BalanceOf<T>, DispatchError> {
+			let result = Self::get_accrued_amount_for_asset(who, Some(current_block), asset_id);
+			LastRewardUpdateBlock::<T>::insert(who, current_block);
+			result
 		}
 	}
 }
