@@ -7,7 +7,7 @@ use services::AssetIdT;
 use sp_std::vec::Vec;
 
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub enum AssetType {
+pub enum AssetType<AssetId> {
 	/// This includes all lstTNT assets
 	Tnt,
 	/// This includes all EVM assets

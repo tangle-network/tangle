@@ -126,7 +126,7 @@ pub mod pallet {
 			BalanceOf<Self>,
 			BlockNumberOf<Self>,
 			Self::AssetId,
-			AssetType,
+			AssetType<Self::AssetId>,
 		>;
 
 		/// The conversion rate for burning TNT to credits.
@@ -719,7 +719,9 @@ pub mod pallet {
 		}
 
 		/// Convert AssetId to AssetType
-		fn asset_id_to_asset_type(asset_id: T::AssetId) -> Result<AssetType, DispatchError> {
+		fn asset_id_to_asset_type(
+			asset_id: T::AssetId,
+		) -> Result<AssetType<T::AssetId>, DispatchError> {
 			let native_asset_id = Default::default(); // Create default AssetId (should be 0 for TNT)
 			if asset_id == native_asset_id {
 				// Native asset ID (TNT)

@@ -26,8 +26,13 @@ use tangle_primitives::{
 };
 
 impl<T: crate::Config>
-	MultiAssetDelegationInfo<T::AccountId, BalanceOf<T>, BlockNumberFor<T>, T::AssetId, AssetType>
-	for crate::Pallet<T>
+	MultiAssetDelegationInfo<
+		T::AccountId,
+		BalanceOf<T>,
+		BlockNumberFor<T>,
+		T::AssetId,
+		AssetType<T::AssetId>,
+	> for crate::Pallet<T>
 {
 	fn get_current_round() -> RoundIndex {
 		Self::current_round()
@@ -85,12 +90,13 @@ impl<T: crate::Config>
 
 	fn get_user_deposit_by_asset_type(
 		who: &T::AccountId,
-		asset_type: AssetType,
+		asset_type: AssetType<T::AssetId>,
 	) -> Option<BalanceOf<T>> {
 		Delegators::<T>::get(who).and_then(|metadata| {
-			let is_matching = |asset: &Asset<T::AssetId>| match asset_type {
-				AssetType::Evm => matches!(asset, Asset::Erc20(_)),
+			let is_matching = |asset: &Asset<T::AssetId>| match &asset_type {
+				AssetType::Evm(_) => matches!(asset, Asset::Erc20(_)),
 				AssetType::Tnt => matches!(asset, Asset::Custom(_)),
+				AssetType::Native(_) => matches!(asset, Asset::Custom(_)),
 			};
 
 			let total = metadata

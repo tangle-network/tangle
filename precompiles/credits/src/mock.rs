@@ -362,8 +362,13 @@ pub type AssetId = u128;
 
 pub struct MockDelegationManager;
 impl
-	tangle_primitives::traits::MultiAssetDelegationInfo<AccountId, Balance, u64, AssetId, AssetType>
-	for MockDelegationManager
+	tangle_primitives::traits::MultiAssetDelegationInfo<
+		AccountId,
+		Balance,
+		u64,
+		AssetId,
+		AssetType<AssetId>,
+	> for MockDelegationManager
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
 		Default::default()
@@ -402,7 +407,10 @@ impl
 		None
 	}
 
-	fn get_user_deposit_by_asset_type(_who: &AccountId, _asset_type: AssetType) -> Option<Balance> {
+	fn get_user_deposit_by_asset_type(
+		_who: &AccountId,
+		_asset_type: AssetType<AssetId>,
+	) -> Option<Balance> {
 		None
 	}
 }
