@@ -330,7 +330,7 @@ pub mod pallet {
 		/// Claim potential credits accrued within the allowed window for a specific asset. 
 		/// Emits event for off-chain processing.
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::claim_credits())]
+		#[pallet::weight(T::WeightInfo::claim_credits_with_asset())]
 		pub fn claim_credits_with_asset(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount_to_claim: BalanceOf<T>,
@@ -421,7 +421,7 @@ pub mod pallet {
 		///
 		/// Weight: O(n) where n is the number of tiers
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::set_stake_tiers())]
+		#[pallet::weight(T::WeightInfo::set_asset_stake_tiers())]
 		pub fn set_asset_stake_tiers(
 			origin: OriginFor<T>,
 			asset_id: T::AssetId,
