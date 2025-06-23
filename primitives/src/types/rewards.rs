@@ -11,7 +11,9 @@ pub enum AssetType {
 	/// This includes all lstTNT assets
 	Tnt,
 	/// This includes all EVM assets
-	Evm,
+	Evm(AssetId),
+	/// This includes all native assets
+	Native(AssetId),
 }
 
 /// Represents different types of rewards a user can earn

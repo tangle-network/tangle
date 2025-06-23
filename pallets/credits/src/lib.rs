@@ -727,7 +727,7 @@ pub mod pallet {
 			} else {
 				// For custom assets, we need to map them appropriately
 				// This might need to be extended based on your asset system
-				Ok(AssetType::Tnt) // Placeholder - you may need to implement proper mapping
+				Ok(AssetType::Native(asset_id)) // Placeholder - you may need to implement proper mapping
 			}
 		}
 
