@@ -45,7 +45,16 @@ std = [
     "sp-core/std",
     "sp-runtime/std",
     "sp-std/std",
+    "sp-io/std",
     "pallet-balances/std",
+    "pallet-assets/std",
+    "pallet-timestamp/std",
+    "pallet-session/std",
+    "pallet-staking/std",
+    "pallet-multi-asset-delegation/std",
+    "sp-staking/std",
+    "sp-weights/std",
+    "frame-election-provider-support/std",
 ]
 try-runtime = ["frame-support/try-runtime", "frame-system/try-runtime", "sp-runtime/try-runtime"]
 runtime-benchmarks = [
