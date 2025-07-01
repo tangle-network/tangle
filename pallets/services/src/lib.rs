@@ -276,9 +276,18 @@ pub mod module {
 			// Only process slashes from eras that have completed their deferral period
 			let process_era = current_era.saturating_sub(slash_defer_duration);
 
+			// Limit the number of slashes processed per block to prevent DoS
+			const MAX_SLASHES_PER_BLOCK: u32 = 10;
+			let mut slashes_processed = 0u32;
+
 			// Get all unapplied slashes for this era
 			let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
 			for (index, slash) in prefix_iter {
+				// Early termination to prevent excessive processing
+				if slashes_processed >= MAX_SLASHES_PER_BLOCK {
+					break;
+				}
+
 				// TODO: This call must be all or nothing.
 				// TODO: If fail then revert all storage changes
 				if Self::slashing_enabled() {
@@ -291,6 +300,7 @@ pub mod module {
 										weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
 									// Remove the slash from storage after successful application
 									UnappliedSlashes::<T>::remove(process_era, index);
+									slashes_processed += 1;
 									TransactionOutcome::Commit(Ok(res))
 								},
 								Err(_) => {
@@ -493,6 +503,8 @@ pub mod module {
 		TooManySubscriptions,
 		/// Custom asset transfer failed
 		CustomAssetTransferFailed,
+		/// Invalid event count provided (too large)
+		InvalidEventCount,
 	}
 
 	#[pallet::event]
@@ -1702,6 +1714,9 @@ pub mod module {
 			// Ensure slash percent is greater than 0
 			ensure!(!slash_percent.is_zero(), Error::<T>::InvalidSlashPercentage);
 
+			// Ensure slash percent is not greater than 100%
+			ensure!(slash_percent <= Percent::from_percent(100), Error::<T>::InvalidSlashPercentage);
+
 			// Verify offender is an operator for this service
 			ensure!(
 				service.operator_security_commitments.iter().any(|(op, _)| op == &offender),
@@ -2115,6 +2130,10 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
+			// Validate metrics_data size upfront to prevent DoS
+			let max_metrics_size = <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize::get() as usize;
+			ensure!(metrics_data.len() <= max_metrics_size, Error::<T>::InvalidHeartbeatData);
+
 			// Ensure the service exists and is active
 			ensure!(
 				ServiceStatus::<T>::contains_key(blueprint_id, service_id),
@@ -2139,10 +2158,12 @@ pub mod module {
 			let bounded_metrics_data = BoundedVec::<u8, <<T as Config>::Constraints as tangle_primitives::services::Constraints>::MaxFieldsSize>::try_from(metrics_data.clone())
     .map_err(|_| Error::<T>::InvalidHeartbeatData)?;
 
-			// Create the message to verify
-			// Format: service_id + blueprint_id + metrics_data
+			// Create the message to verify with replay protection
+			// Format: service_id + blueprint_id + current_block + metrics_data
+			// Including current_block provides replay protection
 			let mut message = service_id.to_le_bytes().to_vec();
 			message.extend_from_slice(&blueprint_id.to_le_bytes());
+			message.extend_from_slice(&current_block.encode()); // Add block number for replay protection
 			message.extend_from_slice(&bounded_metrics_data);
 			let message_hash = sp_io::hashing::keccak_256(&message);
 

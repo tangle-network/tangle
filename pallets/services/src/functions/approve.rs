@@ -120,7 +120,16 @@ impl<T: Config> Pallet<T> {
 
 		// If all operators have approved, initialize the service
 		if request.is_approved() {
-			Self::initialize_approved_service(request_id, request)?;
+			// Use atomic transaction to prevent race conditions
+			frame_support::storage::with_transaction(|| {
+				match Self::initialize_approved_service(request_id, request.clone()) {
+					Ok(_) => sp_runtime::TransactionOutcome::Commit(Ok(())),
+					Err(e) => {
+						// Revert any changes made
+						sp_runtime::TransactionOutcome::Rollback(Err(e))
+					}
+				}
+			})?;
 		} else {
 			// Update the service request if still pending approvals
 			ServiceRequests::<T>::insert(request_id, request);

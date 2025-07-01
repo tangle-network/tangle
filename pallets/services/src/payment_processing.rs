@@ -1,12 +1,12 @@
 use crate::{
 	BalanceOf, BlockNumberFor, Config, Error, JobPayments, JobSubscriptionBillings, Pallet,
-	UserSubscriptionCount,
+	ServiceStatus, UserSubscriptionCount,
 };
 use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ReservableCurrency, fungibles::Mutate},
+	traits::{Currency, ReservableCurrency, fungibles::{Inspect, Mutate}},
 };
 use sp_runtime::traits::{CheckedMul, SaturatedConversion, Saturating, Zero};
 use tangle_primitives::{
@@ -206,11 +206,13 @@ impl<T: Config> Pallet<T> {
 
 		// Get or create billing information for this subscription
 		let mut billing = JobSubscriptionBillings::<T>::get(&billing_key).unwrap_or_else(|| {
-			// Set last_billed to a past block so the first payment is due immediately
+			// For new subscriptions, handle the initial billing setup properly
 			let initial_last_billed = if current_block >= interval {
+				// If enough blocks have passed, set to trigger immediate payment
 				current_block.saturating_sub(interval)
 			} else {
-				// If current_block < interval, start from block 0 to ensure immediate payment
+				// If current_block < interval, we should charge immediately
+				// Set to zero to ensure first payment happens now
 				BlockNumberFor::<T>::zero()
 			};
 
@@ -228,14 +230,28 @@ impl<T: Config> Pallet<T> {
 				service_id,
 				job_index,
 				subscriber: payer.clone(),
-				last_billed: initial_last_billed, // Fixed: Now ensures first payment is due
+				last_billed: initial_last_billed,
 				end_block: maybe_end,
 			}
 		});
 
-		// Determine if payment is due
-		let blocks_since_last = current_block.saturating_sub(billing.last_billed);
-		let payment_due = blocks_since_last >= interval;
+		// Determine if payment is due - handle edge cases properly
+		let blocks_since_last = if billing.last_billed <= current_block {
+			current_block.saturating_sub(billing.last_billed)
+		} else {
+			// This should not happen in normal circumstances, but handle it gracefully
+			log::warn!(
+				"Subscription billing anomaly: last_billed ({:?}) > current_block ({:?}) for service {} job {}",
+				billing.last_billed,
+				current_block,
+				service_id,
+				job_index
+			);
+			BlockNumberFor::<T>::zero()
+		};
+		
+		// For new subscriptions (last_billed == 0), always charge first payment
+		let payment_due = billing.last_billed.is_zero() || blocks_since_last >= interval;
 
 		log::debug!(
 			"Subscription billing check for service {} job {}: blocks_since_last={:?}, interval={:?}, payment_due={}",
@@ -305,6 +321,9 @@ impl<T: Config> Pallet<T> {
 		let (_, blueprint) = Self::blueprints(service.blueprint)?;
 		let _job_def = blueprint.jobs.get(job_index as usize).ok_or(Error::<T>::InvalidJobId)?;
 
+		// Validate event_count bounds before conversion to prevent overflow
+		ensure!(event_count <= u32::MAX / 2, Error::<T>::InvalidEventCount);
+
 		let total_reward = reward_per_event
 			.checked_mul(&event_count.into())
 			.ok_or(Error::<T>::PaymentCalculationOverflow)?;
@@ -337,15 +356,35 @@ impl<T: Config> Pallet<T> {
 		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
 		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
 
+		// Checks: Verify the payer has sufficient balance before any state changes
 		match asset {
 			Asset::Custom(asset_id) => {
 				if *asset_id == T::AssetId::default() {
-					// Native currency
+					// Native currency - check balance first
 					let free_balance = T::Currency::free_balance(payer);
 					ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+				} else {
+					// Custom asset - check balance via fungibles trait
+					let balance = T::Fungibles::balance(asset_id.clone(), payer);
+					ensure!(balance >= amount, Error::<T>::InvalidRequestInput);
+				}
+			},
+			Asset::Erc20(_) => {
+				// ERC20 handled as native currency for now - check balance first
+				let free_balance = T::Currency::free_balance(payer);
+				ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+			},
+		}
+
+		// Effects & Interactions: Now perform the actual transfers
+		// Note: The state changes happen atomically within each transfer function
+		match asset {
+			Asset::Custom(asset_id) => {
+				if *asset_id == T::AssetId::default() {
+					// Native currency - reserve after balance check
 					T::Currency::reserve(payer, amount)?;
 				} else {
-					// Custom asset
+					// Custom asset - transfer after balance check
 					T::Fungibles::transfer(
 						asset_id.clone(),
 						payer,
@@ -357,9 +396,7 @@ impl<T: Config> Pallet<T> {
 				}
 			},
 			Asset::Erc20(_) => {
-				// ERC20 handled separately
-				let free_balance = T::Currency::free_balance(payer);
-				ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+				// ERC20 handled as native currency - reserve after balance check
 				T::Currency::reserve(payer, amount)?;
 			},
 		}
@@ -441,6 +478,24 @@ impl<T: Config> Pallet<T> {
 
 			// Get service and blueprint info
 			if let Ok(service_instance) = Self::services(service_id) {
+				// Verify subscription is still valid before processing
+				// Check if service is still active
+				if !ServiceStatus::<T>::contains_key(service_instance.blueprint, service_id) {
+					// Service is no longer active, skip this subscription
+					// TODO: Consider cleaning up the subscription billing record
+					continue;
+				}
+
+				// Verify subscriber is still authorized
+				let is_authorized = service_instance.permitted_callers.is_empty() || 
+					service_instance.permitted_callers.contains(&subscriber) ||
+					service_instance.owner == subscriber;
+				
+				if !is_authorized {
+					// Subscriber is no longer authorized, skip this subscription
+					continue;
+				}
+
 				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) {
 					if let Some(job_def) = blueprint.jobs.get(job_index as usize) {
 						if let PricingModel::Subscription {
