@@ -27,12 +27,77 @@ use frame_support::{
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
-use tangle_primitives::services::{
-	ApprovalState, Asset, AssetSecurityCommitment, EvmAddressMapping, Service, ServiceRequest,
-	StagingServicePayment,
+use tangle_primitives::{
+	services::{
+		ApprovalState, Asset, AssetSecurityCommitment, AssetSecurityRequirement, EvmAddressMapping, Service, ServiceRequest,
+		StagingServicePayment,
+	},
+	traits::MultiAssetDelegationInfo,
 };
 
 impl<T: Config> Pallet<T> {
+	/// Validate operator security commitments for service approval
+	pub fn validate_operator_security_commitments(
+		operator: &T::AccountId,
+		requirements: &[AssetSecurityRequirement<T::AssetId>],
+		commitments: &[AssetSecurityCommitment<T::AssetId>],
+	) -> DispatchResult {
+		// Ensure operator is active
+		ensure!(
+			T::OperatorDelegationManager::is_operator_active(operator),
+			Error::<T>::OperatorNotActive
+		);
+
+		// Check for commitment-requirement matching
+		for requirement in requirements {
+			let commitment = commitments
+				.iter()
+				.find(|c| c.asset == requirement.asset)
+				.ok_or(Error::<T>::MissingAssetCommitment)?;
+
+			// Validate commitment percentage is within requirement bounds
+			ensure!(
+				commitment.exposure_percent >= requirement.min_exposure_percent &&
+					commitment.exposure_percent <= requirement.max_exposure_percent,
+				Error::<T>::CommitmentBelowMinimum
+			);
+
+			// Get operator's total stake for this asset
+			let asset_stake = match &requirement.asset {
+				Asset::Custom(asset_id) => {
+					if *asset_id == Zero::zero() {
+						// Native asset - get operator stake
+						T::OperatorDelegationManager::get_operator_stake(operator)
+					} else {
+						// For custom assets, currently we don't have multi-asset delegation
+						// so we'll use zero for now
+						BalanceOf::<T>::zero()
+					}
+				},
+				Asset::Erc20(_) => {
+					// For ERC20 tokens, we use zero stake validation for now
+					// This would need integration with ERC20 balance checking
+					BalanceOf::<T>::zero()
+				},
+			};
+
+			// Ensure operator has some stake (basic validation)
+			ensure!(
+				asset_stake > BalanceOf::<T>::zero(),
+				Error::<T>::NoOperatorStake
+			);
+		}
+
+		// Check for unexpected commitments (commitments without requirements)
+		for commitment in commitments {
+			ensure!(
+				requirements.iter().any(|r| r.asset == commitment.asset),
+				Error::<T>::UnexpectedAssetCommitment
+			);
+		}
+
+		Ok(())
+	}
 	/// Process an operator's approval for a service request.
 	///
 	/// This function handles the approval workflow for a service request, including:
