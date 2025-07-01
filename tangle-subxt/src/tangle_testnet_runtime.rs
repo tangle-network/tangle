@@ -652,12 +652,6 @@ pub mod api {
 			use super::runtime_types;
 			pub struct ServicesApi;
 			impl ServicesApi {
-				#[doc = " Query all the services that this operator is providing along with their blueprints."]
-				#[doc = ""]
-				#[doc = " ## Arguments"]
-				#[doc = " - `operator`: The operator account id."]
-				#[doc = " ## Return"]
-				#[doc = " - [`RpcServicesWithBlueprint`]: A list of services with their blueprints."]
 				pub fn query_services_with_blueprints_by_operator(
 					&self,
 					operator: types::query_services_with_blueprints_by_operator::Operator,

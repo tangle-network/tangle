@@ -35,12 +35,12 @@ sp_api::decl_runtime_apis! {
 		AccountId: Codec + MaybeDisplay + Serialize + Clone + PartialEq + Eq + core::fmt::Debug,
 		AssetId: AssetIdT + Clone + PartialEq + Eq + core::fmt::Debug,
 	{
-		/// Query all the services that this operator is providing along with their blueprints.
-		///
-		/// ## Arguments
-		/// - `operator`: The operator account id.
-		/// ## Return
-		/// - [`RpcServicesWithBlueprint`]: A list of services with their blueprints.
+		// /// Query all the services that this operator is providing along with their blueprints.
+		// ///
+		// /// ## Arguments
+		// /// - `operator`: The operator account id.
+		// /// ## Return
+		// /// - [`RpcServicesWithBlueprint`]: A list of services with their blueprints.
 		fn query_services_with_blueprints_by_operator(
 			operator: AccountId,
 		) -> Result<

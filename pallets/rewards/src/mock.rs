@@ -287,7 +287,7 @@ impl
 		Balance,
 		BlockNumber,
 		AssetId,
-		AssetType,
+		AssetType<AssetId>,
 	> for MockDelegationManager
 {
 	fn get_current_round() -> tangle_primitives::types::RoundIndex {
@@ -329,7 +329,10 @@ impl
 		})
 	}
 
-	fn get_user_deposit_by_asset_type(_who: &AccountId, _asset_type: AssetType) -> Option<Balance> {
+	fn get_user_deposit_by_asset_type(
+		_who: &AccountId,
+		_asset_type: AssetType<AssetId>,
+	) -> Option<Balance> {
 		None
 	}
 }

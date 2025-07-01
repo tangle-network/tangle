@@ -7,11 +7,13 @@ use services::AssetIdT;
 use sp_std::vec::Vec;
 
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
-pub enum AssetType {
+pub enum AssetType<AssetId> {
 	/// This includes all lstTNT assets
 	Tnt,
 	/// This includes all EVM assets
-	Evm,
+	Evm(AssetId),
+	/// This includes all native assets
+	Native(AssetId),
 }
 
 /// Represents different types of rewards a user can earn
