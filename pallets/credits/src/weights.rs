@@ -48,6 +48,10 @@ pub trait WeightInfo {
 	fn claim_credits() -> Weight;
 	/// Weight for the `set_stake_tiers` extrinsic
 	fn set_stake_tiers() -> Weight;
+	/// Weight for the `claim_credits_with_asset` extrinsic
+	fn claim_credits_with_asset() -> Weight;
+	/// Weight for the `set_asset_stake_tiers` extrinsic
+	fn set_asset_stake_tiers() -> Weight;
 }
 
 /// Weights for credits pallet using the Substrate node and recommended hardware.
@@ -97,6 +101,35 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		Weight::from_parts(17_350_000, 32)
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
+
+	/// Storage: `Credits::AssetStakeTiers` (r:1 w:0)
+	/// Proof: `Credits::AssetStakeTiers` (`max_values`: None, `max_size`: Some(256), mode: `Measured`)
+	/// Storage: `Credits::LastRewardUpdateBlock` (r:1 w:1)
+	/// Proof: `Credits::LastRewardUpdateBlock` (`max_values`: None, `max_size`: Some(128), mode: `Measured`)
+	/// Storage: `Credits::CreditsClaimed` (r:1 w:0)
+	/// Proof: `Credits::CreditsClaimed` (`max_values`: None, `max_size`: Some(128), mode: `Measured`)
+	/// Storage: `Credits::ClaimedCredits` (r:1 w:1)
+	/// Proof: `Credits::ClaimedCredits` (`max_values`: None, `max_size`: Some(128), mode: `Measured`)
+	fn claim_credits_with_asset() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `640`
+		//  Estimated: `1280`
+		// Minimum execution time: 35_200 nanoseconds (slightly higher due to asset lookup)
+		Weight::from_parts(35_850_000, 1312)
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+
+	/// Storage: `Credits::AssetStakeTiers` (r:0 w:1)
+	/// Proof: `Credits::AssetStakeTiers` (`max_values`: None, `max_size`: Some(256), mode: `Measured`)
+	fn set_asset_stake_tiers() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 16_800 nanoseconds (slightly higher due to asset key)
+		Weight::from_parts(17_950_000, 32)
+			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
 }
 
 // For backwards compatibility and tests
@@ -115,6 +148,17 @@ impl WeightInfo for () {
 	
 	fn set_stake_tiers() -> Weight {
 		Weight::from_parts(17_350_000, 0)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+
+	fn claim_credits_with_asset() -> Weight {
+		Weight::from_parts(35_850_000, 0)
+			.saturating_add(RocksDbWeight::get().reads(4_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+
+	fn set_asset_stake_tiers() -> Weight {
+		Weight::from_parts(17_950_000, 0)
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 }

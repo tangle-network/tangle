@@ -26,10 +26,7 @@ use frame_support::{
 	BoundedVec,
 };
 use frame_system::RawOrigin;
-use sp_runtime::{
-	traits::{UniqueSaturatedInto, Zero},
-	Saturating,
-};
+use sp_runtime::{traits::Zero, Saturating};
 use sp_std::prelude::*;
 
 const SEED: u32 = 0;
@@ -131,6 +128,68 @@ mod benchmarks {
 
 		#[extrinsic_call]
 		set_stake_tiers(RawOrigin::Root, new_tiers);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn claim_credits_with_asset() -> Result<(), BenchmarkError> {
+		// Setup: Create an account with sufficient stake to earn credits
+		let stake_amount: BalanceOf<T> = 1000u32.into();
+		let account = setup_account::<T>(1, stake_amount.saturating_mul(2u32.into()));
+		let asset_id = T::AssetId::default(); // Use default asset ID (TNT)
+
+		// Setup delegation to enable credit accrual
+		setup_delegation::<T>(&account, stake_amount).unwrap();
+
+		// Setup asset-specific stake tiers for the benchmark
+		let asset_tiers = create_stake_tiers::<T>(3);
+		Credits::<T>::set_asset_stake_tiers(RawOrigin::Root.into(), asset_id, asset_tiers).unwrap();
+
+		// Advance blocks to accrue some credits
+		let start_block = frame_system::Pallet::<T>::block_number();
+		let blocks_to_advance = 100u32;
+		let end_block = start_block + blocks_to_advance.into();
+		frame_system::Pallet::<T>::set_block_number(end_block);
+
+		// Calculate a reasonable claim amount based on asset-specific rate
+		let rate = Credits::<T>::get_current_rate_for_asset(stake_amount, asset_id)
+			.unwrap_or_else(|_| 1u32.into());
+		let claim_amount = if rate.is_zero() {
+			1u32.into()
+		} else {
+			// Convert blocks to the appropriate balance type
+			let blocks_as_balance: BalanceOf<T> = blocks_to_advance.into();
+			rate.saturating_mul(blocks_as_balance)
+		};
+
+		// Create a bounded ID for the claim
+		let id_str = b"benchmark_asset_claim_id".to_vec();
+		let bounded_id: BoundedVec<u8, T::MaxOffchainAccountIdLength> =
+			id_str.try_into().expect("ID should not be too long");
+
+		#[extrinsic_call]
+		claim_credits_with_asset(
+			RawOrigin::Signed(account.clone()),
+			claim_amount,
+			bounded_id.clone(),
+			asset_id,
+		);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn set_asset_stake_tiers() -> Result<(), BenchmarkError> {
+		// Use the maximum allowed number of tiers to benchmark worst-case scenario
+		let max_tiers = T::MaxStakeTiers::get() as u32;
+		let asset_id = T::AssetId::default(); // Use default asset ID
+
+		// Create a set of stake tiers with increasing thresholds and rates
+		let new_tiers = create_stake_tiers::<T>(max_tiers);
+
+		#[extrinsic_call]
+		set_asset_stake_tiers(RawOrigin::Root, asset_id, new_tiers);
 
 		Ok(())
 	}
