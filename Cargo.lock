@@ -25597,7 +25597,7 @@ dependencies = [
  "tangle-crypto-primitives",
  "tangle-primitives",
  "tangle-runtime",
- "tangle-subxt 0.18.0",
+ "tangle-subxt 0.19.0",
  "tangle-testnet-runtime",
  "tokio",
 ]
@@ -25783,7 +25783,7 @@ dependencies = [
 
 [[package]]
 name = "tangle-subxt"
-version = "0.18.0"
+version = "0.19.0"
 dependencies = [
  "parity-scale-codec",
  "scale-info",
