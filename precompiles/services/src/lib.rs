@@ -10,7 +10,7 @@ use parity_scale_codec::Decode;
 use precompile_utils::prelude::*;
 use sp_core::U256;
 use sp_runtime::{traits::Dispatchable, Percent};
-use sp_std::{marker::PhantomData, vec, vec::Vec};
+use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::services::{
 	Asset, AssetSecurityRequirement, Field, MembershipModel, ServiceBlueprint,
 };
