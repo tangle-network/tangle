@@ -16,6 +16,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
+use sp_core::bounded_vec;
 use sp_runtime::{DispatchError, Percent};
 use tangle_primitives::services::Asset;
 
