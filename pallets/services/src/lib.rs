@@ -43,8 +43,6 @@ use tangle_primitives::{
 
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
-#[cfg(feature = "std")]
-use std::string::String;
 
 pub mod functions;
 mod impls;
@@ -1049,6 +1047,14 @@ pub mod module {
 
 			// Validate and store the blueprint
 			let blueprint_id = NextBlueprintId::<T>::get();
+
+			// Convert Latest revision to Specific revision to pin it to current latest
+			let mut blueprint = blueprint;
+			if let MasterBlueprintServiceManagerRevision::Latest = blueprint.master_manager_revision
+			{
+				blueprint.master_manager_revision =
+					MasterBlueprintServiceManagerRevision::Specific(Self::mbsm_latest_revision());
+			}
 
 			let (allowed, _weight) =
 				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;

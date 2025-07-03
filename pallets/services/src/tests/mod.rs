@@ -231,12 +231,7 @@ pub fn create_test_blueprint(
 	origin: RuntimeOrigin,
 	blueprint: ServiceBlueprint<ConstraintsOf<Runtime>>,
 ) -> Result<(), sp_runtime::DispatchError> {
-	Services::create_blueprint(
-		origin,
-		blueprint,
-	)
-	.map(|_| ())
-	.map_err(|e| e.error)
+	Services::create_blueprint(origin, blueprint).map(|_| ()).map_err(|e| e.error)
 }
 
 pub fn create_test_blueprint_with_pricing(
@@ -244,10 +239,5 @@ pub fn create_test_blueprint_with_pricing(
 	blueprint: ServiceBlueprint<ConstraintsOf<Runtime>>,
 	_pricing_model: PricingModel<u32, u128>,
 ) -> Result<(), sp_runtime::DispatchError> {
-	Services::create_blueprint(
-		origin,
-		blueprint,
-	)
-	.map(|_| ())
-	.map_err(|e| e.error)
+	Services::create_blueprint(origin, blueprint).map(|_| ()).map_err(|e| e.error)
 }
