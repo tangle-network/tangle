@@ -233,11 +233,7 @@ pub fn create_test_blueprint(
 ) -> Result<(), sp_runtime::DispatchError> {
 	Services::create_blueprint(
 		origin,
-		bounded_vec![],                              // metadata
-		blueprint,                                   // typedef
-		MembershipModel::Fixed { min_operators: 1 }, // membership_model
-		vec![],                                      // security_requirements
-		None,                                        // price_targets
+		blueprint,
 	)
 	.map(|_| ())
 	.map_err(|e| e.error)
@@ -250,11 +246,7 @@ pub fn create_test_blueprint_with_pricing(
 ) -> Result<(), sp_runtime::DispatchError> {
 	Services::create_blueprint(
 		origin,
-		bounded_vec![],                              // metadata
-		blueprint,                                   // typedef
-		MembershipModel::Fixed { min_operators: 1 }, // membership_model
-		vec![],                                      // security_requirements
-		None,                                        // price_targets
+		blueprint,
 	)
 	.map(|_| ())
 	.map_err(|e| e.error)
