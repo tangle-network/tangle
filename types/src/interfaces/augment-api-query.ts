@@ -372,6 +372,11 @@ declare module '@polkadot/api-base/types/storage' {
       [key: string]: QueryableStorageEntry<ApiType>;
     };
     credits: {
+      /**
+       * Storage for asset-specific staking tiers.
+       * Each asset can have its own set of stake tiers and rates.
+       **/
+      assetStakeTiers: AugmentedQuery<ApiType, (arg: u128 | AnyNumber | Uint8Array) => Observable<Option<Vec<PalletCreditsStakeTier>>>, [u128]> & QueryableStorageEntry<ApiType, [u128]>;
       lastRewardUpdateBlock: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<u64>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
       /**
        * Storage for the configured staking tiers.
