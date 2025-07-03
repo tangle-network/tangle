@@ -1021,7 +1021,10 @@ pub mod module {
 		/// * `origin` - The origin of the call, must be signed by the account creating the
 		///   blueprint
 		/// * `metadata` - The metadata of the service blueprint.
-		/// * `typedef` - The type definition of the service blueprint.
+		/// * `blueprint` - The service blueprint containing:
+		///   - Service constraints and requirements
+		///   - Master blueprint service manager revision (Latest or Specific)
+		///   - Template configuration for service instantiation
 		/// * `membership_model` - The membership model of the service blueprint.
 		/// * `security_requirements` - The security requirements of the service blueprint.
 		/// * `price_targets` - The price targets of the service blueprint.
@@ -1040,55 +1043,12 @@ pub mod module {
 		#[pallet::weight(T::WeightInfo::create_blueprint())]
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
-			metadata: BoundedVec<u8, ConstU32<MAX_METADATA_LENGTH>>,
-			typedef: ServiceBlueprint<T::Constraints>,
-			membership_model: MembershipModel,
-			_security_requirements: Vec<AssetSecurityRequirement<T::AssetId>>,
-			_price_targets: Option<PriceTargets>,
+			blueprint: ServiceBlueprint<T::Constraints>,
 		) -> DispatchResultWithPostInfo {
 			let owner = ensure_signed(origin)?;
 
 			// Validate and store the blueprint
 			let blueprint_id = NextBlueprintId::<T>::get();
-
-			let membership_model_type = match membership_model {
-				MembershipModel::Fixed { .. } => MembershipModelType::Fixed,
-				MembershipModel::Dynamic { .. } => MembershipModelType::Dynamic,
-			};
-
-			// Validate that the blueprint supports the requested membership model
-			ensure!(
-				typedef.supported_membership_models.contains(&membership_model_type),
-				Error::<T>::UnsupportedMembershipModel
-			);
-
-			let metadata_string =
-				String::from_utf8(metadata.clone().into_inner()).unwrap_or_default();
-			let blueprint = ServiceBlueprint {
-				metadata: ServiceMetadata {
-					name: BoundedString::try_from(metadata_string.clone()).unwrap(),
-					description: Some(BoundedString::try_from(metadata_string).unwrap()),
-					author: None,
-					category: None,
-					code_repository: None,
-					logo: None,
-					website: None,
-					license: None,
-				},
-				jobs: typedef.jobs,
-				registration_params: typedef.registration_params,
-				request_params: typedef.request_params,
-				manager: typedef.manager,
-				master_manager_revision: match typedef.master_manager_revision {
-					MasterBlueprintServiceManagerRevision::Latest =>
-						MasterBlueprintServiceManagerRevision::Specific(Self::mbsm_latest_revision()),
-					MasterBlueprintServiceManagerRevision::Specific(revision) =>
-						MasterBlueprintServiceManagerRevision::Specific(revision),
-					_ => typedef.master_manager_revision, // Fallback for future variants
-				},
-				sources: typedef.sources,
-				supported_membership_models: typedef.supported_membership_models,
-			};
 
 			let (allowed, _weight) =
 				Self::on_blueprint_created_hook(&blueprint, blueprint_id, &owner)?;
