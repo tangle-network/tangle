@@ -1385,7 +1385,11 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let request = Self::service_requests(request_id)?;
-			Self::validate_operator_security_commitments(&caller, &request.security_requirements, &security_commitments)?;
+			Self::validate_operator_security_commitments(
+				&caller,
+				&request.security_requirements,
+				&security_commitments,
+			)?;
 			Self::do_approve(caller, request_id, &security_commitments)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}

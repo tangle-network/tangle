@@ -5,7 +5,11 @@ use crate::{
 use frame_support::{
 	BoundedVec,
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, fungibles::{Inspect, Mutate}, tokens::Preservation},
+	traits::{
+		Currency, ExistenceRequirement,
+		fungibles::{Inspect, Mutate},
+		tokens::Preservation,
+	},
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
@@ -48,10 +52,7 @@ impl<T: Config> Pallet<T> {
 			}
 
 			// Check for duplicate assets
-			ensure!(
-				seen_assets.insert(&requirement.asset),
-				Error::<T>::DuplicateAsset
-			);
+			ensure!(seen_assets.insert(&requirement.asset), Error::<T>::DuplicateAsset);
 
 			// Validate exposure percentages
 			ensure!(

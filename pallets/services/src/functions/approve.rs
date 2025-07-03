@@ -29,8 +29,8 @@ use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	services::{
-		ApprovalState, Asset, AssetSecurityCommitment, AssetSecurityRequirement, EvmAddressMapping, Service, ServiceRequest,
-		StagingServicePayment,
+		ApprovalState, Asset, AssetSecurityCommitment, AssetSecurityRequirement, EvmAddressMapping,
+		Service, ServiceRequest, StagingServicePayment,
 	},
 	traits::MultiAssetDelegationInfo,
 };
@@ -82,10 +82,7 @@ impl<T: Config> Pallet<T> {
 			};
 
 			// Ensure operator has some stake (basic validation)
-			ensure!(
-				asset_stake > BalanceOf::<T>::zero(),
-				Error::<T>::NoOperatorStake
-			);
+			ensure!(asset_stake > BalanceOf::<T>::zero(), Error::<T>::NoOperatorStake);
 		}
 
 		// Check for unexpected commitments (commitments without requirements)
