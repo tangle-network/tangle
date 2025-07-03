@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { BTreeMap, Bytes, Compact, Null, Option, U256, U8aFixed, Vec, bool, u128, u16, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, IMethod, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, MultiAddress, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, IsmpGrandpaAddStateMachine, IsmpHostStateMachine, IsmpMessagingCreateConsensusState, IsmpMessagingMessage, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletCreditsStakeTier, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletIsmpUtilsFundMessageParams, PalletIsmpUtilsUpdateConsensusState, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletTokenGatewayAssetRegistration, PalletTokenGatewayPrecisionUpdate, PalletTokenGatewayTeleportParams, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesPricingPricingQuote, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesMembershipModel, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesPriceTargets, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType, TokenGatewayPrimitivesGatewayAssetUpdate } from '@polkadot/types/lookup';
+import type { EthereumTransactionTransactionV2, FrameSupportPreimagesBounded, IsmpGrandpaAddStateMachine, IsmpHostStateMachine, IsmpMessagingCreateConsensusState, IsmpMessagingMessage, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAirdropClaimsUtilsMultiAddressSignature, PalletBalancesAdjustmentDirection, PalletCreditsStakeTier, PalletDemocracyConviction, PalletDemocracyMetadataOwner, PalletDemocracyVoteAccountVote, PalletElectionProviderMultiPhaseRawSolution, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenRenouncing, PalletIdentityJudgement, PalletIdentityLegacyIdentityInfo, PalletImOnlineHeartbeat, PalletImOnlineSr25519AppSr25519Signature, PalletIsmpUtilsFundMessageParams, PalletIsmpUtilsUpdateConsensusState, PalletMultiAssetDelegationDelegatorDelegatorBlueprintSelection, PalletMultisigTimepoint, PalletNominationPoolsBondExtra, PalletNominationPoolsClaimPermission, PalletNominationPoolsCommissionChangeRate, PalletNominationPoolsCommissionClaimPermission, PalletNominationPoolsConfigOpAccountId32, PalletNominationPoolsConfigOpPerbill, PalletNominationPoolsConfigOpU128, PalletNominationPoolsConfigOpU32, PalletNominationPoolsPoolState, PalletRewardsAssetAction, PalletRewardsRewardConfigForAssetVault, PalletStakingPalletConfigOpPerbill, PalletStakingPalletConfigOpPercent, PalletStakingPalletConfigOpU128, PalletStakingPalletConfigOpU32, PalletStakingRewardDestination, PalletStakingUnlockChunk, PalletStakingValidatorPrefs, PalletTangleLstBondExtra, PalletTangleLstCommissionCommissionChangeRate, PalletTangleLstCommissionCommissionClaimPermission, PalletTangleLstConfigOpAccountId32, PalletTangleLstConfigOpPerbill, PalletTangleLstConfigOpU128, PalletTangleLstConfigOpU32, PalletTangleLstPoolsPoolState, PalletTokenGatewayAssetRegistration, PalletTokenGatewayPrecisionUpdate, PalletTokenGatewayTeleportParams, PalletVestingVestingInfo, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusGrandpaEquivocationProof, SpConsensusSlotsEquivocationProof, SpCoreVoid, SpNposElectionsElectionScore, SpNposElectionsSupport, SpRuntimeMultiSignature, SpSessionMembershipProof, SpWeightsWeightV2Weight, TanglePrimitivesRewardsLockMultiplier, TanglePrimitivesServicesField, TanglePrimitivesServicesPricingPricingQuote, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesTypesAssetSecurityCommitment, TanglePrimitivesServicesTypesAssetSecurityRequirement, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesMembershipModel, TanglePrimitivesServicesTypesOperatorPreferences, TangleTestnetRuntimeOpaqueSessionKeys, TangleTestnetRuntimeOriginCaller, TangleTestnetRuntimeProxyType, TokenGatewayPrimitivesGatewayAssetUpdate } from '@polkadot/types/lookup';
 
 export type __AugmentedSubmittable = AugmentedSubmittable<() => unknown>;
 export type __SubmittableExtrinsic<ApiType extends ApiTypes> = SubmittableExtrinsic<ApiType>;
@@ -1214,6 +1214,26 @@ declare module '@polkadot/api-base/types/submittable' {
        * processing.
        **/
       claimCredits: AugmentedSubmittable<(amountToClaim: Compact<u128> | AnyNumber | Uint8Array, offchainAccountId: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, Bytes]>;
+      /**
+       * Claim potential credits accrued within the allowed window for a specific asset.
+       * Emits event for off-chain processing.
+       **/
+      claimCreditsWithAsset: AugmentedSubmittable<(amountToClaim: Compact<u128> | AnyNumber | Uint8Array, offchainAccountId: Bytes | string | Uint8Array, assetId: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u128>, Bytes, u128]>;
+      /**
+       * Set stake tiers for a specific asset. This function can only be called by the configured
+       * ForceOrigin. Stake tiers must be provided in ascending order by threshold.
+       * 
+       * Parameters:
+       * - `origin`: Must be the ForceOrigin
+       * - `asset_id`: The asset ID to configure stake tiers for
+       * - `new_tiers`: A vector of StakeTier structs representing the new tiers configuration
+       * for this asset
+       * 
+       * Emits `AssetStakeTiersUpdated` on success.
+       * 
+       * Weight: O(n) where n is the number of tiers
+       **/
+      setAssetStakeTiers: AugmentedSubmittable<(assetId: u128 | AnyNumber | Uint8Array, newTiers: Vec<PalletCreditsStakeTier> | (PalletCreditsStakeTier | { threshold?: any; ratePerBlock?: any } | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>, [u128, Vec<PalletCreditsStakeTier>]>;
       /**
        * Update the stake tiers. This function can only be called by the configured ForceOrigin.
        * Stake tiers must be provided in ascending order by threshold.
@@ -3928,7 +3948,10 @@ declare module '@polkadot/api-base/types/submittable' {
        * * `origin` - The origin of the call, must be signed by the account creating the
        * blueprint
        * * `metadata` - The metadata of the service blueprint.
-       * * `typedef` - The type definition of the service blueprint.
+       * * `blueprint` - The service blueprint containing:
+       * - Service constraints and requirements
+       * - Master blueprint service manager revision (Latest or Specific)
+       * - Template configuration for service instantiation
        * * `membership_model` - The membership model of the service blueprint.
        * * `security_requirements` - The security requirements of the service blueprint.
        * * `price_targets` - The price targets of the service blueprint.
@@ -3945,7 +3968,7 @@ declare module '@polkadot/api-base/types/submittable' {
        * Returns a `DispatchResultWithPostInfo` which on success emits a
        * [`Event::BlueprintCreated`] event containing the owner and blueprint ID.
        **/
-      createBlueprint: AugmentedSubmittable<(metadata: Bytes | string | Uint8Array, typedef: TanglePrimitivesServicesServiceServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; sources?: any; supportedMembershipModels?: any } | string | Uint8Array, membershipModel: TanglePrimitivesServicesTypesMembershipModel | { Fixed: any } | { Dynamic: any } | string | Uint8Array, securityRequirements: Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement> | (TanglePrimitivesServicesTypesAssetSecurityRequirement | { asset?: any; minExposurePercent?: any; maxExposurePercent?: any } | string | Uint8Array)[], priceTargets: Option<TanglePrimitivesServicesTypesPriceTargets> | null | Uint8Array | TanglePrimitivesServicesTypesPriceTargets | { placeholder?: any } | string) => SubmittableExtrinsic<ApiType>, [Bytes, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesTypesMembershipModel, Vec<TanglePrimitivesServicesTypesAssetSecurityRequirement>, Option<TanglePrimitivesServicesTypesPriceTargets>]>;
+      createBlueprint: AugmentedSubmittable<(blueprint: TanglePrimitivesServicesServiceServiceBlueprint | { metadata?: any; jobs?: any; registrationParams?: any; requestParams?: any; manager?: any; masterManagerRevision?: any; sources?: any; supportedMembershipModels?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [TanglePrimitivesServicesServiceServiceBlueprint]>;
       /**
        * Disputes and removes an [UnappliedSlash] from storage.
        * 
