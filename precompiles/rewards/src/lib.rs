@@ -53,7 +53,7 @@ where
 		let caller = handle.context().caller;
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
-		let (_asset, _) = match (asset_id.as_u32(), token_address.0 .0) {
+		let (asset, _) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] =>
 				(Asset::<AssetIdOf<Runtime>>::Erc20(erc20_token.into()), U256::zero()),
 			(other_asset_id, _) =>
@@ -62,8 +62,8 @@ where
 
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
-			Some(who).into(),
-			pallet_rewards::Call::<Runtime>::claim_rewards {},
+			Some(who.clone()).into(),
+			pallet_rewards::Call::<Runtime>::claim_rewards_other { who, asset },
 		)?;
 
 		Ok(())
