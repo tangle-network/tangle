@@ -4,7 +4,7 @@ use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use scale_info::prelude::boxed::Box;
-use sp_core::{ByteArray, H160, crypto::Pair, ecdsa};
+use sp_core::{H160, crypto::Pair, ecdsa};
 use sp_runtime::{KeyTypeId, Percent};
 use sp_std::vec;
 use tangle_primitives::services::{
@@ -96,16 +96,9 @@ fn create_test_blueprint<T: Config>(
 	origin: OriginFor<T>,
 	blueprint: ServiceBlueprint<T::Constraints>,
 ) -> Result<(), sp_runtime::DispatchError> {
-	Pallet::<T>::create_blueprint(
-		origin,
-		Default::default(),                          // metadata
-		blueprint,                                   // typedef
-		MembershipModel::Fixed { min_operators: 1 }, // membership_model
-		vec![],                                      // security_requirements
-		None,                                        // price_targets
-	)
-	.map(|_| ())
-	.map_err(|e| e.error)
+	Pallet::<T>::create_blueprint(origin, blueprint)
+		.map(|_| ())
+		.map_err(|e| e.error)
 }
 
 benchmarks! {
@@ -120,11 +113,7 @@ benchmarks! {
 		let blueprint = cggmp21_blueprint::<T>();
 	}: _(
 		RawOrigin::Signed(alice.clone()),
-		Default::default(),  // metadata
-		blueprint,           // typedef
-		MembershipModel::Fixed { min_operators: 1 }, // membership_model
-		vec![],              // security_requirements
-		None                 // price_targets
+		blueprint
 	)
 
 	pre_register {
