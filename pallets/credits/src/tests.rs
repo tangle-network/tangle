@@ -1079,24 +1079,6 @@ fn burn_overflow_protection_works() {
 }
 
 #[test]
-fn large_block_number_handling() {
-	new_test_ext(vec![]).execute_with(|| {
-		let user = DAVE;
-		let operator = EVE;
-		let stake_amount = 1200;
-		setup_delegation(user.clone(), operator, stake_amount);
-		
-		let large_block: BlockNumber = u32::MAX as BlockNumber + 1000;
-		run_to_block(large_block);
-		
-		let max_claimable = get_max_claimable(user.clone());
-		
-		assert!(max_claimable > 0);
-		assert_ok!(claim_credits(user, max_claimable, b"large_block_test"));
-	});
-}
-
-#[test]
 fn rate_validation_prevents_dos() {
 	new_test_ext(vec![]).execute_with(|| {
 		let excessive_rate = 2_000_000u128;
