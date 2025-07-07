@@ -1,4 +1,6 @@
-use crate::{mock::*, types::*, Error, Event, Pallet as CreditsPallet, StoredStakeTiers, BalanceOf};
+use crate::{
+	mock::*, types::*, BalanceOf, Error, Event, Pallet as CreditsPallet, StoredStakeTiers,
+};
 use frame_support::{
 	assert_noop, assert_ok,
 	traits::{Currency, Get},
@@ -1066,11 +1068,11 @@ mod decimal_precision_tests {
 fn burn_overflow_protection_works() {
 	new_test_ext(vec![]).execute_with(|| {
 		let user = BOB;
-		let max_balance = BalanceOf::<Runtime>::max_value();
+		let max_balance = BalanceOf::<Runtime>::MAX;
 		Balances::make_free_balance_be(&user, max_balance);
-		
+
 		let large_amount = max_balance / 2;
-		
+
 		assert_noop!(
 			CreditsPallet::<Runtime>::burn(RuntimeOrigin::signed(user), large_amount),
 			Error::<Runtime>::Overflow
@@ -1082,10 +1084,8 @@ fn burn_overflow_protection_works() {
 fn rate_validation_prevents_dos() {
 	new_test_ext(vec![]).execute_with(|| {
 		let excessive_rate = 2_000_000u128;
-		let bad_tiers = vec![
-			StakeTier { threshold: 100u128, rate_per_block: excessive_rate },
-		];
-		
+		let bad_tiers = vec![StakeTier { threshold: 100u128, rate_per_block: excessive_rate }];
+
 		assert_noop!(
 			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), bad_tiers),
 			Error::<Runtime>::RateTooHigh
@@ -1098,12 +1098,14 @@ fn asset_rate_validation_prevents_dos() {
 	new_test_ext(vec![]).execute_with(|| {
 		let asset_id = 42;
 		let excessive_rate = 2_000_000u128;
-		let bad_tiers = vec![
-			StakeTier { threshold: 100u128, rate_per_block: excessive_rate },
-		];
-		
+		let bad_tiers = vec![StakeTier { threshold: 100u128, rate_per_block: excessive_rate }];
+
 		assert_noop!(
-			CreditsPallet::<Runtime>::set_asset_stake_tiers(RuntimeOrigin::root(), asset_id, bad_tiers),
+			CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				asset_id,
+				bad_tiers
+			),
 			Error::<Runtime>::RateTooHigh
 		);
 	});
@@ -1114,12 +1116,12 @@ fn update_reward_block_is_atomic() {
 	new_test_ext(vec![]).execute_with(|| {
 		let user = CHARLIE;
 		System::set_block_number(100);
-		
+
 		assert_eq!(last_reward_update(user.clone()), 0);
-		
+
 		assert_ok!(CreditsPallet::<Runtime>::update_reward_block(&user));
 		assert_eq!(last_reward_update(user.clone()), 100);
-		
+
 		System::set_block_number(50);
 		assert_ok!(CreditsPallet::<Runtime>::update_reward_block(&user));
 		assert_eq!(last_reward_update(user), 100);

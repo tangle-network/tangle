@@ -85,7 +85,7 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::prelude::vec::Vec;
-	use sp_runtime::traits::{CheckedMul, MaybeDisplay, Saturating, SaturatedConversion, Zero};
+	use sp_runtime::traits::{CheckedMul, MaybeDisplay, SaturatedConversion, Saturating, Zero};
 	use sp_std::fmt::Debug;
 	use tangle_primitives::{rewards::AssetType, traits::MultiAssetDelegationInfo};
 
@@ -289,8 +289,8 @@ pub mod pallet {
 			Self::burn_tnt(&who, amount)?;
 
 			let conversion_rate = T::BurnConversionRate::get();
-			let credits_granted = amount.checked_mul(&conversion_rate)
-				.ok_or(Error::<T>::Overflow)?;
+			let credits_granted =
+				amount.checked_mul(&conversion_rate).ok_or(Error::<T>::Overflow)?;
 			ensure!(credits_granted > Zero::zero(), Error::<T>::Overflow);
 
 			Self::deposit_event(Event::CreditsGrantedFromBurn {
@@ -413,10 +413,7 @@ pub mod pallet {
 			// Validate that rates don't exceed maximum allowed value
 			for tier in &new_tiers {
 				let max_rate = BalanceOf::<T>::saturated_from(MAX_RATE_PER_BLOCK);
-				ensure!(
-					tier.rate_per_block <= max_rate,
-					Error::<T>::RateTooHigh
-				);
+				ensure!(tier.rate_per_block <= max_rate, Error::<T>::RateTooHigh);
 			}
 
 			// Try to create a bounded vector
@@ -469,10 +466,7 @@ pub mod pallet {
 			// Validate that rates don't exceed maximum allowed value
 			for tier in &new_tiers {
 				let max_rate = BalanceOf::<T>::saturated_from(MAX_RATE_PER_BLOCK);
-				ensure!(
-					tier.rate_per_block <= max_rate,
-					Error::<T>::RateTooHigh
-				);
+				ensure!(tier.rate_per_block <= max_rate, Error::<T>::RateTooHigh);
 			}
 
 			// Try to create a bounded vector
@@ -563,7 +557,8 @@ pub mod pallet {
 				return Ok(Zero::zero());
 			}
 
-			let new_credits = rate.saturating_mul(BalanceOf::<T>::saturated_from(blocks_in_window_u64));
+			let new_credits =
+				rate.saturating_mul(BalanceOf::<T>::saturated_from(blocks_in_window_u64));
 
 			Ok(new_credits)
 		}
@@ -724,7 +719,8 @@ pub mod pallet {
 				return Ok(Zero::zero());
 			}
 
-			let new_credits = rate.saturating_mul(BalanceOf::<T>::saturated_from(blocks_in_window_u64));
+			let new_credits =
+				rate.saturating_mul(BalanceOf::<T>::saturated_from(blocks_in_window_u64));
 			Ok(new_credits)
 		}
 
