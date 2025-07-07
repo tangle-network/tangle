@@ -354,6 +354,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       AmountZero: AugmentedError<ApiType>;
       /**
+       * No stake tiers configured for this asset.
+       **/
+      AssetRatesNotConfigured: AugmentedError<ApiType>;
+      /**
        * Cannot transfer burned tokens to target account (feature not fully implemented).
        **/
       BurnTransferNotImplemented: AugmentedError<ApiType>;

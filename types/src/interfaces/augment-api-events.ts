@@ -365,6 +365,10 @@ declare module '@polkadot/api-base/types/events' {
     };
     credits: {
       /**
+       * Asset-specific stake tiers were updated.
+       **/
+      AssetStakeTiersUpdated: AugmentedEvent<ApiType, [assetId: u128], { assetId: u128 }>;
+      /**
        * Credits were claimed from staking rewards, within the allowed window.
        * [who, amount_claimed, offchain_account_id]
        **/
