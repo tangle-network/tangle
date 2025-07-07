@@ -41,6 +41,7 @@ use tangle_primitives::{
 };
 
 #[cfg(not(feature = "std"))]
+#[allow(unused_imports)]
 use alloc::string::String;
 
 pub mod functions;
@@ -246,6 +247,22 @@ pub mod module {
 			+ Parameter
 			+ MaybeSerializeDeserialize;
 
+		/// Maximum number of slashes to process per block to prevent DoS attacks.
+		#[pallet::constant]
+		type MaxSlashesPerBlock: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// Maximum size of metrics data in heartbeat messages (in bytes).
+		#[pallet::constant]
+		type MaxMetricsDataSize: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// Fallback weight for reads when weight calculation overflows.
+		#[pallet::constant]
+		type FallbackWeightReads: Get<u64> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// Fallback weight for writes when weight calculation overflows.
+		#[pallet::constant]
+		type FallbackWeightWrites: Get<u64> + Default + Parameter + MaybeSerializeDeserialize;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -273,23 +290,26 @@ pub mod module {
 			// Only process slashes from eras that have completed their deferral period
 			let process_era = current_era.saturating_sub(slash_defer_duration);
 
-			// Limit processing to prevent DoS attacks
-			const MAX_SLASHES_PER_BLOCK: u32 = 10;
+			// Limit processing to prevent DoS attacks using configurable limit
+			let max_slashes_per_block = T::MaxSlashesPerBlock::get();
 
 			// Get all unapplied slashes for this era
 			let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
 
 			for (processed_slashes, (index, slash)) in prefix_iter.enumerate() {
-				if processed_slashes >= MAX_SLASHES_PER_BLOCK as usize {
+				if processed_slashes >= max_slashes_per_block as usize {
 					break;
 				}
 
 				let res = T::SlashManager::slash_operator(&slash);
 				match &res {
 					Ok(weight_used) => {
-						weight = weight
-							.checked_add(weight_used)
-							.unwrap_or(T::DbWeight::get().reads_writes(1000, 1000));
+						weight = weight.checked_add(weight_used).unwrap_or(
+							T::DbWeight::get().reads_writes(
+								T::FallbackWeightReads::get(),
+								T::FallbackWeightWrites::get(),
+							),
+						);
 						UnappliedSlashes::<T>::remove(process_era, index);
 					},
 					Err(_) => {
@@ -2092,8 +2112,8 @@ pub mod module {
 			let caller = ensure_signed(origin)?;
 
 			// Validate metrics data size before processing
-			const MAX_METRICS_SIZE: usize = 1024; // 1KB limit
-			ensure!(metrics_data.len() <= MAX_METRICS_SIZE, Error::<T>::MetricsDataTooLarge);
+			let max_metrics_size = T::MaxMetricsDataSize::get() as usize;
+			ensure!(metrics_data.len() <= max_metrics_size, Error::<T>::MetricsDataTooLarge);
 
 			// Ensure the service exists and is active
 			ensure!(
