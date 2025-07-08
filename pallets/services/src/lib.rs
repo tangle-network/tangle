@@ -40,10 +40,6 @@ use tangle_primitives::{
 	traits::{MultiAssetDelegationInfo, SlashManager},
 };
 
-#[cfg(not(feature = "std"))]
-#[allow(unused_imports)]
-use alloc::string::String;
-
 pub mod functions;
 mod impls;
 mod payment_processing;
