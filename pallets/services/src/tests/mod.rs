@@ -30,6 +30,7 @@ mod jobs;
 mod native_slashing;
 mod payments;
 mod registration;
+mod security;
 mod service;
 mod slashing;
 mod subscription_billing;

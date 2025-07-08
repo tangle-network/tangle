@@ -23,7 +23,6 @@ use frame_support::{
 	dispatch::{DispatchResult, DispatchResultWithPostInfo, Pays, PostDispatchInfo},
 	ensure,
 	pallet_prelude::*,
-	storage::TransactionOutcome,
 	traits::{
 		Currency, ReservableCurrency,
 		fungibles::{Inspect, Mutate},
@@ -42,6 +41,7 @@ use tangle_primitives::{
 };
 
 #[cfg(not(feature = "std"))]
+#[allow(unused_imports)]
 use alloc::string::String;
 
 pub mod functions;
@@ -247,6 +247,22 @@ pub mod module {
 			+ Parameter
 			+ MaybeSerializeDeserialize;
 
+		/// Maximum number of slashes to process per block to prevent DoS attacks.
+		#[pallet::constant]
+		type MaxSlashesPerBlock: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// Maximum size of metrics data in heartbeat messages (in bytes).
+		#[pallet::constant]
+		type MaxMetricsDataSize: Get<u32> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// Fallback weight for reads when weight calculation overflows.
+		#[pallet::constant]
+		type FallbackWeightReads: Get<u64> + Default + Parameter + MaybeSerializeDeserialize;
+
+		/// Fallback weight for writes when weight calculation overflows.
+		#[pallet::constant]
+		type FallbackWeightWrites: Get<u64> + Default + Parameter + MaybeSerializeDeserialize;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -267,37 +283,38 @@ pub mod module {
 		/// On initialize, we should check for any unapplied slashes and apply them.
 		/// Also process subscription payments for active services.
 		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
-			let mut weight = Zero::zero();
+			let mut weight: Weight = Weight::zero();
 			let current_era = T::OperatorDelegationManager::get_current_round();
 			let slash_defer_duration = T::SlashDeferDuration::get();
 
 			// Only process slashes from eras that have completed their deferral period
 			let process_era = current_era.saturating_sub(slash_defer_duration);
 
+			// Limit processing to prevent DoS attacks using configurable limit
+			let max_slashes_per_block = T::MaxSlashesPerBlock::get();
+
 			// Get all unapplied slashes for this era
 			let prefix_iter = UnappliedSlashes::<T>::iter_prefix(process_era);
-			for (index, slash) in prefix_iter {
-				// TODO: This call must be all or nothing.
-				// TODO: If fail then revert all storage changes
-				if Self::slashing_enabled() {
-					let _ = frame_support::storage::with_transaction(
-						|| -> TransactionOutcome<Result<_, DispatchError>> {
-							let res = T::SlashManager::slash_operator(&slash);
-							match &res {
-								Ok(weight_used) => {
-									weight =
-										weight_used.checked_add(&weight).unwrap_or_else(Zero::zero);
-									// Remove the slash from storage after successful application
-									UnappliedSlashes::<T>::remove(process_era, index);
-									TransactionOutcome::Commit(Ok(res))
-								},
-								Err(_) => {
-									log::error!("Failed to apply slash for index: {:?}", index);
-									TransactionOutcome::Rollback(Ok(res))
-								},
-							}
-						},
-					);
+
+			for (processed_slashes, (index, slash)) in prefix_iter.enumerate() {
+				if processed_slashes >= max_slashes_per_block as usize {
+					break;
+				}
+
+				let res = T::SlashManager::slash_operator(&slash);
+				match &res {
+					Ok(weight_used) => {
+						weight = weight.checked_add(weight_used).unwrap_or(
+							T::DbWeight::get().reads_writes(
+								T::FallbackWeightReads::get(),
+								T::FallbackWeightWrites::get(),
+							),
+						);
+						UnappliedSlashes::<T>::remove(process_era, index);
+					},
+					Err(_) => {
+						weight = weight.saturating_add(T::DbWeight::get().reads_writes(1, 0));
+					},
 				}
 			}
 
@@ -491,6 +508,14 @@ pub mod module {
 		TooManySubscriptions,
 		/// Custom asset transfer failed
 		CustomAssetTransferFailed,
+		/// Invalid event count provided
+		InvalidEventCount,
+		/// Metrics data too large
+		MetricsDataTooLarge,
+		/// Subscription not valid
+		SubscriptionNotValid,
+		/// Service not owned by caller
+		ServiceNotOwned,
 	}
 
 	#[pallet::event]
@@ -1151,19 +1176,23 @@ pub mod module {
 			registration_args: Vec<Field<T::Constraints, T::AccountId>>,
 			#[pallet::compact] value: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
-			let caller = ensure_signed(origin)?;
-			// Validate the operator preferences
-			ensure!(preferences.key != [0u8; 65], Error::<T>::InvalidKey);
-			// Check if the caller is an active operator in the delegation system
+			let operator = ensure_signed(origin)?;
+
+			// Ensure operator is active in delegation system
 			ensure!(
-				T::OperatorDelegationManager::is_operator_active(&caller),
+				T::OperatorDelegationManager::is_operator_active(&operator),
 				Error::<T>::OperatorNotActive
 			);
+
+			// Validate the operator preferences
+			ensure!(preferences.key != [0u8; 65], Error::<T>::InvalidKey);
+
 			// Check if operator is already registered for this blueprint
 			ensure!(
-				!Operators::<T>::contains_key(blueprint_id, &caller),
+				!Operators::<T>::contains_key(blueprint_id, &operator),
 				Error::<T>::AlreadyRegistered
 			);
+
 			// Check if the key is already in use
 			for (_, prefs) in Operators::<T>::iter_prefix(blueprint_id) {
 				if prefs.key == preferences.key {
@@ -1171,7 +1200,7 @@ pub mod module {
 				}
 			}
 
-			Self::do_register(&caller, blueprint_id, preferences, registration_args, value)?;
+			Self::do_register(&operator, blueprint_id, preferences, registration_args, value)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
 
@@ -1661,6 +1690,7 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 			let service = Self::services(service_id)?;
+			let (_, _blueprint) = Self::blueprints(service.blueprint)?;
 			let (maybe_slashing_origin, _used_weight) = Self::query_slashing_origin(&service)?;
 			let slashing_origin = maybe_slashing_origin.ok_or(Error::<T>::NoSlashingOrigin)?;
 			ensure!(slashing_origin == caller, DispatchError::BadOrigin);
@@ -2081,6 +2111,10 @@ pub mod module {
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
 
+			// Validate metrics data size before processing
+			let max_metrics_size = T::MaxMetricsDataSize::get() as usize;
+			ensure!(metrics_data.len() <= max_metrics_size, Error::<T>::MetricsDataTooLarge);
+
 			// Ensure the service exists and is active
 			ensure!(
 				ServiceStatus::<T>::contains_key(blueprint_id, service_id),
@@ -2106,9 +2140,10 @@ pub mod module {
     .map_err(|_| Error::<T>::InvalidHeartbeatData)?;
 
 			// Create the message to verify
-			// Format: service_id + blueprint_id + metrics_data
+			// Format: service_id + blueprint_id + current_block + metrics_data
 			let mut message = service_id.to_le_bytes().to_vec();
 			message.extend_from_slice(&blueprint_id.to_le_bytes());
+			message.extend_from_slice(&current_block.saturated_into::<u64>().to_le_bytes());
 			message.extend_from_slice(&bounded_metrics_data);
 			let message_hash = sp_io::hashing::keccak_256(&message);
 
