@@ -155,6 +155,18 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
 
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxSlashesPerBlock: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MaxMetricsDataSize: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const FallbackWeightReads: u64 = 100;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const FallbackWeightWrites: u64 = 100;
+
 	// Ripemd160(keccak256("ServicesPalletEvmAccount"))
 	pub const ServicesPalletEvmAccount: H160 = H160([
 		0x09, 0xdf, 0x6a, 0x94, 0x1e, 0xe0, 0x3b, 0x1e,
@@ -200,6 +212,10 @@ impl pallet_services::Config for Runtime {
 	type MaxResourceNameLength = MaxResourceNameLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
+	type MaxSlashesPerBlock = MaxSlashesPerBlock;
+	type MaxMetricsDataSize = MaxMetricsDataSize;
+	type FallbackWeightReads = FallbackWeightReads;
+	type FallbackWeightWrites = FallbackWeightWrites;
 	type Constraints = PalletServicesConstraints;
 	type SlashDeferDuration = SlashDeferDuration;
 	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
