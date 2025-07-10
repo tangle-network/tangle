@@ -1,6 +1,6 @@
 {
 	"name": "@tangle-network/tangle-substrate-types",
-	"version": "0.9.29",
+	"version": "0.9.30",
 	"description": "Polkadot.js type definitions required for interacting with Tangle's tangle network",
 	"author": "Tangle Developers <drew@tangle.network>",
 	"license": "Apache-2.0",

@@ -1,6 +1,6 @@
 use crate::{
 	BalanceOf, BlockNumberFor, Config, Error, JobPayments, JobSubscriptionBillings, Pallet,
-	UserSubscriptionCount,
+	ServiceStatus, UserSubscriptionCount,
 };
 use frame_support::{
 	dispatch::DispatchResult,
@@ -184,6 +184,14 @@ impl<T: Config> Pallet<T> {
 		// Check if subscription has ended
 		if let Some(end_block) = maybe_end {
 			if current_block > end_block {
+				// Clean up subscription count when subscription ends
+				let billing_key = (service_id, job_index, payer.clone());
+				if JobSubscriptionBillings::<T>::contains_key(&billing_key) {
+					JobSubscriptionBillings::<T>::remove(&billing_key);
+					let current_count = UserSubscriptionCount::<T>::get(payer);
+					UserSubscriptionCount::<T>::insert(payer, current_count.saturating_sub(1));
+				}
+
 				log::debug!(
 					"Subscription for service {} job {} has ended at block {:?}",
 					service_id,
@@ -200,7 +208,7 @@ impl<T: Config> Pallet<T> {
 
 		if is_new_subscription {
 			let current_count = UserSubscriptionCount::<T>::get(payer);
-			ensure!(current_count < 100, Error::<T>::TooManySubscriptions); // Max 100 subscriptions per user
+			ensure!(current_count < 100, Error::<T>::TooManySubscriptions);
 			UserSubscriptionCount::<T>::insert(payer, current_count + 1);
 		}
 
@@ -228,14 +236,21 @@ impl<T: Config> Pallet<T> {
 				service_id,
 				job_index,
 				subscriber: payer.clone(),
-				last_billed: initial_last_billed, // Fixed: Now ensures first payment is due
+				last_billed: initial_last_billed,
 				end_block: maybe_end,
 			}
 		});
 
-		// Determine if payment is due
+		// Determine if payment is due with proper zero handling
 		let blocks_since_last = current_block.saturating_sub(billing.last_billed);
-		let payment_due = blocks_since_last >= interval;
+		let payment_due = if blocks_since_last == BlockNumberFor::<T>::zero() &&
+			billing.last_billed == BlockNumberFor::<T>::zero()
+		{
+			// First payment scenario
+			true
+		} else {
+			blocks_since_last >= interval
+		};
 
 		log::debug!(
 			"Subscription billing check for service {} job {}: blocks_since_last={:?}, interval={:?}, payment_due={}",
@@ -305,6 +320,9 @@ impl<T: Config> Pallet<T> {
 		let (_, blueprint) = Self::blueprints(service.blueprint)?;
 		let _job_def = blueprint.jobs.get(job_index as usize).ok_or(Error::<T>::InvalidJobId)?;
 
+		ensure!(event_count > 0, Error::<T>::InvalidEventCount);
+		ensure!(event_count <= u32::MAX / 2, Error::<T>::InvalidEventCount);
+
 		let total_reward = reward_per_event
 			.checked_mul(&event_count.into())
 			.ok_or(Error::<T>::PaymentCalculationOverflow)?;
@@ -337,12 +355,27 @@ impl<T: Config> Pallet<T> {
 		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
 		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
 
+		// Checks: Validate balances before any state changes
+		match asset {
+			Asset::Custom(asset_id) => {
+				if *asset_id == T::AssetId::default() {
+					// Native currency - check balance first
+					let free_balance = T::Currency::free_balance(payer);
+					ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+				}
+			},
+			Asset::Erc20(_) => {
+				// ERC20 handled separately - check balance first
+				let free_balance = T::Currency::free_balance(payer);
+				ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+			},
+		}
+
+		// Effects & Interactions: Execute transfers after validation
 		match asset {
 			Asset::Custom(asset_id) => {
 				if *asset_id == T::AssetId::default() {
 					// Native currency
-					let free_balance = T::Currency::free_balance(payer);
-					ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
 					T::Currency::reserve(payer, amount)?;
 				} else {
 					// Custom asset
@@ -358,8 +391,6 @@ impl<T: Config> Pallet<T> {
 			},
 			Asset::Erc20(_) => {
 				// ERC20 handled separately
-				let free_balance = T::Currency::free_balance(payer);
-				ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
 				T::Currency::reserve(payer, amount)?;
 			},
 		}
@@ -431,16 +462,27 @@ impl<T: Config> Pallet<T> {
 	pub fn process_subscription_payments_on_block(current_block: BlockNumberFor<T>) -> Weight {
 		let mut total_weight = Weight::zero();
 		let mut processed_count = 0u32;
-		const MAX_SUBSCRIPTIONS_PER_BLOCK: u32 = 50; // Limit processing to prevent spam attacks
+		const MAX_SUBSCRIPTIONS_PER_BLOCK: u32 = 50;
 
-		// Iterate through subscription billings directly to avoid nested loops
 		for ((service_id, job_index, subscriber), billing) in JobSubscriptionBillings::<T>::iter() {
 			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
-				break; // Early termination to prevent excessive processing
+				break;
 			}
 
-			// Get service and blueprint info
+			// Validate subscription before processing
 			if let Ok(service_instance) = Self::services(service_id) {
+				// Check if service is still active
+				if !ServiceStatus::<T>::contains_key(service_instance.blueprint, service_id) {
+					continue;
+				}
+
+				// Check if subscriber is still authorized
+				if !service_instance.permitted_callers.is_empty() &&
+					!service_instance.permitted_callers.contains(&subscriber)
+				{
+					continue;
+				}
+
 				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) {
 					if let Some(job_def) = blueprint.jobs.get(job_index as usize) {
 						if let PricingModel::Subscription {
@@ -449,7 +491,6 @@ impl<T: Config> Pallet<T> {
 							maybe_end,
 						} = &job_def.pricing_model
 						{
-							// Convert types for runtime compatibility
 							let rate_converted: BalanceOf<T> =
 								(*rate_per_interval).saturated_into();
 							let interval_converted: BlockNumberFor<T> =
@@ -457,25 +498,20 @@ impl<T: Config> Pallet<T> {
 							let maybe_end_converted: Option<BlockNumberFor<T>> =
 								maybe_end.map(|end| end.saturated_into());
 
-							// Check if payment is due
 							let blocks_since_last =
 								current_block.saturating_sub(billing.last_billed);
 							if blocks_since_last >= interval_converted {
-								// Check if subscription hasn't ended
 								if let Some(end_block) = maybe_end_converted {
 									if current_block > end_block {
 										continue;
 									}
 								}
 
-								// Process payment with early termination on failure
 								if Self::process_job_subscription_payment(
 									service_id,
 									job_index,
-									0, /* call_id not relevant for subscription
-									    * processing */
-									&subscriber, /* subscriber authorizes their own automated
-									              * payment */
+									0,
+									&subscriber,
 									&subscriber,
 									rate_converted,
 									interval_converted,
@@ -484,8 +520,6 @@ impl<T: Config> Pallet<T> {
 								)
 								.is_err()
 								{
-									// Early termination on payment failure to prevent further
-									// processing issues
 									break;
 								}
 
@@ -496,7 +530,6 @@ impl<T: Config> Pallet<T> {
 				}
 			}
 
-			// Add weight for processing
 			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
 		}
 
