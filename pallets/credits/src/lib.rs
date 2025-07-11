@@ -85,12 +85,13 @@ pub mod pallet {
 	};
 	use frame_system::pallet_prelude::*;
 	use scale_info::prelude::vec::Vec;
-	use sp_runtime::traits::{MaybeDisplay, Saturating, UniqueSaturatedInto, Zero};
+	use sp_runtime::traits::{CheckedMul, MaybeDisplay, SaturatedConversion, Saturating, Zero};
 	use sp_std::fmt::Debug;
 	use tangle_primitives::{rewards::AssetType, traits::MultiAssetDelegationInfo};
 
 	// Move STORAGE_VERSION inside the pallet mod
 	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
+	const MAX_RATE_PER_BLOCK: u128 = 1_000_000;
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -266,6 +267,8 @@ pub mod pallet {
 		StakeTiersOverflow,
 		/// No stake tiers configured for this asset.
 		AssetRatesNotConfigured,
+		/// Rate per block exceeds maximum allowed value.
+		RateTooHigh,
 	}
 
 	#[pallet::call]
@@ -286,7 +289,8 @@ pub mod pallet {
 			Self::burn_tnt(&who, amount)?;
 
 			let conversion_rate = T::BurnConversionRate::get();
-			let credits_granted = amount.saturating_mul(conversion_rate);
+			let credits_granted =
+				amount.checked_mul(&conversion_rate).ok_or(Error::<T>::Overflow)?;
 			ensure!(credits_granted > Zero::zero(), Error::<T>::Overflow);
 
 			Self::deposit_event(Event::CreditsGrantedFromBurn {
@@ -406,6 +410,12 @@ pub mod pallet {
 				);
 			}
 
+			// Validate that rates don't exceed maximum allowed value
+			for tier in &new_tiers {
+				let max_rate = BalanceOf::<T>::saturated_from(MAX_RATE_PER_BLOCK);
+				ensure!(tier.rate_per_block <= max_rate, Error::<T>::RateTooHigh);
+			}
+
 			// Try to create a bounded vector
 			let bounded_tiers =
 				BoundedVec::<StakeTier<BalanceOf<T>>, T::MaxStakeTiers>::try_from(new_tiers)
@@ -451,6 +461,12 @@ pub mod pallet {
 					new_tiers[i - 1].threshold <= new_tiers[i].threshold,
 					Error::<T>::StakeTiersNotSorted
 				);
+			}
+
+			// Validate that rates don't exceed maximum allowed value
+			for tier in &new_tiers {
+				let max_rate = BalanceOf::<T>::saturated_from(MAX_RATE_PER_BLOCK);
+				ensure!(tier.rate_per_block <= max_rate, Error::<T>::RateTooHigh);
 			}
 
 			// Try to create a bounded vector
@@ -535,16 +551,14 @@ pub mod pallet {
 				return Ok(Zero::zero()); // Should be unreachable given prior checks
 			}
 
-			// Convert BlockNumber to u32 safely for the multiplication
-			let blocks_in_window_u32: u32 = blocks_in_window.unique_saturated_into();
-			if blocks_in_window_u32 == 0 {
-				// This can happen if blocks_in_window > u32::MAX and saturates to 0 if BlockNumber
-				// is signed? Or more likely if BlockNumber itself was 0. Unlikely, but handle
-				// defensively.
+			// Convert BlockNumber to u64 safely for the multiplication
+			let blocks_in_window_u64: u64 = blocks_in_window.saturated_into();
+			if blocks_in_window_u64 == 0 {
 				return Ok(Zero::zero());
 			}
 
-			let new_credits = rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window_u32));
+			let new_credits =
+				rate.saturating_mul(BalanceOf::<T>::saturated_from(blocks_in_window_u64));
 
 			Ok(new_credits)
 		}
@@ -573,10 +587,11 @@ pub mod pallet {
 		/// Helper to ONLY update the reward block (e.g., for burn).
 		pub fn update_reward_block(who: &T::AccountId) -> DispatchResult {
 			let current_block = frame_system::Pallet::<T>::block_number();
-			let last_update = LastRewardUpdateBlock::<T>::get(who);
-			if last_update < current_block {
-				LastRewardUpdateBlock::<T>::insert(who, current_block);
-			}
+			LastRewardUpdateBlock::<T>::mutate(who, |last_update| {
+				if *last_update < current_block {
+					*last_update = current_block;
+				}
+			});
 			Ok(())
 		}
 
@@ -586,18 +601,22 @@ pub mod pallet {
 
 			match T::CreditBurnRecipient::get() {
 				Some(recipient) => {
-					// Transfer to recipient if specified
+					T::Currency::ensure_can_withdraw(
+						who,
+						amount,
+						frame_support::traits::WithdrawReasons::TRANSFER,
+						T::Currency::free_balance(who).saturating_sub(amount),
+					)?;
 					T::Currency::transfer(who, &recipient, amount, ExistenceRequirement::KeepAlive)?
 				},
 				None => {
-					// Actually burn the tokens by reducing free balance
 					let imbalance = T::Currency::withdraw(
 						who,
 						amount,
 						frame_support::traits::WithdrawReasons::TRANSFER,
 						ExistenceRequirement::KeepAlive,
 					)?;
-					drop(imbalance); // Explicitly drop to burn
+					drop(imbalance);
 				},
 			}
 			Ok(())
@@ -695,12 +714,13 @@ pub mod pallet {
 				return Ok(Zero::zero());
 			}
 
-			let blocks_in_window_u32: u32 = blocks_in_window.unique_saturated_into();
-			if blocks_in_window_u32 == 0 {
+			let blocks_in_window_u64: u64 = blocks_in_window.saturated_into();
+			if blocks_in_window_u64 == 0 {
 				return Ok(Zero::zero());
 			}
 
-			let new_credits = rate.saturating_mul(BalanceOf::<T>::from(blocks_in_window_u32));
+			let new_credits =
+				rate.saturating_mul(BalanceOf::<T>::saturated_from(blocks_in_window_u64));
 			Ok(new_credits)
 		}
 
@@ -722,14 +742,11 @@ pub mod pallet {
 		fn asset_id_to_asset_type(
 			asset_id: T::AssetId,
 		) -> Result<AssetType<T::AssetId>, DispatchError> {
-			let native_asset_id = Default::default(); // Create default AssetId (should be 0 for TNT)
+			let native_asset_id = Default::default();
 			if asset_id == native_asset_id {
-				// Native asset ID (TNT)
 				Ok(AssetType::Tnt)
 			} else {
-				// For custom assets, we need to map them appropriately
-				// This might need to be extended based on your asset system
-				Ok(AssetType::Native(asset_id)) // Placeholder - you may need to implement proper mapping
+				Ok(AssetType::Native(asset_id))
 			}
 		}
 

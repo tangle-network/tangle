@@ -812,7 +812,7 @@ fn test_validate_payment_amount_event_driven() {
 }
 
 // Helper functions for payment processing tests
-fn create_blueprint_with_pricing(
+pub fn create_blueprint_with_pricing(
 	_pricing_model: PricingModel<u32, u128>,
 ) -> ServiceBlueprint<ConstraintsOf<Runtime>> {
 	use frame_support::BoundedVec;

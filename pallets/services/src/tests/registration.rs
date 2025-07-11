@@ -227,6 +227,9 @@ fn test_registration_invalid_preferences() {
 
 		let bob = mock_pub_key(BOB);
 
+		// Join as operator first to pass operator activity validation
+		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000));
+
 		// Test with invalid ECDSA key (zero key)
 		let invalid_key = [0u8; 65];
 		assert_err!(

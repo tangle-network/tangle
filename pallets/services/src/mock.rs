@@ -378,6 +378,22 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxSlashesPerBlock: u32 = 10;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxMetricsDataSize: u32 = 1024;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const FallbackWeightReads: u64 = 100;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const FallbackWeightWrites: u64 = 100;
 }
 
 impl pallet_services::Config for Runtime {
@@ -415,6 +431,10 @@ impl pallet_services::Config for Runtime {
 	type MaxResourceNameLength = MaxResourceNameLength;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerRevisions;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
+	type MaxSlashesPerBlock = MaxSlashesPerBlock;
+	type MaxMetricsDataSize = MaxMetricsDataSize;
+	type FallbackWeightReads = FallbackWeightReads;
+	type FallbackWeightWrites = FallbackWeightWrites;
 	type Constraints = pallet_services::types::ConstraintsOf<Self>;
 	type OperatorDelegationManager = MultiAssetDelegation;
 	type SlashDeferDuration = SlashDeferDuration;
