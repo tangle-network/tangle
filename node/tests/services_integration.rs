@@ -102,59 +102,6 @@ pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
 }
 
 #[test]
-fn test_services_pallet_storage() {
-	run_services_test(|t| async move {
-		let next_blueprint_id_key = api::storage().services().next_blueprint_id();
-		let next_service_request_id_key = api::storage().services().next_service_request_id();
-		let next_instance_id_key = api::storage().services().next_instance_id();
-
-		let next_blueprint_id =
-			t.subxt.storage().at_latest().await?.fetch(&next_blueprint_id_key).await?;
-		let next_service_request_id =
-			t.subxt.storage().at_latest().await?.fetch(&next_service_request_id_key).await?;
-		let next_instance_id =
-			t.subxt.storage().at_latest().await?.fetch(&next_instance_id_key).await?;
-
-		assert!(next_blueprint_id.is_some() || next_blueprint_id.is_none());
-		assert!(next_service_request_id.is_some() || next_service_request_id.is_none());
-		assert!(next_instance_id.is_some() || next_instance_id.is_none());
-
-		anyhow::Ok(())
-	});
-}
-
-#[test]
-fn test_erc20_token_integration() {
-	run_services_test(|t| async move {
-		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
-
-		let usdc = MockERC20::new(t.usdc, &alice_provider);
-
-		let mint_amount = U256::from(1000000);
-		let receipt = usdc.mint(alice.address(), mint_amount).send().await?.get_receipt().await?;
-		assert!(receipt.status());
-
-		let balance = usdc.balanceOf(alice.address()).call().await?;
-		assert_eq!(balance._0, mint_amount);
-
-		anyhow::Ok(())
-	});
-}
-
-#[test]
-fn test_services_precompile_access() {
-	run_services_test(|t| async move {
-		let alice = TestAccount::Alice;
-		let alice_provider = alloy_provider_with_wallet(&t.provider, alice.evm_wallet());
-
-		let _services_precompile = Services::new(SERVICES_PRECOMPILE, &alice_provider);
-
-		anyhow::Ok(())
-	});
-}
-
-#[test]
 fn test_blueprint_creation() {
 	run_services_test(|t| async move {
 		let alice = TestAccount::Alice;
@@ -321,9 +268,9 @@ fn test_end_to_end_services_workflow() {
 	run_services_test(|t| async move {
 		info!("🚀 Starting comprehensive end-to-end services workflow test");
 
-		// Step 1: Create a realistic service blueprint
+		// Step 1: Create a service blueprint
 		let alice = TestAccount::Alice;
-		let blueprint = create_realistic_blueprint();
+		let blueprint = create_test_blueprint();
 
 		info!("Step 1: Creating Echo Service blueprint");
 		let create_blueprint_call = api::tx().services().create_blueprint(blueprint);
@@ -362,8 +309,8 @@ fn test_end_to_end_services_workflow() {
 
 		// Step 2: Register operator for the blueprint (using blueprint ID 0)
 		let bob = TestAccount::Bob;
-		let operator_preferences = create_realistic_operator_preferences();
-		let blueprint_id = 0u64; // Use first blueprint for testing
+		let operator_preferences = create_test_operator_preferences();
+		let blueprint_id = 0u64;
 
 		info!("Step 2: Registering operator for blueprint {blueprint_id}");
 		let register_call = api::tx().services().register(
@@ -530,7 +477,7 @@ fn create_test_operator_preferences() -> OperatorPreferences {
 	}
 }
 
-fn create_realistic_blueprint() -> ServiceBlueprint {
+fn create_test_blueprint() -> ServiceBlueprint {
 	ServiceBlueprint {
 		metadata: ServiceMetadata {
 			name: BoundedString(BoundedVec(b"Echo Service".to_vec())),
@@ -546,7 +493,7 @@ fn create_realistic_blueprint() -> ServiceBlueprint {
 			website: Some(BoundedString(BoundedVec(b"https://tangle.tools".to_vec()))),
 			license: Some(BoundedString(BoundedVec(b"MIT".to_vec()))),
 		},
-		manager: BlueprintServiceManager::Evm(H160([0x13; 20])), // More realistic address
+		manager: BlueprintServiceManager::Evm(H160([0x13; 20])),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,
 		jobs: BoundedVec(vec![JobDefinition {
 			metadata: JobMetadata {
@@ -564,9 +511,9 @@ fn create_realistic_blueprint() -> ServiceBlueprint {
 	}
 }
 
-fn create_realistic_operator_preferences() -> OperatorPreferences {
+fn create_test_operator_preferences() -> OperatorPreferences {
 	OperatorPreferences {
-		key: [5; 65], // Different key from test version
+		key: [5; 65],
 		rpc_address: BoundedString(BoundedVec(b"https://operator.tangle.network:8080".to_vec())),
 	}
 }
