@@ -6,11 +6,11 @@ use frame_support::{
 	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
-	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation, Get},
+	traits::{Currency, ExistenceRequirement, Get, fungibles::Mutate, tokens::Preservation},
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::{Percent, traits::Zero, DispatchError};
+use sp_runtime::{DispatchError, Percent, traits::Zero};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	Account,

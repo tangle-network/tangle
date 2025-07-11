@@ -196,7 +196,7 @@ pub fn join_and_register(
 
 	// Set up delegations for common assets used in tests
 	let delegator = mock_pub_key(CHARLIE); // Use Charlie as a delegator
-	
+
 	// Set up native asset delegation
 	assert_ok!(MultiAssetDelegation::delegate_nomination(
 		RuntimeOrigin::signed(delegator.clone()),

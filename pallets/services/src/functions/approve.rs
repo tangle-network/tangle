@@ -22,7 +22,11 @@ use frame_support::{
 	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
-	traits::{Currency, ExistenceRequirement, fungibles::{Inspect, Mutate}, tokens::Preservation},
+	traits::{
+		Currency, ExistenceRequirement,
+		fungibles::{Inspect, Mutate},
+		tokens::Preservation,
+	},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
@@ -123,10 +127,7 @@ impl<T: Config> Pallet<T> {
 			},
 			Asset::Erc20(token_address) => {
 				// Validate ERC20 token address is not zero address
-				ensure!(
-					*token_address != sp_core::H160::zero(),
-					Error::<T>::InvalidErc20Address
-				);
+				ensure!(*token_address != sp_core::H160::zero(), Error::<T>::InvalidErc20Address);
 				// Note: We could add more sophisticated ERC20 validation here
 				// such as checking if the contract exists at the address
 			},
@@ -160,7 +161,8 @@ impl<T: Config> Pallet<T> {
 		// Retrieve and validate the service request
 		let mut request = Self::service_requests(request_id)?;
 
-		// First validate that commitments match the service request requirements (primitive validation)
+		// First validate that commitments match the service request requirements (primitive
+		// validation)
 		ensure!(
 			request.validate_security_commitments(security_commitments),
 			Error::<T>::InvalidSecurityCommitments
