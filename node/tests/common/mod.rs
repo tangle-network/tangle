@@ -187,10 +187,12 @@ pub async fn subxt_client() -> subxt::OnlineClient<subxt::PolkadotConfig> {
 }
 
 pub trait AddressConverter {
+	#[allow(dead_code)]
 	fn to_account_id(&self) -> subxt::utils::AccountId32;
 }
 
 pub trait AccountIdConverter {
+	#[allow(dead_code)]
 	fn to_address(&self) -> alloy::primitives::Address;
 }
 

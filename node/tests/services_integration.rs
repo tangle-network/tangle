@@ -1,5 +1,7 @@
 //! Services Pallet Integration Tests
 
+#![allow(clippy::too_many_arguments)]
+
 use alloy::{primitives::*, providers::Provider, sol};
 use core::{future::Future, time::Duration};
 use sp_tracing::{error, info};
