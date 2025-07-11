@@ -37,7 +37,7 @@ jobs:
 
     - name: Install Protobuf (Ubuntu)
       if: matrix.os == 'ubuntu-22.04'
-      run: sudo apt-get install protobuf-compiler
+      run: sudo apt-get update && sudo apt-get install protobuf-compiler
 
     - name: Install Protobuf (macOS)
       if: matrix.os == 'macos-latest'
