@@ -4,16 +4,13 @@ use crate::{
 };
 use frame_support::{
 	BoundedVec,
-	pallet_prelude::*,
-	traits::{
-		Currency, ExistenceRequirement,
-		fungibles::{Inspect, Mutate},
-		tokens::Preservation,
-	},
+	dispatch::DispatchResult,
+	ensure,
+	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation, Get},
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::{Percent, traits::Zero};
+use sp_runtime::{Percent, traits::Zero, DispatchError};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	Account,
@@ -24,23 +21,19 @@ use tangle_primitives::{
 };
 
 impl<T: Config> Pallet<T> {
-	/// Validate asset security requirements for service requests
+	/// Validate asset security requirements for a service request
 	pub fn validate_asset_security_requirements(
 		requirements: &[AssetSecurityRequirement<T::AssetId>],
 	) -> DispatchResult {
 		let mut seen_assets = sp_std::collections::btree_set::BTreeSet::new();
 
 		for requirement in requirements {
-			// Validate asset exists based on asset type
+			// For now, we do minimal validation during request creation
+			// More thorough validation will happen during operator approval
 			match &requirement.asset {
-				Asset::Custom(asset_id) => {
-					// For custom assets, verify they exist in the Fungibles system
-					if *asset_id != Zero::zero() {
-						ensure!(
-							T::Fungibles::asset_exists(asset_id.clone()),
-							Error::<T>::AssetNotFound
-						);
-					}
+				Asset::Custom(_asset_id) => {
+					// We don't validate custom asset existence here to avoid permission issues
+					// Asset existence will be validated when operators approve the request
 				},
 				Asset::Erc20(token_address) => {
 					// Validate ERC20 token address is not zero address

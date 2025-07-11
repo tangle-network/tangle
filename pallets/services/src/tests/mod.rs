@@ -139,7 +139,7 @@ fn deploy() -> Deployment {
 
 	let eve = mock_pub_key(EVE);
 	// Give EVE some USDC tokens to pay for the service (need 100 USDC with 6 decimals = 100_000_000
-	// units)
+	// units) - USDC is owned by ALICE (authorities[0])
 	mint_tokens(USDC, mock_pub_key(ALICE), eve.clone(), 200 * 10u128.pow(6));
 	let service_id = Services::next_instance_id();
 	assert_ok!(Services::request(
@@ -191,6 +191,53 @@ pub fn join_and_register(
 	assert_ok!(MultiAssetDelegation::join_operators(
 		RuntimeOrigin::signed(operator.clone()),
 		stake_amount
+	));
+
+	// Set up delegations for common assets used in tests
+	let delegator = mock_pub_key(CHARLIE); // Use Charlie as a delegator
+	
+	// Set up native asset delegation
+	assert_ok!(MultiAssetDelegation::delegate_nomination(
+		RuntimeOrigin::signed(delegator.clone()),
+		operator.clone(),
+		stake_amount,
+		Default::default(),
+	));
+
+	// Set up WETH delegation - WETH is owned by BOB (authorities[1])
+	let weth_stake = 100_000;
+	mint_tokens(WETH, mock_pub_key(BOB), delegator.clone(), weth_stake * 10u128.pow(18));
+	assert_ok!(MultiAssetDelegation::deposit(
+		RuntimeOrigin::signed(delegator.clone()),
+		Asset::Custom(WETH),
+		weth_stake,
+		None,
+		None,
+	));
+	assert_ok!(MultiAssetDelegation::delegate(
+		RuntimeOrigin::signed(delegator.clone()),
+		operator.clone(),
+		Asset::Custom(WETH),
+		weth_stake,
+		Default::default(),
+	));
+
+	// Set up USDC delegation - USDC is owned by ALICE (authorities[0])
+	let usdc_stake = 100_000;
+	mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), usdc_stake * 10u128.pow(6));
+	assert_ok!(MultiAssetDelegation::deposit(
+		RuntimeOrigin::signed(delegator.clone()),
+		Asset::Custom(USDC),
+		usdc_stake,
+		None,
+		None,
+	));
+	assert_ok!(MultiAssetDelegation::delegate(
+		RuntimeOrigin::signed(delegator.clone()),
+		operator.clone(),
+		Asset::Custom(USDC),
+		usdc_stake,
+		Default::default(),
 	));
 
 	// Register for blueprint

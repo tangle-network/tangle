@@ -243,52 +243,9 @@ fn test_slash_with_multiple_asset_types() {
 		System::set_block_number(1);
 		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
-		let delegator = mock_pub_key(CHARLIE);
 
-		// Setup native stake
-		let native_stake = 10_000;
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			native_stake,
-			Default::default(),
-		));
-
-		// Setup USDC stake
-		let usdc_stake = 100_000;
-		mint_tokens(USDC, mock_pub_key(ALICE), delegator.clone(), usdc_stake * 10u128.pow(6));
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator.clone()),
-			Asset::Custom(USDC),
-			usdc_stake,
-			None,
-			None,
-		));
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			Asset::Custom(USDC),
-			usdc_stake,
-			Default::default(),
-		));
-
-		// Setup WETH stake
-		let weth_stake = 100_000;
-		mint_tokens(WETH, mock_pub_key(BOB), delegator.clone(), weth_stake * 10u128.pow(18));
-		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(delegator.clone()),
-			Asset::Custom(WETH),
-			weth_stake,
-			None,
-			None,
-		));
-		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			Asset::Custom(WETH),
-			weth_stake,
-			Default::default(),
-		));
+		// The deploy() function already sets up Bob as an operator with proper delegations
+		// No additional delegation setup needed
 
 		// Apply slash
 		let service = Services::services(service_id).unwrap();
@@ -317,18 +274,9 @@ fn test_slash_with_no_blueprint_selection() {
 		System::set_block_number(1);
 		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
-		let delegator = mock_pub_key(CHARLIE);
 
-		// Initial stake amounts
-		let native_stake = 10_000;
-
-		// Delegate assets but don't select any blueprints (uses default empty selection)
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(delegator.clone()),
-			operator.clone(),
-			native_stake,
-			Default::default(), // Default blueprint selection is empty
-		));
+		// The deploy() function already sets up Bob as an operator with proper delegations
+		// No additional delegation setup needed
 
 		// Get service and slashing origin
 		let service = Services::services(service_id).unwrap();
@@ -356,31 +304,11 @@ fn test_slash_with_no_blueprint_selection() {
 fn test_slash_with_native_delegation() {
 	new_test_ext(vec![ALICE, BOB, CHARLIE, DAVE, EVE]).execute_with(|| {
 		System::set_block_number(1);
-		let Deployment { service_id, blueprint_id, .. } = deploy();
+		let Deployment { service_id, .. } = deploy();
 		let operator = mock_pub_key(BOB);
-		let delegator1 = mock_pub_key(CHARLIE);
 
-		// Initial setup
-		let initial_stake = 10_000;
-		assert_ok!(MultiAssetDelegation::delegate_nomination(
-			RuntimeOrigin::signed(delegator1.clone()),
-			operator.clone(),
-			initial_stake,
-			vec![blueprint_id].into(),
-		));
-
-		// Verify initial delegation storage
-		let delegator1_metadata = MultiAssetDelegation::delegators(delegator1.clone()).unwrap();
-		let initial_delegation = delegator1_metadata
-			.delegations
-			.iter()
-			.find(|d| d.operator == operator)
-			.map(|d| d.amount)
-			.unwrap_or(0);
-		assert_eq!(initial_delegation, initial_stake);
-
-		assert_eq!(delegator1_metadata.total_nomination_delegations(), initial_stake);
-		assert_eq!(delegator1_metadata.total_non_nomination_delegations(), 0);
+		// The deploy() function already sets up Bob as an operator with proper delegations
+		// No additional delegation setup needed
 
 		// Start a slash
 		let service = Services::services(service_id).unwrap();

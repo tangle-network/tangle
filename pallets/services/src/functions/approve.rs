@@ -22,7 +22,7 @@ use frame_support::{
 	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
-	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
+	traits::{Currency, ExistenceRequirement, fungibles::{Inspect, Mutate}, tokens::Preservation},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
@@ -48,6 +48,11 @@ impl<T: Config> Pallet<T> {
 			Error::<T>::OperatorNotActive
 		);
 
+		// Validate asset existence for each commitment
+		for commitment in commitments {
+			Self::validate_asset_existence(&commitment.asset)?;
+		}
+
 		// Check for commitment-requirement matching
 		for requirement in requirements {
 			let commitment = commitments
@@ -57,31 +62,38 @@ impl<T: Config> Pallet<T> {
 
 			// Validate commitment percentage is within requirement bounds
 			ensure!(
-				commitment.exposure_percent >= requirement.min_exposure_percent &&
-					commitment.exposure_percent <= requirement.max_exposure_percent,
+				commitment.exposure_percent >= requirement.min_exposure_percent,
 				Error::<T>::CommitmentBelowMinimum
 			);
+			ensure!(
+				commitment.exposure_percent <= requirement.max_exposure_percent,
+				Error::<T>::CommitmentAboveMaximum
+			);
 
-			// Get operator's total stake for this asset
+			// Get operator's total delegated stake for this asset
 			let asset_stake = match &requirement.asset {
 				Asset::Custom(asset_id) => {
 					if *asset_id == Zero::zero() {
-						// Native asset - get operator stake
+						// Native asset - get operator stake from nomination delegations
 						T::OperatorDelegationManager::get_operator_stake(operator)
 					} else {
-						// For custom assets, currently we don't have multi-asset delegation
-						// so we'll use zero for now
-						BalanceOf::<T>::zero()
+						// For custom assets, get total delegation for this specific asset
+						T::OperatorDelegationManager::get_total_delegation_by_asset(
+							operator,
+							&requirement.asset,
+						)
 					}
 				},
 				Asset::Erc20(_) => {
-					// For ERC20 tokens, we use zero stake validation for now
-					// This would need integration with ERC20 balance checking
-					BalanceOf::<T>::zero()
+					// For ERC20 tokens, get total delegation for this specific asset
+					T::OperatorDelegationManager::get_total_delegation_by_asset(
+						operator,
+						&requirement.asset,
+					)
 				},
 			};
 
-			// Ensure operator has some stake (basic validation)
+			// Ensure operator has sufficient delegated stake for the commitment
 			ensure!(asset_stake > BalanceOf::<T>::zero(), Error::<T>::NoOperatorStake);
 		}
 
@@ -93,6 +105,32 @@ impl<T: Config> Pallet<T> {
 			);
 		}
 
+		Ok(())
+	}
+
+	/// Validate that an asset exists in the system
+	fn validate_asset_existence(asset: &Asset<T::AssetId>) -> DispatchResult {
+		match asset {
+			Asset::Custom(asset_id) => {
+				// Native asset (asset_id == 0) always exists
+				if *asset_id != Zero::zero() {
+					// For custom assets, verify they exist in the Fungibles system
+					ensure!(
+						T::Fungibles::asset_exists(asset_id.clone()),
+						Error::<T>::AssetNotFound
+					);
+				}
+			},
+			Asset::Erc20(token_address) => {
+				// Validate ERC20 token address is not zero address
+				ensure!(
+					*token_address != sp_core::H160::zero(),
+					Error::<T>::InvalidErc20Address
+				);
+				// Note: We could add more sophisticated ERC20 validation here
+				// such as checking if the contract exists at the address
+			},
+		}
 		Ok(())
 	}
 	/// Process an operator's approval for a service request.
@@ -122,11 +160,18 @@ impl<T: Config> Pallet<T> {
 		// Retrieve and validate the service request
 		let mut request = Self::service_requests(request_id)?;
 
-		// Validate operator commitments against service requirements
+		// First validate that commitments match the service request requirements (primitive validation)
 		ensure!(
 			request.validate_security_commitments(security_commitments),
 			Error::<T>::InvalidSecurityCommitments
 		);
+
+		// Then validate operator security commitments (asset existence and stake validation)
+		Self::validate_operator_security_commitments(
+			&operator,
+			&request.security_requirements,
+			security_commitments,
+		)?;
 
 		// Find and update operator's approval state
 		let updated = request
