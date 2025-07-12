@@ -187,10 +187,12 @@ pub async fn subxt_client() -> subxt::OnlineClient<subxt::PolkadotConfig> {
 }
 
 pub trait AddressConverter {
+	#[allow(dead_code)]
 	fn to_account_id(&self) -> subxt::utils::AccountId32;
 }
 
 pub trait AccountIdConverter {
+	#[allow(dead_code)]
 	fn to_address(&self) -> alloy::primitives::Address;
 }
 
@@ -254,9 +256,16 @@ where
 			let config =
 				command.create_configuration(this, tokio_runtime.handle().clone()).unwrap();
 
-			command
-				.init(&CliWrapper::support_url(), &CliWrapper::impl_version(), |_, _| {}, &config)
-				.unwrap();
+			// Handle logger initialization gracefully - it may already be initialized by previous
+			// tests
+			if let Err(e) = command.init(
+				&CliWrapper::support_url(),
+				&CliWrapper::impl_version(),
+				|_, _| {},
+				&config,
+			) {
+				warn!("Logger initialization failed (likely already initialized): {e:?}");
+			}
 			sc_cli::Runner::<CliWrapper>::new(config, tokio_runtime, signals)
 		}
 	}
@@ -274,7 +283,7 @@ where
 		max_past_logs: cli.eth.max_past_logs,
 		tracing_raw_max_memory_usage: cli.eth.tracing_raw_max_memory_usage,
 	};
-	warn!("Starting the node with the following RPC config: {:?}", rpc_config);
+	warn!("Starting the node with the following RPC config: {rpc_config:?}");
 
 	runner
 		.async_run(|config| {
