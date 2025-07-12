@@ -504,6 +504,24 @@ pub mod module {
 		TooManySubscriptions,
 		/// Custom asset transfer failed
 		CustomAssetTransferFailed,
+		/// Asset not found or doesn't exist
+		AssetNotFound,
+		/// Invalid ERC20 token address (zero address)
+		InvalidErc20Address,
+		/// Operator doesn't have sufficient delegated stake for commitment
+		InsufficientDelegatedStake,
+		/// Asset commitment provided but not required
+		UnexpectedAssetCommitment,
+		/// Operator has no stake at all
+		NoOperatorStake,
+		/// Commitment percentage below minimum requirement
+		CommitmentBelowMinimum,
+		/// Commitment percentage above maximum requirement
+		CommitmentAboveMaximum,
+		/// Required asset has no corresponding commitment
+		MissingAssetCommitment,
+		/// Operator has no stake for required asset
+		OperatorHasNoAssetStake,
 		/// Invalid event count provided
 		InvalidEventCount,
 		/// Metrics data too large
@@ -1306,16 +1324,8 @@ pub mod module {
 				);
 			}
 
-			// Ensure each asset has non-zero exposure requirements
-			for requirement in asset_security_requirements.iter() {
-				ensure!(
-					requirement.min_exposure_percent > Percent::zero() &&
-						requirement.max_exposure_percent > Percent::zero() &&
-						requirement.min_exposure_percent <= requirement.max_exposure_percent &&
-						requirement.max_exposure_percent <= Percent::from_percent(100),
-					Error::<T>::InvalidSecurityRequirements,
-				);
-			}
+			// Validate asset security requirements
+			Self::validate_asset_security_requirements(&asset_security_requirements)?;
 
 			// Ensure no duplicate operators
 			let mut seen_operators = BTreeSet::new();
@@ -1399,6 +1409,12 @@ pub mod module {
 			security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
 		) -> DispatchResultWithPostInfo {
 			let caller = ensure_signed(origin)?;
+			let request = Self::service_requests(request_id)?;
+			Self::validate_operator_security_commitments(
+				&caller,
+				&request.security_requirements,
+				&security_commitments,
+			)?;
 			Self::do_approve(caller, request_id, &security_commitments)?;
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}

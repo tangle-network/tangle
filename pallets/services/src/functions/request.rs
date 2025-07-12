@@ -4,12 +4,13 @@ use crate::{
 };
 use frame_support::{
 	BoundedVec,
-	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
+	dispatch::DispatchResult,
+	ensure,
+	traits::{Currency, ExistenceRequirement, Get, fungibles::Mutate, tokens::Preservation},
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::{Percent, traits::Zero};
+use sp_runtime::{DispatchError, Percent, traits::Zero};
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	Account,
@@ -20,6 +21,44 @@ use tangle_primitives::{
 };
 
 impl<T: Config> Pallet<T> {
+	/// Validate asset security requirements for a service request
+	pub fn validate_asset_security_requirements(
+		requirements: &[AssetSecurityRequirement<T::AssetId>],
+	) -> DispatchResult {
+		let mut seen_assets = sp_std::collections::btree_set::BTreeSet::new();
+
+		for requirement in requirements {
+			// For now, we do minimal validation during request creation
+			// More thorough validation will happen during operator approval
+			match &requirement.asset {
+				Asset::Custom(_asset_id) => {
+					// We don't validate custom asset existence here to avoid permission issues
+					// Asset existence will be validated when operators approve the request
+				},
+				Asset::Erc20(token_address) => {
+					// Validate ERC20 token address is not zero address
+					ensure!(
+						*token_address != sp_core::H160::zero(),
+						Error::<T>::InvalidErc20Address
+					);
+				},
+			}
+
+			// Check for duplicate assets
+			ensure!(seen_assets.insert(&requirement.asset), Error::<T>::DuplicateAsset);
+
+			// Validate exposure percentages
+			ensure!(
+				requirement.min_exposure_percent > Percent::zero() &&
+					requirement.max_exposure_percent > Percent::zero() &&
+					requirement.min_exposure_percent <= requirement.max_exposure_percent &&
+					requirement.max_exposure_percent <= Percent::from_percent(100),
+				Error::<T>::InvalidSecurityRequirements,
+			);
+		}
+
+		Ok(())
+	}
 	/// Request a new service using a blueprint and specified operators.
 	///
 	/// # Arguments
@@ -59,16 +98,8 @@ impl<T: Config> Pallet<T> {
 		// ensure we at least have one asset and all assets are unique
 		ensure!(!security_requirements.is_empty(), Error::<T>::NoAssetsProvided);
 
-		// First validate all security requirements have non-zero exposures
-		for requirement in security_requirements.iter() {
-			ensure!(
-				requirement.min_exposure_percent > Percent::zero() &&
-					requirement.max_exposure_percent > Percent::zero() &&
-					requirement.min_exposure_percent <= requirement.max_exposure_percent &&
-					requirement.max_exposure_percent <= Percent::from_percent(100),
-				Error::<T>::InvalidSecurityRequirements
-			);
-		}
+		// Validate asset security requirements
+		Self::validate_asset_security_requirements(&security_requirements)?;
 
 		ensure!(
 			security_requirements

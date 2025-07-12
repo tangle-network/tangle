@@ -426,11 +426,21 @@ impl
 	}
 
 	fn get_operator_stake(_operator: &AccountId) -> Balance {
-		Default::default()
+		// Return non-zero stake for test operators
+		1_000_000_000_000_000_000u128 // 1 TNT token with 18 decimals
 	}
 
 	fn get_total_delegation_by_asset(_operator: &AccountId, _asset_id: &Asset<AssetId>) -> Balance {
-		Default::default()
+		// Return non-zero stake for test operators for all assets
+		match _asset_id {
+			Asset::Custom(0) => 1_000_000_000_000_000_000u128, // 1 TNT token with 18 decimals
+			Asset::Custom(1) => 1_000_000_000u128,             // 1000 USDC with 6 decimals
+			Asset::Custom(2) => 1_000_000_000_000_000_000u128, // 1 WETH with 18 decimals
+			Asset::Custom(3) => 1_000_000_000_000_000_000u128, // 1 WBTC with 18 decimals
+			Asset::Erc20(_) => 1_000_000_000_000_000_000u128,  /* 1 token with 18 decimals for */
+			// ERC20
+			_ => 1_000_000_000_000_000_000u128, // Default to 1 token with 18 decimals
+		}
 	}
 
 	fn get_delegators_for_operator(

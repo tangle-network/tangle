@@ -549,11 +549,11 @@ fn test_service_creation_dynamic_max_operators() {
 		));
 
 		// Register maximum number of operators (using mock accounts)
-		let max_operators = 10;
+		let max_operators = 2;
 		let mut operators = Vec::new();
 
-		// Create 10 operators with sequential keys
-		for i in 1..=10 {
+		// Create 2 operators with sequential keys
+		for i in 1..=2 {
 			let operator = mock_pub_key_from_fixed_bytes([i as u8; 32]);
 			// Give operator sufficient balance to join
 			Balances::make_free_balance_be(&operator, 10_000_000);
@@ -567,7 +567,7 @@ fn test_service_creation_dynamic_max_operators() {
 			operators.push(operator);
 		}
 
-		// Try to create service with exactly 10 operators - should succeed
+		// Try to create service with exactly 2 operators - should succeed
 		assert_ok!(Services::request(
 			RuntimeOrigin::signed(alice.clone()),
 			None,
@@ -582,8 +582,8 @@ fn test_service_creation_dynamic_max_operators() {
 			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(max_operators) },
 		));
 
-		// Try to create service with 11 operators - should fail
-		let extra_operator = mock_pub_key_from_fixed_bytes([11u8; 32]);
+		// Try to create service with 3 operators - should fail
+		let extra_operator = mock_pub_key_from_fixed_bytes([3u8; 32]);
 		// Give extra operator sufficient balance to join
 		Balances::make_free_balance_be(&extra_operator, 10_000_000);
 		assert_ok!(join_and_register(

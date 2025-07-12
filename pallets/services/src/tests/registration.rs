@@ -307,19 +307,13 @@ fn test_registration_during_active_services() {
 		let charlie = mock_pub_key(CHARLIE);
 		let eve = mock_pub_key(EVE);
 
-		// Join operators with stake for Bob
-		assert_ok!(MultiAssetDelegation::join_operators(RuntimeOrigin::signed(bob.clone()), 1000));
-
-		// Register Bob as an operator
-		assert_ok!(Services::register(
-			RuntimeOrigin::signed(bob.clone()),
+		// Join operators with stake for Bob and register
+		assert_ok!(join_and_register(
+			bob.clone(),
 			0,
-			OperatorPreferences {
-				key: test_ecdsa_key(),
-				rpc_address: BoundedString::try_from("https://example.com/rpc").unwrap(),
-			},
-			Default::default(),
-			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc"),
 		));
 
 		// Create a service request

@@ -181,10 +181,11 @@ fn test_security_commitment_validation() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 		// Test Case 1: Commitment below minimum exposure
-		let security_commitments_1 = vec![get_security_commitment(WETH, 5)];
+		let security_commitments_1 =
+			vec![get_security_commitment(TNT, 15), get_security_commitment(WETH, 5)];
 		assert_err!(
 			Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments_1),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::CommitmentBelowMinimum
 		);
 
 		// Create second service request
@@ -205,10 +206,11 @@ fn test_security_commitment_validation() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 		// Test Case 2: Commitment above maximum exposure
-		let security_commitments_2 = vec![get_security_commitment(WETH, 25)];
+		let security_commitments_2 =
+			vec![get_security_commitment(TNT, 15), get_security_commitment(WETH, 25)];
 		assert_err!(
 			Services::approve(RuntimeOrigin::signed(bob.clone()), 1, security_commitments_2),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::CommitmentAboveMaximum
 		);
 
 		// Create third service request
@@ -258,7 +260,7 @@ fn test_security_commitment_validation() {
 		let security_commitments_4 = vec![get_security_commitment(USDC, 15)];
 		assert_err!(
 			Services::approve(RuntimeOrigin::signed(charlie.clone()), 3, security_commitments_4),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::MissingAssetCommitment
 		);
 
 		// Create fifth service request
@@ -278,12 +280,15 @@ fn test_security_commitment_validation() {
 			0,
 			MembershipModel::Fixed { min_operators: 1 },
 		));
-		// Test Case 5: Extra asset commitment
-		let security_commitments_5 =
-			vec![get_security_commitment(WETH, 15), get_security_commitment(TNT, 15)];
+		// Test Case 5: Extra asset commitment (providing USDC which is not required)
+		let security_commitments_5 = vec![
+			get_security_commitment(WETH, 15),
+			get_security_commitment(TNT, 15),
+			get_security_commitment(USDC, 15),
+		];
 		assert_err!(
 			Services::approve(RuntimeOrigin::signed(charlie.clone()), 4, security_commitments_5),
-			Error::<Runtime>::InvalidSecurityCommitments
+			Error::<Runtime>::UnexpectedAssetCommitment
 		);
 	});
 }
