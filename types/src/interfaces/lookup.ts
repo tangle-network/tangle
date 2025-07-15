@@ -6757,7 +6757,20 @@ export default {
       PaymentAlreadyProcessed: 'Null',
       PaymentCalculationOverflow: 'Null',
       TooManySubscriptions: 'Null',
-      CustomAssetTransferFailed: 'Null'
+      CustomAssetTransferFailed: 'Null',
+      AssetNotFound: 'Null',
+      InvalidErc20Address: 'Null',
+      InsufficientDelegatedStake: 'Null',
+      UnexpectedAssetCommitment: 'Null',
+      NoOperatorStake: 'Null',
+      CommitmentBelowMinimum: 'Null',
+      CommitmentAboveMaximum: 'Null',
+      MissingAssetCommitment: 'Null',
+      OperatorHasNoAssetStake: 'Null',
+      InvalidEventCount: 'Null',
+      MetricsDataTooLarge: 'Null',
+      SubscriptionNotValid: 'Null',
+      ServiceNotOwned: 'Null'
     }
   },
   /**
@@ -6931,7 +6944,7 @@ export default {
    * Lookup877: pallet_credits::pallet::Error<T>
    **/
   PalletCreditsError: {
-    _enum: ['InsufficientTntBalance', 'ClaimAmountExceedsWindowAllowance', 'InvalidClaimId', 'NoValidTier', 'AmountZero', 'BurnTransferNotImplemented', 'StakeTiersNotSorted', 'EmptyStakeTiers', 'Overflow', 'StakeTiersOverflow', 'AssetRatesNotConfigured']
+    _enum: ['InsufficientTntBalance', 'ClaimAmountExceedsWindowAllowance', 'InvalidClaimId', 'NoValidTier', 'AmountZero', 'BurnTransferNotImplemented', 'StakeTiersNotSorted', 'EmptyStakeTiers', 'Overflow', 'StakeTiersOverflow', 'AssetRatesNotConfigured', 'RateTooHigh']
   },
   /**
    * Lookup880: frame_system::extensions::check_non_zero_sender::CheckNonZeroSender<T>
