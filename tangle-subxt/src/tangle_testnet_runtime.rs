@@ -4136,9 +4136,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				108u8, 37u8, 40u8, 200u8, 2u8, 160u8, 146u8, 93u8, 23u8, 56u8, 205u8, 150u8, 235u8,
-				147u8, 35u8, 121u8, 94u8, 251u8, 117u8, 128u8, 32u8, 195u8, 97u8, 193u8, 120u8,
-				241u8, 119u8, 131u8, 79u8, 239u8, 217u8, 75u8,
+				183u8, 46u8, 52u8, 76u8, 58u8, 218u8, 254u8, 170u8, 2u8, 206u8, 47u8, 121u8, 145u8,
+				233u8, 27u8, 240u8, 65u8, 73u8, 80u8, 117u8, 165u8, 169u8, 93u8, 108u8, 93u8, 83u8,
+				199u8, 123u8, 167u8, 247u8, 196u8, 209u8,
 			]
 	}
 	pub mod system {
@@ -49140,6 +49140,66 @@ pub mod api {
 						],
 					)
 				}
+				#[doc = " Maximum number of slashes to process per block to prevent DoS attacks."]
+				pub fn max_slashes_per_block(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Services",
+						"MaxSlashesPerBlock",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Maximum size of metrics data in heartbeat messages (in bytes)."]
+				pub fn max_metrics_data_size(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u32> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Services",
+						"MaxMetricsDataSize",
+						[
+							98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+							145u8,
+						],
+					)
+				}
+				#[doc = " Fallback weight for reads when weight calculation overflows."]
+				pub fn fallback_weight_reads(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u64> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Services",
+						"FallbackWeightReads",
+						[
+							128u8, 214u8, 205u8, 242u8, 181u8, 142u8, 124u8, 231u8, 190u8, 146u8,
+							59u8, 226u8, 157u8, 101u8, 103u8, 117u8, 249u8, 65u8, 18u8, 191u8,
+							103u8, 119u8, 53u8, 85u8, 81u8, 96u8, 220u8, 42u8, 184u8, 239u8, 42u8,
+							246u8,
+						],
+					)
+				}
+				#[doc = " Fallback weight for writes when weight calculation overflows."]
+				pub fn fallback_weight_writes(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u64> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Services",
+						"FallbackWeightWrites",
+						[
+							128u8, 214u8, 205u8, 242u8, 181u8, 142u8, 124u8, 231u8, 190u8, 146u8,
+							59u8, 226u8, 157u8, 101u8, 103u8, 117u8, 249u8, 65u8, 18u8, 191u8,
+							103u8, 119u8, 53u8, 85u8, 81u8, 96u8, 220u8, 42u8, 184u8, 239u8, 42u8,
+							246u8,
+						],
+					)
+				}
 			}
 		}
 	}
@@ -62505,6 +62565,9 @@ pub mod api {
 					#[codec(index = 10)]
 					#[doc = "No stake tiers configured for this asset."]
 					AssetRatesNotConfigured,
+					#[codec(index = 11)]
+					#[doc = "Rate per block exceeds maximum allowed value."]
+					RateTooHigh,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,
@@ -69606,6 +69669,45 @@ pub mod api {
 					#[codec(index = 88)]
 					#[doc = "Custom asset transfer failed"]
 					CustomAssetTransferFailed,
+					#[codec(index = 89)]
+					#[doc = "Asset not found or doesn't exist"]
+					AssetNotFound,
+					#[codec(index = 90)]
+					#[doc = "Invalid ERC20 token address (zero address)"]
+					InvalidErc20Address,
+					#[codec(index = 91)]
+					#[doc = "Operator doesn't have sufficient delegated stake for commitment"]
+					InsufficientDelegatedStake,
+					#[codec(index = 92)]
+					#[doc = "Asset commitment provided but not required"]
+					UnexpectedAssetCommitment,
+					#[codec(index = 93)]
+					#[doc = "Operator has no stake at all"]
+					NoOperatorStake,
+					#[codec(index = 94)]
+					#[doc = "Commitment percentage below minimum requirement"]
+					CommitmentBelowMinimum,
+					#[codec(index = 95)]
+					#[doc = "Commitment percentage above maximum requirement"]
+					CommitmentAboveMaximum,
+					#[codec(index = 96)]
+					#[doc = "Required asset has no corresponding commitment"]
+					MissingAssetCommitment,
+					#[codec(index = 97)]
+					#[doc = "Operator has no stake for required asset"]
+					OperatorHasNoAssetStake,
+					#[codec(index = 98)]
+					#[doc = "Invalid event count provided"]
+					InvalidEventCount,
+					#[codec(index = 99)]
+					#[doc = "Metrics data too large"]
+					MetricsDataTooLarge,
+					#[codec(index = 100)]
+					#[doc = "Subscription not valid"]
+					SubscriptionNotValid,
+					#[codec(index = 101)]
+					#[doc = "Service not owned by caller"]
+					ServiceNotOwned,
 				}
 				#[derive(
 					:: subxt_core :: ext :: codec :: Decode,

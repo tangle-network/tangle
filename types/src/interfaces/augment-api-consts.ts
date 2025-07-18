@@ -782,6 +782,14 @@ declare module '@polkadot/api-base/types/consts' {
     };
     services: {
       /**
+       * Fallback weight for reads when weight calculation overflows.
+       **/
+      fallbackWeightReads: u64 & AugmentedConst<ApiType>;
+      /**
+       * Fallback weight for writes when weight calculation overflows.
+       **/
+      fallbackWeightWrites: u64 & AugmentedConst<ApiType>;
+      /**
        * Maximum number of assets per service.
        **/
       maxAssetsPerService: u32 & AugmentedConst<ApiType>;
@@ -846,6 +854,10 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxMetadataLength: u32 & AugmentedConst<ApiType>;
       /**
+       * Maximum size of metrics data in heartbeat messages (in bytes).
+       **/
+      maxMetricsDataSize: u32 & AugmentedConst<ApiType>;
+      /**
        * Maximum number of Operators per service.
        **/
       maxOperatorsPerService: u32 & AugmentedConst<ApiType>;
@@ -869,6 +881,10 @@ declare module '@polkadot/api-base/types/consts' {
        * Maximum number of services per user.
        **/
       maxServicesPerUser: u32 & AugmentedConst<ApiType>;
+      /**
+       * Maximum number of slashes to process per block to prevent DoS attacks.
+       **/
+      maxSlashesPerBlock: u32 & AugmentedConst<ApiType>;
       /**
        * Maximum number of sources per gadget.
        **/

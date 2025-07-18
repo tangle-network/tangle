@@ -386,6 +386,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       Overflow: AugmentedError<ApiType>;
       /**
+       * Rate per block exceeds maximum allowed value.
+       **/
+      RateTooHigh: AugmentedError<ApiType>;
+      /**
        * The stake tiers are not properly sorted by threshold.
        **/
       StakeTiersNotSorted: AugmentedError<ApiType>;
@@ -1798,6 +1802,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ApprovalNotRequested: AugmentedError<ApiType>;
       /**
+       * Asset not found or doesn't exist
+       **/
+      AssetNotFound: AugmentedError<ApiType>;
+      /**
        * Blueprint creation is interrupted.
        **/
       BlueprintCreationInterrupted: AugmentedError<ApiType>;
@@ -1805,6 +1813,14 @@ declare module '@polkadot/api-base/types/errors' {
        * The service blueprint was not found.
        **/
       BlueprintNotFound: AugmentedError<ApiType>;
+      /**
+       * Commitment percentage above maximum requirement
+       **/
+      CommitmentAboveMaximum: AugmentedError<ApiType>;
+      /**
+       * Commitment percentage below minimum requirement
+       **/
+      CommitmentBelowMinimum: AugmentedError<ApiType>;
       /**
        * Custom asset transfer failed
        **/
@@ -1869,6 +1885,18 @@ declare module '@polkadot/api-base/types/errors' {
        * Heartbeat too early
        **/
       HeartbeatTooEarly: AugmentedError<ApiType>;
+      /**
+       * Operator doesn't have sufficient delegated stake for commitment
+       **/
+      InsufficientDelegatedStake: AugmentedError<ApiType>;
+      /**
+       * Invalid ERC20 token address (zero address)
+       **/
+      InvalidErc20Address: AugmentedError<ApiType>;
+      /**
+       * Invalid event count provided
+       **/
+      InvalidEventCount: AugmentedError<ApiType>;
       /**
        * Invalid heartbeat data
        **/
@@ -1980,6 +2008,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       MaxServicesPerUserExceeded: AugmentedError<ApiType>;
       /**
+       * Metrics data too large
+       **/
+      MetricsDataTooLarge: AugmentedError<ApiType>;
+      /**
+       * Required asset has no corresponding commitment
+       **/
+      MissingAssetCommitment: AugmentedError<ApiType>;
+      /**
        * Missing EVM Origin for the EVM execution.
        **/
       MissingEVMOrigin: AugmentedError<ApiType>;
@@ -2003,6 +2039,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Native asset is not found
        **/
       NoNativeAsset: AugmentedError<ApiType>;
+      /**
+       * Operator has no stake at all
+       **/
+      NoOperatorStake: AugmentedError<ApiType>;
       /**
        * The Service Blueprint did not return a slashing origin for this service.
        **/
@@ -2064,6 +2104,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       OnServiceInitHook: AugmentedError<ApiType>;
       /**
+       * Operator has no stake for required asset
+       **/
+      OperatorHasNoAssetStake: AugmentedError<ApiType>;
+      /**
        * The Operator is not active in the delegation system.
        **/
       OperatorNotActive: AugmentedError<ApiType>;
@@ -2096,6 +2140,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ServiceNotFound: AugmentedError<ApiType>;
       /**
+       * Service not owned by caller
+       **/
+      ServiceNotOwned: AugmentedError<ApiType>;
+      /**
        * Either the service or the job call was not found.
        **/
       ServiceOrJobCallNotFound: AugmentedError<ApiType>;
@@ -2111,6 +2159,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Signature verification failed
        **/
       SignatureVerificationFailed: AugmentedError<ApiType>;
+      /**
+       * Subscription not valid
+       **/
+      SubscriptionNotValid: AugmentedError<ApiType>;
       /**
        * The termination of the service was interrupted.
        **/
@@ -2135,6 +2187,10 @@ declare module '@polkadot/api-base/types/errors' {
        * The Unapplied Slash are not found.
        **/
       UnappliedSlashNotFound: AugmentedError<ApiType>;
+      /**
+       * Asset commitment provided but not required
+       **/
+      UnexpectedAssetCommitment: AugmentedError<ApiType>;
       /**
        * Membership model not supported by blueprint
        **/
