@@ -1,10 +1,10 @@
 use super::*;
 use crate::{Call, Config, Pallet as ClaimsPallet};
 use frame_benchmarking::{account, benchmarks};
-use frame_support::{traits::UnfilteredDispatchable, BoundedVec};
-use frame_system::{pallet_prelude::*, RawOrigin};
+use frame_support::{BoundedVec, traits::UnfilteredDispatchable};
+use frame_system::{RawOrigin, pallet_prelude::*};
 use secp_utils::*;
-use sp_runtime::{traits::ValidateUnsigned, AccountId32, DispatchResult};
+use sp_runtime::{AccountId32, DispatchResult, traits::ValidateUnsigned};
 
 const SEED: u32 = 0;
 

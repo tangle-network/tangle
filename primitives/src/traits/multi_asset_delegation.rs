@@ -1,6 +1,6 @@
 use crate::{
 	services::Asset,
-	types::{rewards::UserDepositWithLocks, RoundIndex},
+	types::{RoundIndex, rewards::UserDepositWithLocks},
 };
 use sp_std::prelude::*;
 

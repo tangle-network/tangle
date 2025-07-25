@@ -2,8 +2,8 @@ use std::{path::Path, sync::Arc};
 
 use blueprint_keystore::{Keystore, KeystoreConfig};
 use blueprint_manager::{
-	config::{BlueprintManagerConfig, SourceType, DEFAULT_DOCKER_HOST},
-	executor::{run_blueprint_manager_with_keystore, BlueprintManagerHandle},
+	config::{BlueprintManagerConfig, DEFAULT_DOCKER_HOST, SourceType},
+	executor::{BlueprintManagerHandle, run_blueprint_manager_with_keystore},
 };
 use blueprint_runner::config::BlueprintEnvironment;
 use sc_keystore::LocalKeystore;

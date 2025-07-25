@@ -15,11 +15,11 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
-	constraints::Constraints,
-	jobs::{type_checker, JobDefinition},
-	types::{ApprovalState, Asset, MembershipModel},
 	AssetIdT, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintSource, BoundedString,
 	MembershipModelType, TypeCheckError,
+	constraints::Constraints,
+	jobs::{JobDefinition, type_checker},
+	types::{ApprovalState, Asset, MembershipModel},
 };
 use crate::{Account, BlueprintId};
 use educe::Educe;

@@ -1,10 +1,10 @@
 use rand::Rng;
 use sc_service::{ChainType, Configuration};
-use sp_core::{ecdsa, ed25519, sr25519, ByteArray, Pair, Public};
+use sp_core::{ByteArray, Pair, Public, ecdsa, ed25519, sr25519};
 use sp_keystore::{Keystore, KeystorePtr};
 use sp_runtime::{
-	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 	KeyTypeId,
+	key_types::{ACCOUNT, BABE, GRANDPA, IM_ONLINE},
 };
 
 pub const ROLE: KeyTypeId = KeyTypeId(*b"role");

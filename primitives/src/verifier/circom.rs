@@ -1,12 +1,12 @@
 use core::convert::{TryFrom, TryInto};
 
 use ark_bn254::{Bn254, Fr, G1Affine, G2Affine};
-use ark_crypto_primitives::{snark::SNARK, Error};
+use ark_crypto_primitives::{Error, snark::SNARK};
 use ark_ec::pairing::Pairing;
 use ark_ff::{BigInteger, PrimeField, Zero};
 use ark_groth16::{Groth16, Proof as ArkProof, VerifyingKey as ArkVerifyingKey};
 use ark_serialize::CanonicalDeserialize;
-use ethabi::{ethereum_types::U256, ParamType};
+use ethabi::{ParamType, ethereum_types::U256};
 use sp_std::prelude::*;
 
 pub struct CircomVerifierGroth16Bn254;

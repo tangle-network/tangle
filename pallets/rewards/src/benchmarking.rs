@@ -15,15 +15,15 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{
+	Call, Config, Pallet,
 	pallet::{UserClaimedReward, UserServiceReward},
 	types::*,
-	Call, Config, Pallet,
 };
 use frame_benchmarking::{
-	account, benchmarks, impl_benchmark_test_suite, whitelisted_caller, BenchmarkError,
+	BenchmarkError, account, benchmarks, impl_benchmark_test_suite, whitelisted_caller,
 };
 use frame_support::traits::{Currency, EnsureOrigin};
-use frame_system::{pallet_prelude::BlockNumberFor, RawOrigin};
+use frame_system::{RawOrigin, pallet_prelude::BlockNumberFor};
 use sp_runtime::Perbill;
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
 use tangle_primitives::{rewards::UserDepositWithLocks, services::Asset};

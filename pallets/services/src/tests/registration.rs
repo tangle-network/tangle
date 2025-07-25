@@ -50,8 +50,8 @@ fn register_on_blueprint() {
 			blueprint_id: 0,
 			preferences: OperatorPreferences {
 				key: bob_ecdsa_key,
-				rpc_address: BoundedString::try_from("https://example.com/rpc".to_string())
-					.unwrap(),
+				rpc_address:
+					BoundedString::try_from("https://example.com/rpc".to_string()).unwrap(),
 			},
 			registration_args: Default::default(),
 		})));

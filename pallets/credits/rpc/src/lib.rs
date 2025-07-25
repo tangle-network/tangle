@@ -26,8 +26,8 @@ use parity_scale_codec::Codec;
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
-	traits::{Block as BlockT, MaybeDisplay},
 	Serialize,
+	traits::{Block as BlockT, MaybeDisplay},
 };
 use std::sync::Arc;
 use tangle_primitives::Balance;

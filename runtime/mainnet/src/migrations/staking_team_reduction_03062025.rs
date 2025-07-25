@@ -3,8 +3,8 @@ use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade};
 use frame_system::RawOrigin;
 use pallet_vesting::{MaxVestingSchedulesGet, Vesting, VestingInfo};
 use sp_runtime::{
-	traits::{Convert, EnsureDiv, Header, StaticLookup, Zero},
 	Percent, SaturatedConversion, Saturating,
+	traits::{Convert, EnsureDiv, Header, StaticLookup, Zero},
 };
 use sp_std::{vec, vec::Vec};
 use tangle_primitives::Balance;

@@ -16,7 +16,7 @@
 
 use super::*;
 use frame_support::{assert_err, assert_ok};
-use sp_core::{bounded_vec, crypto::KeyTypeId, ByteArray};
+use sp_core::{ByteArray, bounded_vec, crypto::KeyTypeId};
 use tangle_primitives::services::PricingModel;
 
 #[test]
@@ -125,12 +125,9 @@ fn job_calls() {
 
 		// now we can call the jobs (job_calls test)
 		let job_call_id = 0;
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(2)],
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(2)
+		],));
 
 		assert!(JobCalls::<Runtime>::contains_key(0, job_call_id));
 		let events = System::events()
@@ -255,12 +252,9 @@ fn job_result() {
 		// now we can call the jobs
 		let keygen_job_call_id = 0;
 
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(2)]
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(2)
+		]));
 
 		assert!(JobCalls::<Runtime>::contains_key(0, keygen_job_call_id));
 
@@ -363,19 +357,13 @@ fn test_concurrent_job_execution() {
 		}
 
 		// Submit multiple concurrent job calls
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(1)],
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(1)
+		],));
 
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(2)],
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(2)
+		],));
 
 		// Verify both jobs are tracked
 		assert!(JobCalls::<Runtime>::contains_key(0, 0));
@@ -455,24 +443,18 @@ fn test_result_submission_non_operators() {
 		}
 
 		// Submit job call
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(1)],
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(1)
+		],));
 
 		// Non-operator tries to submit result
 		let key_type = KeyTypeId(*b"mdkg");
 		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
 
 		assert_err!(
-			Services::submit_result(
-				RuntimeOrigin::signed(dave.clone()),
-				0,
-				0,
-				bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
-			),
+			Services::submit_result(RuntimeOrigin::signed(dave.clone()), 0, 0, bounded_vec![
+				Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())
+			],),
 			Error::<Runtime>::NotRegistered
 		);
 	});
@@ -523,21 +505,15 @@ fn test_invalid_result_formats() {
 		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Submit job call
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(1)],
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(1)
+		],));
 
 		// Try to submit result with wrong field type
 		assert_err!(
-			Services::submit_result(
-				RuntimeOrigin::signed(bob.clone()),
-				0,
-				0,
-				bounded_vec![Field::String("invalid".try_into().unwrap())],
-			),
+			Services::submit_result(RuntimeOrigin::signed(bob.clone()), 0, 0, bounded_vec![
+				Field::String("invalid".try_into().unwrap())
+			],),
 			Error::<Runtime>::TypeCheck(TypeCheckError::ArgumentTypeMismatch {
 				index: 0,
 				expected: FieldType::List(Box::new(FieldType::String)),
@@ -592,12 +568,9 @@ fn test_result_submission_after_termination() {
 		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, security_commitments));
 
 		// Submit job call
-		assert_ok!(Services::call(
-			RuntimeOrigin::signed(eve.clone()),
-			0,
-			0,
-			bounded_vec![Field::Uint8(1)],
-		));
+		assert_ok!(Services::call(RuntimeOrigin::signed(eve.clone()), 0, 0, bounded_vec![
+			Field::Uint8(1)
+		],));
 
 		// Terminate service
 		assert_ok!(Services::terminate(RuntimeOrigin::signed(eve.clone()), 0));
@@ -607,12 +580,9 @@ fn test_result_submission_after_termination() {
 		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
 
 		assert_err!(
-			Services::submit_result(
-				RuntimeOrigin::signed(bob.clone()),
-				0,
-				0,
-				bounded_vec![Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())],
-			),
+			Services::submit_result(RuntimeOrigin::signed(bob.clone()), 0, 0, bounded_vec![
+				Field::from(BoundedVec::try_from(dkg.to_raw_vec()).unwrap())
+			],),
 			Error::<Runtime>::ServiceNotFound
 		);
 	});

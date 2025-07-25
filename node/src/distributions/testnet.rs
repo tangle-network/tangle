@@ -23,7 +23,7 @@ use std::{
 
 use fp_evm::GenesisAccount;
 use serde_json::Value;
-use sp_core::{crypto::Ss58Codec, H160, U256};
+use sp_core::{H160, U256, crypto::Ss58Codec};
 use sp_runtime::AccountId32;
 use tangle_testnet_runtime::{AccountId, Balance};
 
@@ -95,15 +95,12 @@ pub fn get_evm_balance_distribution() -> Vec<(H160, GenesisAccount)> {
 		.into_iter()
 		.chain(get_discord_list())
 		.map(|address| {
-			(
-				address,
-				GenesisAccount {
-					balance: U256::from(ENDOWMENT),
-					code: Default::default(),
-					nonce: Default::default(),
-					storage: Default::default(),
-				},
-			)
+			(address, GenesisAccount {
+				balance: U256::from(ENDOWMENT),
+				code: Default::default(),
+				nonce: Default::default(),
+				storage: Default::default(),
+			})
 		})
 		.collect()
 }

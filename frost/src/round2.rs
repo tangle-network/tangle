@@ -3,7 +3,7 @@
 use core::fmt::{self, Debug};
 
 use crate as frost;
-use crate::{round1, Challenge, Ciphersuite, Error, Field, Group, *};
+use crate::{Challenge, Ciphersuite, Error, Field, Group, round1, *};
 
 /// A participant's signature share, which the coordinator will aggregate with all other signer's
 /// shares into the joint signature.

@@ -29,7 +29,7 @@ use frame_support::{
 use frame_system::ensure_signed_or_root;
 use honggfuzz::fuzz;
 use pallet_multi_asset_delegation::{mock::*, pallet as mad, types::*};
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, seq::SliceRandom};
 use sp_runtime::traits::{Scale, Zero};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
@@ -293,7 +293,7 @@ fn main() {
 	let mut block_number = 1;
 	loop {
 		fuzz!(|seed: [u8; 32]| {
-			use ::rand::{rngs::SmallRng, SeedableRng};
+			use ::rand::{SeedableRng, rngs::SmallRng};
 			let mut rng = SmallRng::from_seed(seed);
 
 			ext.execute_with(|| {
@@ -457,13 +457,7 @@ fn do_sanity_checks(call: mad::Call<Runtime>, origin: RuntimeOrigin, outcome: Po
 				delegator
 					.calculate_delegation_by_operator(operator)
 					.iter()
-					.find_map(|x| {
-						if x.asset == asset {
-							Some(x.amount)
-						} else {
-							None
-						}
-					})
+					.find_map(|x| { if x.asset == asset { Some(x.amount) } else { None } })
 					.ge(&Some(amount)),
 				"delegation amount not set"
 			);

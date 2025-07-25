@@ -134,11 +134,11 @@ pub trait PaymentHistory<AccountId, ServiceId, Balance, BlockNumber> {
 
 	/// Get payment history for an operator
 	fn get_operator_payments(&self, operator: &AccountId)
-		-> Vec<(ServiceId, Balance, BlockNumber)>;
+	-> Vec<(ServiceId, Balance, BlockNumber)>;
 
 	/// Get payment history for a service
 	fn get_service_payments(&self, service_id: ServiceId)
-		-> Vec<(AccountId, Balance, BlockNumber)>;
+	-> Vec<(AccountId, Balance, BlockNumber)>;
 }
 
 /// Trait for payment scheduling

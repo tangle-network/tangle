@@ -70,10 +70,12 @@ fn deposit_should_work_for_fungible_asset() {
 		);
 
 		// Verify that rewards manager was called with correct parameters
-		assert_eq!(
-			MockRewardsManager::record_deposit_calls(),
-			vec![(who.clone(), Asset::Custom(VDOT), amount, None)]
-		);
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
+			who.clone(),
+			Asset::Custom(VDOT),
+			amount,
+			None
+		)]);
 	});
 }
 
@@ -241,10 +243,11 @@ fn schedule_withdraw_should_work() {
 		assert!(!metadata.withdraw_requests.is_empty());
 
 		// Ensure that rewards pallet was called
-		assert_eq!(
-			MockRewardsManager::record_withdrawal_calls(),
-			vec![(who.clone(), Asset::Custom(VDOT), amount)]
-		);
+		assert_eq!(MockRewardsManager::record_withdrawal_calls(), vec![(
+			who.clone(),
+			Asset::Custom(VDOT),
+			amount
+		)]);
 	});
 }
 
@@ -629,9 +632,11 @@ fn deposit_should_work_for_tnt_without_adding_to_reward_vault() {
 		);
 
 		// Verify that rewards manager was called with correct parameters
-		assert_eq!(
-			MockRewardsManager::record_deposit_calls(),
-			vec![(who.clone(), Asset::Custom(0), amount, None)]
-		);
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
+			who.clone(),
+			Asset::Custom(0),
+			amount,
+			None
+		)]);
 	});
 }

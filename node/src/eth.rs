@@ -24,7 +24,7 @@ use futures::StreamExt;
 pub use fc_storage::{StorageOverride, StorageOverrideHandler};
 use sc_client_api::BlockchainEvents;
 use sc_network_sync::SyncingService;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{Configuration, TaskManager, error::Error as ServiceError};
 
 // Frontier
 pub use fc_consensus::FrontierBlockImport;

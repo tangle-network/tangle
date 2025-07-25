@@ -19,10 +19,10 @@ use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 use tangle_primitives::{
+	RoundIndex,
 	services::Asset,
 	traits::MultiAssetDelegationInfo,
 	types::rewards::{AssetType, UserDepositWithLocks},
-	RoundIndex,
 };
 
 impl<T: crate::Config>
@@ -106,11 +106,7 @@ impl<T: crate::Config>
 				.map(|(_, deposit)| deposit.amount)
 				.fold(Zero::zero(), |acc: BalanceOf<T>, amount| acc + amount);
 
-			if total.is_zero() {
-				None
-			} else {
-				Some(total)
-			}
+			if total.is_zero() { None } else { Some(total) }
 		})
 	}
 }

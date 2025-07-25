@@ -17,14 +17,14 @@
 use frame_support::{
 	pallet_prelude::Weight,
 	weights::{
-		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_MILLIS},
 		WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
+		constants::{ExtrinsicBaseWeight, WEIGHT_REF_TIME_PER_MILLIS},
 	},
 };
 use smallvec::smallvec;
 use sp_runtime::{
-	traits::{BlakeTwo256, IdentifyAccount, Verify},
 	MultiAddress, MultiSignature, Perbill,
+	traits::{BlakeTwo256, IdentifyAccount, Verify},
 };
 
 #[cfg(not(feature = "std"))]
@@ -232,7 +232,7 @@ pub mod evm {
 }
 
 pub mod democracy {
-	use crate::{currency::UNIT, time::MINUTES, Balance, BlockNumber};
+	use crate::{Balance, BlockNumber, currency::UNIT, time::MINUTES};
 	pub const LAUNCH_PERIOD: BlockNumber = 12 * 60 * MINUTES; // 12 hours
 	pub const VOTING_PERIOD: BlockNumber = 7 * 24 * 60 * MINUTES; // 7 days
 	pub const FASTTRACK_VOTING_PERIOD: BlockNumber = 2 * 24 * 60 * MINUTES; // 2 days
@@ -243,7 +243,7 @@ pub mod democracy {
 }
 
 pub mod elections {
-	use crate::{currency::UNIT, time::DAYS, Balance, BlockNumber};
+	use crate::{Balance, BlockNumber, currency::UNIT, time::DAYS};
 
 	pub const CANDIDACY_BOND: Balance = 1_000 * UNIT;
 	pub const TERM_DURATION: BlockNumber = 7 * DAYS;
@@ -257,9 +257,9 @@ pub mod elections {
 
 pub mod treasury {
 	use crate::{
+		Balance, BlockNumber,
 		currency::{CENT, UNIT},
 		time::DAYS,
-		Balance, BlockNumber,
 	};
 	use frame_support::PalletId;
 	use sp_runtime::{Percent, Permill};

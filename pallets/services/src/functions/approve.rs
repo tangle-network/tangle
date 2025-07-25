@@ -19,14 +19,14 @@ use crate::{
 	ServiceRequests, ServiceStatus, StagingServicePayments, UserServices,
 };
 use frame_support::{
+	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
 	traits::{
+		Currency, ExistenceRequirement,
 		fungibles::{Inspect, Mutate},
 		tokens::Preservation,
-		Currency, ExistenceRequirement,
 	},
-	BoundedVec,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::traits::Zero;
@@ -214,11 +214,7 @@ impl<T: Config> Pallet<T> {
 			.operators_with_approval_state
 			.iter()
 			.filter_map(|(op, state)| {
-				if matches!(state, ApprovalState::Pending) {
-					Some(op.clone())
-				} else {
-					None
-				}
+				if matches!(state, ApprovalState::Pending) { Some(op.clone()) } else { None }
 			})
 			.collect::<Vec<_>>();
 

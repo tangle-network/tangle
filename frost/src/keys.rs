@@ -18,9 +18,9 @@ use rand_core::{CryptoRng, RngCore};
 use zeroize::{DefaultIsZeroes, Zeroize};
 
 use crate::{
-	serialization::{SerializableElement, SerializableScalar},
 	Ciphersuite, Element, Error, Field, Group, Header, Identifier, Scalar, SigningKey,
 	VerifyingKey,
+	serialization::{SerializableElement, SerializableScalar},
 };
 
 #[cfg(feature = "serialization")]
@@ -89,7 +89,7 @@ where
 	#[cfg_attr(feature = "internals", visibility::make(pub))]
 	#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
 	pub(crate) fn to_scalar(&self) -> Scalar<C> {
-		self.0 .0
+		self.0.0
 	}
 
 	/// Deserialize from bytes
@@ -168,7 +168,7 @@ where
 	#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
 	#[allow(dead_code)]
 	pub(crate) fn to_element(&self) -> Element<C> {
-		self.0 .0
+		self.0.0
 	}
 
 	/// Deserialize from bytes
@@ -253,7 +253,7 @@ where
 
 	/// Returns inner element value
 	pub fn value(&self) -> Element<C> {
-		self.0 .0
+		self.0.0
 	}
 }
 
@@ -320,7 +320,7 @@ where
 	/// Get the VerifyingKey matching this commitment vector (which is the first
 	/// element in the vector), or an error if the vector is empty.
 	pub(crate) fn verifying_key(&self) -> Result<VerifyingKey<C>, Error<C>> {
-		Ok(VerifyingKey::new(self.0.first().ok_or(Error::MissingCommitment)?.0 .0))
+		Ok(VerifyingKey::new(self.0.first().ok_or(Error::MissingCommitment)?.0.0))
 	}
 
 	/// Returns the coefficient commitments.
@@ -500,10 +500,11 @@ pub fn split<C: Ciphersuite, R: RngCore + CryptoRng>(
 		secret_shares_by_id.insert(secret_share.identifier, secret_share);
 	}
 
-	Ok((
-		secret_shares_by_id,
-		PublicKeyPackage { header: Header::default(), verifying_shares, verifying_key },
-	))
+	Ok((secret_shares_by_id, PublicKeyPackage {
+		header: Header::default(),
+		verifying_shares,
+		verifying_key,
+	}))
 }
 
 /// Evaluate the polynomial with the given coefficients (constant term first)

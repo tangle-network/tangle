@@ -8,7 +8,7 @@ use core::{
 use alloc::vec::Vec;
 
 use crate::{
-	serialization::SerializableScalar, Ciphersuite, Error, Field, FieldError, Group, Scalar,
+	Ciphersuite, Error, Field, FieldError, Group, Scalar, serialization::SerializableScalar,
 };
 
 /// A FROST participant identifier.
@@ -44,7 +44,7 @@ where
 	#[cfg_attr(feature = "internals", visibility::make(pub))]
 	#[cfg_attr(docsrs, doc(cfg(feature = "internals")))]
 	pub(crate) fn to_scalar(&self) -> Scalar<C> {
-		self.0 .0
+		self.0.0
 	}
 
 	/// Derive an Identifier from an arbitrary byte string.

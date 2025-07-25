@@ -1,12 +1,12 @@
 use pallet_evm::{AddressMapping, HashedAddressMapping};
 use parity_scale_codec::{Decode, Encode};
 use scale_info::{
-	prelude::{format, string::String},
 	TypeInfo,
+	prelude::{format, string::String},
 };
 use serde::{self, Deserialize, Serialize};
-use sp_core::{sr25519::Signature, H160};
-use sp_runtime::{traits::BlakeTwo256, AccountId32, RuntimeDebug};
+use sp_core::{H160, sr25519::Signature};
+use sp_runtime::{AccountId32, RuntimeDebug, traits::BlakeTwo256};
 use sp_std::{hash::Hash, prelude::*};
 
 pub mod ethereum_address;

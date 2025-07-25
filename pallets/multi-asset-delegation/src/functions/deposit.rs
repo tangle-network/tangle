@@ -13,12 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-use crate::{types::*, Config, Delegators, Error, Pallet};
+use crate::{Config, Delegators, Error, Pallet, types::*};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
 	sp_runtime::traits::AccountIdConversion,
-	traits::{fungibles::Mutate, tokens::Preservation, Currency, Get},
+	traits::{Currency, Get, fungibles::Mutate, tokens::Preservation},
 };
 use sp_core::H160;
 use sp_runtime::traits::Zero;
@@ -194,11 +194,7 @@ impl<T: Config> Pallet<T> {
 		let delay = T::LeaveDelegatorsDelay::get();
 		let current_round = Self::current_round();
 		let iter = metadata.withdraw_requests.into_iter().filter_map(move |request| {
-			if current_round >= delay + request.requested_round {
-				Some(request)
-			} else {
-				None
-			}
+			if current_round >= delay + request.requested_round { Some(request) } else { None }
 		});
 
 		Ok(iter)

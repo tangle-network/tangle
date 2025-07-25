@@ -6,7 +6,7 @@ use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
 	pallet_prelude::*,
-	traits::{fungibles::Mutate, Currency, ReservableCurrency},
+	traits::{Currency, ReservableCurrency, fungibles::Mutate},
 };
 use sp_runtime::traits::{CheckedMul, SaturatedConversion, Saturating, Zero};
 use tangle_primitives::{

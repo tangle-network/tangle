@@ -28,15 +28,15 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{ed25519, sr25519, Pair, Public, H160, U256};
+use sp_core::{H160, Pair, Public, U256, ed25519, sr25519};
 use sp_runtime::{
-	traits::{AccountIdConversion, IdentifyAccount, Verify},
 	BoundedVec,
+	traits::{AccountIdConversion, IdentifyAccount, Verify},
 };
 use std::{collections::BTreeMap, str::FromStr};
 use tangle_primitives::{
-	types::{BlockNumber, Signature},
 	TESTNET_LOCAL_SS58_PREFIX,
+	types::{BlockNumber, Signature},
 };
 use tangle_testnet_runtime::{
 	AccountId, Balance, MaxVestingSchedules, Perbill, Precompiles, StakerStatus, TreasuryPalletId,
@@ -269,15 +269,12 @@ fn testnet_genesis(
 		}
 
 		Precompiles::used_addresses_h160().for_each(|address| {
-			map.insert(
-				address,
-				fp_evm::GenesisAccount {
-					nonce: Default::default(),
-					balance: Default::default(),
-					storage: Default::default(),
-					code: revert_bytecode.to_vec(),
-				},
-			);
+			map.insert(address, fp_evm::GenesisAccount {
+				nonce: Default::default(),
+				balance: Default::default(),
+				storage: Default::default(),
+				code: revert_bytecode.to_vec(),
+			});
 		});
 
 		let fully_loaded_accounts = get_fully_funded_accounts_for([
@@ -356,16 +353,13 @@ fn testnet_genesis(
 }
 
 fn generate_fully_loaded_evm_account_for(acc: &str) -> (H160, fp_evm::GenesisAccount) {
-	(
-		H160::from_str(acc).expect("internal H160 is valid; qed"),
-		fp_evm::GenesisAccount {
-			balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-				.expect("internal U256 is valid; qed"),
-			code: Default::default(),
-			nonce: Default::default(),
-			storage: Default::default(),
-		},
-	)
+	(H160::from_str(acc).expect("internal H160 is valid; qed"), fp_evm::GenesisAccount {
+		balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+			.expect("internal U256 is valid; qed"),
+		code: Default::default(),
+		nonce: Default::default(),
+		storage: Default::default(),
+	})
 }
 
 fn get_fully_funded_accounts_for<'a, T: AsRef<[&'a str]>>(

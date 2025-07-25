@@ -109,29 +109,27 @@
 
 use codec::Codec;
 use frame_support::{
-	defensive, defensive_assert, ensure,
+	DefaultNoBound, PalletError, defensive, defensive_assert, ensure,
 	pallet_prelude::{MaxEncodedLen, *},
 	storage::bounded_btree_map::BoundedBTreeMap,
 	traits::{
-		fungibles,
+		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
+		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency, fungibles,
 		fungibles::{
-			metadata::Mutate, Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate,
+			Create, Inspect as FungiblesInspect, Mutate as FungiblesMutate, metadata::Mutate,
 		},
 		tokens::{Fortitude, Precision, Preservation},
-		Currency, Defensive, DefensiveOption, DefensiveResult, DefensiveSaturating,
-		ExistenceRequirement, Get, LockableCurrency, ReservableCurrency,
 	},
-	DefaultNoBound, PalletError,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::TypeInfo;
 use sp_core::U256;
 use sp_runtime::{
+	FixedPointNumber, Perbill,
 	traits::{
 		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, Convert, Saturating,
 		StaticLookup, Zero,
 	},
-	FixedPointNumber, Perbill,
 };
 use sp_staking::{EraIndex, StakingInterface};
 use sp_std::{collections::btree_map::BTreeMap, fmt::Debug, ops::Div, vec::Vec};
@@ -414,9 +412,8 @@ pub mod pallet {
 		PaidOut { member: T::AccountId, pool_id: PoolId, payout: BalanceOf<T> },
 		/// A member has unbonded from their pool.
 		///
-		/// - `balance` is the corresponding balance of the number of points that has been
-		///   requested to be unbonded (the argument of the `unbond` transaction) from the bonded
-		///   pool.
+		/// - `balance` is the corresponding balance of the number of points that has been requested
+		///   to be unbonded (the argument of the `unbond` transaction) from the bonded pool.
 		/// - `points` is the number of points that are issued as a result of `balance` being
 		///   dissolved into the corresponding unbonding pool.
 		/// - `era` is the era in which the balance will be unbonded.
@@ -1791,16 +1788,13 @@ impl<T: Config> Pallet<T> {
 			ExistenceRequirement::KeepAlive,
 		)?;
 
-		RewardPools::<T>::insert(
-			pool_id,
-			RewardPool::<T> {
-				last_recorded_reward_counter: Zero::zero(),
-				last_recorded_total_payouts: Zero::zero(),
-				total_rewards_claimed: Zero::zero(),
-				total_commission_pending: Zero::zero(),
-				total_commission_claimed: Zero::zero(),
-			},
-		);
+		RewardPools::<T>::insert(pool_id, RewardPool::<T> {
+			last_recorded_reward_counter: Zero::zero(),
+			last_recorded_total_payouts: Zero::zero(),
+			total_rewards_claimed: Zero::zero(),
+			total_commission_pending: Zero::zero(),
+			total_commission_claimed: Zero::zero(),
+		});
 		ReversePoolIdLookup::<T>::insert(bonded_pool.bonded_account(), pool_id);
 
 		Self::deposit_event(Event::<T>::Created { depositor: who.clone(), pool_id });

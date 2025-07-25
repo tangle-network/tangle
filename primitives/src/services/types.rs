@@ -20,15 +20,15 @@ use frame_support::pallet_prelude::*;
 use scale_info::TypeInfo;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Deserializer, Serialize};
-use sp_core::{Get, RuntimeDebug, H160};
-use sp_runtime::{traits::AtLeast32BitUnsigned, Percent};
+use sp_core::{Get, H160, RuntimeDebug};
+use sp_runtime::{Percent, traits::AtLeast32BitUnsigned};
 use sp_staking::EraIndex;
 use sp_std::fmt::Display;
 
 #[cfg(not(feature = "std"))]
 use alloc::{string::String, string::ToString, vec, vec::Vec};
 
-use super::{field::FieldType, Constraints, ServiceBlueprint};
+use super::{Constraints, ServiceBlueprint, field::FieldType};
 use crate::BlueprintId;
 
 /// Maximum length for metadata fields
@@ -106,11 +106,7 @@ impl<AssetId: AssetIdT> Asset<AssetId> {
 	}
 
 	pub fn is_native(&self) -> bool {
-		if let Asset::Custom(asset_id) = self {
-			asset_id == &AssetId::default()
-		} else {
-			false
-		}
+		if let Asset::Custom(asset_id) = self { asset_id == &AssetId::default() } else { false }
 	}
 
 	pub fn to_ethabi_param_type() -> ethabi::ParamType {
@@ -321,10 +317,9 @@ impl<'de, C: Constraints> Deserialize<'de> for OperatorPreferences<C> {
 	where
 		D: Deserializer<'de>,
 	{
-		deserializer.deserialize_tuple(
-			3,
-			OperatorPreferencesVisitor { _phantom: std::marker::PhantomData::<C> },
-		)
+		deserializer.deserialize_tuple(3, OperatorPreferencesVisitor {
+			_phantom: std::marker::PhantomData::<C>,
+		})
 	}
 }
 

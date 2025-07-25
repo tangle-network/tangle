@@ -14,18 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{types::*, Config, Delegators, Error, Event, Operators, Pallet};
+use crate::{Config, Delegators, Error, Event, Operators, Pallet, types::*};
 use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
 	traits::{
-		fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement, Get,
-		ReservableCurrency,
+		Currency, ExistenceRequirement, Get, ReservableCurrency, fungibles::Mutate,
+		tokens::Preservation,
 	},
 	weights::Weight,
 };
 use parity_scale_codec::Encode;
-use sp_runtime::{traits::CheckedSub, DispatchError};
+use sp_runtime::{DispatchError, traits::CheckedSub};
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, UnappliedSlash},
 	traits::SlashManager,

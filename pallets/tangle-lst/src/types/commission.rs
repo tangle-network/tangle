@@ -119,11 +119,7 @@ impl<T: Config> Commission<T> {
 					self.max.is_none_or(|m| commission <= &m),
 					Error::<T>::CommissionExceedsMaximum
 				);
-				if commission.is_zero() {
-					None
-				} else {
-					Some((*commission, payee.clone()))
-				}
+				if commission.is_zero() { None } else { Some((*commission, payee.clone())) }
 			},
 		};
 		self.register_update();

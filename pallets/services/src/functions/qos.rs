@@ -79,11 +79,7 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 		// If use_default is true, return the default threshold
-		if use_default {
-			Ok(DefaultHeartbeatThreshold::<T>::get())
-		} else {
-			Ok(threshold)
-		}
+		if use_default { Ok(DefaultHeartbeatThreshold::<T>::get()) } else { Ok(threshold) }
 	}
 
 	/// Gets the slashing window for a service instance.

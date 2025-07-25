@@ -15,8 +15,8 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
 use crate::{
-	types::{DelegatorBlueprintSelection::Fixed, OperatorStatus},
 	CurrentRound, Error,
+	types::{DelegatorBlueprintSelection::Fixed, OperatorStatus},
 };
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::{Alice, Bob, Eve};
