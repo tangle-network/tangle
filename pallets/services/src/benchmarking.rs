@@ -4,7 +4,7 @@ use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use scale_info::prelude::boxed::Box;
-use sp_core::{H160, crypto::Pair, ecdsa};
+use sp_core::{crypto::Pair, ecdsa, H160};
 use sp_runtime::{KeyTypeId, Percent};
 use sp_std::vec;
 use tangle_primitives::services::{

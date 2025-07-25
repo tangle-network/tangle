@@ -26,7 +26,7 @@ use frame_support::traits::{Currency, Get};
 use honggfuzz::fuzz;
 use pallet_evm::AddressMapping;
 use pallet_evm_precompile_multi_asset_delegation::{
-	MultiAssetDelegationPrecompileCall as MADPrecompileCall, mock::*, mock_evm::PrecompilesValue,
+	mock::*, mock_evm::PrecompilesValue, MultiAssetDelegationPrecompileCall as MADPrecompileCall,
 };
 use pallet_multi_asset_delegation::{
 	mock::{Asset, AssetId},
@@ -34,9 +34,9 @@ use pallet_multi_asset_delegation::{
 	types::*,
 };
 use precompile_utils::{prelude::*, testing::*};
-use rand::{Rng, seq::SliceRandom};
+use rand::{seq::SliceRandom, Rng};
 use sp_core::U256;
-use sp_runtime::{DispatchResult, traits::Scale};
+use sp_runtime::{traits::Scale, DispatchResult};
 
 const MAX_ED_MULTIPLE: Balance = 10_000;
 const MIN_ED_MULTIPLE: Balance = 10;
@@ -225,22 +225,28 @@ fn main() {
 	let to = Precompile1.into();
 	loop {
 		fuzz!(|seed: [u8; 32]| {
-			use ::rand::{SeedableRng, rngs::SmallRng};
+			use ::rand::{rngs::SmallRng, SeedableRng};
 			let mut rng = SmallRng::from_seed(seed);
 
 			ext.execute_with(|| {
 				System::set_block_number(block_number);
 				for (call, who) in random_calls(&mut rng) {
-					let mut handle = MockHandle::new(to, Context {
-						address: to,
-						caller: who.into(),
-						apparent_value: Default::default(),
-					});
-					let mut handle_clone = MockHandle::new(to, Context {
-						address: to,
-						caller: who.into(),
-						apparent_value: Default::default(),
-					});
+					let mut handle = MockHandle::new(
+						to,
+						Context {
+							address: to,
+							caller: who.into(),
+							apparent_value: Default::default(),
+						},
+					);
+					let mut handle_clone = MockHandle::new(
+						to,
+						Context {
+							address: to,
+							caller: who.into(),
+							apparent_value: Default::default(),
+						},
+					);
 					let encoded = call.encode();
 					handle.input = encoded.clone();
 					let call_clone = PCall::parse_call_data(&mut handle).unwrap();
@@ -268,7 +274,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 	let caller = <TestAccount as AddressMapping<AccountId>>::into_account_id(origin.0);
 	match call {
 		PCall::deposit { asset_id, amount, token_address, lock_multiplier: 0 } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 				(0, erc20_token) if erc20_token != [0; 20] =>
 					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
@@ -298,7 +304,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			);
 		},
 		PCall::schedule_withdraw { asset_id, amount, token_address } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 				(0, erc20_token) if erc20_token != [0; 20] =>
 					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
@@ -328,7 +334,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		PCall::cancel_withdraw { asset_id, amount, token_address } => {
 			let round = MultiAssetDelegation::current_round();
 
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 				(0, erc20_token) if erc20_token != [0; 20] =>
 					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
@@ -346,7 +352,7 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			);
 		},
 		PCall::delegate { operator, asset_id, amount, token_address, .. } => {
-			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
+			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 				(0, erc20_token) if erc20_token != [0; 20] =>
 					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
@@ -359,7 +365,13 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 				delegator
 					.calculate_delegation_by_operator(operator_account)
 					.iter()
-					.find_map(|x| { if x.asset == deposit_asset { Some(x.amount) } else { None } })
+					.find_map(|x| {
+						if x.asset == deposit_asset {
+							Some(x.amount)
+						} else {
+							None
+						}
+					})
 					.ge(&Some(amount.as_u64())),
 				"delegation amount not set"
 			);

@@ -4,12 +4,10 @@ use frame_support::{assert_err, assert_noop, assert_ok};
 #[test]
 fn update_roles_works() {
 	ExtBuilder::default().build_and_execute(|| {
-		assert_eq!(BondedPools::<Runtime>::get(1).unwrap().roles, PoolRoles {
-			depositor: 10,
-			root: Some(900),
-			nominator: Some(901),
-			bouncer: Some(902)
-		},);
+		assert_eq!(
+			BondedPools::<Runtime>::get(1).unwrap().roles,
+			PoolRoles { depositor: 10, root: Some(900), nominator: Some(901), bouncer: Some(902) },
+		);
 
 		// non-existent pools
 		assert_noop!(
@@ -67,17 +65,18 @@ fn update_roles_works() {
 			ConfigOp::Set(7)
 		));
 
-		assert_eq!(pool_events_since_last_call(), vec![
-			Event::Created { depositor: 10, pool_id: 1 },
-			Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
-			Event::RolesUpdated { root: Some(5), bouncer: Some(7), nominator: Some(6) }
-		]);
-		assert_eq!(BondedPools::<Runtime>::get(1).unwrap().roles, PoolRoles {
-			depositor: 10,
-			root: Some(5),
-			nominator: Some(6),
-			bouncer: Some(7)
-		},);
+		assert_eq!(
+			pool_events_since_last_call(),
+			vec![
+				Event::Created { depositor: 10, pool_id: 1 },
+				Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
+				Event::RolesUpdated { root: Some(5), bouncer: Some(7), nominator: Some(6) }
+			]
+		);
+		assert_eq!(
+			BondedPools::<Runtime>::get(1).unwrap().roles,
+			PoolRoles { depositor: 10, root: Some(5), nominator: Some(6), bouncer: Some(7) },
+		);
 
 		// also root origin can
 		assert_ok!(Lst::update_roles(
@@ -88,17 +87,14 @@ fn update_roles_works() {
 			ConfigOp::Set(3)
 		));
 
-		assert_eq!(pool_events_since_last_call(), vec![Event::RolesUpdated {
-			root: Some(1),
-			bouncer: Some(3),
-			nominator: Some(2)
-		}]);
-		assert_eq!(BondedPools::<Runtime>::get(1).unwrap().roles, PoolRoles {
-			depositor: 10,
-			root: Some(1),
-			nominator: Some(2),
-			bouncer: Some(3)
-		},);
+		assert_eq!(
+			pool_events_since_last_call(),
+			vec![Event::RolesUpdated { root: Some(1), bouncer: Some(3), nominator: Some(2) }]
+		);
+		assert_eq!(
+			BondedPools::<Runtime>::get(1).unwrap().roles,
+			PoolRoles { depositor: 10, root: Some(1), nominator: Some(2), bouncer: Some(3) },
+		);
 
 		// Noop works
 		assert_ok!(Lst::update_roles(
@@ -109,18 +105,15 @@ fn update_roles_works() {
 			ConfigOp::Noop
 		));
 
-		assert_eq!(pool_events_since_last_call(), vec![Event::RolesUpdated {
-			root: Some(11),
-			bouncer: Some(3),
-			nominator: Some(2)
-		}]);
+		assert_eq!(
+			pool_events_since_last_call(),
+			vec![Event::RolesUpdated { root: Some(11), bouncer: Some(3), nominator: Some(2) }]
+		);
 
-		assert_eq!(BondedPools::<Runtime>::get(1).unwrap().roles, PoolRoles {
-			depositor: 10,
-			root: Some(11),
-			nominator: Some(2),
-			bouncer: Some(3)
-		},);
+		assert_eq!(
+			BondedPools::<Runtime>::get(1).unwrap().roles,
+			PoolRoles { depositor: 10, root: Some(11), nominator: Some(2), bouncer: Some(3) },
+		);
 
 		// Remove works
 		assert_ok!(Lst::update_roles(
@@ -131,18 +124,15 @@ fn update_roles_works() {
 			ConfigOp::Remove
 		));
 
-		assert_eq!(pool_events_since_last_call(), vec![Event::RolesUpdated {
-			root: Some(69),
-			bouncer: None,
-			nominator: None
-		}]);
+		assert_eq!(
+			pool_events_since_last_call(),
+			vec![Event::RolesUpdated { root: Some(69), bouncer: None, nominator: None }]
+		);
 
-		assert_eq!(BondedPools::<Runtime>::get(1).unwrap().roles, PoolRoles {
-			depositor: 10,
-			root: Some(69),
-			nominator: None,
-			bouncer: None
-		},);
+		assert_eq!(
+			BondedPools::<Runtime>::get(1).unwrap().roles,
+			PoolRoles { depositor: 10, root: Some(69), nominator: None, bouncer: None },
+		);
 	})
 }
 
@@ -186,15 +176,18 @@ fn reward_counter_update_can_fail_if_pool_is_highly_slashed() {
 	// create a pool that has roughly half of the polkadot issuance in 10 years.
 	let pool_bond = inflation(10) / 2;
 	ExtBuilder::default().ed(DOT).min_bond(pool_bond).build_and_execute(|| {
-		assert_eq!(pool_events_since_last_call(), vec![
-			Event::Created { depositor: 10, pool_id: 1 },
-			Event::Bonded {
-				member: 10,
-				pool_id: 1,
-				bonded: 12_968_712_300_500_000_000,
-				joined: true,
-			}
-		]);
+		assert_eq!(
+			pool_events_since_last_call(),
+			vec![
+				Event::Created { depositor: 10, pool_id: 1 },
+				Event::Bonded {
+					member: 10,
+					pool_id: 1,
+					bonded: 12_968_712_300_500_000_000,
+					joined: true,
+				}
+			]
+		);
 
 		// slash this pool by 99% of that.
 		StakingMock::slash_by(1, pool_bond * 99 / 100);

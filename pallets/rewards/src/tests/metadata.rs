@@ -1,6 +1,6 @@
 //! Tests for vault metadata functionality.
 
-use crate::{Error, Event, VaultMetadataStore, mock::*};
+use crate::{mock::*, Error, Event, VaultMetadataStore};
 use frame_support::{assert_noop, assert_ok};
 use sp_runtime::DispatchError;
 

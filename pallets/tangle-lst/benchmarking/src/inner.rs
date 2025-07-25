@@ -4,8 +4,8 @@ use alloc::{vec, vec::Vec};
 use frame_benchmarking::v1::{account, whitelist_account};
 use frame_election_provider_support::SortedListProvider;
 use frame_support::{
-	BoundedVec,
 	traits::{Currency, Get},
+	BoundedVec,
 };
 use frame_system::RawOrigin as RuntimeOrigin;
 use pallet_staking::MaxNominationsOf;
@@ -15,8 +15,8 @@ use pallet_tangle_lst::{
 	RewardPools,
 };
 use sp_runtime::{
-	Perbill,
 	traits::{Bounded, StaticLookup},
+	Perbill,
 };
 use sp_staking::{EraIndex, StakingInterface};
 // `frame_benchmarking::benchmarks!` macro needs this

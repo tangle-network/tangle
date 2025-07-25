@@ -5,7 +5,7 @@ use alloc::{string::ToString, vec::Vec};
 #[cfg(any(test, feature = "test-impl"))]
 use hex::FromHex;
 
-use crate::{Challenge, Ciphersuite, Error, Group, Signature, serialization::SerializableElement};
+use crate::{serialization::SerializableElement, Challenge, Ciphersuite, Error, Group, Signature};
 
 /// A valid verifying key for Schnorr signatures over a FROST [`Ciphersuite::Group`].
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -64,7 +64,11 @@ where
 		let cA = self.element.0 * challenge.0;
 		let check = (zB - cA - signature.R) * C::Group::cofactor();
 
-		if check == C::Group::identity() { Ok(()) } else { Err(Error::InvalidSignature) }
+		if check == C::Group::identity() {
+			Ok(())
+		} else {
+			Err(Error::InvalidSignature)
+		}
 	}
 
 	/// Verify a purported `signature` over `msg` made by this verification key.

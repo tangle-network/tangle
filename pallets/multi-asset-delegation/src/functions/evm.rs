@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{Config, Error, Event, Pallet, types::*};
+use crate::{types::*, Config, Error, Event, Pallet};
 use ethabi::{Function, StateMutability, Token};
 use frame_support::{
 	dispatch::{DispatchErrorWithPostInfo, PostDispatchInfo},
@@ -82,7 +82,11 @@ impl<T: Config> Pallet<T> {
 		let success = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
 			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
-			if let ethabi::Token::Bool(val) = success { *val } else { false }
+			if let ethabi::Token::Bool(val) = success {
+				*val
+			} else {
+				false
+			}
 		} else {
 			false
 		};
@@ -126,7 +130,11 @@ impl<T: Config> Pallet<T> {
 		let balance = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
 			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
-			if let ethabi::Token::Uint(val) = success { *val } else { U256::zero() }
+			if let ethabi::Token::Uint(val) = success {
+				*val
+			} else {
+				U256::zero()
+			}
 		} else {
 			U256::zero()
 		};

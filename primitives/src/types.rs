@@ -20,7 +20,7 @@ use frame_support::pallet_prelude::*;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::RuntimeDebug;
-use sp_runtime::{AccountId32, OpaqueExtrinsic, generic};
+use sp_runtime::{generic, AccountId32, OpaqueExtrinsic};
 
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
@@ -145,13 +145,21 @@ impl<AccountId> Account<AccountId> {
 	/// Try to convert into an EVM address.
 	#[doc(alias = "try_into_evm")]
 	pub fn try_into_address(self) -> Result<sp_core::H160, Self> {
-		if let Self::Address(v) = self { Ok(v) } else { Err(self) }
+		if let Self::Address(v) = self {
+			Ok(v)
+		} else {
+			Err(self)
+		}
 	}
 
 	/// Try to convert into an AccountId.
 	#[doc(alias = "try_into_native")]
 	pub fn try_into_account_id(self) -> Result<AccountId, Self> {
-		if let Self::Id(v) = self { Ok(v) } else { Err(self) }
+		if let Self::Id(v) = self {
+			Ok(v)
+		} else {
+			Err(self)
+		}
 	}
 }
 

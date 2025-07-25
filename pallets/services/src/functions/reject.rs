@@ -16,7 +16,7 @@
 use crate::{Config, Error, Event, Pallet, ServiceRequests, StagingServicePayments};
 use frame_support::{
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, fungibles::Mutate, tokens::Preservation},
+	traits::{fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement},
 };
 use sp_runtime::traits::Zero;
 use tangle_primitives::services::{ApprovalState, Asset};

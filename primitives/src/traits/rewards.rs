@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{services::Asset, types::rewards::LockMultiplier};
-use sp_runtime::{DispatchResult, traits::Zero};
+use sp_runtime::{traits::Zero, DispatchResult};
 
 /// Trait for managing rewards in the Tangle network.
 /// This trait provides functionality to record deposits, withdrawals, and service rewards,

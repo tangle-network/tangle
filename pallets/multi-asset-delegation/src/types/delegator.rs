@@ -15,13 +15,13 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{BoundedVec, ensure, pallet_prelude::Get};
+use frame_support::{ensure, pallet_prelude::Get, BoundedVec};
 use sp_runtime::traits::{CheckedAdd, Saturating};
 use sp_std::{fmt::Debug, vec};
 use tangle_primitives::{
-	BlueprintId,
 	services::Asset,
 	types::rewards::{LockInfo, LockMultiplier},
+	BlueprintId,
 };
 
 /// Represents how a delegator selects which blueprints to work with.
@@ -144,16 +144,16 @@ pub struct DelegatorMetadata<
 }
 
 impl<
-	AccountId,
-	Balance,
-	AssetId: Encode + Decode + TypeInfo,
-	MaxWithdrawRequests: Get<u32>,
-	MaxDelegations: Get<u32>,
-	MaxUnstakeRequests: Get<u32>,
-	MaxBlueprints: Get<u32>,
-	BlockNumber,
-	MaxLocks: Get<u32>,
-> Default
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode + TypeInfo,
+		MaxWithdrawRequests: Get<u32>,
+		MaxDelegations: Get<u32>,
+		MaxUnstakeRequests: Get<u32>,
+		MaxBlueprints: Get<u32>,
+		BlockNumber,
+		MaxLocks: Get<u32>,
+	> Default
 	for DelegatorMetadata<
 		AccountId,
 		Balance,
@@ -178,16 +178,16 @@ impl<
 }
 
 impl<
-	AccountId,
-	Balance,
-	AssetId: Encode + Decode + TypeInfo,
-	MaxWithdrawRequests: Get<u32>,
-	MaxDelegations: Get<u32>,
-	MaxUnstakeRequests: Get<u32>,
-	MaxBlueprints: Get<u32>,
-	BlockNumber,
-	MaxLocks: Get<u32>,
->
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode + TypeInfo,
+		MaxWithdrawRequests: Get<u32>,
+		MaxDelegations: Get<u32>,
+		MaxUnstakeRequests: Get<u32>,
+		MaxBlueprints: Get<u32>,
+		BlockNumber,
+		MaxLocks: Get<u32>,
+	>
 	DelegatorMetadata<
 		AccountId,
 		Balance,
@@ -314,10 +314,10 @@ pub struct Deposit<Balance, BlockNumber, MaxLocks: Get<u32>> {
 }
 
 impl<
-	Balance: Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::PartialOrd + From<u32>,
-	BlockNumber: Debug + sp_runtime::Saturating + sp_std::convert::From<u32> + sp_std::cmp::PartialOrd,
-	MaxLocks: Get<u32>,
-> Deposit<Balance, BlockNumber, MaxLocks>
+		Balance: Debug + Default + Clone + sp_runtime::Saturating + sp_std::cmp::PartialOrd + From<u32>,
+		BlockNumber: Debug + sp_runtime::Saturating + sp_std::convert::From<u32> + sp_std::cmp::PartialOrd,
+		MaxLocks: Get<u32>,
+	> Deposit<Balance, BlockNumber, MaxLocks>
 {
 	pub fn new(
 		amount: Balance,

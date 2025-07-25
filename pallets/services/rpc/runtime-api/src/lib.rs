@@ -19,7 +19,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::type_complexity)]
 use parity_scale_codec::Codec;
-use sp_runtime::{Serialize, traits::MaybeDisplay};
+use sp_runtime::{traits::MaybeDisplay, Serialize};
 use sp_std::vec::Vec;
 use tangle_primitives::services::{
 	AssetIdT, Constraints, RpcServicesWithBlueprint, ServiceRequest,

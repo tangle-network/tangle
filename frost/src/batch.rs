@@ -9,7 +9,7 @@
 
 use rand_core::{CryptoRng, RngCore};
 
-use crate::{Ciphersuite, Element, scalar_mul::VartimeMultiscalarMul, *};
+use crate::{scalar_mul::VartimeMultiscalarMul, Ciphersuite, Element, *};
 
 /// A batch verification item.
 ///

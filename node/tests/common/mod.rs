@@ -3,8 +3,8 @@ use core::future::Future;
 use alloy::{
 	network::{Ethereum, EthereumWallet},
 	providers::{
-		Provider, RootProvider,
 		fillers::{FillProvider, JoinFill, RecommendedFillers, WalletFiller},
+		Provider, RootProvider,
 	},
 	transports::BoxTransport,
 };
@@ -132,7 +132,7 @@ impl TestAccount {
 	}
 
 	pub fn account_id(&self) -> subxt::utils::AccountId32 {
-		use subxt::{PolkadotConfig, tx::Signer};
+		use subxt::{tx::Signer, PolkadotConfig};
 
 		let signer = self.substrate_signer();
 		Signer::<PolkadotConfig>::account_id(&signer)

@@ -26,7 +26,7 @@ pub trait SlashManager<AccountId> {
 	/// # Parameters
 	/// * `unapplied_slash` - The unapplied slash record containing slash details
 	fn slash_operator(unapplied_slash: &UnappliedSlash<AccountId>)
-	-> Result<Weight, DispatchError>;
+		-> Result<Weight, DispatchError>;
 }
 
 impl<AccountId> SlashManager<AccountId> for () {

@@ -19,7 +19,7 @@ use crate::{
 	TotalRewardVaultDeposit, TotalRewardVaultScore, UserClaimedReward, UserServiceReward,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::{DispatchError, traits::Saturating};
+use sp_runtime::{traits::Saturating, DispatchError};
 use tangle_primitives::{
 	services::Asset, traits::rewards::RewardsManager, types::rewards::LockMultiplier,
 };

@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle. If not, see <http://www.gnu.org/licenses/>.
-use crate::{AssetAction, Error, Pallet as RewardsPallet, mock::*, types::*};
+use crate::{mock::*, types::*, AssetAction, Error, Pallet as RewardsPallet};
 use frame_support::assert_err;
 use sp_runtime::{DispatchError, Perbill};
 use tangle_primitives::services::Asset;

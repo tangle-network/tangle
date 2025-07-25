@@ -18,8 +18,8 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{
-	AccountId, Assets, Balances, EnsureRoot, EnsureRootOrHalfCouncil, Get, H160, Ismp, Runtime,
-	RuntimeEvent, Timestamp, TokenGateway, Treasury,
+	AccountId, Assets, Balances, EnsureRoot, EnsureRootOrHalfCouncil, Get, Ismp, Runtime,
+	RuntimeEvent, Timestamp, TokenGateway, Treasury, H160,
 };
 use frame_support::parameter_types;
 use ismp::{host::StateMachine, module::IsmpModule, router::IsmpRouter};

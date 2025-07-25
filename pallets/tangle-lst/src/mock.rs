@@ -3,10 +3,10 @@
 use super::*;
 use crate::{self as pallet_lst};
 use frame_support::{
-	PalletId, assert_ok, derive_impl, parameter_types, traits::AsEnsureOriginWithArg,
+	assert_ok, derive_impl, parameter_types, traits::AsEnsureOriginWithArg, PalletId,
 };
 use frame_system::RawOrigin;
-use sp_runtime::{BuildStorage, FixedU128, Perbill, traits::ConstU128};
+use sp_runtime::{traits::ConstU128, BuildStorage, FixedU128, Perbill};
 use sp_staking::{OnStakingUpdate, Stake};
 
 pub type BlockNumber = u64;

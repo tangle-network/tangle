@@ -18,7 +18,7 @@ use crate::{
 	SubaccountType,
 };
 use frame_support::{ensure, traits::Get};
-use sp_runtime::{DispatchError, DispatchResult, traits::AccountIdConversion};
+use sp_runtime::{traits::AccountIdConversion, DispatchError, DispatchResult};
 use sp_std::vec::Vec;
 use tangle_primitives::services::Asset;
 

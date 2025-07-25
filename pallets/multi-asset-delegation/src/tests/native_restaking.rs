@@ -320,9 +320,10 @@ fn native_restake_to_non_operator() {
 			amount,
 			pallet_staking::RewardDestination::Staked
 		));
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![
-			non_operator.clone()
-		]));
+		assert_ok!(Staking::nominate(
+			RuntimeOrigin::signed(who.clone()),
+			vec![non_operator.clone()]
+		));
 
 		// Try to restake to non-operator
 		assert_noop!(

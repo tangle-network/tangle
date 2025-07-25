@@ -91,9 +91,9 @@ pub mod pallet {
 		weights::WeightInfo,
 	};
 	use frame_support::{
-		PalletId,
 		pallet_prelude::*,
-		traits::{Currency, Get, LockableCurrency, ReservableCurrency, tokens::fungibles},
+		traits::{tokens::fungibles, Currency, Get, LockableCurrency, ReservableCurrency},
+		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use pallet_session::SessionManager;
@@ -103,10 +103,10 @@ pub mod pallet {
 	use sp_staking::{SessionIndex, StakingInterface};
 	use sp_std::{fmt::Debug, prelude::*, vec::Vec};
 	use tangle_primitives::{
-		BlueprintId, RoundIndex,
 		services::{Asset, EvmAddressMapping},
 		traits::{RewardsManager, ServiceManager},
 		types::rewards::LockMultiplier,
+		BlueprintId, RoundIndex,
 	};
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -204,21 +204,21 @@ pub mod pallet {
 
 		/// Type that implements the reward manager trait
 		type RewardsManager: tangle_primitives::traits::RewardsManager<
-				Self::AccountId,
-				Self::AssetId,
-				BalanceOf<Self>,
-				BlockNumberFor<Self>,
-			>;
+			Self::AccountId,
+			Self::AssetId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+		>;
 
 		/// Currency to vote conversion
 		type CurrencyToVote: sp_staking::currency_to_vote::CurrencyToVote<BalanceOf<Self>>;
 
 		/// Interface to the staking system for nomination information
 		type StakingInterface: StakingInterface<
-				AccountId = Self::AccountId,
-				Balance = BalanceOf<Self>,
-				CurrencyToVote = Self::CurrencyToVote,
-			>;
+			AccountId = Self::AccountId,
+			Balance = BalanceOf<Self>,
+			CurrencyToVote = Self::CurrencyToVote,
+		>;
 
 		#[pallet::constant]
 		type SlashRecipient: Get<Self::AccountId>;

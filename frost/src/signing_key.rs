@@ -5,8 +5,8 @@ use alloc::vec::Vec;
 use rand_core::{CryptoRng, RngCore};
 
 use crate::{
-	Challenge, Ciphersuite, Error, Field, Group, Scalar, Signature, VerifyingKey, random_nonzero,
-	serialization::SerializableScalar,
+	random_nonzero, serialization::SerializableScalar, Challenge, Ciphersuite, Error, Field, Group,
+	Scalar, Signature, VerifyingKey,
 };
 
 /// A signing key for a Schnorr signature on a FROST [`Ciphersuite::Group`].

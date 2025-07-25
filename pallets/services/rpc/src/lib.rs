@@ -24,9 +24,9 @@ use parity_scale_codec::{Codec, MaxEncodedLen};
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{
-	Serialize,
 	scale_info::TypeInfo,
 	traits::{Block as BlockT, MaybeDisplay},
+	Serialize,
 };
 use std::sync::Arc;
 use tangle_primitives::services::{

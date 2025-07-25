@@ -3,21 +3,21 @@ use crate::{
 	NextServiceRequestId, Pallet, ServiceRequests, StagingServicePayments,
 };
 use frame_support::{
-	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
-	traits::{Currency, ExistenceRequirement, Get, fungibles::Mutate, tokens::Preservation},
+	traits::{fungibles::Mutate, tokens::Preservation, Currency, ExistenceRequirement, Get},
+	BoundedVec,
 };
 use frame_system::pallet_prelude::*;
 use sp_core::H160;
-use sp_runtime::{DispatchError, Percent, traits::Zero};
+use sp_runtime::{traits::Zero, DispatchError, Percent};
 use sp_std::vec::Vec;
 use tangle_primitives::{
-	Account,
 	services::{
 		ApprovalState, Asset, AssetSecurityRequirement, EvmAddressMapping, Field, MembershipModel,
 		ServiceRequest, StagingServicePayment,
 	},
+	Account,
 };
 
 impl<T: Config> Pallet<T> {
@@ -233,16 +233,19 @@ impl<T: Config> Pallet<T> {
 			BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 				.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 
-		ServiceRequests::<T>::insert(request_id, ServiceRequest {
-			blueprint: blueprint_id,
-			owner: caller.clone(),
-			security_requirements: security_requirements.clone(),
-			ttl,
-			args,
-			permitted_callers,
-			operators_with_approval_state,
-			membership_model,
-		});
+		ServiceRequests::<T>::insert(
+			request_id,
+			ServiceRequest {
+				blueprint: blueprint_id,
+				owner: caller.clone(),
+				security_requirements: security_requirements.clone(),
+				ttl,
+				args,
+				permitted_callers,
+				operators_with_approval_state,
+				membership_model,
+			},
+		);
 		NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 
 		Self::deposit_event(Event::ServiceRequested {

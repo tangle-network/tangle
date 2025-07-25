@@ -1,4 +1,4 @@
-use ark_crypto_primitives::{Error, snark::SNARK};
+use ark_crypto_primitives::{snark::SNARK, Error};
 use ark_ec::pairing::Pairing;
 use ark_groth16::{Groth16, Proof, VerifyingKey};
 use ark_serialize::CanonicalDeserialize;

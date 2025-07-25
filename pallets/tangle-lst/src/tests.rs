@@ -17,8 +17,8 @@
 
 use super::*;
 use crate::{
-	Event,
 	mock::{Currency, *},
+	Event,
 };
 use frame_support::traits::Currency as CurrencyT;
 

@@ -65,7 +65,11 @@ pub fn get_unique_distribution_results(
 		.into_iter()
 		.filter_map(|(address, (balance, statement))| {
 			// Skip any claims that are below the existential deposit.
-			if balance < EXISTENTIAL_DEPOSIT { None } else { Some((address, balance, statement)) }
+			if balance < EXISTENTIAL_DEPOSIT {
+				None
+			} else {
+				Some((address, balance, statement))
+			}
 		})
 		.collect();
 

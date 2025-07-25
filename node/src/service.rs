@@ -14,11 +14,12 @@
 // limitations under the License.
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
+pub use crate::eth::{db_config_dir, EthConfiguration};
 use crate::eth::{
-	BackendType, EthApi, FrontierBackend, FrontierBlockImport, FrontierPartialComponents,
-	RpcConfig, StorageOverride, StorageOverrideHandler, new_frontier_partial, spawn_frontier_tasks,
+	new_frontier_partial, spawn_frontier_tasks, BackendType, EthApi, FrontierBackend,
+	FrontierBlockImport, FrontierPartialComponents, RpcConfig, StorageOverride,
+	StorageOverrideHandler,
 };
-pub use crate::eth::{EthConfiguration, db_config_dir};
 use futures::FutureExt;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
@@ -26,7 +27,7 @@ use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
 pub use sc_executor::WasmExecutor;
-use sc_service::{ChainType, Configuration, TaskManager, error::Error as ServiceError};
+use sc_service::{error::Error as ServiceError, ChainType, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_core::U256;

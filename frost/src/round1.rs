@@ -15,14 +15,14 @@ use rand_core::{CryptoRng, RngCore};
 use zeroize::Zeroize;
 
 use crate::{
-	Ciphersuite, Element, Error, Field, Group, Header,
 	serialization::{SerializableElement, SerializableScalar},
+	Ciphersuite, Element, Error, Field, Group, Header,
 };
 
 #[cfg(feature = "serialization")]
 use crate::serialization::{Deserialize, Serialize};
 
-use super::{Identifier, keys::SigningShare};
+use super::{keys::SigningShare, Identifier};
 
 /// A scalar that is a signing nonce.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -67,7 +67,7 @@ where
 	pub(crate) fn to_scalar(
 		self,
 	) -> <<<C as Ciphersuite>::Group as Group>::Field as Field>::Scalar {
-		self.0.0
+		self.0 .0
 	}
 
 	/// Generates a nonce from the given random bytes.
@@ -132,7 +132,7 @@ where
 	}
 
 	pub(crate) fn value(&self) -> Element<C> {
-		self.0.0
+		self.0 .0
 	}
 
 	/// Deserialize [`NonceCommitment`] from bytes

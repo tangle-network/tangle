@@ -21,13 +21,13 @@ use crate::{
 use core::ops::Mul;
 use ethabi::Uint;
 use frame_election_provider_support::{
-	SequentialPhragmen,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
-	onchain,
+	onchain, SequentialPhragmen,
 };
 use frame_support::{
-	PalletId, construct_runtime, derive_impl, parameter_types,
-	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, Hooks, OneSessionHandler},
+	construct_runtime, derive_impl, parameter_types,
+	traits::{AsEnsureOriginWithArg, ConstU128, ConstU32, Hooks, OneSessionHandler},
+	PalletId,
 };
 use frame_system::EnsureRoot;
 use pallet_evm::GasWeightMapping;
@@ -35,12 +35,12 @@ use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde_json::json;
-use sp_core::{H160, RuntimeDebug, sr25519};
-use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
+use sp_core::{sr25519, RuntimeDebug, H160};
+use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
-	AccountId32, BuildStorage, DispatchError, DispatchResult, Perbill, Percent,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
+	AccountId32, BuildStorage, DispatchError, DispatchResult, Perbill, Percent,
 };
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
@@ -49,7 +49,7 @@ pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, PricingModel},
 	traits::{RewardRecorder, RewardsManager},
-	types::{BlockNumber, rewards::LockMultiplier},
+	types::{rewards::LockMultiplier, BlockNumber},
 };
 
 pub type AccountId = AccountId32;
@@ -499,8 +499,8 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 }
 
 impl MockRewardsManager {
-	pub fn record_deposit_calls()
-	-> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
+	pub fn record_deposit_calls(
+	) -> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
 		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
 	}
 
@@ -696,12 +696,15 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			raw_hex = format!("0{}", raw_hex);
 		}
 		let code = hex::decode(raw_hex).unwrap();
-		evm_accounts.insert(address, fp_evm::GenesisAccount {
-			code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		});
+		evm_accounts.insert(
+			address,
+			fp_evm::GenesisAccount {
+				code,
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Default::default(),
+			},
+		);
 	};
 
 	create_contract(include_str!("./test-artifacts/CGGMP21Blueprint.hex"), CGGMP21_BLUEPRINT);
@@ -713,21 +716,27 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	create_contract(include_str!("./test-artifacts/MockERC20.hex"), USDC_ERC20);
 
 	for i in 1..=authorities.len() {
-		evm_accounts.insert(mock_address(i as u8), fp_evm::GenesisAccount {
-			code: vec![],
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-		});
+		evm_accounts.insert(
+			mock_address(i as u8),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
 	}
 
 	for a in &authorities {
-		evm_accounts.insert(account_id_to_address(a.clone()), fp_evm::GenesisAccount {
-			code: vec![],
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
-		});
+		evm_accounts.insert(
+			account_id_to_address(a.clone()),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			},
+		);
 	}
 
 	let evm_config =

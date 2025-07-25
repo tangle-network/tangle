@@ -29,10 +29,10 @@ use parity_scale_codec::alloc::collections::BTreeMap;
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sc_service::ChainType;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{H160, Pair, Public, sr25519};
+use sp_core::{sr25519, Pair, Public, H160};
 use sp_runtime::{
-	BoundedVec,
 	traits::{AccountIdConversion, IdentifyAccount, Verify},
+	BoundedVec,
 };
 use tangle_primitives::types::{BlockNumber, Signature};
 use tangle_runtime::{
@@ -222,12 +222,15 @@ fn mainnet_genesis(
 		}
 
 		Precompiles::used_addresses_h160().for_each(|address| {
-			map.insert(address, fp_evm::GenesisAccount {
-				nonce: Default::default(),
-				balance: Default::default(),
-				storage: Default::default(),
-				code: revert_bytecode.to_vec(),
-			});
+			map.insert(
+				address,
+				fp_evm::GenesisAccount {
+					nonce: Default::default(),
+					balance: Default::default(),
+					storage: Default::default(),
+					code: revert_bytecode.to_vec(),
+				},
+			);
 		});
 		map
 	};

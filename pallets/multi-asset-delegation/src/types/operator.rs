@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{BoundedVec, pallet_prelude::*};
+use frame_support::{pallet_prelude::*, BoundedVec};
 use sp_runtime::traits::CheckedAdd;
 use tangle_primitives::services::Asset;
 
@@ -107,12 +107,12 @@ pub struct OperatorMetadata<
 }
 
 impl<
-	AccountId,
-	Balance,
-	AssetId: Encode + Decode,
-	MaxDelegations: Get<u32>,
-	MaxBlueprints: Get<u32>,
-> Default for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
+		AccountId,
+		Balance,
+		AssetId: Encode + Decode,
+		MaxDelegations: Get<u32>,
+		MaxBlueprints: Get<u32>,
+	> Default for OperatorMetadata<AccountId, Balance, AssetId, MaxDelegations, MaxBlueprints>
 where
 	Balance: Default,
 {

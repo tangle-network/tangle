@@ -26,8 +26,8 @@ use frame_support::{
 use frame_system::pallet_prelude::BlockNumberFor;
 use scale_info::prelude::vec;
 use sp_runtime::{
-	DispatchError, DispatchResult, Perbill, SaturatedConversion,
 	traits::{CheckedMul, Saturating, Zero},
+	DispatchError, DispatchResult, Perbill, SaturatedConversion,
 };
 use sp_std::vec::Vec;
 use tangle_primitives::{

@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{Config, Delegators, Error, Event, Operators, Pallet, types::*};
+use crate::{types::*, Config, Delegators, Error, Event, Operators, Pallet};
 use frame_support::{
 	ensure,
 	pallet_prelude::DispatchResult,
 	traits::{Get, LockIdentifier, LockableCurrency, WithdrawReasons},
 };
 use sp_runtime::{
-	DispatchError,
 	traits::{CheckedAdd, Saturating, Zero},
+	DispatchError,
 };
 use sp_staking::StakingInterface;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-use tangle_primitives::{RoundIndex, services::Asset, traits::MultiAssetDelegationInfo};
+use tangle_primitives::{services::Asset, traits::MultiAssetDelegationInfo, RoundIndex};
 
 pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
 
@@ -830,7 +830,11 @@ impl<T: Config> Pallet<T> {
 		let delegator = Self::delegators(who).unwrap_or_default();
 		let nominated_amount =
 			delegator.delegations.iter().fold(BalanceOf::<T>::zero(), |acc, d| {
-				if d.is_nomination { acc.saturating_add(d.amount) } else { acc }
+				if d.is_nomination {
+					acc.saturating_add(d.amount)
+				} else {
+					acc
+				}
 			});
 		let restake_amount = remaining_stake.saturating_sub(nominated_amount);
 		!restake_amount.is_zero()

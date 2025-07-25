@@ -24,20 +24,20 @@ use frame_support::{
 	ensure,
 	pallet_prelude::*,
 	traits::{
-		Currency, ReservableCurrency,
 		fungibles::{Inspect, Mutate},
+		Currency, ReservableCurrency,
 	},
 };
-use frame_system::pallet_prelude::{BlockNumberFor, OriginFor, ensure_signed};
+use frame_system::pallet_prelude::{ensure_signed, BlockNumberFor, OriginFor};
 use sp_core::ecdsa;
-use sp_runtime::{RuntimeAppPublic, SaturatedConversion, traits::Zero};
+use sp_runtime::{traits::Zero, RuntimeAppPublic, SaturatedConversion};
 use sp_std::{collections::btree_map::BTreeMap, prelude::*, vec};
 use tangle_primitives::{
-	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 	services::{
 		AssetSecurityCommitment, AssetSecurityRequirement, MembershipModel, UnappliedSlash,
 	},
 	traits::{MultiAssetDelegationInfo, SlashManager},
+	BlueprintId, InstanceId, JobCallId, ServiceRequestId,
 };
 
 pub mod functions;
@@ -70,7 +70,7 @@ pub use impls::BenchmarkingOperatorDelegationManager;
 pub mod module {
 	use super::*;
 	use sp_core::H160;
-	use sp_runtime::{Percent, Saturating, traits::MaybeSerializeDeserialize};
+	use sp_runtime::{traits::MaybeSerializeDeserialize, Percent, Saturating};
 	use sp_std::{collections::btree_set::BTreeSet, vec::Vec};
 	use tangle_primitives::{
 		rewards::AssetType, services::*, traits::RewardRecorder as RewardRecorderTrait,
@@ -90,11 +90,11 @@ pub mod module {
 
 		/// A type that implements the `RewardRecorder` trait for recording service rewards.
 		type RewardRecorder: RewardRecorderTrait<
-				Self::AccountId,
-				ServiceId,
-				BalanceOf<Self>,
-				PricingModel = PricingModel<BlockNumberFor<Self>, BalanceOf<Self>>,
-			>;
+			Self::AccountId,
+			ServiceId,
+			BalanceOf<Self>,
+			PricingModel = PricingModel<BlockNumberFor<Self>, BalanceOf<Self>>,
+		>;
 
 		/// PalletId used for deriving the AccountId and EVM address.
 		/// This account receives slashed assets upon slash event processing.
@@ -204,12 +204,12 @@ pub mod module {
 
 		/// Manager for getting operator stake and delegation info
 		type OperatorDelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
-				Self::AccountId,
-				BalanceOf<Self>,
-				BlockNumberFor<Self>,
-				Self::AssetId,
-				AssetType<Self::AssetId>,
-			>;
+			Self::AccountId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+			Self::AssetId,
+			AssetType<Self::AssetId>,
+		>;
 
 		/// Manager for slashing that dispatches slash operations to
 		/// `pallet-multi-asset-delegation`.
@@ -217,11 +217,11 @@ pub mod module {
 
 		/// Interface for recording rewards.
 		type RewardsManager: tangle_primitives::traits::RewardsManager<
-				Self::AccountId,
-				Self::AssetId,
-				BalanceOf<Self>,
-				BlockNumberFor<Self>,
-			>;
+			Self::AccountId,
+			Self::AssetId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+		>;
 
 		/// Number of eras that slashes are deferred by, after computation.
 		///

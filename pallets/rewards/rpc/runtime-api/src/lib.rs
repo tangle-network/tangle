@@ -19,7 +19,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::type_complexity)]
 use parity_scale_codec::Codec;
-use sp_runtime::{Serialize, traits::MaybeDisplay};
+use sp_runtime::{traits::MaybeDisplay, Serialize};
 
 pub type BlockNumberOf<Block> =
 	<<Block as sp_runtime::traits::HeaderProvider>::HeaderT as sp_runtime::traits::Header>::Number;

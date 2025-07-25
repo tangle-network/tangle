@@ -31,8 +31,8 @@ use weights::WeightInfo;
 mod benchmarking;
 
 pub use crate::utils::{
-	MultiAddress, MultiAddressSignature,
 	ethereum_address::{EcdsaSignature, EthereumAddress},
+	MultiAddress, MultiAddressSignature,
 };
 use frame_support::{
 	ensure,
@@ -43,15 +43,15 @@ use pallet_evm::AddressMapping;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use serde::{self, Deserialize, Serialize};
-use sp_core::{H160, sr25519::Public};
+use sp_core::{sr25519::Public, H160};
 use sp_io::{
 	crypto::{secp256k1_ecdsa_recover, sr25519_verify},
 	hashing::keccak_256,
 };
 use sp_runtime::{
-	AccountId32, RuntimeDebug, Saturating,
 	traits::{CheckedSub, Zero},
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
+	AccountId32, RuntimeDebug, Saturating,
 };
 use sp_std::{convert::TryInto, prelude::*, vec};
 use utils::Sr25519Signature;
@@ -709,7 +709,7 @@ mod sr25519_utils {
 	use super::*;
 	use frame_support::assert_ok;
 	use schnorrkel::Signature;
-	use sp_core::{Pair, sr25519};
+	use sp_core::{sr25519, Pair};
 
 	#[allow(dead_code)]
 	pub fn public(pair: &sr25519::Pair) -> sr25519::Public {

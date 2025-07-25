@@ -82,9 +82,9 @@ pub mod migrations;
 
 use sp_std::vec::Vec;
 use tangle_primitives::{
-	BlueprintId,
 	services::types::{PricingModel, ServiceId},
 	types::rewards::AssetType,
+	BlueprintId,
 };
 
 /// The pallet's account ID.
@@ -92,14 +92,14 @@ use tangle_primitives::{
 pub mod pallet {
 	use super::*;
 	use frame_support::{
-		PalletId,
 		pallet_prelude::*,
 		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
+		PalletId,
 	};
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::{
-		Perbill,
 		traits::{AccountIdConversion, Saturating, Zero},
+		Perbill,
 	};
 	use tangle_primitives::rewards::LockMultiplier;
 
@@ -131,12 +131,12 @@ pub mod pallet {
 
 		/// Manager for getting operator stake and delegation info
 		type DelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
-				Self::AccountId,
-				BalanceOf<Self>,
-				BlockNumberFor<Self>,
-				Self::AssetId,
-				AssetType<Self::AssetId>,
-			>;
+			Self::AccountId,
+			BalanceOf<Self>,
+			BlockNumberFor<Self>,
+			Self::AssetId,
+			AssetType<Self::AssetId>,
+		>;
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;

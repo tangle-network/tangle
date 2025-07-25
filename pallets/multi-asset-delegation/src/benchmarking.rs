@@ -14,16 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 use super::*;
-use crate::{Pallet as MultiAssetDelegation, types::*};
+use crate::{types::*, Pallet as MultiAssetDelegation};
 use frame_benchmarking::{account, benchmarks, whitelisted_caller};
 use frame_support::{
-	BoundedVec,
 	traits::{Currency, Get},
+	BoundedVec,
 };
 use frame_system::RawOrigin;
 use sp_core::H160;
 use sp_std::vec;
-use tangle_primitives::{BlueprintId, rewards::LockMultiplier, services::Asset};
+use tangle_primitives::{rewards::LockMultiplier, services::Asset, BlueprintId};
 
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;

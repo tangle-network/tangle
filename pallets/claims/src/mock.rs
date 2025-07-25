@@ -1,7 +1,7 @@
 use super::*;
 use pallet_evm::HashedAddressMapping;
 use secp_utils::*;
-use sp_core::{ConstU32, Pair, sr25519};
+use sp_core::{sr25519, ConstU32, Pair};
 use sp_std::convert::TryFrom;
 // The testing primitives are very useful for avoiding having to work with signatures
 // or public keys. `u64` is used as the `AccountId` and no `Signature`s are required.
@@ -12,8 +12,8 @@ use frame_support::{
 };
 use pallet_balances;
 use sp_runtime::{
-	AccountId32, BuildStorage,
 	traits::{BlakeTwo256, Identity},
+	AccountId32, BuildStorage,
 };
 
 type Block = frame_system::mocking::MockBlock<Test>;
