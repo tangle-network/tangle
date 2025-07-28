@@ -16,6 +16,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Checkout srtool
+        uses: actions/checkout@v4
+        with:
+          repository: paritytech/srtool
+          path: srtool-repo
+
+      - name: Get latest Rust version
+        id: rust-version
+        run: |
+          # Get the latest stable Rust version
+          LATEST_RUST=$(curl -s https://forge.rust-lang.org/channel-releases.html | grep -oP 'stable.*?(\d+\.\d+\.\d+)' | head -1 | grep -oP '\d+\.\d+\.\d+')
+          echo "version=$LATEST_RUST" >> $GITHUB_OUTPUT
+          echo "Latest Rust version: $LATEST_RUST"
+
+      - name: Build srtool Docker image
+        run: |
+          cd srtool-repo
+          RUSTC_VERSION=${{ steps.rust-version.outputs.version }}
+          echo "Building srtool with Rust $RUSTC_VERSION"
+          docker build --build-arg RUSTC_VERSION=$RUSTC_VERSION -t local-srtool:latest .
       
       - name: Run Srtool build
         id: srtool_build
@@ -34,7 +55,7 @@ jobs:
             -e RUNTIME_DIR=runtime/${{ matrix.chain }} \
             -e BUILD_OPTS="--features on-chain-release-build" \
             -v $(pwd):/build \
-            paritytech/srtool:1.84.1 build
+            local-srtool:latest build
 
       - name: Summary
         run: |
