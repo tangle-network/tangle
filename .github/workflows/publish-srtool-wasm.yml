@@ -23,13 +23,13 @@ jobs:
           repository: paritytech/srtool
           path: srtool-repo
 
-      - name: Get latest Rust version
+      - name: Get Rust version from toolchain
         id: rust-version
         run: |
-          # Get the latest stable Rust version
-          LATEST_RUST=$(curl -s https://forge.rust-lang.org/channel-releases.html | grep -oP 'stable.*?(\d+\.\d+\.\d+)' | head -1 | grep -oP '\d+\.\d+\.\d+')
-          echo "version=$LATEST_RUST" >> $GITHUB_OUTPUT
-          echo "Latest Rust version: $LATEST_RUST"
+          # Read Rust version from rust-toolchain.toml
+          RUST_VERSION=$(grep 'channel = ' rust-toolchain.toml | sed 's/.*channel = "\([^"]*\)".*/\1/')
+          echo "version=$RUST_VERSION" >> $GITHUB_OUTPUT
+          echo "Using Rust version from rust-toolchain.toml: $RUST_VERSION"
 
       - name: Build srtool Docker image
         run: |
