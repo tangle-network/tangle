@@ -1530,7 +1530,7 @@ pub type Executive = frame_executive::Executive<
 	frame_system::ChainContext<Runtime>,
 	Runtime,
 	AllPalletsWithSystem,
-	(migrations::staking_team_reduction_03062025::UpdateTeamMemberAllocation<Runtime>,),
+	(),
 >;
 
 impl fp_self_contained::SelfContainedCall for RuntimeCall {

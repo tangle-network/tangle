@@ -16,6 +16,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Checkout srtool
+        uses: actions/checkout@v4
+        with:
+          repository: paritytech/srtool
+          path: srtool-repo
+
+      - name: Get Rust version from toolchain
+        id: rust-version
+        run: |
+          # Read Rust version from rust-toolchain.toml
+          RUST_VERSION=$(grep 'channel = ' rust-toolchain.toml | sed 's/.*channel = "\([^"]*\)".*/\1/')
+          echo "version=$RUST_VERSION" >> $GITHUB_OUTPUT
+          echo "Using Rust version from rust-toolchain.toml: $RUST_VERSION"
+
+      - name: Build srtool Docker image
+        run: |
+          cd srtool-repo
+          RUSTC_VERSION=${{ steps.rust-version.outputs.version }}
+          echo "Building srtool with Rust $RUSTC_VERSION"
+          docker build --build-arg RUSTC_VERSION=$RUSTC_VERSION -t local-srtool:latest .
       
       - name: Run Srtool build
         id: srtool_build
@@ -34,7 +55,7 @@ jobs:
             -e RUNTIME_DIR=runtime/${{ matrix.chain }} \
             -e BUILD_OPTS="--features on-chain-release-build" \
             -v $(pwd):/build \
-            paritytech/srtool:1.84.1 build
+            local-srtool:latest build
 
       - name: Summary
         run: |
