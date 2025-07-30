@@ -4136,9 +4136,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash
 			== [
-				183u8, 46u8, 52u8, 76u8, 58u8, 218u8, 254u8, 170u8, 2u8, 206u8, 47u8, 121u8, 145u8,
-				233u8, 27u8, 240u8, 65u8, 73u8, 80u8, 117u8, 165u8, 169u8, 93u8, 108u8, 93u8, 83u8,
-				199u8, 123u8, 167u8, 247u8, 196u8, 209u8,
+				6u8, 228u8, 10u8, 40u8, 164u8, 231u8, 87u8, 7u8, 3u8, 48u8, 33u8, 156u8, 86u8,
+				233u8, 36u8, 115u8, 177u8, 165u8, 81u8, 146u8, 48u8, 73u8, 84u8, 181u8, 23u8, 57u8,
+				71u8, 138u8, 229u8, 36u8, 185u8, 92u8,
 			]
 	}
 	pub mod system {
@@ -56981,6 +56981,20 @@ pub mod api {
 							125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
 							178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
 							145u8,
+						],
+					)
+				}
+				#[doc = " The maximum rate per block for a stake tier."]
+				pub fn max_rate_per_block(
+					&self,
+				) -> ::subxt_core::constants::address::StaticAddress<::core::primitive::u128> {
+					::subxt_core::constants::address::StaticAddress::new_static(
+						"Credits",
+						"MaxRatePerBlock",
+						[
+							84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+							27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+							136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
 						],
 					)
 				}
