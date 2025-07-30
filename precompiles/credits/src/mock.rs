@@ -437,7 +437,7 @@ impl pallet_credits::Config for Runtime {
 	type BurnConversionRate = ConstU128<1000>;
 	type ClaimWindowBlocks = ConstU64<{ tangle_primitives::credits::CLAIM_WINDOW_BLOCKS }>;
 	type CreditBurnRecipient = CreditBurnRecipient;
-	type MaxOffchainAccountIdLength = ConstU32<100>;
+	type MaxOffchainAccountIdLength = ConstU32<1024>;
 	type MaxStakeTiers = MaxStakeTiers;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxRatePerBlock = MaxRatePerBlock;
