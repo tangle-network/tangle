@@ -113,7 +113,9 @@ fn setup_delegation(delegator: AccountId, operator: AccountId, amount: Balance) 
 	let tnt_asset = tangle_primitives::services::Asset::Custom(tnt_asset_id);
 
 	let min_bond = <Runtime as pallet_multi_asset_delegation::Config>::MinOperatorBondAmount::get();
-	Balances::make_free_balance_be(&ALICE, min_bond * 10 + amount * 10);
+	// Ensure ALICE has enough balance for all transfers
+	let total_needed = min_bond * 10 + amount * 20; // Extra buffer for transfers
+	Balances::make_free_balance_be(&ALICE, total_needed);
 
 	Balances::make_free_balance_be(&MultiAssetDelegation::<Runtime>::pallet_account(), 10_000);
 
@@ -1334,5 +1336,99 @@ fn rate_calculation_works_with_max_rates() {
 		let asset_rate =
 			CreditsPallet::<Runtime>::get_current_rate_for_asset(stake_amount, asset_id);
 		assert_eq!(asset_rate, Ok(max_rate / 2));
+	});
+}
+
+#[test]
+fn production_stake_tiers_verification() {
+	new_test_ext(vec![]).execute_with(|| {
+		// Set production stake tiers
+		let production_tiers = vec![
+			StakeTier {
+				threshold: 100 * tangle_primitives::currency::UNIT,
+				rate_per_block: 3105649968750,
+			},
+			StakeTier {
+				threshold: 5100 * tangle_primitives::currency::UNIT,
+				rate_per_block: 22178776975932,
+			},
+			StakeTier {
+				threshold: 10100 * tangle_primitives::currency::UNIT,
+				rate_per_block: 31211395908673,
+			},
+			StakeTier {
+				threshold: 15050 * tangle_primitives::currency::UNIT,
+				rate_per_block: 38099629789848,
+			},
+			StakeTier {
+				threshold: 20050 * tangle_primitives::currency::UNIT,
+				rate_per_block: 43975389441632,
+			},
+			StakeTier {
+				threshold: 25050 * tangle_primitives::currency::UNIT,
+				rate_per_block: 49153717692184,
+			},
+			StakeTier {
+				threshold: 30050 * tangle_primitives::currency::UNIT,
+				rate_per_block: 53836242898095,
+			},
+			StakeTier {
+				threshold: 35050 * tangle_primitives::currency::UNIT,
+				rate_per_block: 58142876913707,
+			},
+			StakeTier {
+				threshold: 40000 * tangle_primitives::currency::UNIT,
+				rate_per_block: 62112999374994,
+			},
+			StakeTier {
+				threshold: 45000 * tangle_primitives::currency::UNIT,
+				rate_per_block: 65880784586841,
+			},
+			StakeTier {
+				threshold: 50000 * tangle_primitives::currency::UNIT,
+				rate_per_block: 69444444444444,
+			},
+		];
+
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(
+			RuntimeOrigin::root(),
+			production_tiers
+		));
+
+		// Test case 1: Tier 1 (150 TNT) should give ~0.045 credits per day
+		let stake_150 = 150 * tangle_primitives::currency::UNIT;
+		let rate_150 = CreditsPallet::<Runtime>::get_current_rate(stake_150);
+		let credits_per_day_150 = (rate_150 * 14400 * 1000) / tangle_primitives::currency::UNIT;
+		println!(
+			"150 TNT stake: rate={}, credits/day x1000={} (expected ~45)",
+			rate_150, credits_per_day_150
+		);
+		assert!((44..=46).contains(&credits_per_day_150), "150 TNT should give ~0.045 credits/day");
+
+		// Test case 2: Tier 2 (6000 TNT) should give ~0.319 credits per day
+		let stake_6000 = 6000 * tangle_primitives::currency::UNIT;
+		let rate_6000 = CreditsPallet::<Runtime>::get_current_rate(stake_6000);
+		let credits_per_day_6000 = (rate_6000 * 14400 * 1000) / tangle_primitives::currency::UNIT;
+		println!(
+			"6000 TNT stake: rate={}, credits/day x1000={} (expected ~319)",
+			rate_6000, credits_per_day_6000
+		);
+		assert!(
+			(318..=320).contains(&credits_per_day_6000),
+			"6000 TNT should give ~0.319 credits/day"
+		);
+
+		// Test case 3: Tier 11 (55000 TNT) should give ~1.0 credits per day
+		let stake_55000 = 55000 * tangle_primitives::currency::UNIT;
+		let rate_55000 = CreditsPallet::<Runtime>::get_current_rate(stake_55000);
+		let credits_per_day_55000 = (rate_55000 * 14400 * 1000) / tangle_primitives::currency::UNIT;
+		println!(
+			"55000 TNT stake: rate={}, credits/day x1000={} (expected ~1000)",
+			rate_55000, credits_per_day_55000
+		);
+		assert!(
+			(999..=1001).contains(&credits_per_day_55000),
+			"55000 TNT should give ~1.0 credits/day"
+		);
 	});
 }
