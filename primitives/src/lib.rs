@@ -307,6 +307,14 @@ pub mod staking {
 	pub const HISTORY_DEPTH: u32 = 80;
 }
 
+pub mod credits {
+	use crate::{currency::UNIT, types::Balance};
+
+	/// The maximum rate per block for stake tiers
+	/// 1 TNT per block = 14,400 TNT per day
+	pub const MAX_RATE_PER_BLOCK: Balance = 1 * UNIT;
+}
+
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.
 pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);

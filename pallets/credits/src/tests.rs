@@ -1083,7 +1083,8 @@ fn burn_overflow_protection_works() {
 #[test]
 fn rate_validation_prevents_dos() {
 	new_test_ext(vec![]).execute_with(|| {
-		let excessive_rate = 2_000_000u128;
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let excessive_rate = max_rate + 1;
 		let bad_tiers = vec![StakeTier { threshold: 100u128, rate_per_block: excessive_rate }];
 
 		assert_noop!(
@@ -1097,7 +1098,8 @@ fn rate_validation_prevents_dos() {
 fn asset_rate_validation_prevents_dos() {
 	new_test_ext(vec![]).execute_with(|| {
 		let asset_id = 42;
-		let excessive_rate = 2_000_000u128;
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let excessive_rate = max_rate + 1;
 		let bad_tiers = vec![StakeTier { threshold: 100u128, rate_per_block: excessive_rate }];
 
 		assert_noop!(
@@ -1125,5 +1127,212 @@ fn update_reward_block_is_atomic() {
 		System::set_block_number(50);
 		assert_ok!(CreditsPallet::<Runtime>::update_reward_block(&user));
 		assert_eq!(last_reward_update(user), 100);
+	});
+}
+
+// ==================== MAX RATE PER BLOCK TESTS ====================
+
+#[test]
+fn rate_at_maximum_allowed_works() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let valid_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: max_rate },
+			StakeTier { threshold: 1000, rate_per_block: max_rate / 2 },
+		];
+
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), valid_tiers));
+
+		let stored_tiers = CreditsPallet::<Runtime>::stake_tiers();
+		assert_eq!(stored_tiers[0].rate_per_block, max_rate);
+		assert_eq!(stored_tiers[1].rate_per_block, max_rate / 2);
+	});
+}
+
+#[test]
+fn rate_above_maximum_fails() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let invalid_tiers = vec![StakeTier { threshold: 100, rate_per_block: max_rate + 1 }];
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), invalid_tiers),
+			Error::<Runtime>::RateTooHigh
+		);
+	});
+}
+
+#[test]
+fn asset_rate_at_maximum_allowed_works() {
+	new_test_ext(vec![]).execute_with(|| {
+		let asset_id = 1;
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let valid_asset_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: max_rate },
+			StakeTier { threshold: 1000, rate_per_block: max_rate / 3 },
+		];
+
+		assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+			RuntimeOrigin::root(),
+			asset_id,
+			valid_asset_tiers
+		));
+
+		let stored_tiers = CreditsPallet::<Runtime>::asset_stake_tiers(asset_id).unwrap();
+		assert_eq!(stored_tiers[0].rate_per_block, max_rate);
+		assert_eq!(stored_tiers[1].rate_per_block, max_rate / 3);
+	});
+}
+
+#[test]
+fn asset_rate_above_maximum_fails() {
+	new_test_ext(vec![]).execute_with(|| {
+		let asset_id = 1;
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let invalid_asset_tiers = vec![StakeTier { threshold: 100, rate_per_block: max_rate + 1 }];
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				asset_id,
+				invalid_asset_tiers
+			),
+			Error::<Runtime>::RateTooHigh
+		);
+	});
+}
+
+#[test]
+fn boundary_rates_work_correctly() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+
+		// Test exactly at max rate
+		let boundary_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: max_rate },
+			StakeTier { threshold: 1000, rate_per_block: 1 }, // minimum non-zero rate
+		];
+
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(
+			RuntimeOrigin::root(),
+			boundary_tiers
+		));
+
+		// Test one above max rate should fail
+		let over_boundary_tiers = vec![StakeTier { threshold: 100, rate_per_block: max_rate + 1 }];
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), over_boundary_tiers),
+			Error::<Runtime>::RateTooHigh
+		);
+	});
+}
+
+#[test]
+fn mixed_valid_invalid_rates_fails() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let mixed_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: max_rate / 2 }, // valid
+			StakeTier { threshold: 1000, rate_per_block: max_rate + 1 }, // invalid
+		];
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), mixed_tiers),
+			Error::<Runtime>::RateTooHigh
+		);
+	});
+}
+
+#[test]
+fn multiple_tiers_at_max_rate_work() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let max_tiers = vec![
+			StakeTier { threshold: 100, rate_per_block: max_rate },
+			StakeTier { threshold: 1000, rate_per_block: max_rate },
+			StakeTier { threshold: 10000, rate_per_block: max_rate },
+		];
+
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), max_tiers));
+
+		let stored_tiers = CreditsPallet::<Runtime>::stake_tiers();
+		for tier in stored_tiers {
+			assert_eq!(tier.rate_per_block, max_rate);
+		}
+	});
+}
+
+#[test]
+fn very_large_rate_overflow_protection() {
+	new_test_ext(vec![]).execute_with(|| {
+		let very_large_rate = u128::MAX;
+		let overflow_tiers = vec![StakeTier { threshold: 100, rate_per_block: very_large_rate }];
+
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), overflow_tiers),
+			Error::<Runtime>::RateTooHigh
+		);
+	});
+}
+
+#[test]
+fn asset_and_global_tiers_independent_validation() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let asset_id = 1;
+
+		// Set valid global tiers
+		let global_tiers = vec![StakeTier { threshold: 100, rate_per_block: max_rate / 2 }];
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), global_tiers));
+
+		// Try to set invalid asset tiers - should fail
+		let invalid_asset_tiers = vec![StakeTier { threshold: 100, rate_per_block: max_rate + 1 }];
+		assert_noop!(
+			CreditsPallet::<Runtime>::set_asset_stake_tiers(
+				RuntimeOrigin::root(),
+				asset_id,
+				invalid_asset_tiers
+			),
+			Error::<Runtime>::RateTooHigh
+		);
+
+		// Global tiers should still be valid
+		let stored_global_tiers = CreditsPallet::<Runtime>::stake_tiers();
+		assert_eq!(stored_global_tiers.len(), 1);
+		assert_eq!(stored_global_tiers[0].rate_per_block, max_rate / 2);
+
+		// No asset-specific tiers should be set
+		assert!(CreditsPallet::<Runtime>::asset_stake_tiers(asset_id).is_none());
+	});
+}
+
+#[test]
+fn rate_calculation_works_with_max_rates() {
+	new_test_ext(vec![]).execute_with(|| {
+		let max_rate = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
+		let asset_id = 1;
+
+		// Set global tiers with max rate
+		let global_tiers = vec![StakeTier { threshold: 500, rate_per_block: max_rate }];
+		assert_ok!(CreditsPallet::<Runtime>::set_stake_tiers(RuntimeOrigin::root(), global_tiers));
+
+		// Set asset tiers with max rate
+		let asset_tiers = vec![StakeTier { threshold: 500, rate_per_block: max_rate / 2 }];
+		assert_ok!(CreditsPallet::<Runtime>::set_asset_stake_tiers(
+			RuntimeOrigin::root(),
+			asset_id,
+			asset_tiers
+		));
+
+		// Test global rate calculation
+		let stake_amount = 1000;
+		let global_rate = CreditsPallet::<Runtime>::get_current_rate(stake_amount);
+		assert_eq!(global_rate, max_rate);
+
+		// Test asset rate calculation
+		let asset_rate =
+			CreditsPallet::<Runtime>::get_current_rate_for_asset(stake_amount, asset_id);
+		assert_eq!(asset_rate, Ok(max_rate / 2));
 	});
 }

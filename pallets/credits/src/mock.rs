@@ -539,6 +539,10 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const CreditBurnRecipient: Option<AccountId> = None;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxRatePerBlock: Balance = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
 }
 
 impl pallet_credits::Config for Runtime {
@@ -552,6 +556,7 @@ impl pallet_credits::Config for Runtime {
 	type MaxOffchainAccountIdLength = ConstU32<100>;
 	type MaxStakeTiers = MaxStakeTiers;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxRatePerBlock = MaxRatePerBlock;
 	type WeightInfo = ();
 }
 
