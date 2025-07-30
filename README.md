@@ -27,6 +27,7 @@
     <li><a href="#prerequisites">Prerequisites</a></li>
     <li><a href="#nix">Installation using Nix</a></li>
     <li><a href="#testnet">Run Tangle Testnet</a></li>
+    <li><a href="#chopsticks">Development with Chopsticks</a></li>
     <li><a href="#troubleshooting">Troubleshooting</a></li>
     <li><a href="#contribute">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -87,6 +88,42 @@ This should start the local testnet, you can view the logs in /tmp directory for
 
 3. To Start validating on the live testnet please visit [Starting a validator on Tangle docs](https://docs.tangle.tools/operators/validator/introduction).
 
+<h2 id="chopsticks"> Development with Chopsticks </h2>
+
+[Chopsticks](https://github.com/AcalaNetwork/chopsticks) allows you to test your changes against real network state without affecting the live network.
+
+### Prerequisites
+
+Make sure you have Node.js installed, then install Chopsticks:
+
+```bash
+npm install -g @acala-network/chopsticks
+```
+
+### Running with Chopsticks
+
+The repository includes a pre-configured Chopsticks configuration file at [`scripts/chopsticks.yml`](scripts/chopsticks.yml) that:
+
+- Forks from the live Tangle testnet (`wss://rpc.tangle.tools`)
+- Sets up Alice as the sudo account
+- Pre-funds several test accounts with 100,000 TNT each
+- Enables instant block building for faster development
+
+To start a local Chopsticks fork, run:
+
+```bash
+npx @acala-network/chopsticks@latest --config=scripts/chopsticks.yml
+```
+
+This will start a local node that you can connect to at `ws://localhost:8000`. You can then:
+
+- Use [Polkadot.js Apps](https://polkadot.js.org/apps/?rpc=ws://localhost:8000) to interact with your local fork
+- Run integration tests against the forked network
+- Test runtime upgrades and governance proposals safely
+- Debug issues with real network state
+
+The forked network will have the same state as the live testnet at the time of forking, but any changes you make will only affect your local instance.
+
 <h2 id="troubleshooting"> Troubleshooting </h2>
 
 The linking phase may fail due to not finding libgmp (i.e., "could not find library -lgmp") when building on apple silicon. To fix this problem, run:
@@ -97,6 +134,8 @@ brew install gmp
 export LIBRARY_PATH=$LIBRARY_PATH:/opt/homebrew/lib
 export INCLUDE_PATH=$INCLUDE_PATH:/opt/homebrew/include
 ```
+
+
 
 <h2 id="contribute"> Contributing </h2>
 
