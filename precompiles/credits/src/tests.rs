@@ -48,7 +48,7 @@ fn test_claim_credits_fails_on_long_offchain_id() {
 	ExtBuilder.build().execute_with(|| {
 		let caller = H160::from_low_u64_be(1);
 		// Creating an ID longer than MaxOffchainAccountIdLength (100)
-		let long_id = vec![0u8; 101];
+		let long_id = vec![0u8; 1025];
 
 		PrecompilesValue::get()
 			.prepare_test(
