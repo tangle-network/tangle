@@ -1,0 +1,81 @@
+name: Publish tangle-subxt to crates.io
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "tangle-subxt/Cargo.toml"
+      - "tangle-subxt/src/**"
+
+permissions:
+  contents: read
+
+jobs:
+  check-version-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history to compare versions
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          cache-on-failure: "true"
+
+      - name: Check if version changed
+        id: version-check
+        run: |
+          # Get the current version from Cargo.toml
+          CURRENT_VERSION=$(grep '^version = ' tangle-subxt/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Check if this version already exists on crates.io
+          if cargo search tangle-subxt --limit 1 | grep -q "tangle-subxt = \"$CURRENT_VERSION\""; then
+            echo "Version $CURRENT_VERSION already exists on crates.io"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version $CURRENT_VERSION not found on crates.io, proceeding with publish"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run tests
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          cd tangle-subxt
+          cargo test
+
+      - name: Check package
+        if: steps.version-check.outputs.should_publish == 'true'
+        run: |
+          cd tangle-subxt
+          cargo check
+
+      - name: Publish to crates.io
+        if: steps.version-check.outputs.should_publish == 'true'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cd tangle-subxt
+          cargo publish --token $CARGO_REGISTRY_TOKEN
+
+      - name: Create git tag
+        if: steps.version-check.outputs.should_publish == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.version-check.outputs.version }}
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git tag "tangle-subxt-v$VERSION"
+          git push origin "tangle-subxt-v$VERSION"
