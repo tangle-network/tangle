@@ -534,11 +534,15 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-	pub const MaxStakeTiers: u32 = 10;
+	pub const MaxStakeTiers: u32 = tangle_primitives::credits::MAX_STAKE_TIERS;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
 	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 	pub const CreditBurnRecipient: Option<AccountId> = None;
+
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
+	pub const MaxRatePerBlock: Balance = tangle_primitives::credits::MAX_RATE_PER_BLOCK;
 }
 
 impl pallet_credits::Config for Runtime {
@@ -547,11 +551,12 @@ impl pallet_credits::Config for Runtime {
 	type AssetId = AssetId;
 	type MultiAssetDelegationInfo = MultiAssetDelegation;
 	type BurnConversionRate = ConstU128<1000>;
-	type ClaimWindowBlocks = ConstU64<1000>;
+	type ClaimWindowBlocks = ConstU64<{ tangle_primitives::credits::CLAIM_WINDOW_BLOCKS }>;
 	type CreditBurnRecipient = CreditBurnRecipient;
-	type MaxOffchainAccountIdLength = ConstU32<100>;
+	type MaxOffchainAccountIdLength = ConstU32<1024>;
 	type MaxStakeTiers = MaxStakeTiers;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxRatePerBlock = MaxRatePerBlock;
 	type WeightInfo = ();
 }
 

@@ -91,7 +91,6 @@ pub mod pallet {
 
 	// Move STORAGE_VERSION inside the pallet mod
 	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
-	const MAX_RATE_PER_BLOCK: u128 = 1_000_000;
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
@@ -152,6 +151,10 @@ pub mod pallet {
 
 		/// Type for the origin that is allowed to update stake tiers.
 		type ForceOrigin: frame_support::traits::EnsureOrigin<Self::RuntimeOrigin>;
+
+		/// The maximum rate per block for a stake tier.
+		#[pallet::constant]
+		type MaxRatePerBlock: Get<BalanceOf<Self>>;
 
 		/// The weight information for the pallet.
 		type WeightInfo: WeightInfo;
@@ -412,7 +415,7 @@ pub mod pallet {
 
 			// Validate that rates don't exceed maximum allowed value
 			for tier in &new_tiers {
-				let max_rate = BalanceOf::<T>::saturated_from(MAX_RATE_PER_BLOCK);
+				let max_rate = BalanceOf::<T>::saturated_from(T::MaxRatePerBlock::get());
 				ensure!(tier.rate_per_block <= max_rate, Error::<T>::RateTooHigh);
 			}
 
@@ -465,7 +468,7 @@ pub mod pallet {
 
 			// Validate that rates don't exceed maximum allowed value
 			for tier in &new_tiers {
-				let max_rate = BalanceOf::<T>::saturated_from(MAX_RATE_PER_BLOCK);
+				let max_rate = BalanceOf::<T>::saturated_from(T::MaxRatePerBlock::get());
 				ensure!(tier.rate_per_block <= max_rate, Error::<T>::RateTooHigh);
 			}
 
