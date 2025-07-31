@@ -1,0 +1,28 @@
+endpoint: wss://rpc.tangle.tools
+build-block-mode: Instant
+allow-unresolved-imports: true
+mock-signature-host: true
+runtime-log-level: 5
+import-storage:
+  Sudo:
+    Key: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY # Alice
+  System:
+    Account:
+      -
+        -
+          - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+        - providers: 1
+          data:
+            free: '100000000000000000000000'
+      -
+        -
+          - ZAP5o2BjWAo5uoKDE6b6Xkk4Ju7k6bDu24LNjgZbfM3iyiR
+        - providers: 1
+          data:
+            free: '100000000000000000000000'
+      -
+        -
+          - ZD39yAE4W4RiXCyk1gv6CD2tSaVjQU5KoKfujyft4Xa2GAz
+        - providers: 1
+          data:
+            free: '100000000000000000000000'
