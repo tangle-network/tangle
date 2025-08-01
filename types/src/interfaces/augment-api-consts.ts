@@ -263,6 +263,10 @@ declare module '@polkadot/api-base/types/consts' {
        **/
       maxOffchainAccountIdLength: u32 & AugmentedConst<ApiType>;
       /**
+       * The maximum rate per block for a stake tier.
+       **/
+      maxRatePerBlock: u128 & AugmentedConst<ApiType>;
+      /**
        * The maximum number of stake tiers.
        **/
       maxStakeTiers: u32 & AugmentedConst<ApiType>;
