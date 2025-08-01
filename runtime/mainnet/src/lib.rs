@@ -2235,4 +2235,28 @@ impl_runtime_apis! {
 			Services::service_requests_with_blueprints_by_operator(operator).map_err(Into::into)
 		}
 	}
+
+	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
+		fn query_user_rewards(
+			account_id: AccountId,
+			asset_id: tangle_primitives::services::Asset<AssetId>,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Rewards::calculate_rewards(&account_id, asset_id)
+		}
+	}
+
+	impl pallet_credits_rpc_runtime_api::CreditsApi<Block, AccountId, Balance, AssetId> for Runtime {
+		fn query_user_credits(
+			account_id: AccountId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount(&account_id, None)
+		}
+
+		fn query_user_credits_with_asset(
+			account_id: AccountId,
+			asset_id: AssetId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount_for_asset(&account_id, None, asset_id)
+		}
+	}
 }

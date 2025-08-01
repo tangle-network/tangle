@@ -238,12 +238,23 @@ where
 	SC: SelectChain<Block> + 'static,
 	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::BlakeTwo256>,
+	C::Api: pallet_services_rpc::ServicesRuntimeApi<
+			Block,
+			PalletServicesConstraints,
+			AccountId,
+			AssetId,
+		>,
+	C::Api: pallet_rewards_rpc::RewardsRuntimeApi<Block, AccountId, AssetId, Balance>,
+	C::Api: pallet_credits_rpc::CreditsRuntimeApi<Block, AccountId, Balance, AssetId>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
+	use pallet_credits_rpc::{CreditsApiServer, CreditsClient};
+	use pallet_rewards_rpc::{RewardsApiServer, RewardsClient};
+	use pallet_services_rpc::{ServicesApiServer, ServicesClient};
 
 	let mut io = RpcModule::new(());
 
@@ -268,6 +279,9 @@ where
 
 	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
+	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
+	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
+	io.merge(CreditsClient::new(client.clone()).into_rpc())?;
 	//io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
 
 	io.merge(
