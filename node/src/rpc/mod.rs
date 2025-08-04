@@ -248,13 +248,13 @@ where
 	C::Api: pallet_credits_rpc::CreditsRuntimeApi<Block, AccountId, Balance, AssetId>,
 	CIDP: sp_inherents::CreateInherentDataProviders<Block, ()> + Send + Sync + 'static,
 {
+	use pallet_credits_rpc::{CreditsApiServer, CreditsClient};
+	use pallet_rewards_rpc::{RewardsApiServer, RewardsClient};
+	use pallet_services_rpc::{ServicesApiServer, ServicesClient};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
 	use substrate_frame_rpc_system::{System, SystemApiServer};
-	use pallet_credits_rpc::{CreditsApiServer, CreditsClient};
-	use pallet_rewards_rpc::{RewardsApiServer, RewardsClient};
-	use pallet_services_rpc::{ServicesApiServer, ServicesClient};
 
 	let mut io = RpcModule::new(());
 

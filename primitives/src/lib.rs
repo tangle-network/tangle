@@ -321,6 +321,59 @@ pub mod credits {
 	pub const CLAIM_WINDOW_BLOCKS: u64 = DAYS * 7;
 }
 
+pub mod multi_asset_delegation {
+	use crate::types::Balance;
+	use frame_support::PalletId;
+
+	/// Minimum amount required to become an operator
+	pub const MIN_OPERATOR_BOND_AMOUNT: Balance = 100;
+
+	/// Minimum amount required to delegate
+	pub const MIN_DELEGATE_AMOUNT: Balance = 1;
+
+	/// Pallet ID for multi-asset-delegation
+	pub const PALLET_ID: PalletId = PalletId(*b"PotStake");
+
+	/// Maximum number of blueprints a delegator can have
+	pub const MAX_DELEGATOR_BLUEPRINTS: u32 = 50;
+
+	/// Maximum number of blueprints an operator can have
+	pub const MAX_OPERATOR_BLUEPRINTS: u32 = 50;
+
+	/// Maximum number of pending withdraw requests
+	pub const MAX_WITHDRAW_REQUESTS: u32 = 5;
+
+	/// Maximum number of pending unstake requests
+	pub const MAX_UNSTAKE_REQUESTS: u32 = 5;
+
+	/// Maximum number of delegations per delegator
+	pub const MAX_DELEGATIONS: u32 = 50;
+
+	/// Leave operators delay for fast runtime
+	pub const LEAVE_OPERATORS_DELAY_FAST: u32 = 1;
+
+	/// Leave delegators delay for fast runtime
+	pub const LEAVE_DELEGATORS_DELAY_FAST: u32 = 1;
+
+	/// Delegation bond less delay for fast runtime
+	pub const DELEGATION_BOND_LESS_DELAY_FAST: u32 = 1;
+
+	/// Operator bond less delay for fast runtime
+	pub const OPERATOR_BOND_LESS_DELAY_FAST: u32 = 1;
+
+	/// Leave operators delay for normal runtime
+	pub const LEAVE_OPERATORS_DELAY: u32 = 10;
+
+	/// Leave delegators delay for normal runtime
+	pub const LEAVE_DELEGATORS_DELAY: u32 = 10;
+
+	/// Delegation bond less delay for normal runtime
+	pub const DELEGATION_BOND_LESS_DELAY: u32 = 5;
+
+	/// Operator bond less delay for normal runtime
+	pub const OPERATOR_BOND_LESS_DELAY: u32 = 5;
+}
+
 /// We assume that ~10% of the block weight is consumed by `on_initialize` handlers. This is
 /// used to limit the maximal weight of a single extrinsic.
 pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);

@@ -6,6 +6,57 @@ use scale_info::TypeInfo;
 use services::AssetIdT;
 use sp_std::vec::Vec;
 
+// Rewards Pallet Constants
+use crate::{currency::UNIT, types::Balance};
+use frame_support::PalletId;
+use sp_runtime::Perbill;
+
+/// Pallet ID for rewards
+pub const PALLET_ID: PalletId = PalletId(*b"py/tnrew");
+
+/// Minimum deposit cap (same for both mainnet and testnet)
+pub const MIN_DEPOSIT_CAP: Balance = 0;
+
+/// Minimum incentive cap (same for both mainnet and testnet)
+pub const MIN_INCENTIVE_CAP: Balance = 0;
+
+/// Maximum vault name length
+pub const MAX_VAULT_NAME_LENGTH: u32 = 64;
+
+/// Maximum vault logo length
+pub const MAX_VAULT_LOGO_LENGTH: u32 = 256;
+
+/// Maximum pending rewards per operator
+pub const MAX_PENDING_REWARDS_PER_OPERATOR: u32 = 100;
+
+/// Mainnet-specific constants
+pub mod mainnet {
+	use super::*;
+
+	/// Maximum deposit cap for mainnet
+	pub const MAX_DEPOSIT_CAP: Balance = UNIT * 100_000_000;
+
+	/// Maximum incentive cap for mainnet
+	pub const MAX_INCENTIVE_CAP: Balance = UNIT * 100_000_000;
+
+	/// Maximum APY for mainnet (2%)
+	pub const MAX_APY: Perbill = Perbill::from_percent(2);
+}
+
+/// Testnet-specific constants
+pub mod testnet {
+	use super::*;
+
+	/// Maximum deposit cap for testnet
+	pub const MAX_DEPOSIT_CAP: Balance = UNIT * 1_000_000_000_000;
+
+	/// Maximum incentive cap for testnet
+	pub const MAX_INCENTIVE_CAP: Balance = UNIT * 1_000_000_000_000;
+
+	/// Maximum APY for testnet (20%)
+	pub const MAX_APY: Perbill = Perbill::from_percent(20);
+}
+
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
 pub enum AssetType<AssetId> {
 	/// This includes all lstTNT assets
