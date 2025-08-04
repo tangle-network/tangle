@@ -1273,14 +1273,14 @@ impl pallet_tangle_lst::Config for Runtime {
 }
 
 parameter_types! {
-	pub const RewardsPID: PalletId = PalletId(*b"py/tnrew");
-	pub const MaxDepositCap: u128 = UNIT * 100_000_000;
-	pub const MaxIncentiveCap: u128 = UNIT * 100_000_000;
-	pub const MaxApy: Perbill = Perbill::from_percent(2);
-	pub const MinDepositCap: u128 = 0;
-	pub const MinIncentiveCap: u128 = 0;
-	pub const MaxVaultNameLen: u32 = 64;
-	pub const MaxVaultLogoLen: u32 = 256;
+	pub const RewardsPID: PalletId = tangle_primitives::types::rewards::PALLET_ID;
+	pub const MaxDepositCap: Balance = tangle_primitives::types::rewards::mainnet::MAX_DEPOSIT_CAP;
+	pub const MaxIncentiveCap: Balance = tangle_primitives::types::rewards::mainnet::MAX_INCENTIVE_CAP;
+	pub const MaxApy: Perbill = tangle_primitives::types::rewards::mainnet::MAX_APY;
+	pub const MinDepositCap: Balance = tangle_primitives::types::rewards::MIN_DEPOSIT_CAP;
+	pub const MinIncentiveCap: Balance = tangle_primitives::types::rewards::MIN_INCENTIVE_CAP;
+	pub const MaxVaultNameLen: u32 = tangle_primitives::types::rewards::MAX_VAULT_NAME_LENGTH;
+	pub const MaxVaultLogoLen: u32 = tangle_primitives::types::rewards::MAX_VAULT_LOGO_LENGTH;
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -1299,56 +1299,60 @@ impl pallet_rewards::Config for Runtime {
 	type MaxVaultNameLength = MaxVaultNameLen;
 	type MaxVaultLogoLength = MaxVaultLogoLen;
 	type VaultMetadataOrigin = EnsureRootOrHalfCouncil;
-	type MaxPendingRewardsPerOperator = ConstU32<100>;
+	type MaxPendingRewardsPerOperator =
+		ConstU32<{ tangle_primitives::types::rewards::MAX_PENDING_REWARDS_PER_OPERATOR }>;
 	type WeightInfo = ();
 }
 
 parameter_types! {
-	pub const MinOperatorBondAmount: Balance = 100;
+	pub const MinOperatorBondAmount: Balance = tangle_primitives::multi_asset_delegation::MIN_OPERATOR_BOND_AMOUNT;
+	pub const MinDelegateAmount: Balance = tangle_primitives::multi_asset_delegation::MIN_DELEGATE_AMOUNT;
+	pub PID: PalletId = tangle_primitives::multi_asset_delegation::PALLET_ID;
 
-	pub const MinDelegateAmount : Balance = 1;
-	pub PID: PalletId = PalletId(*b"PotStake");
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegatorBlueprints : u32 = 50;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxOperatorBlueprints : u32 = 50;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxWithdrawRequests: u32 = 5;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxUnstakeRequests: u32 = 5;
-	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const MaxDelegations: u32 = 50;
+	pub const MaxDelegatorBlueprints: u32 = tangle_primitives::multi_asset_delegation::MAX_DELEGATOR_BLUEPRINTS;
 
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxOperatorBlueprints: u32 = tangle_primitives::multi_asset_delegation::MAX_OPERATOR_BLUEPRINTS;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxWithdrawRequests: u32 = tangle_primitives::multi_asset_delegation::MAX_WITHDRAW_REQUESTS;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxUnstakeRequests: u32 = tangle_primitives::multi_asset_delegation::MAX_UNSTAKE_REQUESTS;
+
+	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
+	pub const MaxDelegations: u32 = tangle_primitives::multi_asset_delegation::MAX_DELEGATIONS;
 }
 
 #[cfg(feature = "fast-runtime")]
 parameter_types! {
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const LeaveOperatorsDelay: u32 = 1;
+	pub const LeaveOperatorsDelay: u32 = tangle_primitives::multi_asset_delegation::LEAVE_OPERATORS_DELAY_FAST;
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const LeaveDelegatorsDelay: u32 = 1;
+	pub const LeaveDelegatorsDelay: u32 = tangle_primitives::multi_asset_delegation::LEAVE_DELEGATORS_DELAY_FAST;
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const DelegationBondLessDelay: u32 = 1;
+	pub const DelegationBondLessDelay: u32 = tangle_primitives::multi_asset_delegation::DELEGATION_BOND_LESS_DELAY_FAST;
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const OperatorBondLessDelay: u32 = 1;
+	pub const OperatorBondLessDelay: u32 = tangle_primitives::multi_asset_delegation::OPERATOR_BOND_LESS_DELAY_FAST;
 }
 
 #[cfg(not(feature = "fast-runtime"))]
 parameter_types! {
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const LeaveOperatorsDelay: u32 = 10;
+	pub const LeaveOperatorsDelay: u32 = tangle_primitives::multi_asset_delegation::LEAVE_OPERATORS_DELAY;
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const LeaveDelegatorsDelay: u32 = 10;
+	pub const LeaveDelegatorsDelay: u32 = tangle_primitives::multi_asset_delegation::LEAVE_DELEGATORS_DELAY;
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const DelegationBondLessDelay: u32 = 5;
+	pub const DelegationBondLessDelay: u32 = tangle_primitives::multi_asset_delegation::DELEGATION_BOND_LESS_DELAY;
 
 	#[derive(PartialEq, Eq, Clone, Copy, Debug, Encode, Decode, MaxEncodedLen, TypeInfo)]
-	pub const OperatorBondLessDelay: u32 = 5;
+	pub const OperatorBondLessDelay: u32 = tangle_primitives::multi_asset_delegation::OPERATOR_BOND_LESS_DELAY;
 }
 
 impl pallet_multi_asset_delegation::Config for Runtime {
@@ -2233,6 +2237,30 @@ impl_runtime_apis! {
 			sp_runtime::DispatchError,
 		> {
 			Services::service_requests_with_blueprints_by_operator(operator).map_err(Into::into)
+		}
+	}
+
+	impl pallet_rewards_rpc_runtime_api::RewardsApi<Block, AccountId, AssetId, Balance> for Runtime {
+		fn query_user_rewards(
+			account_id: AccountId,
+			asset_id: tangle_primitives::services::Asset<AssetId>,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Rewards::calculate_rewards(&account_id, asset_id)
+		}
+	}
+
+	impl pallet_credits_rpc_runtime_api::CreditsApi<Block, AccountId, Balance, AssetId> for Runtime {
+		fn query_user_credits(
+			account_id: AccountId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount(&account_id, None)
+		}
+
+		fn query_user_credits_with_asset(
+			account_id: AccountId,
+			asset_id: AssetId,
+		) -> Result<Balance, sp_runtime::DispatchError> {
+			Credits::get_accrued_amount_for_asset(&account_id, None, asset_id)
 		}
 	}
 }
