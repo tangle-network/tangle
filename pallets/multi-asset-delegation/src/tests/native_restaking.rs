@@ -84,6 +84,14 @@ fn native_restaking_should_work() {
 		assert_eq!(locks[0].amount, amount);
 		assert_eq!(&locks[1].id, b"delegate");
 		assert_eq!(locks[1].amount, delegate_amount);
+
+		// Verify that credits were given on nomination delegation
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
+			who.clone(),
+			Asset::Custom(TNT), // TNT is represented as Asset::Custom(0)
+			delegate_amount,
+			None // No lock multiplier for nomination delegations
+		)]);
 	});
 }
 

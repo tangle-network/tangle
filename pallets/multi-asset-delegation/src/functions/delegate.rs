@@ -26,7 +26,11 @@ use sp_runtime::{
 };
 use sp_staking::StakingInterface;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-use tangle_primitives::{RoundIndex, services::Asset, traits::MultiAssetDelegationInfo};
+use tangle_primitives::{
+	RoundIndex,
+	services::Asset,
+	traits::{MultiAssetDelegationInfo, RewardsManager},
+};
 
 pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
 
@@ -124,6 +128,12 @@ impl<T: Config> Pallet<T> {
 				.increase_delegated_amount(amount)
 				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
+			// Extract lock_multiplier for credit recording
+			let lock_multiplier = user_deposit
+				.locks
+				.as_ref()
+				.and_then(|locks| locks.iter().next().map(|lock| lock.lock_multiplier));
+
 			// Find existing delegation or create new one
 			let delegation_exists = metadata
 				.delegations
@@ -156,6 +166,9 @@ impl<T: Config> Pallet<T> {
 
 			// Update operator metadata
 			Self::update_operator_metadata(&operator, &who, asset, amount, true)?;
+
+			// Record credits for delegation
+			let _ = T::RewardsManager::record_deposit(&who, asset, amount, lock_multiplier);
 
 			// Emit event
 			Self::deposit_event(Event::Delegated { who: who.clone(), operator, amount, asset });
@@ -532,6 +545,10 @@ impl<T: Config> Pallet<T> {
 				amount,
 				true, // is_increase = true for delegation
 			)?;
+
+			// Record credits for nomination delegation
+			let _ =
+				T::RewardsManager::record_deposit(&who, Asset::Custom(Zero::zero()), amount, None);
 
 			// Emit event
 			Self::deposit_event(Event::NominationDelegated {

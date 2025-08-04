@@ -18,6 +18,7 @@ use super::*;
 use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
 use sp_keyring::AccountKeyring::{Alice, Bob, Charlie};
+use sp_runtime::DispatchError;
 use tangle_primitives::services::Asset;
 
 #[test]
@@ -69,6 +70,15 @@ fn delegate_should_work() {
 		assert_eq!(operator_delegation.delegator, who.clone());
 		assert_eq!(operator_delegation.amount, amount);
 		assert_eq!(operator_delegation.asset, asset);
+
+		// Verify that credits were given on delegation (not deposit)
+		// There should be one record_deposit call from the delegation
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
+			who.clone(),
+			asset,
+			amount,
+			None // No lock multiplier for this test
+		)]);
 	});
 }
 
@@ -878,5 +888,87 @@ fn delegate_with_no_deposit() {
 		// Verify state remains unchanged
 		let metadata = MultiAssetDelegation::delegators(who.clone());
 		assert_eq!(metadata.is_none(), true);
+	});
+}
+
+#[test]
+fn debug_tnt_delegation_verify_nomination_issue() {
+	new_test_ext().execute_with(|| {
+		// This test reproduces the exact user scenario to debug the verify_nomination_amount issue
+
+		let who: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		let amount = 1000;
+		let delegate_amount = 500;
+
+		println!("🔍 Starting debug test for TNT delegation issue...");
+
+		// Step 1: Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+		println!("✅ Operator setup complete");
+
+		// Step 2: Create and mint TNT tokens
+		create_and_mint_tokens(TNT, who.clone(), amount);
+		println!("✅ TNT tokens minted");
+
+		// Step 3: Deposit TNT as custom asset (Asset::Custom(0))
+		println!("🔍 Depositing TNT as Asset::Custom(0)...");
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(who.clone()),
+			Asset::Custom(TNT), // TNT = 0
+			amount,
+			None,
+			None,
+		));
+		println!("✅ TNT deposit successful");
+
+		// Check if user is a nominator (should be false)
+		println!("🔍 Is user a nominator? Check if T::StakingInterface::stake works...");
+
+		// Step 4: Try to delegate TNT using regular delegate (not delegate_nomination)
+		println!("🔍 Attempting to delegate TNT using regular delegate extrinsic...");
+		let result = MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(who.clone()),
+			operator.clone(),
+			Asset::Custom(TNT), // TNT = 0
+			delegate_amount,
+			Default::default(),
+		);
+
+		match result {
+			Ok(_) => {
+				println!("✅ TNT delegation successful! No verify_nomination_amount called.");
+				// Verify the delegation was created properly
+				let metadata = MultiAssetDelegation::delegators(who.clone()).unwrap();
+				let delegation = &metadata.delegations[0];
+				assert_eq!(delegation.asset, Asset::Custom(TNT));
+				assert_eq!(delegation.is_nomination, false);
+				println!(
+					"✅ Delegation verified: asset={:?}, is_nomination={}",
+					delegation.asset, delegation.is_nomination
+				);
+			},
+			Err(e) => {
+				println!("❌ TNT delegation failed with error: {:?}", e);
+
+				// Check if it's the NotNominator error that indicates verify_nomination_amount was
+				// called
+				if let DispatchError::Module(module_err) = &e {
+					println!("🔍 Module error details: {:?}", module_err);
+					// If we see NotNominator error here, it means verify_nomination_amount was
+					// called when it shouldn't have been for regular TNT custom asset
+					// delegation
+					let error_bytes = module_err.error;
+					println!("🔍 Error bytes: {:?}", error_bytes);
+					// This would indicate the bug if we get NotNominator
+				}
+
+				// For now, let's just panic on any error to help debug
+				panic!("TNT delegation failed: {:?}", e);
+			},
+		}
 	});
 }

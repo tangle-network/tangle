@@ -69,13 +69,9 @@ fn deposit_should_work_for_fungible_asset() {
 			})
 		);
 
-		// Verify that rewards manager was called with correct parameters
-		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
-			who.clone(),
-			Asset::Custom(VDOT),
-			amount,
-			None
-		)]);
+		// Note: Credits are now given on delegation, not deposit
+		// Verify that no reward calls were made during deposit
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![]);
 	});
 }
 
@@ -631,12 +627,8 @@ fn deposit_should_work_for_tnt_without_adding_to_reward_vault() {
 			})
 		);
 
-		// Verify that rewards manager was called with correct parameters
-		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
-			who.clone(),
-			Asset::Custom(0),
-			amount,
-			None
-		)]);
+		// Note: Credits are now given on delegation, not deposit
+		// Verify that no reward calls were made during deposit
+		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![]);
 	});
 }

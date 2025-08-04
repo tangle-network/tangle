@@ -119,8 +119,6 @@ impl<T: Config> Pallet<T> {
 				metadata.deposits.insert(asset, new_deposit);
 			}
 
-			let _ = T::RewardsManager::record_deposit(&who, asset, amount, lock_multiplier);
-
 			Ok(())
 		})?;
 
