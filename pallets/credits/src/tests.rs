@@ -1452,7 +1452,7 @@ fn tier_switching_upward_works_correctly() {
 		// Advance some blocks and verify tier 1 rate (1 credit per block)
 		run_to_block(10);
 		let max_claimable_1 = get_max_claimable(user.clone());
-		assert_eq!(max_claimable_1, 10 * 1, "Should be tier 1 rate");
+		assert_eq!(max_claimable_1, 10, "Should be tier 1 rate");
 		assert_ok!(claim_credits(user.clone(), max_claimable_1, dave_id_str));
 
 		// Add more delegation to reach tier 2 (total 1200 tokens)
@@ -1598,7 +1598,7 @@ fn exact_tier_boundaries_work_correctly() {
 		let rate_100 = CreditsPallet::<Runtime>::get_current_rate(100u128);
 		assert_eq!(rate_100, 1, "Exactly 100 tokens should be tier 1");
 		let max_claimable = get_max_claimable(user.clone());
-		assert_eq!(max_claimable, 10 * 1, "Should earn tier 1 rate");
+		assert_eq!(max_claimable, 10, "Should earn tier 1 rate");
 
 		// Test one token below tier 1 boundary (99 tokens)
 		let rate_99 = CreditsPallet::<Runtime>::get_current_rate(99u128);
@@ -1720,8 +1720,7 @@ fn multiple_delegations_accumulate_tiers_correctly() {
 		run_to_block(20);
 		let max_claimable_2 = get_max_claimable(user.clone());
 		assert_eq!(
-			max_claimable_2,
-			20 * 1,
+			max_claimable_2, 20,
 			"Combined delegations should qualify for tier 1 from start"
 		);
 		assert_ok!(claim_credits(user.clone(), max_claimable_2, dave_id_str));
@@ -1837,7 +1836,7 @@ fn security_cannot_manipulate_tier_calculation() {
 		// Advance one block and verify normal accrual
 		run_to_block(11);
 		let max_claimable_3 = get_max_claimable(user.clone());
-		assert_eq!(max_claimable_3, 1 * 5, "Should only accrue for 1 block");
+		assert_eq!(max_claimable_3, 5, "Should only accrue for 1 block");
 
 		// Try to claim more than accrued - should fail
 		assert_noop!(
@@ -1918,7 +1917,7 @@ fn concurrent_tier_operations_work_correctly() {
 		let claimable1 = get_max_claimable(user1.clone());
 		let claimable2 = get_max_claimable(user2.clone());
 
-		assert_eq!(claimable1, 10 * 1, "User 1 should get tier 1 rate");
+		assert_eq!(claimable1, 10, "User 1 should get tier 1 rate");
 		assert_eq!(claimable2, 10 * 5, "User 2 should get tier 2 rate");
 
 		// Both should be able to claim in the same block
@@ -2005,7 +2004,7 @@ fn tier_switching_with_locked_multipliers_works() {
 		// The user should be in tier 1 based on total effective stake
 		// (150 base * 2 multiplier = 300 effective, which is tier 1)
 		let max_claimable = get_max_claimable(user.clone());
-		assert_eq!(max_claimable, 10 * 1, "Should get tier 1 rate with lock multiplier");
+		assert_eq!(max_claimable, 10, "Should get tier 1 rate with lock multiplier");
 		assert_ok!(claim_credits(user.clone(), max_claimable, dave_id_str));
 	});
 }
