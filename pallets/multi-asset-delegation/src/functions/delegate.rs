@@ -168,8 +168,8 @@ impl<T: Config> Pallet<T> {
 			Self::update_operator_metadata(&operator, &who, asset, amount, true)?;
 
 			// Record credits and delegation tracking
-			let _ = T::RewardsManager::record_deposit(&who, asset, amount, lock_multiplier);
-			let _ = T::RewardsManager::record_delegate(&who, &operator, asset, amount);
+			let _ =
+				T::RewardsManager::record_delegate(&who, &operator, asset, amount, lock_multiplier);
 
 			// Emit event
 			Self::deposit_event(Event::Delegated { who: who.clone(), operator, amount, asset });
@@ -549,13 +549,12 @@ impl<T: Config> Pallet<T> {
 			)?;
 
 			// Record credits and delegation tracking for nomination delegation
-			let _ =
-				T::RewardsManager::record_deposit(&who, Asset::Custom(Zero::zero()), amount, None);
 			let _ = T::RewardsManager::record_delegate(
 				&who,
 				&operator,
 				Asset::Custom(Zero::zero()),
 				amount,
+				None,
 			);
 
 			// Emit event

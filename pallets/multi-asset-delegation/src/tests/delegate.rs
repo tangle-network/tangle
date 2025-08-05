@@ -70,21 +70,13 @@ fn delegate_should_work() {
 		assert_eq!(operator_delegation.amount, amount);
 		assert_eq!(operator_delegation.asset, asset);
 
-		// Verify that credits were given on delegation (not deposit)
-		// There should be one record_deposit call from the delegation
-		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![(
-			who.clone(),
-			asset,
-			amount,
-			None // No lock multiplier for this test
-		)]);
-
-		// Verify that delegation was recorded
+		// Verify that delegation was recorded with credits
 		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![(
 			who.clone(),
 			operator.clone(),
 			asset,
-			amount
+			amount,
+			None // No lock multiplier for this test
 		)]);
 	});
 }

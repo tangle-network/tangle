@@ -24,7 +24,6 @@ use sp_core::H160;
 use sp_runtime::traits::Zero;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping},
-	traits::RewardsManager,
 	types::rewards::LockMultiplier,
 };
 
@@ -161,8 +160,6 @@ impl<T: Config> Pallet<T> {
 				.try_push(WithdrawRequest { asset, amount, requested_round: current_round })
 				.map_err(|_| Error::<T>::MaxWithdrawRequestsExceeded)?;
 			metadata.withdraw_requests = withdraw_requests;
-
-			let _ = T::RewardsManager::record_withdrawal(&who, asset, amount);
 
 			Ok(())
 		})

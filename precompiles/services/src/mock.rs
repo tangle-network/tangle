@@ -594,8 +594,9 @@ pub struct MockRewardsManager;
 impl RewardsManager<AccountId, AssetId, Balance, u64> for MockRewardsManager {
 	type Error = sp_runtime::DispatchError;
 
-	fn record_deposit(
+	fn record_delegate(
 		_account_id: &AccountId,
+		_operator: &AccountId,
 		_asset: Asset<AssetId>,
 		_amount: Balance,
 		_lock_multiplier: Option<LockMultiplier>,
@@ -603,8 +604,9 @@ impl RewardsManager<AccountId, AssetId, Balance, u64> for MockRewardsManager {
 		Ok(())
 	}
 
-	fn record_withdrawal(
+	fn record_undelegate(
 		_account_id: &AccountId,
+		_operator: &AccountId,
 		_asset: Asset<AssetId>,
 		_amount: Balance,
 	) -> Result<(), Self::Error> {

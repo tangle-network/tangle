@@ -449,9 +449,7 @@ impl pallet_services::Config for Runtime {
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
 thread_local! {
-	static DEPOSIT_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
-	static WITHDRAWAL_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
-	static DELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+	static DELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
 	static UNDELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
 }
 
@@ -460,25 +458,33 @@ pub struct MockRewardsManager;
 impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsManager {
 	type Error = DispatchError;
 
-	fn record_deposit(
+	fn record_delegate(
 		account_id: &AccountId,
+		operator: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 		lock_multiplier: Option<LockMultiplier>,
 	) -> Result<(), Self::Error> {
-		DEPOSIT_CALLS.with(|calls| {
-			calls.borrow_mut().push((account_id.clone(), asset, amount, lock_multiplier));
+		DELEGATE_CALLS.with(|calls| {
+			calls.borrow_mut().push((
+				account_id.clone(),
+				operator.clone(),
+				asset,
+				amount,
+				lock_multiplier,
+			));
 		});
 		Ok(())
 	}
 
-	fn record_withdrawal(
+	fn record_undelegate(
 		account_id: &AccountId,
+		operator: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 	) -> Result<(), Self::Error> {
-		WITHDRAWAL_CALLS.with(|calls| {
-			calls.borrow_mut().push((account_id.clone(), asset, amount));
+		UNDELEGATE_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), operator.clone(), asset, amount));
 		});
 		Ok(())
 	}
@@ -498,43 +504,11 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(0_u32.into())
 	}
-
-	fn record_delegate(
-		account_id: &AccountId,
-		operator: &AccountId,
-		asset: Asset<AssetId>,
-		amount: Balance,
-	) -> Result<(), Self::Error> {
-		DELEGATE_CALLS.with(|calls| {
-			calls.borrow_mut().push((account_id.clone(), operator.clone(), asset, amount));
-		});
-		Ok(())
-	}
-
-	fn record_undelegate(
-		account_id: &AccountId,
-		operator: &AccountId,
-		asset: Asset<AssetId>,
-		amount: Balance,
-	) -> Result<(), Self::Error> {
-		UNDELEGATE_CALLS.with(|calls| {
-			calls.borrow_mut().push((account_id.clone(), operator.clone(), asset, amount));
-		});
-		Ok(())
-	}
 }
 
 impl MockRewardsManager {
-	pub fn record_deposit_calls()
-	-> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
-		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
-	}
-
-	pub fn record_withdrawal_calls() -> Vec<(AccountId, Asset<AssetId>, Balance)> {
-		WITHDRAWAL_CALLS.with(|calls| calls.borrow().clone())
-	}
-
-	pub fn record_delegate_calls() -> Vec<(AccountId, AccountId, Asset<AssetId>, Balance)> {
+	pub fn record_delegate_calls()
+	-> Vec<(AccountId, AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
 		DELEGATE_CALLS.with(|calls| calls.borrow().clone())
 	}
 
@@ -543,8 +517,6 @@ impl MockRewardsManager {
 	}
 
 	pub fn clear_all() {
-		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
-		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
 		DELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 		UNDELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 	}

@@ -71,7 +71,7 @@ fn deposit_should_work_for_fungible_asset() {
 
 		// Note: Credits are now given on delegation, not deposit
 		// Verify that no reward calls were made during deposit
-		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![]);
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![]);
 	});
 }
 
@@ -238,12 +238,10 @@ fn schedule_withdraw_should_work() {
 		assert_eq!(deposit.amount, 0_u32.into());
 		assert!(!metadata.withdraw_requests.is_empty());
 
-		// Ensure that rewards pallet was called
-		assert_eq!(MockRewardsManager::record_withdrawal_calls(), vec![(
-			who.clone(),
-			Asset::Custom(VDOT),
-			amount
-		)]);
+		// Note: Withdrawal doesn't affect credits (only undelegation does)
+		// Verify that no reward calls were made during withdrawal scheduling
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![]);
+		assert_eq!(MockRewardsManager::record_undelegate_calls(), vec![]);
 	});
 }
 
@@ -629,6 +627,6 @@ fn deposit_should_work_for_tnt_without_adding_to_reward_vault() {
 
 		// Note: Credits are now given on delegation, not deposit
 		// Verify that no reward calls were made during deposit
-		assert_eq!(MockRewardsManager::record_deposit_calls(), vec![]);
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![]);
 	});
 }
