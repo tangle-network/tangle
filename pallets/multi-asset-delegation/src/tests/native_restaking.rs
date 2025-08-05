@@ -92,6 +92,14 @@ fn native_restaking_should_work() {
 			delegate_amount,
 			None // No lock multiplier for nomination delegations
 		)]);
+
+		// Verify that delegation was recorded
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![(
+			who.clone(),
+			operator.clone(),
+			Asset::Custom(TNT),
+			delegate_amount
+		)]);
 	});
 }
 

@@ -78,6 +78,14 @@ fn delegate_should_work() {
 			amount,
 			None // No lock multiplier for this test
 		)]);
+
+		// Verify that delegation was recorded
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![(
+			who.clone(),
+			operator.clone(),
+			asset,
+			amount
+		)]);
 	});
 }
 

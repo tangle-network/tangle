@@ -451,6 +451,8 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 thread_local! {
 	static DEPOSIT_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
 	static WITHDRAWAL_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+	static DELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+	static UNDELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
 }
 
 pub struct MockRewardsManager;
@@ -496,6 +498,30 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(0_u32.into())
 	}
+
+	fn record_delegate(
+		account_id: &AccountId,
+		operator: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> Result<(), Self::Error> {
+		DELEGATE_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), operator.clone(), asset, amount));
+		});
+		Ok(())
+	}
+
+	fn record_undelegate(
+		account_id: &AccountId,
+		operator: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> Result<(), Self::Error> {
+		UNDELEGATE_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), operator.clone(), asset, amount));
+		});
+		Ok(())
+	}
 }
 
 impl MockRewardsManager {
@@ -508,9 +534,19 @@ impl MockRewardsManager {
 		WITHDRAWAL_CALLS.with(|calls| calls.borrow().clone())
 	}
 
+	pub fn record_delegate_calls() -> Vec<(AccountId, AccountId, Asset<AssetId>, Balance)> {
+		DELEGATE_CALLS.with(|calls| calls.borrow().clone())
+	}
+
+	pub fn record_undelegate_calls() -> Vec<(AccountId, AccountId, Asset<AssetId>, Balance)> {
+		UNDELEGATE_CALLS.with(|calls| calls.borrow().clone())
+	}
+
 	pub fn clear_all() {
 		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
 		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
+		DELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
+		UNDELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 	}
 }
 

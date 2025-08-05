@@ -82,6 +82,34 @@ pub trait RewardsManager<AccountId, AssetId, Balance, BlockNumber> {
 	/// * `Ok(Balance)` - The incentive cap for the asset
 	/// * `Err(Self::Error)` - If there was an error retrieving the cap
 	fn get_asset_incentive_cap(asset: Asset<AssetId>) -> Result<Balance, Self::Error>;
+
+	/// Records a delegation for an account.
+	///
+	/// # Parameters
+	/// * `account_id` - The account making the delegation
+	/// * `operator` - The operator being delegated to
+	/// * `asset` - The asset being delegated
+	/// * `amount` - The amount being delegated
+	fn record_delegate(
+		account_id: &AccountId,
+		operator: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> Result<(), Self::Error>;
+
+	/// Records an undelegation for an account.
+	///
+	/// # Parameters
+	/// * `account_id` - The account making the undelegation
+	/// * `operator` - The operator being undelegated from
+	/// * `asset` - The asset being undelegated
+	/// * `amount` - The amount being undelegated
+	fn record_undelegate(
+		account_id: &AccountId,
+		operator: &AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> Result<(), Self::Error>;
 }
 
 impl<AccountId, AssetId, Balance, BlockNumber>
@@ -122,6 +150,24 @@ where
 
 	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
 		Ok(Balance::zero())
+	}
+
+	fn record_delegate(
+		_account_id: &AccountId,
+		_operator: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
+	}
+
+	fn record_undelegate(
+		_account_id: &AccountId,
+		_operator: &AccountId,
+		_asset: Asset<AssetId>,
+		_amount: Balance,
+	) -> Result<(), Self::Error> {
+		Ok(())
 	}
 }
 
