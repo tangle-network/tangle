@@ -23,28 +23,32 @@ use sp_runtime::{DispatchResult, traits::Zero};
 pub trait RewardsManager<AccountId, AssetId, Balance, BlockNumber> {
 	type Error;
 
-	/// Records a deposit for an account with an optional lock multiplier.
+	/// Records a delegation for an account with an optional lock multiplier.
 	///
 	/// # Parameters
-	/// * `account_id` - The account making the deposit
-	/// * `asset` - The asset being deposited
-	/// * `amount` - The amount being deposited
-	/// * `lock_multiplier` - Optional multiplier for locked deposits
-	fn record_deposit(
+	/// * `account_id` - The account making the delegation
+	/// * `operator` - The operator being delegated to
+	/// * `asset` - The asset being delegated
+	/// * `amount` - The amount being delegated
+	/// * `lock_multiplier` - Optional multiplier for locked delegations
+	fn record_delegate(
 		account_id: &AccountId,
+		operator: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 		lock_multiplier: Option<LockMultiplier>,
 	) -> Result<(), Self::Error>;
 
-	/// Records a withdrawal for an account.
+	/// Records an undelegation for an account.
 	///
 	/// # Parameters
-	/// * `account_id` - The account making the withdrawal
-	/// * `asset` - The asset being withdrawn
-	/// * `amount` - The amount being withdrawn
-	fn record_withdrawal(
+	/// * `account_id` - The account making the undelegation
+	/// * `operator` - The operator being undelegated from
+	/// * `asset` - The asset being undelegated
+	/// * `amount` - The amount being undelegated
+	fn record_undelegate(
 		account_id: &AccountId,
+		operator: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 	) -> Result<(), Self::Error>;
@@ -91,8 +95,9 @@ where
 {
 	type Error = &'static str;
 
-	fn record_deposit(
+	fn record_delegate(
 		_account_id: &AccountId,
+		_operator: &AccountId,
 		_asset: Asset<AssetId>,
 		_amount: Balance,
 		_lock_multiplier: Option<LockMultiplier>,
@@ -100,8 +105,9 @@ where
 		Ok(())
 	}
 
-	fn record_withdrawal(
+	fn record_undelegate(
 		_account_id: &AccountId,
+		_operator: &AccountId,
 		_asset: Asset<AssetId>,
 		_amount: Balance,
 	) -> Result<(), Self::Error> {

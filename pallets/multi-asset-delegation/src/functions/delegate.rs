@@ -26,7 +26,11 @@ use sp_runtime::{
 };
 use sp_staking::StakingInterface;
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
-use tangle_primitives::{RoundIndex, services::Asset, traits::MultiAssetDelegationInfo};
+use tangle_primitives::{
+	RoundIndex,
+	services::Asset,
+	traits::{MultiAssetDelegationInfo, RewardsManager},
+};
 
 pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
 
@@ -124,6 +128,12 @@ impl<T: Config> Pallet<T> {
 				.increase_delegated_amount(amount)
 				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
+			// Extract lock_multiplier for credit recording
+			let lock_multiplier = user_deposit
+				.locks
+				.as_ref()
+				.and_then(|locks| locks.iter().next().map(|lock| lock.lock_multiplier));
+
 			// Find existing delegation or create new one
 			let delegation_exists = metadata
 				.delegations
@@ -156,6 +166,10 @@ impl<T: Config> Pallet<T> {
 
 			// Update operator metadata
 			Self::update_operator_metadata(&operator, &who, asset, amount, true)?;
+
+			// Record credits and delegation tracking
+			let _ =
+				T::RewardsManager::record_delegate(&who, &operator, asset, amount, lock_multiplier);
 
 			// Emit event
 			Self::deposit_event(Event::Delegated { who: who.clone(), operator, amount, asset });
@@ -395,9 +409,10 @@ impl<T: Config> Pallet<T> {
 					metadata.delegations.remove(idx);
 				}
 
-				// 4. Update operator metadata
+				// 4. Update operator metadata and record undelegation
 				for ((operator, asset), amount) in operator_updates {
 					Self::update_operator_metadata(&operator, &who, asset, amount, false)?;
+					let _ = T::RewardsManager::record_undelegate(&who, &operator, asset, amount);
 				}
 
 				// 5. Remove processed requests
@@ -532,6 +547,15 @@ impl<T: Config> Pallet<T> {
 				amount,
 				true, // is_increase = true for delegation
 			)?;
+
+			// Record credits and delegation tracking for nomination delegation
+			let _ = T::RewardsManager::record_delegate(
+				&who,
+				&operator,
+				Asset::Custom(Zero::zero()),
+				amount,
+				None,
+			);
 
 			// Emit event
 			Self::deposit_event(Event::NominationDelegated {
@@ -715,7 +739,7 @@ impl<T: Config> Pallet<T> {
 			let delegation = &mut metadata.delegations[delegation_index];
 			delegation.amount = delegation.amount.saturating_sub(unstake_amount);
 
-			// Update operator metadata during execution
+			// Update operator metadata and record undelegation during execution
 			Self::update_operator_metadata(
 				&operator,
 				who,
@@ -723,6 +747,12 @@ impl<T: Config> Pallet<T> {
 				unstake_amount,
 				false, // is_increase = false for unstaking
 			)?;
+			let _ = T::RewardsManager::record_undelegate(
+				who,
+				&operator,
+				Asset::Custom(Zero::zero()),
+				unstake_amount,
+			);
 
 			// Remove the unstake request
 			metadata.delegator_unstake_requests.remove(request_index);

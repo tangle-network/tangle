@@ -449,8 +449,8 @@ impl pallet_services::Config for Runtime {
 type Block = frame_system::mocking::MockBlock<Runtime>;
 
 thread_local! {
-	static DEPOSIT_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
-	static WITHDRAWAL_CALLS: RefCell<Vec<(AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+	static DELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
+	static UNDELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
 }
 
 pub struct MockRewardsManager;
@@ -458,25 +458,33 @@ pub struct MockRewardsManager;
 impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsManager {
 	type Error = DispatchError;
 
-	fn record_deposit(
+	fn record_delegate(
 		account_id: &AccountId,
+		operator: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 		lock_multiplier: Option<LockMultiplier>,
 	) -> Result<(), Self::Error> {
-		DEPOSIT_CALLS.with(|calls| {
-			calls.borrow_mut().push((account_id.clone(), asset, amount, lock_multiplier));
+		DELEGATE_CALLS.with(|calls| {
+			calls.borrow_mut().push((
+				account_id.clone(),
+				operator.clone(),
+				asset,
+				amount,
+				lock_multiplier,
+			));
 		});
 		Ok(())
 	}
 
-	fn record_withdrawal(
+	fn record_undelegate(
 		account_id: &AccountId,
+		operator: &AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 	) -> Result<(), Self::Error> {
-		WITHDRAWAL_CALLS.with(|calls| {
-			calls.borrow_mut().push((account_id.clone(), asset, amount));
+		UNDELEGATE_CALLS.with(|calls| {
+			calls.borrow_mut().push((account_id.clone(), operator.clone(), asset, amount));
 		});
 		Ok(())
 	}
@@ -499,18 +507,18 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 }
 
 impl MockRewardsManager {
-	pub fn record_deposit_calls()
-	-> Vec<(AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
-		DEPOSIT_CALLS.with(|calls| calls.borrow().clone())
+	pub fn record_delegate_calls()
+	-> Vec<(AccountId, AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)> {
+		DELEGATE_CALLS.with(|calls| calls.borrow().clone())
 	}
 
-	pub fn record_withdrawal_calls() -> Vec<(AccountId, Asset<AssetId>, Balance)> {
-		WITHDRAWAL_CALLS.with(|calls| calls.borrow().clone())
+	pub fn record_undelegate_calls() -> Vec<(AccountId, AccountId, Asset<AssetId>, Balance)> {
+		UNDELEGATE_CALLS.with(|calls| calls.borrow().clone())
 	}
 
 	pub fn clear_all() {
-		DEPOSIT_CALLS.with(|calls| calls.borrow_mut().clear());
-		WITHDRAWAL_CALLS.with(|calls| calls.borrow_mut().clear());
+		DELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
+		UNDELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 	}
 }
 

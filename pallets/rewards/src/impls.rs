@@ -29,8 +29,9 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 {
 	type Error = DispatchError;
 
-	fn record_deposit(
+	fn record_delegate(
 		account_id: &T::AccountId,
+		_operator: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 		lock_multiplier: Option<LockMultiplier>,
@@ -82,8 +83,9 @@ impl<T: Config> RewardsManager<T::AccountId, T::AssetId, BalanceOf<T>, BlockNumb
 		Ok(())
 	}
 
-	fn record_withdrawal(
+	fn record_undelegate(
 		_account_id: &T::AccountId,
+		_operator: &T::AccountId,
 		asset: Asset<T::AssetId>,
 		amount: BalanceOf<T>,
 	) -> Result<(), Self::Error> {
