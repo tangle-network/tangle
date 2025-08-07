@@ -239,7 +239,7 @@ impl<T: Config> Pallet<T> {
 			let pending_unstake_amount: BalanceOf<T> = metadata
 				.delegator_unstake_requests
 				.iter()
-				.filter(|r| r.operator == operator && r.asset == asset)
+				.filter(|r| r.operator == operator && r.asset == asset && !r.is_nomination)
 				.fold(Zero::zero(), |acc, r| acc.saturating_add(r.amount));
 
 			let available_amount = delegation.amount.saturating_sub(pending_unstake_amount);
