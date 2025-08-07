@@ -939,13 +939,14 @@ fn debug_tnt_delegation_verify_nomination_issue() {
 
 #[test]
 fn delegation_unstake_bug_with_nomination_pending() {
-	// Test case that reproduces the bug where delegation unstake calculation 
+	// Test case that reproduces the bug where delegation unstake calculation
 	// incorrectly includes nomination unstake requests
 	new_test_ext().execute_with(|| {
 		let delegator: AccountId = Bob.into();
 		let operator: AccountId = Alice.into();
-		// Use the same asset that nominations use: Asset::Custom(Zero::zero()) which is Asset::Custom(0)
-		let asset = Asset::Custom(0); 
+		// Use the same asset that nominations use: Asset::Custom(Zero::zero()) which is
+		// Asset::Custom(0)
+		let asset = Asset::Custom(0);
 		let delegation_amount = 500;
 		let nomination_amount = 300;
 		let _delegation_unstake_amount = 200;
@@ -982,7 +983,9 @@ fn delegation_unstake_bug_with_nomination_pending() {
 			nomination_amount,
 			pallet_staking::RewardDestination::Staked
 		));
-		assert_ok!(Staking::nominate(RuntimeOrigin::signed(delegator.clone()), vec![operator.clone()]));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(delegator.clone()), vec![
+			operator.clone()
+		]));
 
 		// Create nomination delegation (simulate native restaking)
 		assert_ok!(MultiAssetDelegation::delegate_nomination(
@@ -1019,13 +1022,13 @@ fn delegation_unstake_bug_with_nomination_pending() {
 		// Verify both unstake requests exist
 		let metadata = MultiAssetDelegation::delegators(delegator.clone()).unwrap();
 		assert_eq!(metadata.delegator_unstake_requests.len(), 2);
-		
+
 		// Check first request is nomination
 		let first_request = &metadata.delegator_unstake_requests[0];
 		assert!(first_request.is_nomination);
 		assert_eq!(first_request.amount, nomination_unstake_amount);
-		
-		// Check second request is delegation  
+
+		// Check second request is delegation
 		let second_request = &metadata.delegator_unstake_requests[1];
 		assert!(!second_request.is_nomination);
 		assert_eq!(second_request.amount, delegation_amount);
