@@ -1,5 +1,5 @@
 [workspace.package]
-version = "1.4.2"
+version = "1.4.3"
 authors = ["Tangle Foundation."]
 edition = "2024"
 license = "Unlicense"
