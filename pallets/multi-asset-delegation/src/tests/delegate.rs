@@ -936,3 +936,101 @@ fn debug_tnt_delegation_verify_nomination_issue() {
 		assert_eq!(delegation.amount, delegate_amount);
 	});
 }
+
+#[test]
+fn delegation_unstake_bug_with_nomination_pending() {
+	// Test case that reproduces the bug where delegation unstake calculation
+	// incorrectly includes nomination unstake requests
+	new_test_ext().execute_with(|| {
+		let delegator: AccountId = Bob.into();
+		let operator: AccountId = Alice.into();
+		// Use the same asset that nominations use: Asset::Custom(Zero::zero()) which is
+		// Asset::Custom(0)
+		let asset = Asset::Custom(0);
+		let delegation_amount = 500;
+		let nomination_amount = 300;
+		let _delegation_unstake_amount = 200;
+		let nomination_unstake_amount = 100;
+
+		// Setup operator
+		assert_ok!(MultiAssetDelegation::join_operators(
+			RuntimeOrigin::signed(operator.clone()),
+			10_000
+		));
+
+		// Create tokens and deposits for delegator
+		create_and_mint_tokens(0, delegator.clone(), delegation_amount);
+		assert_ok!(MultiAssetDelegation::deposit(
+			RuntimeOrigin::signed(delegator.clone()),
+			asset.clone(),
+			delegation_amount,
+			None,
+			None,
+		));
+
+		// Create a regular delegation
+		assert_ok!(MultiAssetDelegation::delegate(
+			RuntimeOrigin::signed(delegator.clone()),
+			operator.clone(),
+			asset.clone(),
+			delegation_amount,
+			Default::default(),
+		));
+
+		// Setup nomination for native restaking
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(delegator.clone()),
+			nomination_amount,
+			pallet_staking::RewardDestination::Staked
+		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(delegator.clone()), vec![
+			operator.clone()
+		]));
+
+		// Create nomination delegation (simulate native restaking)
+		assert_ok!(MultiAssetDelegation::delegate_nomination(
+			RuntimeOrigin::signed(delegator.clone()),
+			operator.clone(),
+			nomination_amount,
+			Default::default(),
+		));
+
+		// Schedule nomination unstake first
+		assert_ok!(MultiAssetDelegation::schedule_nomination_unstake(
+			RuntimeOrigin::signed(delegator.clone()),
+			operator.clone(),
+			nomination_unstake_amount,
+			Default::default(),
+		));
+
+		// Verify nomination unstake request exists
+		let metadata = MultiAssetDelegation::delegators(delegator.clone()).unwrap();
+		assert_eq!(metadata.delegator_unstake_requests.len(), 1);
+		let nomination_request = &metadata.delegator_unstake_requests[0];
+		assert!(nomination_request.is_nomination);
+		assert_eq!(nomination_request.amount, nomination_unstake_amount);
+
+		// Now try to schedule regular delegation unstake for the full amount
+		// This should succeed as we have 500 - 0 = 500 available for delegation
+		assert_ok!(MultiAssetDelegation::schedule_delegator_unstake(
+			RuntimeOrigin::signed(delegator.clone()),
+			operator.clone(),
+			asset.clone(),
+			delegation_amount,
+		));
+
+		// Verify both unstake requests exist
+		let metadata = MultiAssetDelegation::delegators(delegator.clone()).unwrap();
+		assert_eq!(metadata.delegator_unstake_requests.len(), 2);
+
+		// Check first request is nomination
+		let first_request = &metadata.delegator_unstake_requests[0];
+		assert!(first_request.is_nomination);
+		assert_eq!(first_request.amount, nomination_unstake_amount);
+
+		// Check second request is delegation
+		let second_request = &metadata.delegator_unstake_requests[1];
+		assert!(!second_request.is_nomination);
+		assert_eq!(second_request.amount, delegation_amount);
+	});
+}
