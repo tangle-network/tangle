@@ -75354,6 +75354,7 @@ pub mod api {
 					# [codec (crate = :: subxt_core :: ext :: codec)]
 					#[codec(dumb_trait_bound)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+					#[deprecated(since = "1.4.4")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
 					pub struct TestFetcher {
 						pub cargo_package:

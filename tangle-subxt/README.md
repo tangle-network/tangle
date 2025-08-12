@@ -33,6 +33,7 @@ subxt codegen --file metadata/tangle-testnet-runtime.scale \
     --derive Eq \
     --derive PartialEq \
     --attributes-for-type tangle_primitives::services::field::Field='#[codec(dumb_trait_bound)]' \
+    --attributes-for-type tangle_primitives::services::sources::TestFetcher='#[deprecated(since = "1.4.4")]' \
     --derive-for-type tangle_primitives::services::service::ServiceBlueprint=serde::Serialize,recursive \
     --derive-for-type tangle_primitives::services::service::ServiceBlueprint=serde::Deserialize,recursive | rustfmt --edition=2021 --emit=stdout > src/tangle_testnet_runtime.rs
 ```
