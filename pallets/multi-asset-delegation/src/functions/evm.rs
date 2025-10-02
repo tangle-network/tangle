@@ -60,8 +60,8 @@ impl<T: Config> Pallet<T> {
 		};
 
 		let args = [
-			Token::Address(to),
-			Token::Uint(ethabi::Uint::from(value.using_encoded(U256::from_little_endian))),
+			Token::Address(ethabi::ethereum_types::H160::from(to.0)),
+			Token::Uint(ethabi::ethereum_types::U256::from_little_endian(&value.using_encoded(|v| v.to_vec()))),
 		];
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
@@ -112,7 +112,7 @@ impl<T: Config> Pallet<T> {
 			state_mutability: StateMutability::NonPayable,
 		};
 
-		let args = [Token::Address(who)];
+		let args = [Token::Address(ethabi::ethereum_types::H160::from(who.0))];
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		let data = transfer_fn.encode_input(&args).map_err(|_| Error::<T>::EVMAbiEncode)?;
@@ -126,12 +126,14 @@ impl<T: Config> Pallet<T> {
 		let balance = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
 			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
-			if let ethabi::Token::Uint(val) = success { *val } else { U256::zero() }
+			if let ethabi::Token::Uint(val) = success { *val } else { ethabi::ethereum_types::U256::zero() }
 		} else {
-			U256::zero()
+			ethabi::ethereum_types::U256::zero()
 		};
 
-		Ok((balance, weight))
+		let mut bytes = [0u8; 32];
+		balance.to_little_endian(&mut bytes);
+		Ok((sp_core::U256::from_little_endian(&bytes), weight))
 	}
 
 	/// Dispatches a call to the EVM and returns the result.
@@ -233,7 +235,7 @@ impl<T: Config> Pallet<T> {
 				Token::Uint(blueprint_id.into()),
 				Token::Uint(service_id.into()),
 				Token::FixedBytes(operator.to_vec()),
-				Token::Uint(slash_amount.using_encoded(U256::from_little_endian)),
+				Token::Uint(ethabi::ethereum_types::U256::from_little_endian(&slash_amount.using_encoded(|v| v.to_vec()))),
 			])
 			.map_err(|_| Error::<T>::EVMAbiEncode)?;
 

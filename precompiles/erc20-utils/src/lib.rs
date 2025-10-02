@@ -73,7 +73,14 @@ pub fn erc20_transfer(
 		state_mutability: ethabi::StateMutability::NonPayable,
 	};
 
-	let args = [ethabi::Token::Address(to.0), ethabi::Token::Uint(ethabi::Uint::from(amount))];
+	let args = [
+		ethabi::Token::Address(ethabi::ethereum_types::H160::from(to.0)), 
+		ethabi::Token::Uint({
+			let mut bytes = [0u8; 32];
+			amount.to_little_endian(&mut bytes);
+			ethabi::ethereum_types::U256::from_little_endian(&bytes)
+		})
+	];
 
 	let data = transfer_fn
 		.encode_input(&args)
