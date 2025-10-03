@@ -6,7 +6,8 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 ///
 /// This gets serialized to the 0x-prefixed hex representation.
 #[derive(
-	Clone, Copy, PartialEq, Eq, Encode, Decode, Default, RuntimeDebug, TypeInfo, Ord, PartialOrd,
+    Clone, Copy, PartialEq, Eq, Encode, Decode, Default, RuntimeDebug, TypeInfo, Ord, PartialOrd,
+    parity_scale_codec::DecodeWithMemTracking,
 )]
 pub struct EthereumAddress(pub [u8; 20]);
 
@@ -57,7 +58,7 @@ impl From<H160> for EthereumAddress {
 	}
 }
 
-#[derive(Clone, Copy, Eq, Encode, Decode, TypeInfo)]
+#[derive(Clone, Copy, Eq, Encode, Decode, TypeInfo, parity_scale_codec::DecodeWithMemTracking)]
 pub struct EcdsaSignature(pub [u8; 65]);
 
 impl PartialEq for EcdsaSignature {

@@ -24,11 +24,11 @@ use frame_support::{
 	traits::{Currency, FindAuthor, OnUnbalanced},
 	weights::Weight,
 };
-use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
+use pallet_ethereum::{EthereumBlockHashMapping, PostLogContent, RawOrigin};
 use pallet_evm::{
 	EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping, OnChargeEVMTransaction,
 };
-use sp_core::{ConstU32, H160, H256, U256, keccak_256};
+use sp_core::{ConstU32, ConstU64, H160, H256, U256, keccak_256};
 use sp_runtime::{
 	ConsensusEngineId,
 	traits::{BlakeTwo256, DispatchInfoOf, Dispatchable},
@@ -117,7 +117,7 @@ parameter_types! {
 
 pub struct DealWithFees;
 impl OnUnbalanced<RuntimeNegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
+	fn on_unbalanceds(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
 		// whatever
 	}
 }
@@ -205,7 +205,6 @@ impl pallet_evm::Config for Runtime {
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
-	type RuntimeEvent = RuntimeEvent;
 	type PrecompilesType = TanglePrecompiles<Runtime>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
@@ -213,20 +212,29 @@ impl pallet_evm::Config for Runtime {
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 	type OnChargeTransaction = CustomEVMCurrencyAdapter;
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = ();
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Self>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
+	type GasLimitStorageGrowthRatio = ConstU64<1>;
 }
 
 parameter_types! {
 	pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
 }
 
+pub struct MockStateRoot;
+impl sp_core::Get<H256> for MockStateRoot {
+	fn get() -> H256 {
+		H256::default()
+	}
+}
+
 impl pallet_ethereum::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type StateRoot = IntermediateStateRoot<Self>;
+	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;
 }
@@ -303,6 +311,7 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
 		let nonce = None;
 		let access_list = Default::default();
+		let authorization_list = vec![];
 		let weight_limit = None;
 		let proof_size_base_cost = None;
 		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
@@ -315,6 +324,7 @@ impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
 			Some(max_priority_fee_per_gas),
 			nonce,
 			access_list,
+			authorization_list,
 			is_transactional,
 			validate,
 			weight_limit,

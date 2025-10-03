@@ -21,7 +21,7 @@
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
-	traits::ConstU32,
+	traits::{ConstU32, OriginTrait},
 };
 use pallet_evm::AddressMapping;
 use pallet_preimage::Call as PreimageCall;
@@ -77,11 +77,11 @@ where
 			solidity::encode_arguments(hash),
 		);
 		handle.record_log_costs(&[&event])?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let call = PreimageCall::<Runtime>::note_preimage { bytes };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		event.record(handle)?;
 		Ok(hash)
@@ -103,11 +103,11 @@ where
 		let hash: Runtime::Hash = hash
 			.try_into()
 			.map_err(|_| RevertReason::custom("H256 is Runtime::Hash").in_field("hash"))?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let call = PreimageCall::<Runtime>::unnote_preimage { hash };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		event.record(handle)?;
 

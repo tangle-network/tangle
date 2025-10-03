@@ -290,7 +290,7 @@ where
 			// Dispatch call (if enough gas).
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,
-				Some(origin).into(),
+				RuntimeOrigin::signed(origin),
 				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
 					dest: Runtime::Lookup::unlookup(to),
 					value,
@@ -330,7 +330,7 @@ where
 			// Dispatch call (if enough gas).
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,
-				Some(origin).into(),
+				RuntimeOrigin::signed(origin),
 				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
 					dest: Runtime::Lookup::unlookup(to_account_id),
 					value,

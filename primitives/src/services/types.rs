@@ -37,6 +37,7 @@ pub const MAX_METADATA_LENGTH: u32 = 1024;
 /// An error that can occur during type checking.
 #[derive(PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, Clone, MaxEncodedLen)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[codec(mel_bound())]
 pub enum TypeCheckError {
 	/// The argument type does not match the expected type.
 	ArgumentTypeMismatch {
@@ -84,6 +85,7 @@ impl frame_support::traits::PalletError for TypeCheckError {
 	PartialOrd,
 )]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[codec(mel_bound(AssetId: MaxEncodedLen))]
 pub enum Asset<AssetId> {
 	/// Use the specified AssetId.
 	#[codec(index = 0)]
@@ -382,6 +384,7 @@ pub enum MembershipModelType {
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, MaxEncodedLen, TypeInfo)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+#[codec(mel_bound())]
 pub enum MembershipModel {
 	/// Fixed set of operators defined at service creation
 	Fixed { min_operators: u32 },
@@ -491,3 +494,12 @@ pub struct Instance<
 		BoundedVec<(AccountId, Vec<AssetSecurityCommitment<AssetId>>), MaxOperators>,
 	// Note: pricing_model and last_billed removed since payments are now handled per job call
 }
+
+// Manual implementations of DecodeWithMemTracking marker trait
+use parity_scale_codec::DecodeWithMemTracking;
+
+impl<AssetId: parity_scale_codec::Decode + MaxEncodedLen> DecodeWithMemTracking for Asset<AssetId> {}
+
+impl DecodeWithMemTracking for TypeCheckError {}
+
+impl DecodeWithMemTracking for MembershipModel {}

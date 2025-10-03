@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{BoundedVec, ensure, pallet_prelude::Get};
+use frame_support::{BoundedVec, ensure, pallet_prelude::{Get, MaxEncodedLen}};
 use sp_runtime::traits::{CheckedAdd, Saturating};
 use sp_std::{fmt::Debug, vec};
 use tangle_primitives::{
@@ -25,7 +25,7 @@ use tangle_primitives::{
 };
 
 /// Represents how a delegator selects which blueprints to work with.
-#[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq)]
+#[derive(Clone, PartialEq, Encode, Decode, RuntimeDebug, TypeInfo, Eq, MaxEncodedLen)]
 pub enum DelegatorBlueprintSelection<MaxBlueprints: Get<u32>> {
 	/// The delegator works with a fixed set of blueprints.
 	Fixed(BoundedVec<BlueprintId, MaxBlueprints>),
@@ -425,3 +425,6 @@ impl<
 		Ok(())
 	}
 }
+
+// Manual implementation of DecodeWithMemTracking marker trait for DelegatorBlueprintSelection
+impl<MaxBlueprints: Get<u32>> parity_scale_codec::DecodeWithMemTracking for DelegatorBlueprintSelection<MaxBlueprints> {}

@@ -79,7 +79,7 @@ where
 			min_balance,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(())
 	}
 
@@ -92,7 +92,7 @@ where
 
 		let call = pallet_assets::Call::<Runtime>::start_destroy { id: asset_id };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(())
 	}
 
@@ -118,7 +118,7 @@ where
 			amount,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(())
 	}
 
@@ -143,7 +143,7 @@ where
 			amount,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(())
 	}
 

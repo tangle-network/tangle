@@ -74,11 +74,11 @@ pub fn erc20_transfer(
 	};
 
 	let args = [
-		ethabi::Token::Address(ethabi::ethereum_types::H160::from(to.0)), 
+		ethabi::Token::Address(ethabi::ethereum_types::H160::from(to.0 .0)),
 		ethabi::Token::Uint({
-			let mut bytes = [0u8; 32];
-			amount.to_little_endian(&mut bytes);
-			ethabi::ethereum_types::U256::from_little_endian(&bytes)
+			let s = amount.to_string();
+			ethabi::ethereum_types::U256::from_dec_str(&s)
+				.map_err(|_| revert("invalid amount for IERC20.transfer"))?
 		})
 	];
 

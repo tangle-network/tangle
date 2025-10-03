@@ -46,14 +46,14 @@ pub struct RewardConfig<VaultId, Balance> {
 }
 
 /// Asset action for vaults
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, parity_scale_codec::DecodeWithMemTracking)]
 pub enum AssetAction {
 	Add,
 	Remove,
 }
 
 /// Type for subaccounts
-#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, parity_scale_codec::DecodeWithMemTracking)]
 pub enum SubaccountType {
 	RewardPot,
 }

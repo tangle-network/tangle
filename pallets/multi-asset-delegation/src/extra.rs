@@ -1,15 +1,20 @@
-use frame_support::pallet_prelude::*;
-use mock::{AccountId, Runtime, RuntimeCall};
-use parity_scale_codec::{Decode, Encode};
+use frame_support::weights::Weight;
+use mock::{Runtime, RuntimeCall};
+use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
-use sp_runtime::traits::{DispatchInfoOf, SignedExtension};
+use sp_runtime::{
+	traits::{DispatchInfoOf, TransactionExtension},
+	transaction_validity::{InvalidTransaction, TransactionValidityError, ValidTransaction},
+};
 use types::BalanceOf;
 
 use super::*;
 
-#[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo)]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
 #[scale_info(skip_type_params(T))]
 pub struct CheckNominatedRestaked<T>(core::marker::PhantomData<T>);
+
+impl<T> parity_scale_codec::DecodeWithMemTracking for CheckNominatedRestaked<T> {}
 
 impl<T> sp_std::fmt::Debug for CheckNominatedRestaked<T> {
 	#[cfg(feature = "std")]
@@ -42,57 +47,82 @@ impl<T> Default for CheckNominatedRestaked<T> {
 	}
 }
 
-impl SignedExtension for CheckNominatedRestaked<Runtime> {
+impl TransactionExtension<RuntimeCall> for CheckNominatedRestaked<Runtime> {
 	const IDENTIFIER: &'static str = "CheckNominatedRestaked";
-
-	type AccountId = AccountId;
-
-	type Call = RuntimeCall;
-
-	type AdditionalSigned = ();
-
+	type Implicit = ();
 	type Pre = ();
+	type Val = ();
 
-	fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-		Ok(())
+	fn weight(&self, _call: &RuntimeCall) -> Weight {
+		Weight::zero()
 	}
 
 	fn validate(
 		&self,
-		who: &Self::AccountId,
-		call: &Self::Call,
-		_info: &DispatchInfoOf<Self::Call>,
+		origin: <Runtime as frame_system::Config>::RuntimeOrigin,
+		call: &RuntimeCall,
+		_info: &DispatchInfoOf<RuntimeCall>,
 		_len: usize,
-	) -> TransactionValidity {
+		_self_implicit: Self::Implicit,
+		_inherited_implication: &impl Encode,
+		_source: sp_runtime::transaction_validity::TransactionSource,
+	) -> Result<
+		(ValidTransaction, Self::Val, <Runtime as frame_system::Config>::RuntimeOrigin),
+		TransactionValidityError,
+	> {
+		let who = frame_system::ensure_signed(origin.clone())
+			.map_err(|_| TransactionValidityError::Invalid(InvalidTransaction::BadProof))?;
+		
 		match call {
 			RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
-				if Self::can_unbound(who, *value) {
-					Ok(ValidTransaction::default())
+				if Self::can_unbound(&who, *value) {
+					Ok((ValidTransaction::default(), (), origin))
 				} else {
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
 				}
 			},
-			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) =>
-				self.validate(real, call, _info, _len),
+			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) => {
+				let real_who = real.clone();
+				match call.as_ref() {
+					RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
+						if Self::can_unbound(&real_who, *value) {
+							Ok((ValidTransaction::default(), (), origin))
+						} else {
+							Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
+						}
+					},
+					_ => Ok((ValidTransaction::default(), (), origin)),
+				}
+			},
 			RuntimeCall::Utility(pallet_utility::Call::batch { calls }) |
 			RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) |
 			RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
-					self.validate(who, call, _info, _len)?;
+					match call {
+						RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
+							if !Self::can_unbound(&who, *value) {
+								return Err(TransactionValidityError::Invalid(
+									InvalidTransaction::Custom(1),
+								));
+							}
+						},
+						_ => {},
+					}
 				}
-				Ok(ValidTransaction::default())
+				Ok((ValidTransaction::default(), (), origin))
 			},
-			_ => Ok(ValidTransaction::default()),
+			_ => Ok((ValidTransaction::default(), (), origin)),
 		}
 	}
 
-	fn pre_dispatch(
+	fn prepare(
 		self,
-		who: &Self::AccountId,
-		call: &Self::Call,
-		info: &DispatchInfoOf<Self::Call>,
-		len: usize,
+		_val: Self::Val,
+		_origin: &<Runtime as frame_system::Config>::RuntimeOrigin,
+		_call: &RuntimeCall,
+		_info: &DispatchInfoOf<RuntimeCall>,
+		_len: usize,
 	) -> Result<Self::Pre, TransactionValidityError> {
-		self.validate(who, call, info, len).map(|_| ())
+		Ok(())
 	}
 }

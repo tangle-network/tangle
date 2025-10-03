@@ -78,7 +78,14 @@ where
 
 		let call = pallet_tangle_lst::Call::<Runtime>::join { amount, pool_id };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -104,7 +111,14 @@ where
 
 		let call = pallet_tangle_lst::Call::<Runtime>::bond_extra { pool_id, extra };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -132,7 +146,14 @@ where
 			unbonding_points,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -153,7 +174,14 @@ where
 			num_slashing_spans,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -179,7 +207,14 @@ where
 			num_slashing_spans,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -218,7 +253,14 @@ where
 			icon: Some(maybe_icon),
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -240,7 +282,14 @@ where
 
 		let call = pallet_tangle_lst::Call::<Runtime>::nominate { pool_id, validators };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -260,7 +309,14 @@ where
 
 		let call = pallet_tangle_lst::Call::<Runtime>::set_state { pool_id, state };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -278,7 +334,14 @@ where
 
 		let call = pallet_tangle_lst::Call::<Runtime>::set_metadata { pool_id, metadata };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -320,7 +383,7 @@ where
 			new_nominator,
 			new_bouncer,
 		};
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(())
 	}
 
@@ -331,11 +394,14 @@ where
 		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(origin).into(),
-			pallet_tangle_lst::Call::<Runtime>::chill { pool_id },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            pallet_tangle_lst::Call::<Runtime>::chill { pool_id },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -356,14 +422,17 @@ where
 		);
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(origin).into(),
-			pallet_tangle_lst::Call::<Runtime>::bond_extra_other {
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            pallet_tangle_lst::Call::<Runtime>::bond_extra_other {
 				pool_id,
 				member: Runtime::Lookup::unlookup(member),
 				extra,
-			},
+            },
+            0,
 		)?;
 
 		Ok(())
@@ -387,13 +456,16 @@ where
 			Some((Perbill::from_parts(commission_value), origin))
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_tangle_lst::Call::<Runtime>::set_commission {
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_tangle_lst::Call::<Runtime>::set_commission {
 				pool_id,
 				new_commission: commission,
-			},
+            },
+            0,
 		)?;
 
 		Ok(())
@@ -412,11 +484,14 @@ where
 			max_commission.try_into().map_err(|_| revert("Max commission overflow"))?;
 		let max_commission = Perbill::from_parts(max_commission_value);
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_tangle_lst::Call::<Runtime>::set_commission_max { pool_id, max_commission },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_tangle_lst::Call::<Runtime>::set_commission_max { pool_id, max_commission },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -441,11 +516,14 @@ where
 			min_delay,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_tangle_lst::Call::<Runtime>::set_commission_change_rate { pool_id, change_rate },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_tangle_lst::Call::<Runtime>::set_commission_change_rate { pool_id, change_rate },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -457,11 +535,14 @@ where
 		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(origin).into(),
-			pallet_tangle_lst::Call::<Runtime>::claim_commission { pool_id },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            pallet_tangle_lst::Call::<Runtime>::claim_commission { pool_id },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -472,11 +553,14 @@ where
 
 		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_tangle_lst::Call::<Runtime>::adjust_pool_deposit { pool_id },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_tangle_lst::Call::<Runtime>::adjust_pool_deposit { pool_id },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -498,13 +582,16 @@ where
 			_ => None,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_tangle_lst::Call::<Runtime>::set_commission_claim_permission {
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_tangle_lst::Call::<Runtime>::set_commission_claim_permission {
 				pool_id,
 				permission,
-			},
+            },
+            0,
 		)?;
 
 		Ok(())

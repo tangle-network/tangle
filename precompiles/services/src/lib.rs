@@ -2,7 +2,10 @@
 #![allow(clippy::too_many_arguments)]
 
 use fp_evm::{PrecompileFailure, PrecompileHandle};
-use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
+use frame_support::{
+    dispatch::{GetDispatchInfo, PostDispatchInfo},
+    traits::OriginTrait,
+};
 use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
 use pallet_services::types::BalanceOf;
@@ -60,7 +63,7 @@ where
 		blueprint_data: UnboundedBytes,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let blueprint_data: Vec<u8> = blueprint_data.into();
 		let blueprint: ServiceBlueprint<Runtime::Constraints> =
@@ -80,7 +83,7 @@ where
 			},
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -106,7 +109,7 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let msg_sender = handle.context().caller;
-		let origin = Runtime::AddressMapping::into_account_id(msg_sender);
+		let origin = Runtime::AddressMapping::into_account_id(msg_sender).into();
 
 		let blueprint_id: u64 = blueprint_id.as_u64();
 		let asset_security_requirements_data: Vec<Vec<u8>> =
@@ -201,7 +204,7 @@ where
 			membership_model,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -210,13 +213,13 @@ where
 	#[precompile::public("terminateService(uint256)")]
 	fn terminate_service(handle: &mut impl PrecompileHandle, service_id: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let service_id: u64 = service_id.as_u64();
 
 		let call = pallet_services::Call::<Runtime>::terminate { service_id };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -230,7 +233,7 @@ where
 		args_data: UnboundedBytes,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let service_id: u64 = service_id.as_u64();
 		let args: Vec<u8> = args_data.into();
 
@@ -240,7 +243,7 @@ where
 
 		let call = pallet_services::Call::<Runtime>::call { service_id, job, args: decoded_args };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -260,7 +263,7 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let caller = handle.context().caller;
-		let origin = Runtime::AddressMapping::into_account_id(caller);
+		let origin = Runtime::AddressMapping::into_account_id(caller).into();
 		let service_id: u64 = service_id.as_u64();
 		let percent: Percent = Percent::from_percent(percent);
 		let offender_bytes: Vec<_> = offender.into();
@@ -273,7 +276,7 @@ where
 			service_id,
 			slash_percent: percent,
 		};
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -285,11 +288,11 @@ where
 	fn dispute(handle: &mut impl PrecompileHandle, era: u32, index: u32) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let caller = handle.context().caller;
-		let origin = Runtime::AddressMapping::into_account_id(caller);
+		let origin = Runtime::AddressMapping::into_account_id(caller).into();
 
 		// inside this call, we do check if the caller is authorized to dispute the slash
 		let call = pallet_services::Call::<Runtime>::dispute { era, index };
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}

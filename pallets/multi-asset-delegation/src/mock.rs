@@ -16,7 +16,6 @@
 #![allow(clippy::all)]
 use super::*;
 use crate::{self as pallet_multi_asset_delegation};
-use ethabi::Uint;
 use frame_election_provider_support::{
 	SequentialPhragmen,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -35,8 +34,8 @@ use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use serde_json::json;
-use sp_core::{H160, sr25519};
-use sp_keyring::AccountKeyring;
+use sp_core::{H160, U256, sr25519};
+use sp_keyring::Sr25519Keyring as AccountKeyring;
 use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
 	AccountId32, BoundToRuntimeAppPublic, BuildStorage, DispatchError, Perbill, generic,
@@ -51,7 +50,6 @@ use tangle_primitives::{
 	types::rewards::LockMultiplier,
 };
 
-use core::ops::Mul;
 use std::{collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
@@ -107,6 +105,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -119,6 +118,7 @@ parameter_types! {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = AccountId;
 	type FullIdentificationOf = ConvertInto;
+	type RuntimeEvent = RuntimeEvent;
 }
 
 sp_runtime::impl_opaque_keys! {
@@ -179,8 +179,9 @@ impl pallet_session::Config for Runtime {
 	type SessionHandler = <MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
-	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
+	type ValidatorIdOf = ConvertInto;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_session::disabling::UpToLimitDisablingStrategy;
 }
 
 pub struct OnChainSeqPhragmen;
@@ -189,8 +190,10 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type Solver = SequentialPhragmen<AccountId, Perbill>;
 	type DataProvider = Staking;
 	type WeightInfo = ();
-	type MaxWinners = ConstU32<100>;
 	type Bounds = ElectionBoundsOnChain;
+	type Sort = ();
+	type MaxBackersPerWinner = ConstU32<100>;
+	type MaxWinnersPerPage = ConstU32<100>;
 }
 
 /// Upper limit on the number of NPOS nominations.
@@ -224,7 +227,10 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type MaxValidatorSet = ConstU32<100>;
+	type Filter = ();
 }
 
 parameter_types! {
@@ -275,6 +281,7 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	type Holder = ();
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }
@@ -480,6 +487,9 @@ impl frame_support::traits::InstanceFilter<RuntimeCall> for ProxyType {
 	}
 }
 
+// Manual implementation of DecodeWithMemTracking marker trait for ProxyType
+impl parity_scale_codec::DecodeWithMemTracking for ProxyType {}
+
 impl pallet_proxy::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
@@ -493,6 +503,7 @@ impl pallet_proxy::Config for Runtime {
 	type CallHasher = sp_runtime::traits::BlakeTwo256;
 	type AnnouncementDepositBase = ConstU128<1>;
 	type AnnouncementDepositFactor = ConstU128<1>;
+	type BlockNumberProvider = System;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -507,7 +518,7 @@ pub type MockUncheckedExtrinsic = generic::UncheckedExtrinsic<
 	AccountId,
 	RuntimeCall,
 	u32,
-	extra::CheckNominatedRestaked<Runtime>,
+	(),
 >;
 
 /// An implementation of `sp_runtime::traits::Block` to be used in tests.
@@ -584,7 +595,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	];
 	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_u128)));
 
-	pallet_balances::GenesisConfig::<Runtime> { balances }
+	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
@@ -595,7 +606,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			balance: U256::from(1_000) * U256::from(10).pow(U256::from(18)),
 		});
 	}
 
@@ -604,7 +615,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			balance: U256::from(1_000) * U256::from(10).pow(U256::from(18)),
 		});
 	}
 
@@ -693,8 +704,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				}))
 				.unwrap()
 				.encode_input(&[
-					ethabi::Token::Address(mock_address(i as u8)),
-					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from_slice(&mock_address(i as u8).0)),
+					ethabi::Token::Uint(ethabi::ethereum_types::U256::from(100_000) * ethabi::ethereum_types::U256::from(10).pow(ethabi::ethereum_types::U256::from(6))),
 				])
 				.unwrap(),
 				Default::default(),

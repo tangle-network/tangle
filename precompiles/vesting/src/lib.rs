@@ -62,10 +62,11 @@ impl<Runtime> VestingPrecompile<Runtime>
 where
 	Runtime: pallet_vesting::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_vesting::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<WrappedAccountId32>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId: Clone,
 {
 	/// Helper method to parse SS58 address
 	fn parse_32byte_address(addr: Vec<u8>) -> EvmResult<Runtime::AccountId> {
@@ -93,7 +94,7 @@ where
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
 			) => {
 				let ethereum_address = Address(H160::from_slice(&payee.0[12..]));
-				Runtime::AddressMapping::into_account_id(ethereum_address.0)
+				Runtime::AddressMapping::into_account_id(ethereum_address.0).into()
 			},
 			H256(account) => Self::parse_32byte_address(account.to_vec())?,
 		};
@@ -107,10 +108,11 @@ impl<Runtime> VestingPrecompile<Runtime>
 where
 	Runtime: pallet_vesting::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_vesting::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<WrappedAccountId32>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId: Clone,
 {
 	#[precompile::public("vest()")]
 	fn vest(handle: &mut impl PrecompileHandle) -> EvmResult {
@@ -120,8 +122,15 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = pallet_vesting::Call::<Runtime>::vest {};
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -137,8 +146,15 @@ where
 		let tgt = <<Runtime as frame_system::Config>::Lookup as StaticLookup>::unlookup(target);
 		let call = pallet_vesting::Call::<Runtime>::vest_other { target: tgt };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(origin)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -150,7 +166,8 @@ where
 
 		// First get the vesting schedule of the `msg.sender`
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		match pallet_vesting::Vesting::<Runtime>::get(origin.clone()) {
+		let origin_account: Runtime::AccountId = origin.clone().into();
+		match pallet_vesting::Vesting::<Runtime>::get(origin_account.clone()) {
 			Some(schedules) => {
 				if index >= schedules.len() as u8 {
 					return Err(revert("Invalid vesting schedule index"));
@@ -164,8 +181,15 @@ where
 					schedule: schedules[index as usize],
 				};
 
-				// Dispatch call (if enough gas).
-				RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+                // Dispatch call (if enough gas).
+                RuntimeHelper::<Runtime>::try_dispatch(
+                    handle,
+                    Into::<
+                        <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+                    >::into(Some(origin)),
+                    call,
+                    0,
+                )?;
 
 				Ok(())
 			},
@@ -187,7 +211,14 @@ where
 		let call =
 			pallet_vesting::Call::<Runtime>::merge_schedules { schedule1_index, schedule2_index };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(caller_account).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(caller_account)),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}

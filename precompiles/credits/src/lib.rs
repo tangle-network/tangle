@@ -1,7 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;
-use frame_support::dispatch::{GetDispatchInfo, PostDispatchInfo};
+use frame_support::{
+    dispatch::{GetDispatchInfo, PostDispatchInfo},
+    traits::OriginTrait,
+};
 use pallet_credits::types::OffchainAccountIdOf;
 use pallet_evm::AddressMapping;
 use precompile_utils::{prelude::*, solidity};
@@ -74,7 +77,7 @@ where
 
 		let call = pallet_credits::Call::<Runtime>::burn { amount };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(true)
 	}
 
@@ -98,7 +101,7 @@ where
 		let call =
 			pallet_credits::Call::<Runtime>::claim_credits { amount_to_claim, offchain_account_id };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 		Ok(true)
 	}
 

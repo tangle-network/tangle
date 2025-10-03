@@ -193,7 +193,7 @@ where
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::add_proxy { delegate, proxy_type, delay };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -225,7 +225,7 @@ where
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::remove_proxy { delegate, proxy_type, delay };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -239,7 +239,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call: ProxyCall<Runtime> = ProxyCall::<Runtime>::remove_proxies {};
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}

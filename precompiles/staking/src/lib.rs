@@ -42,7 +42,7 @@ mod tests;
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
-	traits::Currency,
+	traits::{Currency, OriginTrait},
 };
 use pallet_evm::AddressMapping;
 use precompile_utils::prelude::*;
@@ -64,10 +64,18 @@ impl<Runtime> StakingPrecompile<Runtime>
 where
 	Runtime: pallet_staking::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<
+        Option<
+            <<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+        >,
+    >,
+    <Runtime as pallet_staking::Config>::Currency:
+        Currency<<Runtime as frame_system::Config>::AccountId>,
 	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<WrappedAccountId32>,
+	U256: From<<Runtime as pallet_staking::Config>::CurrencyBalance>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId: Clone,
 {
 	/// Helper method to parse SS58 address
 	fn parse_32byte_address(addr: Vec<u8>) -> EvmResult<Runtime::AccountId> {
@@ -103,10 +111,10 @@ where
 			H256(
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
 			) => {
-				let ethereum_address = Address(H160::from_slice(&payee.0[12..]));
-				pallet_staking::RewardDestination::Account(
-					Runtime::AddressMapping::into_account_id(ethereum_address.0),
-				)
+			let ethereum_address = Address(H160::from_slice(&payee.0[12..]));
+			let account: <Runtime as frame_system::Config>::AccountId =
+				Runtime::AddressMapping::into_account_id(ethereum_address.0).into();
+			pallet_staking::RewardDestination::Account(account)
 			},
 			H256(account) => pallet_staking::RewardDestination::Account(
 				Self::parse_32byte_address(account.to_vec())?,
@@ -126,10 +134,18 @@ impl<Runtime> StakingPrecompile<Runtime>
 where
 	Runtime: pallet_staking::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+    <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<
+        Option<
+            <<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+        >,
+    >,
+    <Runtime as pallet_staking::Config>::Currency:
+        Currency<<Runtime as frame_system::Config>::AccountId>,
 	Runtime::RuntimeCall: From<pallet_staking::Call<Runtime>>,
-	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<WrappedAccountId32>,
+    BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+    U256: From<<Runtime as pallet_staking::Config>::CurrencyBalance>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId: Clone,
 {
 	#[precompile::public("currentEra()")]
 	#[precompile::public("current_era()")]
@@ -201,7 +217,8 @@ where
 	#[precompile::public("is_nominator(address)")]
 	#[precompile::view]
 	fn is_nominator(handle: &mut impl PrecompileHandle, nominator: Address) -> EvmResult<bool> {
-		let nominator_account = Runtime::AddressMapping::into_account_id(nominator.0);
+		let nominator_account: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(nominator.0).into();
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		let is_nominator = pallet_staking::Nominators::<Runtime>::contains_key(nominator_account);
 		Ok(is_nominator)
@@ -212,8 +229,8 @@ where
 	#[precompile::view]
 	fn eras_total_stake(handle: &mut impl PrecompileHandle, era_index: u32) -> EvmResult<U256> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let total_stake: U256 =
-			<pallet_staking::Pallet<Runtime>>::eras_total_stake(era_index).into();
+        let total_stake: U256 =
+            <pallet_staking::Pallet<Runtime>>::eras_total_stake(era_index).into();
 
 		Ok(total_stake)
 	}
@@ -234,7 +251,8 @@ where
 	#[precompile::public("nominate(bytes32[])")]
 	fn nominate(handle: &mut impl PrecompileHandle, targets: Vec<H256>) -> EvmResult {
 		handle.record_log_costs_manual(2, 32 * targets.len())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let mut converted_targets: Vec<<Runtime::Lookup as StaticLookup>::Source> = vec![];
 		for tgt in targets {
 			let target: Runtime::AccountId = Self::parse_32byte_address(tgt.0.to_vec())?;
@@ -243,8 +261,13 @@ where
 		}
 		let call = pallet_staking::Call::<Runtime>::nominate { targets: converted_targets };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -252,16 +275,23 @@ where
 	#[precompile::public("bond(uint256,bytes32)")]
 	fn bond(handle: &mut impl PrecompileHandle, value: U256, payee: H256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let value: BalanceOf<Runtime> = value
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+        let balance_value: BalanceOf<Runtime> = value
 			.try_into()
 			.map_err(|_| revert("Value is too large for provided balance type"))?;
+		let value = balance_value;
 		let payee = Self::convert_to_reward_destination(payee)?;
 
 		let call = pallet_staking::Call::<Runtime>::bond { value, payee };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -270,15 +300,21 @@ where
 	#[precompile::public("bond_extra(uint256)")]
 	fn bond_extra(handle: &mut impl PrecompileHandle, max_additional: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let max_additional: BalanceOf<Runtime> = max_additional
 			.try_into()
 			.map_err(|_| revert("Value is too large for provided balance type"))?;
 
 		let call = pallet_staking::Call::<Runtime>::bond_extra { max_additional };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -286,15 +322,21 @@ where
 	#[precompile::public("unbond(uint256)")]
 	fn unbond(handle: &mut impl PrecompileHandle, value: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let value: BalanceOf<Runtime> = value
 			.try_into()
 			.map_err(|_| revert("Value is too large for provided balance type"))?;
 
 		let call = pallet_staking::Call::<Runtime>::unbond { value };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -303,12 +345,18 @@ where
 	#[precompile::public("withdraw_unbonded(uint32)")]
 	fn withdraw_unbonded(handle: &mut impl PrecompileHandle, num_slashing_spans: u32) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let call = pallet_staking::Call::<Runtime>::withdraw_unbonded { num_slashing_spans };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -316,12 +364,18 @@ where
 	#[precompile::public("chill()")]
 	fn chill(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let call = pallet_staking::Call::<Runtime>::chill {};
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -330,7 +384,8 @@ where
 	#[precompile::public("set_payee(uint8)")]
 	fn set_payee(handle: &mut impl PrecompileHandle, payee: u8) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: <Runtime as frame_system::Config>::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let payee = match payee {
 			1 => pallet_staking::RewardDestination::Staked,
 			2 => pallet_staking::RewardDestination::Stash,
@@ -339,8 +394,13 @@ where
 
 		let call = pallet_staking::Call::<Runtime>::set_payee { payee };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -353,12 +413,17 @@ where
 	#[precompile::public("set_controller()")]
 	fn set_controller(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let call = pallet_staking::Call::<Runtime>::set_controller {};
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -371,14 +436,19 @@ where
 		era: u32,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let validator_stash: Runtime::AccountId =
 			Self::parse_32byte_address(validator_stash.0.to_vec())?;
 
 		let call = pallet_staking::Call::<Runtime>::payout_stakers { validator_stash, era };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -386,15 +456,20 @@ where
 	#[precompile::public("rebond(uint256)")]
 	fn rebond(handle: &mut impl PrecompileHandle, value: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let value: BalanceOf<Runtime> = value
 			.try_into()
 			.map_err(|_| revert("Value is too large for provided balance type"))?;
 
 		let call = pallet_staking::Call::<Runtime>::rebond { value };
 
-		// Dispatch call (if enough gas).
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+        // Dispatch call (if enough gas).
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+            call,
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -410,11 +485,14 @@ where
 			blocked: false,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::validate { prefs },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::validate { prefs },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -426,11 +504,14 @@ where
 		let stash = Self::convert_to_account_id(stash)?;
 		let num_slashing_spans = 0u32; // Default to 0 as it's the most common case
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::reap_stash { stash, num_slashing_spans },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::reap_stash { stash, num_slashing_spans },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -444,11 +525,14 @@ where
 
 		let who = who.into_iter().map(Runtime::Lookup::unlookup).collect();
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::kick { who },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::kick { who },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -459,11 +543,14 @@ where
 
 		let stash = Self::convert_to_account_id(controller)?;
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::chill_other { stash },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::chill_other { stash },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -477,11 +564,14 @@ where
 
 		let validator_stash = Self::convert_to_account_id(validator_stash)?;
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::force_apply_min_commission { validator_stash },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::force_apply_min_commission { validator_stash },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -497,11 +587,14 @@ where
 
 		let validator_stash = Self::convert_to_account_id(validator_stash)?;
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::payout_stakers_by_page { validator_stash, era, page },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::payout_stakers_by_page { validator_stash, era, page },
+            0,
+        )?;
 
 		Ok(())
 	}
@@ -519,11 +612,14 @@ where
 			_ => return Err(revert("Invalid reward destination")),
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(Runtime::AddressMapping::into_account_id(handle.context().caller)).into(),
-			pallet_staking::Call::<Runtime>::set_payee { payee: reward_destination },
-		)?;
+        RuntimeHelper::<Runtime>::try_dispatch(
+            handle,
+            Into::<
+                <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            pallet_staking::Call::<Runtime>::set_payee { payee: reward_destination },
+            0,
+        )?;
 
 		Ok(())
 	}

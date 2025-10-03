@@ -561,7 +561,8 @@ pub mod pallet {
 	}
 
 	#[derive(Encode, Decode, PartialEq, TypeInfo, PalletError, RuntimeDebug)]
-	pub enum DefensiveError {
+    #[derive(codec::DecodeWithMemTracking)]
+    pub enum DefensiveError {
 		/// There isn't enough space in the unbond pool.
 		NotEnoughSpaceInUnbondPool,
 		/// A (bonded) pool id does not exist.

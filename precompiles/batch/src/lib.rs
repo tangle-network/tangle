@@ -18,8 +18,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use evm::{ExitError, ExitReason};
-use fp_evm::{Context, Log, PrecompileFailure, PrecompileHandle, Transfer};
+use fp_evm::{Context, ExitError, ExitReason, Log, PrecompileFailure, PrecompileHandle, Transfer};
 use frame_support::traits::ConstU32;
 use precompile_utils::{evm::costs::call_cost, prelude::*};
 use sp_core::{H160, U256};

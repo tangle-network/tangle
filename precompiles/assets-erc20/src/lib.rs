@@ -22,7 +22,7 @@
 use core::fmt::Display;
 use fp_evm::{ExitError, PrecompileHandle};
 use frame_support::{
-	dispatch::{GetDispatchInfo, PostDispatchInfo},
+	dispatch::{GetDispatchInfo, PostDispatchInfo, RawOrigin},
 	sp_runtime::traits::StaticLookup,
 	traits::{
 		fungibles::{
@@ -257,25 +257,27 @@ where
 		if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender) !=
 			0u32.into()
 		{
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				Some(owner.clone()).into(),
-				pallet_assets::Call::<Runtime, Instance>::cancel_approval {
-					id: asset_id.clone().into(),
-					delegate: Runtime::Lookup::unlookup(spender.clone()),
-				},
-			)?;
-		}
-		// Dispatch call (if enough gas).
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
-			Some(owner).into(),
-			pallet_assets::Call::<Runtime, Instance>::approve_transfer {
-				id: asset_id.into(),
-				delegate: Runtime::Lookup::unlookup(spender),
-				amount,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner.clone()),
+			pallet_assets::Call::<Runtime, Instance>::cancel_approval {
+				id: asset_id.clone().into(),
+				delegate: Runtime::Lookup::unlookup(spender.clone()),
 			},
+			0,
 		)?;
+		}
+	// Dispatch call (if enough gas).
+	RuntimeHelper::<Runtime>::try_dispatch(
+		handle,
+		<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner),
+		pallet_assets::Call::<Runtime, Instance>::approve_transfer {
+			id: asset_id.into(),
+			delegate: Runtime::Lookup::unlookup(spender),
+			amount,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -297,16 +299,17 @@ where
 			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 			let to = Runtime::AddressMapping::into_account_id(to);
 
-			// Dispatch call (if enough gas).
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				Some(origin).into(),
-				pallet_assets::Call::<Runtime, Instance>::transfer {
-					id: asset_id.into(),
-					target: Runtime::Lookup::unlookup(to),
-					amount: value,
-				},
-			)?;
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			pallet_assets::Call::<Runtime, Instance>::transfer {
+				id: asset_id.into(),
+				target: Runtime::Lookup::unlookup(to),
+				amount: value,
+			},
+			0,
+		)?;
 		}
 
 		log3(
@@ -343,28 +346,30 @@ where
 
 			// If caller is "from", it can spend as much as it wants from its own balance.
 			if caller != from {
-				// Dispatch call (if enough gas).
-				RuntimeHelper::<Runtime>::try_dispatch(
-					handle,
-					Some(caller).into(),
-					pallet_assets::Call::<Runtime, Instance>::transfer_approved {
-						id: asset_id.into(),
-						owner: Runtime::Lookup::unlookup(from),
-						destination: Runtime::Lookup::unlookup(to),
-						amount: value,
-					},
-				)?;
+			// Dispatch call (if enough gas).
+			RuntimeHelper::<Runtime>::try_dispatch(
+				handle,
+				<Runtime as frame_system::Config>::RuntimeOrigin::signed(caller),
+				pallet_assets::Call::<Runtime, Instance>::transfer_approved {
+					id: asset_id.into(),
+					owner: Runtime::Lookup::unlookup(from),
+					destination: Runtime::Lookup::unlookup(to),
+					amount: value,
+				},
+				0,
+			)?;
 			} else {
-				// Dispatch call (if enough gas).
-				RuntimeHelper::<Runtime>::try_dispatch(
-					handle,
-					Some(from).into(),
-					pallet_assets::Call::<Runtime, Instance>::transfer {
-						id: asset_id.into(),
-						target: Runtime::Lookup::unlookup(to),
-						amount: value,
-					},
-				)?;
+			// Dispatch call (if enough gas).
+			RuntimeHelper::<Runtime>::try_dispatch(
+				handle,
+				<Runtime as frame_system::Config>::RuntimeOrigin::signed(from),
+				pallet_assets::Call::<Runtime, Instance>::transfer {
+					id: asset_id.into(),
+					target: Runtime::Lookup::unlookup(to),
+					amount: value,
+				},
+				0,
+			)?;
 			}
 		}
 

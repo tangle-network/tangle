@@ -23,7 +23,7 @@
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
-	traits::{Bounded, ConstU32, Currency, QueryPreimage},
+	traits::{Bounded, ConstU32, Currency, OriginTrait, QueryPreimage},
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_democracy::{
@@ -241,7 +241,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::propose { proposal: bounded, value };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		log2(
 			handle.context().address,
@@ -272,7 +272,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::second { proposal: prop_index };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		log2(
 			handle.context().address,
@@ -316,7 +316,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::vote { ref_index, vote };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		log2(
 			handle.context().address,
@@ -348,7 +348,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::remove_vote { index: ref_index };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -372,12 +372,12 @@ where
 			"Delegating vote to {representative:?} with balance {amount:?} and conviction {conviction:?}",
 		);
 
-		let to = Runtime::AddressMapping::into_account_id(representative.into());
-		let to: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(to);
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+	let to = Runtime::AddressMapping::into_account_id(representative.into()).into();
+	let to: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(to);
+	let origin = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = DemocracyCall::<Runtime>::delegate { to, conviction, balance: amount };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		log2(
 			handle.context().address,
@@ -397,7 +397,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::undelegate {};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		log2(handle.context().address, SELECTOR_LOG_UNDELEGATED, handle.context().caller, [])
 			.record(handle)?;
@@ -407,9 +407,9 @@ where
 
 	#[precompile::public("unlock(address)")]
 	fn unlock(handle: &mut impl PrecompileHandle, target: Address) -> EvmResult {
-		let target: H160 = target.into();
-		let target = Runtime::AddressMapping::into_account_id(target);
-		let target: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(target);
+	let target: H160 = target.into();
+	let target = Runtime::AddressMapping::into_account_id(target).into();
+	let target: <Runtime::Lookup as StaticLookup>::Source = Runtime::Lookup::unlookup(target);
 
 		log::trace!(
 			target: "democracy-precompile",
@@ -419,7 +419,7 @@ where
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = DemocracyCall::<Runtime>::unlock { target };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -439,7 +439,7 @@ where
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = PreimageCall::<Runtime>::note_preimage { bytes: encoded_proposal };
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -472,7 +472,7 @@ where
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
 		let call = PreimageCall::<Runtime>::note_preimage { bytes: encoded_proposal };
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(origin).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
