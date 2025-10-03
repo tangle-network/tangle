@@ -30,6 +30,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	fn default() -> Self {
 		Self::new()
@@ -43,6 +44,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	pub fn new() -> Self {
 		Self(PhantomData)
@@ -67,12 +69,13 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	#[precompile::public("burn(uint256)")]
 	fn burn(handle: &mut impl PrecompileHandle, amount: U256) -> EvmResult<bool> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let amount = Self::u256_to_balance(amount)?;
 
 		let call = pallet_credits::Call::<Runtime>::burn { amount };
@@ -89,7 +92,7 @@ where
 	) -> EvmResult<bool> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let amount_to_claim = Self::u256_to_balance(amount_to_claim)?;
 
 		// Convert BoundedBytes to BoundedVec<u8>
@@ -125,10 +128,10 @@ where
 		handle: &mut impl PrecompileHandle,
 		account: Address,
 	) -> EvmResult<U256> {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let account_id = Runtime::AddressMapping::into_account_id(account.into());
-		let current_block = frame_system::Pallet::<Runtime>::block_number();
+	let account_id: Runtime::AccountId = Runtime::AddressMapping::into_account_id(account.into()).into();
+	let current_block = frame_system::Pallet::<Runtime>::block_number();
 
 		// Call the internal pallet function to calculate accrued credits
 		let accrued_amount =

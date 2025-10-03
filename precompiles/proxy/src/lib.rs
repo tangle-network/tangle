@@ -56,6 +56,7 @@ where
 	<Runtime as frame_system::Config>::RuntimeCall:
 		From<ProxyCall<Runtime>> + From<BalancesCall<Runtime>>,
 	<Runtime as pallet_balances::Config<()>>::Balance: TryFrom<U256> + Into<U256>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
@@ -87,6 +88,7 @@ where
 	<Runtime as frame_system::Config>::RuntimeCall:
 		From<ProxyCall<Runtime>> + From<BalancesCall<Runtime>>,
 	<Runtime as pallet_balances::Config<()>>::Balance: TryFrom<U256> + Into<U256>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
@@ -147,6 +149,7 @@ where
 	<Runtime as frame_system::Config>::RuntimeCall:
 		From<ProxyCall<Runtime>> + From<BalancesCall<Runtime>>,
 	<Runtime as pallet_balances::Config<()>>::Balance: TryFrom<U256> + Into<U256>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	/// Register a proxy account for the sender that is able to make calls on its behalf.
 	/// The dispatch origin for this call must be Signed.
@@ -162,14 +165,14 @@ where
 		proxy_type: u8,
 		delay: u32,
 	) -> EvmResult {
-		let delegate = Runtime::AddressMapping::into_account_id(delegate.into());
+		let delegate: Runtime::AccountId = Runtime::AddressMapping::into_account_id(delegate.into()).into();
 		let proxy_type = Runtime::ProxyType::decode(&mut proxy_type.to_le_bytes().as_slice())
 			.map_err(|_| {
 				RevertReason::custom("Failed decoding value to ProxyType").in_field("proxyType")
 			})?;
 		let delay = delay.into();
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		// Disallow re-adding proxy via precompile to prevent re-entrancy.
 		// See: https://github.com/PureStake/sr-/issues/30
@@ -193,7 +196,7 @@ where
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::add_proxy { delegate, proxy_type, delay };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -212,7 +215,7 @@ where
 		proxy_type: u8,
 		delay: u32,
 	) -> EvmResult {
-		let delegate = Runtime::AddressMapping::into_account_id(delegate.into());
+		let delegate: Runtime::AccountId = Runtime::AddressMapping::into_account_id(delegate.into()).into();
 		let proxy_type = Runtime::ProxyType::decode(&mut proxy_type.to_le_bytes().as_slice())
 			.map_err(|_| {
 				RevertReason::custom("Failed decoding value to ProxyType").in_field("proxyType")
@@ -221,11 +224,11 @@ where
 
 		let delegate: <Runtime::Lookup as StaticLookup>::Source =
 			Runtime::Lookup::unlookup(delegate);
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::remove_proxy { delegate, proxy_type, delay };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -236,10 +239,10 @@ where
 	/// unreserved fees will be inaccessible. All access to this account will be lost.
 	#[precompile::public("removeProxies()")]
 	fn remove_proxies(handle: &mut impl PrecompileHandle) -> EvmResult {
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call: ProxyCall<Runtime> = ProxyCall::<Runtime>::remove_proxies {};
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -310,14 +313,14 @@ where
 		proxy_type: u8,
 		delay: u32,
 	) -> EvmResult<bool> {
-		let delegate = Runtime::AddressMapping::into_account_id(delegate.into());
+		let delegate: Runtime::AccountId = Runtime::AddressMapping::into_account_id(delegate.into()).into();
 		let proxy_type = Runtime::ProxyType::decode(&mut proxy_type.to_le_bytes().as_slice())
 			.map_err(|_| {
 				RevertReason::custom("Failed decoding value to ProxyType").in_field("proxyType")
 			})?;
 		let delay = delay.into();
 
-		let real = Runtime::AddressMapping::into_account_id(real.into());
+		let real: Runtime::AccountId = Runtime::AddressMapping::into_account_id(real.into()).into();
 
 		// Proxies:
 		// Twox64Concat(8) + AccountId(20) + BoundedVec(ProxyDefinition * MaxProxies) + Balance(16)
@@ -344,9 +347,9 @@ where
 			return Err(revert("real address must be EOA"));
 		};
 
-		// Read proxy
-		let real_account_id = Runtime::AddressMapping::into_account_id(real.into());
-		let who = Runtime::AddressMapping::into_account_id(handle.context().caller);
+	// Read proxy
+	let real_account_id: Runtime::AccountId = Runtime::AddressMapping::into_account_id(real.into()).into();
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		// Proxies:
 		// Twox64Concat(8) + AccountId(20) + BoundedVec(ProxyDefinition * MaxProxies) + Balance(16)
 		handle.record_db_read::<Runtime>(
@@ -385,22 +388,23 @@ where
 			let contract_address: Runtime::AccountId =
 				Runtime::AddressMapping::into_account_id(handle.context().address);
 
-			// Send back funds received by the precompile.
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				Some(contract_address).into(),
-				pallet_balances::Call::<Runtime>::transfer_allow_death {
-					dest: Runtime::Lookup::unlookup(who),
-					value: {
-						let balance: <Runtime as pallet_balances::Config<()>>::Balance =
-							value.try_into().map_err(|_| PrecompileFailure::Revert {
-								exit_status: fp_evm::ExitRevert::Reverted,
-								output: sp_std::vec::Vec::new(),
-							})?;
-						balance
-					},
+		// Send back funds received by the precompile.
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(contract_address).into(),
+			pallet_balances::Call::<Runtime>::transfer_allow_death {
+				dest: Runtime::Lookup::unlookup(who),
+				value: {
+					let balance: <Runtime as pallet_balances::Config<()>>::Balance =
+						value.try_into().map_err(|_| PrecompileFailure::Revert {
+							exit_status: fp_evm::ExitRevert::Reverted,
+							output: sp_std::vec::Vec::new(),
+						})?;
+					balance
 				},
-			)?;
+			},
+			0,
+		)?;
 
 			Some(Transfer { source: sub_context.caller, target: address, value })
 		};

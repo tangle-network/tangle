@@ -120,6 +120,7 @@ where
 	Runtime: AddressToAssetId<AssetIdOf<Runtime, Instance>>,
 	<<Runtime as frame_system::Config>::RuntimeCall as Dispatchable>::RuntimeOrigin: OriginTrait,
 	AssetIdOf<Runtime, Instance>: Display,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	/// PrecompileSet discriminant. Allows knowing if the address maps to an asset id,
 	/// and if this is the case which one.
@@ -172,11 +173,11 @@ where
 
 		let who: H160 = who.into();
 
-		// Fetch info.
-		let amount: U256 = {
-			let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who);
-			pallet_assets::Pallet::<Runtime, Instance>::balance(asset_id, &who).into()
-		};
+	// Fetch info.
+	let amount: U256 = {
+		let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who).into();
+		pallet_assets::Pallet::<Runtime, Instance>::balance(asset_id, &who).into()
+	};
 
 		// Build output.
 		Ok(amount)
@@ -197,10 +198,10 @@ where
 		let owner: H160 = owner.into();
 		let spender: H160 = spender.into();
 
-		// Fetch info.
-		let amount: U256 = {
-			let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner);
-			let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender);
+	// Fetch info.
+	let amount: U256 = {
+		let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
+		let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
 
 			// Fetch info.
 			pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id, &owner, &spender).into()
@@ -243,20 +244,20 @@ where
 		spender: H160,
 		value: U256,
 	) -> EvmResult {
-		let owner = Runtime::AddressMapping::into_account_id(owner);
-		let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender);
-		// Amount saturate if too high.
-		let amount: BalanceOf<Runtime, Instance> =
-			value.try_into().unwrap_or_else(|_| Bounded::max_value());
+	let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
+	let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
+	// Amount saturate if too high.
+	let amount: BalanceOf<Runtime, Instance> =
+		value.try_into().unwrap_or_else(|_| Bounded::max_value());
 
-		// Storage item: Approvals:
-		// Blake2_128(16) + AssetId(16) + (2 * Blake2_128(16) + AccountId(20)) + Approval(32)
-		handle.record_db_read::<Runtime>(136)?;
+	// Storage item: Approvals:
+	// Blake2_128(16) + AssetId(16) + (2 * Blake2_128(16) + AccountId(20)) + Approval(32)
+	handle.record_db_read::<Runtime>(136)?;
 
-		// If previous approval exists, we need to clean it
-		if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender) !=
-			0u32.into()
-		{
+	// If previous approval exists, we need to clean it
+	if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender) !=
+		0u32.into()
+	{
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner.clone()),

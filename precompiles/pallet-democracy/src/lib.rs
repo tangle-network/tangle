@@ -92,6 +92,7 @@ where
 	Runtime::RuntimeCall: From<PreimageCall<Runtime>>,
 	Runtime::Hash: From<H256> + Into<H256>,
 	BlockNumberFor<Runtime>: Into<U256>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	// The accessors are first. They directly return their result.
 	#[precompile::public("publicPropCount()")]
@@ -238,8 +239,8 @@ where
 			len,
 		};
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = DemocracyCall::<Runtime>::propose { proposal: bounded, value };
+	let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+	let call = DemocracyCall::<Runtime>::propose { proposal: bounded, value };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
@@ -269,8 +270,8 @@ where
 			"Seconding proposal {:?}, with bound {:?}", prop_index, seconds_upper_bound
 		);
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = DemocracyCall::<Runtime>::second { proposal: prop_index };
+	let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+	let call = DemocracyCall::<Runtime>::second { proposal: prop_index };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
@@ -313,7 +314,7 @@ where
 			aye, ref_index, conviction_enum
 		);
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = DemocracyCall::<Runtime>::vote { ref_index, vote };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
@@ -345,7 +346,7 @@ where
 			ref_index
 		);
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = DemocracyCall::<Runtime>::remove_vote { index: ref_index };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
@@ -394,7 +395,7 @@ where
 	#[precompile::public("un_delegate()")]
 	fn un_delegate(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_log_costs_manual(2, 0)?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = DemocracyCall::<Runtime>::undelegate {};
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
@@ -416,7 +417,7 @@ where
 			"Unlocking democracy tokens for {:?}", target
 		);
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = DemocracyCall::<Runtime>::unlock { target };
 
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
@@ -437,7 +438,7 @@ where
 			"Noting preimage {:?}", encoded_proposal
 		);
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = PreimageCall::<Runtime>::note_preimage { bytes: encoded_proposal };
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
@@ -470,7 +471,7 @@ where
 			return Err(revert("not imminent preimage (preimage not requested)"));
 		};
 
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call = PreimageCall::<Runtime>::note_preimage { bytes: encoded_proposal };
 		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 

@@ -54,9 +54,7 @@ use sp_runtime::{
 use sp_std::{convert::TryInto, marker::PhantomData, vec, vec::Vec};
 use tangle_primitives::types::WrappedAccountId32;
 
-type BalanceOf<Runtime> = <<Runtime as pallet_staking::Config>::Currency as Currency<
-	<Runtime as frame_system::Config>::AccountId,
->>::Balance;
+type BalanceOf<Runtime> = <Runtime as pallet_staking::Config>::CurrencyBalance;
 
 pub struct StakingPrecompile<Runtime>(PhantomData<Runtime>);
 

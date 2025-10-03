@@ -66,12 +66,12 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_tangle_lst::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<WrappedAccountId32>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	#[precompile::public("join(uint256,uint256)")]
 	fn join(handle: &mut impl PrecompileHandle, amount: U256, pool_id: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
@@ -98,7 +98,7 @@ where
 		extra: U256,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 		let extra: BalanceOf<Runtime> =
@@ -131,7 +131,7 @@ where
 		unbonding_points: U256,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let member_account = Self::convert_to_account_id(member_account)?;
 		let member_account: <Runtime::Lookup as StaticLookup>::Source =
@@ -165,7 +165,7 @@ where
 		num_slashing_spans: u32,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 
@@ -194,7 +194,7 @@ where
 		num_slashing_spans: u32,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let member_account = Self::convert_to_account_id(member_account)?;
 		let member_account: <Runtime::Lookup as StaticLookup>::Source =
@@ -230,7 +230,7 @@ where
 		icon: Vec<u8>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let amount: BalanceOf<Runtime> = amount.try_into().map_err(|_| revert("Invalid amount"))?;
 		let root = Self::convert_to_account_id(root)?;
@@ -272,7 +272,7 @@ where
 		validators: Vec<H256>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 		let validators: Vec<Runtime::AccountId> = validators
@@ -297,7 +297,7 @@ where
 	#[precompile::public("setState(uint256,uint8)")]
 	fn set_state(handle: &mut impl PrecompileHandle, pool_id: U256, state: u8) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 		let state = match state {
@@ -328,7 +328,7 @@ where
 		metadata: Vec<u8>,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 
@@ -355,7 +355,7 @@ where
 		new_bouncer: H256,
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
 		let pool_id: PoolId = pool_id.try_into().map_err(|_| revert("Invalid pool id"))?;
 
@@ -377,22 +377,29 @@ where
 			pallet_tangle_lst::ConfigOp::Set(Self::convert_to_account_id(new_bouncer)?)
 		};
 
-		let call = pallet_tangle_lst::Call::<Runtime>::update_roles {
-			pool_id,
-			new_root,
-			new_nominator,
-			new_bouncer,
-		};
-		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
-		Ok(())
-	}
+	let call = pallet_tangle_lst::Call::<Runtime>::update_roles {
+		pool_id,
+		new_root,
+		new_nominator,
+		new_bouncer,
+	};
+	RuntimeHelper::<Runtime>::try_dispatch(
+		handle,
+		Into::<
+			<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
+		>::into(Some(origin)),
+		call,
+		0,
+	)?;
+	Ok(())
+}
 
 	#[precompile::public("chill(uint256)")]
 	fn chill(handle: &mut impl PrecompileHandle, pool_id: U256) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
 		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
         RuntimeHelper::<Runtime>::try_dispatch(
             handle,
@@ -420,7 +427,7 @@ where
 		let extra = pallet_tangle_lst::BondExtra::FreeBalance(
 			amount.try_into().map_err(|_| revert("Amount overflow"))?,
 		);
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
         RuntimeHelper::<Runtime>::try_dispatch(
             handle,
@@ -452,7 +459,7 @@ where
 		let commission = if commission_value == 0 {
 			None
 		} else {
-			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+			let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 			Some((Perbill::from_parts(commission_value), origin))
 		};
 
@@ -460,7 +467,7 @@ where
             handle,
             Into::<
                 <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
-            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller).into())),
             pallet_tangle_lst::Call::<Runtime>::set_commission {
 				pool_id,
 				new_commission: commission,
@@ -488,7 +495,7 @@ where
             handle,
             Into::<
                 <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
-            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller).into())),
             pallet_tangle_lst::Call::<Runtime>::set_commission_max { pool_id, max_commission },
             0,
         )?;
@@ -520,7 +527,7 @@ where
             handle,
             Into::<
                 <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
-            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller).into())),
             pallet_tangle_lst::Call::<Runtime>::set_commission_change_rate { pool_id, change_rate },
             0,
         )?;
@@ -533,7 +540,7 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
 		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 
         RuntimeHelper::<Runtime>::try_dispatch(
             handle,
@@ -557,7 +564,7 @@ where
             handle,
             Into::<
                 <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
-            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller).into())),
             pallet_tangle_lst::Call::<Runtime>::adjust_pool_deposit { pool_id },
             0,
         )?;
@@ -574,19 +581,19 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
 		let pool_id = pool_id.try_into().map_err(|_| revert("Pool ID overflow"))?;
-		let permission = match permission {
-			0 => Some(pallet_tangle_lst::CommissionClaimPermission::Permissionless),
-			1 => Some(pallet_tangle_lst::CommissionClaimPermission::Account(
-				Runtime::AddressMapping::into_account_id(handle.context().caller),
-			)),
-			_ => None,
-		};
+	let permission = match permission {
+		0 => Some(pallet_tangle_lst::CommissionClaimPermission::Permissionless),
+		1 => Some(pallet_tangle_lst::CommissionClaimPermission::Account(
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into(),
+		)),
+		_ => None,
+	};
 
         RuntimeHelper::<Runtime>::try_dispatch(
             handle,
             Into::<
                 <Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin,
-            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller))),
+            >::into(Some(Runtime::AddressMapping::into_account_id(handle.context().caller).into())),
             pallet_tangle_lst::Call::<Runtime>::set_commission_claim_permission {
 				pool_id,
 				permission,
@@ -605,7 +612,7 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_tangle_lst::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<WrappedAccountId32>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	/// Helper method to parse SS58 address
 	fn parse_32byte_address(addr: Vec<u8>) -> EvmResult<Runtime::AccountId> {
@@ -633,7 +640,7 @@ where
 				[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
 			) => {
 				let ethereum_address = Address(H160::from_slice(&payee.0[12..]));
-				Runtime::AddressMapping::into_account_id(ethereum_address.0)
+				Runtime::AddressMapping::into_account_id(ethereum_address.0).into()
 			},
 			H256(account) => Self::parse_32byte_address(account.to_vec())?,
 		};

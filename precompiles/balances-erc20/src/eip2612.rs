@@ -140,8 +140,8 @@ where
 				Erc20BalancesPrecompile::<Runtime, Metadata, Instance>::u256_to_amount(value)
 					.unwrap_or_else(|_| Bounded::max_value());
 
-			let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner);
-			let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender);
+		let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
+		let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
 			ApprovesStorage::<Runtime, Instance>::insert(owner, spender, amount);
 		}
 

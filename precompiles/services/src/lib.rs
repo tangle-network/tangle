@@ -35,6 +35,7 @@ where
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_services::Call<Runtime>>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	// Errors for the `Services` precompile.
 
@@ -137,30 +138,20 @@ where
 				.collect::<Result<_, _>>()
 				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
 
-		let value_bytes = {
-			let value = handle.context().apparent_value;
-			let mut value_bytes = [0u8; core::mem::size_of::<U256>()];
-			value.to_little_endian(&mut value_bytes);
-			value_bytes
-		};
-		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
-			.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?;
+	let value_bytes = handle.context().apparent_value.to_little_endian();
+	let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
+		.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?;
 
-		let ttl_bytes = {
-			let mut ttl_bytes = [0u8; core::mem::size_of::<U256>()];
-			ttl.to_little_endian(&mut ttl_bytes);
-			ttl_bytes
-		};
+	let ttl_bytes = ttl.to_little_endian();
 
-		let ttl = BlockNumberFor::<Runtime>::decode(&mut &ttl_bytes[..])
-			.map_err(|_| revert_custom_error(Self::INVALID_TTL))?;
+	let ttl = BlockNumberFor::<Runtime>::decode(&mut &ttl_bytes[..])
+		.map_err(|_| revert_custom_error(Self::INVALID_TTL))?;
 
-		let amount = {
-			let mut amount_bytes = [0u8; core::mem::size_of::<U256>()];
-			amount.to_little_endian(&mut amount_bytes);
-			BalanceOf::<Runtime>::decode(&mut &amount_bytes[..])
-				.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?
-		};
+	let amount = {
+		let amount_bytes = amount.to_little_endian();
+		BalanceOf::<Runtime>::decode(&mut &amount_bytes[..])
+			.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?
+	};
 
 		const ZERO_ADDRESS: [u8; 20] = [0; 20];
 

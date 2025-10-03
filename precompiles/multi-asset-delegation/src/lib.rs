@@ -48,7 +48,7 @@ use evm_erc20_utils::*;
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
-	traits::Currency,
+	traits::{Currency, OriginTrait},
 };
 use pallet_evm::AddressMapping;
 use pallet_multi_asset_delegation::types::DelegatorBlueprintSelection;
@@ -76,7 +76,7 @@ where
 	Runtime::RuntimeCall: From<pallet_multi_asset_delegation::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
-	Runtime::AccountId: From<WrappedAccountId32>,
+	Runtime::AccountId: From<WrappedAccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	#[precompile::public("balanceOf(address,uint256,address)")]
 	#[precompile::view]
@@ -86,9 +86,9 @@ where
 		asset_id: U256,
 		token_address: Address,
 	) -> EvmResult<U256> {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let who = Runtime::AddressMapping::into_account_id(who.0);
-		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who.0).into();
+	let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
 		else {
 			return Ok(U256::zero());
 		};
@@ -108,9 +108,9 @@ where
 		asset_id: U256,
 		token_address: Address,
 	) -> EvmResult<U256> {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let who = Runtime::AddressMapping::into_account_id(who.0);
-		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who.0).into();
+	let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
 		else {
 			return Ok(U256::zero());
 		};
@@ -125,8 +125,8 @@ where
 	#[precompile::public("executeWithdraw()")]
 	fn execute_withdraw(handle: &mut impl PrecompileHandle) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 
 		let pallet_account_id = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_account();
 		let pallet_address = pallet_multi_asset_delegation::Pallet::<Runtime>::pallet_evm_account();
@@ -151,7 +151,7 @@ where
 			evm_address: Some(caller),
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(pallet_account_id).into(), call)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, Some(pallet_account_id).into(), call, 0)?;
 
 		Ok(())
 	}
@@ -186,11 +186,11 @@ where
 				}
 				(who, Asset::Erc20(erc20_token.into()), amount)
 			},
-			(other_asset_id, _) => (
-				Runtime::AddressMapping::into_account_id(caller),
-				Asset::Custom(other_asset_id.into()),
-				amount,
-			),
+		(other_asset_id, _) => (
+			Runtime::AddressMapping::into_account_id(caller).into(),
+			Asset::Custom(other_asset_id.into()),
+			amount,
+		),
 		};
 
 		let lock_multiplier = match lock_multiplier {
@@ -205,15 +205,16 @@ where
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::deposit {
-				asset: deposit_asset,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-				evm_address: Some(caller),
-				lock_multiplier,
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::deposit {
+			asset: deposit_asset,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+			evm_address: Some(caller),
+			lock_multiplier,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -227,8 +228,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] =>
@@ -239,13 +240,14 @@ where
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw {
-				asset: deposit_asset,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::schedule_withdraw {
+			asset: deposit_asset,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -259,8 +261,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
 			(0, erc20_token) if erc20_token != [0; 20] =>
@@ -271,13 +273,14 @@ where
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw {
-				asset: deposit_asset,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::cancel_withdraw {
+			asset: deposit_asset,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -293,8 +296,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
@@ -306,19 +309,20 @@ where
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::delegate {
-				operator,
-				asset: deposit_asset,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-				blueprint_selection: DelegatorBlueprintSelection::Fixed(
-					blueprint_selection.try_into().map_err(|_| {
-						RevertReason::custom("Too many blueprint ids for fixed selection")
-					})?,
-				),
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::delegate {
+			operator,
+			asset: deposit_asset,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+			blueprint_selection: DelegatorBlueprintSelection::Fixed(
+				blueprint_selection.try_into().map_err(|_| {
+					RevertReason::custom("Too many blueprint ids for fixed selection")
+				})?,
+			),
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -333,8 +337,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
@@ -346,25 +350,26 @@ where
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::schedule_delegator_unstake {
-				operator,
-				asset: deposit_asset,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::schedule_delegator_unstake {
+			operator,
+			asset: deposit_asset,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
 
 	#[precompile::public("executeDelegatorUnstake()")]
 	fn execute_delegator_unstake(handle: &mut impl PrecompileHandle) -> EvmResult {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
-		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_delegator_unstake {};
+	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+	let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+	let call = pallet_multi_asset_delegation::Call::<Runtime>::execute_delegator_unstake {};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
 
 		Ok(())
 	}
@@ -379,8 +384,8 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
@@ -392,14 +397,15 @@ where
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::cancel_delegator_unstake {
-				operator,
-				asset: deposit_asset,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::cancel_delegator_unstake {
+			operator,
+			asset: deposit_asset,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -415,8 +421,8 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		// Validate amount before dispatching
@@ -430,16 +436,17 @@ where
 				.map_err(|_| RevertReason::custom("Too many blueprint ids for fixed selection"))?,
 		);
 
-		// Dispatch the call
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::delegate_nomination {
-				operator,
-				amount,
-				blueprint_selection,
-			},
-		)?;
+	// Dispatch the call
+	RuntimeHelper::<Runtime>::try_dispatch(
+		handle,
+		Some(who).into(),
+		pallet_multi_asset_delegation::Call::<Runtime>::delegate_nomination {
+			operator,
+			amount,
+			blueprint_selection,
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -453,25 +460,26 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::schedule_nomination_unstake {
-				operator,
-				amount: amount
-					.try_into()
-					.map_err(|_| RevertReason::value_is_too_large("amount"))?,
-				blueprint_selection: DelegatorBlueprintSelection::Fixed(
-					blueprint_selection.try_into().map_err(|_| {
-						RevertReason::custom("Too many blueprint ids for fixed selection")
-					})?,
-				),
-			},
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::schedule_nomination_unstake {
+			operator,
+			amount: amount
+				.try_into()
+				.map_err(|_| RevertReason::value_is_too_large("amount"))?,
+			blueprint_selection: DelegatorBlueprintSelection::Fixed(
+				blueprint_selection.try_into().map_err(|_| {
+					RevertReason::custom("Too many blueprint ids for fixed selection")
+				})?,
+			),
+		},
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -483,15 +491,16 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::execute_nomination_unstake { operator },
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::execute_nomination_unstake { operator },
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -503,15 +512,16 @@ where
 	) -> EvmResult {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let caller = handle.context().caller;
-		let who = Runtime::AddressMapping::into_account_id(caller);
+	let caller = handle.context().caller;
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
 			Some(who).into(),
-			pallet_multi_asset_delegation::Call::<Runtime>::cancel_nomination_unstake { operator },
-		)?;
+		pallet_multi_asset_delegation::Call::<Runtime>::cancel_nomination_unstake { operator },
+		0,
+	)?;
 
 		Ok(())
 	}
@@ -521,10 +531,10 @@ where
 		handle: &mut impl PrecompileHandle,
 		who: Address,
 	) -> EvmResult<U256> {
-		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-		let who = Runtime::AddressMapping::into_account_id(who.0);
-		let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
+	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who.0).into();
+	let Some(delegator) = pallet_multi_asset_delegation::Pallet::<Runtime>::delegators(&who)
 		else {
 			return Ok(U256::zero());
 		};

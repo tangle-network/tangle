@@ -24,7 +24,7 @@ use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	sp_runtime::traits::{Bounded, CheckedSub, Dispatchable, StaticLookup},
 	storage::types::{StorageDoubleMap, StorageMap, ValueQuery},
-	traits::StorageInstance,
+	traits::{OriginTrait, StorageInstance},
 	Blake2_128Concat,
 };
 use pallet_balances::pallet::{
@@ -194,7 +194,7 @@ where
 	BalanceOf<Runtime, Instance>: TryFrom<U256> + Into<U256>,
 	Metadata: Erc20Metadata,
 	Instance: InstanceToPrefix + 'static,
-	Runtime::AccountId: From<AccountId32>,
+	Runtime::AccountId: From<AccountId32> + From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 {
 	#[precompile::public("totalSupply()")]
 	#[precompile::view]
@@ -212,8 +212,8 @@ where
 		// Blake2128(16) + AccountId(20) + AccountInfo ((4 * 4) + AccountData(16 * 4))
 		handle.record_db_read::<Runtime>(116)?;
 
-		let owner: H160 = owner.into();
-		let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner);
+	let owner: H160 = owner.into();
+	let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
 
 		Ok(pallet_balances::Pallet::<Runtime, Instance>::usable_balance(&owner).into())
 	}
@@ -232,8 +232,8 @@ where
 		let owner: H160 = owner.into();
 		let spender: H160 = spender.into();
 
-		let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner);
-		let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender);
+	let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
+	let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
 
 		Ok(ApprovesStorage::<Runtime, Instance>::get(owner, spender)
 			.unwrap_or_default()
@@ -253,9 +253,9 @@ where
 
 		// Write into storage.
 		{
-			let caller: Runtime::AccountId =
-				Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender);
+		let caller: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
 			// Amount saturate if too high.
 			let value = Self::u256_to_amount(value).unwrap_or_else(|_| Bounded::max_value());
 
@@ -283,14 +283,14 @@ where
 
 		// Build call with origin.
 		{
-			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let to = Runtime::AddressMapping::into_account_id(to);
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to).into();
 			let value = Self::u256_to_amount(value).in_field("value")?;
 
 			// Dispatch call (if enough gas).
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,
-				RuntimeOrigin::signed(origin),
+				<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
 				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
 					dest: Runtime::Lookup::unlookup(to),
 					value,
@@ -324,13 +324,13 @@ where
 
 		// Build call with origin.
 		{
-			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let value = Self::u256_to_amount(value).in_field("value")?;
+		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		let value = Self::u256_to_amount(value).in_field("value")?;
 
 			// Dispatch call (if enough gas).
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,
-				RuntimeOrigin::signed(origin),
+				<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
 				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
 					dest: Runtime::Lookup::unlookup(to_account_id),
 					value,
@@ -367,10 +367,10 @@ where
 		let to: H160 = to.into();
 
 		{
-			let caller: Runtime::AccountId =
-				Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let from: Runtime::AccountId = Runtime::AddressMapping::into_account_id(from);
-			let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to);
+		let caller: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		let from: Runtime::AccountId = Runtime::AddressMapping::into_account_id(from).into();
+		let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to).into();
 			let value = Self::u256_to_amount(value).in_field("value")?;
 
 			// If caller is "from", it can spend as much as it wants.
@@ -442,9 +442,9 @@ where
 			return Err(RevertReason::UnknownSelector.into());
 		}
 
-		let caller: Runtime::AccountId =
-			Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let precompile = Runtime::AddressMapping::into_account_id(handle.context().address);
+	let caller: Runtime::AccountId =
+		Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+	let precompile: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().address).into();
 		let amount = Self::u256_to_amount(handle.context().apparent_value)?;
 
 		if amount.into() == U256::from(0u32) {
@@ -484,9 +484,9 @@ where
 		handle.record_log_costs_manual(2, 32)?;
 
 		let account_amount: U256 = {
-			let owner: Runtime::AccountId =
-				Runtime::AddressMapping::into_account_id(handle.context().caller);
-			pallet_balances::Pallet::<Runtime, Instance>::usable_balance(&owner).into()
+		let owner: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		pallet_balances::Pallet::<Runtime, Instance>::usable_balance(&owner).into()
 		};
 
 		if value > account_amount {
