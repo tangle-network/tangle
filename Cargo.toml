@@ -351,7 +351,7 @@ signature = { version = "2.2", default-features = false }
 # EVM & Ethereum
 # (wasm)
 ethereum-types = { version = "0.14.1", default-features = false }
-ethereum = { version = "0.15.0", default-features = false, features = ["with-codec"] }
+ethereum = { version = "0.18.2", default-features = false, features = ["with-scale"] }
 evm = { version = "0.41.1", default-features = false }
 evm-gasometer = { version = "0.41.0", default-features = false }
 evm-runtime = { version = "0.41.0", default-features = false }
@@ -415,3 +415,5 @@ subxt-signer = { version = "0.39.0", default-features = false }
 
 [profile.release]
 panic = "unwind"
+
+

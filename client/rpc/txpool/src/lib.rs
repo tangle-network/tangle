@@ -19,8 +19,8 @@ use ethereum_types::{H160, H256, U256};
 use fc_rpc::{internal_err, public_key};
 use jsonrpsee::core::RpcResult;
 pub use rpc_core_txpool::{GetT, Summary, Transaction, TransactionMap, TxPoolResult, TxPoolServer};
-use sc_transaction_pool::{ChainApi, Pool};
-use sc_transaction_pool_api::InPoolTransaction;
+use sc_transaction_pool::ChainApi;
+use sc_transaction_pool_api::TransactionPool as _;
 use serde::Serialize;
 use sha3::{Digest, Keccak256};
 use sp_api::{ApiExt, ProvideRuntimeApi};
@@ -30,19 +30,19 @@ use std::{marker::PhantomData, sync::Arc};
 
 use rpc_primitives_txpool::{Transaction as TransactionV2, TxPoolResponse, TxPoolRuntimeApi};
 
-pub struct TxPool<B: BlockT, C, A: ChainApi> {
+pub struct TxPool<B: BlockT, C, P> {
 	client: Arc<C>,
-	graph: Arc<Pool<A>>,
+	pool: Arc<P>,
 	_marker: PhantomData<B>,
 }
 
-impl<B, C, A> TxPool<B, C, A>
+impl<B, C, P> TxPool<B, C, P>
 where
 	C: ProvideRuntimeApi<B>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B> + 'static,
 	C: Send + Sync + 'static,
 	B: BlockT<Hash = H256> + Send + Sync + 'static,
-	A: ChainApi<Block = B> + 'static,
+	P: sc_transaction_pool_api::TransactionPool<Block = B> + 'static,
 	C::Api: TxPoolRuntimeApi<B>,
 {
 	/// Use the transaction graph interface to get the extrinsics currently in the ready and future
@@ -53,19 +53,17 @@ where
 	{
 		// Collect transactions in the ready validated pool.
 		let txs_ready = self
-			.graph
-			.validated_pool()
+			.pool
 			.ready()
-			.map(|in_pool_tx| in_pool_tx.data().clone())
+			.map(|in_pool_tx| (**in_pool_tx.data()).clone())
 			.collect();
 
 		// Collect transactions in the future validated pool.
 		let txs_future = self
-			.graph
-			.validated_pool()
+			.pool
 			.futures()
-			.iter()
-			.map(|(_hash, extrinsic)| extrinsic.clone())
+			.into_iter()
+			.map(|in_pool_tx| (**in_pool_tx.data()).clone())
 			.collect();
 
 		// Use the runtime to match the (here) opaque extrinsics against ethereum transactions.
@@ -131,19 +129,19 @@ where
 	}
 }
 
-impl<B: BlockT, C, A: ChainApi> TxPool<B, C, A> {
-	pub fn new(client: Arc<C>, graph: Arc<Pool<A>>) -> Self {
-		Self { client, graph, _marker: PhantomData }
+impl<B: BlockT, C, P> TxPool<B, C, P> {
+	pub fn new(client: Arc<C>, pool: Arc<P>) -> Self {
+		Self { client, pool, _marker: PhantomData }
 	}
 }
 
-impl<B, C, A> TxPoolServer for TxPool<B, C, A>
+impl<B, C, P> TxPoolServer for TxPool<B, C, P>
 where
 	C: ProvideRuntimeApi<B>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
 	B: BlockT<Hash = H256> + Send + Sync + 'static,
-	A: ChainApi<Block = B> + 'static,
+	P: sc_transaction_pool_api::TransactionPool<Block = B> + 'static,
 	C::Api: TxPoolRuntimeApi<B>,
 {
 	fn content(&self) -> RpcResult<TxPoolResult<TransactionMap<Transaction>>> {
@@ -155,13 +153,13 @@ where
 	}
 
 	fn status(&self) -> RpcResult<TxPoolResult<U256>> {
-		let status = self.graph.validated_pool().status();
+		let status = self.pool.status();
 		Ok(TxPoolResult { pending: U256::from(status.ready), queued: U256::from(status.future) })
 	}
 }
 
-impl<B: BlockT, C, A: ChainApi> Clone for TxPool<B, C, A> {
+impl<B: BlockT, C, P> Clone for TxPool<B, C, P> {
 	fn clone(&self) -> Self {
-		Self::new(self.client.clone(), self.graph.clone())
+		Self::new(self.client.clone(), self.pool.clone())
 	}
 }

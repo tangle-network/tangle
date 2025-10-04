@@ -68,7 +68,7 @@ where
 
         let call = pallet_oracle::Call::<Runtime>::feed_values { values: bounded_feed_values };
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, RuntimeOrigin::signed(origin), call, 0)?;
+        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
         Ok(())
     }
 

@@ -257,6 +257,7 @@ impl pallet_proxy::Config for Runtime {
 	type CallHasher = BlakeTwo256;
 	type AnnouncementDepositBase = ();
 	type AnnouncementDepositFactor = ();
+	type BlockNumberProvider = System;
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
@@ -279,9 +280,9 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances }
-			.assimilate_storage(&mut t)
-			.expect("Pallet balances storage can be assimilated");
+	pallet_balances::GenesisConfig::<Runtime> { balances: self.balances, dev_accounts: None }
+		.assimilate_storage(&mut t)
+		.expect("Pallet balances storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.execute_with(|| {

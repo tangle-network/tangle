@@ -22,7 +22,7 @@
 use core::fmt::Display;
 use fp_evm::{ExitError, PrecompileHandle};
 use frame_support::{
-	dispatch::{GetDispatchInfo, PostDispatchInfo, RawOrigin},
+	dispatch::{GetDispatchInfo, PostDispatchInfo},
 	sp_runtime::traits::StaticLookup,
 	traits::{
 		fungibles::{
@@ -237,48 +237,46 @@ where
 		Ok(true)
 	}
 
-	fn approve_inner(
+	pub(crate) fn approve_inner(
 		asset_id: AssetIdOf<Runtime, Instance>,
 		handle: &mut impl PrecompileHandle,
 		owner: H160,
 		spender: H160,
 		value: U256,
 	) -> EvmResult {
-	let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
-	let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
-	// Amount saturate if too high.
-	let amount: BalanceOf<Runtime, Instance> =
-		value.try_into().unwrap_or_else(|_| Bounded::max_value());
+		let owner: Runtime::AccountId = Runtime::AddressMapping::into_account_id(owner).into();
+		let spender: Runtime::AccountId = Runtime::AddressMapping::into_account_id(spender).into();
+		let amount: BalanceOf<Runtime, Instance> =
+			value.try_into().unwrap_or_else(|_| Bounded::max_value());
 
-	// Storage item: Approvals:
-	// Blake2_128(16) + AssetId(16) + (2 * Blake2_128(16) + AccountId(20)) + Approval(32)
-	handle.record_db_read::<Runtime>(136)?;
+		// Storage item: Approvals:
+		// Blake2_128(16) + AssetId(16) + (2 * Blake2_128(16) + AccountId(20)) + Approval(32)
+		handle.record_db_read::<Runtime>(136)?;
 
-	// If previous approval exists, we need to clean it
-	if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender) !=
-		0u32.into()
-	{
+		// If previous approval exists, we need to clean it
+		if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender) !=
+			0u32.into()
+		{
+			RuntimeHelper::<Runtime>::try_dispatch(
+				handle,
+				<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner.clone()),
+				pallet_assets::Call::<Runtime, Instance>::cancel_approval {
+					id: asset_id.clone().into(),
+					delegate: Runtime::Lookup::unlookup(spender.clone()),
+				},
+				0,
+			)?;
+		}
 		RuntimeHelper::<Runtime>::try_dispatch(
 			handle,
-			<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner.clone()),
-			pallet_assets::Call::<Runtime, Instance>::cancel_approval {
-				id: asset_id.clone().into(),
-				delegate: Runtime::Lookup::unlookup(spender.clone()),
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner),
+			pallet_assets::Call::<Runtime, Instance>::approve_transfer {
+				id: asset_id.into(),
+				delegate: Runtime::Lookup::unlookup(spender),
+				amount,
 			},
 			0,
 		)?;
-		}
-	// Dispatch call (if enough gas).
-	RuntimeHelper::<Runtime>::try_dispatch(
-		handle,
-		<Runtime as frame_system::Config>::RuntimeOrigin::signed(owner),
-		pallet_assets::Call::<Runtime, Instance>::approve_transfer {
-			id: asset_id.into(),
-			delegate: Runtime::Lookup::unlookup(spender),
-			amount,
-		},
-		0,
-	)?;
 
 		Ok(())
 	}
@@ -297,8 +295,8 @@ where
 
 		// Build call with origin.
 		{
-			let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let to = Runtime::AddressMapping::into_account_id(to);
+			let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+			let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to).into();
 
 		// Dispatch call (if enough gas).
 		RuntimeHelper::<Runtime>::try_dispatch(
@@ -340,37 +338,36 @@ where
 		let value = Self::u256_to_amount(value).in_field("value")?;
 
 		{
-			let caller: Runtime::AccountId =
-				Runtime::AddressMapping::into_account_id(handle.context().caller);
-			let from: Runtime::AccountId = Runtime::AddressMapping::into_account_id(from);
-			let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to);
+			let caller: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+			let from: Runtime::AccountId = Runtime::AddressMapping::into_account_id(from).into();
+			let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to).into();
 
 			// If caller is "from", it can spend as much as it wants from its own balance.
 			if caller != from {
-			// Dispatch call (if enough gas).
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				<Runtime as frame_system::Config>::RuntimeOrigin::signed(caller),
-				pallet_assets::Call::<Runtime, Instance>::transfer_approved {
-					id: asset_id.into(),
-					owner: Runtime::Lookup::unlookup(from),
-					destination: Runtime::Lookup::unlookup(to),
-					amount: value,
-				},
-				0,
-			)?;
+				// Dispatch call (if enough gas).
+				RuntimeHelper::<Runtime>::try_dispatch(
+					handle,
+					<Runtime as frame_system::Config>::RuntimeOrigin::signed(caller),
+					pallet_assets::Call::<Runtime, Instance>::transfer_approved {
+						id: asset_id.into(),
+						owner: Runtime::Lookup::unlookup(from),
+						destination: Runtime::Lookup::unlookup(to),
+						amount: value,
+					},
+					0,
+				)?;
 			} else {
-			// Dispatch call (if enough gas).
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				<Runtime as frame_system::Config>::RuntimeOrigin::signed(from),
-				pallet_assets::Call::<Runtime, Instance>::transfer {
-					id: asset_id.into(),
-					target: Runtime::Lookup::unlookup(to),
-					amount: value,
-				},
-				0,
-			)?;
+				// Dispatch call (if enough gas).
+				RuntimeHelper::<Runtime>::try_dispatch(
+					handle,
+					<Runtime as frame_system::Config>::RuntimeOrigin::signed(from),
+					pallet_assets::Call::<Runtime, Instance>::transfer {
+						id: asset_id.into(),
+						target: Runtime::Lookup::unlookup(to),
+						amount: value,
+					},
+					0,
+				)?;
 			}
 		}
 

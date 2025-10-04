@@ -7,7 +7,7 @@ license = "GPL-3.0-only"
 repository = { workspace = true }
 
 [dependencies]
-ethereum = { workspace = true, features = [ "with-codec" ] }
+ethereum = { workspace = true, features = [ "with-scale" ] }
 ethereum-types = { workspace = true, features = [ "std" ] }
 futures = { workspace = true, features = [ "compat" ] }
 jsonrpsee = { workspace = true, features = [ "macros", "server" ] }

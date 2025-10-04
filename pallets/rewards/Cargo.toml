@@ -29,7 +29,7 @@ hex = { workspace = true, features = ["alloc"] }
 pallet-multi-asset-delegation = { workspace = true, default-features = false, optional = true }
 
 [dev-dependencies]
-ethereum = { workspace = true, features = ["with-codec"] }
+ethereum = { workspace = true, features = ["with-scale"] }
 ethers = "2.0"
 num_enum = { workspace = true }
 hex-literal = { workspace = true }

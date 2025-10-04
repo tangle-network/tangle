@@ -39,7 +39,7 @@ use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sp_core::{self, sr25519::Public as sr25519Public, ConstU32, H160};
-use sp_keyring::AccountKeyring;
+use sp_keyring::Sr25519Keyring as AccountKeyring;
 use sp_keystore::{testing::MemoryKeystore, KeystoreExt, KeystorePtr};
 use sp_runtime::{
 	curve::PiecewiseLinear, testing::UintAuthorityId, AccountId32, BuildStorage, DispatchError,
@@ -234,6 +234,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 impl pallet_assets::Config for Runtime {
@@ -255,6 +256,7 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	type Holder = ();
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }
@@ -424,6 +426,7 @@ parameter_types! {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+	type RuntimeEvent = RuntimeEvent;
 }
 
 pallet_staking_reward_curve::build! {
@@ -490,8 +493,9 @@ impl pallet_session::Config for Runtime {
 	type SessionHandler = (MockSessionHandler,);
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = AccountId;
-	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
+	type ValidatorIdOf = sp_runtime::traits::ConvertInto;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_session::disabling::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {
@@ -507,7 +511,9 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type Solver = SequentialPhragmen<AccountId, Perbill>;
 	type DataProvider = Staking;
 	type WeightInfo = ();
-	type MaxWinners = ConstU32<100>;
+	type Sort = ();
+	type MaxBackersPerWinner = ConstU32<100>;
+	type MaxWinnersPerPage = ConstU32<100>;
 	type Bounds = ElectionBoundsOnChain;
 }
 
@@ -531,7 +537,7 @@ impl pallet_staking::Config for Runtime {
 	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
 	type Slash = ();
-	type Reward = MockReward;
+	type Reward = ();
 	type SessionsPerEra = SessionsPerEra;
 	type SlashDeferDuration = SlashDeferDuration;
 	type AdminOrigin = frame_system::EnsureRoot<Self::AccountId>;
@@ -551,7 +557,10 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type MaxValidatorSet = ConstU32<100>;
+	type Filter = ();
 }
 
 /// Build test externalities, prepopulated with data for testing democracy precompiles
@@ -607,11 +616,12 @@ impl ExtBuilder {
 					]
 					.iter(),
 				)
-				.cloned()
-				.collect(),
-		}
-		.assimilate_storage(&mut t)
-		.expect("Pallet balances storage can be assimilated");
+			.cloned()
+			.collect(),
+		dev_accounts: None,
+	}
+	.assimilate_storage(&mut t)
+	.expect("Pallet balances storage can be assimilated");
 
 		let mut evm_accounts = BTreeMap::new();
 
@@ -630,7 +640,7 @@ impl ExtBuilder {
 					code: vec![],
 					storage: Default::default(),
 					nonce: Default::default(),
-					balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+					balance: sp_core::U256::from(1_000).saturating_mul(sp_core::U256::from(10).pow(sp_core::U256::from(18))),
 				},
 			);
 		}
@@ -642,7 +652,7 @@ impl ExtBuilder {
 					code: vec![],
 					storage: Default::default(),
 					nonce: Default::default(),
-					balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+					balance: sp_core::U256::from(1_000).saturating_mul(sp_core::U256::from(10).pow(sp_core::U256::from(18))),
 				},
 			);
 		}
@@ -727,14 +737,14 @@ impl ExtBuilder {
 						"outputs": [],
 						"stateMutability": "nonpayable"
 					}))
-					.unwrap()
-					.encode_input(&[
-						ethabi::Token::Address(mock_address(i as u8)),
-						ethabi::Token::Uint(
-							Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6))),
-						),
-					])
-					.unwrap(),
+				.unwrap()
+				.encode_input(&[
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from(mock_address(i as u8).0)),
+					ethabi::Token::Uint(
+						Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6))),
+					),
+				])
+				.unwrap(),
 					Default::default(),
 					300_000,
 					true,

@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use crate::{
-	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
+	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeOrigin, Timestamp},
 	MultiAssetDelegationPrecompile, MultiAssetDelegationPrecompileCall,
 };
 use fp_evm::FeeCalculator;
@@ -31,7 +31,7 @@ use pallet_evm_precompile_staking::{StakingPrecompile, StakingPrecompileCall};
 use precompile_utils::precompile_set::{
 	AddressU64, PrecompileAt, PrecompileSetBuilder, SubcallWithMaxNesting,
 };
-use sp_core::{keccak_256, ConstU32, H160, H256, U256};
+use sp_core::{keccak_256, ConstU32, ConstU64, H160, H256, U256};
 use sp_runtime::{
 	traits::{DispatchInfoOf, Dispatchable},
 	transaction_validity::{TransactionValidity, TransactionValidityError},
@@ -110,13 +110,9 @@ parameter_types! {
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
 }
 
-parameter_types! {
-	pub SuicideQuickClearLimit: u32 = 0;
-}
-
 pub struct DealWithFees;
 impl OnUnbalanced<RuntimeNegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
+	fn on_unbalanceds(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
 		// whatever
 	}
 }
@@ -204,7 +200,6 @@ impl pallet_evm::Config for Runtime {
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
 	type AddressMapping = crate::mock::TestAccount;
 	type Currency = Balances;
-	type RuntimeEvent = RuntimeEvent;
 	type PrecompilesType = Precompiles<Self>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
@@ -212,20 +207,29 @@ impl pallet_evm::Config for Runtime {
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 	type OnChargeTransaction = CustomEVMCurrencyAdapter;
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = ();
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Self>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
+	type GasLimitStorageGrowthRatio = ConstU64<1>;
 }
 
 parameter_types! {
 	pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
 }
 
+pub struct MockStateRoot;
+impl sp_core::Get<H256> for MockStateRoot {
+	fn get() -> H256 {
+		H256::default()
+	}
+}
+
 impl pallet_ethereum::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type StateRoot = IntermediateStateRoot<Self>;
+	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;
 }
@@ -302,6 +306,7 @@ impl EvmRunner<Runtime> for MockedEvmRunner {
 		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
 		let nonce = None;
 		let access_list = Default::default();
+		let authorization_list = Default::default();
 		let weight_limit = None;
 		let proof_size_base_cost = None;
 		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
@@ -314,10 +319,11 @@ impl EvmRunner<Runtime> for MockedEvmRunner {
 			Some(max_priority_fee_per_gas),
 			nonce,
 			access_list,
-			is_transactional,
+			authorization_list,
 			validate,
-			weight_limit,
+			is_transactional,
 			proof_size_base_cost,
+			weight_limit,
 			<Runtime as pallet_evm::Config>::config(),
 		)
 		.map_err(|o| tangle_primitives::services::RunnerError { error: o.error, weight: o.weight })

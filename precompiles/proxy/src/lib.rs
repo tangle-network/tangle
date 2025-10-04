@@ -183,7 +183,7 @@ where
 		handle.record_db_read::<Runtime>(
 			28 + (29 * (<Runtime as pallet_proxy::Config>::MaxProxies::get() as usize)) + 8,
 		)?;
-		if ProxyPallet::<Runtime>::proxies(&origin)
+		if ProxyPallet::<Runtime>::proxies(origin.clone())
 			.0
 			.iter()
 			.any(|pd| pd.delegate == delegate)
@@ -196,7 +196,7 @@ where
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::add_proxy { delegate, proxy_type, delay };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call, 0)?;
 
 		Ok(())
 	}
@@ -228,7 +228,7 @@ where
 		let call: ProxyCall<Runtime> =
 			ProxyCall::<Runtime>::remove_proxy { delegate, proxy_type, delay };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call, 0)?;
 
 		Ok(())
 	}
@@ -242,7 +242,7 @@ where
 		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let call: ProxyCall<Runtime> = ProxyCall::<Runtime>::remove_proxies {};
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(handle, Some(origin).into(), call, 0)?;
 
 		Ok(())
 	}
@@ -385,8 +385,8 @@ where
 		let transfer = if value.is_zero() {
 			None
 		} else {
-			let contract_address: Runtime::AccountId =
-				Runtime::AddressMapping::into_account_id(handle.context().address);
+		let contract_address: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().address).into();
 
 		// Send back funds received by the precompile.
 		RuntimeHelper::<Runtime>::try_dispatch(

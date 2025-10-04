@@ -20,7 +20,7 @@ sp-io = { workspace = true }
 sp-std = { workspace = true }
 
 # Frontier
-evm = { workspace = true, features = ["with-codec"] }
+evm = { workspace = true }
 fp-evm = { workspace = true }
 pallet-evm = { workspace = true, features = ["forbid-evm-reentrancy"] }
 

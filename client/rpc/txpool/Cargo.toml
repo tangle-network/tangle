@@ -23,5 +23,5 @@ sp-blockchain = { workspace = true }
 sp-runtime = { workspace = true }
 
 # Frontier
-ethereum-types = { workspace = true, features = ["std"] }
+ethereum-types = { workspace = true, features = ["std", "serialize"] }
 fc-rpc = { workspace = true }

@@ -27,7 +27,7 @@ hex = { workspace = true, features = ["alloc"] }
 k256 = { workspace = true }
 
 [dev-dependencies]
-ethereum = { workspace = true, features = ["with-codec"] }
+ethereum = { workspace = true, features = ["with-scale"] }
 hex = { workspace = true }
 num_enum = { workspace = true }
 hex-literal = { workspace = true }

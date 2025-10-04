@@ -27,7 +27,6 @@
 
 #[cfg(feature = "std")]
 use parity_scale_codec::Decode;
-use sp_runtime_interface::runtime_interface;
 use sp_std::vec::Vec;
 
 use evm_tracing_events::StepEventFilter;

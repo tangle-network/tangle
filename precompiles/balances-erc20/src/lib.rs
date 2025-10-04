@@ -287,15 +287,16 @@ where
 		let to: Runtime::AccountId = Runtime::AddressMapping::into_account_id(to).into();
 			let value = Self::u256_to_amount(value).in_field("value")?;
 
-			// Dispatch call (if enough gas).
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
-				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
-					dest: Runtime::Lookup::unlookup(to),
-					value,
-				},
-			)?;
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
+				dest: Runtime::Lookup::unlookup(to),
+				value,
+			},
+			0,
+		)?;
 		}
 
 		log3(
@@ -327,15 +328,16 @@ where
 		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let value = Self::u256_to_amount(value).in_field("value")?;
 
-			// Dispatch call (if enough gas).
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
-				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
-					dest: Runtime::Lookup::unlookup(to_account_id),
-					value,
-				},
-			)?;
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
+				dest: Runtime::Lookup::unlookup(to_account_id),
+				value,
+			},
+			0,
+		)?;
 		}
 
 		log3(
@@ -391,16 +393,17 @@ where
 				})?;
 			}
 
-			// Build call with origin. Here origin is the "from"/owner field.
-			// Dispatch call (if enough gas).
-			RuntimeHelper::<Runtime>::try_dispatch(
-				handle,
-				Some(from).into(),
-				pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
-					dest: Runtime::Lookup::unlookup(to),
-					value,
-				},
-			)?;
+		// Build call with origin. Here origin is the "from"/owner field.
+		// Dispatch call (if enough gas).
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(from).into(),
+			pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
+				dest: Runtime::Lookup::unlookup(to),
+				value,
+			},
+			0,
+		)?;
 		}
 
 		log3(
@@ -453,15 +456,16 @@ where
 
 		handle.record_log_costs_manual(2, 32)?;
 
-		// Send back funds received by the precompile.
-		RuntimeHelper::<Runtime>::try_dispatch(
-			handle,
-			Some(precompile).into(),
-			pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
-				dest: Runtime::Lookup::unlookup(caller),
-				value: amount,
-			},
-		)?;
+	// Send back funds received by the precompile.
+	RuntimeHelper::<Runtime>::try_dispatch(
+		handle,
+		Some(precompile).into(),
+		pallet_balances::Call::<Runtime, Instance>::transfer_allow_death {
+			dest: Runtime::Lookup::unlookup(caller),
+			value: amount,
+		},
+		0,
+	)?;
 
 		log2(
 			handle.context().address,

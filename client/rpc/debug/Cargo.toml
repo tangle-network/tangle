@@ -28,7 +28,7 @@ sp-io = { workspace = true, features = ["std"] }
 sp-runtime = { workspace = true, features = ["std"] }
 
 # Frontier
-ethereum = { workspace = true, features = ["std", "with-codec"] }
+ethereum = { workspace = true, features = ["std", "with-scale"] }
 ethereum-types = { workspace = true, features = ["std"] }
 fc-db = { workspace = true }
 fc-rpc = { workspace = true, features = ["rpc-binary-search-estimate"] }

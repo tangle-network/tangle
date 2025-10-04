@@ -29,7 +29,7 @@ derive_more = { workspace = true, features = ["full"], optional = true }
 hex-literal = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 sha3 = { workspace = true, optional = true }
-ethereum = { workspace = true, features = ["with-codec"], optional = true }
+ethereum = { workspace = true, features = ["with-scale"], optional = true }
 num_enum = { workspace = true, optional = true }
 libsecp256k1 = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
@@ -71,7 +71,7 @@ derive_more = { workspace = true, features = ["full"] }
 hex-literal = { workspace = true }
 serde = { workspace = true }
 sha3 = { workspace = true }
-ethereum = { workspace = true, features = ["with-codec"] }
+ethereum = { workspace = true, features = ["with-scale"] }
 hex = { workspace = true }
 num_enum = { workspace = true }
 libsecp256k1 = { workspace = true }
