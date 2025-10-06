@@ -46,9 +46,11 @@ impl<T> Default for CheckNominatedRestaked<T> {
 	}
 }
 
-impl<T: Config + pallet_staking::Config + Send + Sync> TransactionExtension<<T as frame_system::Config>::RuntimeCall> for CheckNominatedRestaked<T>
+impl<T: Config + pallet_staking::Config + Send + Sync>
+	TransactionExtension<<T as frame_system::Config>::RuntimeCall> for CheckNominatedRestaked<T>
 where
-	<T as frame_system::Config>::RuntimeCall: IsSubType<Call<T>> + IsSubType<pallet_staking::Call<T>>,
+	<T as frame_system::Config>::RuntimeCall:
+		IsSubType<Call<T>> + IsSubType<pallet_staking::Call<T>>,
 {
 	const IDENTIFIER: &'static str = "CheckNominatedRestaked";
 	type Implicit = ();

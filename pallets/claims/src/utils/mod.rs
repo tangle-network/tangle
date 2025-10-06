@@ -1,6 +1,6 @@
 use pallet_evm::{AddressMapping, HashedAddressMapping};
-use parity_scale_codec::{Decode, Encode};
 use parity_scale_codec as codec;
+use parity_scale_codec::{Decode, Encode};
 use scale_info::{
 	TypeInfo,
 	prelude::{format, string::String},
@@ -15,18 +15,18 @@ pub mod ethereum_address;
 pub use ethereum_address::{EcdsaSignature, EthereumAddress};
 
 #[derive(
-    Encode,
-    Decode,
-    Clone,
-    Eq,
-    PartialEq,
-    RuntimeDebug,
-    TypeInfo,
-    Serialize,
-    Deserialize,
-    Ord,
-    PartialOrd,
-    codec::DecodeWithMemTracking,
+	Encode,
+	Decode,
+	Clone,
+	Eq,
+	PartialEq,
+	RuntimeDebug,
+	TypeInfo,
+	Serialize,
+	Deserialize,
+	Ord,
+	PartialOrd,
+	codec::DecodeWithMemTracking,
 )]
 pub enum MultiAddress {
 	/// Claimer is Ethereum address
@@ -61,11 +61,15 @@ impl MultiAddress {
 	}
 }
 
-#[derive(Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, codec::DecodeWithMemTracking)]
+#[derive(
+	Encode, Decode, Clone, Eq, PartialEq, RuntimeDebug, TypeInfo, codec::DecodeWithMemTracking,
+)]
 pub enum MultiAddressSignature {
 	EVM(EcdsaSignature),
 	Native(Sr25519Signature),
 }
 
-#[derive(Clone, Eq, Encode, PartialEq, Decode, TypeInfo, RuntimeDebug, codec::DecodeWithMemTracking)]
+#[derive(
+	Clone, Eq, Encode, PartialEq, Decode, TypeInfo, RuntimeDebug, codec::DecodeWithMemTracking,
+)]
 pub struct Sr25519Signature(pub Signature);

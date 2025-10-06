@@ -612,12 +612,12 @@ impl ExtBuilder {
 					]
 					.iter(),
 				)
-			.cloned()
-			.collect(),
-		dev_accounts: None,
-	}
-	.assimilate_storage(&mut t)
-	.expect("Pallet balances storage can be assimilated");
+				.cloned()
+				.collect(),
+			dev_accounts: None,
+		}
+		.assimilate_storage(&mut t)
+		.expect("Pallet balances storage can be assimilated");
 
 		let mut evm_accounts = BTreeMap::new();
 
@@ -636,7 +636,8 @@ impl ExtBuilder {
 					code: vec![],
 					storage: Default::default(),
 					nonce: Default::default(),
-					balance: sp_core::U256::from(1_000).saturating_mul(sp_core::U256::from(10).pow(sp_core::U256::from(18))),
+					balance: sp_core::U256::from(1_000)
+						.saturating_mul(sp_core::U256::from(10).pow(sp_core::U256::from(18))),
 				},
 			);
 		}
@@ -648,7 +649,8 @@ impl ExtBuilder {
 					code: vec![],
 					storage: Default::default(),
 					nonce: Default::default(),
-					balance: sp_core::U256::from(1_000).saturating_mul(sp_core::U256::from(10).pow(sp_core::U256::from(18))),
+					balance: sp_core::U256::from(1_000)
+						.saturating_mul(sp_core::U256::from(10).pow(sp_core::U256::from(18))),
 				},
 			);
 		}
@@ -733,14 +735,16 @@ impl ExtBuilder {
 						"outputs": [],
 						"stateMutability": "nonpayable"
 					}))
-				.unwrap()
-				.encode_input(&[
-					ethabi::Token::Address(ethabi::ethereum_types::H160::from(mock_address(i as u8).0)),
-					ethabi::Token::Uint(
-						Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6))),
-					),
-				])
-				.unwrap(),
+					.unwrap()
+					.encode_input(&[
+						ethabi::Token::Address(ethabi::ethereum_types::H160::from(
+							mock_address(i as u8).0,
+						)),
+						ethabi::Token::Uint(
+							Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6))),
+						),
+					])
+					.unwrap(),
 					Default::default(),
 					300_000,
 					true,

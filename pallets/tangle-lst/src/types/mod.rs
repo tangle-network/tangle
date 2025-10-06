@@ -20,7 +20,16 @@ pub type AccountIdLookupOf<T> = <<T as frame_system::Config>::Lookup as StaticLo
 
 pub const POINTS_TO_BALANCE_INIT_RATIO: u32 = 1;
 /// Possible operations on the configuration values of this pallet.
-#[derive(Encode, Decode, MaxEncodedLen, TypeInfo, RuntimeDebugNoBound, PartialEq, Clone, codec::DecodeWithMemTracking)]
+#[derive(
+	Encode,
+	Decode,
+	MaxEncodedLen,
+	TypeInfo,
+	RuntimeDebugNoBound,
+	PartialEq,
+	Clone,
+	codec::DecodeWithMemTracking,
+)]
 pub enum ConfigOp<T: Codec + Debug + codec::DecodeWithMemTracking> {
 	/// Don't change.
 	Noop,

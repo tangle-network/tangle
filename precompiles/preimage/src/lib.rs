@@ -58,7 +58,9 @@ where
 		From<Option<Runtime::AccountId>>,
 	<Runtime as frame_system::Config>::Hash: Into<H256>,
 	<Runtime as frame_system::Config>::RuntimeCall: From<PreimageCall<Runtime>>,
-	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	Runtime::AccountId: From<
+		<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+	>,
 {
 	/// Register a preimage on-chain.
 	///
@@ -82,7 +84,12 @@ where
 
 		let call = PreimageCall::<Runtime>::note_preimage { bytes };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		event.record(handle)?;
 		Ok(hash)
@@ -108,7 +115,12 @@ where
 
 		let call = PreimageCall::<Runtime>::unnote_preimage { hash };
 
-		<RuntimeHelper<Runtime>>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		<RuntimeHelper<Runtime>>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		event.record(handle)?;
 

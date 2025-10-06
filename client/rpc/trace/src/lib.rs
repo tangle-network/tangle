@@ -764,14 +764,14 @@ where
 				)),
 		};
 
-	let eth_block_hash = eth_block.header.hash();
-	let eth_tx_hashes: Vec<ethereum_types::H256> = eth_transactions
-		.iter()
-		.map(|t| {
-			let bytes: [u8; 32] = t.transaction_hash.0;
-			ethereum_types::H256::from(bytes)
-		})
-		.collect();
+		let eth_block_hash = eth_block.header.hash();
+		let eth_tx_hashes: Vec<ethereum_types::H256> = eth_transactions
+			.iter()
+			.map(|t| {
+				let bytes: [u8; 32] = t.transaction_hash.0;
+				ethereum_types::H256::from(bytes)
+			})
+			.collect();
 
 		// Get extrinsics (containing Ethereum ones)
 		let extrinsics = backend
@@ -837,13 +837,13 @@ where
 			Ok(rpc_primitives_debug::Response::Block)
 		};
 
-	let eth_transactions_by_index: BTreeMap<u32, H256> = eth_transactions
-		.iter()
-		.map(|t| {
-			let bytes: [u8; 32] = t.transaction_hash.0;
-			(t.transaction_index, ethereum_types::H256::from(bytes))
-		})
-		.collect();
+		let eth_transactions_by_index: BTreeMap<u32, H256> = eth_transactions
+			.iter()
+			.map(|t| {
+				let bytes: [u8; 32] = t.transaction_hash.0;
+				(t.transaction_index, ethereum_types::H256::from(bytes))
+			})
+			.collect();
 
 		let mut proxy = client_evm_tracing::listeners::CallList::default();
 		proxy.using(f)?;
@@ -853,10 +853,10 @@ where
 				.ok_or("Fail to format proxy")?
 				.into_iter()
 				.filter_map(|mut trace| {
-				match eth_transactions_by_index.get(&trace.transaction_position) {
-					Some(transaction_hash) => {
-						let block_hash_bytes: [u8; 32] = eth_block_hash.0;
-						trace.block_hash = ethereum_types::H256::from(block_hash_bytes);
+					match eth_transactions_by_index.get(&trace.transaction_position) {
+						Some(transaction_hash) => {
+							let block_hash_bytes: [u8; 32] = eth_block_hash.0;
+							trace.block_hash = ethereum_types::H256::from(block_hash_bytes);
 							trace.block_number = height;
 							trace.transaction_hash = *transaction_hash;
 

@@ -510,12 +510,7 @@ impl pallet_utility::Config for Runtime {
 }
 
 /// An unchecked extrinsic type to be used in tests.
-pub type MockUncheckedExtrinsic = generic::UncheckedExtrinsic<
-	AccountId,
-	RuntimeCall,
-	u32,
-	(),
->;
+pub type MockUncheckedExtrinsic = generic::UncheckedExtrinsic<AccountId, RuntimeCall, u32, ()>;
 
 /// An implementation of `sp_runtime::traits::Block` to be used in tests.
 type Block =
@@ -700,8 +695,14 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				}))
 				.unwrap()
 				.encode_input(&[
-					ethabi::Token::Address(ethabi::ethereum_types::H160::from_slice(&mock_address(i as u8).0)),
-					ethabi::Token::Uint(ethabi::ethereum_types::U256::from(100_000) * ethabi::ethereum_types::U256::from(10).pow(ethabi::ethereum_types::U256::from(6))),
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from_slice(
+						&mock_address(i as u8).0,
+					)),
+					ethabi::Token::Uint(
+						ethabi::ethereum_types::U256::from(100_000) *
+							ethabi::ethereum_types::U256::from(10)
+								.pow(ethabi::ethereum_types::U256::from(6)),
+					),
 				])
 				.unwrap(),
 				Default::default(),

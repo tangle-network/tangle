@@ -39,8 +39,8 @@ use sp_blockchain::{
 };
 use sp_runtime::{
 	generic::BlockId,
-	traits::{BlakeTwo256, Block as BlockT, Header as HeaderT, UniqueSaturatedInto},
 	testing::H256 as SpH256,
+	traits::{BlakeTwo256, Block as BlockT, Header as HeaderT, UniqueSaturatedInto},
 };
 use std::{future::Future, marker::PhantomData, sync::Arc};
 
@@ -362,13 +362,13 @@ where
 				Ok(BlockId::Number(0u32.unique_saturated_into())),
 			RequestBlockId::Tag(RequestBlockTag::Pending) =>
 				Err(internal_err("'pending' blocks are not supported")),
-		RequestBlockId::Hash(eth_hash) => {
-			let eth_hash_bytes: [u8; 32] = eth_hash.0;
-			let eth_hash_converted = SpH256::from(eth_hash_bytes);
-			match futures::executor::block_on(frontier_backend_client::load_hash::<B, C>(
-				client.as_ref(),
-				frontier_backend.as_ref(),
-				eth_hash_converted,
+			RequestBlockId::Hash(eth_hash) => {
+				let eth_hash_bytes: [u8; 32] = eth_hash.0;
+				let eth_hash_converted = SpH256::from(eth_hash_bytes);
+				match futures::executor::block_on(frontier_backend_client::load_hash::<B, C>(
+					client.as_ref(),
+					frontier_backend.as_ref(),
+					eth_hash_converted,
 				)) {
 					Ok(Some(hash)) => Ok(BlockId::Hash(hash)),
 					Ok(_) => Err(internal_err("Block hash not found".to_string())),
@@ -393,16 +393,16 @@ where
 		// Get parent blockid.
 		let parent_block_hash = *header.parent_hash();
 
-	let statuses = overrides.current_transaction_statuses(hash).unwrap_or_default();
+		let statuses = overrides.current_transaction_statuses(hash).unwrap_or_default();
 
-	// Known ethereum transaction hashes.
-	let eth_tx_hashes: Vec<ethereum_types::H256> = statuses
-		.iter()
-		.map(|t| {
-			let bytes: [u8; 32] = t.transaction_hash.0;
-			ethereum_types::H256::from(bytes)
-		})
-		.collect();
+		// Known ethereum transaction hashes.
+		let eth_tx_hashes: Vec<ethereum_types::H256> = statuses
+			.iter()
+			.map(|t| {
+				let bytes: [u8; 32] = t.transaction_hash.0;
+				ethereum_types::H256::from(bytes)
+			})
+			.collect();
 
 		// If there are no ethereum transactions in the block return empty trace right away.
 		if eth_tx_hashes.is_empty() {
@@ -514,29 +514,29 @@ where
 		overrides: Arc<dyn StorageOverride<B>>,
 		raw_max_memory_usage: usize,
 	) -> RpcResult<Response> {
-	let (tracer_input, trace_type, tracer_config) = Self::handle_params(params)?;
+		let (tracer_input, trace_type, tracer_config) = Self::handle_params(params)?;
 
-	let transaction_hash_bytes: [u8; 32] = transaction_hash.0;
-	let transaction_hash_converted = SpH256::from(transaction_hash_bytes);
-	
-	let (hash, index) =
-		match futures::executor::block_on(frontier_backend_client::load_transactions::<B, C>(
-			client.as_ref(),
-			frontier_backend.as_ref(),
-			transaction_hash_converted,
-			false,
-		)) {
-			Ok(Some((hash, index))) => (hash, index as usize),
-			Ok(None) => return Err(internal_err("Transaction hash not found".to_string())),
-			Err(e) => return Err(e),
-		};
+		let transaction_hash_bytes: [u8; 32] = transaction_hash.0;
+		let transaction_hash_converted = SpH256::from(transaction_hash_bytes);
 
-	let reference_id =
-		match futures::executor::block_on(frontier_backend_client::load_hash::<B, C>(
-			client.as_ref(),
-			frontier_backend.as_ref(),
-			hash,
-		)) {
+		let (hash, index) =
+			match futures::executor::block_on(frontier_backend_client::load_transactions::<B, C>(
+				client.as_ref(),
+				frontier_backend.as_ref(),
+				transaction_hash_converted,
+				false,
+			)) {
+				Ok(Some((hash, index))) => (hash, index as usize),
+				Ok(None) => return Err(internal_err("Transaction hash not found".to_string())),
+				Err(e) => return Err(e),
+			};
+
+		let reference_id =
+			match futures::executor::block_on(frontier_backend_client::load_hash::<B, C>(
+				client.as_ref(),
+				frontier_backend.as_ref(),
+				hash,
+			)) {
 				Ok(Some(hash)) => BlockId::Hash(hash),
 				Ok(_) => return Err(internal_err("Block hash not found".to_string())),
 				Err(e) => return Err(e),
@@ -618,21 +618,21 @@ where
 								exts,
 								transaction,
 							)
-					} else {
-						// Pre-london update, legacy transactions.
-						match transaction {
-							#[allow(deprecated)]
-							ethereum::TransactionV3::Legacy(tx) => api.trace_transaction_before_version_4(
-								parent_block_hash,
-								exts,
-								tx,
-							),
-							_ =>
-								return Err(internal_err(
-									"Bug: pre-london runtime expects legacy transactions"
-										.to_string(),
-								)),
-						}
+						} else {
+							// Pre-london update, legacy transactions.
+							match transaction {
+								#[allow(deprecated)]
+								ethereum::TransactionV3::Legacy(tx) => api.trace_transaction_before_version_4(
+									parent_block_hash,
+									exts,
+									tx,
+								),
+								_ =>
+									return Err(internal_err(
+										"Bug: pre-london runtime expects legacy transactions"
+											.to_string(),
+									)),
+							}
 						}
 					};
 
@@ -717,13 +717,13 @@ where
 				Ok(BlockId::Number(0u32.unique_saturated_into())),
 			RequestBlockId::Tag(RequestBlockTag::Pending) =>
 				Err(internal_err("'pending' blocks are not supported")),
-		RequestBlockId::Hash(eth_hash) => {
-			let eth_hash_bytes: [u8; 32] = eth_hash.0;
-			let eth_hash_converted = SpH256::from(eth_hash_bytes);
-			match futures::executor::block_on(frontier_backend_client::load_hash::<B, C>(
-				client.as_ref(),
-				frontier_backend.as_ref(),
-				eth_hash_converted,
+			RequestBlockId::Hash(eth_hash) => {
+				let eth_hash_bytes: [u8; 32] = eth_hash.0;
+				let eth_hash_converted = SpH256::from(eth_hash_bytes);
+				match futures::executor::block_on(frontier_backend_client::load_hash::<B, C>(
+					client.as_ref(),
+					frontier_backend.as_ref(),
+					eth_hash_converted,
 				)) {
 					Ok(Some(hash)) => Ok(BlockId::Hash(hash)),
 					Ok(_) => Err(internal_err("Block hash not found".to_string())),
@@ -799,43 +799,44 @@ where
 				},
 			};
 
-	let gas_limit = match gas {
-		Some(amount) => amount,
-		None => {
-			if let Some(block) = api
-				.current_block(parent_block_hash)
-				.map_err(|err| internal_err(format!("runtime error: {:?}", err)))?
-			{
-				let gas_limit_bytes = block.header.gas_limit.to_big_endian();
-				ethereum_types::U256::from_big_endian(&gas_limit_bytes)
-			} else {
-				return Err(internal_err(
-					"block unavailable, cannot query gas limit".to_string(),
-				));
-			}
-		},
-	};
+		let gas_limit = match gas {
+			Some(amount) => amount,
+			None => {
+				if let Some(block) = api
+					.current_block(parent_block_hash)
+					.map_err(|err| internal_err(format!("runtime error: {:?}", err)))?
+				{
+					let gas_limit_bytes = block.header.gas_limit.to_big_endian();
+					ethereum_types::U256::from_big_endian(&gas_limit_bytes)
+				} else {
+					return Err(internal_err(
+						"block unavailable, cannot query gas limit".to_string(),
+					));
+				}
+			},
+		};
 		let data = data.map(|d| d.0).unwrap_or_default();
 
 		let access_list = access_list.unwrap_or_default();
 
 		let f = || -> RpcResult<_> {
-			let converted_access_list: Vec<(ethereum_types::H160, Vec<ethereum_types::H256>)> = access_list
-				.into_iter()
-				.map(|item| {
-					let addr_bytes: [u8; 20] = item.address.0;
-					let addr = ethereum_types::H160::from(addr_bytes);
-					let storage_keys: Vec<ethereum_types::H256> = item
-						.storage_keys
-						.into_iter()
-						.map(|key| {
-							let key_bytes: [u8; 32] = key.0;
-							ethereum_types::H256::from(key_bytes)
-						})
-						.collect();
-					(addr, storage_keys)
-				})
-				.collect();
+			let converted_access_list: Vec<(ethereum_types::H160, Vec<ethereum_types::H256>)> =
+				access_list
+					.into_iter()
+					.map(|item| {
+						let addr_bytes: [u8; 20] = item.address.0;
+						let addr = ethereum_types::H160::from(addr_bytes);
+						let storage_keys: Vec<ethereum_types::H256> = item
+							.storage_keys
+							.into_iter()
+							.map(|key| {
+								let key_bytes: [u8; 32] = key.0;
+								ethereum_types::H256::from(key_bytes)
+							})
+							.collect();
+						(addr, storage_keys)
+					})
+					.collect();
 
 			api.trace_call(
 				parent_block_hash,

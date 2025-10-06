@@ -523,18 +523,18 @@ fn test_nested_evm_bypass_proxy_should_allow_elevating_proxy_type() {
 			}
 			.into();
 
-		let evm_call = RuntimeCall::Evm(EvmCall::call {
-			source: Alice.into(),
-			target: Precompile1.into(),
-			input: add_proxy_precompile,
-			value: U256::zero(),
-			gas_limit: u64::MAX,
-			max_fee_per_gas: 0.into(),
-			max_priority_fee_per_gas: Some(U256::zero()),
-			nonce: None,
-			access_list: Vec::new(),
-			authorization_list: Vec::new(),
-		});
+			let evm_call = RuntimeCall::Evm(EvmCall::call {
+				source: Alice.into(),
+				target: Precompile1.into(),
+				input: add_proxy_precompile,
+				value: U256::zero(),
+				gas_limit: u64::MAX,
+				max_fee_per_gas: 0.into(),
+				max_priority_fee_per_gas: Some(U256::zero()),
+				nonce: None,
+				access_list: Vec::new(),
+				authorization_list: Vec::new(),
+			});
 
 			// call the evm call in a proxy call
 			assert_ok!(<ProxyPallet<Runtime>>::proxy(

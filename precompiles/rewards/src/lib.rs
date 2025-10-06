@@ -41,7 +41,9 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_rewards::Call<Runtime>>,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256> + From<u32>,
-	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	Runtime::AccountId: From<
+		<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+	>,
 {
 	#[precompile::public("claimRewards(uint256,address)")]
 	fn claim_rewards(
@@ -49,24 +51,24 @@ where
 		asset_id: U256,
 		token_address: Address,
 	) -> EvmResult {
-	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-	let caller = handle.context().caller;
-	let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
+		let caller = handle.context().caller;
+		let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(caller).into();
 
-	let (asset, _) = match (asset_id.as_u32(), token_address.0 .0) {
-		(0, erc20_token) if erc20_token != [0; 20] =>
-			(Asset::<AssetIdOf<Runtime>>::Erc20(erc20_token.into()), U256::zero()),
-		(other_asset_id, _) =>
-			(Asset::<AssetIdOf<Runtime>>::Custom(other_asset_id.into()), U256::zero()),
-	};
+		let (asset, _) = match (asset_id.as_u32(), token_address.0 .0) {
+			(0, erc20_token) if erc20_token != [0; 20] =>
+				(Asset::<AssetIdOf<Runtime>>::Erc20(erc20_token.into()), U256::zero()),
+			(other_asset_id, _) =>
+				(Asset::<AssetIdOf<Runtime>>::Custom(other_asset_id.into()), U256::zero()),
+		};
 
-	RuntimeHelper::<Runtime>::try_dispatch(
-		handle,
-		Some(who.clone()).into(),
-		pallet_rewards::Call::<Runtime>::claim_rewards_other { who, asset },
-		0,
-	)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			Some(who.clone()).into(),
+			pallet_rewards::Call::<Runtime>::claim_rewards_other { who, asset },
+			0,
+		)?;
 
 		Ok(())
 	}

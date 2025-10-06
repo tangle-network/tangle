@@ -81,8 +81,17 @@ type BalanceOf<T> = <CurrencyOf<T> as Currency<<T as frame_system::Config>::Acco
 
 /// The kind of statement an account needs to make for a claim to be valid.
 #[derive(
-    Encode, Decode, Clone, Copy, Eq, PartialEq, RuntimeDebug, TypeInfo, Serialize, Deserialize,
-    parity_scale_codec::DecodeWithMemTracking,
+	Encode,
+	Decode,
+	Clone,
+	Copy,
+	Eq,
+	PartialEq,
+	RuntimeDebug,
+	TypeInfo,
+	Serialize,
+	Deserialize,
+	parity_scale_codec::DecodeWithMemTracking,
 )]
 pub enum StatementKind {
 	/// Statement required to be made by non-SAFE holders.

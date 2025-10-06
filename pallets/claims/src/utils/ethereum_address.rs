@@ -6,8 +6,18 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 ///
 /// This gets serialized to the 0x-prefixed hex representation.
 #[derive(
-    Clone, Copy, PartialEq, Eq, Encode, Decode, Default, RuntimeDebug, TypeInfo, Ord, PartialOrd,
-    parity_scale_codec::DecodeWithMemTracking,
+	Clone,
+	Copy,
+	PartialEq,
+	Eq,
+	Encode,
+	Decode,
+	Default,
+	RuntimeDebug,
+	TypeInfo,
+	Ord,
+	PartialOrd,
+	parity_scale_codec::DecodeWithMemTracking,
 )]
 pub struct EthereumAddress(pub [u8; 20]);
 

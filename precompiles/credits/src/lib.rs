@@ -2,8 +2,8 @@
 
 use fp_evm::PrecompileHandle;
 use frame_support::{
-    dispatch::{GetDispatchInfo, PostDispatchInfo},
-    traits::OriginTrait,
+	dispatch::{GetDispatchInfo, PostDispatchInfo},
+	traits::OriginTrait,
 };
 use pallet_credits::types::OffchainAccountIdOf;
 use pallet_evm::AddressMapping;
@@ -30,7 +30,9 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	Runtime::AccountId: From<
+		<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+	>,
 {
 	fn default() -> Self {
 		Self::new()
@@ -44,7 +46,9 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	Runtime::AccountId: From<
+		<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+	>,
 {
 	pub fn new() -> Self {
 		Self(PhantomData)
@@ -69,18 +73,26 @@ where
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_credits::Call<Runtime>>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
-	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	Runtime::AccountId: From<
+		<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+	>,
 {
 	#[precompile::public("burn(uint256)")]
 	fn burn(handle: &mut impl PrecompileHandle, amount: U256) -> EvmResult<bool> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		let origin: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let amount = Self::u256_to_balance(amount)?;
 
 		let call = pallet_credits::Call::<Runtime>::burn { amount };
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 		Ok(true)
 	}
 
@@ -92,7 +104,8 @@ where
 	) -> EvmResult<bool> {
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
-		let origin: Runtime::AccountId = Runtime::AddressMapping::into_account_id(handle.context().caller).into();
+		let origin: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(handle.context().caller).into();
 		let amount_to_claim = Self::u256_to_balance(amount_to_claim)?;
 
 		// Convert BoundedBytes to BoundedVec<u8>
@@ -104,7 +117,12 @@ where
 		let call =
 			pallet_credits::Call::<Runtime>::claim_credits { amount_to_claim, offchain_account_id };
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 		Ok(true)
 	}
 
@@ -128,10 +146,11 @@ where
 		handle: &mut impl PrecompileHandle,
 		account: Address,
 	) -> EvmResult<U256> {
-	handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
+		handle.record_cost(RuntimeHelper::<Runtime>::db_read_gas_cost())?;
 
-	let account_id: Runtime::AccountId = Runtime::AddressMapping::into_account_id(account.into()).into();
-	let current_block = frame_system::Pallet::<Runtime>::block_number();
+		let account_id: Runtime::AccountId =
+			Runtime::AddressMapping::into_account_id(account.into()).into();
+		let current_block = frame_system::Pallet::<Runtime>::block_number();
 
 		// Call the internal pallet function to calculate accrued credits
 		let accrued_amount =

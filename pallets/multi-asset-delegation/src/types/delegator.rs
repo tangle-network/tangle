@@ -15,7 +15,10 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
-use frame_support::{BoundedVec, ensure, pallet_prelude::{Get, MaxEncodedLen}};
+use frame_support::{
+	BoundedVec, ensure,
+	pallet_prelude::{Get, MaxEncodedLen},
+};
 use sp_runtime::traits::{CheckedAdd, Saturating};
 use sp_std::{fmt::Debug, vec};
 use tangle_primitives::{
@@ -427,4 +430,7 @@ impl<
 }
 
 // Manual implementation of DecodeWithMemTracking marker trait for DelegatorBlueprintSelection
-impl<MaxBlueprints: Get<u32>> parity_scale_codec::DecodeWithMemTracking for DelegatorBlueprintSelection<MaxBlueprints> {}
+impl<MaxBlueprints: Get<u32>> parity_scale_codec::DecodeWithMemTracking
+	for DelegatorBlueprintSelection<MaxBlueprints>
+{
+}

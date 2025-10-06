@@ -61,7 +61,9 @@ impl<T: Config> Pallet<T> {
 
 		let args = [
 			Token::Address(ethabi::ethereum_types::H160::from(to.0)),
-			Token::Uint(ethabi::ethereum_types::U256::from_little_endian(&value.using_encoded(|v| v.to_vec()))),
+			Token::Uint(ethabi::ethereum_types::U256::from_little_endian(
+				&value.using_encoded(|v| v.to_vec()),
+			)),
 		];
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
@@ -126,7 +128,11 @@ impl<T: Config> Pallet<T> {
 		let balance = if let Some(data) = maybe_value {
 			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
 			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
-			if let ethabi::Token::Uint(val) = success { *val } else { ethabi::ethereum_types::U256::zero() }
+			if let ethabi::Token::Uint(val) = success {
+				*val
+			} else {
+				ethabi::ethereum_types::U256::zero()
+			}
 		} else {
 			ethabi::ethereum_types::U256::zero()
 		};
@@ -235,7 +241,9 @@ impl<T: Config> Pallet<T> {
 				Token::Uint(blueprint_id.into()),
 				Token::Uint(service_id.into()),
 				Token::FixedBytes(operator.to_vec()),
-				Token::Uint(ethabi::ethereum_types::U256::from_little_endian(&slash_amount.using_encoded(|v| v.to_vec()))),
+				Token::Uint(ethabi::ethereum_types::U256::from_little_endian(
+					&slash_amount.using_encoded(|v| v.to_vec()),
+				)),
 			])
 			.map_err(|_| Error::<T>::EVMAbiEncode)?;
 

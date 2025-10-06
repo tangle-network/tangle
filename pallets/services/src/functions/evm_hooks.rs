@@ -131,8 +131,10 @@ impl<T: Config> Pallet<T> {
 				};
 				let args = &[
 					Token::Uint(ethabi::Uint::from(blueprint_id)),
-                    Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(owner.clone()).0)),
-                    Token::Address(ethabi::ethereum_types::H160::from(mbsm.0)),
+					Token::Address(ethabi::ethereum_types::H160::from(
+						T::EvmAddressMapping::into_address(owner.clone()).0,
+					)),
+					Token::Address(ethabi::ethereum_types::H160::from(mbsm.0)),
 				];
 				let data = f.encode_input(args).map_err(|_| Error::<T>::EVMAbiEncode)?;
 				let gas_limit = 500_000;
@@ -176,7 +178,9 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-                Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(owner.clone()).0)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(owner.clone()).0,
+				)),
 				blueprint.to_ethabi(),
 			],
 			Zero::zero(),
@@ -722,18 +726,32 @@ impl<T: Config> Pallet<T> {
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
 				Token::Tuple(vec![
 					Token::Uint(ethabi::Uint::from(request_id)),
-                    Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(requester.clone()).0)),
+					Token::Address(ethabi::ethereum_types::H160::from(
+						T::EvmAddressMapping::into_address(requester.clone()).0,
+					)),
 					Token::Array(operators.iter().map(OperatorPreferences::to_ethabi).collect()),
 					Token::Bytes(Field::encode_to_ethabi(request_args)),
 					Token::Array(
 						permitted_callers
 							.iter()
-                            .map(|caller| Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(caller.clone()).0)))
+							.map(|caller| {
+								Token::Address(ethabi::ethereum_types::H160::from(
+									T::EvmAddressMapping::into_address(caller.clone()).0,
+								))
+							})
 							.collect(),
 					),
-                    Token::Uint({ let v: sp_core::U256 = ttl.into(); let b = v.to_little_endian(); ethabi::ethereum_types::U256::from_little_endian(&b) }),
+					Token::Uint({
+						let v: sp_core::U256 = ttl.into();
+						let b = v.to_little_endian();
+						ethabi::ethereum_types::U256::from_little_endian(&b)
+					}),
 					payment_asset.to_ethabi(),
-                    Token::Uint({ let v: sp_core::U256 = value.using_encoded(U256::from_little_endian); let b = v.to_little_endian(); ethabi::ethereum_types::U256::from_little_endian(&b) }),
+					Token::Uint({
+						let v: sp_core::U256 = value.using_encoded(U256::from_little_endian);
+						let b = v.to_little_endian();
+						ethabi::ethereum_types::U256::from_little_endian(&b)
+					}),
 				]),
 			],
 			Zero::zero(),
@@ -815,17 +833,27 @@ impl<T: Config> Pallet<T> {
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
 				Token::Uint(ethabi::Uint::from(request_id)),
 				Token::Uint(ethabi::Uint::from(service_id)),
-                Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(owner.clone()).0)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(owner.clone()).0,
+				)),
 				Token::Array(
 					permitted_callers
 						.iter()
-                            .map(|caller| Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(caller.clone()).0)))
+						.map(|caller| {
+							Token::Address(ethabi::ethereum_types::H160::from(
+								T::EvmAddressMapping::into_address(caller.clone()).0,
+							))
+						})
 						.collect(),
-			),
-			// Token::Array(vec![]),
-                Token::Uint({ let v: sp_core::U256 = ttl.into(); let b = v.to_little_endian(); ethabi::ethereum_types::U256::from_little_endian(&b) }),
-		],
-		Zero::zero(),
+				),
+				// Token::Array(vec![]),
+				Token::Uint({
+					let v: sp_core::U256 = ttl.into();
+					let b = v.to_little_endian();
+					ethabi::ethereum_types::U256::from_little_endian(&b)
+				}),
+			],
+			Zero::zero(),
 		)
 	}
 
@@ -876,7 +904,9 @@ impl<T: Config> Pallet<T> {
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
 				Token::Uint(ethabi::Uint::from(service_id)),
-                Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(owner.clone()).0)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(owner.clone()).0,
+				)),
 			],
 			Zero::zero(),
 		)
@@ -1130,7 +1160,9 @@ impl<T: Config> Pallet<T> {
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
 				Token::Uint(ethabi::Uint::from(instance_id)),
-                Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(operator.clone()).0)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(operator.clone()).0,
+				)),
 				preferences.to_ethabi(),
 			],
 			Zero::zero(),
@@ -1188,10 +1220,12 @@ impl<T: Config> Pallet<T> {
 				state_mutability: StateMutability::NonPayable,
 			},
 			&[
-			Token::Uint(ethabi::Uint::from(blueprint_id)),
-			Token::Uint(ethabi::Uint::from(instance_id)),
-			Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(operator.clone()).0)),
-			preferences.to_ethabi(),
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(instance_id)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(operator.clone()).0,
+				)),
+				preferences.to_ethabi(),
 			],
 			Zero::zero(),
 		)
@@ -1247,7 +1281,9 @@ impl<T: Config> Pallet<T> {
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
 				Token::Uint(ethabi::Uint::from(instance_id)),
-				Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(operator.clone()).0)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(operator.clone()).0,
+				)),
 			],
 			Zero::zero(),
 		)
@@ -1298,18 +1334,20 @@ impl<T: Config> Pallet<T> {
 				],
 				outputs: Default::default(),
 				constant: None,
-			state_mutability: StateMutability::NonPayable,
-		},
-		&[
-			Token::Uint(ethabi::Uint::from(blueprint_id)),
-			Token::Uint(ethabi::Uint::from(instance_id)),
-			Token::Address(ethabi::ethereum_types::H160::from(T::EvmAddressMapping::into_address(operator.clone()).0)),
-		],
-		Zero::zero(),
-	)
-}
+				state_mutability: StateMutability::NonPayable,
+			},
+			&[
+				Token::Uint(ethabi::Uint::from(blueprint_id)),
+				Token::Uint(ethabi::Uint::from(instance_id)),
+				Token::Address(ethabi::ethereum_types::H160::from(
+					T::EvmAddressMapping::into_address(operator.clone()).0,
+				)),
+			],
+			Zero::zero(),
+		)
+	}
 
-/// Hook to be called when a slash is applied.
+	/// Hook to be called when a slash is applied.
 	///
 	/// This function is called when a slash is applied to an operator. It performs an EVM call
 	/// to the `onSlash` function of the service blueprint's manager contract.
@@ -1597,14 +1635,14 @@ impl<T: Config> Pallet<T> {
 			state_mutability: StateMutability::NonPayable,
 		};
 
-	let args = [
-		Token::Address(ethabi::ethereum_types::H160::from(to.0)),
-		Token::Uint({
-			let sp_value = value.using_encoded(U256::from_little_endian);
-			let bytes = sp_value.to_little_endian();
-			ethabi::Uint::from_little_endian(&bytes)
-		}),
-	];
+		let args = [
+			Token::Address(ethabi::ethereum_types::H160::from(to.0)),
+			Token::Uint({
+				let sp_value = value.using_encoded(U256::from_little_endian);
+				let bytes = sp_value.to_little_endian();
+				ethabi::Uint::from_little_endian(&bytes)
+			}),
+		];
 
 		log::debug!(target: "evm", "Dispatching EVM call(0x{}): {}", hex::encode(transfer_fn.short_signature()), transfer_fn.signature());
 		#[cfg(test)]
@@ -1663,23 +1701,23 @@ impl<T: Config> Pallet<T> {
 			Self::evm_call(Self::pallet_evm_account(), erc20, U256::zero(), data, gas_limit)?;
 		let weight = Self::weight_from_call_info(&info);
 
-	// decode the result and return it
-	let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
-	let balance = if let Some(data) = maybe_value {
-		let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
-		let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
-		if let ethabi::Token::Uint(val) = success {
-			let mut bytes = [0u8; 32];
-			val.to_little_endian(&mut bytes);
-			U256::from_little_endian(&bytes)
+		// decode the result and return it
+		let maybe_value = info.exit_reason.is_succeed().then_some(&info.value);
+		let balance = if let Some(data) = maybe_value {
+			let result = transfer_fn.decode_output(data).map_err(|_| Error::<T>::EVMAbiDecode)?;
+			let success = result.first().ok_or(Error::<T>::EVMAbiDecode)?;
+			if let ethabi::Token::Uint(val) = success {
+				let mut bytes = [0u8; 32];
+				val.to_little_endian(&mut bytes);
+				U256::from_little_endian(&bytes)
+			} else {
+				U256::zero()
+			}
 		} else {
 			U256::zero()
-		}
-	} else {
-		U256::zero()
-	};
+		};
 
-	Ok((balance, weight))
+		Ok((balance, weight))
 	}
 
 	/// Hook to notify an external contract about a slash event.
@@ -1737,9 +1775,13 @@ impl<T: Config> Pallet<T> {
 			},
 			&[
 				Token::Uint(ethabi::Uint::from(blueprint_id)),
-			Token::Uint(ethabi::Uint::from(service_id)),
-			Token::Bytes(operator.encode()),
-			Token::Uint({ let v: sp_core::U256 = amount.into(); let b = v.to_little_endian(); ethabi::ethereum_types::U256::from_little_endian(&b) }),
+				Token::Uint(ethabi::Uint::from(service_id)),
+				Token::Bytes(operator.encode()),
+				Token::Uint({
+					let v: sp_core::U256 = amount.into();
+					let b = v.to_little_endian();
+					ethabi::ethereum_types::U256::from_little_endian(&b)
+				}),
 			],
 			Zero::zero(),
 		)?;

@@ -50,18 +50,23 @@ impl GetT for Summary {
 			EthereumTransaction::Legacy(t) => (t.action, t.value, t.gas_price, t.gas_limit),
 			EthereumTransaction::EIP2930(t) => (t.action, t.value, t.gas_price, t.gas_limit),
 			EthereumTransaction::EIP1559(t) => (t.action, t.value, t.max_fee_per_gas, t.gas_limit),
-			EthereumTransaction::EIP7702(t) => (ethereum::TransactionAction::Create, Default::default(), t.max_fee_per_gas, t.gas_limit),
+			EthereumTransaction::EIP7702(t) => (
+				ethereum::TransactionAction::Create,
+				Default::default(),
+				t.max_fee_per_gas,
+				t.gas_limit,
+			),
 		};
-		
+
 		let value_bytes = value.to_big_endian();
 		let value_converted = U256::from_big_endian(&value_bytes);
-		
+
 		let gas_price_bytes = gas_price.to_big_endian();
 		let gas_price_converted = U256::from_big_endian(&gas_price_bytes);
-		
+
 		let gas_limit_bytes = gas_limit.to_big_endian();
 		let gas_limit_converted = U256::from_big_endian(&gas_limit_bytes);
-		
+
 		Self {
 			to: match action {
 				TransactionAction::Call(to) => {

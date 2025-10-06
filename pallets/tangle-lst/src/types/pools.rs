@@ -61,7 +61,17 @@ impl<T: Config> PoolMember<T> {
 }
 
 /// A pool's possible states.
-#[derive(Encode, Decode, MaxEncodedLen, TypeInfo, PartialEq, RuntimeDebugNoBound, Clone, Copy, codec::DecodeWithMemTracking)]
+#[derive(
+	Encode,
+	Decode,
+	MaxEncodedLen,
+	TypeInfo,
+	PartialEq,
+	RuntimeDebugNoBound,
+	Clone,
+	Copy,
+	codec::DecodeWithMemTracking,
+)]
 pub enum PoolState {
 	/// The pool is open to be joined, and is working normally.
 	Open,

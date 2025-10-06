@@ -560,9 +560,10 @@ pub mod pallet {
 		NoBalanceToUnbond,
 	}
 
-	#[derive(Encode, Decode, PartialEq, TypeInfo, PalletError, RuntimeDebug)]
-    #[derive(codec::DecodeWithMemTracking)]
-    pub enum DefensiveError {
+	#[derive(
+		Encode, Decode, PartialEq, TypeInfo, PalletError, RuntimeDebug, codec::DecodeWithMemTracking,
+	)]
+	pub enum DefensiveError {
 		/// There isn't enough space in the unbond pool.
 		NotEnoughSpaceInUnbondPool,
 		/// A (bonded) pool id does not exist.

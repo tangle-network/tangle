@@ -3,8 +3,8 @@
 
 use fp_evm::{PrecompileFailure, PrecompileHandle};
 use frame_support::{
-    dispatch::{GetDispatchInfo, PostDispatchInfo},
-    traits::OriginTrait,
+	dispatch::{GetDispatchInfo, PostDispatchInfo},
+	traits::OriginTrait,
 };
 use frame_system::pallet_prelude::BlockNumberFor;
 use pallet_evm::AddressMapping;
@@ -35,7 +35,9 @@ where
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
 	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_services::Call<Runtime>>,
-	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
+	Runtime::AccountId: From<
+		<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId,
+	>,
 {
 	// Errors for the `Services` precompile.
 
@@ -84,7 +86,12 @@ where
 			},
 		};
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		Ok(())
 	}
@@ -138,20 +145,20 @@ where
 				.collect::<Result<_, _>>()
 				.map_err(|_| revert_custom_error(Self::INVALID_REQUEST_ARGUMENTS))?;
 
-	let value_bytes = handle.context().apparent_value.to_little_endian();
-	let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
-		.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?;
+		let value_bytes = handle.context().apparent_value.to_little_endian();
+		let value = BalanceOf::<Runtime>::decode(&mut &value_bytes[..])
+			.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?;
 
-	let ttl_bytes = ttl.to_little_endian();
+		let ttl_bytes = ttl.to_little_endian();
 
-	let ttl = BlockNumberFor::<Runtime>::decode(&mut &ttl_bytes[..])
-		.map_err(|_| revert_custom_error(Self::INVALID_TTL))?;
+		let ttl = BlockNumberFor::<Runtime>::decode(&mut &ttl_bytes[..])
+			.map_err(|_| revert_custom_error(Self::INVALID_TTL))?;
 
-	let amount = {
-		let amount_bytes = amount.to_little_endian();
-		BalanceOf::<Runtime>::decode(&mut &amount_bytes[..])
-			.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?
-	};
+		let amount = {
+			let amount_bytes = amount.to_little_endian();
+			BalanceOf::<Runtime>::decode(&mut &amount_bytes[..])
+				.map_err(|_| revert_custom_error(Self::INVALID_AMOUNT))?
+		};
 
 		const ZERO_ADDRESS: [u8; 20] = [0; 20];
 
@@ -195,7 +202,12 @@ where
 			membership_model,
 		};
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		Ok(())
 	}
@@ -210,7 +222,12 @@ where
 
 		let call = pallet_services::Call::<Runtime>::terminate { service_id };
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		Ok(())
 	}
@@ -234,7 +251,12 @@ where
 
 		let call = pallet_services::Call::<Runtime>::call { service_id, job, args: decoded_args };
 
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		Ok(())
 	}
@@ -267,7 +289,12 @@ where
 			service_id,
 			slash_percent: percent,
 		};
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		Ok(())
 	}
@@ -283,7 +310,12 @@ where
 
 		// inside this call, we do check if the caller is authorized to dispute the slash
 		let call = pallet_services::Call::<Runtime>::dispute { era, index };
-        RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(
+			handle,
+			<Runtime as frame_system::Config>::RuntimeOrigin::signed(origin),
+			call,
+			0,
+		)?;
 
 		Ok(())
 	}

@@ -73,22 +73,28 @@ impl GetT for Transaction {
 				(t.nonce, t.action, t.value, t.gas_price, t.gas_limit, t.input.clone()),
 			EthereumTransaction::EIP1559(t) =>
 				(t.nonce, t.action, t.value, t.max_fee_per_gas, t.gas_limit, t.input.clone()),
-			EthereumTransaction::EIP7702(t) =>
-				(t.nonce, ethereum::TransactionAction::Create, Default::default(), t.max_fee_per_gas, t.gas_limit, Default::default()),
+			EthereumTransaction::EIP7702(t) => (
+				t.nonce,
+				ethereum::TransactionAction::Create,
+				Default::default(),
+				t.max_fee_per_gas,
+				t.gas_limit,
+				Default::default(),
+			),
 		};
-		
+
 		let nonce_bytes = nonce.to_big_endian();
 		let nonce_converted = U256::from_big_endian(&nonce_bytes);
-		
+
 		let value_bytes = value.to_big_endian();
 		let value_converted = U256::from_big_endian(&value_bytes);
-		
+
 		let gas_price_bytes = gas_price.to_big_endian();
 		let gas_price_converted = U256::from_big_endian(&gas_price_bytes);
-		
+
 		let gas_limit_bytes = gas_limit.to_big_endian();
 		let gas_limit_converted = U256::from_big_endian(&gas_limit_bytes);
-		
+
 		Self {
 			hash,
 			nonce: nonce_converted,

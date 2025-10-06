@@ -251,7 +251,8 @@ impl<C: Constraints> ServiceBlueprint<C> {
 			// Request Parameters ?
 			// Blueprint Manager
 			match self.manager {
-				BlueprintServiceManager::Evm(addr) => ethabi::Token::Address(ethabi::ethereum_types::H160::from(addr.0)),
+				BlueprintServiceManager::Evm(addr) =>
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from(addr.0)),
 			},
 			// Master Manager Revision
 			match self.master_manager_revision {
