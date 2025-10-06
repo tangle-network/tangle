@@ -400,9 +400,9 @@ pallet-hyperbridge = { git = "https://github.com/polytope-labs/hyperbridge", bra
 anyhow = { version = "1.0.93", default-features = false }
 
 # Subxt
-subxt = { version = "0.39.0", default-features = false }
-subxt-core = { version = "0.39.0", default-features = false }
-subxt-signer = { version = "0.39.0", default-features = false }
+subxt = { version = "0.44.0", default-features = false }
+subxt-core = { version = "0.44.0", default-features = false }
+subxt-signer = { version = "0.44.0", default-features = false }
 
 # Blueprint
 # blueprint-manager = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
