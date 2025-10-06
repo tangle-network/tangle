@@ -118,7 +118,6 @@ parameter_types! {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = AccountId;
 	type FullIdentificationOf = ConvertInto;
-	type RuntimeEvent = RuntimeEvent;
 }
 
 sp_runtime::impl_opaque_keys! {
@@ -191,9 +190,7 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type DataProvider = Staking;
 	type WeightInfo = ();
 	type Bounds = ElectionBoundsOnChain;
-	type Sort = ();
-	type MaxBackersPerWinner = ConstU32<100>;
-	type MaxWinnersPerPage = ConstU32<100>;
+	type MaxWinners = ConstU32<100>;
 }
 
 /// Upper limit on the number of NPOS nominations.
@@ -229,7 +226,6 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = ();
 	type OldCurrency = Balances;
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxValidatorSet = ConstU32<100>;
 	type Filter = ();
 }
 

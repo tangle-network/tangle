@@ -15,18 +15,23 @@
 
 //! Runtime extension implementations for testnet.
 
-use frame_support::pallet_prelude::*;
+use frame_support::{pallet_prelude::*, weights::Weight};
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::traits::{DispatchInfoOf, SignedExtension};
+use sp_runtime::{
+	traits::{DispatchInfoOf, TransactionExtension},
+	transaction_validity::{InvalidTransaction, TransactionValidityError, ValidTransaction},
+};
 
-use crate::{Balance, Runtime};
+use crate::{Balance, Runtime, RuntimeCall};
 
 /// Extension that checks for nominated tokens that are being restaked.
 /// Prevents unbonding when tokens are delegated through the multi-asset-delegation system.
-#[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo)]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
 #[scale_info(skip_type_params(T))]
 pub struct CheckNominatedRestaked<T>(core::marker::PhantomData<T>);
+
+impl<T> parity_scale_codec::DecodeWithMemTracking for CheckNominatedRestaked<T> {}
 
 impl<T> sp_std::fmt::Debug for CheckNominatedRestaked<T> {
 	#[cfg(feature = "std")]
@@ -62,70 +67,85 @@ impl<T> Default for CheckNominatedRestaked<T> {
 	}
 }
 
-impl SignedExtension for CheckNominatedRestaked<Runtime> {
+impl TransactionExtension<RuntimeCall> for CheckNominatedRestaked<Runtime> {
 	const IDENTIFIER: &'static str = "CheckNominatedRestaked";
-
-	type AccountId = <Runtime as frame_system::Config>::AccountId;
-
-	type Call = <Runtime as frame_system::Config>::RuntimeCall;
-
-	type AdditionalSigned = ();
-
+	type Implicit = ();
 	type Pre = ();
+	type Val = ();
 
-	fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-		Ok(())
+	fn weight(&self, _call: &RuntimeCall) -> Weight {
+		Weight::zero()
 	}
 
 	fn validate(
 		&self,
-		who: &Self::AccountId,
-		call: &Self::Call,
-		_info: &DispatchInfoOf<Self::Call>,
+		origin: <Runtime as frame_system::Config>::RuntimeOrigin,
+		call: &RuntimeCall,
+		_info: &DispatchInfoOf<RuntimeCall>,
 		_len: usize,
-	) -> TransactionValidity {
-		use crate::RuntimeCall;
+		_self_implicit: Self::Implicit,
+		_inherited_implication: &impl Encode,
+		_source: sp_runtime::transaction_validity::TransactionSource,
+	) -> Result<
+		(ValidTransaction, Self::Val, <Runtime as frame_system::Config>::RuntimeOrigin),
+		TransactionValidityError,
+	> {
+		let who = frame_system::ensure_signed(origin.clone())
+			.map_err(|_| TransactionValidityError::Invalid(InvalidTransaction::BadProof))?;
 
-		match call {
-			// Match on Staking unbond calls
+		let result = match call {
 			RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
-				if Self::can_unbound(who, *value) {
+				if Self::can_unbound(&who, *value) {
 					Ok(ValidTransaction::default())
 				} else {
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
 				}
 			},
-			// Match on Proxy calls
 			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) => {
-				// Convert MultiAddress to AccountId
 				if let sp_runtime::MultiAddress::Id(account_id) = real {
-					self.validate(account_id, call, _info, _len)
+					match call.as_ref() {
+						RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
+							if Self::can_unbound(account_id, *value) {
+								Ok(ValidTransaction::default())
+							} else {
+								Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
+							}
+						},
+						_ => Ok(ValidTransaction::default()),
+					}
 				} else {
-					// If not an Id type, we allow it by default
 					Ok(ValidTransaction::default())
 				}
 			},
-			// Match on various Utility batch calls
 			RuntimeCall::Utility(pallet_utility::Call::batch { calls }) |
 			RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) |
 			RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
-					self.validate(who, call, _info, _len)?;
+					match call {
+						RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
+							if !Self::can_unbound(&who, *value) {
+								return Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)));
+							}
+						},
+						_ => {},
+					}
 				}
 				Ok(ValidTransaction::default())
 			},
-			// Default case for all other calls
 			_ => Ok(ValidTransaction::default()),
-		}
+		};
+
+		result.map(|v| (v, (), origin))
 	}
 
-	fn pre_dispatch(
+	fn prepare(
 		self,
-		who: &Self::AccountId,
-		call: &Self::Call,
-		info: &DispatchInfoOf<Self::Call>,
-		len: usize,
+		_val: Self::Val,
+		_origin: &<Runtime as frame_system::Config>::RuntimeOrigin,
+		_call: &RuntimeCall,
+		_info: &DispatchInfoOf<RuntimeCall>,
+		_len: usize,
 	) -> Result<Self::Pre, TransactionValidityError> {
-		self.validate(who, call, info, len).map(|_| ())
+		Ok(())
 	}
 }

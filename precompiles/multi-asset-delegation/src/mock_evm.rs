@@ -15,7 +15,7 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use crate::{
-	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeOrigin, Timestamp},
+	mock::{AccountId, Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, Timestamp},
 	MultiAssetDelegationPrecompile, MultiAssetDelegationPrecompileCall,
 };
 use fp_evm::FeeCalculator;
@@ -200,6 +200,7 @@ impl pallet_evm::Config for Runtime {
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
 	type AddressMapping = crate::mock::TestAccount;
 	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
 	type PrecompilesType = Precompiles<Self>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
@@ -229,6 +230,7 @@ impl sp_core::Get<H256> for MockStateRoot {
 }
 
 impl pallet_ethereum::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
 	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;

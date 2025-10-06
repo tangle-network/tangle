@@ -20,7 +20,7 @@ use fc_rpc::{internal_err, public_key};
 use jsonrpsee::core::RpcResult;
 pub use rpc_core_txpool::{GetT, Summary, Transaction, TransactionMap, TxPoolResult, TxPoolServer};
 use sc_transaction_pool::ChainApi;
-use sc_transaction_pool_api::TransactionPool as _;
+use sc_transaction_pool_api::{InPoolTransaction, TransactionPool as _};
 use serde::Serialize;
 use sha3::{Digest, Keccak256};
 use sp_api::{ApiExt, ProvideRuntimeApi};
@@ -92,39 +92,53 @@ where
 		};
 		// Build the T response.
 		let mut pending = TransactionMap::<T>::new();
-		for txn in ethereum_txns.ready.iter() {
-			let hash = txn.hash();
-			let nonce = match txn {
-				TransactionV2::Legacy(t) => t.nonce,
-				TransactionV2::EIP2930(t) => t.nonce,
-				TransactionV2::EIP1559(t) => t.nonce,
-			};
-			let from_address = match public_key(txn) {
-				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
-				Err(_e) => H160::default(),
-			};
-			pending
-				.entry(from_address)
-				.or_default()
-				.insert(nonce, T::get(hash, from_address, txn));
-		}
-		let mut queued = TransactionMap::<T>::new();
-		for txn in ethereum_txns.future.iter() {
-			let hash = txn.hash();
-			let nonce = match txn {
-				TransactionV2::Legacy(t) => t.nonce,
-				TransactionV2::EIP2930(t) => t.nonce,
-				TransactionV2::EIP1559(t) => t.nonce,
-			};
-			let from_address = match public_key(txn) {
-				Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
-				Err(_e) => H160::default(),
-			};
-			queued
-				.entry(from_address)
-				.or_default()
-				.insert(nonce, T::get(hash, from_address, txn));
-		}
+	for txn in ethereum_txns.ready.iter() {
+		let hash_raw = txn.hash();
+		let hash_bytes: [u8; 32] = hash_raw.0;
+		let hash = ethereum_types::H256::from(hash_bytes);
+		
+		let nonce_raw = match txn {
+			TransactionV2::Legacy(t) => t.nonce,
+			TransactionV2::EIP2930(t) => t.nonce,
+			TransactionV2::EIP1559(t) => t.nonce,
+			TransactionV2::EIP7702(t) => t.nonce,
+		};
+		let nonce_bytes = nonce_raw.to_big_endian();
+		let nonce = ethereum_types::U256::from_big_endian(&nonce_bytes);
+		
+		let from_address = match public_key(txn) {
+			Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
+			Err(_e) => H160::default(),
+		};
+		pending
+			.entry(from_address)
+			.or_default()
+			.insert(nonce, T::get(hash, from_address, txn));
+	}
+	let mut queued = TransactionMap::<T>::new();
+	for txn in ethereum_txns.future.iter() {
+		let hash_raw = txn.hash();
+		let hash_bytes: [u8; 32] = hash_raw.0;
+		let hash = ethereum_types::H256::from(hash_bytes);
+		
+		let nonce_raw = match txn {
+			TransactionV2::Legacy(t) => t.nonce,
+			TransactionV2::EIP2930(t) => t.nonce,
+			TransactionV2::EIP1559(t) => t.nonce,
+			TransactionV2::EIP7702(t) => t.nonce,
+		};
+		let nonce_bytes = nonce_raw.to_big_endian();
+		let nonce = ethereum_types::U256::from_big_endian(&nonce_bytes);
+		
+		let from_address = match public_key(txn) {
+			Ok(pk) => H160::from(H256::from_slice(Keccak256::digest(pk).as_slice())),
+			Err(_e) => H160::default(),
+		};
+		queued
+			.entry(from_address)
+			.or_default()
+			.insert(nonce, T::get(hash, from_address, txn));
+	}
 		Ok(TxPoolResult { pending, queued })
 	}
 }

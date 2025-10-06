@@ -167,7 +167,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
-	state_version: 0,
+	system_version: 1,
 };
 
 /// The version information used to identify this runtime when compiled natively.
@@ -320,6 +320,7 @@ impl pallet_transaction_payment::Config for Runtime {
 		MinimumMultiplier,
 		MaximumMultiplier,
 	>;
+	type WeightInfo = pallet_transaction_payment::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -338,6 +339,7 @@ impl pallet_scheduler::Config for Runtime {
 	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
 	type Preimages = Preimage;
+	type BlockNumberProvider = System;
 }
 
 parameter_types! {
@@ -491,7 +493,6 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
 }
 
 parameter_types! {
@@ -787,6 +788,8 @@ impl pallet_nomination_pools::Config for Runtime {
 	type RuntimeFreezeReason = RuntimeFreezeReason;
 	type AdminOrigin = EnsureRoot<AccountId>;
 	type StakeAdapter = pallet_nomination_pools::adapter::TransferStake<Self, Staking>;
+	type BlockNumberProvider = System;
+	type Filter = frame_support::traits::Everything;
 }
 
 parameter_types! {
@@ -956,6 +959,7 @@ impl pallet_treasury::Config for Runtime {
 	type SpendFunds = Bounties;
 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 	type MaxApprovals = MaxApprovals;
+	type BlockNumberProvider = System;
 }
 
 parameter_types! {
@@ -1096,6 +1100,7 @@ impl pallet_multisig::Config for Runtime {
 	type DepositFactor = DepositFactor;
 	type MaxSignatories = ConstU32<100>;
 	type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
+	type BlockNumberProvider = System;
 }
 
 parameter_types! {
@@ -1191,6 +1196,7 @@ impl pallet_proxy::Config for Runtime {
 	type CallHasher = BlakeTwo256;
 	type AnnouncementDepositBase = AnnouncementDepositBase;
 	type AnnouncementDepositFactor = AnnouncementDepositFactor;
+	type BlockNumberProvider = System;
 }
 
 parameter_types! {

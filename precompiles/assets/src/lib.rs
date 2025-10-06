@@ -3,7 +3,7 @@
 use fp_evm::PrecompileHandle;
 use frame_support::{
 	dispatch::{GetDispatchInfo, PostDispatchInfo},
-	traits::fungibles::Inspect,
+	traits::{fungibles::Inspect, OriginTrait},
 };
 use pallet_evm::AddressMapping;
 use parity_scale_codec::MaxEncodedLen;
@@ -29,8 +29,9 @@ impl<Runtime> AssetsPrecompile<Runtime>
 where
 	Runtime: pallet_assets::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime>>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	RawAssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
@@ -50,8 +51,9 @@ impl<Runtime> AssetsPrecompile<Runtime>
 where
 	Runtime: pallet_assets::Config + pallet_evm::Config,
 	Runtime::RuntimeCall: Dispatchable<PostInfo = PostDispatchInfo> + GetDispatchInfo,
-	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<Runtime::AccountId>>,
+	<Runtime::RuntimeCall as Dispatchable>::RuntimeOrigin: From<Option<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>>,
 	Runtime::RuntimeCall: From<pallet_assets::Call<Runtime>>,
+	Runtime::AccountId: From<<<Runtime as pallet_evm::Config>::AccountProvider as fp_evm::AccountProvider>::AccountId>,
 	BalanceOf<Runtime>: TryFrom<U256> + Into<U256> + solidity::Codec,
 	AssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
 	RawAssetIdOf<Runtime>: TryFrom<U256> + Into<U256>,
@@ -67,7 +69,8 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let admin = Runtime::AddressMapping::into_account_id(admin.0);
+		let admin_evm = Runtime::AddressMapping::into_account_id(admin.0);
+		let admin: Runtime::AccountId = admin_evm.into();
 		let asset_id = Self::u256_to_asset_id(id)?;
 		let min_balance: BalanceOf<Runtime> = min_balance
 			.try_into()
@@ -79,7 +82,7 @@ where
 			min_balance,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin.into()), call, 0)?;
 		Ok(())
 	}
 
@@ -92,7 +95,7 @@ where
 
 		let call = pallet_assets::Call::<Runtime>::start_destroy { id: asset_id };
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin.into()), call, 0)?;
 		Ok(())
 	}
 
@@ -107,7 +110,8 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let beneficiary = Runtime::AddressMapping::into_account_id(beneficiary.0);
+		let beneficiary_evm = Runtime::AddressMapping::into_account_id(beneficiary.0);
+		let beneficiary: Runtime::AccountId = beneficiary_evm.into();
 		let asset_id = Self::u256_to_asset_id(id)?;
 		let amount: BalanceOf<Runtime> =
 			amount.try_into().map_err(|_| revert("Amount exceeds bounds"))?;
@@ -118,7 +122,7 @@ where
 			amount,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin.into()), call, 0)?;
 		Ok(())
 	}
 
@@ -132,7 +136,8 @@ where
 		handle.record_cost(RuntimeHelper::<Runtime>::db_write_gas_cost())?;
 
 		let origin = Runtime::AddressMapping::into_account_id(handle.context().caller);
-		let target = Runtime::AddressMapping::into_account_id(target.0);
+		let target_evm = Runtime::AddressMapping::into_account_id(target.0);
+		let target: Runtime::AccountId = target_evm.into();
 		let asset_id = Self::u256_to_asset_id(id)?;
 		let amount: BalanceOf<Runtime> =
 			amount.try_into().map_err(|_| revert("Amount exceeds bounds"))?;
@@ -143,7 +148,7 @@ where
 			amount,
 		};
 
-		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin), call, 0)?;
+		RuntimeHelper::<Runtime>::try_dispatch(handle, <Runtime as frame_system::Config>::RuntimeOrigin::signed(origin.into()), call, 0)?;
 		Ok(())
 	}
 
@@ -165,16 +170,14 @@ where
 		asset_id: U256,
 		who: Address,
 	) -> EvmResult<U256> {
-		// Storage item: Account:
-		// Blake2_128(16) + AssetId(16) + Blake2_128(16) + AccountId(20) + AssetAccount(19 + Extra)
 		handle.record_db_read::<Runtime>(
 			87 + <Runtime as pallet_assets::Config>::Extra::max_encoded_len(),
 		)?;
 
-		let who: Runtime::AccountId = Runtime::AddressMapping::into_account_id(who.into());
+		let who_evm = Runtime::AddressMapping::into_account_id(who.into());
+		let who: Runtime::AccountId = who_evm.into();
 		let asset_id = Self::u256_to_raw_asset_id(asset_id)?;
 
-		// Fetch info.
 		let amount: U256 = { pallet_assets::Pallet::<Runtime>::balance(asset_id, &who).into() };
 		Ok(amount)
 	}

@@ -426,7 +426,6 @@ parameter_types! {
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
-	type RuntimeEvent = RuntimeEvent;
 }
 
 pallet_staking_reward_curve::build! {
@@ -511,9 +510,7 @@ impl onchain::Config for OnChainSeqPhragmen {
 	type Solver = SequentialPhragmen<AccountId, Perbill>;
 	type DataProvider = Staking;
 	type WeightInfo = ();
-	type Sort = ();
-	type MaxBackersPerWinner = ConstU32<100>;
-	type MaxWinnersPerPage = ConstU32<100>;
+	type MaxWinners = ConstU32<100>;
 	type Bounds = ElectionBoundsOnChain;
 }
 
@@ -559,7 +556,6 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = ();
 	type OldCurrency = Balances;
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type MaxValidatorSet = ConstU32<100>;
 	type Filter = ();
 }
 

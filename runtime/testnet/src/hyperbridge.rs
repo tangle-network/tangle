@@ -57,7 +57,6 @@ impl pallet_ismp::Config for Runtime {
 	// A tuple of types implementing the ConsensusClient interface, which defines all consensus
 	// algorithms supported by this protocol deployment
 	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
-	type WeightProvider = ();
 	type OffchainDB = ();
 }
 

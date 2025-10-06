@@ -145,7 +145,6 @@ parameter_types! {
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxResourceNameLength: u32 = 16;
 
-	// Slash defer duration in days (era-index)
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const SlashDeferDuration: EraIndex = 7;
 

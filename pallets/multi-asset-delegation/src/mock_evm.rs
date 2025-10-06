@@ -205,6 +205,7 @@ impl pallet_evm::Config for Runtime {
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
 	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
 	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
 	type PrecompilesType = TanglePrecompiles<Runtime>;
 	type PrecompilesValue = PrecompilesValue;
 	type ChainId = ChainId;
@@ -234,6 +235,7 @@ impl sp_core::Get<H256> for MockStateRoot {
 }
 
 impl pallet_ethereum::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
 	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;

@@ -148,7 +148,6 @@ impl pallet_evm::Config for Runtime {
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 	type OnChargeTransaction = CustomEVMCurrencyAdapter;
 	type OnCreate = ();
-	type SuicideQuickClearLimit = ConstU32<0>;
 	type FindAuthor = FindAuthorTruncated<Babe>;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
