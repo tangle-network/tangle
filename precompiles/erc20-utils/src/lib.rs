@@ -19,6 +19,9 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+#[cfg(not(feature = "std"))]
+use alloc::string::ToString;
+
 use ethabi::Function;
 use fp_evm::PrecompileFailure;
 use precompile_utils::prelude::*;

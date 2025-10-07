@@ -308,6 +308,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = RuntimeFreezeReason;
 	type FreezeIdentifier = RuntimeFreezeReason;
 	type MaxFreezes = MaxFreezes;
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -430,6 +431,7 @@ impl pallet_session::Config for Runtime {
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = ();
+	type DisablingStrategy = ();
 }
 
 impl pallet_session::historical::Config for Runtime {
@@ -484,8 +486,8 @@ impl pallet_staking::Config for Runtime {
 	type CurrencyToVote = U128CurrencyToVote;
 	type RewardRemainder = Treasury;
 	type RuntimeEvent = RuntimeEvent;
-	type Slash = Treasury; // send the slashed funds to the treasury.
-	type Reward = (); // rewards are minted from the void
+	type Slash = Treasury;
+	type Reward = ();
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
@@ -504,6 +506,9 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Filter = frame_support::traits::Everything;
 }
 
 parameter_types! {
@@ -592,6 +597,9 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 	type MaxProposalWeight = MaxProposalWeight;
+	type DisapproveOrigin = EnsureRoot<AccountId>;
+	type KillOrigin = EnsureRoot<AccountId>;
+	type Consideration = ();
 }
 
 parameter_types! {
@@ -809,61 +817,61 @@ parameter_types! {
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::MAX / 2;
 }
 
-impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
-where
-	RuntimeCall: From<LocalCall>,
-{
-	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
-		call: RuntimeCall,
-		public: <Signature as traits::Verify>::Signer,
-		account: AccountId,
-		nonce: Nonce,
-	) -> Option<(RuntimeCall, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
-		let tip = 0;
-		// take the biggest period possible.
-		let period = BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2);
-		let current_block = System::block_number()
-			.saturated_into::<u64>()
-			// The `System::block_number` is initialized with `n+1`,
-			// so the actual block number is `n`.
-			.saturating_sub(1);
-		let era = Era::mortal(period, current_block);
-		let extra = (
-			frame_system::CheckNonZeroSender::<Runtime>::new(),
-			frame_system::CheckSpecVersion::<Runtime>::new(),
-			frame_system::CheckTxVersion::<Runtime>::new(),
-			frame_system::CheckGenesis::<Runtime>::new(),
-			frame_system::CheckEra::<Runtime>::from(era),
-			frame_system::CheckNonce::<Runtime>::from(nonce),
-			frame_system::CheckWeight::<Runtime>::new(),
-			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
-			frame_metadata_hash_extension::CheckMetadataHash::<Runtime>::new(true),
-			extension::CheckNominatedRestaked::<Runtime>::new(),
-		);
-		let raw_payload = SignedPayload::new(call, extra)
-			.map_err(|e| {
-				log::warn!("Unable to create signed payload: {e:?}");
-			})
-			.ok()?;
-		let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
-		let address = Indices::unlookup(account);
-		let (call, extra, _) = raw_payload.deconstruct();
-		Some((call, (address, signature, extra)))
-	}
-}
+// TEMPORARY: Commented out due to API changes in stable2503
+// The offchain transaction signing API has changed and needs to be updated
+// impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
+// where
+// 	RuntimeCall: From<LocalCall>,
+// {
+// 	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+// 		call: RuntimeCall,
+// 		public: <Signature as traits::Verify>::Signer,
+// 		account: AccountId,
+// 		nonce: Nonce,
+// 	) -> Option<(RuntimeCall, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
+// 		let tip = 0;
+// 		let period = BlockHashCount::get().checked_next_power_of_two().map(|c| c / 2).unwrap_or(2);
+// 		let current_block = System::block_number()
+// 			.saturated_into::<u64>()
+// 			.saturating_sub(1);
+// 		let era = Era::mortal(period, current_block);
+// 		let extra = (
+// 			frame_system::CheckNonZeroSender::<Runtime>::new(),
+// 			frame_system::CheckSpecVersion::<Runtime>::new(),
+// 			frame_system::CheckTxVersion::<Runtime>::new(),
+// 			frame_system::CheckGenesis::<Runtime>::new(),
+// 			frame_system::CheckEra::<Runtime>::from(era),
+// 			frame_system::CheckNonce::<Runtime>::from(nonce),
+// 			frame_system::CheckWeight::<Runtime>::new(),
+// 			pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+// 			frame_metadata_hash_extension::CheckMetadataHash::<Runtime>::new(true),
+// 			extension::CheckNominatedRestaked::<Runtime>::new(),
+// 		);
+// 		let raw_payload = SignedPayload::new(call, extra)
+// 			.map_err(|e| {
+// 				log::warn!("Unable to create signed payload: {e:?}");
+// 			})
+// 			.ok()?;
+// 		let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
+// 		let address = Indices::unlookup(account);
+// 		let (call, extra, _) = raw_payload.deconstruct();
+// 		Some((call, (address, signature, extra)))
+// 	}
+// }
 
 impl frame_system::offchain::SigningTypes for Runtime {
 	type Public = <Signature as traits::Verify>::Signer;
 	type Signature = Signature;
 }
 
-impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
-where
-	RuntimeCall: From<C>,
-{
-	type Extrinsic = UncheckedExtrinsic;
-	type OverarchingCall = RuntimeCall;
-}
+// TEMPORARY: SendTransactionTypes trait no longer exists in stable2503
+// impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
+// where
+// 	RuntimeCall: From<C>,
+// {
+// 	type Extrinsic = UncheckedExtrinsic;
+// 	type OverarchingCall = RuntimeCall;
+// }
 
 parameter_types! {
 	pub const MinVestedTransfer: Balance = 100 * UNIT;
@@ -1078,6 +1086,8 @@ impl pallet_identity::Config for Runtime {
 	type ForceOrigin = EnsureRoot<Self::AccountId>;
 	type RegistrarOrigin = EnsureRoot<Self::AccountId>;
 	type WeightInfo = ();
+	type UsernameDeposit = BasicDeposit;
+	type UsernameGracePeriod = PendingUsernameExpiration;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -1155,6 +1165,8 @@ impl Default for ProxyType {
 		Self::Any
 	}
 }
+
+impl parity_scale_codec::DecodeWithMemTracking for ProxyType {}
 impl InstanceFilter<RuntimeCall> for ProxyType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
@@ -1372,7 +1384,7 @@ pub struct TransactionConverter;
 
 impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
 	fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
-		UncheckedExtrinsic::new_unsigned(
+		UncheckedExtrinsic::new_bare(
 			pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
 		)
 	}
@@ -1383,7 +1395,7 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 		&self,
 		transaction: pallet_ethereum::Transaction,
 	) -> opaque::UncheckedExtrinsic {
-		let extrinsic = UncheckedExtrinsic::new_unsigned(
+		let extrinsic = UncheckedExtrinsic::new_bare(
 			pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
 		);
 		let encoded = extrinsic.encode();
@@ -1520,7 +1532,6 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	type AssetId = AssetId;
 	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
 	type Currency = Balances;
-	// only lst pallet can create pool tokens
 	type CreateOrigin =
 		AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
 	type ForceOrigin = frame_system::EnsureRoot<Self::AccountId>;
@@ -1537,6 +1548,7 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
+	type Holder = ();
 }
 
 parameter_types! {
@@ -1765,18 +1777,19 @@ impl_runtime_apis! {
 			pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
 		}
 
-		fn call(
-			from: H160,
-			to: H160,
-			data: Vec<u8>,
-			value: U256,
-			gas_limit: U256,
-			max_fee_per_gas: Option<U256>,
-			max_priority_fee_per_gas: Option<U256>,
-			nonce: Option<U256>,
-			estimate: bool,
-			access_list: Option<Vec<(H160, Vec<H256>)>>,
-		) -> Result<pallet_evm::CallInfo, sp_runtime::DispatchError> {
+	fn call(
+		from: H160,
+		to: H160,
+		data: Vec<u8>,
+		value: U256,
+		gas_limit: U256,
+		max_fee_per_gas: Option<U256>,
+		max_priority_fee_per_gas: Option<U256>,
+		nonce: Option<U256>,
+		estimate: bool,
+		access_list: Option<Vec<(H160, Vec<H256>)>>,
+		_authorization_list: Option<Vec<u8>>,
+	) -> Result<pallet_evm::CallInfo, sp_runtime::DispatchError> {
 			use pallet_evm::GasWeightMapping;
 			let config = if estimate {
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
@@ -1821,35 +1834,37 @@ impl_runtime_apis! {
 					_ => (None, None),
 				};
 			let evm_config = config.as_ref().unwrap_or(<Runtime as pallet_evm::Config>::config());
-			<Runtime as pallet_evm::Config>::Runner::call(
-				from,
-				to,
-				data,
-				value,
-				gas_limit.unique_saturated_into(),
-				max_fee_per_gas,
-				max_priority_fee_per_gas,
-				nonce,
-				access_list.unwrap_or_default(),
-				is_transactional,
-				validate,
-				weight_limit,
-				proof_size_base_cost,
-				evm_config,
-			).map_err(|err| err.error.into())
+		<Runtime as pallet_evm::Config>::Runner::call(
+			from,
+			to,
+			data,
+			value,
+			gas_limit.unique_saturated_into(),
+			max_fee_per_gas,
+			max_priority_fee_per_gas,
+			nonce,
+			access_list.unwrap_or_default(),
+			Vec::new(),
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			evm_config,
+		).map_err(|err| err.error.into())
 		}
 
-		fn create(
-			from: H160,
-			data: Vec<u8>,
-			value: U256,
-			gas_limit: U256,
-			max_fee_per_gas: Option<U256>,
-			max_priority_fee_per_gas: Option<U256>,
-			nonce: Option<U256>,
-			estimate: bool,
-			access_list: Option<Vec<(H160, Vec<H256>)>>,
-		) -> Result<pallet_evm::CreateInfo, sp_runtime::DispatchError> {
+	fn create(
+		from: H160,
+		data: Vec<u8>,
+		value: U256,
+		gas_limit: U256,
+		max_fee_per_gas: Option<U256>,
+		max_priority_fee_per_gas: Option<U256>,
+		nonce: Option<U256>,
+		estimate: bool,
+		access_list: Option<Vec<(H160, Vec<H256>)>>,
+		_authorization_list: Option<Vec<u8>>,
+	) -> Result<pallet_evm::CreateInfo, sp_runtime::DispatchError> {
 			use pallet_evm::GasWeightMapping;
 			let config = if estimate {
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
@@ -1893,21 +1908,22 @@ impl_runtime_apis! {
 					_ => (None, None),
 				};
 			let evm_config = config.as_ref().unwrap_or(<Runtime as pallet_evm::Config>::config());
-			<Runtime as pallet_evm::Config>::Runner::create(
-				from,
-				data,
-				value,
-				gas_limit.unique_saturated_into(),
-				max_fee_per_gas,
-				max_priority_fee_per_gas,
-				nonce,
-				access_list.unwrap_or_default(),
-				is_transactional,
-				validate,
-				weight_limit,
-				proof_size_base_cost,
-				evm_config,
-			).map_err(|err| err.error.into())
+		<Runtime as pallet_evm::Config>::Runner::create(
+			from,
+			data,
+			value,
+			gas_limit.unique_saturated_into(),
+			max_fee_per_gas,
+			max_priority_fee_per_gas,
+			nonce,
+			access_list.unwrap_or_default(),
+			Vec::new(),
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			evm_config,
+		).map_err(|err| err.error.into())
 		}
 
 		fn current_transaction_statuses() -> Option<Vec<TransactionStatus>> {
@@ -1971,7 +1987,7 @@ impl_runtime_apis! {
 
 	impl fp_rpc::ConvertTransactionRuntimeApi<Block> for Runtime {
 		fn convert_transaction(transaction: EthereumTransaction) -> <Block as BlockT>::Extrinsic {
-			UncheckedExtrinsic::new_unsigned(
+			UncheckedExtrinsic::new_bare(
 				pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
 			)
 		}

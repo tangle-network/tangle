@@ -1,4 +1,5 @@
 use super::*;
+
 pub mod bonded_pool;
 pub mod commission;
 pub mod pools;
@@ -53,6 +54,11 @@ pub enum BondExtra<Balance> {
 	/// Take from the free balance.
 	FreeBalance(Balance),
 }
+
+impl<Balance> codec::DecodeWithMemTracking for BondExtra<Balance> 
+where
+	BondExtra<Balance>: Decode,
+{}
 
 /// The type of account being created.
 #[derive(Encode, Decode)]

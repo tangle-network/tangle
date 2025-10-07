@@ -38,7 +38,8 @@ use pallet_evm_precompile_tangle_lst::TangleLstPrecompile;
 use pallet_evm_precompile_verify_bls381_signature::Bls381Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256k1_signature::EcdsaSecp256k1Precompile;
 use pallet_evm_precompile_verify_ecdsa_secp256r1_signature::EcdsaSecp256r1Precompile;
-use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
+// TEMPORARY: Commented out due to size-of crate ABI issues on macOS
+// use pallet_evm_precompile_verify_ecdsa_stark_signature::EcdsaStarkPrecompile;
 use pallet_evm_precompile_verify_schnorr_signatures::*;
 use pallet_evm_precompile_vesting::VestingPrecompile;
 use pallet_evm_precompileset_assets_erc20::Erc20AssetsPrecompileSet;
@@ -178,12 +179,13 @@ pub type TanglePrecompilesAt<R> = (
 		EcdsaSecp256r1Precompile<R>,
 		(CallableByContract, CallableByPrecompile),
 	>,
-	// Address: 0x0000000000000000000000000000000000000818 - PRECOMPILE_ECDSA_STARK (2072)
-	PrecompileAt<
-		AddressU64<{ PRECOMPILE_ECDSA_STARK }>,
-		EcdsaStarkPrecompile<R>,
-		(CallableByContract, CallableByPrecompile),
-	>,
+	// TEMPORARY: Commented out due to size-of crate ABI issues on macOS
+	// // Address: 0x0000000000000000000000000000000000000818 - PRECOMPILE_ECDSA_STARK (2072)
+	// PrecompileAt<
+	// 	AddressU64<{ PRECOMPILE_ECDSA_STARK }>,
+	// 	EcdsaStarkPrecompile<R>,
+	// 	(CallableByContract, CallableByPrecompile),
+	// >,
 	// Address: 0x0000000000000000000000000000000000000819 - PRECOMPILE_SCHNORR_SR25519 (2073)
 	PrecompileAt<
 		AddressU64<{ PRECOMPILE_SCHNORR_SR25519 }>,

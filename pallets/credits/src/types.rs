@@ -27,6 +27,12 @@ pub struct StakeTier<
 	pub rate_per_block: Balance,
 }
 
+impl<Balance: MaxEncodedLen + Encode + Decode + Clone + Eq + PartialEq + TypeInfo + Serialize> 
+	parity_scale_codec::DecodeWithMemTracking for StakeTier<Balance> 
+where
+	StakeTier<Balance>: Decode,
+{}
+
 /// Type alias for the block number type from the frame_system configuration.
 pub type BlockNumberOf<T> = frame_system::pallet_prelude::BlockNumberFor<T>;
 

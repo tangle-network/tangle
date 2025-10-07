@@ -58,12 +58,14 @@ impl pallet_ismp::Config for Runtime {
 	// algorithms supported by this protocol deployment
 	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type OffchainDB = ();
+	type FeeHandler = ();
 }
 
 impl ::ismp_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IsmpHost = pallet_ismp::Pallet<Runtime>;
 	type WeightInfo = crate::weights::ismp_grandpa::WeightInfo<Runtime>;
+	type RootOrigin = EnsureRoot<AccountId>;
 }
 
 #[derive(Default)]

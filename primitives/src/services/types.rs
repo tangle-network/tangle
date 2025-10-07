@@ -231,6 +231,8 @@ pub struct AssetSecurityRequirement<AssetId: AssetIdT> {
 	pub max_exposure_percent: Percent,
 }
 
+impl<AssetId: AssetIdT> parity_scale_codec::DecodeWithMemTracking for AssetSecurityRequirement<AssetId> {}
+
 /// Asset-specific security commitment from an operator
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(Default(bound()), Clone(bound()), PartialEq(bound()), Eq, PartialOrd, Ord(bound()))]
@@ -247,6 +249,8 @@ pub struct AssetSecurityCommitment<AssetId: AssetIdT> {
 	/// The percentage of the asset exposed for slashing
 	pub exposure_percent: Percent,
 }
+
+impl<AssetId: AssetIdT> parity_scale_codec::DecodeWithMemTracking for AssetSecurityCommitment<AssetId> {}
 
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]
 #[educe(Debug(bound()), Clone(bound()), PartialEq(bound()), Eq)]
@@ -266,6 +270,8 @@ impl<C: Constraints> Default for OperatorPreferences<C> {
 		Self { key: [0u8; 65], rpc_address: BoundedString::default() }
 	}
 }
+
+impl<C: Constraints> parity_scale_codec::DecodeWithMemTracking for OperatorPreferences<C> {}
 
 #[cfg(feature = "std")]
 impl<C: Constraints> Serialize for OperatorPreferences<C> {
@@ -448,6 +454,11 @@ impl<BlockNumber, Balance: Default> Default for PricingModel<BlockNumber, Balanc
 		PricingModel::PayOnce { amount: Balance::default() }
 	}
 }
+
+impl<BlockNumber, Balance> parity_scale_codec::DecodeWithMemTracking for PricingModel<BlockNumber, Balance> 
+where
+	PricingModel<BlockNumber, Balance>: Decode,
+{}
 
 /// Price targets for service pricing (placeholder type)
 #[derive(Clone, Debug, PartialEq, Eq, Encode, Decode, TypeInfo, MaxEncodedLen, Default)]

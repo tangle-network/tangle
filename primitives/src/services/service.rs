@@ -24,6 +24,7 @@ use super::{
 use crate::{Account, BlueprintId};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
+use parity_scale_codec;
 use sp_core::H160;
 use sp_std::{vec, vec::Vec};
 
@@ -142,6 +143,8 @@ pub struct ServiceBlueprint<C: Constraints> {
 	/// The membership models supported by this blueprint
 	pub supported_membership_models: BoundedVec<MembershipModelType, ConstU32<2>>,
 }
+
+impl<C: Constraints> parity_scale_codec::DecodeWithMemTracking for ServiceBlueprint<C> {}
 
 impl<C: Constraints> ServiceBlueprint<C> {
 	/// Check if the supplied arguments match the registration parameters.

@@ -17,6 +17,7 @@
 use super::{AssetSecurityCommitment, BoundedString, Constraints};
 use educe::Educe;
 use frame_support::pallet_prelude::*;
+use parity_scale_codec;
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 use sp_core::keccak_256;
@@ -45,6 +46,8 @@ pub struct PricingQuote<C: Constraints> {
 	/// Security commitments for assets
 	pub security_commitments: BoundedVec<AssetSecurityCommitment<u128>, C::MaxOperatorsPerService>,
 }
+
+impl<C: Constraints> parity_scale_codec::DecodeWithMemTracking for PricingQuote<C> {}
 
 /// Pricing for a specific resource type
 #[derive(Educe, Encode, Decode, TypeInfo, MaxEncodedLen)]

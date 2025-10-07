@@ -7,6 +7,11 @@ pub enum CommissionClaimPermission<AccountId> {
 	Account(AccountId),
 }
 
+impl<AccountId> codec::DecodeWithMemTracking for CommissionClaimPermission<AccountId> 
+where
+	CommissionClaimPermission<AccountId>: Decode,
+{}
+
 /// Pool commission.
 ///
 /// The pool `root` can set commission configuration after pool creation. By default, all commission
@@ -221,3 +226,8 @@ pub struct CommissionChangeRate<BlockNumber> {
 	/// How often an update can take place.
 	pub min_delay: BlockNumber,
 }
+
+impl<BlockNumber> codec::DecodeWithMemTracking for CommissionChangeRate<BlockNumber> 
+where
+	CommissionChangeRate<BlockNumber>: Decode,
+{}

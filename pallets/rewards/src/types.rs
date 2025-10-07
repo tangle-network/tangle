@@ -36,6 +36,11 @@ pub struct RewardConfigForAssetVault<Balance> {
 	pub boost_multiplier: Option<u32>,
 }
 
+impl<Balance> parity_scale_codec::DecodeWithMemTracking for RewardConfigForAssetVault<Balance> 
+where
+	RewardConfigForAssetVault<Balance>: Decode,
+{}
+
 /// Configuration for rewards in the system.
 #[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo)]
 pub struct RewardConfig<VaultId, Balance> {

@@ -47,7 +47,7 @@ macro_rules! impl_deal_with_fees {
 			pallet_treasury::Pallet<R>: OnUnbalanced<NegativeImbalance<R>>,
 			<R as frame_system::Config>::RuntimeEvent: From<pallet_balances::Event<R>>,
 		{
-			fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<R>>) {
+			fn on_unbalanceds(mut fees_then_tips: impl Iterator<Item = NegativeImbalance<R>>) {
 				if let Some(fees) = fees_then_tips.next() {
 					// for fees, 80% to treasury, 20% to author
 					let mut split = fees.ration(80, 20);

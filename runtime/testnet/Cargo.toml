@@ -139,7 +139,8 @@ pallet-evm-precompile-staking = { workspace = true }
 pallet-evm-precompile-vesting = { workspace = true }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { workspace = true }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { workspace = true }
-pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
+# TEMPORARY: Commented out due to size-of crate ABI issues on macOS
+# pallet-evm-precompile-verify-ecdsa-stark-signature = { workspace = true }
 pallet-evm-precompile-verify-schnorr-signatures = { workspace = true }
 pallet-evm-precompile-verify-bls381-signature = { workspace = true }
 pallet-evm-precompile-multi-asset-delegation = { workspace = true }
@@ -188,7 +189,8 @@ runtime-benchmarks = [
     "pallet-rewards/runtime-benchmarks",
     "pallet-credits/runtime-benchmarks",
 ]
-default = ["std", "with-rocksdb-weights", "evm-tracing"]
+# TEMPORARY: Disabled evm-tracing due to primitives-ext runtime_interface issues
+default = ["std", "with-rocksdb-weights"] # , "evm-tracing"]
 local-testing = []
 
 std = [
@@ -307,7 +309,8 @@ std = [
     "pallet-evm-precompile-multi-asset-delegation/std",
     "pallet-evm-precompile-verify-ecdsa-secp256k1-signature/std",
     "pallet-evm-precompile-verify-ecdsa-secp256r1-signature/std",
-    "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
+    # TEMPORARY: Commented out due to size-of crate ABI issues on macOS
+    # "pallet-evm-precompile-verify-ecdsa-stark-signature/std",
     "pallet-evm-precompile-verify-schnorr-signatures/std",
     "pallet-evm-precompile-verify-bls381-signature/std",
     "precompile-utils/std",
