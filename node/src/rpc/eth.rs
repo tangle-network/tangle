@@ -49,13 +49,13 @@ pub struct TracingConfig {
 }
 
 /// Extra dependencies for Ethereum compatibility.
-pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT, CIDP> {
+pub struct EthDeps<C, P, CT, B: BlockT, CIDP> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
 	pub pool: Arc<P>,
 	/// Graph pool instance.
-	pub graph: Arc<Pool<A>>,
+	pub graph: Arc<P>,
 	/// Ethereum transaction converter.
 	pub converter: Option<CT>,
 	/// The Node authority flag
@@ -91,7 +91,7 @@ pub struct EthDeps<C, P, A: ChainApi, CT, B: BlockT, CIDP> {
 	pub pending_create_inherent_data_providers: CIDP,
 }
 
-impl<C, P, A: ChainApi, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, P, A, CT, B, CIDP> {
+impl<C, P, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, P, CT, B, CIDP> {
 	fn clone(&self) -> Self {
 		Self {
 			client: self.client.clone(),
@@ -120,9 +120,9 @@ impl<C, P, A: ChainApi, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, 
 }
 
 /// Instantiate Ethereum-compatible RPC extensions.
-pub fn create_eth<B, C, BE, P, A, CT, CIDP, EC>(
+pub fn create_eth<B, C, BE, P, CT, CIDP, EC>(
 	mut io: RpcModule<()>,
-	deps: EthDeps<C, P, A, CT, B, CIDP>,
+	deps: EthDeps<C, P, CT, B, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -143,7 +143,6 @@ where
 	C: HeaderBackend<B> + HeaderMetadata<B, Error = BlockChainError> + StorageProvider<B, BE>,
 	BE: Backend<B> + 'static,
 	P: TransactionPool<Block = B> + 'static,
-	A: ChainApi<Block = B> + 'static,
 	CT: ConvertTransaction<<B as BlockT>::Extrinsic> + Send + Sync + 'static,
 	CIDP: CreateInherentDataProviders<B, ()> + Send + Sync + 'static,
 	EC: EthConfig<B, C>,
@@ -185,55 +184,57 @@ where
 		signers.push(Box::new(EthDevSigner::new()) as Box<dyn EthSigner>);
 	}
 
-	io.merge(
-		Eth::<B, C, P, CT, BE, A, CIDP, EC>::new(
-			client.clone(),
-			pool.clone(),
-			graph.clone(),
-			converter,
-			sync.clone(),
-			signers,
-			storage_override.clone(),
-			frontier_backend.clone(),
-			is_authority,
-			block_data_cache.clone(),
-			fee_history_cache,
-			fee_history_cache_limit,
-			execute_gas_limit_multiplier,
-			forced_parent_hashes,
-			pending_create_inherent_data_providers,
-			None,
-		)
-		.replace_config::<EC>()
-		.into_rpc(),
-	)?;
+	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
+	// io.merge(
+	// 	Eth::<B, C, P, CT, BE, CIDP, EC>::new(
+	// 		client.clone(),
+	// 		pool.clone(),
+	// 		graph.clone(),
+	// 		converter,
+	// 		sync.clone(),
+	// 		signers,
+	// 		storage_override.clone(),
+	// 		frontier_backend.clone(),
+	// 		is_authority,
+	// 		block_data_cache.clone(),
+	// 		fee_history_cache,
+	// 		fee_history_cache_limit,
+	// 		execute_gas_limit_multiplier,
+	// 		forced_parent_hashes,
+	// 		pending_create_inherent_data_providers,
+	// 		None,
+	// 	)
+	// 	.replace_config::<EC>()
+	// 	.into_rpc(),
+	// )?;
 
-	if let Some(filter_pool) = filter_pool {
-		io.merge(
-			EthFilter::new(
-				client.clone(),
-				frontier_backend,
-				graph.clone(),
-				filter_pool,
-				500_usize, // max stored filters
-				max_past_logs,
-				block_data_cache,
-			)
-			.into_rpc(),
-		)?;
-	}
+	// if let Some(filter_pool) = filter_pool {
+	// 	io.merge(
+	// 		EthFilter::new(
+	// 			client.clone(),
+	// 			frontier_backend,
+	// 			graph.clone(),
+	// 			filter_pool,
+	// 			500_usize, // max stored filters
+	// 			max_past_logs,
+	// 			block_data_cache,
+	// 		)
+	// 		.into_rpc(),
+	// 	)?;
+	// }
 
-	io.merge(
-		EthPubSub::new(
-			pool,
-			client.clone(),
-			sync,
-			subscription_task_executor,
-			storage_override.clone(),
-			pubsub_notification_sinks,
-		)
-		.into_rpc(),
-	)?;
+	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
+	// io.merge(
+	// 	EthPubSub::new(
+	// 		pool,
+	// 		client.clone(),
+	// 		sync,
+	// 		subscription_task_executor,
+	// 		storage_override.clone(),
+	// 		pubsub_notification_sinks,
+	// 	)
+	// 	.into_rpc(),
+	// )?;
 
 	io.merge(
 		Net::new(
@@ -250,17 +251,18 @@ where
 	#[cfg(feature = "txpool")]
 	io.merge(rpc_txpool::TxPool::new(Arc::clone(&client), graph).into_rpc())?;
 
-	if let Some(tracing_config) = tracing_config {
-		if let Some(trace_filter_requester) = tracing_config.tracing_requesters.trace {
-			io.merge(
-				Trace::new(client, trace_filter_requester, tracing_config.trace_filter_max_count)
-					.into_rpc(),
-			)?;
-		}
+	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
+	// if let Some(tracing_config) = tracing_config {
+	// 	if let Some(trace_filter_requester) = tracing_config.tracing_requesters.trace {
+	// 		io.merge(
+	// 			Trace::new(client, trace_filter_requester, tracing_config.trace_filter_max_count)
+	// 				.into_rpc(),
+	// 		)?;
+	// 	}
 
-		if let Some(debug_requester) = tracing_config.tracing_requesters.debug {
-			io.merge(Debug::new(debug_requester).into_rpc())?;
-		}
-	}
+	// 	if let Some(debug_requester) = tracing_config.tracing_requesters.debug {
+	// 		io.merge(Debug::new(debug_requester).into_rpc())?;
+	// 	}
+	// }
 	Ok(io)
 }

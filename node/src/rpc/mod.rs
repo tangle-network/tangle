@@ -75,7 +75,7 @@ pub struct GrandpaDeps<B> {
 }
 
 /// Full client dependencies.
-pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
+pub struct FullDeps<C, P, CT, SC, B, CIDP> {
 	/// The client instance to use.
 	pub client: Arc<C>,
 	/// Transaction pool instance.
@@ -83,7 +83,7 @@ pub struct FullDeps<C, P, A: ChainApi, CT, SC, B, CIDP> {
 	/// Whether to deny unsafe calls
 	pub deny_unsafe: DenyUnsafe,
 	/// Ethereum-compatibility specific dependencies.
-	pub eth: EthDeps<C, P, A, CT, Block, CIDP>,
+	pub eth: EthDeps<C, P, CT, Block, CIDP>,
 	/// BABE specific dependencies.
 	pub babe: Option<BabeDeps>,
 	/// The SelectChain Strategy
@@ -108,8 +108,8 @@ where
 
 /// Instantiate all Full RPC extensions.
 #[cfg(feature = "testnet")]
-pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
-	deps: FullDeps<C, P, A, CT, SC, B, CIDP>,
+pub fn create_full<C, P, BE, CT, SC, B, CIDP>(
+	deps: FullDeps<C, P, CT, SC, B, CIDP>,
 	subscription_task_executor: SubscriptionTaskExecutor,
 	pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
@@ -132,8 +132,9 @@ where
 	C::Api: pallet_credits_rpc::CreditsRuntimeApi<Block, AccountId, Balance, AssetId>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
-	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
-	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
+	// TEMPORARY: Debug and TxPool APIs have Hash type mismatches with stable2503
+	// C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
+	// C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
@@ -142,7 +143,6 @@ where
 	BE: Backend<Block> + 'static,
 	C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
 	P: TransactionPool<Block = Block> + 'static,
-	A: ChainApi<Block = Block> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
 	SC: SelectChain<Block> + 'static,
 	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
@@ -168,7 +168,7 @@ where
 		finality_provider,
 	} = grandpa;
 
-	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+	io.merge(System::new(client.clone(), pool).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
@@ -177,10 +177,7 @@ where
 
 	if let Some(babe) = babe {
 		let BabeDeps { babe_worker_handle, keystore } = babe;
-		io.merge(
-			Babe::new(client.clone(), babe_worker_handle, keystore, select_chain, deny_unsafe)
-				.into_rpc(),
-		)?;
+		io.merge(Babe::new(client.clone(), babe_worker_handle, keystore, select_chain).into_rpc())?;
 	}
 
 	io.merge(
@@ -195,22 +192,23 @@ where
 	)?;
 
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
-		io,
-		eth,
-		subscription_task_executor,
-		pubsub_notification_sinks,
-	)?;
+	// TEMPORARY: Eth RPC has Hash type mismatches with stable2503
+	// let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	// 	io,
+	// 	eth,
+	// 	subscription_task_executor,
+	// 	pubsub_notification_sinks,
+	// )?;
 
 	Ok(io)
 }
 
 /// Instantiate all Full RPC extensions.
 #[cfg(not(feature = "testnet"))]
-pub fn create_full<C, P, BE, A, CT, SC, B, CIDP>(
-	deps: FullDeps<C, P, A, CT, SC, B, CIDP>,
-	subscription_task_executor: SubscriptionTaskExecutor,
-	pubsub_notification_sinks: Arc<
+pub fn create_full<C, P, BE, CT, SC, B, CIDP>(
+	deps: FullDeps<C, P, CT, SC, B, CIDP>,
+	_subscription_task_executor: SubscriptionTaskExecutor,
+	_pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
 			fc_mapping_sync::EthereumBlockNotification<Block>,
 		>,
@@ -223,8 +221,9 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
-	C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
-	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
+	// TEMPORARY: Debug and TxPool APIs have Hash type mismatches with stable2503
+	// C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
+	// C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
 	C: BlockchainEvents<Block> + 'static,
 	C: HeaderBackend<Block>
@@ -233,7 +232,6 @@ where
 	BE: Backend<Block> + 'static,
 	// C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
 	P: TransactionPool<Block = Block> + 'static,
-	A: ChainApi<Block = Block> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
 	SC: SelectChain<Block> + 'static,
 	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
@@ -263,10 +261,7 @@ where
 
 	if let Some(babe) = babe {
 		let BabeDeps { babe_worker_handle, keystore } = babe;
-		io.merge(
-			Babe::new(client.clone(), babe_worker_handle, keystore, select_chain, deny_unsafe)
-				.into_rpc(),
-		)?;
+		io.merge(Babe::new(client.clone(), babe_worker_handle, keystore, select_chain).into_rpc())?;
 	}
 
 	let GrandpaDeps {
@@ -277,7 +272,7 @@ where
 		finality_provider,
 	} = grandpa;
 
-	io.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())?;
+	io.merge(System::new(client.clone(), pool).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
@@ -296,12 +291,13 @@ where
 	)?;
 
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
-		io,
-		eth,
-		subscription_task_executor,
-		pubsub_notification_sinks,
-	)?;
+	// TEMPORARY: Eth RPC has Hash type mismatches with stable2503
+	// let io = create_eth::<_, _, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	// 	io,
+	// 	eth,
+	// 	subscription_task_executor,
+	// 	pubsub_notification_sinks,
+	// )?;
 
 	Ok(io)
 }

@@ -24,6 +24,7 @@ use crate::{
 	},
 };
 use futures::{FutureExt, future};
+use jsonrpsee::RpcModule;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus::BasicQueue;
 use sc_consensus_babe::BabeWorkerHandle;
@@ -125,11 +126,7 @@ where
 		.transpose()?;
 
 	// Create the WasmExecutor with allow_missing_host_functions flag set to true
-	let executor = WasmExecutor::builder()
-		.with_max_runtime_instances(config.max_runtime_instances)
-		.with_runtime_cache_size(config.runtime_cache_size)
-		.with_allow_missing_host_functions(true)
-		.build();
+	let executor = WasmExecutor::builder().with_allow_missing_host_functions(true).build();
 
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(
@@ -146,12 +143,15 @@ where
 
 	let select_chain = sc_consensus::LongestChain::new(backend.clone());
 
-	let transaction_pool = sc_transaction_pool::BasicPool::new_full(
-		config.transaction_pool.clone(),
-		config.role.is_authority().into(),
-		config.prometheus_registry(),
-		task_manager.spawn_essential_handle(),
-		client.clone(),
+	let transaction_pool = Arc::new(
+		sc_transaction_pool::Builder::new(
+			task_manager.spawn_essential_handle(),
+			client.clone(),
+			config.role.is_authority().into(),
+		)
+		.with_options(config.transaction_pool.clone())
+		.with_prometheus(config.prometheus_registry())
+		.build(),
 	);
 
 	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
@@ -300,7 +300,10 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		Block,
 		<Block as BlockT>::Hash,
 		Network,
-	>::new(&config.network);
+	>::new(
+		&config.network,
+		config.prometheus_config.as_ref().map(|cfg| cfg.registry.clone()),
+	);
 
 	let peer_store_handle = net_config.peer_store_handle();
 	let metrics = Network::register_notification_metrics(
@@ -321,13 +324,13 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 	net_config.add_notification_protocol(grandpa_protocol_config);
 
-	let warp_sync = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
+	let warp_sync_provider = Arc::new(sc_consensus_grandpa::warp_proof::NetworkProvider::new(
 		backend.clone(),
 		grandpa_link.shared_authority_set().clone(),
 		Vec::default(),
 	));
 
-	let (network, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
+	let (network, system_rpc_tx, tx_handler_controller, sync_service) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
 			config: &config,
 			net_config,
@@ -336,7 +339,9 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			spawn_handle: task_manager.spawn_handle(),
 			import_queue,
 			block_announce_validator_builder: None,
-			warp_sync_params: Some(sc_service::WarpSyncParams::WithProvider(warp_sync)),
+			warp_sync_config: Some(sc_network_sync::WarpSyncConfig::WithProvider(
+				warp_sync_provider,
+			)),
 			block_relay: None,
 			metrics,
 		})?;
@@ -365,9 +370,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let prometheus_registry = config.prometheus_registry().cloned();
 
 	if config.offchain_worker.enabled {
-		task_manager.spawn_handle().spawn(
-			"offchain-workers-runner",
-			"offchain-work",
+		let offchain_workers =
 			sc_offchain::OffchainWorkers::new(sc_offchain::OffchainWorkerOptions {
 				runtime_api_provider: client.clone(),
 				keystore: Some(keystore_container.keystore()),
@@ -379,9 +382,12 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 				is_validator: role.is_authority(),
 				enable_http_requests: true,
 				custom_extensions: move |_| vec![],
-			})
-			.run(client.clone(), task_manager.spawn_handle())
-			.boxed(),
+			})?;
+
+		task_manager.spawn_handle().spawn(
+			"offchain-workers-runner",
+			"offchain-work",
+			offchain_workers.run(client.clone(), task_manager.spawn_handle()).boxed(),
 		);
 	}
 
@@ -396,27 +402,30 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let pubsub_notification_sinks = Arc::new(pubsub_notification_sinks);
 
 	// for ethereum-compatibility rpc.
-	config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
+	// TEMPORARY: rpc_id_provider field removed in stable2503
+	// config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
 
 	let slot_duration = babe_link.config().slot_duration();
 	let target_gas_price = eth_config.target_gas_price;
 	let frontier_backend = Arc::new(frontier_backend);
 
 	let ethapi_cmd = rpc_config.ethapi.clone();
-	let tracing_requesters =
-		if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
-			crate::rpc::tracing::spawn_tracing_tasks(
-				&task_manager,
-				client.clone(),
-				backend.clone(),
-				frontier_backend.clone(),
-				storage_override.clone(),
-				&rpc_config,
-				prometheus_registry.clone(),
-			)
-		} else {
-			crate::rpc::tracing::RpcRequesters { debug: None, trace: None }
-		};
+	// TEMPORARY: Tracing has Hash type mismatches with stable2503
+	// let tracing_requesters =
+	// 	if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
+	// 		crate::rpc::tracing::spawn_tracing_tasks(
+	// 			&task_manager,
+	// 			client.clone(),
+	// 			backend.clone(),
+	// 			frontier_backend.clone(),
+	// 			storage_override.clone(),
+	// 			&rpc_config,
+	// 			prometheus_registry.clone(),
+	// 		)
+	// 	} else {
+	// 		crate::rpc::tracing::RpcRequesters { debug: None, trace: None }
+	// 	};
+	let tracing_requesters = crate::rpc::tracing::RpcRequesters { debug: None, trace: None };
 
 	let pending_create_inherent_data_providers = move |_, ()| async move {
 		let current = sp_timestamp::InherentDataProvider::from_system_time();
@@ -436,7 +445,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let eth_rpc_params = crate::rpc::EthDeps {
 		client: client.clone(),
 		pool: transaction_pool.clone(),
-		graph: transaction_pool.pool().clone(),
+		graph: transaction_pool.clone(),
 		converter: Some(TransactionConverter),
 		is_authority: config.role.is_authority(),
 		enable_dev_signer: eth_config.enable_dev_signer,
@@ -485,7 +494,10 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		let backend_clone = backend.clone();
 		Box::new(
-			move |deny_unsafe, subscription_task_executor: sc_rpc::SubscriptionTaskExecutor| {
+			move |spawner: Arc<dyn sc_core::traits::SpawnNamed>| -> Result<RpcModule<()>, sc_service::Error> {
+				let deny_unsafe = sc_rpc_api::DenyUnsafe::No;
+				let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor(spawner);
+
 				let deps = crate::rpc::FullDeps {
 					client: client.clone(),
 					pool: pool.clone(),
@@ -507,8 +519,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 					deps,
 					subscription_task_executor,
 					pubsub_notification_sinks.clone(),
-				)
-				.map_err(Into::into)
+				).map_err(Into::into)
 			},
 		)
 	};
@@ -625,8 +636,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			.spawn_essential_handle()
 			.spawn_blocking("manual-seal", None, manual_seal);
 
-		network_starter.start_network();
-		log::info!("Manual Seal Ready");
+	log::info!("Manual Seal Ready");
 
 		#[cfg(feature = "blueprint-manager")]
 		{
