@@ -106,6 +106,8 @@ pallet-base-fee = { workspace = true }
 pallet-dynamic-fee = { workspace = true }
 pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
+ethereum = { workspace = true }
+primitive-types = { workspace = true }
 pallet-evm-chain-id = { workspace = true }
 pallet-evm-precompile-balances-erc20 = { workspace = true }
 pallet-evm-precompile-blake2 = { workspace = true }

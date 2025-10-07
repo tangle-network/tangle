@@ -40,7 +40,8 @@ members = [
     "precompiles/erc20-utils",
     "precompiles/verify-ecdsa-secp256k1-signature",
     "precompiles/verify-ecdsa-secp256r1-signature",
-    "precompiles/verify-ecdsa-stark-signature",
+    # TEMPORARY: Commented out due to size-of crate ABI issues on macOS
+    # "precompiles/verify-ecdsa-stark-signature",
     "precompiles/verify-schnorr-signatures",
     "precompiles/verify-bls381-signature",
     "precompiles/multi-asset-delegation",
@@ -335,7 +336,8 @@ pallet-evm-precompile-vesting = { path = "precompiles/vesting", default-features
 pallet-evm-precompile-multi-asset-delegation = { path = "precompiles/multi-asset-delegation", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256k1-signature = { path = "precompiles/verify-ecdsa-secp256k1-signature", default-features = false }
 pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/verify-ecdsa-secp256r1-signature", default-features = false }
-pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
+# TEMPORARY: Commented out due to size-of crate ABI issues on macOS
+# pallet-evm-precompile-verify-ecdsa-stark-signature = { path = "precompiles/verify-ecdsa-stark-signature", default-features = false }
 pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }

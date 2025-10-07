@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-extern crate alloc;
-
 use crate::{
 	AccountId, Assets, Balances, EnsureRoot, EnsureRootOrHalfCouncil, Get, H160, Ismp, Runtime,
 	RuntimeEvent, Timestamp, TokenGateway, Treasury,
@@ -60,7 +58,7 @@ impl pallet_ismp::Config for Runtime {
 	// algorithms supported by this protocol deployment
 	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type OffchainDB = ();
-	type FeeHandler = TangleFeeHandler;
+	type FeeHandler = (); // TEMPORARY: FeeHandler API needs update for stable2503
 }
 
 impl ::ismp_grandpa::Config for Runtime {
@@ -72,20 +70,6 @@ impl ::ismp_grandpa::Config for Runtime {
 
 #[derive(Default)]
 pub struct Router;
-
-pub struct TangleFeeHandler;
-
-impl pallet_ismp::fee_handler::FeeHandler for TangleFeeHandler {
-	fn on_executed(
-		_messages: alloc::vec::Vec<ismp::messaging::Message>,
-		_events: alloc::vec::Vec<ismp::events::Event>,
-	) -> frame_support::dispatch::DispatchResultWithPostInfo {
-		Ok(frame_support::dispatch::PostDispatchInfo {
-			actual_weight: None,
-			pays_fee: frame_support::dispatch::Pays::No,
-		})
-	}
-}
 
 impl IsmpRouter for Router {
 	fn module_for_id(&self, id: Vec<u8>) -> Result<Box<dyn IsmpModule>, anyhow::Error> {

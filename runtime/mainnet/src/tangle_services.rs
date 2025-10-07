@@ -1,8 +1,5 @@
 use super::*;
-use frontier_evm::DefaultBaseFeePerGas;
-use pallet_evm::GasWeightMapping;
-use scale_info::TypeInfo;
-use sp_staking::EraIndex;
+use crate::frontier_evm::DefaultBaseFeePerGas;
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
@@ -39,6 +36,7 @@ impl tangle_primitives::services::EvmRunner<Runtime> for PalletEvmRunner {
 			Some(max_priority_fee_per_gas),
 			nonce,
 			access_list,
+			Vec::new(),
 			is_transactional,
 			validate,
 			weight_limit,
@@ -89,7 +87,7 @@ parameter_types! {
 	pub const MaxMetadataLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxJobsPerService: u32 = 64;
+	pub const MaxJobsPerService: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxOperatorsPerService: u32 = 1024;
@@ -107,34 +105,34 @@ parameter_types! {
 	pub const MaxServicesPerUser: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxBinariesPerGadget: u32 = 16;
+	pub const MaxBinariesPerGadget: u32 = 64;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxSourcesPerGadget: u32 = 16;
+	pub const MaxSourcesPerGadget: u32 = 64;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxGitOwnerLength: u32 = 256;
+	pub const MaxGitOwnerLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxGitRepoLength: u32 = 256;
+	pub const MaxGitRepoLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxGitTagLength: u32 = 256;
+	pub const MaxGitTagLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxBinaryNameLength: u32 = 256;
+	pub const MaxBinaryNameLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxIpfsHashLength: u32 = 256;
+	pub const MaxIpfsHashLength: u32 = 46;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxContainerRegistryLength: u32 = 256;
+	pub const MaxContainerRegistryLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxContainerImageNameLength: u32 = 256;
+	pub const MaxContainerImageNameLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxContainerImageTagLength: u32 = 256;
+	pub const MaxContainerImageTagLength: u32 = 1024;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxAssetsPerService: u32 = 64;
@@ -146,13 +144,10 @@ parameter_types! {
 	pub const MaxResourceNameLength: u32 = 16;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const SlashDeferDuration: EraIndex = 7;
+	pub const SlashDeferDuration: u32 = 7;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MaxMasterBlueprintServiceManagerVersions: u32 = 1024;
-
-	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
-	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
+	pub const MaxMasterBlueprintServiceManagerVersions: u32 = u32::MAX;
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const MaxSlashesPerBlock: u32 = 10;
@@ -165,14 +160,49 @@ parameter_types! {
 
 	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
 	pub const FallbackWeightWrites: u64 = 100;
+}
 
-	// Ripemd160(keccak256("ServicesPalletEvmAccount"))
+impl parity_scale_codec::DecodeWithMemTracking for MaxFields {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxFieldsSize {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxMetadataLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxJobsPerService {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxOperatorsPerService {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxPermittedCallers {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxServicesPerOperator {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxBlueprintsPerOperator {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxServicesPerUser {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxBinariesPerGadget {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxSourcesPerGadget {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxGitOwnerLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxGitRepoLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxGitTagLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxBinaryNameLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxIpfsHashLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxContainerRegistryLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxContainerImageNameLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxContainerImageTagLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxAssetsPerService {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxRpcAddressLength {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxResourceNameLength {}
+impl parity_scale_codec::DecodeWithMemTracking for SlashDeferDuration {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxMasterBlueprintServiceManagerVersions {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxSlashesPerBlock {}
+impl parity_scale_codec::DecodeWithMemTracking for MaxMetricsDataSize {}
+impl parity_scale_codec::DecodeWithMemTracking for FallbackWeightReads {}
+impl parity_scale_codec::DecodeWithMemTracking for FallbackWeightWrites {}
+
+parameter_types! {
+	#[derive(Default, Copy, Clone, Eq, PartialEq, RuntimeDebug, Encode, Decode, MaxEncodedLen, TypeInfo, Serialize, Deserialize)]
+	pub const MinimumNativeSecurityRequirement: Percent = Percent::from_percent(10);
+
 	pub const ServicesPalletEvmAccount: H160 = H160([
 		0x09, 0xdf, 0x6a, 0x94, 0x1e, 0xe0, 0x3b, 0x1e,
 		0x63, 0x29, 0x04, 0xe3, 0x82, 0xe1, 0x08, 0x62,
 		0xfa, 0x9c, 0xc0, 0xe3
 	]);
 }
+
+impl parity_scale_codec::DecodeWithMemTracking for MinimumNativeSecurityRequirement {}
 
 pub type PalletServicesConstraints = pallet_services::types::ConstraintsOf<Runtime>;
 
@@ -181,6 +211,8 @@ impl pallet_services::Config for Runtime {
 	type ForceOrigin = EnsureRootOrHalfCouncil;
 	type Currency = Balances;
 	type Fungibles = Assets;
+	type RewardRecorder = Rewards;
+	type RewardsManager = Rewards;
 	type PalletEvmAccount = ServicesPalletEvmAccount;
 	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;
@@ -209,16 +241,16 @@ impl pallet_services::Config for Runtime {
 	type MaxAssetsPerService = MaxAssetsPerService;
 	type MaxRpcAddressLength = MaxRpcAddressLength;
 	type MaxResourceNameLength = MaxResourceNameLength;
+	type Constraints = PalletServicesConstraints;
+	type SlashDeferDuration = SlashDeferDuration;
 	type MaxMasterBlueprintServiceManagerVersions = MaxMasterBlueprintServiceManagerVersions;
+	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
+	type DefaultParameterUpdateOrigin = EnsureRootOrHalfCouncil;
 	type MinimumNativeSecurityRequirement = MinimumNativeSecurityRequirement;
 	type MaxSlashesPerBlock = MaxSlashesPerBlock;
 	type MaxMetricsDataSize = MaxMetricsDataSize;
 	type FallbackWeightReads = FallbackWeightReads;
 	type FallbackWeightWrites = FallbackWeightWrites;
-	type Constraints = PalletServicesConstraints;
-	type SlashDeferDuration = SlashDeferDuration;
-	type MasterBlueprintServiceManagerUpdateOrigin = EnsureRootOrHalfCouncil;
-	type DefaultParameterUpdateOrigin = EnsureRootOrHalfCouncil;
 	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
 	#[cfg(feature = "runtime-benchmarks")]
@@ -226,6 +258,4 @@ impl pallet_services::Config for Runtime {
 		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
 	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
-	type RewardRecorder = Rewards;
-	type RewardsManager = Rewards;
 }

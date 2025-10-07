@@ -400,8 +400,8 @@ impl pallet_babe::Config for Runtime {
 	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type KeyOwnerProof =
 		<Historical as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
-	type EquivocationReportSystem =
-		pallet_babe::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
+	// TEMPORARY: CreateInherent trait bound issue in stable2503
+	type EquivocationReportSystem = ();
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -484,9 +484,9 @@ impl pallet_staking::Config for Runtime {
 	type AdminOrigin = EnsureRoot<AccountId>;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = U128CurrencyToVote;
-	type RewardRemainder = Treasury;
+	type RewardRemainder = (); // TEMPORARY: NegativeImbalance type changed in stable2503
 	type RuntimeEvent = RuntimeEvent;
-	type Slash = Treasury;
+	type Slash = (); // TEMPORARY: NegativeImbalance type changed in stable2503
 	type Reward = ();
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
@@ -1027,7 +1027,7 @@ impl pallet_im_online::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type NextSessionRotation = Babe;
 	type ValidatorSet = Historical;
-	type ReportUnresponsiveness = ();
+	type ReportUnresponsiveness = Offences;
 	type UnsignedPriority = ImOnlineUnsignedPriority;
 	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
 	type MaxKeys = MaxKeys;
@@ -1304,6 +1304,29 @@ impl pallet_credits::Config for Runtime {
 	type ForceOrigin = EnsureRoot<AccountId>;
 	type MaxRatePerBlock = MaxRatePerBlock;
 	type WeightInfo = ();
+}
+
+impl<LocalCall> frame_system::offchain::CreateInherent<LocalCall> for Runtime
+where
+	RuntimeCall: From<LocalCall>,
+{
+	fn create_inherent(call: RuntimeCall) -> UncheckedExtrinsic {
+		UncheckedExtrinsic::new_bare(call)
+	}
+}
+
+impl<C> frame_system::offchain::CreateTransactionBase<C> for Runtime
+where
+	RuntimeCall: From<C>,
+{
+	type Extrinsic = UncheckedExtrinsic;
+	type RuntimeCall = RuntimeCall;
+}
+
+impl sp_core::Get<RuntimeVersion> for Runtime {
+	fn get() -> RuntimeVersion {
+		VERSION
+	}
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -1772,9 +1795,9 @@ impl_runtime_apis! {
 		}
 
 		fn storage_at(address: H160, index: U256) -> H256 {
-			let mut tmp = [0u8; 32];
-			index.to_big_endian(&mut tmp);
-			pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
+		let mut tmp = [0u8; 32];
+		let _ = index.to_big_endian();
+		pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
 		}
 
 	fn call(
@@ -1788,7 +1811,7 @@ impl_runtime_apis! {
 		nonce: Option<U256>,
 		estimate: bool,
 		access_list: Option<Vec<(H160, Vec<H256>)>>,
-		_authorization_list: Option<Vec<u8>>,
+		_authorization_list: Option<Vec<ethereum::AuthorizationListItem>>,
 	) -> Result<pallet_evm::CallInfo, sp_runtime::DispatchError> {
 			use pallet_evm::GasWeightMapping;
 			let config = if estimate {
@@ -1863,7 +1886,7 @@ impl_runtime_apis! {
 		nonce: Option<U256>,
 		estimate: bool,
 		access_list: Option<Vec<(H160, Vec<H256>)>>,
-		_authorization_list: Option<Vec<u8>>,
+		_authorization_list: Option<Vec<ethereum::AuthorizationListItem>>,
 	) -> Result<pallet_evm::CreateInfo, sp_runtime::DispatchError> {
 			use pallet_evm::GasWeightMapping;
 			let config = if estimate {
@@ -2170,14 +2193,14 @@ impl_runtime_apis! {
 			))
 		}
 
-		fn trace_block(
-			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
-			known_transactions: Vec<H256>,
-			header: &<Block as BlockT>::Header,
-		) -> Result<
-			(),
-			sp_runtime::DispatchError,
-		> {
+	fn trace_block(
+		extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+		known_transactions: Vec<primitive_types::H256>,
+		header: &<Block as BlockT>::Header,
+	) -> Result<
+		(),
+		sp_runtime::DispatchError,
+	> {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;
@@ -2215,18 +2238,18 @@ impl_runtime_apis! {
 			))
 		}
 
-		fn trace_call(
-			header: &<Block as BlockT>::Header,
-			from: H160,
-			to: H160,
-			data: Vec<u8>,
-			value: U256,
-			gas_limit: U256,
-			max_fee_per_gas: Option<U256>,
-			max_priority_fee_per_gas: Option<U256>,
-			nonce: Option<U256>,
-			access_list: Option<Vec<(H160, Vec<H256>)>>,
-		) -> Result<(), sp_runtime::DispatchError> {
+	fn trace_call(
+		header: &<Block as BlockT>::Header,
+		from: primitive_types::H160,
+		to: primitive_types::H160,
+		data: Vec<u8>,
+		value: primitive_types::U256,
+		gas_limit: primitive_types::U256,
+		max_fee_per_gas: Option<primitive_types::U256>,
+		max_priority_fee_per_gas: Option<primitive_types::U256>,
+		nonce: Option<primitive_types::U256>,
+		access_list: Option<Vec<(primitive_types::H160, Vec<primitive_types::H256>)>>,
+	) -> Result<(), sp_runtime::DispatchError> {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;

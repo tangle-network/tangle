@@ -25,10 +25,12 @@ pub mod extension;
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
-pub mod migrations;
+// TEMPORARY: Migration has Currency trait bound issues with stable2503
+// pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
+use ethereum;
 use frame_election_provider_support::{
 	BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -59,6 +61,7 @@ use pallet_transaction_payment::{
 };
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
+use primitive_types;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -295,6 +298,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = RuntimeFreezeReason;
 	type FreezeIdentifier = RuntimeFreezeReason;
 	type MaxFreezes = MaxFreezes;
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -386,16 +390,14 @@ impl pallet_babe::Config for Runtime {
 	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type KeyOwnerProof =
 		<Historical as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
-	type EquivocationReportSystem =
-		pallet_babe::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
+	type EquivocationReportSystem = ();
 }
 
 impl pallet_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type MaxSetIdSessionEntries = frame_support::traits::ConstU64<0>;
 	type MaxAuthorities = MaxAuthorities;
-	type EquivocationReportSystem =
-		pallet_grandpa::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
+	type EquivocationReportSystem = ();
 	type KeyOwnerProof = <Historical as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
 	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type WeightInfo = ();
@@ -418,6 +420,7 @@ impl pallet_session::Config for Runtime {
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+	type DisablingStrategy = ();
 }
 
 impl pallet_session::historical::Config for Runtime {
@@ -471,10 +474,10 @@ impl pallet_staking::Config for Runtime {
 	type AdminOrigin = EnsureRoot<AccountId>;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = U128CurrencyToVote;
-	type RewardRemainder = Treasury;
+	type RewardRemainder = ();
 	type RuntimeEvent = RuntimeEvent;
-	type Slash = Treasury; // send the slashed funds to the treasury.
-	type Reward = (); // rewards are minted from the void
+	type Slash = ();
+	type Reward = ();
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
@@ -493,6 +496,9 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Filter = frame_support::traits::Everything;
 }
 
 parameter_types! {
@@ -581,6 +587,9 @@ impl pallet_collective::Config<CouncilCollective> for Runtime {
 	type DefaultVote = pallet_collective::PrimeDefaultVote;
 	type WeightInfo = pallet_collective::weights::SubstrateWeight<Runtime>;
 	type MaxProposalWeight = MaxProposalWeight;
+	type DisapproveOrigin = EnsureRoot<AccountId>;
+	type KillOrigin = EnsureRoot<AccountId>;
+	type Consideration = ();
 }
 
 parameter_types! {
@@ -1075,6 +1084,8 @@ impl pallet_identity::Config for Runtime {
 	type MaxSuffixLength = ConstU32<7>;
 	type MaxUsernameLength = ConstU32<32>;
 	type WeightInfo = ();
+	type UsernameDeposit = BasicDeposit;
+	type UsernameGracePeriod = PendingUsernameExpiration;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -1150,6 +1161,9 @@ impl Default for ProxyType {
 		Self::Any
 	}
 }
+
+impl parity_scale_codec::DecodeWithMemTracking for ProxyType {}
+
 impl InstanceFilter<RuntimeCall> for ProxyType {
 	fn filter(&self, c: &RuntimeCall) -> bool {
 		match self {
@@ -1227,7 +1241,6 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	type AssetId = AssetId;
 	type AssetIdParameter = parity_scale_codec::Compact<AssetId>;
 	type Currency = Balances;
-	// only lst pallet can create pool tokens
 	type CreateOrigin =
 		AsEnsureOriginWithArg<EnsureSignedBy<LstPalletOrigin, sp_runtime::AccountId32>>;
 	type ForceOrigin = EnsureRootOrHalfCouncil;
@@ -1244,6 +1257,7 @@ impl pallet_assets::Config<LstPoolAssetsInstance> for Runtime {
 	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
+	type Holder = ();
 }
 
 parameter_types! {
@@ -1419,6 +1433,29 @@ impl pallet_credits::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl<LocalCall> frame_system::offchain::CreateInherent<LocalCall> for Runtime
+where
+	RuntimeCall: From<LocalCall>,
+{
+	fn create_inherent(call: RuntimeCall) -> UncheckedExtrinsic {
+		UncheckedExtrinsic::new_bare(call)
+	}
+}
+
+impl<C> frame_system::offchain::CreateTransactionBase<C> for Runtime
+where
+	RuntimeCall: From<C>,
+{
+	type Extrinsic = UncheckedExtrinsic;
+	type RuntimeCall = RuntimeCall;
+}
+
+impl sp_core::Get<RuntimeVersion> for Runtime {
+	fn get() -> RuntimeVersion {
+		VERSION
+	}
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime {
@@ -1490,7 +1527,7 @@ pub struct TransactionConverter;
 
 impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
 	fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
-		UncheckedExtrinsic::new_unsigned(
+		UncheckedExtrinsic::new_bare(
 			pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
 		)
 	}
@@ -1501,7 +1538,7 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 		&self,
 		transaction: pallet_ethereum::Transaction,
 	) -> opaque::UncheckedExtrinsic {
-		let extrinsic = UncheckedExtrinsic::new_unsigned(
+		let extrinsic = UncheckedExtrinsic::new_bare(
 			pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
 		);
 		let encoded = extrinsic.encode();
@@ -1834,24 +1871,25 @@ impl_runtime_apis! {
 			<pallet_evm::Pallet<Runtime>>::find_author()
 		}
 
-		fn storage_at(address: H160, index: U256) -> H256 {
-			let mut tmp = [0u8; 32];
-			index.to_big_endian(&mut tmp);
-			pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
-		}
+	fn storage_at(address: H160, index: U256) -> H256 {
+		let mut tmp = [0u8; 32];
+		let _ = index.to_big_endian();
+		pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
+	}
 
-		fn call(
-			from: H160,
-			to: H160,
-			data: Vec<u8>,
-			value: U256,
-			gas_limit: U256,
-			max_fee_per_gas: Option<U256>,
-			max_priority_fee_per_gas: Option<U256>,
-			nonce: Option<U256>,
-			estimate: bool,
-			access_list: Option<Vec<(H160, Vec<H256>)>>,
-		) -> Result<pallet_evm::CallInfo, sp_runtime::DispatchError> {
+	fn call(
+		from: H160,
+		to: H160,
+		data: Vec<u8>,
+		value: U256,
+		gas_limit: U256,
+		max_fee_per_gas: Option<U256>,
+		max_priority_fee_per_gas: Option<U256>,
+		nonce: Option<U256>,
+		estimate: bool,
+		access_list: Option<Vec<(H160, Vec<H256>)>>,
+		_authorization_list: Option<Vec<ethereum::AuthorizationListItem>>,
+	) -> Result<pallet_evm::CallInfo, sp_runtime::DispatchError> {
 			use pallet_evm::GasWeightMapping;
 			let config = if estimate {
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
@@ -1896,35 +1934,37 @@ impl_runtime_apis! {
 					_ => (None, None),
 				};
 			let evm_config = config.as_ref().unwrap_or(<Runtime as pallet_evm::Config>::config());
-			<Runtime as pallet_evm::Config>::Runner::call(
-				from,
-				to,
-				data,
-				value,
-				gas_limit.unique_saturated_into(),
-				max_fee_per_gas,
-				max_priority_fee_per_gas,
-				nonce,
-				access_list.unwrap_or_default(),
-				is_transactional,
-				validate,
-				weight_limit,
-				proof_size_base_cost,
-				evm_config,
-			).map_err(|err| err.error.into())
+		<Runtime as pallet_evm::Config>::Runner::call(
+			from,
+			to,
+			data,
+			value,
+			gas_limit.unique_saturated_into(),
+			max_fee_per_gas,
+			max_priority_fee_per_gas,
+			nonce,
+			access_list.unwrap_or_default(),
+			Vec::new(),
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			evm_config,
+		).map_err(|err| err.error.into())
 		}
 
-		fn create(
-			from: H160,
-			data: Vec<u8>,
-			value: U256,
-			gas_limit: U256,
-			max_fee_per_gas: Option<U256>,
-			max_priority_fee_per_gas: Option<U256>,
-			nonce: Option<U256>,
-			estimate: bool,
-			access_list: Option<Vec<(H160, Vec<H256>)>>,
-		) -> Result<pallet_evm::CreateInfo, sp_runtime::DispatchError> {
+	fn create(
+		from: H160,
+		data: Vec<u8>,
+		value: U256,
+		gas_limit: U256,
+		max_fee_per_gas: Option<U256>,
+		max_priority_fee_per_gas: Option<U256>,
+		nonce: Option<U256>,
+		estimate: bool,
+		access_list: Option<Vec<(H160, Vec<H256>)>>,
+		_authorization_list: Option<Vec<ethereum::AuthorizationListItem>>,
+	) -> Result<pallet_evm::CreateInfo, sp_runtime::DispatchError> {
 			use pallet_evm::GasWeightMapping;
 			let config = if estimate {
 				let mut config = <Runtime as pallet_evm::Config>::config().clone();
@@ -1968,21 +2008,22 @@ impl_runtime_apis! {
 					_ => (None, None),
 				};
 			let evm_config = config.as_ref().unwrap_or(<Runtime as pallet_evm::Config>::config());
-			<Runtime as pallet_evm::Config>::Runner::create(
-				from,
-				data,
-				value,
-				gas_limit.unique_saturated_into(),
-				max_fee_per_gas,
-				max_priority_fee_per_gas,
-				nonce,
-				access_list.unwrap_or_default(),
-				is_transactional,
-				validate,
-				weight_limit,
-				proof_size_base_cost,
-				evm_config,
-			).map_err(|err| err.error.into())
+		<Runtime as pallet_evm::Config>::Runner::create(
+			from,
+			data,
+			value,
+			gas_limit.unique_saturated_into(),
+			max_fee_per_gas,
+			max_priority_fee_per_gas,
+			nonce,
+			access_list.unwrap_or_default(),
+			Vec::new(),
+			is_transactional,
+			validate,
+			weight_limit,
+			proof_size_base_cost,
+			evm_config,
+		).map_err(|err| err.error.into())
 		}
 
 		fn current_transaction_statuses() -> Option<Vec<TransactionStatus>> {
@@ -2046,7 +2087,7 @@ impl_runtime_apis! {
 
 	impl fp_rpc::ConvertTransactionRuntimeApi<Block> for Runtime {
 		fn convert_transaction(transaction: EthereumTransaction) -> <Block as BlockT>::Extrinsic {
-			UncheckedExtrinsic::new_unsigned(
+			UncheckedExtrinsic::new_bare(
 				pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
 			)
 		}
@@ -2092,14 +2133,14 @@ impl_runtime_apis! {
 			))
 		}
 
-		fn trace_block(
-			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
-			known_transactions: Vec<H256>,
-			header: &<Block as BlockT>::Header,
-		) -> Result<
-			(),
-			sp_runtime::DispatchError,
-		> {
+	fn trace_block(
+		extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+		known_transactions: Vec<primitive_types::H256>,
+		header: &<Block as BlockT>::Header,
+	) -> Result<
+		(),
+		sp_runtime::DispatchError,
+	> {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;
@@ -2137,18 +2178,18 @@ impl_runtime_apis! {
 			))
 		}
 
-		fn trace_call(
-			header: &<Block as BlockT>::Header,
-			from: H160,
-			to: H160,
-			data: Vec<u8>,
-			value: U256,
-			gas_limit: U256,
-			max_fee_per_gas: Option<U256>,
-			max_priority_fee_per_gas: Option<U256>,
-			nonce: Option<U256>,
-			access_list: Option<Vec<(H160, Vec<H256>)>>,
-		) -> Result<(), sp_runtime::DispatchError> {
+	fn trace_call(
+		header: &<Block as BlockT>::Header,
+		from: primitive_types::H160,
+		to: primitive_types::H160,
+		data: Vec<u8>,
+		value: primitive_types::U256,
+		gas_limit: primitive_types::U256,
+		max_fee_per_gas: Option<primitive_types::U256>,
+		max_priority_fee_per_gas: Option<primitive_types::U256>,
+		nonce: Option<primitive_types::U256>,
+		access_list: Option<Vec<(primitive_types::H160, Vec<primitive_types::H256>)>>,
+	) -> Result<(), sp_runtime::DispatchError> {
 			#[cfg(feature = "evm-tracing")]
 			{
 				use evm_tracer::tracer::EvmTracer;
@@ -2174,22 +2215,23 @@ impl_runtime_apis! {
 							_ => (None, None),
 						};
 
-					let _ = <Runtime as pallet_evm::Config>::Runner::call(
-						from,
-						to,
-						data,
-						value,
-						gas_limit,
-						max_fee_per_gas,
-						max_priority_fee_per_gas,
-						nonce,
-						access_list.unwrap_or_default(),
-						is_transactional,
-						validate,
-						weight_limit,
-						proof_size_base_cost,
-						<Runtime as pallet_evm::Config>::config(),
-					);
+				let _ = <Runtime as pallet_evm::Config>::Runner::call(
+					from,
+					to,
+					data,
+					value,
+					gas_limit,
+					max_fee_per_gas,
+					max_priority_fee_per_gas,
+					nonce,
+					access_list.unwrap_or_default(),
+					Vec::new(),
+					is_transactional,
+					validate,
+					weight_limit,
+					proof_size_base_cost,
+					<Runtime as pallet_evm::Config>::config(),
+				);
 				});
 
 				Ok(())
