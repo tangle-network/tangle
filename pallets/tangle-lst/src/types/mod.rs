@@ -55,10 +55,7 @@ pub enum BondExtra<Balance> {
 	FreeBalance(Balance),
 }
 
-impl<Balance> codec::DecodeWithMemTracking for BondExtra<Balance> 
-where
-	BondExtra<Balance>: Decode,
-{}
+impl<Balance> codec::DecodeWithMemTracking for BondExtra<Balance> where BondExtra<Balance>: Decode {}
 
 /// The type of account being created.
 #[derive(Encode, Decode)]

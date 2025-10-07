@@ -25,15 +25,15 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-// TEMPORARY STUB: The runtime_interface macro is not working properly with the new polkadot-sdk version
-// This is a minimal stub to allow compilation to proceed
+// TEMPORARY STUB: The runtime_interface macro is not working properly with the new polkadot-sdk
+// version This is a minimal stub to allow compilation to proceed
 
 use evm_tracing_events::StepEventFilter;
 use sp_std::vec::Vec;
 
 pub mod ext {
 	use super::*;
-	
+
 	pub fn raw_step(_data: Vec<u8>) {}
 	pub fn raw_gas(_data: Vec<u8>) {}
 	pub fn raw_return_value(_data: Vec<u8>) {}
@@ -42,7 +42,7 @@ pub mod ext {
 	pub fn evm_event(_event: Vec<u8>) {}
 	pub fn gasometer_event(_event: Vec<u8>) {}
 	pub fn runtime_event(_event: Vec<u8>) {}
-	pub fn step_event_filter() -> StepEventFilter { 
+	pub fn step_event_filter() -> StepEventFilter {
 		StepEventFilter::default()
 	}
 }

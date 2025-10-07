@@ -7,10 +7,10 @@ pub enum CommissionClaimPermission<AccountId> {
 	Account(AccountId),
 }
 
-impl<AccountId> codec::DecodeWithMemTracking for CommissionClaimPermission<AccountId> 
-where
-	CommissionClaimPermission<AccountId>: Decode,
-{}
+impl<AccountId> codec::DecodeWithMemTracking for CommissionClaimPermission<AccountId> where
+	CommissionClaimPermission<AccountId>: Decode
+{
+}
 
 /// Pool commission.
 ///
@@ -227,7 +227,7 @@ pub struct CommissionChangeRate<BlockNumber> {
 	pub min_delay: BlockNumber,
 }
 
-impl<BlockNumber> codec::DecodeWithMemTracking for CommissionChangeRate<BlockNumber> 
-where
-	CommissionChangeRate<BlockNumber>: Decode,
-{}
+impl<BlockNumber> codec::DecodeWithMemTracking for CommissionChangeRate<BlockNumber> where
+	CommissionChangeRate<BlockNumber>: Decode
+{
+}

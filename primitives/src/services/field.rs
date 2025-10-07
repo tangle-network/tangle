@@ -116,10 +116,10 @@ pub enum Field<C: Constraints, AccountId> {
 	AccountId(AccountId),
 }
 
-impl<C: Constraints, AccountId> parity_scale_codec::DecodeWithMemTracking for Field<C, AccountId> 
-where
-	Field<C, AccountId>: Decode,
-{}
+impl<C: Constraints, AccountId> parity_scale_codec::DecodeWithMemTracking for Field<C, AccountId> where
+	Field<C, AccountId>: Decode
+{
+}
 
 #[cfg(feature = "std")]
 impl<C: Constraints, AccountId: core::fmt::Debug> core::fmt::Debug for Field<C, AccountId> {
@@ -453,10 +453,10 @@ impl<C: Constraints, AccountId: Clone + Encode> Field<C, AccountId> {
 #[repr(transparent)]
 pub struct BoundedString<S: Get<u32>>(pub(crate) BoundedVec<u8, S>);
 
-impl<S: Get<u32>> parity_scale_codec::DecodeWithMemTracking for BoundedString<S> 
-where
-	BoundedString<S>: Decode,
-{}
+impl<S: Get<u32>> parity_scale_codec::DecodeWithMemTracking for BoundedString<S> where
+	BoundedString<S>: Decode
+{
+}
 
 impl<S: Get<u32>> Default for BoundedString<S> {
 	fn default() -> Self {
