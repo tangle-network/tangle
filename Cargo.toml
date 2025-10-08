@@ -52,7 +52,7 @@ members = [
     "precompiles/vesting",
     "precompiles/staking",
     "precompiles/rewards",
-    # "tangle-subxt",
+    # "tangle-subxt",  # TODO: regenerate for stable2503
     "evm-tracer",
 ]
 resolver = "2"
@@ -110,7 +110,7 @@ honggfuzz = { version = "0.5.55" }
 
 tangle-testnet-runtime = { package = "tangle-testnet-runtime", path = "runtime/testnet" }
 tangle-runtime = { package = "tangle-runtime", path = "runtime/mainnet" }
-# tangle-subxt = { package = "tangle-subxt", path = "tangle-subxt" }
+# tangle-subxt = { package = "tangle-subxt", path = "tangle-subxt" }  # TODO: regenerate for stable2503
 
 # Arkworks
 ark-ec = { version = "^0.4.2", default-features = false }

@@ -25,7 +25,7 @@ use frame_support::{
 	weights::Weight,
 	PalletId,
 };
-use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
+use pallet_ethereum::{EthereumBlockHashMapping, PostLogContent, RawOrigin};
 use pallet_evm::{EnsureAddressNever, EnsureAddressOrigin, OnChargeEVMTransaction};
 use pallet_evm_precompile_staking::{StakingPrecompile, StakingPrecompileCall};
 use precompile_utils::precompile_set::{

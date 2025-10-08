@@ -127,9 +127,9 @@ futures-timer = { workspace = true }
 # blueprint-keystore = { workspace = true, optional = true }
 
 [dev-dependencies]
-# tangle-subxt = { workspace = true }
+# tangle-subxt = { workspace = true }  # TODO: regenerate for stable2503
 sp-tracing = { workspace = true }
-alloy = { version = "0.9", features = ["full", "provider-debug-api"] }
+alloy = { version = "0.7", features = ["full", "provider-debug-api"] }
 anyhow = "1.0"
 
 [features]

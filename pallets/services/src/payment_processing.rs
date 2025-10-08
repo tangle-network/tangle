@@ -182,24 +182,24 @@ impl<T: Config> Pallet<T> {
 		current_block: BlockNumberFor<T>,
 	) -> DispatchResult {
 		// Check if subscription has ended
-		if let Some(end_block) = maybe_end {
-			if current_block > end_block {
-				// Clean up subscription count when subscription ends
-				let billing_key = (service_id, job_index, payer.clone());
-				if JobSubscriptionBillings::<T>::contains_key(&billing_key) {
-					JobSubscriptionBillings::<T>::remove(&billing_key);
-					let current_count = UserSubscriptionCount::<T>::get(payer);
-					UserSubscriptionCount::<T>::insert(payer, current_count.saturating_sub(1));
-				}
-
-				log::debug!(
-					"Subscription for service {} job {} has ended at block {:?}",
-					service_id,
-					job_index,
-					end_block
-				);
-				return Ok(());
+		if let Some(end_block) = maybe_end &&
+			current_block > end_block
+		{
+			// Clean up subscription count when subscription ends
+			let billing_key = (service_id, job_index, payer.clone());
+			if JobSubscriptionBillings::<T>::contains_key(&billing_key) {
+				JobSubscriptionBillings::<T>::remove(&billing_key);
+				let current_count = UserSubscriptionCount::<T>::get(payer);
+				UserSubscriptionCount::<T>::insert(payer, current_count.saturating_sub(1));
 			}
+
+			log::debug!(
+				"Subscription for service {} job {} has ended at block {:?}",
+				service_id,
+				job_index,
+				end_block
+			);
+			return Ok(());
 		}
 
 		// Check subscription limits for new subscriptions
@@ -483,49 +483,41 @@ impl<T: Config> Pallet<T> {
 					continue;
 				}
 
-				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) {
-					if let Some(job_def) = blueprint.jobs.get(job_index as usize) {
-						if let PricingModel::Subscription {
-							rate_per_interval,
-							interval,
-							maybe_end,
-						} = &job_def.pricing_model
+				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) &&
+					let Some(job_def) = blueprint.jobs.get(job_index as usize) &&
+					let PricingModel::Subscription { rate_per_interval, interval, maybe_end } =
+						&job_def.pricing_model
+				{
+					let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
+					let interval_converted: BlockNumberFor<T> = (*interval).saturated_into();
+					let maybe_end_converted: Option<BlockNumberFor<T>> =
+						maybe_end.map(|end| end.saturated_into());
+
+					let blocks_since_last = current_block.saturating_sub(billing.last_billed);
+					if blocks_since_last >= interval_converted {
+						if let Some(end_block) = maybe_end_converted &&
+							current_block > end_block
 						{
-							let rate_converted: BalanceOf<T> =
-								(*rate_per_interval).saturated_into();
-							let interval_converted: BlockNumberFor<T> =
-								(*interval).saturated_into();
-							let maybe_end_converted: Option<BlockNumberFor<T>> =
-								maybe_end.map(|end| end.saturated_into());
-
-							let blocks_since_last =
-								current_block.saturating_sub(billing.last_billed);
-							if blocks_since_last >= interval_converted {
-								if let Some(end_block) = maybe_end_converted {
-									if current_block > end_block {
-										continue;
-									}
-								}
-
-								if Self::process_job_subscription_payment(
-									service_id,
-									job_index,
-									0,
-									&subscriber,
-									&subscriber,
-									rate_converted,
-									interval_converted,
-									maybe_end_converted,
-									current_block,
-								)
-								.is_err()
-								{
-									break;
-								}
-
-								processed_count += 1;
-							}
+							continue;
 						}
+
+						if Self::process_job_subscription_payment(
+							service_id,
+							job_index,
+							0,
+							&subscriber,
+							&subscriber,
+							rate_converted,
+							interval_converted,
+							maybe_end_converted,
+							current_block,
+						)
+						.is_err()
+						{
+							break;
+						}
+
+						processed_count += 1;
 					}
 				}
 			}

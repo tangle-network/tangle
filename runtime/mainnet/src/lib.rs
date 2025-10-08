@@ -30,7 +30,6 @@ pub mod impls;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
-use ethereum;
 use frame_election_provider_support::{
 	BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -61,7 +60,6 @@ use pallet_transaction_payment::{
 };
 use pallet_tx_pause::RuntimeCallNameOf;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
-use primitive_types;
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
 use sp_api::impl_runtime_apis;
@@ -114,7 +112,6 @@ pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-use sp_runtime::generic::Era;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 
 pub use tangle_primitives::{
@@ -1872,7 +1869,7 @@ impl_runtime_apis! {
 		}
 
 	fn storage_at(address: H160, index: U256) -> H256 {
-		let mut tmp = [0u8; 32];
+		let tmp = [0u8; 32];
 		let _ = index.to_big_endian();
 		pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
 	}

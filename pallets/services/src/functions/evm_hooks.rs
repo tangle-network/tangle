@@ -1920,10 +1920,10 @@ impl<T: Config> Pallet<T> {
 			info.used_gas.standard.unique_saturated_into(),
 			true,
 		);
-		if let Some(weight_info) = info.weight_info {
-			if let Some(proof_size_usage) = weight_info.proof_size_usage {
-				*gas_to_weight.proof_size_mut() = proof_size_usage;
-			}
+		if let Some(weight_info) = info.weight_info &&
+			let Some(proof_size_usage) = weight_info.proof_size_usage
+		{
+			*gas_to_weight.proof_size_mut() = proof_size_usage;
 		}
 		gas_to_weight
 	}

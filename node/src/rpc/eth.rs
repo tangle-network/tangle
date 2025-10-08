@@ -43,6 +43,7 @@ use rpc_txpool::TxPoolServer;
 use sp_consensus_babe::BabeApi;
 
 #[derive(Clone)]
+#[allow(dead_code)]
 pub struct TracingConfig {
 	pub tracing_requesters: crate::rpc::tracing::RpcRequesters,
 	pub trace_filter_max_count: u32,
@@ -120,6 +121,7 @@ impl<C, P, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, P, CT, B, CID
 }
 
 /// Instantiate Ethereum-compatible RPC extensions.
+#[allow(dead_code, clippy::extra_unused_type_parameters)]
 pub fn create_eth<B, C, BE, P, CT, CIDP, EC>(
 	mut io: RpcModule<()>,
 	deps: EthDeps<C, P, CT, B, CIDP>,

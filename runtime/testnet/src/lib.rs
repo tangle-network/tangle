@@ -121,7 +121,6 @@ pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-use sp_runtime::generic::Era;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 pub use tangle_primitives::{
@@ -1795,7 +1794,7 @@ impl_runtime_apis! {
 		}
 
 		fn storage_at(address: H160, index: U256) -> H256 {
-		let mut tmp = [0u8; 32];
+		let tmp = [0u8; 32];
 		let _ = index.to_big_endian();
 		pallet_evm::AccountStorages::<Runtime>::get(address, H256::from_slice(&tmp[..]))
 		}

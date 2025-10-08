@@ -15,8 +15,8 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 use crate::eth::{
-	BackendType, EthApi, FrontierBackend, FrontierBlockImport, FrontierPartialComponents,
-	RpcConfig, StorageOverride, StorageOverrideHandler, new_frontier_partial, spawn_frontier_tasks,
+	BackendType, FrontierBackend, FrontierBlockImport, FrontierPartialComponents, RpcConfig,
+	StorageOverride, StorageOverrideHandler, new_frontier_partial, spawn_frontier_tasks,
 };
 pub use crate::eth::{EthConfiguration, db_config_dir};
 use futures::FutureExt;
@@ -242,7 +242,7 @@ pub struct RunFullParams {
 /// Builds a new service for a full client.
 pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
 	RunFullParams {
-		mut config,
+		config,
 		eth_config,
 		rpc_config,
 		debug_output: _,
@@ -369,7 +369,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			metrics,
 		})?;
 
-	let role = config.role.clone();
+	let role = config.role;
 	let force_authoring = config.force_authoring;
 	let name = config.network.node_name.clone();
 	let enable_grandpa = !config.disable_grandpa;
@@ -500,9 +500,9 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		let backend_clone = backend.clone();
 		Box::new(
-			move |spawner: Arc<dyn sc_core::traits::SpawnNamed>| -> Result<RpcModule<()>, sc_service::Error> {
+			move |spawner: Arc<dyn sp_core::traits::SpawnNamed>| -> Result<RpcModule<()>, sc_service::Error> {
 				let deny_unsafe = sc_rpc_api::DenyUnsafe::No;
-				let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor(spawner);
+				let subscription_task_executor = spawner.clone();
 
 				let deps = crate::rpc::FullDeps {
 					client: client.clone(),

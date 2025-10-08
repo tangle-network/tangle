@@ -345,43 +345,42 @@ impl<T: Config> Pallet<T> {
 
 		// Add score with lock multipliers if any
 		// only if the admin has enabled boost multiplier for the vault
-		if reward.boost_multiplier.is_some() {
-			if let Some(locks) = deposit.amount_with_locks {
-				for lock in locks {
-					if lock.expiry_block > last_claim_block {
-						if lock.expiry_block > current_block {
-							// Calculate lock reward:
-							// amount * APY * lock_multiplier *
-							//    (remaining_lock_time / total_lock_time)
-							let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
-							let lock_score = lock.amount.saturating_mul(multiplier);
-							log::debug!(target: LOG_TARGET, "user lock has not expired and still active, lock_multiplier: {:?}, lock_score: {:?}", lock.lock_multiplier, lock_score);
+		if reward.boost_multiplier.is_some() &&
+			let Some(locks) = deposit.amount_with_locks
+		{
+			for lock in locks {
+				if lock.expiry_block > last_claim_block {
+					if lock.expiry_block > current_block {
+						// Calculate lock reward:
+						// amount * APY * lock_multiplier *
+						//    (remaining_lock_time / total_lock_time)
+						let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
+						let lock_score = lock.amount.saturating_mul(multiplier);
+						log::debug!(target: LOG_TARGET, "user lock has not expired and still active, lock_multiplier: {:?}, lock_score: {:?}", lock.lock_multiplier, lock_score);
 
-							user_rewards_score_by_blocks.push((lock_score, blocks_to_be_paid));
-						} else {
-							// the lock has expired, so we only apply the lock multiplier during the
-							// unexpired period
-							let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
-							let lock_score = lock.amount.saturating_mul(multiplier);
-							let multiplier_applied_blocks =
-								lock.expiry_block.saturating_sub(last_claim_block);
+						user_rewards_score_by_blocks.push((lock_score, blocks_to_be_paid));
+					} else {
+						// the lock has expired, so we only apply the lock multiplier during the
+						// unexpired period
+						let multiplier = BalanceOf::<T>::from(lock.lock_multiplier.value());
+						let lock_score = lock.amount.saturating_mul(multiplier);
+						let multiplier_applied_blocks =
+							lock.expiry_block.saturating_sub(last_claim_block);
 
-							log::debug!(target: LOG_TARGET, "user lock has partially expired, lock_multiplier: {:?}, lock_score: {:?}, multiplier_applied_blocks: {:?}, blocks_to_be_paid: {:?}",
+						log::debug!(target: LOG_TARGET, "user lock has partially expired, lock_multiplier: {:?}, lock_score: {:?}, multiplier_applied_blocks: {:?}, blocks_to_be_paid: {:?}",
 								lock.lock_multiplier, lock_score, multiplier_applied_blocks, blocks_to_be_paid);
 
-							user_rewards_score_by_blocks
-								.push((lock_score, multiplier_applied_blocks));
+						user_rewards_score_by_blocks.push((lock_score, multiplier_applied_blocks));
 
-							// for rest of the blocks, we do not apply the lock multiplier
-							user_rewards_score_by_blocks.push((
-								lock.amount,
-								blocks_to_be_paid.saturating_sub(multiplier_applied_blocks),
-							));
-						}
-					} else {
-						// if the lock has expired, we only consider the base score
-						user_rewards_score_by_blocks.push((lock.amount, blocks_to_be_paid));
+						// for rest of the blocks, we do not apply the lock multiplier
+						user_rewards_score_by_blocks.push((
+							lock.amount,
+							blocks_to_be_paid.saturating_sub(multiplier_applied_blocks),
+						));
 					}
+				} else {
+					// if the lock has expired, we only consider the base score
+					user_rewards_score_by_blocks.push((lock.amount, blocks_to_be_paid));
 				}
 			}
 		}

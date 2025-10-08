@@ -256,16 +256,16 @@ where
 			let config =
 				command.create_configuration(this, tokio_runtime.handle().clone()).unwrap();
 
-			// Handle logger initialization gracefully - it may already be initialized by previous
-			// tests
-			if let Err(e) = command.init(
-				&CliWrapper::support_url(),
-				&CliWrapper::impl_version(),
-				|_, _| {},
-				&config,
-			) {
-				warn!("Logger initialization failed (likely already initialized): {e:?}");
-			}
+		// Handle logger initialization gracefully - it may already be initialized by previous
+		// tests
+		if let Err(e) = command.init(
+			&CliWrapper::support_url(),
+			&CliWrapper::impl_version(),
+			|_| {},
+			&config,
+		) {
+			warn!("Logger initialization failed (likely already initialized): {e:?}");
+		}
 			sc_cli::Runner::<CliWrapper>::new(config, tokio_runtime, signals)
 		}
 	}

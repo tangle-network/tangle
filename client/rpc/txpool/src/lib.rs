@@ -19,7 +19,6 @@ use ethereum_types::{H160, H256, U256};
 use fc_rpc::{internal_err, public_key};
 use jsonrpsee::core::RpcResult;
 pub use rpc_core_txpool::{GetT, Summary, Transaction, TransactionMap, TxPoolResult, TxPoolServer};
-use sc_transaction_pool::ChainApi;
 use sc_transaction_pool_api::{InPoolTransaction, TransactionPool as _};
 use serde::Serialize;
 use sha3::{Digest, Keccak256};

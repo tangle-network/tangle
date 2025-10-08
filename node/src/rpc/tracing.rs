@@ -32,6 +32,7 @@ use substrate_prometheus_endpoint::Registry as PrometheusRegistry;
 use tokio::sync::Semaphore;
 
 #[derive(Clone)]
+#[allow(dead_code)]
 pub struct RpcRequesters {
 	pub debug: Option<DebugRequester>,
 	pub trace: Option<TraceFilterCacheRequester>,

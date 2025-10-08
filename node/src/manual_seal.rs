@@ -494,9 +494,9 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 
 		let backend_clone = backend.clone();
 		Box::new(
-			move |spawner: Arc<dyn sc_core::traits::SpawnNamed>| -> Result<RpcModule<()>, sc_service::Error> {
+			move |spawner: Arc<dyn sp_core::traits::SpawnNamed>| -> Result<RpcModule<()>, sc_service::Error> {
 				let deny_unsafe = sc_rpc_api::DenyUnsafe::No;
-				let subscription_task_executor = sc_rpc::SubscriptionTaskExecutor(spawner);
+				let subscription_task_executor = spawner.clone();
 
 				let deps = crate::rpc::FullDeps {
 					client: client.clone(),
@@ -636,7 +636,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			.spawn_essential_handle()
 			.spawn_blocking("manual-seal", None, manual_seal);
 
-	log::info!("Manual Seal Ready");
+		log::info!("Manual Seal Ready");
 
 		#[cfg(feature = "blueprint-manager")]
 		{

@@ -121,14 +121,12 @@ impl TransactionExtension<RuntimeCall> for CheckNominatedRestaked<Runtime> {
 			RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) |
 			RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
-					match call {
-						RuntimeCall::Staking(pallet_staking::Call::unbond { value }) =>
-							if !Self::can_unbound(&who, *value) {
-								return Err(TransactionValidityError::Invalid(
-									InvalidTransaction::Custom(1),
-								));
-							},
-						_ => {},
+					if let RuntimeCall::Staking(pallet_staking::Call::unbond { value }) = call {
+						if !Self::can_unbound(&who, *value) {
+							return Err(TransactionValidityError::Invalid(
+								InvalidTransaction::Custom(1),
+							));
+						}
 					}
 				}
 				Ok(ValidTransaction::default())

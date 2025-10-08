@@ -471,10 +471,10 @@ pub fn split<C: Ciphersuite, R: RngCore + CryptoRng>(
 ) -> Result<(BTreeMap<Identifier<C>, SecretShare<C>>, PublicKeyPackage<C>), Error<C>> {
 	validate_num_of_signers(min_signers, max_signers)?;
 
-	if let IdentifierList::Custom(identifiers) = &identifiers {
-		if identifiers.len() != max_signers as usize {
-			return Err(Error::IncorrectNumberOfIdentifiers);
-		}
+	if let IdentifierList::Custom(identifiers) = &identifiers &&
+		identifiers.len() != max_signers as usize
+	{
+		return Err(Error::IncorrectNumberOfIdentifiers);
 	}
 
 	let verifying_key = VerifyingKey::from(key);

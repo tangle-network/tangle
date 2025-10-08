@@ -94,6 +94,7 @@ pub struct FullDeps<C, P, CT, SC, B, CIDP> {
 	pub backend: Arc<B>,
 }
 
+#[allow(dead_code)]
 pub struct DefaultEthConfig<C, BE>(std::marker::PhantomData<(C, BE)>);
 
 impl<C, BE> fc_rpc::EthConfig<Block, C> for DefaultEthConfig<C, BE>

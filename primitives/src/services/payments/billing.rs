@@ -65,15 +65,15 @@ where
 		match self {
 			PricingModel::Subscription { rate_per_interval, interval, maybe_end } => {
 				// Check if subscription has ended
-				if let Some(end_block) = maybe_end {
-					if current_block > *end_block {
-						return Some(BillingCalculation {
-							amount: Balance::zero(),
-							trigger: BillingTrigger::BlockInterval,
-							should_bill: false,
-							skip_reason: Some(BillingSkipReason::SubscriptionEnded),
-						});
-					}
+				if let Some(end_block) = maybe_end &&
+					current_block > *end_block
+				{
+					return Some(BillingCalculation {
+						amount: Balance::zero(),
+						trigger: BillingTrigger::BlockInterval,
+						should_bill: false,
+						skip_reason: Some(BillingSkipReason::SubscriptionEnded),
+					});
 				}
 
 				let last_billed_block = last_billed.unwrap_or_else(|| BlockNumber::zero());
@@ -170,10 +170,10 @@ where
 				let next_block = last_billed_block.saturating_add(*interval);
 
 				// Check if next billing would be after subscription end
-				if let Some(end_block) = maybe_end {
-					if next_block > *end_block {
-						return None;
-					}
+				if let Some(end_block) = maybe_end &&
+					next_block > *end_block
+				{
+					return None;
 				}
 
 				Some(next_block)
