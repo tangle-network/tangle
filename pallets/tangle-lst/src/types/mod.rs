@@ -31,7 +31,10 @@ pub const POINTS_TO_BALANCE_INIT_RATIO: u32 = 1;
 	Clone,
 	codec::DecodeWithMemTracking,
 )]
-pub enum ConfigOp<T: Codec + Debug + codec::DecodeWithMemTracking> {
+pub enum ConfigOp<T>
+where
+	T: Codec + Debug + codec::DecodeWithMemTracking,
+{
 	/// Don't change.
 	Noop,
 	/// Set the given value.

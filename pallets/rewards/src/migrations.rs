@@ -28,6 +28,7 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 
 		// Define the old version of the structure
 		#[derive(Clone, Encode, Decode, RuntimeDebug, TypeInfo, Eq, PartialEq)]
+		#[allow(dead_code)]
 		pub struct OldRewardConfigForAssetVault<Balance> {
 			// The annual percentage yield (APY) for the asset, represented as a percentage
 			pub apy: Percent, // Percentage value

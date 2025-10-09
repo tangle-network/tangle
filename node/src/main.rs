@@ -24,6 +24,7 @@ mod manual_seal;
 #[cfg(feature = "manual-seal")]
 use manual_seal as service;
 
+#[allow(clippy::result_large_err)]
 fn main() -> sc_cli::Result<()> {
 	command::run()
 }

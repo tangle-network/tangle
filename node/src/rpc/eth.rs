@@ -125,8 +125,8 @@ impl<C, P, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, P, CT, B, CID
 pub fn create_eth<B, C, BE, P, CT, CIDP, EC>(
 	mut io: RpcModule<()>,
 	deps: EthDeps<C, P, CT, B, CIDP>,
-	subscription_task_executor: SubscriptionTaskExecutor,
-	pubsub_notification_sinks: Arc<
+	_subscription_task_executor: SubscriptionTaskExecutor,
+	_pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
 			fc_mapping_sync::EthereumBlockNotification<B>,
 		>,
@@ -161,24 +161,24 @@ where
 	use fc_rpc::{TxPool, TxPoolApiServer};
 	let EthDeps {
 		client,
-		pool,
-		graph,
-		converter,
-		is_authority,
+		pool: _pool,
+		graph: _graph,
+		converter: _converter,
+		is_authority: _is_authority,
 		enable_dev_signer,
 		network,
-		sync,
-		frontier_backend,
-		storage_override,
-		block_data_cache,
-		filter_pool,
-		max_past_logs,
-		fee_history_cache,
-		fee_history_cache_limit,
-		execute_gas_limit_multiplier,
-		forced_parent_hashes,
-		tracing_config,
-		pending_create_inherent_data_providers,
+		sync: _sync,
+		frontier_backend: _frontier_backend,
+		storage_override: _storage_override,
+		block_data_cache: _block_data_cache,
+		filter_pool: _filter_pool,
+		max_past_logs: _max_past_logs,
+		fee_history_cache: _fee_history_cache,
+		fee_history_cache_limit: _fee_history_cache_limit,
+		execute_gas_limit_multiplier: _execute_gas_limit_multiplier,
+		forced_parent_hashes: _forced_parent_hashes,
+		tracing_config: _tracing_config,
+		pending_create_inherent_data_providers: _pending_create_inherent_data_providers,
 	} = deps;
 
 	let mut signers = Vec::new();

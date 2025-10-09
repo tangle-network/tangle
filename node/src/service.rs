@@ -54,7 +54,7 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 type GrandpaLinkHalf<Client> = sc_consensus_grandpa::LinkHalf<Block, Client, FullSelectChain>;
 type BoxBlockImport = sc_consensus::BoxBlockImport<Block>;
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::result_large_err)]
 pub fn new_partial(
 	config: &Configuration,
 	eth_config: &EthConfiguration,
@@ -415,7 +415,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let target_gas_price = eth_config.target_gas_price;
 	let frontier_backend = Arc::new(frontier_backend);
 
-	let ethapi_cmd = rpc_config.ethapi.clone();
+	let _ethapi_cmd = rpc_config.ethapi.clone();
 	// TEMPORARY: Tracing has Hash type mismatches with stable2503
 	// let tracing_requesters =
 	// 	if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
@@ -699,7 +699,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	Ok(task_manager)
 }
 
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::result_large_err)]
 pub fn new_chain_ops(
 	config: &mut Configuration,
 	eth_config: &EthConfiguration,

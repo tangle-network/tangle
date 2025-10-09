@@ -5,6 +5,7 @@ use thiserror_nostd_notrait::Error;
 use crate::{Ciphersuite, Identifier};
 
 #[derive(Error, Debug, Clone, Copy, Eq, PartialEq)]
+#[allow(dead_code)]
 pub struct ParticipantError<C: Ciphersuite>(Identifier<C>);
 
 /// An error related to FROST.

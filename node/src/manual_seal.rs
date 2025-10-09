@@ -409,7 +409,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let target_gas_price = eth_config.target_gas_price;
 	let frontier_backend = Arc::new(frontier_backend);
 
-	let ethapi_cmd = rpc_config.ethapi.clone();
+	let _ethapi_cmd = rpc_config.ethapi.clone();
 	// TEMPORARY: Tracing has Hash type mismatches with stable2503
 	// let tracing_requesters =
 	// 	if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {

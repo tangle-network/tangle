@@ -169,6 +169,7 @@ pub struct FrontierPartialComponents {
 	pub fee_history_cache_limit: FeeHistoryCacheLimit,
 }
 
+#[allow(clippy::result_large_err)]
 pub fn new_frontier_partial(
 	config: &EthConfiguration,
 ) -> Result<FrontierPartialComponents, ServiceError> {

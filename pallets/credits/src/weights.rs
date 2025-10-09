@@ -55,6 +55,7 @@ pub trait WeightInfo {
 }
 
 /// Weights for credits pallet using the Substrate node and recommended hardware.
+#[allow(dead_code)]
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Storage: `Credits::StakeTiers` (r:1 w:0)
