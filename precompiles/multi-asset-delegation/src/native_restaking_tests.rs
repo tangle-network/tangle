@@ -3,7 +3,7 @@ use frame_support::{assert_ok, traits::Currency};
 use pallet_multi_asset_delegation::{CurrentRound, Delegators};
 use precompile_utils::testing::*;
 use sp_core::{H160, H256, U256};
-use sp_keyring::AccountKeyring;
+use sp_keyring::Sr25519Keyring as AccountKeyring;
 
 #[test]
 fn test_delegate_nomination_through_precompile() {

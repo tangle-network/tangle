@@ -1,3 +1,4 @@
+#![cfg_attr(test, allow(warnings))]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Tangle Foundation.
 //

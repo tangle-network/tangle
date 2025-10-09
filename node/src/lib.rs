@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 #[cfg(feature = "blueprint-manager")]
 pub mod blueprint_service;
 pub mod chainspec;

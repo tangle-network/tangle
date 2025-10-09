@@ -1,3 +1,4 @@
+#![cfg_attr(test, allow(warnings))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;

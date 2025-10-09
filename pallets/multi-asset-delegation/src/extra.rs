@@ -11,6 +11,7 @@ use super::*;
 
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
 #[scale_info(skip_type_params(T))]
+#[allow(dead_code)]
 pub struct CheckNominatedRestaked<T>(core::marker::PhantomData<T>);
 
 impl<T> parity_scale_codec::DecodeWithMemTracking for CheckNominatedRestaked<T> {}
@@ -28,6 +29,7 @@ impl<T> sp_std::fmt::Debug for CheckNominatedRestaked<T> {
 }
 
 impl<T> CheckNominatedRestaked<T> {
+	#[allow(dead_code)]
 	pub fn new() -> Self {
 		CheckNominatedRestaked(core::marker::PhantomData)
 	}
@@ -35,6 +37,7 @@ impl<T> CheckNominatedRestaked<T> {
 
 impl<T: Config> CheckNominatedRestaked<T> {
 	/// See [`crate::Pallet::can_unbound`]
+	#[allow(dead_code)]
 	pub fn can_unbound(who: &T::AccountId, amount: BalanceOf<T>) -> bool {
 		crate::Pallet::<T>::can_unbound(who, amount)
 	}

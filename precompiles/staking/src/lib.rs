@@ -1,4 +1,4 @@
-// This file is part of Tangle.
+#![cfg_attr(test, allow(warnings))]
 // Copyright (C) 2022-2024 Tangle Foundation.
 //
 // This file is part of pallet-evm-precompile-staking package, originally developed by Purestake

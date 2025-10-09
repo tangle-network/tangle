@@ -16,6 +16,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
 #![recursion_limit = "256"]
+#![allow(deprecated)]
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
@@ -66,13 +67,13 @@ use sp_api::impl_runtime_apis;
 use sp_core::{H160, H256, OpaqueMetadata, U256, crypto::KeyTypeId};
 use sp_runtime::{
 	ApplyExtrinsicResult, FixedPointNumber, FixedU128, Perquintill, RuntimeDebug,
-	SaturatedConversion, create_runtime_str,
+	create_runtime_str,
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
 		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
 		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
-		StaticLookup, UniqueSaturatedInto,
+		UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
@@ -2092,9 +2093,9 @@ impl_runtime_apis! {
 
 	impl rpc_primitives_debug::DebugRuntimeApi<Block> for Runtime {
 		fn trace_transaction(
-			extrinsics: Vec<<Block as BlockT>::Extrinsic>,
-			traced_transaction: &EthereumTransaction,
-			header: &<Block as BlockT>::Header,
+			_extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+			_traced_transaction: &EthereumTransaction,
+			_header: &<Block as BlockT>::Header,
 		) -> Result<
 			(),
 			sp_runtime::DispatchError,
@@ -2131,9 +2132,9 @@ impl_runtime_apis! {
 		}
 
 	fn trace_block(
-		extrinsics: Vec<<Block as BlockT>::Extrinsic>,
-		known_transactions: Vec<primitive_types::H256>,
-		header: &<Block as BlockT>::Header,
+		_extrinsics: Vec<<Block as BlockT>::Extrinsic>,
+		_known_transactions: Vec<primitive_types::H256>,
+		_header: &<Block as BlockT>::Header,
 	) -> Result<
 		(),
 		sp_runtime::DispatchError,
@@ -2176,16 +2177,16 @@ impl_runtime_apis! {
 		}
 
 	fn trace_call(
-		header: &<Block as BlockT>::Header,
-		from: primitive_types::H160,
-		to: primitive_types::H160,
-		data: Vec<u8>,
-		value: primitive_types::U256,
-		gas_limit: primitive_types::U256,
-		max_fee_per_gas: Option<primitive_types::U256>,
-		max_priority_fee_per_gas: Option<primitive_types::U256>,
-		nonce: Option<primitive_types::U256>,
-		access_list: Option<Vec<(primitive_types::H160, Vec<primitive_types::H256>)>>,
+		_header: &<Block as BlockT>::Header,
+		_from: primitive_types::H160,
+		_to: primitive_types::H160,
+		_data: Vec<u8>,
+		_value: primitive_types::U256,
+		_gas_limit: primitive_types::U256,
+		_max_fee_per_gas: Option<primitive_types::U256>,
+		_max_priority_fee_per_gas: Option<primitive_types::U256>,
+		_nonce: Option<primitive_types::U256>,
+		_access_list: Option<Vec<(primitive_types::H160, Vec<primitive_types::H256>)>>,
 	) -> Result<(), sp_runtime::DispatchError> {
 			#[cfg(feature = "evm-tracing")]
 			{

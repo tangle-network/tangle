@@ -1,3 +1,4 @@
+#![cfg_attr(test, allow(dead_code, unused_variables, unused_imports))]
 // This file is part of Tangle.
 // Copyright (C) 2022-2024 Tangle Foundation.
 //
@@ -13,7 +14,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use fp_evm::PrecompileHandle;
