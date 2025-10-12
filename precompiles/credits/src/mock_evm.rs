@@ -175,9 +175,6 @@ parameter_types! {
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
 }
 
-parameter_types! {
-	pub SuicideQuickClearLimit: u32 = 0;
-}
 pub struct FreeEVMExecution;
 
 impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {
@@ -219,20 +216,30 @@ impl pallet_evm::Config for Runtime {
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 	type OnChargeTransaction = ();
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = ();
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 parameter_types! {
 	pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
 }
 
+pub struct MockStateRoot;
+impl sp_core::Get<H256> for MockStateRoot {
+	fn get() -> H256 {
+		H256::default()
+	}
+}
+
 impl pallet_ethereum::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type StateRoot = IntermediateStateRoot<Self>;
+	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;
 }
@@ -309,6 +316,7 @@ impl EvmRunner<Runtime> for MockedEvmRunner {
 		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
 		let nonce = None;
 		let access_list = Default::default();
+		let authorization_list = vec![];
 		let weight_limit = None;
 		let proof_size_base_cost = None;
 		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
@@ -321,6 +329,7 @@ impl EvmRunner<Runtime> for MockedEvmRunner {
 			Some(max_priority_fee_per_gas),
 			nonce,
 			access_list,
+			authorization_list,
 			is_transactional,
 			validate,
 			weight_limit,

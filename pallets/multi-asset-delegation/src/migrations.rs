@@ -282,7 +282,7 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+	fn pre_upgrade() -> Result<Vec<u8>, sp_runtime::DispatchError> {
 		// Count how many entries we have pre-migration
 		let count = Delegators::<T>::iter().count() as u32;
 		log::info!("DelegatorMetadataMigration pre_upgrade: Found {} delegator entries", count);
@@ -304,12 +304,14 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn post_upgrade(state: Vec<u8>) -> Result<(), &'static str> {
+	fn post_upgrade(state: Vec<u8>) -> Result<(), sp_runtime::DispatchError> {
+		use sp_runtime::DispatchError;
+
 		// Decode the state from pre_upgrade
 		let mut state_cursor = &state[..];
 
 		let pre_count =
-			u32::decode(&mut state_cursor).map_err(|_| "Failed to decode pre-migration count")?;
+			u32::decode(&mut state_cursor).map_err(|_| DispatchError::Other("Failed to decode pre-migration count"))?;
 
 		// Get the current count
 		let post_count = Delegators::<T>::iter().count() as u32;
@@ -321,28 +323,28 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 				pre_count,
 				post_count
 			);
-			return Err("Entry count decreased after migration");
+			return Err(DispatchError::Other("Entry count decreased after migration"));
 		}
 
 		// Verify the sampled accounts still exist
 		let sample_count =
-			u32::decode(&mut state_cursor).map_err(|_| "Failed to decode sample count")?;
+			u32::decode(&mut state_cursor).map_err(|_| DispatchError::Other("Failed to decode sample count"))?;
 
 		for _ in 0..sample_count {
 			let account_id = <T as frame_system::Config>::AccountId::decode(&mut state_cursor)
-				.map_err(|_| "Failed to decode account ID")?;
+				.map_err(|_| DispatchError::Other("Failed to decode account ID"))?;
 
 			if !Delegators::<T>::contains_key(&account_id) {
 				log::error!(
 					"DelegatorMetadataMigration post_upgrade: Account {:?} missing after migration",
 					account_id
 				);
-				return Err("Account missing after migration");
+				return Err(DispatchError::Other("Account missing after migration"));
 			}
 
 			// Verify the new structure has the expected fields
 			let metadata =
-				Delegators::<T>::get(&account_id).ok_or("Failed to get metadata for account")?;
+				Delegators::<T>::get(&account_id).ok_or(DispatchError::Other("Failed to get metadata for account"))?;
 
 			// Check that delegations have is_nomination field
 			for delegation in metadata.delegations.iter() {

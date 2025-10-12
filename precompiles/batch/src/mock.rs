@@ -89,6 +89,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 pub type Precompiles<R> = PrecompileSetBuilder<
@@ -122,8 +123,6 @@ parameter_types! {
 		let block_gas_limit = BlockGasLimit::get().min(u64::MAX.into()).low_u64();
 		block_gas_limit.saturating_div(MAX_POV_SIZE)
 	};
-	pub SuicideQuickClearLimit: u32 = 0;
-
 }
 
 impl pallet_evm::Config for Runtime {
@@ -144,10 +143,13 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = pallet_evm::SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 parameter_types! {
@@ -177,16 +179,17 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances }
+		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances, dev_accounts: None }
 			.assimilate_storage(&mut t)
 			.expect("Pallet balances storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.execute_with(|| {
 			System::set_block_number(1);
-			pallet_evm::Pallet::<Runtime>::create_account(
+			let _ = pallet_evm::Pallet::<Runtime>::create_account(
 				Revert.into(),
 				hex_literal::hex!("1460006000fd").to_vec(),
+				None,
 			);
 		});
 		ext

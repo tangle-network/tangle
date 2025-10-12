@@ -90,6 +90,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 mock_account!(Registry, |_| MockAccount::from_u64(1));
@@ -106,10 +107,6 @@ pub type PCall = PrecompileRegistryCall<Runtime>;
 parameter_types! {
 	pub PrecompilesValue: Precompiles<Runtime> = Precompiles::new();
 	pub const WeightPerGas: Weight = Weight::from_parts(1, 0);
-}
-
-parameter_types! {
-	pub SuicideQuickClearLimit: u32 = 0;
 }
 
 impl pallet_evm::Config for Runtime {
@@ -130,10 +127,13 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = pallet_evm::SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type GasLimitPovSizeRatio = ();
+	type GasLimitStorageGrowthRatio = ();
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 parameter_types! {
@@ -163,7 +163,7 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances }
+		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances, dev_accounts: None }
 			.assimilate_storage(&mut t)
 			.expect("Pallet balances storage can be assimilated");
 
@@ -173,6 +173,7 @@ impl ExtBuilder {
 			pallet_evm::Pallet::<Runtime>::create_account(
 				SmartContract.into(),
 				b"SmartContract".to_vec(),
+				None,
 			);
 		});
 		ext

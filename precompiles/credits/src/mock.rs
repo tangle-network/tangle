@@ -94,6 +94,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -168,6 +169,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_session::disabling::UpToLimitDisablingStrategy;
 }
 
 pub struct OnChainSeqPhragmen;
@@ -211,7 +213,9 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Filter = ();
 }
 
 impl pallet_assets::Config for Runtime {
@@ -233,6 +237,7 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	type Holder = ();
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }
@@ -498,7 +503,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
 	let balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_000_u128)).collect();
-	pallet_balances::GenesisConfig::<Runtime> { balances }
+	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
@@ -571,7 +576,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+				balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 			},
 		);
 	}
