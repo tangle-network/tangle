@@ -15,7 +15,6 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 #![allow(clippy::all)]
 use crate::{self as pallet_rewards};
-use ethabi::Uint;
 use frame_election_provider_support::{
 	SequentialPhragmen,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -29,7 +28,6 @@ use pallet_session::historical as pallet_session_historical;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_core::{H160, sr25519};
-use sp_keyring::AccountKeyring;
 use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
@@ -41,7 +39,6 @@ use tangle_primitives::{
 	types::rewards::{AssetType, UserDepositWithLocks},
 };
 
-use core::ops::Mul;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 
 pub type AccountId = AccountId32;
@@ -94,6 +91,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -168,6 +166,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_session::disabling::UpToLimitDisablingStrategy;
 }
 
 pub struct OnChainSeqPhragmen;
@@ -211,7 +210,9 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Filter = ();
 }
 
 parameter_types! {
@@ -238,6 +239,7 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	type Holder = ();
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }
@@ -378,6 +380,7 @@ construct_runtime!(
 	}
 );
 
+#[allow(dead_code)]
 pub struct ExtBuilder;
 
 impl Default for ExtBuilder {
@@ -408,18 +411,18 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
 	let authorities: Vec<AccountId> = vec![
-		AccountKeyring::Alice.into(),
-		AccountKeyring::Bob.into(),
-		AccountKeyring::Charlie.into(),
+		mock_pub_key(1),
+		mock_pub_key(2),
+		mock_pub_key(3),
 	];
 	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 200_000_u128)).collect();
 
 	// Add test accounts with enough balance
-	let test_accounts = vec![AccountKeyring::Dave.into(), AccountKeyring::Eve.into()];
+	let test_accounts = vec![mock_pub_key(4), mock_pub_key(5)];
 
 	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_u128)));
 
-	pallet_balances::GenesisConfig::<Runtime> { balances }
+	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
@@ -430,7 +433,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 		});
 	}
 
@@ -439,7 +442,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+			balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 		});
 	}
 

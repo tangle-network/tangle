@@ -23,17 +23,20 @@ use frame_support::{
 	pallet_prelude::{InvalidTransaction, TransactionValidityError},
 	traits::Hooks,
 };
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
-use sp_runtime::traits::SignedExtension;
+const ALICE: u8 = 1;
+const BOB: u8 = 2;
+const CHARLIE: u8 = 3;
+const DAVE: u8 = 4;
+use sp_runtime::traits::TransactionExtension;
 use tangle_primitives::services::Asset;
 
 #[test]
 fn native_restaking_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Dave.into();
+		let who: AccountId = mock_pub_key(DAVE);
 		let validator = Staking::invulnerables()[0].clone();
-		let operator: AccountId = Alice.into();
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 		// Bond Some TNT
@@ -100,9 +103,9 @@ fn native_restaking_should_work() {
 fn unbond_should_fail_if_delegated_nomination() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Dave.into();
+		let who: AccountId = mock_pub_key(DAVE);
 		let validator = Staking::invulnerables()[0].clone();
-		let operator: AccountId = Alice.into();
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 		// Bond Some TNT
@@ -167,11 +170,14 @@ fn unbond_should_fail_if_delegated_nomination() {
 		// Try to unbond from the staking pallet - should fail
 		assert_err!(
 			CheckNominatedRestaked::<Runtime>::new().validate(
-				&who,
+				RuntimeOrigin::signed(who.clone()),
 				&call,
 				&DispatchInfo::default(),
-				0
-			),
+				0,
+				(),
+				&sp_runtime::traits::TxBaseImplication(()),
+				sp_runtime::transaction_validity::TransactionSource::External,
+			).map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
@@ -203,8 +209,8 @@ fn unbond_should_fail_if_delegated_nomination() {
 fn successful_multiple_native_restaking() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let total_nomination = 100;
 		let first_restake = 40;
 		let second_restake = 30;
@@ -258,8 +264,8 @@ fn successful_multiple_native_restaking() {
 #[test]
 fn native_restake_exceeding_nomination_amount() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let nomination_amount = 100;
 		let excessive_amount = 150;
 
@@ -293,8 +299,8 @@ fn native_restake_exceeding_nomination_amount() {
 #[test]
 fn native_restake_with_no_active_nomination() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 
 		// Setup operator
@@ -319,8 +325,8 @@ fn native_restake_with_no_active_nomination() {
 #[test]
 fn native_restake_to_non_operator() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let non_operator: AccountId = Charlie.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let non_operator: AccountId = mock_pub_key(CHARLIE);
 		let amount = 100;
 
 		// Setup nomination
@@ -349,8 +355,8 @@ fn native_restake_to_non_operator() {
 #[test]
 fn native_restake_and_unstake_flow() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 		let unstake_amount = 40;
 
@@ -409,8 +415,8 @@ fn native_restake_and_unstake_flow() {
 #[test]
 fn native_restake_zero_amount() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 
 		// Setup
@@ -441,8 +447,8 @@ fn native_restake_zero_amount() {
 #[test]
 fn native_restake_concurrent_operations() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 
 		// Setup
@@ -488,8 +494,8 @@ fn native_restake_concurrent_operations() {
 #[test]
 fn native_restake_early_unstake_execution_fails() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 		let unstake_amount = 40;
 
@@ -565,8 +571,8 @@ fn native_restake_early_unstake_execution_fails() {
 #[test]
 fn native_restake_cancel_unstake() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 		let unstake_amount = 40;
 
@@ -634,10 +640,10 @@ fn native_restake_cancel_unstake() {
 fn proxy_unbond_should_fail_if_delegated_nomination() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Dave.into();
-		let proxy: AccountId = Charlie.into();
+		let who: AccountId = mock_pub_key(DAVE);
+		let proxy: AccountId = mock_pub_key(CHARLIE);
 		let validator = Staking::invulnerables()[0].clone();
-		let operator: AccountId = Alice.into();
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 
@@ -688,11 +694,14 @@ fn proxy_unbond_should_fail_if_delegated_nomination() {
 
 		assert_err!(
 			CheckNominatedRestaked::<Runtime>::new().validate(
-				&proxy,
+				RuntimeOrigin::signed(proxy.clone()),
 				&proxy_call,
 				&DispatchInfo::default(),
-				0
-			),
+				0,
+				(),
+				&sp_runtime::traits::TxBaseImplication(()),
+				sp_runtime::transaction_validity::TransactionSource::External,
+			).map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
@@ -708,9 +717,9 @@ fn proxy_unbond_should_fail_if_delegated_nomination() {
 fn batch_unbond_should_fail_if_delegated_nomination() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Dave.into();
+		let who: AccountId = mock_pub_key(DAVE);
 		let validator = Staking::invulnerables()[0].clone();
-		let operator: AccountId = Alice.into();
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 
@@ -749,11 +758,14 @@ fn batch_unbond_should_fail_if_delegated_nomination() {
 
 		assert_err!(
 			CheckNominatedRestaked::<Runtime>::new().validate(
-				&who,
+				RuntimeOrigin::signed(who.clone()),
 				&batch_call,
 				&DispatchInfo::default(),
-				0
-			),
+				0,
+				(),
+				&sp_runtime::traits::TxBaseImplication(()),
+				sp_runtime::transaction_validity::TransactionSource::External,
+			).map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
@@ -769,10 +781,10 @@ fn batch_unbond_should_fail_if_delegated_nomination() {
 fn proxy_batch_unbond_should_fail_if_delegated_nomination() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Dave.into();
-		let proxy: AccountId = Charlie.into();
+		let who: AccountId = mock_pub_key(DAVE);
+		let proxy: AccountId = mock_pub_key(CHARLIE);
 		let validator = Staking::invulnerables()[0].clone();
-		let operator: AccountId = Alice.into();
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100_000;
 		let delegate_amount = amount / 2;
 
@@ -824,11 +836,14 @@ fn proxy_batch_unbond_should_fail_if_delegated_nomination() {
 
 		assert_err!(
 			CheckNominatedRestaked::<Runtime>::new().validate(
-				&proxy,
+				RuntimeOrigin::signed(proxy.clone()),
 				&proxy_batch_call,
 				&DispatchInfo::default(),
-				0
-			),
+				0,
+				(),
+				&sp_runtime::traits::TxBaseImplication(()),
+				sp_runtime::transaction_validity::TransactionSource::External,
+			).map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 

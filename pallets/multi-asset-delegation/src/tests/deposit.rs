@@ -16,9 +16,10 @@
 use super::*;
 use crate::{CurrentRound, Error};
 use frame_support::{assert_err, assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::Bob;
 use sp_runtime::{ArithmeticError, DispatchError};
 use tangle_primitives::services::{Asset, EvmAddressMapping};
+
+const BOB: u8 = 2;
 
 pub fn create_and_mint_tokens(
 	asset: AssetId,
@@ -42,7 +43,7 @@ pub fn mint_tokens(
 fn deposit_should_work_for_fungible_asset() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 200;
 
 		create_and_mint_tokens(VDOT, who.clone(), amount);
@@ -79,7 +80,7 @@ fn deposit_should_work_for_fungible_asset() {
 fn deposit_should_work_for_evm_asset() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 200;
 
 		create_and_mint_tokens(VDOT, who.clone(), amount);
@@ -112,7 +113,7 @@ fn deposit_should_work_for_evm_asset() {
 fn multiple_deposit_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 200;
 
 		create_and_mint_tokens(VDOT, who.clone(), amount * 4);
@@ -167,7 +168,7 @@ fn multiple_deposit_should_work() {
 fn deposit_should_fail_for_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 2000;
 
 		create_and_mint_tokens(VDOT, who.clone(), 100);
@@ -189,7 +190,7 @@ fn deposit_should_fail_for_insufficient_balance() {
 fn deposit_should_fail_for_bond_too_low() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 50; // Below the minimum stake amount
 
 		create_and_mint_tokens(VDOT, who.clone(), amount);
@@ -211,7 +212,7 @@ fn deposit_should_fail_for_bond_too_low() {
 fn schedule_withdraw_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -249,7 +250,7 @@ fn schedule_withdraw_should_work() {
 fn schedule_withdraw_should_fail_if_not_delegator() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -270,7 +271,7 @@ fn schedule_withdraw_should_fail_if_not_delegator() {
 fn schedule_withdraw_should_fail_for_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 200;
 
@@ -300,7 +301,7 @@ fn schedule_withdraw_should_fail_for_insufficient_balance() {
 fn schedule_withdraw_should_fail_if_withdraw_request_exists() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -328,7 +329,7 @@ fn schedule_withdraw_should_fail_if_withdraw_request_exists() {
 fn execute_withdraw_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -372,7 +373,7 @@ fn execute_withdraw_should_work() {
 fn execute_withdraw_should_fail_if_not_delegator() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 
 		assert_noop!(
 			MultiAssetDelegation::execute_withdraw(RuntimeOrigin::signed(who.clone()), None),
@@ -385,7 +386,7 @@ fn execute_withdraw_should_fail_if_not_delegator() {
 fn execute_withdraw_should_fail_if_no_withdraw_request() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -411,7 +412,7 @@ fn execute_withdraw_should_fail_if_no_withdraw_request() {
 fn execute_withdraw_should_fail_if_withdraw_not_ready() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -509,7 +510,7 @@ fn execute_withdraw_should_fail_if_caller_not_pallet_from_evm() {
 fn cancel_withdraw_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -553,7 +554,7 @@ fn cancel_withdraw_should_work() {
 fn cancel_withdraw_should_fail_if_not_delegator() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 
 		assert_noop!(
 			MultiAssetDelegation::cancel_withdraw(
@@ -570,7 +571,7 @@ fn cancel_withdraw_should_fail_if_not_delegator() {
 fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -600,7 +601,7 @@ fn cancel_withdraw_should_fail_if_no_withdraw_request() {
 fn deposit_should_work_for_tnt_without_adding_to_reward_vault() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 200;
 
 		assert_ok!(MultiAssetDelegation::deposit(

@@ -16,15 +16,18 @@
 use super::*;
 use crate::CurrentRound;
 use frame_support::{assert_noop, assert_ok, traits::OnInitialize};
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie, Dave};
+const ALICE: u8 = 1;
+const BOB: u8 = 2;
+const CHARLIE: u8 = 3;
+const DAVE: u8 = 4;
 use tangle_primitives::services::Asset;
 
 #[test]
 fn handle_round_change_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who = Bob.to_account_id();
-		let operator = Alice.to_account_id();
+		let who = mock_pub_key(BOB);
+		let operator = mock_pub_key(ALICE);
 		let asset_id = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -72,10 +75,10 @@ fn handle_round_change_should_work() {
 fn handle_round_change_with_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let delegator1 = Alice.to_account_id();
-		let delegator2 = Bob.to_account_id();
-		let operator1 = Charlie.to_account_id();
-		let operator2 = Dave.to_account_id();
+		let delegator1 = mock_pub_key(ALICE);
+		let delegator2 = mock_pub_key(BOB);
+		let operator1 = mock_pub_key(CHARLIE);
+		let operator2 = mock_pub_key(DAVE);
 		let asset = Asset::Custom(VDOT);
 		let amount1 = 100_000;
 		let amount2 = 100_000;
