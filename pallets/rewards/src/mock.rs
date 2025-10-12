@@ -380,15 +380,6 @@ construct_runtime!(
 	}
 );
 
-#[allow(dead_code)]
-pub struct ExtBuilder;
-
-impl Default for ExtBuilder {
-	fn default() -> Self {
-		ExtBuilder
-	}
-}
-
 pub fn mock_pub_key(id: u8) -> AccountId {
 	sr25519::Public::from_raw([id; 32]).into()
 }
