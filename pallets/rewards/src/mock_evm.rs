@@ -106,7 +106,6 @@ parameter_types! {
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
 }
 
-#[allow(dead_code)]
 pub struct FreeEVMExecution;
 
 impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {
@@ -146,7 +145,7 @@ impl pallet_evm::Config for Runtime {
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type OnChargeTransaction = ();
+	type OnChargeTransaction = FreeEVMExecution;
 	type OnCreate = ();
 	type FindAuthor = FindAuthorTruncated;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
