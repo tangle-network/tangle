@@ -451,6 +451,7 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 thread_local! {
 	static DELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
 	static UNDELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+	static PENDING_REWARDS: RefCell<BTreeMap<AccountId, Vec<(u64, Balance)>>> = RefCell::new(BTreeMap::new());
 }
 
 pub struct MockRewardsManager;
@@ -516,21 +517,39 @@ impl MockRewardsManager {
 		UNDELEGATE_CALLS.with(|calls| calls.borrow().clone())
 	}
 
+	pub fn get_pending_rewards(operator: &AccountId) -> Vec<(u64, Balance)> {
+		PENDING_REWARDS.with(|rewards| {
+			rewards.borrow().get(operator).cloned().unwrap_or_default()
+		})
+	}
+
 	pub fn clear_all() {
 		DELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 		UNDELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
+		PENDING_REWARDS.with(|rewards| rewards.borrow_mut().clear());
 	}
 }
 
 impl RewardRecorder<AccountId, u64, Balance> for MockRewardsManager {
 	type PricingModel = PricingModel<BlockNumber, Balance>;
 
+	fn account_id() -> AccountId {
+		// Mock rewards pallet account
+		mock_pub_key(100)
+	}
+
 	fn record_reward(
-		_operator: &AccountId,
-		_service_id: u64,
-		_amount: Balance,
+		operator: &AccountId,
+		service_id: u64,
+		amount: Balance,
 		_model: &Self::PricingModel,
 	) -> DispatchResult {
+		PENDING_REWARDS.with(|rewards| {
+			let mut rewards_map = rewards.borrow_mut();
+			rewards_map.entry(operator.clone())
+				.or_insert_with(Vec::new)
+				.push((service_id, amount));
+		});
 		Ok(())
 	}
 }

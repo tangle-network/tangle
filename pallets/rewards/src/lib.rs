@@ -698,6 +698,10 @@ pub mod pallet {
 	{
 		type PricingModel = PricingModel<BlockNumberFor<T>, BalanceOf<T>>;
 
+		fn account_id() -> T::AccountId {
+			Self::account_id()
+		}
+
 		fn record_reward(
 			operator: &T::AccountId,
 			service_id: ServiceId,
@@ -725,14 +729,12 @@ pub mod pallet {
 					Ok(())
 				},
 				Err(_) => {
-					// Log an error or handle the case where the operator has too many pending
-					// rewards. For now, we simply don't record the reward if the limit is
-					// reached. Optionally, emit a specific event or error.
-					log::warn!(
-						"Failed to record reward for operator {:?}: Too many pending rewards.",
+					// Operator has too many pending rewards - they must claim before receiving more
+					log::error!(
+						"Failed to record reward for operator {:?}: Too many pending rewards. Operator must claim existing rewards first.",
 						operator
 					);
-					Ok(())
+					Err(Error::<T>::TooManyPendingRewards.into())
 				},
 			}
 		}

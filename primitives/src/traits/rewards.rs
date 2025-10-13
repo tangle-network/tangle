@@ -145,6 +145,11 @@ pub trait RewardRecorder<AccountId, ServiceId, Balance> {
 	/// The type of pricing model associated with the reward.
 	type PricingModel;
 
+	/// Returns the account ID of the rewards pallet.
+	///
+	/// This account holds the funds that will be transferred when operators claim rewards.
+	fn account_id() -> AccountId;
+
 	/// Records a reward for a given operator and service.
 	///
 	/// This function should handle the accumulation of rewards, which can then
@@ -166,8 +171,17 @@ pub trait RewardRecorder<AccountId, ServiceId, Balance> {
 /// A no-operation implementation of `RewardRecorder`.
 /// This can be used in runtime configurations where reward recording is not needed
 /// or handled by a different mechanism.
-impl<AccountId, ServiceId, Balance> RewardRecorder<AccountId, ServiceId, Balance> for () {
+impl<AccountId, ServiceId, Balance> RewardRecorder<AccountId, ServiceId, Balance> for ()
+where
+	AccountId: Default,
+{
 	type PricingModel = ();
+
+	fn account_id() -> AccountId {
+		// No-op implementation returns default account
+		// This should never be called in practice when using the unit type
+		AccountId::default()
+	}
 
 	fn record_reward(
 		_operator: &AccountId,

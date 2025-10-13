@@ -6,7 +6,7 @@ use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ReservableCurrency, fungibles::Mutate},
+	traits::{Currency, ExistenceRequirement, ReservableCurrency, fungibles::Mutate},
 };
 use sp_runtime::traits::{CheckedMul, SaturatedConversion, Saturating, Zero};
 use tangle_primitives::{
@@ -14,7 +14,7 @@ use tangle_primitives::{
 		Asset, JobPayment, JobSubscriptionBilling, PricingModel, ServiceBlueprint,
 		StagingServicePayment,
 	},
-	traits::RewardRecorder as RewardRecorderTrait,
+	traits::RewardRecorder,
 };
 
 impl<T: Config> Pallet<T> {
@@ -155,10 +155,17 @@ impl<T: Config> Pallet<T> {
 			},
 		};
 
-		T::RewardRecorder::record_reward(payer, service_id, amount, &runtime_pricing_model)?;
+		// Distribute payment to operators, developer, and protocol
+		let (blueprint_owner, _) = Self::blueprints(service.blueprint)?;
+		Self::distribute_service_payment(
+			&service,
+			&blueprint_owner,
+			amount,
+			&runtime_pricing_model,
+		)?;
 
 		log::debug!(
-			"Processed pay-once payment for job call {}-{}-{}: {:?}",
+			"Processed and distributed pay-once payment for job call {}-{}-{}: {:?}",
 			service_id,
 			job_index,
 			call_id,
@@ -269,9 +276,9 @@ impl<T: Config> Pallet<T> {
 			billing.last_billed = current_block;
 			JobSubscriptionBillings::<T>::insert(&billing_key, &billing);
 
-			// Record the reward
+			// Distribute payment to operators, developer, and protocol
 			let service = Self::services(service_id)?;
-			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+			let (blueprint_owner, blueprint) = Self::blueprints(service.blueprint)?;
 			let _job_def =
 				blueprint.jobs.get(job_index as usize).ok_or(Error::<T>::InvalidJobId)?;
 
@@ -279,9 +286,9 @@ impl<T: Config> Pallet<T> {
 			let runtime_pricing_model =
 				PricingModel::Subscription { rate_per_interval, interval, maybe_end };
 
-			T::RewardRecorder::record_reward(
-				payer,
-				service_id,
+			Self::distribute_service_payment(
+				&service,
+				&blueprint_owner,
 				rate_per_interval,
 				&runtime_pricing_model,
 			)?;
@@ -330,9 +337,15 @@ impl<T: Config> Pallet<T> {
 		// Charge the payment with authorization check
 		Self::charge_payment(caller, payer, total_reward)?;
 
-		// Record the reward with the rewards pallet
+		// Distribute payment to operators, developer, and protocol
+		let (blueprint_owner, _) = Self::blueprints(service.blueprint)?;
 		let runtime_pricing_model = PricingModel::EventDriven { reward_per_event };
-		T::RewardRecorder::record_reward(payer, service_id, total_reward, &runtime_pricing_model)?;
+		Self::distribute_service_payment(
+			&service,
+			&blueprint_owner,
+			total_reward,
+			&runtime_pricing_model,
+		)?;
 
 		log::debug!(
 			"Processed event-driven payment for service {} job {}: {} events, total reward: {:?}",
@@ -355,6 +368,9 @@ impl<T: Config> Pallet<T> {
 		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
 		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
 
+		// Get the rewards pallet account where funds should be transferred
+		let rewards_account = T::RewardRecorder::account_id();
+
 		// Checks: Validate balances before any state changes
 		match asset {
 			Asset::Custom(asset_id) => {
@@ -371,18 +387,24 @@ impl<T: Config> Pallet<T> {
 			},
 		}
 
-		// Effects & Interactions: Execute transfers after validation
+		// Effects & Interactions: Transfer funds to rewards pallet account
+		// This ensures operators can claim rewards via claim_rewards() extrinsic
 		match asset {
 			Asset::Custom(asset_id) => {
 				if *asset_id == T::AssetId::default() {
-					// Native currency
-					T::Currency::reserve(payer, amount)?;
+					// Native currency - transfer to rewards pallet account
+					T::Currency::transfer(
+						payer,
+						&rewards_account,
+						amount,
+						ExistenceRequirement::KeepAlive,
+					)?;
 				} else {
-					// Custom asset
+					// Custom asset - transfer to rewards pallet account
 					T::Fungibles::transfer(
 						asset_id.clone(),
 						payer,
-						&Self::pallet_account(),
+						&rewards_account,
 						amount,
 						frame_support::traits::tokens::Preservation::Expendable,
 					)
@@ -390,8 +412,13 @@ impl<T: Config> Pallet<T> {
 				}
 			},
 			Asset::Erc20(_) => {
-				// ERC20 handled separately
-				T::Currency::reserve(payer, amount)?;
+				// ERC20 - transfer to rewards pallet account
+				T::Currency::transfer(
+					payer,
+					&rewards_account,
+					amount,
+					ExistenceRequirement::KeepAlive,
+				)?;
 			},
 		}
 
@@ -399,7 +426,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Charge payment from a user account with proper authorization checks (native currency)
-	fn charge_payment(
+	pub(crate) fn charge_payment(
 		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,
