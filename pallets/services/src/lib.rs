@@ -530,6 +530,16 @@ pub mod module {
 		SubscriptionNotValid,
 		/// Service not owned by caller
 		ServiceNotOwned,
+		/// No operators available for reward distribution
+		NoOperatorsAvailable,
+		/// Invalid revenue distribution configuration (percentages don't sum to 100%)
+		InvalidRevenueDistribution,
+		/// No operator exposure found for reward distribution
+		NoOperatorExposure,
+		/// Arithmetic overflow occurred during reward calculation
+		ArithmeticOverflow,
+		/// Division by zero during reward calculation
+		DivisionByZero,
 	}
 
 	#[pallet::event]

@@ -5,3 +5,4 @@ pub mod qos;
 pub mod register;
 pub mod reject;
 pub mod request;
+pub mod reward_distribution;

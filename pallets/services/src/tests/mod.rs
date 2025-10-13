@@ -29,7 +29,6 @@ mod hooks;
 mod jobs;
 mod native_slashing;
 mod operator_rewards;
-mod payment_integration;
 mod payments;
 mod registration;
 mod reward_distribution;
