@@ -1130,6 +1130,7 @@ fn cannot_note_duplicate_preimage() {
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce
 				access_list: Vec::new(),
+				authorization_list: Vec::new(),
 			})
 			.dispatch(RuntimeOrigin::root()));
 
@@ -1185,6 +1186,7 @@ fn cannot_note_imminent_preimage_before_it_is_actually_imminent() {
 				max_priority_fee_per_gas: Some(U256::zero()),
 				nonce: None, // Use the next nonce
 				access_list: Vec::new(),
+				authorization_list: Vec::new(),
 			})
 			.dispatch(RuntimeOrigin::root()));
 

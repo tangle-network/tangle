@@ -182,13 +182,9 @@ parameter_types! {
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
 }
 
-parameter_types! {
-	pub SuicideQuickClearLimit: u32 = 0;
-}
-
 pub struct DealWithFees;
 impl OnUnbalanced<RuntimeNegativeImbalance> for DealWithFees {
-	fn on_unbalanceds<B>(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
+	fn on_unbalanceds(_fees_then_tips: impl Iterator<Item = RuntimeNegativeImbalance>) {
 		// whatever
 	}
 }
@@ -282,20 +278,30 @@ impl pallet_evm::Config for Runtime {
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 	type OnChargeTransaction = CustomEVMCurrencyAdapter;
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = ();
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 parameter_types! {
 	pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
 }
 
+pub struct MockStateRoot;
+impl sp_core::Get<H256> for MockStateRoot {
+	fn get() -> H256 {
+		H256::default()
+	}
+}
+
 impl pallet_ethereum::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type StateRoot = IntermediateStateRoot<Self>;
+	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;
 }

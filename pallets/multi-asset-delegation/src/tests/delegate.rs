@@ -17,15 +17,18 @@
 use super::*;
 use crate::{CurrentRound, Error};
 use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::{Alice, Bob, Charlie};
 use tangle_primitives::services::Asset;
+
+const ALICE: u8 = 1;
+const BOB: u8 = 2;
+const CHARLIE: u8 = 3;
 
 #[test]
 fn delegate_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -85,8 +88,8 @@ fn delegate_should_work() {
 fn schedule_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -150,8 +153,8 @@ fn schedule_delegator_unstake_should_work() {
 fn execute_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -206,8 +209,8 @@ fn execute_delegator_unstake_should_work() {
 fn cancel_delegator_unstake_should_work() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -281,8 +284,8 @@ fn cancel_delegator_unstake_should_work() {
 fn cancel_delegator_unstake_should_update_already_existing() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -360,8 +363,8 @@ fn cancel_delegator_unstake_should_update_already_existing() {
 fn delegate_should_fail_if_not_enough_balance() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 10_000;
 
@@ -397,8 +400,8 @@ fn delegate_should_fail_if_not_enough_balance() {
 fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -434,8 +437,8 @@ fn schedule_delegator_unstake_should_fail_if_no_delegation() {
 fn execute_delegator_unstake_should_fail_if_not_ready() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 
@@ -490,8 +493,8 @@ fn execute_delegator_unstake_should_fail_if_not_ready() {
 fn delegate_should_not_create_multiple_on_repeat_delegation() {
 	new_test_ext().execute_with(|| {
 		// Arrange
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let asset = Asset::Custom(VDOT);
 		let amount = 100;
 		let additional_amount = 50;
@@ -563,7 +566,7 @@ fn delegate_should_not_create_multiple_on_repeat_delegation() {
 #[test]
 fn delegate_exceeds_max_delegations() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
+		let who: AccountId = mock_pub_key(BOB);
 		let amount = 100;
 
 		// Setup max number of operators
@@ -605,7 +608,7 @@ fn delegate_exceeds_max_delegations() {
 			));
 		}
 
-		let operator: AccountId = Charlie.into();
+		let operator: AccountId = mock_pub_key(CHARLIE);
 		// Give operator enough balance to join
 		assert_ok!(Balances::force_set_balance(RuntimeOrigin::root(), operator.clone(), 100_000));
 		assert_ok!(MultiAssetDelegation::join_operators(
@@ -632,8 +635,8 @@ fn delegate_exceeds_max_delegations() {
 #[test]
 fn delegate_insufficient_deposit() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let deposit_amount = 100;
 		let delegate_amount = deposit_amount + 1;
 		let asset = Asset::Custom(USDC);
@@ -678,8 +681,8 @@ fn delegate_insufficient_deposit() {
 #[test]
 fn delegate_to_inactive_operator() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 
 		// Setup operator but make them inactive
@@ -720,8 +723,8 @@ fn delegate_to_inactive_operator() {
 #[test]
 fn delegate_repeated_same_asset() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let initial_amount = 100;
 		let additional_amount = 50;
 
@@ -780,8 +783,8 @@ fn delegate_repeated_same_asset() {
 #[test]
 fn delegate_multiple_assets_same_operator() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 
 		// Setup operator
@@ -836,8 +839,8 @@ fn delegate_multiple_assets_same_operator() {
 #[test]
 fn delegate_zero_amount() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 
 		// Setup operator
 		assert_ok!(MultiAssetDelegation::join_operators(
@@ -862,8 +865,8 @@ fn delegate_zero_amount() {
 #[test]
 fn delegate_with_no_deposit() {
 	new_test_ext().execute_with(|| {
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 100;
 
 		// Setup operator
@@ -895,8 +898,8 @@ fn debug_tnt_delegation_verify_nomination_issue() {
 	new_test_ext().execute_with(|| {
 		// This test verifies TNT delegation works correctly without nomination verification
 
-		let who: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let who: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		let amount = 1000;
 		let delegate_amount = 500;
 
@@ -942,8 +945,8 @@ fn delegation_unstake_bug_with_nomination_pending() {
 	// Test case that reproduces the bug where delegation unstake calculation
 	// incorrectly includes nomination unstake requests
 	new_test_ext().execute_with(|| {
-		let delegator: AccountId = Bob.into();
-		let operator: AccountId = Alice.into();
+		let delegator: AccountId = mock_pub_key(BOB);
+		let operator: AccountId = mock_pub_key(ALICE);
 		// Use the same asset that nominations use: Asset::Custom(Zero::zero()) which is
 		// Asset::Custom(0)
 		let asset = Asset::Custom(0);

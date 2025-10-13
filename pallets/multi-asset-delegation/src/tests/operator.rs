@@ -19,8 +19,11 @@ use crate::{
 	types::{DelegatorBlueprintSelection::Fixed, OperatorStatus},
 };
 use frame_support::{assert_noop, assert_ok};
-use sp_keyring::AccountKeyring::{Alice, Bob, Eve};
 use sp_runtime::Percent;
+
+const ALICE: u8 = 1;
+const BOB: u8 = 2;
+const EVE: u8 = 5;
 use tangle_primitives::{
 	services::{Asset, UnappliedSlash},
 	traits::SlashManager,
@@ -32,11 +35,11 @@ fn join_operator_success() {
 		let bond_amount = 10_000;
 
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.stake, bond_amount);
 		assert_eq!(operator_info.delegation_count, 0);
 		assert_eq!(operator_info.request, None);
@@ -44,7 +47,7 @@ fn join_operator_success() {
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorJoined {
-			who: Alice.to_account_id(),
+			who: mock_pub_key(ALICE),
 		}));
 	});
 }
@@ -55,12 +58,12 @@ fn join_operator_already_operator() {
 		let bond_amount = 10_000;
 
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 		assert_noop!(
 			MultiAssetDelegation::join_operators(
-				RuntimeOrigin::signed(Alice.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(ALICE)),
 				bond_amount
 			),
 			Error::<Runtime>::AlreadyOperator
@@ -75,7 +78,7 @@ fn join_operator_insufficient_bond() {
 
 		assert_noop!(
 			MultiAssetDelegation::join_operators(
-				RuntimeOrigin::signed(Eve.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(EVE)),
 				insufficient_bond
 			),
 			Error::<Runtime>::BondTooLow
@@ -90,7 +93,7 @@ fn join_operator_insufficient_funds() {
 
 		assert_noop!(
 			MultiAssetDelegation::join_operators(
-				RuntimeOrigin::signed(Alice.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(ALICE)),
 				bond_amount
 			),
 			pallet_balances::Error::<Runtime, _>::InsufficientBalance
@@ -105,11 +108,11 @@ fn join_operator_minimum_bond() {
 		let exact_bond = minimum_bond;
 
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			exact_bond
 		));
 
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.stake, exact_bond);
 	});
 }
@@ -122,7 +125,7 @@ fn schedule_leave_operator_success() {
 		// Schedule leave operators without joining
 		assert_noop!(
 			MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::NotAnOperator
 		);
@@ -132,22 +135,22 @@ fn schedule_leave_operator_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Schedule leave operators
 		assert_ok!(MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(
-			Alice.to_account_id()
+			mock_pub_key(ALICE)
 		)));
 
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.status, OperatorStatus::Leaving(15)); // current_round (5) + leave_operators_delay (10)
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			Event::OperatorLeavingScheduled { who: Alice.to_account_id() },
+			Event::OperatorLeavingScheduled { who: mock_pub_key(ALICE) },
 		));
 	});
 }
@@ -159,7 +162,7 @@ fn cancel_leave_operator_tests() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
@@ -168,44 +171,44 @@ fn cancel_leave_operator_tests() {
 
 		// Schedule leave operators
 		assert_ok!(MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(
-			Alice.to_account_id()
+			mock_pub_key(ALICE)
 		)));
 
 		// Verify operator metadata after cancellation
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.status, OperatorStatus::Leaving(15)); // current_round (5) + leave_operators_delay (10)
 
 		// Test: Cancel leave operators successfully
 		assert_ok!(MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(
-			Alice.to_account_id()
+			mock_pub_key(ALICE)
 		)));
 
 		// Verify operator metadata after cancellation
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.status, OperatorStatus::Active); // current_round (5) + leave_operators_delay (10)
 
 		// Verify event for cancellation
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			Event::OperatorLeaveCancelled { who: Alice.to_account_id() },
+			Event::OperatorLeaveCancelled { who: mock_pub_key(ALICE) },
 		));
 
 		// Test: Cancel leave operators without being in leaving state
 		assert_noop!(
 			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::NotLeavingOperator
 		);
 
 		// Test: Schedule leave operators again
 		assert_ok!(MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(
-			Alice.to_account_id()
+			mock_pub_key(ALICE)
 		)));
 
 		// Test: Cancel leave operators without being an operator
 		assert_noop!(
 			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(
-				Bob.to_account_id()
+				mock_pub_key(BOB)
 			)),
 			Error::<Runtime>::NotAnOperator
 		);
@@ -220,23 +223,23 @@ fn operator_bond_more_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// stake more TNT
 		assert_ok!(MultiAssetDelegation::operator_bond_more(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			additional_bond
 		));
 
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.stake, bond_amount + additional_bond);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorBondMore {
-			who: Alice.to_account_id(),
+			who: mock_pub_key(ALICE),
 			additional_bond,
 		}));
 	});
@@ -250,7 +253,7 @@ fn operator_bond_more_not_an_operator() {
 		// Attempt to stake more without being an operator
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(
-				RuntimeOrigin::signed(Alice.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(ALICE)),
 				additional_bond
 			),
 			Error::<Runtime>::NotAnOperator
@@ -266,14 +269,14 @@ fn operator_bond_more_insufficient_balance() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Attempt to stake more with insufficient balance
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(
-				RuntimeOrigin::signed(Alice.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(ALICE)),
 				additional_bond
 			),
 			pallet_balances::Error::<Runtime>::InsufficientBalance
@@ -289,18 +292,18 @@ fn schedule_operator_unstake_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Schedule unstake
 		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			unstake_amount
 		));
 
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.request.unwrap().amount, unstake_amount);
 
 		// Verify remaining stake is above minimum
@@ -311,7 +314,7 @@ fn schedule_operator_unstake_success() {
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			Event::OperatorBondLessScheduled { who: Alice.to_account_id(), unstake_amount },
+			Event::OperatorBondLessScheduled { who: mock_pub_key(ALICE), unstake_amount },
 		));
 	});
 }
@@ -325,14 +328,14 @@ fn schedule_operator_unstake_respects_minimum_stake() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Attempt to schedule unstake that would leave less than minimum
 		assert_noop!(
 			MultiAssetDelegation::schedule_operator_unstake(
-				RuntimeOrigin::signed(Alice.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(ALICE)),
 				unstake_amount
 			),
 			Error::<Runtime>::InsufficientStakeRemaining
@@ -348,7 +351,7 @@ fn schedule_operator_unstake_not_an_operator() {
 		// Attempt to schedule unstake without being an operator
 		assert_noop!(
 			MultiAssetDelegation::schedule_operator_unstake(
-				RuntimeOrigin::signed(Alice.to_account_id()),
+				RuntimeOrigin::signed(mock_pub_key(ALICE)),
 				unstake_amount
 			),
 			Error::<Runtime>::NotAnOperator
@@ -377,7 +380,7 @@ fn schedule_operator_unstake_not_an_operator() {
 //         // Attempt to schedule unstake with active services
 //         assert_noop!(
 //
-// MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(Alice.to_account_id()),
+// MultiAssetDelegation::schedule_operator_unstake(RuntimeOrigin::signed(mock_pub_key(ALICE)),
 // unstake_amount),             Error::<Runtime>::ActiveServicesUsingTNT
 //         );
 //     });
@@ -391,35 +394,35 @@ fn execute_operator_unstake_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Schedule unstake
 		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			unstake_amount
 		));
 
 		// Set the current round to simulate passage of time
 		<CurrentRound<Runtime>>::put(15);
 
-		let reserved_balance = Balances::reserved_balance(Alice.to_account_id());
+		let reserved_balance = Balances::reserved_balance(mock_pub_key(ALICE));
 		// Execute unstake
 		assert_ok!(MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-			Alice.to_account_id()
+			mock_pub_key(ALICE)
 		)));
 
-		let reserved_balance_after = Balances::reserved_balance(Alice.to_account_id());
+		let reserved_balance_after = Balances::reserved_balance(mock_pub_key(ALICE));
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.stake, bond_amount - unstake_amount);
 		assert_eq!(operator_info.request, None);
 		assert_eq!(reserved_balance - reserved_balance_after, unstake_amount);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			Event::OperatorBondLessExecuted { who: Alice.to_account_id() },
+			Event::OperatorBondLessExecuted { who: mock_pub_key(ALICE) },
 		));
 	});
 }
@@ -430,7 +433,7 @@ fn execute_operator_unstake_not_an_operator() {
 		// Attempt to execute unstake without being an operator
 		assert_noop!(
 			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::NotAnOperator
 		);
@@ -444,14 +447,14 @@ fn execute_operator_unstake_no_scheduled_unstake() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Attempt to execute unstake without scheduling it
 		assert_noop!(
 			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::NoScheduledBondLess
 		);
@@ -466,20 +469,20 @@ fn execute_operator_unstake_request_not_satisfied() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Schedule unstake
 		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			unstake_amount
 		));
 
 		// Attempt to execute unstake before request is satisfied
 		assert_noop!(
 			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::BondLessRequestNotSatisfied
 		);
@@ -494,28 +497,28 @@ fn cancel_operator_unstake_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Schedule unstake
 		assert_ok!(MultiAssetDelegation::schedule_operator_unstake(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			unstake_amount
 		));
 
 		// Cancel unstake
 		assert_ok!(MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(
-			Alice.to_account_id()
+			mock_pub_key(ALICE)
 		)));
 
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.request, None);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(
-			Event::OperatorBondLessCancelled { who: Alice.to_account_id() },
+			Event::OperatorBondLessCancelled { who: mock_pub_key(ALICE) },
 		));
 	});
 }
@@ -526,7 +529,7 @@ fn cancel_operator_unstake_not_an_operator() {
 		// Attempt to cancel unstake without being an operator
 		assert_noop!(
 			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::NotAnOperator
 		);
@@ -540,14 +543,14 @@ fn cancel_operator_unstake_no_scheduled_unstake() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Attempt to cancel unstake without scheduling it
 		assert_noop!(
 			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(
-				Alice.to_account_id()
+				mock_pub_key(ALICE)
 			)),
 			Error::<Runtime>::NoScheduledBondLess
 		);
@@ -561,20 +564,20 @@ fn go_offline_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Go offline
-		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(Alice.to_account_id())));
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(mock_pub_key(ALICE))));
 
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.status, OperatorStatus::Inactive);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorWentOffline {
-			who: Alice.to_account_id(),
+			who: mock_pub_key(ALICE),
 		}));
 	});
 }
@@ -584,7 +587,7 @@ fn go_offline_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		// Attempt to go offline without being an operator
 		assert_noop!(
-			MultiAssetDelegation::go_offline(RuntimeOrigin::signed(Alice.to_account_id())),
+			MultiAssetDelegation::go_offline(RuntimeOrigin::signed(mock_pub_key(ALICE))),
 			Error::<Runtime>::NotAnOperator
 		);
 	});
@@ -597,23 +600,23 @@ fn go_online_success() {
 
 		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			bond_amount
 		));
 
 		// Go offline first
-		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(Alice.to_account_id())));
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(mock_pub_key(ALICE))));
 
 		// Go online
-		assert_ok!(MultiAssetDelegation::go_online(RuntimeOrigin::signed(Alice.to_account_id())));
+		assert_ok!(MultiAssetDelegation::go_online(RuntimeOrigin::signed(mock_pub_key(ALICE))));
 
 		// Verify operator metadata
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.status, OperatorStatus::Active);
 
 		// Verify event
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorWentOnline {
-			who: Alice.to_account_id(),
+			who: mock_pub_key(ALICE),
 		}));
 	});
 }
@@ -624,7 +627,7 @@ fn slash_operator_success() {
 		// Setup operator
 		let operator_stake = 10_000;
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			operator_stake
 		));
 
@@ -637,11 +640,11 @@ fn slash_operator_success() {
 		let service_id = 42;
 
 		// Setup first delegator with asset1 and selected blueprint
-		create_and_mint_tokens(1, Bob.to_account_id(), delegator1_stake);
-		mint_tokens(Bob.to_account_id(), 1, Bob.to_account_id(), delegator1_stake);
+		create_and_mint_tokens(1, mock_pub_key(BOB), delegator1_stake);
+		mint_tokens(mock_pub_key(BOB), 1, mock_pub_key(BOB), delegator1_stake);
 
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(Bob.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(BOB)),
 			asset1,
 			delegator1_stake,
 			None,
@@ -649,24 +652,24 @@ fn slash_operator_success() {
 		));
 
 		assert_ok!(MultiAssetDelegation::add_blueprint_id(
-			RuntimeOrigin::signed(Bob.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(BOB)),
 			blueprint_id
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(Bob.to_account_id()),
-			Alice.to_account_id(),
+			RuntimeOrigin::signed(mock_pub_key(BOB)),
+			mock_pub_key(ALICE),
 			asset1,
 			delegator1_stake,
 			Fixed(vec![blueprint_id].try_into().unwrap()),
 		));
 
 		// Setup second delegator with asset2 but without selecting the blueprint
-		create_and_mint_tokens(2, Eve.to_account_id(), delegator2_stake);
-		mint_tokens(Eve.to_account_id(), 2, Eve.to_account_id(), delegator2_stake);
+		create_and_mint_tokens(2, mock_pub_key(EVE), delegator2_stake);
+		mint_tokens(mock_pub_key(EVE), 2, mock_pub_key(EVE), delegator2_stake);
 
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(Eve.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(EVE)),
 			asset2,
 			delegator2_stake,
 			None,
@@ -674,8 +677,8 @@ fn slash_operator_success() {
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(Eve.to_account_id()),
-			Alice.to_account_id(),
+			RuntimeOrigin::signed(mock_pub_key(EVE)),
+			mock_pub_key(ALICE),
 			asset2,
 			delegator2_stake,
 			Fixed(vec![].try_into().unwrap()),
@@ -689,7 +692,7 @@ fn slash_operator_success() {
 			era: 1,
 			blueprint_id,
 			service_id,
-			operator: Alice.to_account_id(),
+			operator: mock_pub_key(ALICE),
 			slash_percent: Percent::from_percent(50),
 		};
 
@@ -697,30 +700,30 @@ fn slash_operator_success() {
 		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
 
 		// Verify operator stake was slashed
-		let operator_info = MultiAssetDelegation::operator_info(Alice.to_account_id()).unwrap();
+		let operator_info = MultiAssetDelegation::operator_info(mock_pub_key(ALICE)).unwrap();
 		assert_eq!(operator_info.stake, operator_stake - exposed_stake);
 
 		// Verify first delegator (Bob) was slashed
-		let delegator1 = MultiAssetDelegation::delegators(Bob.to_account_id()).unwrap();
+		let delegator1 = MultiAssetDelegation::delegators(mock_pub_key(BOB)).unwrap();
 		let delegation1 = delegator1
 			.delegations
 			.iter()
-			.find(|d| d.operator == Alice.to_account_id() && d.asset == asset1)
+			.find(|d| d.operator == mock_pub_key(ALICE) && d.asset == asset1)
 			.unwrap();
 		assert_eq!(delegation1.amount, delegator1_stake - exposed_delegation);
 
 		// Verify second delegator (Eve) was NOT slashed since they didn't select the blueprint
-		let delegator2 = MultiAssetDelegation::delegators(Eve.to_account_id()).unwrap();
+		let delegator2 = MultiAssetDelegation::delegators(mock_pub_key(EVE)).unwrap();
 		let delegation2 = delegator2
 			.delegations
 			.iter()
-			.find(|d| d.operator == Alice.to_account_id() && d.asset == asset2)
+			.find(|d| d.operator == mock_pub_key(ALICE) && d.asset == asset2)
 			.unwrap();
 		assert_eq!(delegation2.amount, delegator2_stake); // Amount unchanged
 
 		// Verify events
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::OperatorSlashed {
-			operator: Alice.to_account_id(),
+			operator: mock_pub_key(ALICE),
 			service_id,
 			blueprint_id,
 			era: 1,
@@ -728,7 +731,7 @@ fn slash_operator_success() {
 		}));
 
 		System::assert_has_event(RuntimeEvent::MultiAssetDelegation(Event::DelegatorSlashed {
-			delegator: Bob.to_account_id(),
+			delegator: mock_pub_key(BOB),
 			service_id,
 			blueprint_id,
 			era: 1,
@@ -745,7 +748,7 @@ fn slash_operator_not_an_operator() {
 			era: 1,
 			blueprint_id: 1,
 			service_id: 42,
-			operator: Alice.to_account_id(),
+			operator: mock_pub_key(ALICE),
 			slash_percent: Percent::from_percent(50),
 		};
 
@@ -761,16 +764,16 @@ fn slash_operator_not_active() {
 	new_test_ext().execute_with(|| {
 		// Setup and deactivate operator
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			10_000
 		));
-		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(Alice.to_account_id())));
+		assert_ok!(MultiAssetDelegation::go_offline(RuntimeOrigin::signed(mock_pub_key(ALICE))));
 
 		let unapplied_slash = UnappliedSlash {
 			era: 1,
 			blueprint_id: 1,
 			service_id: 42,
-			operator: Alice.to_account_id(),
+			operator: mock_pub_key(ALICE),
 			slash_percent: Percent::from_percent(50),
 		};
 
@@ -786,17 +789,17 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 	new_test_ext().execute_with(|| {
 		// Setup operator
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(Alice.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(ALICE)),
 			10_000
 		));
 
 		// Setup delegator with fixed blueprint selection
 		let delegator_stake = 5_000;
 		let asset = Asset::Custom(1);
-		create_and_mint_tokens(1, Bob.to_account_id(), delegator_stake);
+		create_and_mint_tokens(1, mock_pub_key(BOB), delegator_stake);
 
 		assert_ok!(MultiAssetDelegation::deposit(
-			RuntimeOrigin::signed(Bob.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(BOB)),
 			asset,
 			delegator_stake,
 			None,
@@ -804,13 +807,13 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 		));
 
 		assert_ok!(MultiAssetDelegation::add_blueprint_id(
-			RuntimeOrigin::signed(Bob.to_account_id()),
+			RuntimeOrigin::signed(mock_pub_key(BOB)),
 			1
 		));
 
 		assert_ok!(MultiAssetDelegation::delegate(
-			RuntimeOrigin::signed(Bob.to_account_id()),
-			Alice.to_account_id(),
+			RuntimeOrigin::signed(mock_pub_key(BOB)),
+			mock_pub_key(ALICE),
 			asset,
 			delegator_stake,
 			Fixed(vec![2].try_into().unwrap()), // Selected blueprint 2, not 1
@@ -821,17 +824,17 @@ fn slash_delegator_fixed_blueprint_not_selected() {
 			era: 1,
 			blueprint_id: 1,
 			service_id: 42,
-			operator: Alice.to_account_id(),
+			operator: mock_pub_key(ALICE),
 			slash_percent: Percent::from_percent(50),
 		};
 
 		// Verify delegator is not slashed since they didn't select blueprint 1
 		assert_ok!(MultiAssetDelegation::slash_operator(&unapplied_slash));
-		let delegator = MultiAssetDelegation::delegators(Bob.to_account_id()).unwrap();
+		let delegator = MultiAssetDelegation::delegators(mock_pub_key(BOB)).unwrap();
 		let delegation = delegator
 			.delegations
 			.iter()
-			.find(|d| d.operator == Alice.to_account_id())
+			.find(|d| d.operator == mock_pub_key(ALICE))
 			.unwrap();
 		assert_eq!(delegation.amount, delegator_stake); // Amount unchanged
 	});

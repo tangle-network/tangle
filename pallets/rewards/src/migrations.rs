@@ -73,28 +73,31 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+	fn pre_upgrade() -> Result<Vec<u8>, sp_runtime::DispatchError> {
 		// Count how many entries we have pre-migration
 		let count = RewardConfigStorage::<T>::iter().count() as u32;
 		Ok(count.encode())
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn post_upgrade(state: Vec<u8>) -> Result<(), &'static str> {
+	fn post_upgrade(state: Vec<u8>) -> Result<(), sp_runtime::DispatchError> {
+		use sp_runtime::DispatchError;
+
 		// Ensure we have the same number of entries post-migration
 		let pre_count =
-			u32::decode(&mut &state[..]).expect("pre_upgrade should have encoded a u32");
+			u32::decode(&mut &state[..]).map_err(|_| DispatchError::Other("Failed to decode pre-migration count"))?;
 		let post_count = RewardConfigStorage::<T>::iter().count() as u32;
 
-		assert_eq!(
-			pre_count, post_count,
-			"Number of reward configurations changed during migration"
-		);
+		if pre_count != post_count {
+			return Err(DispatchError::Other("Number of reward configurations changed during migration"));
+		}
 
 		// Validate all APY values are now proper Perbill values
 		for (_vault_id, config) in RewardConfigStorage::<T>::iter() {
 			// Ensure APY is within Perbill range (0..=1_000_000_000)
-			assert!(config.apy.deconstruct() <= 1_000_000_000, "APY value exceeds Perbill maximum");
+			if config.apy.deconstruct() > 1_000_000_000 {
+				return Err(DispatchError::Other("APY value exceeds Perbill maximum"));
+			}
 		}
 
 		log::info!(

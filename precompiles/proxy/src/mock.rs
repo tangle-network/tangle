@@ -101,6 +101,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 pub type Precompiles<R> = PrecompileSetBuilder<
@@ -153,10 +154,6 @@ parameter_types! {
 	};
 }
 
-parameter_types! {
-	pub SuicideQuickClearLimit: u32 = 0;
-}
-
 impl pallet_evm::Config for Runtime {
 	type FeeCalculator = ();
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
@@ -175,10 +172,13 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 parameter_types! {
@@ -212,6 +212,8 @@ pub enum ProxyType {
 	Something = 1,
 	Nothing = 2,
 }
+
+impl parity_scale_codec::DecodeWithMemTracking for ProxyType {}
 
 impl crate::EvmProxyCallFilter for ProxyType {
 	fn is_evm_proxy_call_allowed(

@@ -272,6 +272,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = ();
 	type FreezeIdentifier = ();
 	type MaxFreezes = ();
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -325,10 +326,13 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = pallet_evm::SubstrateBlockHashMapping<Self>;
 	type FindAuthor = ();
 	type OnCreate = ();
-	type SuicideQuickClearLimit = ConstU32<0>;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = pallet_evm::weights::SubstrateWeight<Runtime>;
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 const MAX_POV_SIZE: u64 = 5 * 1024 * 1024;
@@ -365,6 +369,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_session::disabling::UpToLimitDisablingStrategy;
 }
 
 pub struct OnChainSeqPhragmen;
@@ -381,10 +386,11 @@ impl onchain::Config for OnChainSeqPhragmen {
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
 pub struct MockReward {}
-impl frame_support::traits::OnUnbalanced<pallet_balances::PositiveImbalance<Runtime>>
-	for MockReward
+impl frame_support::traits::OnUnbalanced<
+	frame_support::traits::fungible::Debt<AccountId, pallet_balances::Pallet<Runtime>>
+> for MockReward
 {
-	fn on_unbalanced(_: pallet_balances::PositiveImbalance<Runtime>) {
+	fn on_unbalanced(_: frame_support::traits::fungible::Debt<AccountId, pallet_balances::Pallet<Runtime>>) {
 		RewardOnUnbalanceWasCalled::set(true);
 	}
 }
@@ -417,35 +423,37 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Filter = ();
 }
 
-type Extrinsic = TestXt<RuntimeCall, ()>;
+type Extrinsic = TestXt<RuntimeCall, (u64, ())>;
 
 impl frame_system::offchain::SigningTypes for Runtime {
 	type Public = <Signature as Verify>::Signer;
 	type Signature = Signature;
 }
 
-impl<LocalCall> frame_system::offchain::SendTransactionTypes<LocalCall> for Runtime
+impl<LocalCall> frame_system::offchain::CreateTransactionBase<LocalCall> for Runtime
 where
 	RuntimeCall: From<LocalCall>,
 {
-	type OverarchingCall = RuntimeCall;
 	type Extrinsic = Extrinsic;
+	type RuntimeCall = RuntimeCall;
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 where
 	RuntimeCall: From<LocalCall>,
 {
-	fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+	fn create_signed_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
 		call: RuntimeCall,
 		_public: <Signature as traits::Verify>::Signer,
 		_account: AccountId,
 		nonce: u64,
-	) -> Option<(RuntimeCall, <Extrinsic as ExtrinsicT>::SignaturePayload)> {
-		Some((call, (nonce, ())))
+	) -> Option<Extrinsic> {
+		Some(Extrinsic::new_bare(call))
 	}
 }
 
@@ -468,7 +476,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	// We use default for brevity, but you can configure as desired if needed.
 	let balances: Vec<_> = authorities.iter().map(|i| (*i, 1_000_000_000u128)).collect();
 
-	pallet_balances::GenesisConfig::<Runtime> { balances }
+	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)
 		.unwrap();
 
@@ -480,7 +488,7 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 		})
 		.collect();
 
-	pallet_session::GenesisConfig::<Runtime> { keys: session_keys }
+	pallet_session::GenesisConfig::<Runtime> { keys: session_keys, non_authority_keys: vec![] }
 		.assimilate_storage(&mut t)
 		.unwrap();
 

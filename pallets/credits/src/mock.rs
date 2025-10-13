@@ -96,6 +96,7 @@ impl pallet_balances::Config for Runtime {
 	type RuntimeFreezeReason = RuntimeHoldReason;
 	type FreezeIdentifier = [u8; 8];
 	type MaxFreezes = ConstU32<50>;
+	type DoneSlashHandler = ();
 }
 
 parameter_types! {
@@ -181,6 +182,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorId = AccountId;
 	type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
 	type WeightInfo = ();
+	type DisablingStrategy = pallet_session::disabling::UpToLimitDisablingStrategy;
 }
 
 pub struct OnChainSeqPhragmen;
@@ -224,7 +226,9 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type NominationsQuota = pallet_staking::FixedNominationsQuota<MAX_QUOTA_NOMINATIONS>;
 	type WeightInfo = ();
-	type DisablingStrategy = pallet_staking::UpToLimitDisablingStrategy;
+	type OldCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
+	type Filter = frame_support::traits::Everything;
 }
 
 parameter_types! {
@@ -250,6 +254,7 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
+	type Holder = ();
 	#[cfg(feature = "runtime-benchmarks")]
 	type BenchmarkHelper = ();
 }
@@ -583,6 +588,7 @@ construct_runtime!(
 	}
 );
 
+#[allow(dead_code)]
 pub struct ExtBuilder;
 
 impl Default for ExtBuilder {

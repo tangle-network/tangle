@@ -146,9 +146,9 @@ fn batch_all_empty() {
 }
 
 fn batch_returns(
-	precompiles: &Precompiles<Runtime>,
+	precompiles: &'_ Precompiles<Runtime>,
 	mode: Mode,
-) -> PrecompilesTester<Precompiles<Runtime>> {
+) -> PrecompilesTester<'_, Precompiles<Runtime>> {
 	let mut counter = 0;
 
 	let (_, total_call_cost) = costs();
@@ -267,9 +267,9 @@ fn batch_all_returns() {
 }
 
 fn batch_out_of_gas(
-	precompiles: &Precompiles<Runtime>,
+	precompiles: &'_ Precompiles<Runtime>,
 	mode: Mode,
-) -> PrecompilesTester<Precompiles<Runtime>> {
+) -> PrecompilesTester<'_, Precompiles<Runtime>> {
 	let (_, total_call_cost) = costs();
 
 	precompiles
@@ -338,9 +338,9 @@ fn batch_all_out_of_gas() {
 }
 
 fn batch_incomplete(
-	precompiles: &Precompiles<Runtime>,
+	precompiles: &'_ Precompiles<Runtime>,
 	mode: Mode,
-) -> PrecompilesTester<Precompiles<Runtime>> {
+) -> PrecompilesTester<'_, Precompiles<Runtime>> {
 	let mut counter = 0;
 
 	let (_, total_call_cost) = costs();
@@ -485,9 +485,9 @@ fn batch_all_incomplete() {
 }
 
 fn batch_log_out_of_gas(
-	precompiles: &Precompiles<Runtime>,
+	precompiles: &'_ Precompiles<Runtime>,
 	mode: Mode,
-) -> PrecompilesTester<Precompiles<Runtime>> {
+) -> PrecompilesTester<'_, Precompiles<Runtime>> {
 	let (log_cost, _) = costs();
 
 	precompiles
@@ -532,9 +532,9 @@ fn batch_some_until_failure_log_out_of_gas() {
 }
 
 fn batch_call_out_of_gas(
-	precompiles: &Precompiles<Runtime>,
+	precompiles: &'_ Precompiles<Runtime>,
 	mode: Mode,
-) -> PrecompilesTester<Precompiles<Runtime>> {
+) -> PrecompilesTester<'_, Precompiles<Runtime>> {
 	let (_, total_call_cost) = costs();
 
 	precompiles
@@ -579,9 +579,9 @@ fn batch_some_until_failure_call_out_of_gas() {
 }
 
 fn batch_gas_limit(
-	precompiles: &Precompiles<Runtime>,
+	precompiles: &'_ Precompiles<Runtime>,
 	mode: Mode,
-) -> PrecompilesTester<Precompiles<Runtime>> {
+) -> PrecompilesTester<'_, Precompiles<Runtime>> {
 	let (_, total_call_cost) = costs();
 
 	precompiles

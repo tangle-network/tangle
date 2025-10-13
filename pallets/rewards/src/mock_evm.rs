@@ -19,7 +19,7 @@ use crate::mock::{
 };
 use fp_evm::FeeCalculator;
 use frame_support::{PalletId, parameter_types, traits::FindAuthor, weights::Weight};
-use pallet_ethereum::{EthereumBlockHashMapping, IntermediateStateRoot, PostLogContent, RawOrigin};
+use pallet_ethereum::{EthereumBlockHashMapping, PostLogContent, RawOrigin};
 use pallet_evm::{
 	EnsureAddressNever, EnsureAddressRoot, HashedAddressMapping, OnChargeEVMTransaction,
 };
@@ -106,10 +106,6 @@ parameter_types! {
 	pub const WeightPerGas: Weight = Weight::from_parts(20_000, 0);
 }
 
-parameter_types! {
-	pub SuicideQuickClearLimit: u32 = 0;
-}
-
 pub struct FreeEVMExecution;
 
 impl OnChargeEVMTransaction<Runtime> for FreeEVMExecution {
@@ -149,22 +145,32 @@ impl pallet_evm::Config for Runtime {
 	type ChainId = ChainId;
 	type BlockGasLimit = BlockGasLimit;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
-	type OnChargeTransaction = ();
+	type OnChargeTransaction = FreeEVMExecution;
 	type OnCreate = ();
-	type SuicideQuickClearLimit = SuicideQuickClearLimit;
 	type FindAuthor = FindAuthorTruncated;
 	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitPovSizeRatio;
 	type Timestamp = Timestamp;
 	type WeightInfo = ();
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Runtime>;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
 }
 
 parameter_types! {
 	pub const PostBlockAndTxnHashes: PostLogContent = PostLogContent::BlockAndTxnHashes;
 }
 
+pub struct MockStateRoot;
+impl sp_core::Get<H256> for MockStateRoot {
+	fn get() -> H256 {
+		H256::default()
+	}
+}
+
 impl pallet_ethereum::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type StateRoot = IntermediateStateRoot<Self>;
+	type StateRoot = MockStateRoot;
 	type PostLogContent = PostBlockAndTxnHashes;
 	type ExtraDataLength = ConstU32<30>;
 }
@@ -220,46 +226,6 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 				Some(call.dispatch(RuntimeOrigin::from(RawOrigin::EthereumTransaction(info)))),
 			_ => None,
 		}
-	}
-}
-
-pub struct MockedEvmRunner;
-
-impl tangle_primitives::services::EvmRunner<Runtime> for MockedEvmRunner {
-	type Error = pallet_evm::Error<Runtime>;
-
-	fn call(
-		source: sp_core::H160,
-		target: sp_core::H160,
-		input: Vec<u8>,
-		value: sp_core::U256,
-		gas_limit: u64,
-		is_transactional: bool,
-		validate: bool,
-	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
-		let max_fee_per_gas = FixedGasPrice::min_gas_price().0;
-		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
-		let nonce = None;
-		let access_list = Default::default();
-		let weight_limit = None;
-		let proof_size_base_cost = None;
-		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::call(
-			source,
-			target,
-			input,
-			value,
-			gas_limit,
-			Some(max_fee_per_gas),
-			Some(max_priority_fee_per_gas),
-			nonce,
-			access_list,
-			is_transactional,
-			validate,
-			weight_limit,
-			proof_size_base_cost,
-			<Runtime as pallet_evm::Config>::config(),
-		)
-		.map_err(|o| tangle_primitives::services::RunnerError { error: o.error, weight: o.weight })
 	}
 }
 

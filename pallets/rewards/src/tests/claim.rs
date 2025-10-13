@@ -156,11 +156,7 @@ fn test_claim_rewards_only_unlocked() {
 
 		// Verify approximate expected rewards (19 tokens with some precision loss)
 		let expected_reward = 191 * EIGHTEEN_DECIMALS / 10;
-		let diff = if balance > expected_reward {
-			balance - expected_reward
-		} else {
-			expected_reward - balance
-		};
+		let diff = balance.abs_diff(expected_reward);
 		println!("diff: {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
 		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
@@ -218,11 +214,7 @@ fn test_claim_rewards_with_expired_lock() {
 		// reward for expired locked 10k = 0.01902587519 * 100 = 1.92587519
 		let expected_reward =
 			19 * EIGHTEEN_DECIMALS + 34 * EIGHTEEN_DECIMALS + 2 * EIGHTEEN_DECIMALS;
-		let diff = if balance > expected_reward {
-			balance - expected_reward
-		} else {
-			expected_reward - balance
-		};
+		let diff = balance.abs_diff(expected_reward);
 		assert!(diff < EIGHTEEN_DECIMALS);
 	});
 }
@@ -286,11 +278,7 @@ fn test_claim_rewards_with_active_locks() {
 		// reward for locked 90k = 0.171232876712328767122 * 1000 = 171.232876712328767122
 		let expected_reward =
 			19 * EIGHTEEN_DECIMALS + 76 * EIGHTEEN_DECIMALS + 171 * EIGHTEEN_DECIMALS;
-		let diff = if balance > expected_reward {
-			balance - expected_reward
-		} else {
-			expected_reward - balance
-		};
+		let diff = balance.abs_diff(expected_reward);
 		println!("diff {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
 		assert!(diff < 2 * EIGHTEEN_DECIMALS); // allow for 1TNT precision loss
 	});
@@ -557,11 +545,7 @@ fn test_claim_rewards_other() {
 
 		// Verify approximate expected rewards (19 tokens with some precision loss)
 		let expected_reward = 191 * EIGHTEEN_DECIMALS / 10;
-		let diff = if balance > expected_reward {
-			balance - expected_reward
-		} else {
-			expected_reward - balance
-		};
+		let diff = balance.abs_diff(expected_reward);
 		println!("diff: {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
 		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
