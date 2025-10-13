@@ -359,7 +359,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Charge payment from a user account with proper authorization checks
-	fn charge_payment_with_asset(
+	pub(crate) fn charge_payment_with_asset(
 		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,

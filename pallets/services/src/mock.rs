@@ -523,6 +523,12 @@ impl MockRewardsManager {
 		})
 	}
 
+	pub fn clear_pending_rewards(operator: &AccountId) {
+		PENDING_REWARDS.with(|rewards| {
+			rewards.borrow_mut().remove(operator);
+		});
+	}
+
 	pub fn clear_all() {
 		DELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 		UNDELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
