@@ -57,12 +57,19 @@ pub type Balance = u128;
 pub type Nonce = u32;
 pub type AssetId = u128;
 
+parameter_types! {
+	pub const TestDbWeight: frame_support::weights::RuntimeDbWeight = frame_support::weights::RuntimeDbWeight {
+		read: 25_000_000,  // 25 µs per read
+		write: 100_000_000,  // 100 µs per write
+	};
+}
+
 #[frame_support::derive_impl(frame_system::config_preludes::TestDefaultConfig as frame_system::DefaultConfig)]
 impl frame_system::Config for Runtime {
 	type BaseCallFilter = frame_support::traits::Everything;
 	type BlockWeights = ();
 	type BlockLength = ();
-	type DbWeight = ();
+	type DbWeight = TestDbWeight;
 	type RuntimeOrigin = RuntimeOrigin;
 	type Nonce = Nonce;
 	type RuntimeCall = RuntimeCall;

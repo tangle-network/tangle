@@ -5,7 +5,6 @@
 
 use super::*;
 use frame_support::{assert_ok, weights::Weight};
-use sp_core::bounded_vec;
 
 #[test]
 fn subscription_processes_with_on_idle() {
@@ -181,6 +180,20 @@ fn subscription_respects_weight_limits() {
 			vec![Field::Uint8(1)].try_into().unwrap()
 		));
 
+		// Process the subscription payment for the first time to create billing entry
+		let current_block = System::block_number();
+		assert_ok!(Services::process_job_subscription_payment(
+			service_id,
+			KEYGEN_JOB_ID,
+			0, // call_id
+			&eve,
+			&eve,
+			10 * 10u128.pow(6), // rate_per_interval
+			1, // interval
+			None, // maybe_end
+			current_block,
+		));
+
 		System::set_block_number(2);
 
 		// Test with ZERO remaining weight
@@ -238,9 +251,13 @@ fn subscription_cursor_persists_across_blocks() {
 		));
 
 		// Create 5 subscriptions from different users
-		for user_id in 10..15 {
+		for (call_id, user_id) in (10..15).enumerate() {
 			let user = mock_pub_key(user_id);
 			mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
+
+			// Give user native tokens to pay for services
+			use frame_support::traits::Currency;
+			let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
 
 			let service_id = Services::next_instance_id();
 			assert_ok!(Services::request(
@@ -274,6 +291,20 @@ fn subscription_cursor_persists_across_blocks() {
 				service_id,
 				KEYGEN_JOB_ID,
 				vec![Field::Uint8(1)].try_into().unwrap()
+			));
+
+			// Process the subscription payment for the first time to create billing entry
+			let current_block = System::block_number();
+			assert_ok!(Services::process_job_subscription_payment(
+				service_id,
+				KEYGEN_JOB_ID,
+				call_id as u64, // call_id
+				&user,
+				&user,
+				10 * 10u128.pow(6), // rate_per_interval
+				1, // interval
+				None, // maybe_end
+				current_block,
 			));
 		}
 
@@ -338,7 +369,7 @@ fn subscription_processes_multiple_in_single_block() {
 		));
 
 		// Create 3 subscriptions
-		for user_id in 10..13 {
+		for (call_id, user_id) in (10..13).enumerate() {
 			let user = mock_pub_key(user_id);
 			mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 
@@ -378,6 +409,20 @@ fn subscription_processes_multiple_in_single_block() {
 				service_id,
 				KEYGEN_JOB_ID,
 				vec![Field::Uint8(1)].try_into().unwrap()
+			));
+
+			// Process the subscription payment for the first time to create billing entry
+			let current_block = System::block_number();
+			assert_ok!(Services::process_job_subscription_payment(
+				service_id,
+				KEYGEN_JOB_ID,
+				call_id as u64, // call_id
+				&user,
+				&user,
+				10 * 10u128.pow(6), // rate_per_interval
+				1, // interval
+				None, // maybe_end
+				current_block,
 			));
 		}
 
@@ -463,6 +508,20 @@ fn subscription_skips_processing_when_no_weight() {
 			service_id,
 			KEYGEN_JOB_ID,
 			vec![Field::Uint8(1)].try_into().unwrap()
+		));
+
+		// Process the subscription payment for the first time to create billing entry
+		let current_block = System::block_number();
+		assert_ok!(Services::process_job_subscription_payment(
+			service_id,
+			KEYGEN_JOB_ID,
+			0, // call_id
+			&eve,
+			&eve,
+			10 * 10u128.pow(6), // rate_per_interval
+			1, // interval
+			None, // maybe_end
+			current_block,
 		));
 
 		// Simulate busy block with zero remaining weight

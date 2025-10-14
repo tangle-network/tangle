@@ -497,7 +497,7 @@ fn test_rewards_remain_in_pallet_until_claimed() {
 
 		// Rewards are recorded but not yet transferred to operators
 		let bob_rewards = MockRewardsManager::get_pending_rewards(&bob);
-		assert!(bob_rewards.len() > 0, "Bob should have pending rewards recorded");
+		assert!(!bob_rewards.is_empty(), "Bob should have pending rewards recorded");
 
 		// Bob's actual balance hasn't changed yet
 		let bob_balance = Balances::free_balance(&bob);

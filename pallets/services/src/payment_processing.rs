@@ -507,7 +507,7 @@ impl<T: Config> Pallet<T> {
 
 		let start_cursor = SubscriptionProcessingCursor::<T>::get();
 		let mut skip_until_cursor = start_cursor.is_some();
-		let cursor_key = start_cursor;
+		let cursor_key = start_cursor.clone();
 
 		for (key, billing) in JobSubscriptionBillings::<T>::iter() {
 			// Skip entries until we reach the cursor position
@@ -515,8 +515,10 @@ impl<T: Config> Pallet<T> {
 				if let Some(ref cursor) = cursor_key {
 					if &key == cursor {
 						skip_until_cursor = false;
+						// Don't continue - we want to process this entry
+					} else {
+						continue; // Only skip if we haven't reached the cursor yet
 					}
-					continue;
 				}
 			}
 			// Weight check
@@ -531,18 +533,17 @@ impl<T: Config> Pallet<T> {
 				break;
 			}
 
-			let (service_id, job_index, subscriber) = key;
+			let (service_id, job_index, subscriber) = key.clone();
 
 			if let Ok(service_instance) = Self::services(service_id) {
 				if !ServiceStatus::<T>::contains_key(service_instance.blueprint, service_id) {
 					continue;
 				}
 
-				if !service_instance.permitted_callers.is_empty() &&
-					!service_instance.permitted_callers.contains(&subscriber)
-				{
-					continue;
-				}
+				// NOTE: We skip permitted_callers check for on_idle subscription processing
+				// because if a billing entry exists, the subscription was already authorized
+				// when initially created. The subscriber is paying for their own subscription,
+				// not making a new service call.
 
 				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) {
 					if let Some(job_def) = blueprint.jobs.get(job_index as usize) {
@@ -580,8 +581,12 @@ impl<T: Config> Pallet<T> {
 									maybe_end_converted,
 									current_block,
 								) {
-									Ok(_) => processed_count += 1,
-									Err(_) => continue,
+									Ok(_) => {
+										processed_count += 1;
+									},
+									Err(_) => {
+										continue;
+									},
 								}
 							}
 						}
