@@ -23,7 +23,7 @@
 //! - Protocol treasury (configurable percentage)
 
 use crate::{BalanceOf, Config, Error, Pallet};
-use frame_support::{dispatch::DispatchResult, ensure};
+use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_runtime::{Perbill, traits::{CheckedDiv, CheckedMul, Saturating, Zero}};
 use tangle_primitives::{
@@ -134,12 +134,21 @@ impl<T: Config> Pallet<T> {
 			)?;
 		}
 
-		// Distribute to protocol treasury (if configured)
+		// Distribute to protocol treasury
 		if !protocol_amount.is_zero() {
-			// TODO: Add treasury account configuration to Config trait
-			// For now, we skip protocol share or add it to operator pool
+			let treasury_account = T::TreasuryAccount::get();
+
+			// Record treasury reward (treasury can claim like any operator)
+			T::RewardRecorder::record_reward(
+				&treasury_account,
+				service.id,
+				protocol_amount,
+				pricing_model,
+			)?;
+
 			log::debug!(
-				"Protocol share ({:?}) not distributed - treasury account not configured",
+				"Recorded treasury reward: service={}, amount={:?}",
+				service.id,
 				protocol_amount
 			);
 		}

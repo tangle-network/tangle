@@ -829,8 +829,8 @@ benchmarks! {
 		);
 	}
 
-	// Benchmark subscription payments processing on block
-	process_subscription_payments_on_block {
+	// Benchmark subscription payments processing with on_idle
+	process_subscription_payments_on_idle {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
@@ -858,8 +858,9 @@ benchmarks! {
 		}
 
 		let current_block = 100_u32.into();
+		let remaining_weight = frame_support::weights::Weight::from_parts(1_000_000_000, 0);
 	}: {
-		let _ = Pallet::<T>::process_subscription_payments_on_block(current_block);
+		let _ = Pallet::<T>::process_subscription_payments_on_idle(current_block, remaining_weight);
 	}
 }
 

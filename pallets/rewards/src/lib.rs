@@ -337,6 +337,14 @@ pub mod pallet {
 		VaultMetadataRemoved { vault_id: T::VaultId },
 		/// Reward recorded
 		RewardRecorded { operator: T::AccountId, service_id: ServiceId, amount: BalanceOf<T> },
+		/// Reward aggregated with existing pending reward
+		RewardAggregated {
+			operator: T::AccountId,
+			service_id: ServiceId,
+			previous_amount: BalanceOf<T>,
+			added_amount: BalanceOf<T>,
+			new_total: BalanceOf<T>,
+		},
 		/// Operator rewards claimed
 		OperatorRewardsClaimed { operator: T::AccountId, amount: BalanceOf<T> },
 	}
@@ -702,41 +710,97 @@ pub mod pallet {
 			Self::account_id()
 		}
 
+		/// Record a reward for an operator with automatic aggregation.
+		///
+		/// If the operator already has a pending reward for this service,
+		/// the new amount is added to the existing entry (aggregation).
+		/// This prevents BoundedVec overflow while maintaining accurate totals.
+		///
+		/// # Arguments
+		/// * `operator` - The operator account to receive the reward
+		/// * `service_id` - The service ID this reward is for
+		/// * `amount` - The reward amount to record
+		/// * `_model` - Pricing model (for future use)
+		///
+		/// # Aggregation Logic
+		/// - If entry exists for (operator, service_id): ADD to existing amount
+		/// - If no entry exists: CREATE new entry
+		/// - If BoundedVec full AND no matching entry: FAIL with TooManyPendingRewards
+		///
+		/// # Security
+		/// - Aggregation is safe: only legitimate payments can add
+		/// - No way to overflow individual amounts (uses saturating_add)
+		/// - Still bounded by MaxPendingRewardsPerOperator unique services
 		fn record_reward(
 			operator: &T::AccountId,
 			service_id: ServiceId,
 			amount: BalanceOf<T>,
-			_model: &Self::PricingModel, // Model might be used later
+			_model: &Self::PricingModel,
 		) -> DispatchResult {
+			// Skip zero rewards
 			if amount == BalanceOf::<T>::zero() {
-				return Ok(()); // No need to record zero rewards
+				return Ok(());
 			}
 
-			// Attempt to append the new reward.
-			// This handles the BoundedVec limit implicitly.
-			let result = PendingOperatorRewards::<T>::try_mutate(operator, |rewards| {
-				rewards.try_push((service_id, amount))
-			});
+			// Try to aggregate with existing entry first
+			PendingOperatorRewards::<T>::try_mutate(operator, |rewards| {
+				// Search for existing entry with same service_id
+				if let Some(existing_entry) = rewards.iter_mut().find(|(sid, _)| *sid == service_id) {
+					// AGGREGATE: Add to existing amount
+					let old_amount = existing_entry.1;
+					existing_entry.1 = existing_entry.1.saturating_add(amount);
 
-			match result {
-				Ok(_) => {
-					// Emit event only if successful
-					Self::deposit_event(Event::RewardRecorded {
+					log::debug!(
+						"Aggregated reward for operator {:?}, service {}: {:?} + {:?} = {:?}",
+						operator,
+						service_id,
+						old_amount,
+						amount,
+						existing_entry.1
+					);
+
+					// Emit aggregation event
+					Self::deposit_event(Event::RewardAggregated {
 						operator: operator.clone(),
 						service_id,
-						amount,
+						previous_amount: old_amount,
+						added_amount: amount,
+						new_total: existing_entry.1,
 					});
-					Ok(())
-				},
-				Err(_) => {
-					// Operator has too many pending rewards - they must claim before receiving more
-					log::error!(
-						"Failed to record reward for operator {:?}: Too many pending rewards. Operator must claim existing rewards first.",
-						operator
-					);
-					Err(Error::<T>::TooManyPendingRewards.into())
-				},
-			}
+
+					return Ok(());
+				}
+
+				// No existing entry - try to add new one
+				rewards.try_push((service_id, amount))
+					.map_err(|_| {
+						// BoundedVec is full with unique services
+						log::error!(
+							"Cannot record reward for operator {:?}: {} unique services already pending. \
+							Operator must claim existing rewards before receiving rewards from new services.",
+							operator,
+							rewards.len()
+						);
+						Error::<T>::TooManyPendingRewards
+					})?;
+
+				log::debug!(
+					"Recorded new reward for operator {:?}, service {}: {:?} (total entries: {})",
+					operator,
+					service_id,
+					amount,
+					rewards.len()
+				);
+
+				// Emit standard recording event
+				Self::deposit_event(Event::RewardRecorded {
+					operator: operator.clone(),
+					service_id,
+					amount,
+				});
+
+				Ok(())
+			})
 		}
 	}
 }

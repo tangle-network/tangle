@@ -24,6 +24,7 @@ use sp_runtime::Percent;
 use tangle_primitives::services::*;
 
 mod asset_security;
+mod auto_aggregation;
 mod blueprint;
 mod hooks;
 mod jobs;
@@ -37,6 +38,8 @@ mod security;
 mod service;
 mod slashing;
 mod subscription_billing;
+mod subscription_cursor;
+mod treasury_distribution;
 mod type_checking;
 
 pub const ALICE: u8 = 1;

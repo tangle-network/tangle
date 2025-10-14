@@ -1,6 +1,6 @@
 use crate::{
 	BalanceOf, BlockNumberFor, Config, Error, JobPayments, JobSubscriptionBillings, Pallet,
-	ServiceStatus, UserSubscriptionCount,
+	ServiceStatus, SubscriptionProcessingCursor, UserSubscriptionCount,
 };
 use frame_support::{
 	dispatch::DispatchResult,
@@ -480,30 +480,64 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Hook called on every block to process subscription payments
+	/// Process subscription payments with cursor-based resumable iteration.
+	///
+	/// Called in `on_idle` hook for automatic subscription billing using ONLY
+	/// remaining weight after transactions (zero competition with user txs).
+	///
+	/// # DDOS Protection
+	/// - Bounded by remaining_weight (busy blocks skip naturally)
+	/// - Further bounded by MAX_SUBSCRIPTIONS_PER_BLOCK (50 iterations max)
+	/// - Cursor enables fair round-robin processing
 	///
 	/// # Security Note
-	/// This function processes automatic subscription payments. Since these are
-	/// pre-authorized through the service registration process, we use the
-	/// subscriber as both caller and payer for automated billing.
-	pub fn process_subscription_payments_on_block(current_block: BlockNumberFor<T>) -> Weight {
+	/// Pre-authorized through service registration, subscriber pays automatically.
+	pub fn process_subscription_payments_on_idle(
+		current_block: BlockNumberFor<T>,
+		remaining_weight: Weight,
+	) -> Weight {
 		let mut total_weight = Weight::zero();
 		let mut processed_count = 0u32;
 		const MAX_SUBSCRIPTIONS_PER_BLOCK: u32 = 50;
+		let min_weight = T::DbWeight::get().reads_writes(5, 2);
 
-		for ((service_id, job_index, subscriber), billing) in JobSubscriptionBillings::<T>::iter() {
-			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
+		if remaining_weight.ref_time() < min_weight.ref_time() {
+			return Weight::zero();
+		}
+
+		let start_cursor = SubscriptionProcessingCursor::<T>::get();
+		let mut skip_until_cursor = start_cursor.is_some();
+		let cursor_key = start_cursor;
+
+		for (key, billing) in JobSubscriptionBillings::<T>::iter() {
+			// Skip entries until we reach the cursor position
+			if skip_until_cursor {
+				if let Some(ref cursor) = cursor_key {
+					if &key == cursor {
+						skip_until_cursor = false;
+					}
+					continue;
+				}
+			}
+			// Weight check
+			if total_weight.saturating_add(min_weight).ref_time() > remaining_weight.ref_time() {
+				SubscriptionProcessingCursor::<T>::put(key);
 				break;
 			}
 
-			// Validate subscription before processing
+			// Iteration limit
+			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
+				SubscriptionProcessingCursor::<T>::put(key);
+				break;
+			}
+
+			let (service_id, job_index, subscriber) = key;
+
 			if let Ok(service_instance) = Self::services(service_id) {
-				// Check if service is still active
 				if !ServiceStatus::<T>::contains_key(service_instance.blueprint, service_id) {
 					continue;
 				}
 
-				// Check if subscriber is still authorized
 				if !service_instance.permitted_callers.is_empty() &&
 					!service_instance.permitted_callers.contains(&subscriber)
 				{
@@ -527,6 +561,7 @@ impl<T: Config> Pallet<T> {
 
 							let blocks_since_last =
 								current_block.saturating_sub(billing.last_billed);
+
 							if blocks_since_last >= interval_converted {
 								if let Some(end_block) = maybe_end_converted {
 									if current_block > end_block {
@@ -534,7 +569,7 @@ impl<T: Config> Pallet<T> {
 									}
 								}
 
-								if Self::process_job_subscription_payment(
+								match Self::process_job_subscription_payment(
 									service_id,
 									job_index,
 									0,
@@ -544,13 +579,10 @@ impl<T: Config> Pallet<T> {
 									interval_converted,
 									maybe_end_converted,
 									current_block,
-								)
-								.is_err()
-								{
-									break;
+								) {
+									Ok(_) => processed_count += 1,
+									Err(_) => continue,
 								}
-
-								processed_count += 1;
 							}
 						}
 					}
@@ -558,6 +590,10 @@ impl<T: Config> Pallet<T> {
 			}
 
 			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
+		}
+
+		if processed_count < MAX_SUBSCRIPTIONS_PER_BLOCK {
+			SubscriptionProcessingCursor::<T>::kill();
 		}
 
 		total_weight

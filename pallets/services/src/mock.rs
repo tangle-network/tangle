@@ -226,6 +226,8 @@ parameter_types! {
 		0xfa, 0x9c, 0xc0, 0xe3
 	]);
 	pub const SlashRecipient: AccountId = AccountId32::new([9u8; 32]);
+	/// Treasury account for protocol revenue (5% share)
+	pub const TreasuryAccount: AccountId = AccountId32::new([10u8; 32]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -443,6 +445,7 @@ impl pallet_services::Config for Runtime {
 	type RoleKeyId = RoleKeyId;
 	type RewardRecorder = MockRewardsManager;
 	type RewardsManager = MockRewardsManager;
+	type TreasuryAccount = TreasuryAccount;
 	type WeightInfo = ();
 }
 
@@ -552,9 +555,17 @@ impl RewardRecorder<AccountId, u64, Balance> for MockRewardsManager {
 	) -> DispatchResult {
 		PENDING_REWARDS.with(|rewards| {
 			let mut rewards_map = rewards.borrow_mut();
-			rewards_map.entry(operator.clone())
-				.or_insert_with(Vec::new)
-				.push((service_id, amount));
+			let operator_rewards = rewards_map.entry(operator.clone())
+				.or_insert_with(Vec::new);
+
+			// AUTO-AGGREGATION: Search for existing entry with same service_id
+			if let Some(existing_entry) = operator_rewards.iter_mut().find(|(sid, _)| *sid == service_id) {
+				// Aggregate: Add to existing amount
+				existing_entry.1 = existing_entry.1.saturating_add(amount);
+			} else {
+				// No existing entry - create new one
+				operator_rewards.push((service_id, amount));
+			}
 		});
 		Ok(())
 	}

@@ -229,4 +229,5 @@ impl pallet_services::Config for Runtime {
 	type WeightInfo = ();
 	type RewardRecorder = Rewards;
 	type RewardsManager = Rewards;
+	type TreasuryAccount = TreasuryAccount;
 }

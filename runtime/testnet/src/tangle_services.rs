@@ -179,6 +179,7 @@ impl pallet_services::Config for Runtime {
 	type Fungibles = Assets;
 	type RewardRecorder = Rewards;
 	type RewardsManager = Rewards;
+	type TreasuryAccount = TreasuryAccount;
 	type PalletEvmAccount = ServicesPalletEvmAccount;
 	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;

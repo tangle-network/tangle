@@ -5,6 +5,7 @@ use super::*;
 use crate::mock::MockRewardsManager;
 use frame_support::{assert_ok, traits::Currency};
 use sp_runtime::Percent;
+use sp_weights::Weight;
 use tangle_primitives::{
 	services::{Asset, AssetSecurityCommitment, PricingModel, Service},
 	traits::RewardRecorder,
@@ -38,8 +39,10 @@ fn advance_blocks_with_subscriptions(n: u64) -> u32 {
 		let current = System::block_number();
 		System::set_block_number(current + 1);
 
-		// Process subscription payments for this block
-		let _ = Services::process_subscription_payments_on_block(System::block_number());
+		// Process subscription payments for this block with generous remaining weight
+		// Simulate on_idle with plenty of weight available for subscription processing
+		let remaining_weight = Weight::from_parts(1_000_000_000, 0);
+		let _ = Services::process_subscription_payments_on_idle(System::block_number(), remaining_weight);
 
 		// Count how many rewards were added this block
 		total_processed += 1;

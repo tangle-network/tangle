@@ -259,6 +259,27 @@ pub mod module {
 		#[pallet::constant]
 		type FallbackWeightWrites: Get<u64> + Default + Parameter + MaybeSerializeDeserialize;
 
+		/// The treasury account that receives protocol share (5%) of all service payments.
+		/// Typically derived from the Treasury pallet's PalletId.
+		///
+		/// Treasury rewards are recorded just like operator rewards and can be claimed
+		/// using the standard `claim_rewards()` extrinsic.
+		///
+		/// # Example Runtime Configuration
+		/// ```ignore
+		/// parameter_types! {
+		///     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+		/// }
+		///
+		/// pub struct TreasuryAccountId;
+		/// impl Get<AccountId> for TreasuryAccountId {
+		///     fn get() -> AccountId {
+		///         TreasuryPalletId::get().into_account_truncating()
+		///     }
+		/// }
+		/// ```
+		type TreasuryAccount: Get<Self::AccountId>;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
 	}
@@ -277,8 +298,7 @@ pub mod module {
 		}
 
 		/// On initialize, we should check for any unapplied slashes and apply them.
-		/// Also process subscription payments for active services.
-		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
 			let mut weight: Weight = Weight::zero();
 			let current_era = T::OperatorDelegationManager::get_current_round();
 			let slash_defer_duration = T::SlashDeferDuration::get();
@@ -314,11 +334,30 @@ pub mod module {
 				}
 			}
 
-			// Process subscription payments
-			let subscription_weight = Self::process_subscription_payments_on_block(n);
-			weight = weight.saturating_add(subscription_weight);
-
 			weight
+		}
+
+		/// Process subscription payments using remaining block weight.
+		///
+		/// This hook executes AFTER all transactions have been processed,
+		/// using only leftover weight. This ensures subscription billing
+		/// never competes with user transactions for block space.
+		///
+		/// # Why `on_idle` vs `on_finalize`
+		/// - ✅ Uses remaining weight (no competition with transactions)
+		/// - ✅ Busy blocks naturally skip (built-in DDOS protection)
+		/// - ✅ Quiet blocks can process more subscriptions
+		/// - ✅ Better resource utilization
+		///
+		/// # Parameters
+		/// * `n` - Current block number
+		/// * `remaining_weight` - Weight remaining after all transactions
+		///
+		/// # Returns
+		/// Weight consumed by subscription processing
+		fn on_idle(n: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
+			// Process subscriptions using remaining weight
+			Self::process_subscription_payments_on_idle(n, remaining_weight)
 		}
 	}
 
@@ -823,6 +862,23 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn next_unapplied_slash_index)]
 	pub type NextUnappliedSlashIndex<T> = StorageValue<_, u32, ValueQuery>;
+
+	/// Cursor for resumable subscription processing.
+	///
+	/// Stores the last processed subscription key to enable round-robin
+	/// processing across blocks when >50 subscriptions are active.
+	///
+	/// Format: (ServiceId, JobIndex, AccountId)
+	///
+	/// - When set: Processing resumes from this key in next block's `on_idle`
+	/// - When None: Processing starts from beginning of storage map
+	///
+	/// This enables fair, bounded subscription billing that doesn't compete
+	/// with user transactions for block space.
+	#[pallet::storage]
+	#[pallet::getter(fn subscription_processing_cursor)]
+	pub type SubscriptionProcessingCursor<T: Config> =
+		StorageValue<_, (ServiceId, u8, T::AccountId), OptionQuery>;
 
 	/// The service blueprints along with their owner.
 	#[pallet::storage]
