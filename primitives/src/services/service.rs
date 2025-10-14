@@ -63,6 +63,10 @@ pub struct ServiceMetadata<C: Constraints> {
 	pub website: Option<BoundedString<C::MaxMetadataLength>>,
 	/// Service License.
 	pub license: Option<BoundedString<C::MaxMetadataLength>>,
+	/// Profiling data - arbitrary base64-encoded bytes for additional metadata.
+	/// This can be used to store performance metrics, benchmarking data, or other
+	/// auxiliary information about the service.
+	pub profiling_data: Option<BoundedString<C::MaxMetadataLength>>,
 }
 
 /// Blueprint Service Manager is a smart contract that will manage the service lifecycle.
@@ -181,6 +185,8 @@ impl<C: Constraints> ServiceBlueprint<C> {
 				ethabi::ParamType::String,
 				// Service License
 				ethabi::ParamType::String,
+				// Profiling Data
+				ethabi::ParamType::String,
 			]),
 			// Job Definitions ?
 			// Registration Parameters ?
@@ -244,6 +250,10 @@ impl<C: Constraints> ServiceBlueprint<C> {
 				// Service License
 				ethabi::Token::String(
 					self.metadata.license.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+				),
+				// Profiling Data
+				ethabi::Token::String(
+					self.metadata.profiling_data.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
 				),
 			]),
 			// Job Definitions ?
