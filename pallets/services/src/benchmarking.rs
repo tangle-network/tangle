@@ -101,6 +101,14 @@ fn create_test_blueprint<T: Config>(
 		.map_err(|e| e.error)
 }
 
+fn setup_master_blueprint_manager<T: Config>() {
+	// Set up master blueprint service manager first
+	Pallet::<T>::update_master_blueprint_service_manager(
+		frame_system::RawOrigin::Root.into(),
+		H160::from_slice(&[0u8; 20])
+	).unwrap();
+}
+
 benchmarks! {
 
 	where_clause {
@@ -110,6 +118,7 @@ benchmarks! {
 
 	create_blueprint {
 		let alice = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 	}: _(
 		RawOrigin::Signed(alice.clone()),
@@ -118,6 +127,7 @@ benchmarks! {
 
 	pre_register {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -128,6 +138,7 @@ benchmarks! {
 
 	register {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -139,6 +150,7 @@ benchmarks! {
 
 	unregister {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -157,6 +169,7 @@ benchmarks! {
 
 	update_rpc_address {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -177,6 +190,7 @@ benchmarks! {
 
 	request {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -236,6 +250,7 @@ benchmarks! {
 
 	approve {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -296,6 +311,7 @@ benchmarks! {
 
 	reject {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -350,6 +366,7 @@ benchmarks! {
 
 	terminate {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -405,6 +422,7 @@ benchmarks! {
 
 	call {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -465,6 +483,7 @@ benchmarks! {
 
 	submit_result {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -544,6 +563,7 @@ benchmarks! {
 		let blueprint_id = 0u64;
 		let service_id = Pallet::<T>::next_service_request_id();
 
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint);
 
@@ -597,6 +617,7 @@ benchmarks! {
 	// Slash an operator's stake for a service
 	slash {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -630,6 +651,7 @@ benchmarks! {
 	// Dispute a scheduled slash
 	dispute {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -670,6 +692,7 @@ benchmarks! {
 	// Join a service as an operator
 	join_service {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -700,6 +723,7 @@ benchmarks! {
 	// Leave a service as an operator
 	leave_service {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -730,6 +754,7 @@ benchmarks! {
 	// Benchmark payment validation for pay-once services
 	validate_payment_amount_pay_once {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -742,6 +767,7 @@ benchmarks! {
 	// Benchmark payment processing for subscription services
 	process_subscription_payment {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -789,6 +815,7 @@ benchmarks! {
 	// Benchmark event-driven payment processing
 	process_event_driven_payment {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
@@ -832,6 +859,7 @@ benchmarks! {
 	// Benchmark subscription payments processing with on_idle
 	process_subscription_payments_on_idle {
 		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
