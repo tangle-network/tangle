@@ -1,11 +1,15 @@
 use super::*;
 use crate::OriginFor;
 use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
-use frame_support::BoundedVec;
+use frame_support::{BoundedVec, assert_ok, traits::Currency};
 use frame_system::RawOrigin;
+use pallet_assets::Pallet as Assets;
 use scale_info::prelude::boxed::Box;
 use sp_core::{H160, crypto::Pair, ecdsa};
-use sp_runtime::{KeyTypeId, Percent};
+use sp_runtime::{
+	KeyTypeId, Percent,
+	traits::{SaturatedConversion, StaticLookup, Zero},
+};
 use sp_std::vec;
 use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
@@ -16,11 +20,18 @@ use tangle_primitives::services::{
 
 pub type AssetId = u32;
 pub type AssetIdOf<T> = <T as Config>::AssetId;
+#[allow(dead_code)]
 const CGGMP21_BLUEPRINT: H160 = H160([0x21; 20]);
+#[allow(dead_code)]
 pub const TNT: AssetId = 0;
 pub const USDC: AssetId = 1;
 pub const WETH: AssetId = 2;
 pub const WBTC: AssetId = 3;
+
+const NATIVE_BALANCE_TARGET: u128 = 1_000_000_000_000;
+const CUSTOM_ASSET_BALANCE_TARGET: u128 = 1_000_000_000_000;
+const ASSET_ADMIN_ID: u8 = 200;
+
 pub(crate) fn get_security_requirement<T: Config>(
 	a: T::AssetId,
 	p: &[u8; 2],
@@ -39,8 +50,7 @@ pub(crate) fn get_security_commitment<T: Config>(
 	AssetSecurityCommitment { asset: Asset::Custom(a), exposure_percent: Percent::from_percent(p) }
 }
 
-pub(crate) fn test_ecdsa_key() -> [u8; 65] {
-	let seed = [1u8; 32];
+fn derive_ecdsa_key(seed: [u8; 32]) -> [u8; 65] {
 	let ecdsa_key = sp_core::ecdsa::Pair::from_seed(&seed);
 	let secret = k256::ecdsa::SigningKey::from_slice(&ecdsa_key.seed())
 		.expect("Should be able to create a secret key from a seed");
@@ -49,13 +59,149 @@ pub(crate) fn test_ecdsa_key() -> [u8; 65] {
 	public_key.to_bytes().to_vec().try_into().unwrap()
 }
 
+#[allow(dead_code)]
+pub(crate) fn test_ecdsa_key() -> [u8; 65] {
+	derive_ecdsa_key([1u8; 32])
+}
+
+fn bench_ecdsa_key(seed_byte: u8) -> [u8; 65] {
+	let mut seed = [0u8; 32];
+	seed.fill(seed_byte);
+	seed[0] = seed_byte;
+	seed[15] = seed_byte.wrapping_mul(7).wrapping_add(3);
+	seed[31] = seed_byte.wrapping_mul(11).wrapping_add(1);
+	derive_ecdsa_key(seed)
+}
+
 fn mock_account_id<T: Config>(id: u8) -> T::AccountId {
 	frame_benchmarking::account("account", id as u32, 0)
 }
 
-fn operator_preferences<T: Config>() -> OperatorPreferences<T::Constraints> {
+fn asset_admin_account<T: Config>() -> T::AccountId {
+	mock_account_id::<T>(ASSET_ADMIN_ID)
+}
+
+fn ensure_native_balance<T: Config>(account: &T::AccountId) {
+	let target: BalanceOf<T> = NATIVE_BALANCE_TARGET.saturated_into();
+	let current = T::Currency::free_balance(account);
+	if current < target {
+		let needed = target - current;
+		if !needed.is_zero() {
+			let _ = T::Currency::deposit_creating(account, needed);
+		}
+	}
+}
+
+fn ensure_asset_exists<T>(asset: u32)
+where
+	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+{
+	let asset_id: AssetIdOf<T> = asset.into();
+	if Assets::<T>::maybe_total_supply(asset_id.clone()).is_some() {
+		return;
+	}
+
+	let owner = asset_admin_account::<T>();
+	ensure_native_balance::<T>(&owner);
+
+	let owner_lookup = T::Lookup::unlookup(owner.clone());
+	let min_balance: <T as pallet_assets::Config>::Balance = 1u128.saturated_into();
+	let _ = Assets::<T>::force_create(
+		RawOrigin::Root.into(),
+		asset_id.clone().into(),
+		owner_lookup,
+		true,
+		min_balance,
+	);
+}
+
+fn ensure_asset_balance<T>(account: &T::AccountId, asset: u32)
+where
+	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+{
+	ensure_asset_exists::<T>(asset);
+	let asset_id: AssetIdOf<T> = asset.into();
+	let current = Assets::<T>::balance(asset_id.clone(), account);
+	let current_u128: u128 = current.saturated_into();
+
+	if current_u128 >= CUSTOM_ASSET_BALANCE_TARGET {
+		return;
+	}
+
+	let delta = CUSTOM_ASSET_BALANCE_TARGET - current_u128;
+	if delta == 0 {
+		return;
+	}
+
+	let delta_balance: <T as pallet_assets::Config>::Balance = delta.saturated_into();
+	let owner = asset_admin_account::<T>();
+	ensure_native_balance::<T>(&owner);
+	let beneficiary = T::Lookup::unlookup(account.clone());
+	let _ = Assets::<T>::mint(
+		RawOrigin::Signed(owner).into(),
+		asset_id.into(),
+		beneficiary,
+		delta_balance,
+	);
+}
+
+fn ensure_account_ready<T>(account: &T::AccountId)
+where
+	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+{
+	ensure_native_balance::<T>(account);
+	ensure_asset_balance::<T>(account, USDC);
+	ensure_asset_balance::<T>(account, WETH);
+	ensure_asset_balance::<T>(account, WBTC);
+}
+
+fn funded_account<T>(id: u8) -> T::AccountId
+where
+	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+{
+	let account = mock_account_id::<T>(id);
+	ensure_account_ready::<T>(&account);
+	account
+}
+
+fn register_operator<T>(blueprint_id: u64, id: u8) -> T::AccountId
+where
+	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+{
+	let operator = funded_account::<T>(id);
+	assert_ok!(Pallet::<T>::register(
+		RawOrigin::Signed(operator.clone()).into(),
+		blueprint_id,
+		operator_preferences::<T>(id),
+		Default::default(),
+		0_u32.into()
+	));
+	operator
+}
+
+fn prepare_blueprint_with_operators<T>(operator_ids: &[u8]) -> (T::AccountId, Vec<T::AccountId>)
+where
+	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+{
+	let owner = funded_account::<T>(1u8);
+	setup_master_blueprint_manager::<T>();
+	let blueprint = cggmp21_blueprint::<T>();
+	assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(owner.clone()).into(), blueprint));
+
+	let operators =
+		operator_ids.iter().map(|id| register_operator::<T>(0, *id)).collect::<Vec<_>>();
+
+	(owner, operators)
+}
+
+fn operator_preferences<T: Config>(seed: u8) -> OperatorPreferences<T::Constraints> {
 	OperatorPreferences {
-		key: test_ecdsa_key(),
+		key: bench_ecdsa_key(seed),
 		rpc_address: BoundedString::try_from("https://example.com/rpc".to_owned()).unwrap(),
 	}
 }
@@ -105,19 +251,22 @@ fn setup_master_blueprint_manager<T: Config>() {
 	// Set up master blueprint service manager first
 	Pallet::<T>::update_master_blueprint_service_manager(
 		frame_system::RawOrigin::Root.into(),
-		H160::from_slice(&[0u8; 20])
-	).unwrap();
+		H160::from_slice(&[0u8; 20]),
+	)
+	.unwrap();
 }
 
 benchmarks! {
 
 	where_clause {
 		where
-			T::AssetId: From<u32>,
+			<T as crate::module::Config>::AssetId: From<u32>,
+			T: pallet_assets::Config<AssetId = <T as crate::module::Config>::AssetId>,
+			<T as pallet_assets::Config>::Balance: SaturatedConversion,
 	}
 
 	create_blueprint {
-		let alice = mock_account_id::<T>(1u8);
+		let alice = funded_account::<T>(1u8);
 		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
 	}: _(
@@ -126,110 +275,47 @@ benchmarks! {
 	)
 
 	pre_register {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let alice = funded_account::<T>(1u8);
 		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
+		let bob = funded_account::<T>(2u8);
 
 	}: _(RawOrigin::Signed(bob.clone()), 0)
 
 
 	register {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let alice = funded_account::<T>(1u8);
 		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
+		let bob = funded_account::<T>(2u8);
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preference.clone(), Default::default(), 0_u32.into())
+	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preferences::<T>(2u8), Default::default(), 0_u32.into())
 
 
 	unregister {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
+		let (_owner, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("Operator exists");
 
 	}: _(RawOrigin::Signed(bob.clone()), 0)
 
 	update_rpc_address {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
+		let (_owner, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("Operator exists");
 		let rpc_address = BoundedString::try_from("https://example.com/rpc".to_owned()).unwrap();
-
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
 
 	}: _(RawOrigin::Signed(bob.clone()), 0, rpc_address)
 
 
 	request {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
-
-		let operator_preference = operator_preferences::<T>();
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(charlie.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(dave.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(eve.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4, 5]);
+		let eve = operators.pop().expect("Eve exists");
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
 
 	}: _(
 		RawOrigin::Signed(bob.clone()),
@@ -249,42 +335,13 @@ benchmarks! {
 		)
 
 	approve {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(charlie.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(dave.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::request(
+		let eve = funded_account::<T>(5u8);
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
@@ -299,7 +356,7 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
-		);
+		));
 
 		let security_commitments = vec![
 			get_security_commitment::<T>(USDC.into(), 10),
@@ -310,41 +367,13 @@ benchmarks! {
 
 
 	reject {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
 
-		let operator_preference = operator_preferences::<T>();
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(charlie.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(dave.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::request(
+		let eve = funded_account::<T>(5u8);
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
@@ -359,48 +388,19 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
-		);
+		));
 
 	}: _(RawOrigin::Signed(charlie.clone()), 0)
 
 
 	terminate {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
 
-		let operator_preference = operator_preferences::<T>();
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(charlie.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(dave.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::request(
+		let eve = funded_account::<T>(5u8);
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
@@ -415,49 +415,19 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
-		);
+		));
 
 	}: _(RawOrigin::Signed(eve.clone()),0)
 
 
 	call {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
 
-
-		let operator_preference = operator_preferences::<T>();
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(charlie.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(dave.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::request(
+		let eve = funded_account::<T>(5u8);
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
@@ -472,7 +442,7 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
-		);
+		));
 
 	}: _(
 			RawOrigin::Signed(eve.clone()),
@@ -482,42 +452,13 @@ benchmarks! {
 		)
 
 	submit_result {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
 
-		let operator_preference = operator_preferences::<T>();
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(charlie.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let dave: T::AccountId =  mock_account_id::<T>(4u8);
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(dave.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		let eve: T::AccountId =  mock_account_id::<T>(5u8);
-		let _= Pallet::<T>::request(
+		let eve = funded_account::<T>(5u8);
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(eve.clone()).into(),
 			None,
 			0,
@@ -532,14 +473,14 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
-		);
+		));
 
-		let _= Pallet::<T>::call(
+		assert_ok!(Pallet::<T>::call(
 			RawOrigin::Signed(eve.clone()).into(),
 			0,
 			0,
 			vec![Field::Uint8(2)].try_into().unwrap()
-		);
+		));
 
 		let keygen_job_call_id = 0;
 		let key_type = KeyTypeId(*b"mdkg");
@@ -556,33 +497,33 @@ benchmarks! {
 		const HEARTBEAT_INTERVAL_VALUE: u32 = 10;
 		const DUMMY_OPERATOR_ADDRESS_BYTES: [u8; 20] = [1u8; 20];
 
-		let creator: T::AccountId = mock_account_id::<T>(0u8);
-		let operator_account: T::AccountId = mock_account_id::<T>(1u8);
-		let service_requester: T::AccountId = mock_account_id::<T>(2u8);
+		let creator = funded_account::<T>(0u8);
+		let operator_account = funded_account::<T>(1u8);
+		let service_requester = funded_account::<T>(2u8);
 
 		let blueprint_id = 0u64;
 		let service_id = Pallet::<T>::next_service_request_id();
 
 		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint);
+		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint));
 
 		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
 		let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
-		let op_preferences = operator_preferences::<T>();
+		let op_preferences = operator_preferences::<T>(1u8);
 		let registration_args = Vec::<Field<T::Constraints, T::AccountId>>::new();
 
-		Pallet::<T>::register(
+		assert_ok!(Pallet::<T>::register(
 			RawOrigin::Signed(operator_account.clone()).into(),
 			blueprint_id,
 			op_preferences,
 			registration_args,
 			0u32.into()
-		).unwrap();
+		));
 
 		frame_system::Pallet::<T>::set_block_number(1u32.into());
 
-		Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(service_requester.clone()).into(),
 			None,
 			blueprint_id,
@@ -591,10 +532,10 @@ benchmarks! {
 			Default::default(),
 			Default::default(),
 			100u32.into(),
-			Asset::Custom(T::AssetId::from(USDC)),
+			Asset::Custom(AssetIdOf::<T>::from(USDC)),
 			0u32.into(),
 			MembershipModel::Fixed { min_operators: 1u32.into() }
-		).unwrap();
+		));
 
 		frame_system::Pallet::<T>::set_block_number(2u32.into());
 
@@ -616,23 +557,10 @@ benchmarks! {
 
 	// Slash an operator's stake for a service
 	slash {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("operator exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		// Create a service instance for bob
-		let _= Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
 			None,
 			0,
@@ -644,29 +572,16 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 1 }
-		);
+		));
 
 	}: _(RawOrigin::Signed(alice.clone()), bob.clone(), 0, Percent::from_percent(50))
 
 	// Dispute a scheduled slash
 	dispute {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("operator exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(
-			RawOrigin::Signed(bob.clone()).into(),
-			0,
-			operator_preference.clone(),
-			Default::default(),
-			0_u32.into()
-		);
-
-		// Create a service instance and slash bob
-		let _= Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
 			None,
 			0,
@@ -678,30 +593,27 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 1 }
-		);
+		));
 
-		let _= Pallet::<T>::slash(RawOrigin::Signed(alice.clone()).into(), bob.clone(), 0, Percent::from_percent(50));
+		assert_ok!(Pallet::<T>::slash(
+			RawOrigin::Signed(alice.clone()).into(),
+			bob.clone(),
+			0,
+			Percent::from_percent(50)
+		));
 
 	}: _(RawOrigin::Signed(alice.clone()), 0, 0)
 
 	// Update master blueprint service manager
 	update_master_blueprint_service_manager {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
 	}: _(RawOrigin::Root, H160::zero())
 
 	// Join a service as an operator
 	join_service {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("operator exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
-
-		// Create a service instance
-		let _= Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
 			None,
 			0,
@@ -713,29 +625,20 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 1 }
-		);
+		));
 
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+		let charlie = register_operator::<T>(0, 3u8);
 
 	}: _(RawOrigin::Signed(charlie.clone()), 0, vec![get_security_commitment::<T>(USDC.into(), 10)])
 
 	// Leave a service as an operator
 	leave_service {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, operators) = prepare_blueprint_with_operators::<T>(&[2, 3]);
+		let mut iter = operators.clone().into_iter();
+		let bob = iter.next().expect("bob exists");
+		let charlie = iter.next().expect("charlie exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
-
-		let charlie: T::AccountId =  mock_account_id::<T>(3u8);
-		let _= Pallet::<T>::register(RawOrigin::Signed(charlie.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
-
-		// Create a service instance with dynamic membership
-		let _= Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
 			None,
 			0,
@@ -747,18 +650,18 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(3) }
-		);
+		));
 
 	}: _(RawOrigin::Signed(charlie.clone()), 0)
 
 	// Benchmark payment validation for pay-once services
 	validate_payment_amount_pay_once {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
+		let alice = funded_account::<T>(1u8);
 		setup_master_blueprint_manager::<T>();
 		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
 
-		let (_, blueprint) = Pallet::<T>::blueprints(0).unwrap();
+		let (_, blueprint) = Pallet::<T>::blueprints(0).expect("blueprint exists");
 		let amount = 1000_u32.into();
 	}: {
 		let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
@@ -766,17 +669,10 @@ benchmarks! {
 
 	// Benchmark payment processing for subscription services
 	process_subscription_payment {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("operator exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
-
-		// Create a service instance
-		let _= Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
 			None,
 			0,
@@ -788,7 +684,7 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 1 }
-		);
+		));
 
 		let service_id = 0;
 		let job_index = 0;
@@ -814,17 +710,10 @@ benchmarks! {
 
 	// Benchmark event-driven payment processing
 	process_event_driven_payment {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("operator exists");
 
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
-
-		// Create a service instance
-		let _= Pallet::<T>::request(
+		assert_ok!(Pallet::<T>::request(
 			RawOrigin::Signed(alice.clone()).into(),
 			None,
 			0,
@@ -836,7 +725,7 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 1 }
-		);
+		));
 
 		let service_id = 0;
 		let job_index = 0;
@@ -858,19 +747,13 @@ benchmarks! {
 
 	// Benchmark subscription payments processing with on_idle
 	process_subscription_payments_on_idle {
-		let alice: T::AccountId = mock_account_id::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		let _= create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
-
-		let bob: T::AccountId =  mock_account_id::<T>(2u8);
-		let operator_preference = operator_preferences::<T>();
-		let _= Pallet::<T>::register(RawOrigin::Signed(bob.clone()).into(), 0, operator_preference.clone(), Default::default(), 0_u32.into());
+		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+		let bob = operators.pop().expect("operator exists");
 
 		// Create multiple service instances to test batch processing
 		for i in 0..5 {
-			let requester: T::AccountId = mock_account_id::<T>((10 + i) as u8);
-			let _= Pallet::<T>::request(
+			let requester = funded_account::<T>((10 + i) as u8);
+			assert_ok!(Pallet::<T>::request(
 				RawOrigin::Signed(requester).into(),
 				None,
 				0,
@@ -882,7 +765,7 @@ benchmarks! {
 				Asset::Custom(USDC.into()),
 				0_u32.into(),
 				MembershipModel::Fixed { min_operators: 1 }
-			);
+			));
 		}
 
 		let current_block = 100_u32.into();
