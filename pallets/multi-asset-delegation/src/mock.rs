@@ -587,6 +587,14 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	];
 	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_000_u128)));
 
+	// Add mock accounts used in tests (mock_pub_key(1), mock_pub_key(2), etc.)
+	for i in 1..=10 {
+		balances.push((mock_pub_key(i), 1_000_000_000_u128));
+	}
+
+	// Add account with limited balance for insufficient balance tests
+	balances.push((mock_pub_key(99), 200_000_u128));
+
 	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)
 		.unwrap();

@@ -89,11 +89,11 @@ fn join_operator_insufficient_bond() {
 #[test]
 fn join_operator_insufficient_funds() {
 	new_test_ext().execute_with(|| {
-		let bond_amount = 350_000; // User 4 has only 200_000
+		let bond_amount = 350_000;
 
 		assert_noop!(
 			MultiAssetDelegation::join_operators(
-				RuntimeOrigin::signed(mock_pub_key(ALICE)),
+				RuntimeOrigin::signed(mock_pub_key(99)),
 				bond_amount
 			),
 			pallet_balances::Error::<Runtime, _>::InsufficientBalance
@@ -263,18 +263,16 @@ fn operator_bond_more_not_an_operator() {
 fn operator_bond_more_insufficient_balance() {
 	new_test_ext().execute_with(|| {
 		let bond_amount = 10_000;
-		let additional_bond = 1_150_000; // Exceeds available balance
+		let additional_bond = 200_000;
 
-		// Join operator first
 		assert_ok!(MultiAssetDelegation::join_operators(
-			RuntimeOrigin::signed(mock_pub_key(ALICE)),
+			RuntimeOrigin::signed(mock_pub_key(99)),
 			bond_amount
 		));
 
-		// Attempt to stake more with insufficient balance
 		assert_noop!(
 			MultiAssetDelegation::operator_bond_more(
-				RuntimeOrigin::signed(mock_pub_key(ALICE)),
+				RuntimeOrigin::signed(mock_pub_key(99)),
 				additional_bond
 			),
 			pallet_balances::Error::<Runtime>::InsufficientBalance

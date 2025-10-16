@@ -67,7 +67,7 @@ where
 	fn validate(
 		&self,
 		origin: <T as frame_system::Config>::RuntimeOrigin,
-		_call: &<T as frame_system::Config>::RuntimeCall,
+		call: &<T as frame_system::Config>::RuntimeCall,
 		_info: &DispatchInfoOf<<T as frame_system::Config>::RuntimeCall>,
 		_len: usize,
 		_self_implicit: Self::Implicit,
@@ -77,6 +77,28 @@ where
 		(ValidTransaction, Self::Val, <T as frame_system::Config>::RuntimeOrigin),
 		TransactionValidityError,
 	> {
+		use sp_runtime::transaction_validity::InvalidTransaction;
+
+		let who = frame_system::ensure_signed(origin.clone())
+			.map_err(|_| TransactionValidityError::Invalid(InvalidTransaction::BadSigner))?;
+
+		// Helper function to check if account has nominated restaked funds
+		let has_restaked_nominations = |account: &T::AccountId| -> bool {
+			if let Some(delegator) = crate::Pallet::<T>::delegators(account) {
+				delegator.delegations.iter().any(|d| d.is_nomination)
+			} else {
+				false
+			}
+		};
+
+		// Check direct unbond call
+		if let Some(staking_call) = call.is_sub_type() &&
+			matches!(staking_call, pallet_staking::Call::unbond { .. }) &&
+			has_restaked_nominations(&who)
+		{
+			return Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)));
+		}
+
 		Ok((ValidTransaction::default(), (), origin))
 	}
 

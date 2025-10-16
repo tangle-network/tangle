@@ -21,7 +21,6 @@ use tangle_primitives::services::Asset;
 
 const ALICE: u8 = 1;
 const BOB: u8 = 2;
-const CHARLIE: u8 = 3;
 
 #[test]
 fn delegate_should_work() {
@@ -608,8 +607,7 @@ fn delegate_exceeds_max_delegations() {
 			));
 		}
 
-		let operator: AccountId = mock_pub_key(CHARLIE);
-		// Give operator enough balance to join
+		let operator: AccountId = mock_pub_key(100);
 		assert_ok!(Balances::force_set_balance(RuntimeOrigin::root(), operator.clone(), 100_000));
 		assert_ok!(MultiAssetDelegation::join_operators(
 			RuntimeOrigin::signed(operator.clone()),

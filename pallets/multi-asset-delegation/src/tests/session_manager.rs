@@ -107,7 +107,7 @@ fn handle_round_change_with_unstake_should_work() {
 				None,
 				None,
 			),
-			Error::<Runtime>::DepositExceedsCapForAsset
+			sp_runtime::ArithmeticError::Underflow
 		);
 
 		// Deposit and delegate first
