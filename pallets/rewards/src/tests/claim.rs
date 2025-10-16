@@ -138,8 +138,9 @@ fn test_claim_rewards_only_unlocked() {
 			});
 		});
 
-		// Initial balance should be 0
-		assert_eq!(Balances::free_balance(&account), 0);
+		// Initial balance should be 200_000 (from genesis config)
+		let initial_balance = Balances::free_balance(&account);
+		assert_eq!(initial_balance, 200_000);
 
 		// Run to block 1000
 		run_to_block(1000);
@@ -154,10 +155,11 @@ fn test_claim_rewards_only_unlocked() {
 		// Check that rewards were received
 		let balance = Balances::free_balance(&account);
 
-		// Verify approximate expected rewards (19 tokens with some precision loss)
-		let expected_reward = 191 * EIGHTEEN_DECIMALS / 10;
+		// Verify approximate expected rewards (19 tokens with some precision loss + initial
+		// balance)
+		let expected_reward = (191 * EIGHTEEN_DECIMALS / 10) + initial_balance;
 		let diff = balance.abs_diff(expected_reward);
-		println!("diff: {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
+		println!("diff: {diff:?} {}", diff / EIGHTEEN_DECIMALS);
 		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
 }
@@ -527,8 +529,9 @@ fn test_claim_rewards_other() {
 			});
 		});
 
-		// Initial balance should be 0
-		assert_eq!(Balances::free_balance(&account), 0);
+		// Initial balance should be 200_000 (from genesis config)
+		let initial_balance = Balances::free_balance(&account);
+		assert_eq!(initial_balance, 200_000);
 
 		// Run to block 1000
 		run_to_block(1000);
@@ -543,10 +546,11 @@ fn test_claim_rewards_other() {
 		// Check that rewards were received
 		let balance = Balances::free_balance(&account);
 
-		// Verify approximate expected rewards (19 tokens with some precision loss)
-		let expected_reward = 191 * EIGHTEEN_DECIMALS / 10;
+		// Verify approximate expected rewards (19 tokens with some precision loss + initial
+		// balance)
+		let expected_reward = (191 * EIGHTEEN_DECIMALS / 10) + initial_balance;
 		let diff = balance.abs_diff(expected_reward);
-		println!("diff: {:?} {:?}", diff, diff / EIGHTEEN_DECIMALS);
+		println!("diff: {diff:?} {}", diff / EIGHTEEN_DECIMALS);
 		assert!(diff <= 2 * EIGHTEEN_DECIMALS);
 	});
 }

@@ -200,17 +200,21 @@ impl pallet_democracy::Config for Runtime {
 	type MaxBlacklisted = ConstU32<5>;
 	type SubmitOrigin = EnsureSigned<AccountId>;
 }
+parameter_types! {
+	pub MaximumSchedulerWeight: Weight = Weight::from_parts(u64::MAX, u64::MAX);
+}
+
 impl pallet_scheduler::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeOrigin = RuntimeOrigin;
 	type PalletsOrigin = OriginCaller;
 	type RuntimeCall = RuntimeCall;
-	type MaximumWeight = ();
+	type MaximumWeight = MaximumSchedulerWeight;
 	type ScheduleOrigin = EnsureRoot<AccountId>;
-	type MaxScheduledPerBlock = ();
+	type MaxScheduledPerBlock = frame_support::traits::ConstU32<50>;
 	type WeightInfo = ();
 	type OriginPrivilegeCmp = EqualPrivilegeOnly;
-	type Preimages = ();
+	type Preimages = Preimage;
 	type BlockNumberProvider = System;
 }
 
@@ -258,9 +262,12 @@ impl ExtBuilder {
 			.build_storage()
 			.expect("Frame system builds valid default genesis config");
 
-		pallet_balances::GenesisConfig::<Runtime> { balances: self.balances.clone(), dev_accounts: None }
-			.assimilate_storage(&mut t)
-			.expect("Pallet balances storage can be assimilated");
+		pallet_balances::GenesisConfig::<Runtime> {
+			balances: self.balances.clone(),
+			dev_accounts: None,
+		}
+		.assimilate_storage(&mut t)
+		.expect("Pallet balances storage can be assimilated");
 
 		let mut ext = sp_io::TestExternalities::new(t);
 		ext.execute_with(|| {

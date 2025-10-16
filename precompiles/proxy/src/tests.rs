@@ -561,7 +561,12 @@ fn fails_if_called_by_smart_contract() {
 		.build()
 		.execute_with(|| {
 			// Set code to Alice address as it if was a smart contract.
-			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), vec![10u8]);
+			let code = vec![10u8];
+			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), code.clone());
+			pallet_evm::AccountCodesMetadata::<Runtime>::insert(
+				H160::from(Alice),
+				pallet_evm::CodeMetadata::from_code(&code),
+			);
 
 			PrecompilesValue::get()
 				.prepare_test(
@@ -580,18 +585,13 @@ fn fails_if_called_by_smart_contract() {
 #[test]
 fn succeed_if_called_by_precompile() {
 	ExtBuilder::default()
-		.with_balances(vec![(Alice.into(), 1000), (Bob.into(), 1000)])
+		.with_balances(vec![(AddressU64::<2>::get().into(), 1000), (Bob.into(), 1000)])
 		.build()
 		.execute_with(|| {
-			// Set dummy code to Alice address as it if was a precompile.
-			pallet_evm::AccountCodes::<Runtime>::insert(
-				H160::from(Alice),
-				vec![0x60, 0x00, 0x60, 0x00, 0xfd],
-			);
-
+			// AddressU64::<2> is a precompile that's allowed to call Proxy precompile
 			PrecompilesValue::get()
 				.prepare_test(
-					Alice,
+					AddressU64::<2>::get(),
 					Precompile1,
 					PCall::add_proxy {
 						delegate: Address(Bob.into()),
@@ -610,7 +610,12 @@ fn succeed_if_is_proxy_called_by_smart_contract() {
 		.build()
 		.execute_with(|| {
 			// Set code to Alice address as it if was a smart contract.
-			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), vec![10u8]);
+			let code = vec![10u8];
+			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), code.clone());
+			pallet_evm::AccountCodesMetadata::<Runtime>::insert(
+				H160::from(Alice),
+				pallet_evm::CodeMetadata::from_code(&code),
+			);
 
 			PrecompilesValue::get()
 				.prepare_test(
@@ -677,7 +682,12 @@ fn proxy_proxy_should_succeed_if_called_by_smart_contract() {
 		.build()
 		.execute_with(|| {
 			// Set code to Alice address as it if was a smart contract.
-			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), vec![10u8]);
+			let code = vec![10u8];
+			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), code.clone());
+			pallet_evm::AccountCodesMetadata::<Runtime>::insert(
+				H160::from(Alice),
+				pallet_evm::CodeMetadata::from_code(&code),
+			);
 
 			// Bob allows Alice to make calls on his behalf
 			assert_ok!(RuntimeCall::Proxy(ProxyCall::add_proxy {
@@ -741,8 +751,17 @@ fn proxy_proxy_should_fail_if_called_by_smart_contract_for_a_non_eoa_account() {
 		.build()
 		.execute_with(|| {
 			// Set code to Alice & Bob addresses as if they are smart contracts.
-			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), vec![10u8]);
-			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Bob), vec![10u8]);
+			let code = vec![10u8];
+			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Alice), code.clone());
+			pallet_evm::AccountCodesMetadata::<Runtime>::insert(
+				H160::from(Alice),
+				pallet_evm::CodeMetadata::from_code(&code),
+			);
+			pallet_evm::AccountCodes::<Runtime>::insert(H160::from(Bob), code.clone());
+			pallet_evm::AccountCodesMetadata::<Runtime>::insert(
+				H160::from(Bob),
+				pallet_evm::CodeMetadata::from_code(&code),
+			);
 
 			// Bob allows Alice to make calls on his behalf
 			assert_ok!(RuntimeCall::Proxy(ProxyCall::add_proxy {

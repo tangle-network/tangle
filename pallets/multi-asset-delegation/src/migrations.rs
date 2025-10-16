@@ -310,8 +310,8 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 		// Decode the state from pre_upgrade
 		let mut state_cursor = &state[..];
 
-		let pre_count =
-			u32::decode(&mut state_cursor).map_err(|_| DispatchError::Other("Failed to decode pre-migration count"))?;
+		let pre_count = u32::decode(&mut state_cursor)
+			.map_err(|_| DispatchError::Other("Failed to decode pre-migration count"))?;
 
 		// Get the current count
 		let post_count = Delegators::<T>::iter().count() as u32;
@@ -327,8 +327,8 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 		}
 
 		// Verify the sampled accounts still exist
-		let sample_count =
-			u32::decode(&mut state_cursor).map_err(|_| DispatchError::Other("Failed to decode sample count"))?;
+		let sample_count = u32::decode(&mut state_cursor)
+			.map_err(|_| DispatchError::Other("Failed to decode sample count"))?;
 
 		for _ in 0..sample_count {
 			let account_id = <T as frame_system::Config>::AccountId::decode(&mut state_cursor)
@@ -343,8 +343,8 @@ impl<T: Config> OnRuntimeUpgrade for DelegatorMetadataMigration<T> {
 			}
 
 			// Verify the new structure has the expected fields
-			let metadata =
-				Delegators::<T>::get(&account_id).ok_or(DispatchError::Other("Failed to get metadata for account"))?;
+			let metadata = Delegators::<T>::get(&account_id)
+				.ok_or(DispatchError::Other("Failed to get metadata for account"))?;
 
 			// Check that delegations have is_nomination field
 			for delegation in metadata.delegations.iter() {

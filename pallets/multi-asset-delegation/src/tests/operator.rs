@@ -124,9 +124,9 @@ fn schedule_leave_operator_success() {
 
 		// Schedule leave operators without joining
 		assert_noop!(
-			MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::schedule_leave_operators(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::NotAnOperator
 		);
 
@@ -194,9 +194,9 @@ fn cancel_leave_operator_tests() {
 
 		// Test: Cancel leave operators without being in leaving state
 		assert_noop!(
-			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::NotLeavingOperator
 		);
 
@@ -207,9 +207,7 @@ fn cancel_leave_operator_tests() {
 
 		// Test: Cancel leave operators without being an operator
 		assert_noop!(
-			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(
-				mock_pub_key(BOB)
-			)),
+			MultiAssetDelegation::cancel_leave_operators(RuntimeOrigin::signed(mock_pub_key(BOB))),
 			Error::<Runtime>::NotAnOperator
 		);
 	});
@@ -432,9 +430,9 @@ fn execute_operator_unstake_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		// Attempt to execute unstake without being an operator
 		assert_noop!(
-			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::NotAnOperator
 		);
 	});
@@ -453,9 +451,9 @@ fn execute_operator_unstake_no_scheduled_unstake() {
 
 		// Attempt to execute unstake without scheduling it
 		assert_noop!(
-			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::NoScheduledBondLess
 		);
 	});
@@ -481,9 +479,9 @@ fn execute_operator_unstake_request_not_satisfied() {
 
 		// Attempt to execute unstake before request is satisfied
 		assert_noop!(
-			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::execute_operator_unstake(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::BondLessRequestNotSatisfied
 		);
 	});
@@ -528,9 +526,9 @@ fn cancel_operator_unstake_not_an_operator() {
 	new_test_ext().execute_with(|| {
 		// Attempt to cancel unstake without being an operator
 		assert_noop!(
-			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::NotAnOperator
 		);
 	});
@@ -549,9 +547,9 @@ fn cancel_operator_unstake_no_scheduled_unstake() {
 
 		// Attempt to cancel unstake without scheduling it
 		assert_noop!(
-			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(
-				mock_pub_key(ALICE)
-			)),
+			MultiAssetDelegation::cancel_operator_unstake(RuntimeOrigin::signed(mock_pub_key(
+				ALICE
+			))),
 			Error::<Runtime>::NoScheduledBondLess
 		);
 	});

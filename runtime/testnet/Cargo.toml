@@ -336,6 +336,29 @@ evm-tracing = []
 fast-runtime = ["tangle-primitives/fast-runtime"]
 manual-seal = ["tangle-primitives/manual-seal"]
 
+try-runtime = [
+    "frame-support/try-runtime",
+    "frame-executive/try-runtime",
+    "frame-system/try-runtime",
+    "pallet-balances/try-runtime",
+    "pallet-grandpa/try-runtime",
+    "pallet-timestamp/try-runtime",
+    "pallet-vesting/try-runtime",
+    "pallet-assets/try-runtime",
+    "pallet-collective/try-runtime",
+    "pallet-tx-pause/try-runtime",
+    "pallet-staking/try-runtime",
+    "sp-runtime/try-runtime",
+
+    # Frontier
+    "fp-self-contained/try-runtime",
+    "pallet-ethereum/try-runtime",
+    "pallet-evm/try-runtime",
+    "pallet-hotfix-sufficients/try-runtime",
+    # Tangle
+    "pallet-services/try-runtime",
+]
+
 # Enable the metadata hash generation.
 #
 # This is hidden behind a feature because it increases the compile time.

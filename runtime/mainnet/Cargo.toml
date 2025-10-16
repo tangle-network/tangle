@@ -318,6 +318,7 @@ try-runtime = [
     "sp-runtime/try-runtime",
 
     # Frontier
+    "fp-self-contained/try-runtime",
     "pallet-ethereum/try-runtime",
     "pallet-evm/try-runtime",
     "pallet-hotfix-sufficients/try-runtime",

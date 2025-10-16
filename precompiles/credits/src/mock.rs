@@ -576,7 +576,8 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+				balance: sp_core::U256::from(1_000u128) *
+					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 			},
 		);
 	}

@@ -86,11 +86,8 @@ fp-ethereum = { workspace = true }
 fp-rpc = { workspace = true }
 fp-self-contained = { workspace = true }
 fp-storage = { workspace = true }
-pallet-base-fee = { workspace = true }
-pallet-dynamic-fee = { workspace = true }
 pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
-pallet-evm-chain-id = { workspace = true }
 pallet-evm-precompile-blake2 = { workspace = true }
 pallet-evm-precompile-bn128 = { workspace = true }
 pallet-evm-precompile-curve25519 = { workspace = true }
@@ -172,11 +169,8 @@ fuzzing = [
     "fp-rpc",
     "fp-self-contained",
     "fp-storage",
-    "pallet-base-fee",
-    "pallet-dynamic-fee",
     "pallet-ethereum",
     "pallet-evm",
-    "pallet-evm-chain-id",
     "pallet-evm-precompile-blake2",
     "pallet-evm-precompile-bn128",
     "pallet-evm-precompile-curve25519",

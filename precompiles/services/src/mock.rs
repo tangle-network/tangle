@@ -221,7 +221,7 @@ impl pallet_staking::Config for Runtime {
 	type WeightInfo = ();
 	type OldCurrency = Balances;
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type Filter = frame_support::traits::Everything;
+	type Filter = ();
 }
 
 parameter_types! {
@@ -798,7 +798,8 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+				balance: sp_core::U256::from(1_000u128) *
+					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 			},
 		);
 	}
@@ -908,7 +909,9 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				}))
 				.unwrap()
 				.encode_input(&[
-					ethabi::Token::Address(ethabi::ethereum_types::H160::from(H160::from(TestAccount::from(a)).0)),
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from(
+						H160::from(TestAccount::from(a)).0,
+					)),
 					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
 				])
 				.unwrap(),

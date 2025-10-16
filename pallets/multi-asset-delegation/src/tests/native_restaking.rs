@@ -169,15 +169,17 @@ fn unbond_should_fail_if_delegated_nomination() {
 
 		// Try to unbond from the staking pallet - should fail
 		assert_err!(
-			CheckNominatedRestaked::<Runtime>::new().validate(
-				RuntimeOrigin::signed(who.clone()),
-				&call,
-				&DispatchInfo::default(),
-				0,
-				(),
-				&sp_runtime::traits::TxBaseImplication(()),
-				sp_runtime::transaction_validity::TransactionSource::External,
-			).map(|(_, _, _)| ()),
+			CheckNominatedRestaked::<Runtime>::new()
+				.validate(
+					RuntimeOrigin::signed(who.clone()),
+					&call,
+					&DispatchInfo::default(),
+					0,
+					(),
+					&sp_runtime::traits::TxBaseImplication(()),
+					sp_runtime::transaction_validity::TransactionSource::External,
+				)
+				.map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
@@ -693,15 +695,17 @@ fn proxy_unbond_should_fail_if_delegated_nomination() {
 		});
 
 		assert_err!(
-			CheckNominatedRestaked::<Runtime>::new().validate(
-				RuntimeOrigin::signed(proxy.clone()),
-				&proxy_call,
-				&DispatchInfo::default(),
-				0,
-				(),
-				&sp_runtime::traits::TxBaseImplication(()),
-				sp_runtime::transaction_validity::TransactionSource::External,
-			).map(|(_, _, _)| ()),
+			CheckNominatedRestaked::<Runtime>::new()
+				.validate(
+					RuntimeOrigin::signed(proxy.clone()),
+					&proxy_call,
+					&DispatchInfo::default(),
+					0,
+					(),
+					&sp_runtime::traits::TxBaseImplication(()),
+					sp_runtime::transaction_validity::TransactionSource::External,
+				)
+				.map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
@@ -757,15 +761,17 @@ fn batch_unbond_should_fail_if_delegated_nomination() {
 			RuntimeCall::Utility(pallet_utility::Call::batch { calls: vec![unbond_call] });
 
 		assert_err!(
-			CheckNominatedRestaked::<Runtime>::new().validate(
-				RuntimeOrigin::signed(who.clone()),
-				&batch_call,
-				&DispatchInfo::default(),
-				0,
-				(),
-				&sp_runtime::traits::TxBaseImplication(()),
-				sp_runtime::transaction_validity::TransactionSource::External,
-			).map(|(_, _, _)| ()),
+			CheckNominatedRestaked::<Runtime>::new()
+				.validate(
+					RuntimeOrigin::signed(who.clone()),
+					&batch_call,
+					&DispatchInfo::default(),
+					0,
+					(),
+					&sp_runtime::traits::TxBaseImplication(()),
+					sp_runtime::transaction_validity::TransactionSource::External,
+				)
+				.map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 
@@ -835,15 +841,17 @@ fn proxy_batch_unbond_should_fail_if_delegated_nomination() {
 		});
 
 		assert_err!(
-			CheckNominatedRestaked::<Runtime>::new().validate(
-				RuntimeOrigin::signed(proxy.clone()),
-				&proxy_batch_call,
-				&DispatchInfo::default(),
-				0,
-				(),
-				&sp_runtime::traits::TxBaseImplication(()),
-				sp_runtime::transaction_validity::TransactionSource::External,
-			).map(|(_, _, _)| ()),
+			CheckNominatedRestaked::<Runtime>::new()
+				.validate(
+					RuntimeOrigin::signed(proxy.clone()),
+					&proxy_batch_call,
+					&DispatchInfo::default(),
+					0,
+					(),
+					&sp_runtime::traits::TxBaseImplication(()),
+					sp_runtime::transaction_validity::TransactionSource::External,
+				)
+				.map(|(_, _, _)| ()),
 			TransactionValidityError::Invalid(InvalidTransaction::Custom(1))
 		);
 

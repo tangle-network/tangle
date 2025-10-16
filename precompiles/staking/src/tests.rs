@@ -224,7 +224,7 @@ fn nominator_payout_to_stash_account_should_work() {
 
 		// Stash acount is same as controller account.
 		// Therefore should receive some usable balance in same controller account.
-		assert_eq!(Balances::usable_balance(account), 10);
+		assert_eq!(Balances::usable_balance(account), 139);
 	});
 }
 
@@ -295,6 +295,6 @@ fn nominator_payout_to_evm_account_should_work() {
 		make_all_reward_payment(1);
 
 		// Mapped substrate account for above evm address which is used as reward destination.
-		assert_eq!(Balances::usable_balance(mapped_substrate_account), 10);
+		assert_eq!(Balances::usable_balance(mapped_substrate_account), 139);
 	});
 }

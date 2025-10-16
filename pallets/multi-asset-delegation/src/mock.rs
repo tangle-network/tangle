@@ -387,7 +387,7 @@ impl RewardsManager<AccountId, AssetId, Balance, BlockNumber> for MockRewardsMan
 	}
 
 	fn get_asset_deposit_cap_remaining(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
-		Ok(100_000_u32.into())
+		Ok(100_000_000_u128)
 	}
 
 	fn get_asset_incentive_cap(_asset: Asset<AssetId>) -> Result<Balance, Self::Error> {
@@ -576,7 +576,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		AccountKeyring::Bob.into(),
 		AccountKeyring::Charlie.into(),
 	];
-	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 200_000_u128)).collect();
+	let mut balances: Vec<_> =
+		authorities.iter().map(|i| (i.clone(), 1_000_000_000_u128)).collect();
 
 	// Add test accounts with enough balance
 	let test_accounts = vec![
@@ -584,7 +585,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 		AccountKeyring::Eve.into(),
 		MultiAssetDelegation::pallet_account(),
 	];
-	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_u128)));
+	balances.extend(test_accounts.iter().map(|i: &AccountId| (i.clone(), 1_000_000_000_u128)));
 
 	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)

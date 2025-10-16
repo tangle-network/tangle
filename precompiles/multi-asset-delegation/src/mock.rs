@@ -655,6 +655,17 @@ impl ExtBuilder {
 			);
 		}
 
+		evm_accounts.insert(
+			USDC_ERC20,
+			fp_evm::GenesisAccount {
+				code: include_bytes!("../../../pallets/services/src/test-artifacts/MockERC20.bin")
+					.to_vec(),
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Default::default(),
+			},
+		);
+
 		let evm_config =
 			pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
 
@@ -707,11 +718,24 @@ impl ExtBuilder {
 				])
 				.unwrap(),
 				Default::default(),
-				300_000,
+				30_000_000,
 				true,
 				false,
 			);
 
+			match &call {
+				Ok(info) =>
+					if !info.exit_reason.is_succeed() {
+						eprintln!(
+							"EVM initialize call failed with exit reason: {:?}",
+							info.exit_reason
+						);
+						eprintln!("Return value: {:?}", String::from_utf8_lossy(&info.value));
+					},
+				Err(e) => {
+					eprintln!("EVM initialize call error: {:?}", e);
+				},
+			}
 			assert_eq!(call.map(|info| info.exit_reason.is_succeed()).ok(), Some(true));
 			// Mint
 			for i in 1..=accounts.len() {
@@ -746,7 +770,7 @@ impl ExtBuilder {
 					])
 					.unwrap(),
 					Default::default(),
-					300_000,
+					30_000_000,
 					true,
 					false,
 				);

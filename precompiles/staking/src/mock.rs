@@ -386,11 +386,14 @@ impl onchain::Config for OnChainSeqPhragmen {
 const MAX_QUOTA_NOMINATIONS: u32 = 16;
 
 pub struct MockReward {}
-impl frame_support::traits::OnUnbalanced<
-	frame_support::traits::fungible::Debt<AccountId, pallet_balances::Pallet<Runtime>>
-> for MockReward
+impl
+	frame_support::traits::OnUnbalanced<
+		frame_support::traits::fungible::Debt<AccountId, pallet_balances::Pallet<Runtime>>,
+	> for MockReward
 {
-	fn on_unbalanced(_: frame_support::traits::fungible::Debt<AccountId, pallet_balances::Pallet<Runtime>>) {
+	fn on_unbalanced(
+		_: frame_support::traits::fungible::Debt<AccountId, pallet_balances::Pallet<Runtime>>,
+	) {
 		RewardOnUnbalanceWasCalled::set(true);
 	}
 }
@@ -447,7 +450,9 @@ impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for R
 where
 	RuntimeCall: From<LocalCall>,
 {
-	fn create_signed_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+	fn create_signed_transaction<
+		C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>,
+	>(
 		call: RuntimeCall,
 		_public: <Signature as traits::Verify>::Signer,
 		_account: AccountId,
@@ -474,7 +479,7 @@ pub fn new_test_ext(ids: Vec<u8>) -> TestExternalities {
 pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let balances: Vec<_> = authorities.iter().map(|i| (*i, 1_000_000_000u128)).collect();
+	let balances: Vec<_> = authorities.iter().map(|i| (*i, 10_000_000_000u128)).collect();
 
 	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)

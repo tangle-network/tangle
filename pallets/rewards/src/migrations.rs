@@ -84,12 +84,14 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 		use sp_runtime::DispatchError;
 
 		// Ensure we have the same number of entries post-migration
-		let pre_count =
-			u32::decode(&mut &state[..]).map_err(|_| DispatchError::Other("Failed to decode pre-migration count"))?;
+		let pre_count = u32::decode(&mut &state[..])
+			.map_err(|_| DispatchError::Other("Failed to decode pre-migration count"))?;
 		let post_count = RewardConfigStorage::<T>::iter().count() as u32;
 
 		if pre_count != post_count {
-			return Err(DispatchError::Other("Number of reward configurations changed during migration"));
+			return Err(DispatchError::Other(
+				"Number of reward configurations changed during migration",
+			));
 		}
 
 		// Validate all APY values are now proper Perbill values

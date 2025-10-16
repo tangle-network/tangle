@@ -53,11 +53,8 @@ fp-self-contained = { workspace = true }
 fp-storage = { workspace = true }
 
 # Frontier FRAME
-pallet-base-fee = { workspace = true }
-pallet-dynamic-fee = { workspace = true }
 pallet-ethereum = { workspace = true }
 pallet-evm = { workspace = true }
-pallet-evm-chain-id = { workspace = true }
 
 pallet-evm-precompile-blake2 = { workspace = true }
 pallet-evm-precompile-bn128 = { workspace = true }

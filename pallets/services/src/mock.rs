@@ -733,7 +733,8 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+			balance: sp_core::U256::from(1_000u128) *
+				sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 		});
 	}
 
@@ -742,9 +743,17 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+			balance: sp_core::U256::from(1_000u128) *
+				sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 		});
 	}
+
+	evm_accounts.insert(USDC_ERC20, fp_evm::GenesisAccount {
+		code: include_bytes!("test-artifacts/MockERC20.bin").to_vec(),
+		storage: Default::default(),
+		nonce: Default::default(),
+		balance: Default::default(),
+	});
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };
@@ -850,7 +859,9 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 				}))
 				.unwrap()
 				.encode_input(&[
-					ethabi::Token::Address(ethabi::ethereum_types::H160::from(mock_address(i as u8).0)),
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from(
+						mock_address(i as u8).0,
+					)),
 					ethabi::Token::Uint(Uint::from(100_000).mul(Uint::from(10).pow(Uint::from(6)))),
 				])
 				.unwrap(),

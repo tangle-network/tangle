@@ -401,11 +401,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let authorities: Vec<AccountId> = vec![
-		mock_pub_key(1),
-		mock_pub_key(2),
-		mock_pub_key(3),
-	];
+	let authorities: Vec<AccountId> = vec![mock_pub_key(1), mock_pub_key(2), mock_pub_key(3)];
 	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 200_000_u128)).collect();
 
 	// Add test accounts with enough balance
@@ -424,7 +420,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+			balance: sp_core::U256::from(1_000u128) *
+				sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 		});
 	}
 
@@ -433,7 +430,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 			code: vec![],
 			storage: Default::default(),
 			nonce: Default::default(),
-			balance: sp_core::U256::from(1_000u128) * sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+			balance: sp_core::U256::from(1_000u128) *
+				sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 		});
 	}
 

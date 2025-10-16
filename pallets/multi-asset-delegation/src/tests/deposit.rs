@@ -26,8 +26,14 @@ pub fn create_and_mint_tokens(
 	recipient: <Runtime as frame_system::Config>::AccountId,
 	amount: Balance,
 ) {
-	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset, recipient.clone(), false, 1));
-	assert_ok!(Assets::mint(RuntimeOrigin::signed(recipient.clone()), asset, recipient, amount));
+	assert_ok!(Assets::force_create(RuntimeOrigin::root(), asset, recipient.clone(), true, 1));
+	let mint_amount = amount.max(100);
+	assert_ok!(Assets::mint(
+		RuntimeOrigin::signed(recipient.clone()),
+		asset,
+		recipient,
+		mint_amount
+	));
 }
 
 pub fn mint_tokens(
@@ -44,7 +50,7 @@ fn deposit_should_work_for_fungible_asset() {
 	new_test_ext().execute_with(|| {
 		// Arrange
 		let who: AccountId = mock_pub_key(BOB);
-		let amount = 200;
+		let amount = 200_000;
 
 		create_and_mint_tokens(VDOT, who.clone(), amount);
 
