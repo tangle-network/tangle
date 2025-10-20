@@ -80,6 +80,9 @@ pub mod weights;
 pub use weights::*;
 pub mod migrations;
 
+// Re-export key types for easier access
+pub use types::{DelegatorRewardDebt, OperatorRewardPool};
+
 use sp_std::vec::Vec;
 use tangle_primitives::{
 	BlueprintId,
@@ -173,6 +176,22 @@ pub mod pallet {
 		/// The maximum number of pending reward entries an operator can have.
 		#[pallet::constant]
 		type MaxPendingRewardsPerOperator: Get<u32>;
+
+		/// Default commission rate for operators.
+		///
+		/// When an operator receives rewards, this percentage goes directly to them as commission
+		/// for operating the service. The remaining percentage goes to the delegator pool, which
+		/// is shared proportionally among all delegators (including the operator via their self-stake).
+		///
+		/// Example: If set to 15%:
+		/// - Operator receives 15% as direct commission (via claim_rewards)
+		/// - Remaining 85% goes to pool for all delegators (via claim_delegator_rewards)
+		/// - If operator has 60% stake: they get 15% + (60% × 85%) = 66% total
+		/// - Delegators with 40% stake: they get 40% × 85% = 34% total
+		///
+		/// This incentivizes operators to run services while also rewarding delegators fairly.
+		#[pallet::constant]
+		type DefaultOperatorCommission: Get<Perbill>;
 	}
 
 	#[pallet::pallet]
@@ -288,6 +307,43 @@ pub mod pallet {
 		ValueQuery,
 	>;
 
+	/// Pool-based reward accumulator for each operator.
+	///
+	/// This storage enables O(1) reward distribution to delegators regardless of delegator count.
+	/// When a reward is recorded for an operator, only this single storage item is updated:
+	/// `accumulated_rewards_per_share += reward / total_staked`
+	///
+	/// Delegators calculate their owed rewards at claim time by comparing their
+	/// `DelegatorRewardDebt` against this accumulator.
+	#[pallet::storage]
+	#[pallet::getter(fn operator_reward_pools)]
+	pub type OperatorRewardPools<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId, // Operator AccountId
+		OperatorRewardPool<BalanceOf<T>, BlockNumberFor<T>>,
+		ValueQuery,
+	>;
+
+	/// Tracks each delegator's position in their operators' reward pools.
+	///
+	/// This acts as a "checkpoint" or "debt" - the difference between the operator's
+	/// current `accumulated_rewards_per_share` and the delegator's `last_accumulated_per_share`
+	/// determines the rewards earned since last claim.
+	///
+	/// Storage Structure: DelegatorRewardDebts[Delegator][Operator] = RewardDebt
+	#[pallet::storage]
+	#[pallet::getter(fn delegator_reward_debts)]
+	pub type DelegatorRewardDebts<T: Config> = StorageDoubleMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId, // Delegator AccountId
+		Blake2_128Concat,
+		T::AccountId, // Operator AccountId
+		DelegatorRewardDebt<BalanceOf<T>>,
+		OptionQuery,
+	>;
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -347,6 +403,26 @@ pub mod pallet {
 		},
 		/// Operator rewards claimed
 		OperatorRewardsClaimed { operator: T::AccountId, amount: BalanceOf<T> },
+		/// Operator reward pool updated with new rewards
+		OperatorPoolUpdated {
+			operator: T::AccountId,
+			reward_amount: BalanceOf<T>,
+			new_accumulated_per_share: sp_arithmetic::FixedU128,
+			total_staked: BalanceOf<T>,
+		},
+		/// Delegator reward debt initialized (first delegation)
+		DelegatorDebtInitialized {
+			delegator: T::AccountId,
+			operator: T::AccountId,
+			initial_accumulated_per_share: sp_arithmetic::FixedU128,
+			staked_amount: BalanceOf<T>,
+		},
+		/// Delegator rewards claimed
+		DelegatorRewardsClaimed {
+			delegator: T::AccountId,
+			operator: T::AccountId,
+			amount: BalanceOf<T>,
+		},
 	}
 
 	#[pallet::error]
@@ -413,6 +489,10 @@ pub mod pallet {
 		TransferFailed,
 		/// Operator has too many pending rewards.
 		TooManyPendingRewards,
+		/// Delegator has no active delegation with this operator.
+		NoDelegation,
+		/// No rewards available for delegator to claim.
+		NoDelegatorRewards,
 	}
 
 	#[pallet::call]
@@ -692,6 +772,47 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		/// Allows a delegator to claim their share of rewards from an operator's pool.
+		///
+		/// This uses the pool-based reward distribution system which calculates rewards
+		/// based on the difference between the current pool accumulator and the delegator's
+		/// last claim position (debt).
+		///
+		/// # Arguments
+		/// * `origin` - The delegator claiming rewards
+		/// * `operator` - The operator whose reward pool to claim from
+		///
+		/// # Complexity
+		/// O(1) - Constant time regardless of number of delegators or rewards
+		///
+		/// # Errors
+		/// * `NoDelegation` - Delegator has no active delegation with this operator
+		/// * `NoDelegatorRewards` - No rewards available to claim
+		/// * `TransferFailed` - Token transfer failed
+		#[pallet::call_index(11)]
+		#[pallet::weight(T::DbWeight::get().reads_writes(2, 2))]
+		pub fn claim_delegator_rewards(
+			origin: OriginFor<T>,
+			operator: T::AccountId,
+		) -> DispatchResult {
+			let delegator = ensure_signed(origin)?;
+
+			// Calculate and claim rewards using pool-based system
+			let claimed_amount = Self::calculate_and_claim_delegator_rewards(&delegator, &operator)?;
+
+			// Ensure there were rewards to claim
+			ensure!(!claimed_amount.is_zero(), Error::<T>::NoDelegatorRewards);
+
+			// Emit event
+			Self::deposit_event(Event::DelegatorRewardsClaimed {
+				delegator,
+				operator,
+				amount: claimed_amount,
+			});
+
+			Ok(())
+		}
 	}
 
 	impl<T: Config> Pallet<T> {
@@ -710,27 +831,43 @@ pub mod pallet {
 			Self::account_id()
 		}
 
-		/// Record a reward for an operator with automatic aggregation.
+		/// Record a reward for an operator with commission split and delegator distribution.
 		///
-		/// If the operator already has a pending reward for this service,
-		/// the new amount is added to the existing entry (aggregation).
-		/// This prevents BoundedVec overflow while maintaining accurate totals.
+		/// This function implements the economic model where operator rewards are split:
+		/// 1. **Commission** (DefaultOperatorCommission %): Direct payment to operator for running the service
+		/// 2. **Delegator Pool** (Remaining %): Shared proportionally by all delegators including operator
+		///
+		/// # Economic Flow
+		/// If operator receives 850 TNT with 15% commission and has 60% of total stake:
+		/// - Commission: 15% × 850 = 127.5 TNT → Operator claims via claim_rewards()
+		/// - Pool: 85% × 850 = 722.5 TNT → All delegators claim via claim_delegator_rewards()
+		///   - Operator (60% stake): 60% × 722.5 = 433.5 TNT
+		///   - Delegators (40% stake): 40% × 722.5 = 289 TNT
+		/// - Operator total: 127.5 + 433.5 = 561 TNT
+		/// - Delegators total: 289 TNT
+		/// - Sum: 850 TNT ✅
 		///
 		/// # Arguments
 		/// * `operator` - The operator account to receive the reward
 		/// * `service_id` - The service ID this reward is for
-		/// * `amount` - The reward amount to record
+		/// * `amount` - The total reward amount to split
 		/// * `_model` - Pricing model (for future use)
 		///
-		/// # Aggregation Logic
-		/// - If entry exists for (operator, service_id): ADD to existing amount
-		/// - If no entry exists: CREATE new entry
+		/// # Commission Aggregation
+		/// - If entry exists for (operator, service_id): ADD commission to existing amount
+		/// - If no entry exists: CREATE new entry with commission
 		/// - If BoundedVec full AND no matching entry: FAIL with TooManyPendingRewards
 		///
+		/// # Delegator Pool Distribution
+		/// - Updates operator's pool: `accumulated_per_share += pool_share / total_staked`
+		/// - O(1) complexity - single storage write regardless of delegator count
+		/// - Delegators calculate their share at claim time
+		///
 		/// # Security
+		/// - No double-counting: commission + pool = 100% of amount
 		/// - Aggregation is safe: only legitimate payments can add
-		/// - No way to overflow individual amounts (uses saturating_add)
-		/// - Still bounded by MaxPendingRewardsPerOperator unique services
+		/// - No overflow (uses saturating_add)
+		/// - Bounded by MaxPendingRewardsPerOperator unique services
 		fn record_reward(
 			operator: &T::AccountId,
 			service_id: ServiceId,
@@ -742,65 +879,91 @@ pub mod pallet {
 				return Ok(());
 			}
 
+			// Calculate commission split
+			let commission_rate = T::DefaultOperatorCommission::get();
+			let operator_commission = commission_rate.mul_floor(amount);
+			let delegator_pool_share = amount.saturating_sub(operator_commission);
+
+			log::debug!(
+				"Recording reward for operator {:?}: total={:?}, commission={:?} ({}%), pool={:?} ({}%)",
+				operator,
+				amount,
+				operator_commission,
+				commission_rate.deconstruct() as f64 / 10_000_000.0,
+				delegator_pool_share,
+				(Perbill::one().saturating_sub(commission_rate)).deconstruct() as f64 / 10_000_000.0
+			);
+
+			// STEP 1: Record operator's commission (if non-zero)
 			// Try to aggregate with existing entry first
-			PendingOperatorRewards::<T>::try_mutate(operator, |rewards| {
-				// Search for existing entry with same service_id
-				if let Some(existing_entry) = rewards.iter_mut().find(|(sid, _)| *sid == service_id) {
-					// AGGREGATE: Add to existing amount
-					let old_amount = existing_entry.1;
-					existing_entry.1 = existing_entry.1.saturating_add(amount);
+			if !operator_commission.is_zero() {
+				PendingOperatorRewards::<T>::try_mutate(operator, |rewards| -> DispatchResult {
+					// Search for existing entry with same service_id
+					if let Some(existing_entry) = rewards.iter_mut().find(|(sid, _)| *sid == service_id) {
+						// AGGREGATE: Add commission to existing amount
+						let old_amount = existing_entry.1;
+						existing_entry.1 = existing_entry.1.saturating_add(operator_commission);
+
+						log::debug!(
+							"Aggregated commission for operator {:?}, service {}: {:?} + {:?} = {:?}",
+							operator,
+							service_id,
+							old_amount,
+							operator_commission,
+							existing_entry.1
+						);
+
+						// Emit aggregation event
+						Self::deposit_event(Event::RewardAggregated {
+							operator: operator.clone(),
+							service_id,
+							previous_amount: old_amount,
+							added_amount: operator_commission,
+							new_total: existing_entry.1,
+						});
+
+						return Ok(());
+					}
+
+					// No existing entry - try to add new one with commission
+					rewards.try_push((service_id, operator_commission))
+						.map_err(|_| {
+							// BoundedVec is full with unique services
+							log::error!(
+								"Cannot record commission for operator {:?}: {} unique services already pending. \
+								Operator must claim existing rewards before receiving rewards from new services.",
+								operator,
+								rewards.len()
+							);
+							Error::<T>::TooManyPendingRewards
+						})?;
 
 					log::debug!(
-						"Aggregated reward for operator {:?}, service {}: {:?} + {:?} = {:?}",
+						"Recorded new commission for operator {:?}, service {}: {:?} (total entries: {})",
 						operator,
 						service_id,
-						old_amount,
-						amount,
-						existing_entry.1
+						operator_commission,
+						rewards.len()
 					);
 
-					// Emit aggregation event
-					Self::deposit_event(Event::RewardAggregated {
+					// Emit standard recording event
+					Self::deposit_event(Event::RewardRecorded {
 						operator: operator.clone(),
 						service_id,
-						previous_amount: old_amount,
-						added_amount: amount,
-						new_total: existing_entry.1,
+						amount: operator_commission,
 					});
 
-					return Ok(());
-				}
+					Ok(())
+				})?;
+			}
 
-				// No existing entry - try to add new one
-				rewards.try_push((service_id, amount))
-					.map_err(|_| {
-						// BoundedVec is full with unique services
-						log::error!(
-							"Cannot record reward for operator {:?}: {} unique services already pending. \
-							Operator must claim existing rewards before receiving rewards from new services.",
-							operator,
-							rewards.len()
-						);
-						Error::<T>::TooManyPendingRewards
-					})?;
+			// STEP 2: Update operator's pool for delegator distribution
+			// This distributes the remaining (100% - commission%) to all delegators including operator
+			if !delegator_pool_share.is_zero() {
+				Self::record_operator_reward_to_pool(operator, delegator_pool_share)?;
+			}
 
-				log::debug!(
-					"Recorded new reward for operator {:?}, service {}: {:?} (total entries: {})",
-					operator,
-					service_id,
-					amount,
-					rewards.len()
-				);
-
-				// Emit standard recording event
-				Self::deposit_event(Event::RewardRecorded {
-					operator: operator.clone(),
-					service_id,
-					amount,
-				});
-
-				Ok(())
-			})
+			Ok(())
 		}
 	}
 }

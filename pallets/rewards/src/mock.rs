@@ -249,6 +249,7 @@ parameter_types! {
 	pub const MaxApy: Perbill = Perbill::from_percent(20);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
+	pub const DefaultOperatorCommission: Perbill = Perbill::from_percent(15);
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -268,6 +269,7 @@ impl pallet_rewards::Config for Runtime {
 	type MaxVaultLogoLength = ConstU32<256>;
 	type VaultMetadataOrigin = frame_system::EnsureSigned<AccountId>;
 	type MaxPendingRewardsPerOperator = MaxPendingRewardsPerOperator;
+	type DefaultOperatorCommission = DefaultOperatorCommission;
 	type WeightInfo = ();
 }
 
