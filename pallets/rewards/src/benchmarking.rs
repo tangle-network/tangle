@@ -172,6 +172,42 @@ let decay_config = RewardConfig {
 		// Verify that the APY blocks were updated
 		assert_eq!(ApyBlocks::<T>::get(), blocks);
 	}
+
+	claim_delegator_rewards {
+		// Setup operator account
+		let operator: T::AccountId = account("operator", 0, SEED);
+		let operator_balance = BalanceOf::<T>::from(10000u32);
+		T::Currency::make_free_balance_be(&operator, operator_balance);
+
+		// Setup delegator account
+		let delegator: T::AccountId = account("delegator", 1, SEED);
+		let delegator_balance = BalanceOf::<T>::from(10000u32);
+		T::Currency::make_free_balance_be(&delegator, delegator_balance);
+
+		// Simulate operator reward pool with accumulated rewards
+		// Using Asset::Custom(0) for native token
+		let asset = Asset::Custom(T::AssetId::from(0u32));
+		let pool = OperatorRewardPool {
+			asset: asset.clone(),
+			accumulated_rewards_per_share: 1_000_000_000_000_000_000u128, // 1.0 with 10^18 scaling
+			total_stake: BalanceOf::<T>::from(1000u32),
+		};
+		crate::pallet::OperatorRewardPools::<T>::insert(&operator, asset.clone(), pool);
+
+		// Initialize delegator debt to zero (first time claiming)
+		let debt = DelegatorRewardDebt {
+			asset: asset.clone(),
+			last_accumulated_per_share: 0u128,
+		};
+		crate::pallet::DelegatorRewardDebts::<T>::insert(&delegator, &operator, asset.clone(), debt);
+
+	}: _(RawOrigin::Signed(delegator.clone()), operator.clone())
+	verify {
+		// Verify that the debt was updated
+		let updated_debt = crate::pallet::DelegatorRewardDebts::<T>::get(&delegator, &operator, asset);
+		assert!(updated_debt.is_some());
+		assert!(updated_debt.unwrap().last_accumulated_per_share > 0);
+	}
 }
 
 impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(), crate::mock::Runtime);

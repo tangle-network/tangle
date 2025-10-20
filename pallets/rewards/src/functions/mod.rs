@@ -22,6 +22,7 @@ use sp_runtime::{DispatchError, DispatchResult, traits::AccountIdConversion};
 use sp_std::vec::Vec;
 use tangle_primitives::services::Asset;
 
+pub mod delegator_rewards;
 pub mod rewards;
 pub mod services;
 

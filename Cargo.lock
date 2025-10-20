@@ -16351,6 +16351,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+ "sp-arithmetic 26.0.0",
  "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
  "sp-keyring 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
