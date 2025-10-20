@@ -52,12 +52,15 @@ fn create_works() {
 		);
 		assert_eq!(RewardPools::<Runtime>::get(2).unwrap(), RewardPool { ..Default::default() });
 
-		assert_eq!(pool_events_since_last_call(), vec![
-			Event::Created { depositor: 10, pool_id: 1 },
-			Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
-			Event::Created { depositor: 11, pool_id: 2 },
-			Event::Bonded { member: 11, pool_id: 2, bonded: 10, joined: true }
-		]);
+		assert_eq!(
+			pool_events_since_last_call(),
+			vec![
+				Event::Created { depositor: 10, pool_id: 1 },
+				Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
+				Event::Created { depositor: 11, pool_id: 2 },
+				Event::Bonded { member: 11, pool_id: 2, bonded: 10, joined: true }
+			]
+		);
 	});
 }
 

@@ -32,7 +32,10 @@ use api::runtime_types::{
 			BlueprintServiceManager, MasterBlueprintServiceManagerRevision, ServiceBlueprint,
 			ServiceMetadata,
 		},
-		types::{Asset, AssetSecurityRequirement, MembershipModel, MembershipModelType, OperatorPreferences, PricingModel},
+		types::{
+			Asset, AssetSecurityRequirement, MembershipModel, MembershipModelType,
+			OperatorPreferences, PricingModel,
+		},
 	},
 };
 
@@ -92,17 +95,16 @@ where
 			}
 		}
 
+		// Add delay to allow nonce to update and prevent "Transaction is outdated" error
+		tokio::time::sleep(Duration::from_millis(500)).await;
+		let test_inputs = RewardSimulationInputs { provider, subxt, usdc: usdc_addr };
 
-	// Add delay to allow nonce to update and prevent "Transaction is outdated" error
-	tokio::time::sleep(Duration::from_millis(500)).await;
-	let test_inputs = RewardSimulationInputs { provider, subxt, usdc: usdc_addr };
-
-	let result = f(test_inputs).await;
-	if result.is_err() {
-		error!("Reward simulation test failed: {result:?}");
-	}
-	assert!(result.is_ok(), "Reward simulation test failed: {result:?}");
-	result
+		let result = f(test_inputs).await;
+		if result.is_err() {
+			error!("Reward simulation test failed: {result:?}");
+		}
+		assert!(result.is_ok(), "Reward simulation test failed: {result:?}");
+		result
 	});
 }
 
@@ -152,7 +154,9 @@ fn create_payonce_blueprint(payment_amount: u128) -> ServiceBlueprint {
 		jobs: BoundedVec(vec![JobDefinition {
 			metadata: JobMetadata {
 				name: BoundedString(BoundedVec(b"compute".to_vec())),
-				description: Some(BoundedString(BoundedVec(b"Compute job with PayOnce pricing".to_vec()))),
+				description: Some(BoundedString(BoundedVec(
+					b"Compute job with PayOnce pricing".to_vec(),
+				))),
 			},
 			params: BoundedVec(vec![]),
 			result: BoundedVec(vec![]),
@@ -186,7 +190,9 @@ fn create_subscription_blueprint(rate_per_interval: u128, interval: u32) -> Serv
 		jobs: BoundedVec(vec![JobDefinition {
 			metadata: JobMetadata {
 				name: BoundedString(BoundedVec(b"monitor".to_vec())),
-				description: Some(BoundedString(BoundedVec(b"Monitoring job with Subscription pricing".to_vec()))),
+				description: Some(BoundedString(BoundedVec(
+					b"Monitoring job with Subscription pricing".to_vec(),
+				))),
 			},
 			params: BoundedVec(vec![]),
 			result: BoundedVec(vec![]),
@@ -285,9 +291,7 @@ async fn query_pending_rewards(
 	let rewards_key = api::storage().rewards().pending_operator_rewards(&account.account_id());
 	let pending = client.storage().at_latest().await?.fetch(&rewards_key).await?;
 
-	let total = pending
-		.map(|rewards| rewards.0.iter().map(|r| r.1).sum())
-		.unwrap_or(0);
+	let total = pending.map(|rewards| rewards.0.iter().map(|r| r.1).sum()).unwrap_or(0);
 
 	Ok(total)
 }
@@ -319,19 +323,21 @@ async fn verify_claim_succeeds(
 
 	// Step 1: Record balance before
 	let account_query = api::storage().system().account(&claimer.account_id());
-	let balance_before = client.storage().at_latest().await?
-		.fetch(&account_query).await?
-		.map(|a| a.data.free).unwrap_or(0);
+	let balance_before = client
+		.storage()
+		.at_latest()
+		.await?
+		.fetch(&account_query)
+		.await?
+		.map(|a| a.data.free)
+		.unwrap_or(0);
 	info!("{} balance before claim: {} TNT", context, balance_before);
 
 	// Step 2: Record pending rewards before
 	let rewards_key = api::storage().rewards().pending_operator_rewards(&claimer.account_id());
-	let pending_before = client.storage().at_latest().await?
-		.fetch(&rewards_key).await?;
-	let pending_amount_before: u128 = pending_before
-		.as_ref()
-		.map(|r| r.0.iter().map(|r| r.1).sum())
-		.unwrap_or(0);
+	let pending_before = client.storage().at_latest().await?.fetch(&rewards_key).await?;
+	let pending_amount_before: u128 =
+		pending_before.as_ref().map(|r| r.0.iter().map(|r| r.1).sum()).unwrap_or(0);
 
 	assert_eq!(
 		pending_amount_before, expected_amount,
@@ -342,7 +348,8 @@ async fn verify_claim_succeeds(
 
 	// Step 3: Submit claim extrinsic (propagate errors - test MUST fail if this fails)
 	let claim_call = api::tx().rewards().claim_rewards();
-	let mut result = client.tx()
+	let mut result = client
+		.tx()
 		.sign_and_submit_then_watch_default(&claim_call, &claimer.substrate_signer())
 		.await?; // Propagate error - fail test if submission fails
 
@@ -358,16 +365,17 @@ async fn verify_claim_succeeds(
 		}
 	}
 
-	assert!(
-		claim_succeeded,
-		"{} claim extrinsic MUST be included in block",
-		context
-	);
+	assert!(claim_succeeded, "{} claim extrinsic MUST be included in block", context);
 
 	// Step 5: MANDATORY balance verification (ALWAYS runs)
-	let balance_after = client.storage().at_latest().await?
-		.fetch(&account_query).await?
-		.map(|a| a.data.free).unwrap_or(0);
+	let balance_after = client
+		.storage()
+		.at_latest()
+		.await?
+		.fetch(&account_query)
+		.await?
+		.map(|a| a.data.free)
+		.unwrap_or(0);
 	let balance_gained = balance_after.saturating_sub(balance_before);
 
 	assert_eq!(
@@ -375,12 +383,13 @@ async fn verify_claim_succeeds(
 		"{} balance MUST increase by EXACTLY {} TNT (actual increase: {})",
 		context, expected_amount, balance_gained
 	);
-	info!("✅ MANDATORY ASSERTION PASSED: {} balance increased by EXACTLY {} TNT",
-		context, balance_gained);
+	info!(
+		"✅ MANDATORY ASSERTION PASSED: {} balance increased by EXACTLY {} TNT",
+		context, balance_gained
+	);
 
 	// Step 6: Verify pending rewards cleared
-	let pending_after = client.storage().at_latest().await?
-		.fetch(&rewards_key).await?;
+	let pending_after = client.storage().at_latest().await?.fetch(&rewards_key).await?;
 
 	assert!(
 		pending_after.is_none() || pending_after.unwrap().0.is_empty(),
@@ -442,8 +451,12 @@ fn test_payonce_job_complete_reward_flow() {
 				let events = block.wait_for_success().await?;
 				for event in events.iter() {
 					let event = event?;
-					if event.pallet_name() == "Services" && event.variant_name() == "BlueprintCreated" {
-						info!("✅ Blueprint created (ID: {blueprint_id}) with PayOnce job ({payment_amount} TNT)");
+					if event.pallet_name() == "Services" &&
+						event.variant_name() == "BlueprintCreated"
+					{
+						info!(
+							"✅ Blueprint created (ID: {blueprint_id}) with PayOnce job ({payment_amount} TNT)"
+						);
 						break;
 					}
 				}
@@ -474,30 +487,65 @@ fn test_payonce_job_complete_reward_flow() {
 		info!("═══ STEP 4: Recording initial balances ═══");
 
 		let alice_account_query = api::storage().system().account(&alice.account_id());
-		let alice_before = t.subxt.storage().at_latest().await?.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Alice (customer) initial balance: {alice_before} TNT");
 
 		let bob_account_query = api::storage().system().account(&bob.account_id());
-		let bob_before = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Bob (operator) initial balance: {bob_before} TNT");
 
 		let charlie_account_query = api::storage().system().account(&charlie.account_id());
-		let charlie_before = t.subxt.storage().at_latest().await?.fetch(&charlie_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let charlie_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&charlie_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Charlie (developer) initial balance: {charlie_before} TNT");
 
 		let rewards_account = get_rewards_pallet_account(&t.subxt).await?;
 		let rewards_account_query = api::storage().system().account(&rewards_account);
-		let rewards_before = t.subxt.storage().at_latest().await?.fetch(&rewards_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let rewards_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&rewards_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Rewards pallet initial balance: {rewards_before} TNT");
 
 		let treasury_account = get_treasury_account();
 		let treasury_account_query = api::storage().system().account(&treasury_account);
-		let treasury_before = t.subxt.storage().at_latest().await?.fetch(&treasury_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let treasury_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&treasury_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Treasury initial balance: {treasury_before} TNT");
 
 		// STEP 5: Create service request
@@ -531,15 +579,16 @@ fn test_payonce_job_complete_reward_flow() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				match block.wait_for_success().await {
-					Ok(events) => {
+					Ok(events) =>
 						for event in events.iter() {
 							let event = event?;
-							if event.pallet_name() == "Services" && event.variant_name() == "ServiceRequested" {
+							if event.pallet_name() == "Services" &&
+								event.variant_name() == "ServiceRequested"
+							{
 								info!("✅ Service requested (ID: {service_id})");
 								break;
 							}
-						}
-					},
+						},
 					Err(e) => {
 						error!("Service request failed: {e:?}");
 					},
@@ -576,7 +625,7 @@ fn test_payonce_job_complete_reward_flow() {
 		info!("═══ STEP 7: CALLING THE JOB (triggers payment & distribution) ═══");
 		let job_call = api::tx().services().call(
 			service_id,
-			0u8, // job index 0
+			0u8,    // job index 0
 			vec![], // no args for this test job
 		);
 
@@ -587,27 +636,29 @@ fn test_payonce_job_complete_reward_flow() {
 			.await;
 
 		match job_result {
-			Ok(mut events_stream) => {
+			Ok(mut events_stream) =>
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						match block.wait_for_success().await {
-							Ok(events) => {
+							Ok(events) =>
 								for event in events.iter() {
 									let event = event?;
-									if event.pallet_name() == "Services" && event.variant_name() == "JobCalled" {
-										info!("✅✅✅ JOB CALLED SUCCESSFULLY - Payment should be processed!");
+									if event.pallet_name() == "Services" &&
+										event.variant_name() == "JobCalled"
+									{
+										info!(
+											"✅✅✅ JOB CALLED SUCCESSFULLY - Payment should be processed!"
+										);
 										break;
 									}
-								}
-							},
+								},
 							Err(e) => {
 								error!("Job call failed: {e:?}");
 							},
 						}
 						break;
 					}
-				}
-			},
+				},
 			Err(e) => {
 				error!("Job call submission failed: {e:?}");
 			},
@@ -616,13 +667,27 @@ fn test_payonce_job_complete_reward_flow() {
 		// STEP 8: Verify balances after job call
 		info!("═══ STEP 8: Verifying balances after job call ═══");
 
-		let alice_after = t.subxt.storage().at_latest().await?.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let alice_paid = alice_before.saturating_sub(alice_after);
 		info!("Alice paid: {alice_paid} TNT (expected: {payment_amount})");
 
-		let rewards_after = t.subxt.storage().at_latest().await?.fetch(&rewards_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let rewards_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&rewards_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let rewards_received = rewards_after.saturating_sub(rewards_before);
 		info!("Rewards pallet received: {rewards_received} TNT (expected: {payment_amount})");
 
@@ -633,7 +698,9 @@ fn test_payonce_job_complete_reward_flow() {
 			alice_paid >= payment_amount && alice_paid <= expected_payment_with_fees,
 			"Customer should pay exactly {payment_amount} TNT (paid: {alice_paid})"
 		);
-		info!("✅ EXACT ASSERTION PASSED: Customer paid exactly {alice_paid} TNT (expected: {payment_amount})");
+		info!(
+			"✅ EXACT ASSERTION PASSED: Customer paid exactly {alice_paid} TNT (expected: {payment_amount})"
+		);
 
 		// Rewards pallet should receive the full payment amount
 		assert!(
@@ -646,7 +713,8 @@ fn test_payonce_job_complete_reward_flow() {
 		info!("═══ STEP 9: Querying pending rewards ═══");
 
 		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
-		let bob_pending_rewards = t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?;
+		let bob_pending_rewards =
+			t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?;
 
 		// Expected: 85% of payment_amount
 		let expected_operator_reward = payment_amount * 85 / 100;
@@ -660,10 +728,14 @@ fn test_payonce_job_complete_reward_flow() {
 			"Operator should get EXACTLY 85% = {} TNT (got: {})",
 			expected_operator_reward, bob_actual_amount
 		);
-		info!("✅ EXACT ASSERTION PASSED: Bob has EXACTLY {bob_actual_amount} TNT pending (85% of {payment_amount})");
+		info!(
+			"✅ EXACT ASSERTION PASSED: Bob has EXACTLY {bob_actual_amount} TNT pending (85% of {payment_amount})"
+		);
 
-		let charlie_rewards_key = api::storage().rewards().pending_operator_rewards(&charlie.account_id());
-		let charlie_pending_rewards = t.subxt.storage().at_latest().await?.fetch(&charlie_rewards_key).await?;
+		let charlie_rewards_key =
+			api::storage().rewards().pending_operator_rewards(&charlie.account_id());
+		let charlie_pending_rewards =
+			t.subxt.storage().at_latest().await?.fetch(&charlie_rewards_key).await?;
 
 		// Expected: 10% of payment_amount
 		let expected_dev_reward = payment_amount * 10 / 100;
@@ -677,11 +749,20 @@ fn test_payonce_job_complete_reward_flow() {
 			"Developer should get EXACTLY 10% = {} TNT (got: {})",
 			expected_dev_reward, charlie_actual_amount
 		);
-		info!("✅ EXACT ASSERTION PASSED: Charlie (developer) has EXACTLY {charlie_actual_amount} TNT pending (10% of {payment_amount})");
+		info!(
+			"✅ EXACT ASSERTION PASSED: Charlie (developer) has EXACTLY {charlie_actual_amount} TNT pending (10% of {payment_amount})"
+		);
 
 		// Verify treasury received EXACTLY 5%
-		let treasury_after = t.subxt.storage().at_latest().await?.fetch(&treasury_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let treasury_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&treasury_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let treasury_received = treasury_after.saturating_sub(treasury_before);
 		let expected_treasury = payment_amount * 5 / 100;
 
@@ -690,7 +771,9 @@ fn test_payonce_job_complete_reward_flow() {
 			"Treasury should receive EXACTLY 5% = {} TNT (got: {})",
 			expected_treasury, treasury_received
 		);
-		info!("✅ EXACT ASSERTION PASSED: Treasury received EXACTLY {treasury_received} TNT (5% of {payment_amount})");
+		info!(
+			"✅ EXACT ASSERTION PASSED: Treasury received EXACTLY {treasury_received} TNT (5% of {payment_amount})"
+		);
 
 		// STEP 10: Operator (Bob) claims rewards - MANDATORY VERIFICATION
 		info!("═══ STEP 10: Operator claiming rewards (MANDATORY) ═══");
@@ -703,13 +786,33 @@ fn test_payonce_job_complete_reward_flow() {
 		// STEP 12: Final balance verification
 		info!("═══ STEP 12: Final balance verification ═══");
 
-		let bob_final = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
-		let charlie_final = t.subxt.storage().at_latest().await?.fetch(&charlie_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_final = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
+		let charlie_final = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&charlie_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 
-		info!("Bob final balance: {bob_final} TNT (change: {} TNT)", bob_final.saturating_sub(bob_before));
-		info!("Charlie final balance: {charlie_final} TNT (change: {} TNT)", charlie_final.saturating_sub(charlie_before));
+		info!(
+			"Bob final balance: {bob_final} TNT (change: {} TNT)",
+			bob_final.saturating_sub(bob_before)
+		);
+		info!(
+			"Charlie final balance: {charlie_final} TNT (change: {} TNT)",
+			charlie_final.saturating_sub(charlie_before)
+		);
 
 		info!("🎉 PayOnce job reward distribution test completed");
 		info!("📊 Summary:");
@@ -758,7 +861,8 @@ fn test_multi_operator_weighted_distribution() {
 
 		let total_stake = bob_stake + charlie_stake + dave_stake;
 		info!("Total stake: {total_stake} TNT");
-		info!("Proportions - Bob: {}%, Charlie: {}%, Dave: {}%",
+		info!(
+			"Proportions - Bob: {}%, Charlie: {}%, Dave: {}%",
 			bob_stake * 100 / total_stake,
 			charlie_stake * 100 / total_stake,
 			dave_stake * 100 / total_stake
@@ -790,7 +894,8 @@ fn test_multi_operator_weighted_distribution() {
 
 		for operator in [&bob, &charlie, &dave] {
 			let preferences = create_test_operator_preferences(operator);
-			let register_call = api::tx().services().register(blueprint_id, preferences, vec![], 0u128);
+			let register_call =
+				api::tx().services().register(blueprint_id, preferences, vec![], 0u128);
 			let mut result = t
 				.subxt
 				.tx()
@@ -872,15 +977,14 @@ fn test_multi_operator_weighted_distribution() {
 			.await;
 
 		match job_result {
-			Ok(mut events_stream) => {
+			Ok(mut events_stream) =>
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						let _ = block.wait_for_success().await;
 						info!("✅ Job called - payment should be distributed");
 						break;
 					}
-				}
-			},
+				},
 			Err(e) => {
 				info!("Job call result: {e:?}");
 			},
@@ -899,7 +1003,11 @@ fn test_multi_operator_weighted_distribution() {
 
 		info!("Expected rewards:");
 		info!("  - Bob ({}% stake): ~{} TNT", bob_stake * 100 / total_stake, expected_bob);
-		info!("  - Charlie ({}% stake): ~{} TNT", charlie_stake * 100 / total_stake, expected_charlie);
+		info!(
+			"  - Charlie ({}% stake): ~{} TNT",
+			charlie_stake * 100 / total_stake,
+			expected_charlie
+		);
 		info!("  - Dave ({}% stake): ~{} TNT", dave_stake * 100 / total_stake, expected_dave);
 
 		// Query ACTUAL reward amounts from storage and assert EXACT values
@@ -908,20 +1016,21 @@ fn test_multi_operator_weighted_distribution() {
 			(&charlie, expected_charlie, "Charlie"),
 			(&dave, expected_dave, "Dave"),
 		] {
-			let rewards_key = api::storage().rewards().pending_operator_rewards(&operator.account_id());
+			let rewards_key =
+				api::storage().rewards().pending_operator_rewards(&operator.account_id());
 			let pending = t.subxt.storage().at_latest().await?.fetch(&rewards_key).await?;
 
-			let actual_amount: u128 = pending
-				.as_ref()
-				.map(|rewards| rewards.0.iter().map(|r| r.1).sum())
-				.unwrap_or(0);
+			let actual_amount: u128 =
+				pending.as_ref().map(|rewards| rewards.0.iter().map(|r| r.1).sum()).unwrap_or(0);
 
 			assert_eq!(
 				actual_amount, expected,
 				"{name} should get EXACTLY {} TNT (got: {})",
 				expected, actual_amount
 			);
-			info!("✅ EXACT ASSERTION PASSED: {name} has EXACTLY {actual_amount} TNT pending (expected: {expected})");
+			info!(
+				"✅ EXACT ASSERTION PASSED: {name} has EXACTLY {actual_amount} TNT pending (expected: {expected})"
+			);
 		}
 
 		// Verify total distributed is exactly 85% of payment
@@ -931,7 +1040,9 @@ fn test_multi_operator_weighted_distribution() {
 			"Total distributed should be EXACTLY 85% of payment = {} TNT (got: {})",
 			operator_total, total_distributed
 		);
-		info!("✅ EXACT ASSERTION PASSED: Total distributed = {total_distributed} TNT (85% of {payment_amount})");
+		info!(
+			"✅ EXACT ASSERTION PASSED: Total distributed = {total_distributed} TNT (85% of {payment_amount})"
+		);
 
 		info!("🎉 Multi-operator weighted distribution test completed");
 		info!("📊 This test verifies that:");
@@ -1046,8 +1157,15 @@ fn test_subscription_automatic_billing() {
 		info!("Initial block: {initial_block}");
 
 		let bob_account_query = api::storage().system().account(&bob.account_id());
-		let bob_before = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Bob initial balance: {bob_before} TNT");
 
 		// STEP 6: Call subscription job to initiate billing
@@ -1061,15 +1179,14 @@ fn test_subscription_automatic_billing() {
 			.await;
 
 		match job_result {
-			Ok(mut events_stream) => {
+			Ok(mut events_stream) =>
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						let _ = block.wait_for_success().await;
 						info!("✅ Subscription job called - billing should start");
 						break;
 					}
-				}
-			},
+				},
 			Err(e) => {
 				info!("Subscription job call: {e:?}");
 			},
@@ -1090,15 +1207,18 @@ fn test_subscription_automatic_billing() {
 		info!("═══ STEP 8: Querying and verifying accumulated rewards (MANDATORY) ═══");
 
 		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
-		let bob_pending = t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?
-			.expect("Subscription billing MUST create pending rewards - billing did not trigger!");
+		let bob_pending =
+			t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?.expect(
+				"Subscription billing MUST create pending rewards - billing did not trigger!",
+			);
 
 		// Calculate expected billing cycles
 		let expected_cycles = (blocks_elapsed / interval as u64) as u128;
 		assert!(
 			expected_cycles >= 2,
 			"Should have waited for at least 2 billing cycles (waited {} blocks, interval {})",
-			blocks_elapsed, interval
+			blocks_elapsed,
+			interval
 		);
 		info!("✅ Waited for {} billing cycles ({} blocks)", expected_cycles, blocks_elapsed);
 
@@ -1107,10 +1227,13 @@ fn test_subscription_automatic_billing() {
 		assert!(
 			num_entries as u64 >= expected_cycles as u64,
 			"MUST have at least {} reward entries (got: {}). Subscription billing failed!",
-			expected_cycles, num_entries
+			expected_cycles,
+			num_entries
 		);
-		info!("✅ MANDATORY ASSERTION PASSED: {} reward entries created (expected: at least {})",
-			num_entries, expected_cycles);
+		info!(
+			"✅ MANDATORY ASSERTION PASSED: {} reward entries created (expected: at least {})",
+			num_entries, expected_cycles
+		);
 
 		// Calculate and verify total accumulated rewards
 		let total_accumulated: u128 = bob_pending.0.iter().map(|r| r.1).sum();
@@ -1120,10 +1243,15 @@ fn test_subscription_automatic_billing() {
 		assert!(
 			total_accumulated >= expected_min_total,
 			"Accumulated rewards MUST be at least {} TNT (85% × {} cycles × {} rate). Got: {}. Billing calculation broken!",
-			expected_min_total, expected_cycles, rate_per_interval, total_accumulated
+			expected_min_total,
+			expected_cycles,
+			rate_per_interval,
+			total_accumulated
 		);
-		info!("✅ MANDATORY ASSERTION PASSED: {} TNT accumulated (expected: at least {})",
-			total_accumulated, expected_min_total);
+		info!(
+			"✅ MANDATORY ASSERTION PASSED: {} TNT accumulated (expected: at least {})",
+			total_accumulated, expected_min_total
+		);
 
 		info!("🎉 Subscription automatic billing test completed");
 		info!("📊 VERIFIED with mandatory assertions:");
@@ -1174,7 +1302,10 @@ fn test_payment_fails_with_insufficient_balance() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				let _ = block.wait_for_success().await?;
-				info!("✅ Blueprint created with {} TNT payment (more than Alice has)", enormous_payment);
+				info!(
+					"✅ Blueprint created with {} TNT payment (more than Alice has)",
+					enormous_payment
+				);
 				break;
 			}
 		}
@@ -1250,8 +1381,15 @@ fn test_payment_fails_with_insufficient_balance() {
 		// STEP 6: Record balances before
 		info!("═══ STEP 6: Recording balances before job call ═══");
 		let alice_account_query = api::storage().system().account(&alice.account_id());
-		let alice_before = t.subxt.storage().at_latest().await?.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Alice balance: {} TNT (payment requires: {} TNT)", alice_before, enormous_payment);
 
 		// STEP 7: Attempt to call job (should FAIL due to insufficient balance)
@@ -1284,10 +1422,7 @@ fn test_payment_fails_with_insufficient_balance() {
 			},
 		}
 
-		assert!(
-			call_failed,
-			"Job call MUST fail when customer has insufficient balance"
-		);
+		assert!(call_failed, "Job call MUST fail when customer has insufficient balance");
 
 		// STEP 8: Verify no rewards were distributed
 		info!("═══ STEP 8: Verifying no rewards distributed ═══");
@@ -1300,8 +1435,15 @@ fn test_payment_fails_with_insufficient_balance() {
 		info!("✅ VERIFIED: No rewards distributed for failed payment");
 
 		// STEP 9: Verify customer balance unchanged (minus tx fees)
-		let alice_after = t.subxt.storage().at_latest().await?.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let alice_paid = alice_before.saturating_sub(alice_after);
 
 		assert!(
@@ -1309,8 +1451,10 @@ fn test_payment_fails_with_insufficient_balance() {
 			"Customer balance should only decrease by tx fees, not {} TNT payment",
 			enormous_payment
 		);
-		info!("✅ VERIFIED: Customer only paid tx fees ({} TNT), not {} TNT payment",
-			alice_paid, enormous_payment);
+		info!(
+			"✅ VERIFIED: Customer only paid tx fees ({} TNT), not {} TNT payment",
+			alice_paid, enormous_payment
+		);
 
 		info!("🎉 Negative test completed: Insufficient balance properly rejected");
 		anyhow::Ok(())
@@ -1436,15 +1580,32 @@ fn test_claim_rewards_twice_fails() {
 		let expected_operator_reward = payment_amount * 85 / 100;
 
 		let bob_account_query = api::storage().system().account(&bob.account_id());
-		let bob_before_first_claim = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_before_first_claim = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 
-		verify_claim_succeeds(&t.subxt, &bob, expected_operator_reward, "Operator (first claim)").await?;
+		verify_claim_succeeds(&t.subxt, &bob, expected_operator_reward, "Operator (first claim)")
+			.await?;
 
-		let bob_after_first_claim = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
-		info!("✅ First claim succeeded, balance increased by {} TNT",
-			bob_after_first_claim.saturating_sub(bob_before_first_claim));
+		let bob_after_first_claim = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
+		info!(
+			"✅ First claim succeeded, balance increased by {} TNT",
+			bob_after_first_claim.saturating_sub(bob_before_first_claim)
+		);
 
 		// STEP 9: Second claim attempt (should FAIL or return 0)
 		info!("═══ STEP 9: Second claim attempt (should FAIL or return 0) ═══");
@@ -1475,17 +1636,27 @@ fn test_claim_rewards_twice_fails() {
 		}
 
 		// STEP 10: Verify balance did NOT double
-		let bob_after_second_claim = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_after_second_claim = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let second_claim_gained = bob_after_second_claim.saturating_sub(bob_before_second_claim);
 
 		assert!(
 			second_claim_gained < expected_operator_reward / 100, // Should be ~0 (just tx fees)
 			"Second claim MUST NOT increase balance significantly (gained: {}, original reward: {})",
-			second_claim_gained, expected_operator_reward
+			second_claim_gained,
+			expected_operator_reward
 		);
-		info!("✅ VERIFIED: Second claim did NOT increase balance (gained only {} TNT in tx fees)",
-			second_claim_gained);
+		info!(
+			"✅ VERIFIED: Second claim did NOT increase balance (gained only {} TNT in tx fees)",
+			second_claim_gained
+		);
 
 		// STEP 11: Verify pending rewards still empty
 		let bob_pending_after = query_pending_rewards(&t.subxt, &bob).await?;
@@ -1630,10 +1801,7 @@ fn test_unauthorized_job_call_fails() {
 			},
 		}
 
-		assert!(
-			call_failed,
-			"Unauthorized job call MUST fail - authorization check broken!"
-		);
+		assert!(call_failed, "Unauthorized job call MUST fail - authorization check broken!");
 
 		// STEP 8: Verify no rewards distributed
 		info!("═══ STEP 8: Verifying no rewards distributed from unauthorized call ═══");
@@ -1775,28 +1943,48 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		info!("═══ STEP 5B: Recording initial balances for rigorous flow verification ═══");
 
 		let alice_account_query = api::storage().system().account(&alice.account_id());
-		let alice_before = t.subxt.storage().at_latest().await?
-			.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Alice (customer) initial balance: {} TNT", alice_before);
 
 		let rewards_account = get_rewards_pallet_account(&t.subxt).await?;
 		let rewards_account_query = api::storage().system().account(&rewards_account);
-		let rewards_before = t.subxt.storage().at_latest().await?
-			.fetch(&rewards_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let rewards_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&rewards_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Rewards pallet initial balance: {} TNT", rewards_before);
 
 		let treasury_account = get_treasury_account();
 		let treasury_account_query = api::storage().system().account(&treasury_account);
-		let treasury_before = t.subxt.storage().at_latest().await?
-			.fetch(&treasury_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let treasury_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&treasury_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Treasury initial balance: {} TNT", treasury_before);
 
 		// STEP 6: STRESS TEST - Call job 50 TIMES on the SAME service
 		info!("═══ STEP 6: STRESS TEST - Calling job 50 times ═══");
-		info!("⚠️  WITHOUT aggregation: This would create 50 storage entries → BoundedVec OVERFLOW");
+		info!(
+			"⚠️  WITHOUT aggregation: This would create 50 storage entries → BoundedVec OVERFLOW"
+		);
 		info!("✅ WITH aggregation: All 50 should collapse into 1 entry");
 
 		let num_jobs = 50u32;
@@ -1823,15 +2011,27 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		// STEP 6B: RIGOROUS balance flow verification (customer → rewards pallet)
 		info!("═══ STEP 6B: Verifying payment flow (customer → rewards pallet) ═══");
 
-		let alice_after = t.subxt.storage().at_latest().await?
-			.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let alice_paid = alice_before.saturating_sub(alice_after);
 		info!("Alice paid: {} TNT for {} jobs", alice_paid, num_jobs);
 
-		let rewards_after = t.subxt.storage().at_latest().await?
-			.fetch(&rewards_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let rewards_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&rewards_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let rewards_received = rewards_after.saturating_sub(rewards_before);
 		info!("Rewards pallet received: {} TNT", rewards_received);
 
@@ -1842,15 +2042,19 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		assert!(
 			alice_paid >= total_payment_expected && alice_paid <= payment_with_fees,
 			"🚨 PAYMENT FLOW ERROR: Alice should pay {} TNT (got: {})",
-			total_payment_expected, alice_paid
+			total_payment_expected,
+			alice_paid
 		);
-		info!("✅ RIGOROUS CHECK PASSED: Customer paid {} TNT (expected: {} + fees)",
-			alice_paid, total_payment_expected);
+		info!(
+			"✅ RIGOROUS CHECK PASSED: Customer paid {} TNT (expected: {} + fees)",
+			alice_paid, total_payment_expected
+		);
 
 		assert!(
 			rewards_received >= total_payment_expected * 99 / 100,
 			"🚨 PAYMENT FLOW ERROR: Rewards pallet should receive ~{} TNT (got: {})",
-			total_payment_expected, rewards_received
+			total_payment_expected,
+			rewards_received
 		);
 		info!("✅ RIGOROUS CHECK PASSED: Rewards pallet received {} TNT", rewards_received);
 
@@ -1858,8 +2062,13 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		info!("═══ STEP 7: Querying REAL pallet-rewards storage (CRITICAL CHECK) ═══");
 
 		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
-		let bob_pending_rewards = t.subxt.storage().at_latest().await?
-			.fetch(&bob_rewards_key).await?
+		let bob_pending_rewards = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_rewards_key)
+			.await?
 			.expect("Operator MUST have pending rewards after 50 jobs");
 
 		// CRITICAL ASSERTION: Number of storage entries
@@ -1886,14 +2095,21 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 			"Total accumulated MUST equal sum of all {} jobs × {} TNT = {} TNT (got: {})",
 			num_jobs, expected_per_job, expected_total, total_accumulated
 		);
-		info!("✅ EXACT ASSERTION PASSED: Total = {} TNT (50 jobs × {} TNT aggregated)",
-			total_accumulated, expected_per_job);
+		info!(
+			"✅ EXACT ASSERTION PASSED: Total = {} TNT (50 jobs × {} TNT aggregated)",
+			total_accumulated, expected_per_job
+		);
 
 		// STEP 9: RIGOROUS treasury balance verification (5% of ALL 50 jobs)
 		info!("═══ STEP 9: Verifying treasury received 5% of payment ═══");
 
-		let treasury_after = t.subxt.storage().at_latest().await?
-			.fetch(&treasury_account_query).await?
+		let treasury_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&treasury_account_query)
+			.await?
 			.map(|a| a.data.free)
 			.unwrap_or(0);
 		let treasury_received = treasury_after.saturating_sub(treasury_before);
@@ -1901,22 +2117,29 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		let expected_treasury_per_job = payment_amount * 5 / 100;
 		let expected_treasury_total = expected_treasury_per_job * num_jobs as u128;
 
-		info!("Treasury received: {} TNT (expected: {} TNT from {} jobs)",
-			treasury_received, expected_treasury_total, num_jobs);
+		info!(
+			"Treasury received: {} TNT (expected: {} TNT from {} jobs)",
+			treasury_received, expected_treasury_total, num_jobs
+		);
 
 		// RIGOROUS ASSERTION: Treasury must receive exactly 5% of all payments
 		assert!(
 			treasury_received >= expected_treasury_total * 99 / 100 &&
-			treasury_received <= expected_treasury_total * 101 / 100,
+				treasury_received <= expected_treasury_total * 101 / 100,
 			"🚨 TREASURY ERROR: Expected {} TNT (5% of {}), got {}",
-			expected_treasury_total, total_payment_expected, treasury_received
+			expected_treasury_total,
+			total_payment_expected,
+			treasury_received
 		);
-		info!("✅ RIGOROUS CHECK PASSED: Treasury received {} TNT (5% of all payments)",
-			treasury_received);
+		info!(
+			"✅ RIGOROUS CHECK PASSED: Treasury received {} TNT (5% of all payments)",
+			treasury_received
+		);
 
 		// STEP 10: Claim aggregated rewards to verify everything works
 		info!("═══ STEP 10: Claiming aggregated rewards (MANDATORY VERIFICATION) ═══");
-		verify_claim_succeeds(&t.subxt, &bob, expected_total, "Operator (aggregated 50 jobs)").await?;
+		verify_claim_succeeds(&t.subxt, &bob, expected_total, "Operator (aggregated 50 jobs)")
+			.await?;
 
 		info!("🎉 AUTO-AGGREGATION E2E STRESS TEST COMPLETED");
 		info!("📊 VERIFIED with REAL pallet-rewards storage:");
@@ -2053,16 +2276,28 @@ fn test_aggregation_across_multiple_services_e2e() {
 		info!("═══ STEP 4B: Recording initial balances ═══");
 
 		let alice_account_query = api::storage().system().account(&alice.account_id());
-		let alice_before = t.subxt.storage().at_latest().await?
-			.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Alice (customer) initial balance: {} TNT", alice_before);
 
 		let rewards_account = get_rewards_pallet_account(&t.subxt).await?;
 		let rewards_account_query = api::storage().system().account(&rewards_account);
-		let rewards_before = t.subxt.storage().at_latest().await?
-			.fetch(&rewards_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let rewards_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&rewards_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Rewards pallet initial balance: {} TNT", rewards_before);
 
 		// STEP 5: Call jobs multiple times on EACH service
@@ -2097,14 +2332,26 @@ fn test_aggregation_across_multiple_services_e2e() {
 		// STEP 5B: RIGOROUS balance flow verification
 		info!("═══ STEP 5B: Verifying payment flow (customer → rewards pallet) ═══");
 
-		let alice_after = t.subxt.storage().at_latest().await?
-			.fetch(&alice_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let alice_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&alice_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let alice_paid = alice_before.saturating_sub(alice_after);
 
-		let rewards_after = t.subxt.storage().at_latest().await?
-			.fetch(&rewards_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let rewards_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&rewards_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let rewards_received = rewards_after.saturating_sub(rewards_before);
 
 		let total_payment_expected = payment_amount * total_jobs as u128;
@@ -2113,15 +2360,19 @@ fn test_aggregation_across_multiple_services_e2e() {
 		assert!(
 			alice_paid >= total_payment_expected && alice_paid <= payment_with_fees,
 			"🚨 PAYMENT FLOW ERROR: Alice should pay {} TNT, got {}",
-			total_payment_expected, alice_paid
+			total_payment_expected,
+			alice_paid
 		);
-		info!("✅ RIGOROUS CHECK: Customer paid {} TNT ({} jobs × {})",
-			alice_paid, total_jobs, payment_amount);
+		info!(
+			"✅ RIGOROUS CHECK: Customer paid {} TNT ({} jobs × {})",
+			alice_paid, total_jobs, payment_amount
+		);
 
 		assert!(
 			rewards_received >= total_payment_expected * 99 / 100,
 			"🚨 PAYMENT FLOW ERROR: Rewards pallet should receive ~{} TNT, got {}",
-			total_payment_expected, rewards_received
+			total_payment_expected,
+			rewards_received
 		);
 		info!("✅ RIGOROUS CHECK: Rewards pallet received {} TNT", rewards_received);
 
@@ -2129,8 +2380,13 @@ fn test_aggregation_across_multiple_services_e2e() {
 		info!("═══ STEP 6: Querying REAL storage (CRITICAL MULTI-SERVICE CHECK) ═══");
 
 		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
-		let bob_pending_rewards = t.subxt.storage().at_latest().await?
-			.fetch(&bob_rewards_key).await?
+		let bob_pending_rewards = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_rewards_key)
+			.await?
 			.expect("Operator MUST have pending rewards");
 
 		// CRITICAL ASSERTION: Should have exactly 3 entries (one per service)
@@ -2142,8 +2398,10 @@ fn test_aggregation_across_multiple_services_e2e() {
 			WITH aggregation: {} entries (one per service_id).",
 			num_services, num_entries, total_jobs, num_services
 		);
-		info!("✅ ✅ CRITICAL ASSERTION PASSED: {} entries for {} services (aggregated per service_id)",
-			num_entries, num_services);
+		info!(
+			"✅ ✅ CRITICAL ASSERTION PASSED: {} entries for {} services (aggregated per service_id)",
+			num_entries, num_services
+		);
 		info!("    WITHOUT aggregation: {} entries", total_jobs);
 		info!("    WITH aggregation: {} entries", num_entries);
 
@@ -2156,7 +2414,9 @@ fn test_aggregation_across_multiple_services_e2e() {
 			let expected_amount = expected_per_job * num_jobs as u128;
 
 			// Find reward entry for this service
-			let reward_entry = bob_pending_rewards.0.iter()
+			let reward_entry = bob_pending_rewards
+				.0
+				.iter()
 				.find(|r| r.0 == service_id)
 				.expect(&format!("Should have reward entry for service {}", service_id));
 
@@ -2165,8 +2425,10 @@ fn test_aggregation_across_multiple_services_e2e() {
 				"Service {} should have {} TNT ({} jobs × {}), got {}",
 				service_id, expected_amount, num_jobs, expected_per_job, reward_entry.1
 			);
-			info!("  ✓ Service {}: {} TNT ({} jobs aggregated)",
-				service_id, reward_entry.1, num_jobs);
+			info!(
+				"  ✓ Service {}: {} TNT ({} jobs aggregated)",
+				service_id, reward_entry.1, num_jobs
+			);
 		}
 
 		// STEP 8: Verify total
@@ -2178,13 +2440,17 @@ fn test_aggregation_across_multiple_services_e2e() {
 			"Total should be {} TNT ({} jobs total), got {}",
 			expected_total, total_jobs, total_accumulated
 		);
-		info!("✅ Total accumulated: {} TNT ({} jobs across {} services)",
-			total_accumulated, total_jobs, num_services);
+		info!(
+			"✅ Total accumulated: {} TNT ({} jobs across {} services)",
+			total_accumulated, total_jobs, num_services
+		);
 
 		info!("🎉 MULTI-SERVICE AGGREGATION E2E TEST COMPLETED");
 		info!("📊 VERIFIED with REAL storage:");
-		info!("  ✅ {} services with 10+15+20 jobs = {} entries (NOT {} entries!)",
-			num_services, num_entries, total_jobs);
+		info!(
+			"  ✅ {} services with 10+15+20 jobs = {} entries (NOT {} entries!)",
+			num_services, num_entries, total_jobs
+		);
 		info!("  ✅ Each service has correct aggregated amount");
 		info!("  ✅ Aggregation works per service_id as designed");
 
@@ -2234,8 +2500,10 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				let _ = block.wait_for_success().await?;
-				info!("✅ Subscription blueprint created (rate: {} TNT per {} blocks)",
-					rate_per_interval, interval);
+				info!(
+					"✅ Subscription blueprint created (rate: {} TNT per {} blocks)",
+					rate_per_interval, interval
+				);
 				break;
 			}
 		}
@@ -2260,7 +2528,10 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 		// STEP 4: Create MULTIPLE subscription services (stress test)
 		info!("═══ STEP 4: Creating MULTIPLE subscription services ═══");
 		let num_subscriptions = 10usize; // Create 10 subscriptions to stress test cursor
-		info!("Creating {} subscription services to stress test cursor mechanism...", num_subscriptions);
+		info!(
+			"Creating {} subscription services to stress test cursor mechanism...",
+			num_subscriptions
+		);
 
 		let security_requirements = vec![AssetSecurityRequirement {
 			asset: Asset::Custom(0u128),
@@ -2346,8 +2617,8 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 		info!("Initial block: {}", initial_block);
 
 		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
-		let bob_pending_initial = t.subxt.storage().at_latest().await?
-			.fetch(&bob_rewards_key).await?;
+		let bob_pending_initial =
+			t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?;
 		let initial_entries = bob_pending_initial.as_ref().map(|r| r.0.len()).unwrap_or(0);
 		info!("Initial pending reward entries: {}", initial_entries);
 
@@ -2367,23 +2638,34 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 		// STEP 8: Verify subscriptions were processed via on_idle
 		info!("═══ STEP 8: Verifying subscription processing (CRITICAL CURSOR CHECK) ═══");
 
-		let bob_pending_after = t.subxt.storage().at_latest().await?
-			.fetch(&bob_rewards_key).await?
+		let bob_pending_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_rewards_key)
+			.await?
 			.expect("Operator MUST have pending rewards after subscription billing");
 
 		// Count number of reward entries
 		let num_entries = bob_pending_after.0.len();
-		info!("Pending reward entries after billing: {} (initial: {})", num_entries, initial_entries);
+		info!(
+			"Pending reward entries after billing: {} (initial: {})",
+			num_entries, initial_entries
+		);
 
 		// With aggregation, should have one entry per service
 		assert!(
 			num_entries >= num_subscriptions,
 			"Should have at least {} reward entries (one per subscription service), got {}.
 			Cursor mechanism may have failed to process all subscriptions!",
-			num_subscriptions, num_entries
+			num_subscriptions,
+			num_entries
 		);
-		info!("✅ CURSOR ASSERTION PASSED: {} reward entries for {} subscriptions",
-			num_entries, num_subscriptions);
+		info!(
+			"✅ CURSOR ASSERTION PASSED: {} reward entries for {} subscriptions",
+			num_entries, num_subscriptions
+		);
 
 		// STEP 9: Verify reward amounts are correct
 		info!("═══ STEP 9: Verifying reward amounts ═══");
@@ -2399,8 +2681,10 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 			Billing may not have processed all subscriptions!",
 			expected_min_total, num_subscriptions, expected_cycles, expected_per_service, total_accumulated
 		);
-		info!("✅ AMOUNT ASSERTION PASSED: {} TNT accumulated (expected: at least {})",
-			total_accumulated, expected_min_total);
+		info!(
+			"✅ AMOUNT ASSERTION PASSED: {} TNT accumulated (expected: at least {})",
+			total_accumulated, expected_min_total
+		);
 
 		// STEP 10: Verify each service has rewards (cursor processed all)
 		info!("═══ STEP 10: Verifying ALL subscriptions were processed ═══");
@@ -2417,8 +2701,10 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 			Cursor mechanism failed to process all subscriptions!",
 			num_subscriptions, services_with_rewards
 		);
-		info!("✅ ALL-PROCESSED ASSERTION PASSED: {}/{} subscriptions have rewards",
-			services_with_rewards, num_subscriptions);
+		info!(
+			"✅ ALL-PROCESSED ASSERTION PASSED: {}/{} subscriptions have rewards",
+			services_with_rewards, num_subscriptions
+		);
 
 		info!("🎉 SUBSCRIPTION CURSOR E2E STRESS TEST COMPLETED");
 		info!("📊 VERIFIED with REAL subscription processing:");
@@ -2500,7 +2786,10 @@ fn test_delegator_rewards_with_commission_split() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				let _ = block.wait_for_success().await?;
-				info!("✅ Blueprint created (ID: {}) with {} TNT payment", blueprint_id, payment_amount);
+				info!(
+					"✅ Blueprint created (ID: {}) with {} TNT payment",
+					blueprint_id, payment_amount
+				);
 				break;
 			}
 		}
@@ -2528,18 +2817,39 @@ fn test_delegator_rewards_with_commission_split() {
 		info!("═══ STEP 5: Recording initial balances ═══");
 
 		let bob_account_query = api::storage().system().account(&bob.account_id());
-		let bob_balance_before = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_balance_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Bob (operator) initial balance: {} TNT", bob_balance_before);
 
 		let charlie_account_query = api::storage().system().account(&charlie.account_id());
-		let charlie_balance_before = t.subxt.storage().at_latest().await?.fetch(&charlie_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let charlie_balance_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&charlie_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Charlie (delegator) initial balance: {} TNT", charlie_balance_before);
 
 		let dave_account_query = api::storage().system().account(&dave.account_id());
-		let dave_balance_before = t.subxt.storage().at_latest().await?.fetch(&dave_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let dave_balance_before = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&dave_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		info!("Dave (developer) initial balance: {} TNT", dave_balance_before);
 
 		// STEP 6: Create and approve service
@@ -2609,18 +2919,23 @@ fn test_delegator_rewards_with_commission_split() {
 			if let TxStatus::InBestBlock(block) = status {
 				match block.wait_for_success().await {
 					Ok(_) => {
-						info!("✅ Job called successfully - payment of {} TNT triggered", payment_amount);
+						info!(
+							"✅ Job called successfully - payment of {} TNT triggered",
+							payment_amount
+						);
 					},
 					Err(e) => {
 						error!("Job call failed: {:?}", e);
-					}
+					},
 				}
 				break;
 			}
 		}
 
 		// STEP 8: Verify payment distribution
-		info!("═══ STEP 8: Verifying payment distribution (85% operator, 10% dev, 5% treasury) ═══");
+		info!(
+			"═══ STEP 8: Verifying payment distribution (85% operator, 10% dev, 5% treasury) ═══"
+		);
 
 		// Expected distribution from 100,000 TNT payment:
 		// - Operator (Bob): 85% = 85,000 TNT
@@ -2634,7 +2949,13 @@ fn test_delegator_rewards_with_commission_split() {
 		// STEP 9: Verify Bob's commission rewards
 		info!("═══ STEP 9: Verifying Bob's commission rewards ═══");
 		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
-		let bob_pending_commission = t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?
+		let bob_pending_commission = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_rewards_key)
+			.await?
 			.unwrap_or(BoundedVec(vec![]));
 
 		let bob_commission_total: u128 = bob_pending_commission.0.iter().map(|r| r.1).sum();
@@ -2643,12 +2964,16 @@ fn test_delegator_rewards_with_commission_split() {
 		// Commission should be 15% of 85,000 = 12,750 TNT
 		let expected_commission = 12_750u128;
 		assert!(
-			bob_commission_total >= expected_commission - 100 && bob_commission_total <= expected_commission + 100,
+			bob_commission_total >= expected_commission - 100 &&
+				bob_commission_total <= expected_commission + 100,
 			"Bob's commission should be ~{} TNT, got {}",
 			expected_commission,
 			bob_commission_total
 		);
-		info!("✅ Bob's commission verified: {} TNT (expected ~{})", bob_commission_total, expected_commission);
+		info!(
+			"✅ Bob's commission verified: {} TNT (expected ~{})",
+			bob_commission_total, expected_commission
+		);
 
 		// STEP 10: Bob claims commission
 		info!("═══ STEP 10: Bob claims commission ═══");
@@ -2668,9 +2993,17 @@ fn test_delegator_rewards_with_commission_split() {
 		}
 
 		// Verify Bob's balance increased by commission
-		let bob_balance_after_commission = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
-		let bob_commission_received = bob_balance_after_commission.saturating_sub(bob_balance_before);
+		let bob_balance_after_commission = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
+		let bob_commission_received =
+			bob_balance_after_commission.saturating_sub(bob_balance_before);
 		info!("Bob received commission: {} TNT", bob_commission_received);
 
 		// STEP 11: Bob claims delegator rewards (his pool share)
@@ -2691,25 +3024,38 @@ fn test_delegator_rewards_with_commission_split() {
 		}
 
 		// Verify Bob's balance increased by pool share
-		let bob_balance_after_pool = t.subxt.storage().at_latest().await?.fetch(&bob_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let bob_balance_after_pool = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&bob_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let bob_pool_received = bob_balance_after_pool.saturating_sub(bob_balance_after_commission);
 		info!("Bob received pool share: {} TNT", bob_pool_received);
 
 		// Bob's pool share should be 60% of 72,250 = 43,350 TNT
 		let expected_bob_pool = 43_350u128;
 		assert!(
-			bob_pool_received >= expected_bob_pool - 100 && bob_pool_received <= expected_bob_pool + 100,
+			bob_pool_received >= expected_bob_pool - 100 &&
+				bob_pool_received <= expected_bob_pool + 100,
 			"Bob's pool share should be ~{} TNT, got {}",
 			expected_bob_pool,
 			bob_pool_received
 		);
-		info!("✅ Bob's pool share verified: {} TNT (expected ~{})", bob_pool_received, expected_bob_pool);
+		info!(
+			"✅ Bob's pool share verified: {} TNT (expected ~{})",
+			bob_pool_received, expected_bob_pool
+		);
 
 		// Total Bob earnings: commission + pool
 		let bob_total_earnings = bob_commission_received + bob_pool_received;
-		info!("📊 Bob's total earnings: {} TNT (commission: {}, pool: {})",
-			bob_total_earnings, bob_commission_received, bob_pool_received);
+		info!(
+			"📊 Bob's total earnings: {} TNT (commission: {}, pool: {})",
+			bob_total_earnings, bob_commission_received, bob_pool_received
+		);
 
 		// STEP 12: Charlie claims delegator rewards
 		info!("═══ STEP 12: Charlie claims delegator rewards (40% of pool) ═══");
@@ -2729,31 +3075,50 @@ fn test_delegator_rewards_with_commission_split() {
 		}
 
 		// Verify Charlie's balance increased
-		let charlie_balance_after = t.subxt.storage().at_latest().await?.fetch(&charlie_account_query).await?
-			.map(|a| a.data.free).unwrap_or(0);
+		let charlie_balance_after = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&charlie_account_query)
+			.await?
+			.map(|a| a.data.free)
+			.unwrap_or(0);
 		let charlie_rewards_received = charlie_balance_after.saturating_sub(charlie_balance_before);
 		info!("Charlie received: {} TNT", charlie_rewards_received);
 
 		// Charlie's share should be 40% of 72,250 = 28,900 TNT
 		let expected_charlie_pool = 28_900u128;
 		assert!(
-			charlie_rewards_received >= expected_charlie_pool - 100 && charlie_rewards_received <= expected_charlie_pool + 100,
+			charlie_rewards_received >= expected_charlie_pool - 100 &&
+				charlie_rewards_received <= expected_charlie_pool + 100,
 			"Charlie's pool share should be ~{} TNT, got {}",
 			expected_charlie_pool,
 			charlie_rewards_received
 		);
-		info!("✅ Charlie's pool share verified: {} TNT (expected ~{})", charlie_rewards_received, expected_charlie_pool);
+		info!(
+			"✅ Charlie's pool share verified: {} TNT (expected ~{})",
+			charlie_rewards_received, expected_charlie_pool
+		);
 
 		// STEP 13: Verify Dave received developer rewards
 		info!("═══ STEP 13: Verifying Dave's developer rewards ═══");
-		let dave_rewards_key = api::storage().rewards().pending_operator_rewards(&dave.account_id());
-		let dave_pending = t.subxt.storage().at_latest().await?.fetch(&dave_rewards_key).await?
+		let dave_rewards_key =
+			api::storage().rewards().pending_operator_rewards(&dave.account_id());
+		let dave_pending = t
+			.subxt
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&dave_rewards_key)
+			.await?
 			.unwrap_or(BoundedVec(vec![]));
 
 		let dave_rewards_total: u128 = dave_pending.0.iter().map(|r| r.1).sum();
 		let expected_dave_rewards = 10_000u128; // 10% of 100,000
 		assert!(
-			dave_rewards_total >= expected_dave_rewards - 100 && dave_rewards_total <= expected_dave_rewards + 100,
+			dave_rewards_total >= expected_dave_rewards - 100 &&
+				dave_rewards_total <= expected_dave_rewards + 100,
 			"Dave's rewards should be ~{} TNT, got {}",
 			expected_dave_rewards,
 			dave_rewards_total
@@ -2766,13 +3131,22 @@ fn test_delegator_rewards_with_commission_split() {
 		info!("  • Payment: {} TNT", payment_amount);
 		info!("  • Bob's commission (15% of 85k): {} TNT", bob_commission_received);
 		info!("  • Bob's pool share (60% of 72.25k): {} TNT", bob_pool_received);
-		info!("  • Bob's total: {} TNT ({:.1}% of payment)", bob_total_earnings, (bob_total_earnings as f64 / payment_amount as f64) * 100.0);
-		info!("  • Charlie's pool share (40% of 72.25k): {} TNT ({:.1}% of payment)", charlie_rewards_received, (charlie_rewards_received as f64 / payment_amount as f64) * 100.0);
+		info!(
+			"  • Bob's total: {} TNT ({:.1}% of payment)",
+			bob_total_earnings,
+			(bob_total_earnings as f64 / payment_amount as f64) * 100.0
+		);
+		info!(
+			"  • Charlie's pool share (40% of 72.25k): {} TNT ({:.1}% of payment)",
+			charlie_rewards_received,
+			(charlie_rewards_received as f64 / payment_amount as f64) * 100.0
+		);
 		info!("  • Dave's developer share (10%): {} TNT", dave_rewards_total);
 		info!("  • Treasury (5%): ~5000 TNT");
 
 		// Verify total distribution adds up
-		let distributed_total = bob_total_earnings + charlie_rewards_received + dave_rewards_total + 5_000;
+		let distributed_total =
+			bob_total_earnings + charlie_rewards_received + dave_rewards_total + 5_000;
 		info!("  • Total distributed: ~{} TNT", distributed_total);
 
 		info!("🎉 DELEGATOR REWARDS WITH COMMISSION E2E TEST COMPLETED");

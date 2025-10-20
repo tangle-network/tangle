@@ -186,11 +186,8 @@ fn test_e2e_subscription_payment_distribution() {
 		// Subscription payment: 1,000 tokens per 10 blocks
 		let rate_per_interval: Balance = 1_000;
 		let interval: BlockNumberFor<Runtime> = 10;
-		let pricing_model = PricingModel::Subscription {
-			rate_per_interval,
-			interval,
-			maybe_end: Some(100),
-		};
+		let pricing_model =
+			PricingModel::Subscription { rate_per_interval, interval, maybe_end: Some(100) };
 
 		// Process first subscription payment
 		assert_ok!(Services::charge_payment(&customer, &customer, rate_per_interval));
@@ -290,7 +287,12 @@ fn test_multiple_operators_different_exposures() {
 
 		// Customer pays
 		assert_ok!(Services::charge_payment(&customer, &customer, payment));
-		assert_ok!(Services::distribute_service_payment(&service, &customer, payment, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&customer,
+			payment,
+			&pricing_model
+		));
 
 		// Verify funds transferred
 		let rewards_after = Balances::free_balance(&rewards_account);
@@ -371,7 +373,12 @@ fn test_zero_payment_no_transfer() {
 		let pricing_model = PricingModel::PayOnce { amount: payment };
 
 		assert_ok!(Services::charge_payment(&customer, &customer, payment));
-		assert_ok!(Services::distribute_service_payment(&service, &customer, payment, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&customer,
+			payment,
+			&pricing_model
+		));
 
 		// No funds transferred
 		let rewards_after = Balances::free_balance(&rewards_account);
@@ -485,7 +492,12 @@ fn test_rewards_remain_in_pallet_until_claimed() {
 
 		// Payment and distribution
 		assert_ok!(Services::charge_payment(&customer, &customer, payment));
-		assert_ok!(Services::distribute_service_payment(&service, &charlie, payment, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&charlie,
+			payment,
+			&pricing_model
+		));
 
 		// Funds should remain in rewards pallet account
 		let rewards_after = Balances::free_balance(&rewards_account);
@@ -501,8 +513,8 @@ fn test_rewards_remain_in_pallet_until_claimed() {
 
 		// Bob's actual balance hasn't changed yet
 		let bob_balance = Balances::free_balance(&bob);
-		// In a real scenario with actual claim_rewards(), Bob would need to call it to receive funds
-		// This test verifies the funds are safely held in the rewards pallet account
+		// In a real scenario with actual claim_rewards(), Bob would need to call it to receive
+		// funds This test verifies the funds are safely held in the rewards pallet account
 		assert_eq!(bob_balance, 20_000, "Bob's balance unchanged until he claims");
 	});
 }

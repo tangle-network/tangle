@@ -60,10 +60,7 @@ fn subscription_processes_with_on_idle() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		// Subscribe to job (creates subscription billing entry)
@@ -83,8 +80,8 @@ fn subscription_processes_with_on_idle() {
 			&eve,
 			&eve,
 			10 * 10u128.pow(6), // rate_per_interval
-			1, // interval
-			None, // maybe_end
+			1,                  // interval
+			None,               // maybe_end
 			current_block,
 		));
 
@@ -97,14 +94,10 @@ fn subscription_processes_with_on_idle() {
 		// Advance to next block and simulate on_idle processing
 		System::set_block_number(2);
 		let remaining_weight = Weight::from_parts(1_000_000_000, 0);
-		let weight_used =
-			Services::process_subscription_payments_on_idle(2, remaining_weight);
+		let weight_used = Services::process_subscription_payments_on_idle(2, remaining_weight);
 
 		// Should have processed the subscription
-		assert!(
-			weight_used.ref_time() > 0,
-			"Should have used some weight processing subscription"
-		);
+		assert!(weight_used.ref_time() > 0, "Should have used some weight processing subscription");
 
 		// With only 1 subscription, cursor should be cleared after processing
 		assert!(
@@ -167,10 +160,7 @@ fn subscription_respects_weight_limits() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		assert_ok!(Services::call(
@@ -189,8 +179,8 @@ fn subscription_respects_weight_limits() {
 			&eve,
 			&eve,
 			10 * 10u128.pow(6), // rate_per_interval
-			1, // interval
-			None, // maybe_end
+			1,                  // interval
+			None,               // maybe_end
 			current_block,
 		));
 
@@ -199,29 +189,17 @@ fn subscription_respects_weight_limits() {
 		// Test with ZERO remaining weight
 		let zero_weight = Weight::from_parts(0, 0);
 		let weight_used = Services::process_subscription_payments_on_idle(2, zero_weight);
-		assert_eq!(
-			weight_used,
-			Weight::zero(),
-			"Should not process anything with zero weight"
-		);
+		assert_eq!(weight_used, Weight::zero(), "Should not process anything with zero weight");
 
 		// Test with very small weight (below minimum)
 		let tiny_weight = Weight::from_parts(100, 0);
 		let weight_used = Services::process_subscription_payments_on_idle(2, tiny_weight);
-		assert_eq!(
-			weight_used,
-			Weight::zero(),
-			"Should not process with insufficient weight"
-		);
+		assert_eq!(weight_used, Weight::zero(), "Should not process with insufficient weight");
 
 		// Test with sufficient weight
 		let sufficient_weight = Weight::from_parts(1_000_000_000, 0);
-		let weight_used =
-			Services::process_subscription_payments_on_idle(2, sufficient_weight);
-		assert!(
-			weight_used.ref_time() > 0,
-			"Should process with sufficient weight"
-		);
+		let weight_used = Services::process_subscription_payments_on_idle(2, sufficient_weight);
+		assert!(weight_used.ref_time() > 0, "Should process with sufficient weight");
 	});
 }
 
@@ -280,10 +258,7 @@ fn subscription_cursor_persists_across_blocks() {
 			assert_ok!(Services::approve(
 				RuntimeOrigin::signed(bob.clone()),
 				service_id,
-				vec![
-					get_security_commitment(TNT, 10),
-					get_security_commitment(WETH, 10)
-				],
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 			));
 
 			assert_ok!(Services::call(
@@ -302,8 +277,8 @@ fn subscription_cursor_persists_across_blocks() {
 				&user,
 				&user,
 				10 * 10u128.pow(6), // rate_per_interval
-				1, // interval
-				None, // maybe_end
+				1,                  // interval
+				None,               // maybe_end
 				current_block,
 			));
 		}
@@ -311,8 +286,7 @@ fn subscription_cursor_persists_across_blocks() {
 		// Process with limited weight that might not finish all subscriptions
 		System::set_block_number(2);
 		let limited_weight = Weight::from_parts(10_000_000, 0); // Very limited
-		let _weight_used =
-			Services::process_subscription_payments_on_idle(2, limited_weight);
+		let _weight_used = Services::process_subscription_payments_on_idle(2, limited_weight);
 
 		// If cursor is set, it means we didn't finish processing
 		// (This test is informational - behavior depends on actual weights)
@@ -321,8 +295,7 @@ fn subscription_cursor_persists_across_blocks() {
 		// Process again with generous weight to finish
 		System::set_block_number(3);
 		let generous_weight = Weight::from_parts(1_000_000_000, 0);
-		let _weight_used =
-			Services::process_subscription_payments_on_idle(3, generous_weight);
+		let _weight_used = Services::process_subscription_payments_on_idle(3, generous_weight);
 
 		// Cursor should be cleared after finishing all subscriptions
 		let cursor_after_second_block = SubscriptionProcessingCursor::<Runtime>::get();
@@ -373,7 +346,8 @@ fn subscription_processes_multiple_in_single_block() {
 			let user = mock_pub_key(user_id);
 			mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 
-			// Give user native tokens to pay for services (subscription rate is 10 USDC = 10M units)
+			// Give user native tokens to pay for services (subscription rate is 10 USDC = 10M
+			// units)
 			use frame_support::traits::Currency;
 			let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
 
@@ -398,10 +372,7 @@ fn subscription_processes_multiple_in_single_block() {
 			assert_ok!(Services::approve(
 				RuntimeOrigin::signed(bob.clone()),
 				service_id,
-				vec![
-					get_security_commitment(TNT, 10),
-					get_security_commitment(WETH, 10)
-				],
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 			));
 
 			assert_ok!(Services::call(
@@ -420,8 +391,8 @@ fn subscription_processes_multiple_in_single_block() {
 				&user,
 				&user,
 				10 * 10u128.pow(6), // rate_per_interval
-				1, // interval
-				None, // maybe_end
+				1,                  // interval
+				None,               // maybe_end
 				current_block,
 			));
 		}
@@ -430,8 +401,7 @@ fn subscription_processes_multiple_in_single_block() {
 
 		// Process with generous weight - should handle all 3 subscriptions
 		let generous_weight = Weight::from_parts(1_000_000_000, 0);
-		let weight_used =
-			Services::process_subscription_payments_on_idle(2, generous_weight);
+		let weight_used = Services::process_subscription_payments_on_idle(2, generous_weight);
 
 		// Should have processed subscriptions
 		assert!(weight_used.ref_time() > 0, "Should have processed subscriptions");
@@ -497,10 +467,7 @@ fn subscription_skips_processing_when_no_weight() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		assert_ok!(Services::call(
@@ -519,8 +486,8 @@ fn subscription_skips_processing_when_no_weight() {
 			&eve,
 			&eve,
 			10 * 10u128.pow(6), // rate_per_interval
-			1, // interval
-			None, // maybe_end
+			1,                  // interval
+			None,               // maybe_end
 			current_block,
 		));
 

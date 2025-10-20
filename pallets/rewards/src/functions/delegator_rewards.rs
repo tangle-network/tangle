@@ -21,16 +21,13 @@
 //!
 //! ## How It Works
 //!
-//! 1. **Reward Recording** (O(1)):
-//!    When operator receives reward:
-//!    `pool.accumulated_per_share += reward / pool.total_staked`
+//! 1. **Reward Recording** (O(1)): When operator receives reward: `pool.accumulated_per_share +=
+//!    reward / pool.total_staked`
 //!
-//! 2. **Reward Claiming** (O(1)):
-//!    When delegator claims:
-//!    `owed = stake * (pool.accumulated_per_share - delegator.last_accumulated_per_share)`
+//! 2. **Reward Claiming** (O(1)): When delegator claims: `owed = stake *
+//!    (pool.accumulated_per_share - delegator.last_accumulated_per_share)`
 //!
-//! 3. **Stake Changes**:
-//!    When delegator changes stake: MUST claim first, then update stake amount
+//! 3. **Stake Changes**: When delegator changes stake: MUST claim first, then update stake amount
 //!
 //! ## Mathematical Correctness
 //!
@@ -45,9 +42,15 @@
 //! stake percentage of each reward event.
 
 use crate::{BalanceOf, Config, DelegatorRewardDebts, Error, Event, OperatorRewardPools, Pallet};
-use frame_support::{dispatch::DispatchResult, traits::{Currency, ExistenceRequirement}};
+use frame_support::{
+	dispatch::DispatchResult,
+	traits::{Currency, ExistenceRequirement},
+};
 use sp_arithmetic::FixedU128;
-use sp_runtime::{FixedPointNumber, traits::{Saturating, SaturatedConversion, Zero}};
+use sp_runtime::{
+	FixedPointNumber,
+	traits::{SaturatedConversion, Saturating, Zero},
+};
 
 impl<T: Config> Pallet<T> {
 	/// Record operator reward and update pool accumulator for delegator distribution.
@@ -104,9 +107,8 @@ impl<T: Config> Pallet<T> {
 			);
 
 			// Add to cumulative accumulator
-			pool.accumulated_rewards_per_share = pool
-				.accumulated_rewards_per_share
-				.saturating_add(reward_per_share);
+			pool.accumulated_rewards_per_share =
+				pool.accumulated_rewards_per_share.saturating_add(reward_per_share);
 
 			// Update metadata
 			pool.last_updated_block = <frame_system::Pallet<T>>::block_number();
@@ -155,8 +157,8 @@ impl<T: Config> Pallet<T> {
 		operator: &T::AccountId,
 	) -> Result<BalanceOf<T>, sp_runtime::DispatchError> {
 		// Get delegator's debt (their last claim position)
-		let debt = DelegatorRewardDebts::<T>::get(delegator, operator)
-			.ok_or(Error::<T>::NoDelegation)?;
+		let debt =
+			DelegatorRewardDebts::<T>::get(delegator, operator).ok_or(Error::<T>::NoDelegation)?;
 
 		// Get operator's current pool state
 		let pool = OperatorRewardPools::<T>::get(operator);
@@ -243,12 +245,7 @@ impl<T: Config> Pallet<T> {
 			)
 			.map_err(|_| Error::<T>::TransferFailed)?;
 
-			log::info!(
-				"Delegator {:?} claimed {:?} from operator {:?}",
-				delegator,
-				owed,
-				operator
-			);
+			log::info!("Delegator {:?} claimed {:?} from operator {:?}", delegator, owed, operator);
 		}
 
 		Ok(owed)
@@ -398,8 +395,8 @@ impl<T: Config> Pallet<T> {
 		operator: &T::AccountId,
 	) -> DispatchResult {
 		// Get current debt to update pool total
-		let debt = DelegatorRewardDebts::<T>::get(delegator, operator)
-			.ok_or(Error::<T>::NoDelegation)?;
+		let debt =
+			DelegatorRewardDebts::<T>::get(delegator, operator).ok_or(Error::<T>::NoDelegation)?;
 
 		// Remove debt storage
 		DelegatorRewardDebts::<T>::remove(delegator, operator);
@@ -476,7 +473,8 @@ mod tests {
 			assert_ok!(Rewards::record_operator_reward_to_pool(&operator, 300));
 
 			// Should accumulate to 600 total
-			let pending = Rewards::calculate_pending_delegator_rewards(&delegator, &operator).unwrap();
+			let pending =
+				Rewards::calculate_pending_delegator_rewards(&delegator, &operator).unwrap();
 			assert_eq!(pending, 600);
 		});
 	}
@@ -502,11 +500,13 @@ mod tests {
 			assert_ok!(Rewards::record_operator_reward_to_pool(&operator, 1000));
 
 			// A should have: 1000 (from first reward) + 500 (from second) = 1500
-			let pending_a = Rewards::calculate_pending_delegator_rewards(&delegator_a, &operator).unwrap();
+			let pending_a =
+				Rewards::calculate_pending_delegator_rewards(&delegator_a, &operator).unwrap();
 			assert_eq!(pending_a, 1500);
 
 			// B should have: 0 (from first, wasn't delegated) + 500 (from second) = 500
-			let pending_b = Rewards::calculate_pending_delegator_rewards(&delegator_b, &operator).unwrap();
+			let pending_b =
+				Rewards::calculate_pending_delegator_rewards(&delegator_b, &operator).unwrap();
 			assert_eq!(pending_b, 500);
 		});
 	}
@@ -528,14 +528,16 @@ mod tests {
 			assert_ok!(Rewards::calculate_and_claim_delegator_rewards(&delegator, &operator));
 
 			// Pending should now be zero
-			let pending = Rewards::calculate_pending_delegator_rewards(&delegator, &operator).unwrap();
+			let pending =
+				Rewards::calculate_pending_delegator_rewards(&delegator, &operator).unwrap();
 			assert_eq!(pending, 0);
 
 			// Record another reward
 			assert_ok!(Rewards::record_operator_reward_to_pool(&operator, 500));
 
 			// Should only show new 500
-			let pending = Rewards::calculate_pending_delegator_rewards(&delegator, &operator).unwrap();
+			let pending =
+				Rewards::calculate_pending_delegator_rewards(&delegator, &operator).unwrap();
 			assert_eq!(pending, 500);
 		});
 	}

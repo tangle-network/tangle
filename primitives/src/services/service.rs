@@ -253,7 +253,11 @@ impl<C: Constraints> ServiceBlueprint<C> {
 				),
 				// Profiling Data
 				ethabi::Token::String(
-					self.metadata.profiling_data.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
+					self.metadata
+						.profiling_data
+						.as_ref()
+						.map(|v| v.as_str().into())
+						.unwrap_or_default(),
 				),
 			]),
 			// Job Definitions ?

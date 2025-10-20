@@ -236,10 +236,8 @@ pub fn run() -> sc_cli::Result<()> {
 						}
 
 						// Combine Substrate host functions with Tangle's EVM tracing host functions
-						type TangleHostFunctions = (
-							sp_io::SubstrateHostFunctions,
-							primitives_ext::ext::HostFunctions,
-						);
+						type TangleHostFunctions =
+							(sp_io::SubstrateHostFunctions, primitives_ext::ext::HostFunctions);
 
 						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, TangleHostFunctions>(Some(
 							config.chain_spec,
@@ -267,9 +265,8 @@ pub fn run() -> sc_cli::Result<()> {
 					},
 					BenchmarkCmd::Overhead(_cmd) => Err("Unsupported benchmarking command".into()),
 					BenchmarkCmd::Extrinsic(_cmd) => Err("Unsupported benchmarking command".into()),
-					BenchmarkCmd::Machine(cmd) => {
-						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone())
-					},
+					BenchmarkCmd::Machine(cmd) =>
+						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
 				}
 			})
 		},

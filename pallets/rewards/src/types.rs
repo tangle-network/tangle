@@ -17,7 +17,7 @@ use crate::Config;
 use frame_support::traits::Currency;
 use parity_scale_codec::{Decode, Encode};
 use scale_info::TypeInfo;
-use sp_runtime::{traits::Zero, Perbill, RuntimeDebug};
+use sp_runtime::{Perbill, RuntimeDebug, traits::Zero};
 use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 
 pub type BalanceOf<T> =

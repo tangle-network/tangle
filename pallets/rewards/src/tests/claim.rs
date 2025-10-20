@@ -56,10 +56,10 @@ fn setup_vault(
 
 	// Set deposit in mock delegation info
 	MOCK_DELEGATION_INFO.with(|m| {
-		m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-			unlocked_amount: MOCK_DEPOSIT,
-			amount_with_locks: None,
-		});
+		m.borrow_mut().deposits.insert(
+			(account.clone(), asset),
+			UserDepositWithLocks { unlocked_amount: MOCK_DEPOSIT, amount_with_locks: None },
+		);
 	});
 
 	// Set total deposit and total score for the vault
@@ -93,10 +93,10 @@ fn test_claim_rewards_zero_deposit() {
 
 		// Mock deposit with zero amount
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: 0,
-				amount_with_locks: None,
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: 0, amount_with_locks: None },
+			);
 		});
 
 		// Try to claim rewards for the account with zero deposit - should fail
@@ -133,10 +133,10 @@ fn test_claim_rewards_only_unlocked() {
 
 		// Mock deposit with only unlocked amount
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: None,
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
+			);
 		});
 
 		// Initial balance should be 0
@@ -179,14 +179,17 @@ fn test_claim_rewards_with_expired_lock() {
 
 		// Mock deposit with expired lock
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![LockInfo {
-					amount: user_deposit,
-					lock_multiplier: LockMultiplier::TwoMonths,
-					expiry_block: 900,
-				}]),
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks {
+					unlocked_amount: user_deposit,
+					amount_with_locks: Some(vec![LockInfo {
+						amount: user_deposit,
+						lock_multiplier: LockMultiplier::TwoMonths,
+						expiry_block: 900,
+					}]),
+				},
+			);
 		});
 
 		// Run to block 1000 (after lock expiry)
@@ -240,21 +243,24 @@ fn test_claim_rewards_with_active_locks() {
 
 		// Mock deposit with active locks
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![
-					LockInfo {
-						amount: user_deposit * 2,
-						lock_multiplier: LockMultiplier::TwoMonths,
-						expiry_block: 2000,
-					},
-					LockInfo {
-						amount: user_deposit * 3,
-						lock_multiplier: LockMultiplier::ThreeMonths,
-						expiry_block: 2000,
-					},
-				]),
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks {
+					unlocked_amount: user_deposit,
+					amount_with_locks: Some(vec![
+						LockInfo {
+							amount: user_deposit * 2,
+							lock_multiplier: LockMultiplier::TwoMonths,
+							expiry_block: 2000,
+						},
+						LockInfo {
+							amount: user_deposit * 3,
+							lock_multiplier: LockMultiplier::ThreeMonths,
+							expiry_block: 2000,
+						},
+					]),
+				},
+			);
 		});
 
 		// Run to block 1000
@@ -309,14 +315,17 @@ fn test_claim_rewards_multiple_claims() {
 
 		// Mock deposit with active locks
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![LockInfo {
-					amount: user_deposit,
-					lock_multiplier: LockMultiplier::TwoMonths,
-					expiry_block: 2000,
-				}]),
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks {
+					unlocked_amount: user_deposit,
+					amount_with_locks: Some(vec![LockInfo {
+						amount: user_deposit,
+						lock_multiplier: LockMultiplier::TwoMonths,
+						expiry_block: 2000,
+					}]),
+				},
+			);
 		});
 
 		// First claim at block 1000
@@ -382,10 +391,10 @@ fn test_claim_rewards_with_zero_cap() {
 
 		// Mock deposit
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: None,
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
+			);
 		});
 
 		run_to_block(1000);
@@ -534,10 +543,10 @@ fn test_claim_rewards_other() {
 
 		// Mock deposit with only unlocked amount
 		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: None,
-			});
+			m.borrow_mut().deposits.insert(
+				(account.clone(), asset),
+				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
+			);
 		});
 
 		// Initial balance should be 0
@@ -662,14 +671,10 @@ fn test_delegator_reward_distribution_proportional() {
 		));
 
 		// Calculate pending rewards for each delegator
-		let pending_a = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&delegator_a,
-			&operator
-		);
-		let pending_b = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&delegator_b,
-			&operator
-		);
+		let pending_a =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator_a, &operator);
+		let pending_b =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator_b, &operator);
 
 		assert_ok!(&pending_a);
 		assert_ok!(&pending_b);
@@ -691,16 +696,12 @@ fn test_operator_receives_commission_plus_pool_share() {
 
 		// Operator self-delegates 600, delegator has 400 (60/40 split)
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&operator,
-			&operator,
-			600u128
+			&operator, &operator, 600u128
 		));
 
 		let delegator: AccountId = AccountId::new([2u8; 32]);
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&delegator,
-			&operator,
-			400u128
+			&delegator, &operator, 400u128
 		));
 
 		// Fund the rewards pallet account for transfers
@@ -722,10 +723,8 @@ fn test_operator_receives_commission_plus_pool_share() {
 		assert_eq!(pending_commission[0].1, 150);
 
 		// Verify operator's pool share (60% of 850 = 510)
-		let pool_share = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&operator,
-			&operator
-		);
+		let pool_share =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&operator, &operator);
 		assert_ok!(&pool_share);
 		assert_eq!(pool_share.unwrap(), 510);
 
@@ -745,14 +744,10 @@ fn test_delegator_only_receives_pool_share_no_commission() {
 
 		// Setup delegation: operator has 600, delegator has 400
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&operator,
-			&operator,
-			600u128
+			&operator, &operator, 600u128
 		));
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&delegator,
-			&operator,
-			400u128
+			&delegator, &operator, 400u128
 		));
 
 		// Record reward
@@ -769,10 +764,8 @@ fn test_delegator_only_receives_pool_share_no_commission() {
 		assert!(delegator_commission.is_empty());
 
 		// Verify delegator only has pool share (40% of 850 = 340)
-		let pool_share = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&delegator,
-			&operator
-		);
+		let pool_share =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator, &operator);
 		assert_ok!(&pool_share);
 		assert_eq!(pool_share.unwrap(), 340);
 	});
@@ -788,9 +781,7 @@ fn test_claim_delegator_rewards_updates_balance() {
 
 		// Setup delegation
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&delegator,
-			&operator,
-			1000u128 // 100% stake for simplicity
+			&delegator, &operator, 1000u128 // 100% stake for simplicity
 		));
 
 		// Fund the rewards pallet
@@ -810,10 +801,8 @@ fn test_claim_delegator_rewards_updates_balance() {
 		let balance_before = Balances::free_balance(&delegator);
 
 		// Claim delegator rewards
-		let claimed = RewardsPallet::<Runtime>::calculate_and_claim_delegator_rewards(
-			&delegator,
-			&operator
-		);
+		let claimed =
+			RewardsPallet::<Runtime>::calculate_and_claim_delegator_rewards(&delegator, &operator);
 		assert_ok!(&claimed);
 
 		// Verify balance increased by pool share (85% of 1000 = 850)
@@ -822,10 +811,8 @@ fn test_claim_delegator_rewards_updates_balance() {
 		assert_eq!(claimed.unwrap(), 850);
 
 		// Verify pending rewards are now zero after claim
-		let pending_after = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&delegator,
-			&operator
-		);
+		let pending_after =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator, &operator);
 		assert_ok!(&pending_after);
 		assert_eq!(pending_after.unwrap(), 0);
 	});
@@ -839,14 +826,10 @@ fn test_multiple_rewards_accumulate_in_pool() {
 
 		// Setup delegation (50/50 split)
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&operator,
-			&operator,
-			500u128
+			&operator, &operator, 500u128
 		));
 		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
-			&delegator,
-			&operator,
-			500u128
+			&delegator, &operator, 500u128
 		));
 
 		// Record multiple rewards
@@ -865,10 +848,8 @@ fn test_multiple_rewards_accumulate_in_pool() {
 		// Pool per reward: 85 (total 255)
 		// Each delegator should get 50% of 255 = 127.5 ≈ 127
 
-		let delegator_pending = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&delegator,
-			&operator
-		);
+		let delegator_pending =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator, &operator);
 		assert_ok!(&delegator_pending);
 		assert_eq!(delegator_pending.unwrap(), 127); // 50% of 255
 
@@ -878,10 +859,8 @@ fn test_multiple_rewards_accumulate_in_pool() {
 		let total_commission: u128 = operator_commission.iter().map(|r| r.1).sum();
 		assert_eq!(total_commission, 45); // 3 × 15
 
-		let operator_pool = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
-			&operator,
-			&operator
-		);
+		let operator_pool =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&operator, &operator);
 		assert_ok!(&operator_pool);
 		assert_eq!(operator_pool.unwrap(), 127); // 50% of 255
 	});
@@ -931,7 +910,7 @@ fn test_delegator_joins_mid_period_no_historical_rewards() {
 		// - Total = 1275
 		let early_pending = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
 			&early_delegator,
-			&operator
+			&operator,
 		);
 		assert_ok!(&early_pending);
 		assert_eq!(early_pending.unwrap(), 1275);
@@ -942,7 +921,7 @@ fn test_delegator_joins_mid_period_no_historical_rewards() {
 		// - Total = 425
 		let late_pending = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
 			&late_delegator,
-			&operator
+			&operator,
 		);
 		assert_ok!(&late_pending);
 		assert_eq!(late_pending.unwrap(), 425);

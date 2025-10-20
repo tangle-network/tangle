@@ -233,16 +233,19 @@ impl<T: Config> Pallet<T> {
 			BoundedVec::<_, MaxOperatorsPerServiceOf<T>>::try_from(operators)
 				.map_err(|_| Error::<T>::MaxServiceProvidersExceeded)?;
 
-		ServiceRequests::<T>::insert(request_id, ServiceRequest {
-			blueprint: blueprint_id,
-			owner: caller.clone(),
-			security_requirements: security_requirements.clone(),
-			ttl,
-			args,
-			permitted_callers,
-			operators_with_approval_state,
-			membership_model,
-		});
+		ServiceRequests::<T>::insert(
+			request_id,
+			ServiceRequest {
+				blueprint: blueprint_id,
+				owner: caller.clone(),
+				security_requirements: security_requirements.clone(),
+				ttl,
+				args,
+				permitted_callers,
+				operators_with_approval_state,
+				membership_model,
+			},
+		);
 		NextServiceRequestId::<T>::set(request_id.saturating_add(1));
 
 		Self::deposit_event(Event::ServiceRequested {

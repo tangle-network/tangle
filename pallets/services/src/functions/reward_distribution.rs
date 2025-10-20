@@ -25,7 +25,10 @@
 use crate::{BalanceOf, Config, Error, Pallet};
 use frame_support::{dispatch::DispatchResult, ensure, traits::Get};
 use frame_system::pallet_prelude::BlockNumberFor;
-use sp_runtime::{Perbill, traits::{CheckedDiv, CheckedMul, Saturating, Zero}};
+use sp_runtime::{
+	Perbill,
+	traits::{CheckedDiv, CheckedMul, Saturating, Zero},
+};
 use tangle_primitives::{
 	services::{PricingModel, Service},
 	traits::RewardRecorder,
@@ -56,7 +59,8 @@ impl RevenueDistribution {
 
 	/// Validate that percentages sum to 100%
 	pub fn validate(&self) -> bool {
-		let total = self.operator_share
+		let total = self
+			.operator_share
 			.saturating_add(self.developer_share)
 			.saturating_add(self.protocol_share);
 		total == Perbill::one()
@@ -77,8 +81,8 @@ impl<T: Config> Pallet<T> {
 	///
 	/// # Distribution Logic
 	/// 1. Calculate operator_total = operator_share * total_amount
-	/// 2. For each operator, calculate:
-	///    operator_reward = (operator_exposure_percent / total_exposure) * operator_total
+	/// 2. For each operator, calculate: operator_reward = (operator_exposure_percent /
+	///    total_exposure) * operator_total
 	/// 3. Record developer_share * total_amount to blueprint owner
 	/// 4. Record protocol_share * total_amount to treasury (if configured)
 	///
@@ -107,22 +111,12 @@ impl<T: Config> Pallet<T> {
 		ensure!(distribution.validate(), Error::<T>::InvalidRevenueDistribution);
 
 		// Calculate shares
-		let operator_total = distribution
-			.operator_share
-			.mul_floor(total_amount);
-		let developer_amount = distribution
-			.developer_share
-			.mul_floor(total_amount);
-		let protocol_amount = distribution
-			.protocol_share
-			.mul_floor(total_amount);
+		let operator_total = distribution.operator_share.mul_floor(total_amount);
+		let developer_amount = distribution.developer_share.mul_floor(total_amount);
+		let protocol_amount = distribution.protocol_share.mul_floor(total_amount);
 
 		// Distribute to operators weighted by exposure
-		Self::distribute_to_operators(
-			service,
-			operator_total,
-			pricing_model,
-		)?;
+		Self::distribute_to_operators(service, operator_total, pricing_model)?;
 
 		// Distribute to developer
 		if !developer_amount.is_zero() {
@@ -202,10 +196,8 @@ impl<T: Config> Pallet<T> {
 
 		for (operator, commitments) in &service.operator_security_commitments {
 			// Calculate this operator's total exposure
-			let operator_exposure: u128 = commitments
-				.iter()
-				.map(|c| c.exposure_percent.deconstruct() as u128)
-				.sum();
+			let operator_exposure: u128 =
+				commitments.iter().map(|c| c.exposure_percent.deconstruct() as u128).sum();
 
 			if operator_exposure == 0 {
 				continue;
@@ -224,12 +216,7 @@ impl<T: Config> Pallet<T> {
 			}
 
 			// Record reward for this operator
-			T::RewardRecorder::record_reward(
-				operator,
-				service.id,
-				operator_reward,
-				pricing_model,
-			)?;
+			T::RewardRecorder::record_reward(operator, service.id, operator_reward, pricing_model)?;
 
 			distributed_sum = distributed_sum.saturating_add(operator_reward);
 		}
@@ -266,21 +253,15 @@ impl<T: Config> Pallet<T> {
 		total: BalanceOf<T>,
 	) -> Result<BalanceOf<T>, sp_runtime::DispatchError> {
 		// Convert to Balance type for calculation
-		let numerator_balance = numerator
-			.try_into()
-			.map_err(|_| Error::<T>::ArithmeticOverflow)?;
-		let denominator_balance = denominator
-			.try_into()
-			.map_err(|_| Error::<T>::ArithmeticOverflow)?;
+		let numerator_balance = numerator.try_into().map_err(|_| Error::<T>::ArithmeticOverflow)?;
+		let denominator_balance =
+			denominator.try_into().map_err(|_| Error::<T>::ArithmeticOverflow)?;
 
 		// Calculate: (numerator * total) / denominator
-		let product = total
-			.checked_mul(&numerator_balance)
-			.ok_or(Error::<T>::ArithmeticOverflow)?;
+		let product =
+			total.checked_mul(&numerator_balance).ok_or(Error::<T>::ArithmeticOverflow)?;
 
-		let result = product
-			.checked_div(&denominator_balance)
-			.ok_or(Error::<T>::DivisionByZero)?;
+		let result = product.checked_div(&denominator_balance).ok_or(Error::<T>::DivisionByZero)?;
 
 		Ok(result)
 	}

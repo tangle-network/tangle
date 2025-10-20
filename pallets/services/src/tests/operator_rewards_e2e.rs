@@ -42,7 +42,10 @@ fn advance_blocks_with_subscriptions(n: u64) -> u32 {
 		// Process subscription payments for this block with generous remaining weight
 		// Simulate on_idle with plenty of weight available for subscription processing
 		let remaining_weight = Weight::from_parts(1_000_000_000, 0);
-		let _ = Services::process_subscription_payments_on_idle(System::block_number(), remaining_weight);
+		let _ = Services::process_subscription_payments_on_idle(
+			System::block_number(),
+			remaining_weight,
+		);
 
 		// Count how many rewards were added this block
 		total_processed += 1;
@@ -100,7 +103,12 @@ fn test_full_e2e_native_payment_with_claim() {
 		let pricing_model = PricingModel::PayOnce { amount: payment };
 
 		assert_ok!(Services::charge_payment(&customer, &customer, payment));
-		assert_ok!(Services::distribute_service_payment(&service, &developer, payment, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&developer,
+			payment,
+			&pricing_model
+		));
 
 		// Verify balances after payment
 		let customer_after_payment = Balances::free_balance(&customer);
@@ -212,30 +220,47 @@ fn test_multi_block_subscription_payments_with_claims() {
 
 		let rate_per_interval: Balance = 1_000;
 		let interval: BlockNumberFor<Runtime> = 10;
-		let pricing_model = PricingModel::Subscription {
-			rate_per_interval,
-			interval,
-			maybe_end: Some(50),
-		};
+		let pricing_model =
+			PricingModel::Subscription { rate_per_interval, interval, maybe_end: Some(50) };
 
 		// Payment 1: Block 1
 		assert_ok!(Services::charge_payment(&customer, &customer, rate_per_interval));
-		assert_ok!(Services::distribute_service_payment(&service, &developer, rate_per_interval, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&developer,
+			rate_per_interval,
+			&pricing_model
+		));
 
 		// Payment 2: Block 11
 		advance_blocks_with_subscriptions(10);
 		assert_ok!(Services::charge_payment(&customer, &customer, rate_per_interval));
-		assert_ok!(Services::distribute_service_payment(&service, &developer, rate_per_interval, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&developer,
+			rate_per_interval,
+			&pricing_model
+		));
 
 		// Payment 3: Block 21
 		advance_blocks_with_subscriptions(10);
 		assert_ok!(Services::charge_payment(&customer, &customer, rate_per_interval));
-		assert_ok!(Services::distribute_service_payment(&service, &developer, rate_per_interval, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&developer,
+			rate_per_interval,
+			&pricing_model
+		));
 
 		// Payment 4: Block 31
 		advance_blocks_with_subscriptions(10);
 		assert_ok!(Services::charge_payment(&customer, &customer, rate_per_interval));
-		assert_ok!(Services::distribute_service_payment(&service, &developer, rate_per_interval, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&developer,
+			rate_per_interval,
+			&pricing_model
+		));
 
 		// Verify 4 payments made (blocks 1, 11, 21, 31)
 		let total_paid = rate_per_interval * 4;
@@ -250,13 +275,19 @@ fn test_multi_block_subscription_payments_with_claims() {
 		let operator_pending = MockRewardsManager::get_pending_rewards(&operator);
 		let operator_total: Balance = operator_pending.iter().map(|(_, amt)| *amt).sum();
 		let expected_operator = 850 * 4; // 85% of 1,000 per payment
-		assert_eq!(operator_total, expected_operator, "Operator should have 3,400 pending (4 x 850)");
+		assert_eq!(
+			operator_total, expected_operator,
+			"Operator should have 3,400 pending (4 x 850)"
+		);
 
 		// Verify developer accumulated rewards
 		let developer_pending = MockRewardsManager::get_pending_rewards(&developer);
 		let developer_total: Balance = developer_pending.iter().map(|(_, amt)| *amt).sum();
 		let expected_developer = 100 * 4; // 10% of 1,000 per payment
-		assert_eq!(developer_total, expected_developer, "Developer should have 400 pending (4 x 100)");
+		assert_eq!(
+			developer_total, expected_developer,
+			"Developer should have 400 pending (4 x 100)"
+		);
 
 		// Simulate operator claiming after 4 payments
 		let operator_claimed = simulate_operator_claim(&operator, &rewards_account);
@@ -272,7 +303,12 @@ fn test_multi_block_subscription_payments_with_claims() {
 		// Continue with Payment 5: Block 41
 		advance_blocks_with_subscriptions(10);
 		assert_ok!(Services::charge_payment(&customer, &customer, rate_per_interval));
-		assert_ok!(Services::distribute_service_payment(&service, &developer, rate_per_interval, &pricing_model));
+		assert_ok!(Services::distribute_service_payment(
+			&service,
+			&developer,
+			rate_per_interval,
+			&pricing_model
+		));
 
 		// Operator should have new pending rewards (850 from payment 5)
 		let operator_pending_2 = MockRewardsManager::get_pending_rewards(&operator);
@@ -428,10 +464,12 @@ fn test_erc20_pay_once_job_payment_e2e() {
 		let _initial_charlie_erc20 = Services::query_erc20_balance_of(USDC_ERC20, charlie_address)
 			.map(|(b, _)| b.as_u128())
 			.unwrap_or(0);
-		let _initial_rewards_erc20 = Services::query_erc20_balance_of(USDC_ERC20,
-			account_id_to_address(rewards_account.clone()))
-			.map(|(b, _)| b.as_u128())
-			.unwrap_or(0);
+		let _initial_rewards_erc20 = Services::query_erc20_balance_of(
+			USDC_ERC20,
+			account_id_to_address(rewards_account.clone()),
+		)
+		.map(|(b, _)| b.as_u128())
+		.unwrap_or(0);
 
 		let payment_amount = 5_000u128;
 
@@ -537,11 +575,8 @@ fn test_custom_asset_usdc_subscription_e2e() {
 
 		let rate_per_interval: Balance = 10_000; // 10,000 USDC per interval
 		let interval: BlockNumberFor<Runtime> = 5;
-		let pricing_model = PricingModel::Subscription {
-			rate_per_interval,
-			interval,
-			maybe_end: Some(30),
-		};
+		let pricing_model =
+			PricingModel::Subscription { rate_per_interval, interval, maybe_end: Some(30) };
 
 		// Process 3 subscription payments (blocks 1, 6, 11)
 		for payment_num in 0..3 {
@@ -716,11 +751,7 @@ fn test_event_driven_payment_multiple_events_e2e() {
 		let operator_final = Balances::free_balance(&operator);
 		let total_operator_gain = operator_final - operator_initial;
 		let expected_total = 850 + expected_2_3; // 850 + 6,375 = 7,225
-		assert_eq!(
-			total_operator_gain,
-			expected_total,
-			"Operator total gain should be 7,225"
-		);
+		assert_eq!(total_operator_gain, expected_total, "Operator total gain should be 7,225");
 	});
 }
 

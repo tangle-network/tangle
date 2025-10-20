@@ -97,9 +97,10 @@ pub mod pallet {
 	use frame_support::{
 		PalletId,
 		pallet_prelude::*,
-		traits::{Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency},
+		traits::{
+			Currency, ExistenceRequirement, LockableCurrency, ReservableCurrency, StorageVersion,
+		},
 	};
-	use frame_support::traits::StorageVersion;
 	use frame_system::pallet_prelude::*;
 	use sp_runtime::{
 		Perbill,
@@ -182,7 +183,8 @@ pub mod pallet {
 		///
 		/// When an operator receives rewards, this percentage goes directly to them as commission
 		/// for operating the service. The remaining percentage goes to the delegator pool, which
-		/// is shared proportionally among all delegators (including the operator via their self-stake).
+		/// is shared proportionally among all delegators (including the operator via their
+		/// self-stake).
 		///
 		/// Example: If set to 15%:
 		/// - Operator receives 15% as direct commission (via claim_rewards)
@@ -804,7 +806,8 @@ pub mod pallet {
 			let delegator = ensure_signed(origin)?;
 
 			// Calculate and claim rewards using pool-based system
-			let claimed_amount = Self::calculate_and_claim_delegator_rewards(&delegator, &operator)?;
+			let claimed_amount =
+				Self::calculate_and_claim_delegator_rewards(&delegator, &operator)?;
 
 			// Ensure there were rewards to claim
 			ensure!(!claimed_amount.is_zero(), Error::<T>::NoDelegatorRewards);
@@ -839,8 +842,10 @@ pub mod pallet {
 		/// Record a reward for an operator with commission split and delegator distribution.
 		///
 		/// This function implements the economic model where operator rewards are split:
-		/// 1. **Commission** (DefaultOperatorCommission %): Direct payment to operator for running the service
-		/// 2. **Delegator Pool** (Remaining %): Shared proportionally by all delegators including operator
+		/// 1. **Commission** (DefaultOperatorCommission %): Direct payment to operator for running
+		///    the service
+		/// 2. **Delegator Pool** (Remaining %): Shared proportionally by all delegators including
+		///    operator
 		///
 		/// # Economic Flow
 		/// If operator receives 850 TNT with 15% commission and has 60% of total stake:
@@ -896,7 +901,8 @@ pub mod pallet {
 				operator_commission,
 				commission_rate.deconstruct() as f64 / 10_000_000.0,
 				delegator_pool_share,
-				(Perbill::one().saturating_sub(commission_rate)).deconstruct() as f64 / 10_000_000.0
+				(Perbill::one().saturating_sub(commission_rate)).deconstruct() as f64 /
+					10_000_000.0
 			);
 
 			// STEP 1: Record operator's commission (if non-zero)
@@ -904,7 +910,9 @@ pub mod pallet {
 			if !operator_commission.is_zero() {
 				PendingOperatorRewards::<T>::try_mutate(operator, |rewards| -> DispatchResult {
 					// Search for existing entry with same service_id
-					if let Some(existing_entry) = rewards.iter_mut().find(|(sid, _)| *sid == service_id) {
+					if let Some(existing_entry) =
+						rewards.iter_mut().find(|(sid, _)| *sid == service_id)
+					{
 						// AGGREGATE: Add commission to existing amount
 						let old_amount = existing_entry.1;
 						existing_entry.1 = existing_entry.1.saturating_add(operator_commission);
@@ -931,17 +939,16 @@ pub mod pallet {
 					}
 
 					// No existing entry - try to add new one with commission
-					rewards.try_push((service_id, operator_commission))
-						.map_err(|_| {
-							// BoundedVec is full with unique services
-							log::error!(
-								"Cannot record commission for operator {:?}: {} unique services already pending. \
+					rewards.try_push((service_id, operator_commission)).map_err(|_| {
+						// BoundedVec is full with unique services
+						log::error!(
+							"Cannot record commission for operator {:?}: {} unique services already pending. \
 								Operator must claim existing rewards before receiving rewards from new services.",
-								operator,
-								rewards.len()
-							);
-							Error::<T>::TooManyPendingRewards
-						})?;
+							operator,
+							rewards.len()
+						);
+						Error::<T>::TooManyPendingRewards
+					})?;
 
 					log::debug!(
 						"Recorded new commission for operator {:?}, service {}: {:?} (total entries: {})",
@@ -963,7 +970,8 @@ pub mod pallet {
 			}
 
 			// STEP 2: Update operator's pool for delegator distribution
-			// This distributes the remaining (100% - commission%) to all delegators including operator
+			// This distributes the remaining (100% - commission%) to all delegators including
+			// operator
 			if !delegator_pool_share.is_zero() {
 				Self::record_operator_reward_to_pool(operator, delegator_pool_share)?;
 			}

@@ -55,10 +55,7 @@ fn rewards_aggregate_for_same_service() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		// Make 10 job calls to the SAME service and process payments
@@ -171,10 +168,7 @@ fn aggregation_works_across_different_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id_0,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		let service_id_1 = Services::next_instance_id();
@@ -198,10 +192,7 @@ fn aggregation_works_across_different_services() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id_1,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		// Make 5 calls to service 0 with payments
@@ -267,16 +258,8 @@ fn aggregation_works_across_different_services() {
 			.map(|(_, amt)| *amt)
 			.expect("Should have reward for service 1");
 
-		assert_eq!(
-			service_0_reward,
-			operator_share_per_job * 5,
-			"Service 0: 5 jobs aggregated"
-		);
-		assert_eq!(
-			service_1_reward,
-			operator_share_per_job * 3,
-			"Service 1: 3 jobs aggregated"
-		);
+		assert_eq!(service_0_reward, operator_share_per_job * 5, "Service 0: 5 jobs aggregated");
+		assert_eq!(service_1_reward, operator_share_per_job * 3, "Service 1: 3 jobs aggregated");
 	});
 }
 
@@ -328,10 +311,7 @@ fn aggregation_prevents_bounded_vec_overflow() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		// Make 50 job calls - WITHOUT aggregation, this would overflow BoundedVec
@@ -421,10 +401,7 @@ fn aggregation_works_with_claim_in_between() {
 		assert_ok!(Services::approve(
 			RuntimeOrigin::signed(bob.clone()),
 			service_id,
-			vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
 		));
 
 		// Make 5 calls with payments
@@ -457,11 +434,7 @@ fn aggregation_works_with_claim_in_between() {
 
 		// After claim, pending should be cleared
 		let bob_rewards_after_claim = MockRewardsManager::get_pending_rewards(&bob);
-		assert_eq!(
-			bob_rewards_after_claim.len(),
-			0,
-			"Pending rewards cleared after claim"
-		);
+		assert_eq!(bob_rewards_after_claim.len(), 0, "Pending rewards cleared after claim");
 
 		// Make 3 more calls to same service with payments
 		for i in 5..8 {
@@ -484,11 +457,7 @@ fn aggregation_works_with_claim_in_between() {
 
 		// Should have 1 new entry for the 3 new calls
 		let bob_rewards_final = MockRewardsManager::get_pending_rewards(&bob);
-		assert_eq!(
-			bob_rewards_final.len(),
-			1,
-			"New calls after claim create new aggregated entry"
-		);
+		assert_eq!(bob_rewards_final.len(), 1, "New calls after claim create new aggregated entry");
 
 		let payment_amount = 100;
 		let operator_share_per_job = payment_amount * 85 / 100;

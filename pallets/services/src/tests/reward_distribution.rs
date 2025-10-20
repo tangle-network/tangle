@@ -279,8 +279,10 @@ fn test_no_operators_fails() {
 		let pricing_model = PricingModel::PayOnce { amount: payment };
 
 		// Should fail with NoOperatorsAvailable
-		assert!(Services::distribute_service_payment(&service, &alice, payment, &pricing_model)
-			.is_err());
+		assert!(
+			Services::distribute_service_payment(&service, &alice, payment, &pricing_model)
+				.is_err()
+		);
 	});
 }
 
