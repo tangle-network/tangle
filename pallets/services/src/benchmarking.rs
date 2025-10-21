@@ -3,7 +3,6 @@ use crate::OriginFor;
 use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
 use frame_support::{BoundedVec, assert_ok, traits::Currency};
 use frame_system::RawOrigin;
-use pallet_assets::Pallet as Assets;
 use scale_info::prelude::boxed::Box;
 use sp_core::{H160, crypto::Pair, ecdsa};
 use sp_runtime::{
@@ -94,10 +93,10 @@ fn ensure_native_balance<T: Config>(account: &T::AccountId) {
 
 fn ensure_asset_exists<T>(asset: u32)
 where
-	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
+	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
 {
 	let asset_id: AssetIdOf<T> = asset.into();
-	if Assets::<T>::maybe_total_supply(asset_id.clone()).is_some() {
+	if pallet_assets::Pallet::<T, pallet_assets::Instance1>::maybe_total_supply(asset_id.clone()).is_some() {
 		return;
 	}
 
@@ -105,8 +104,8 @@ where
 	ensure_native_balance::<T>(&owner);
 
 	let owner_lookup = T::Lookup::unlookup(owner.clone());
-	let min_balance: <T as pallet_assets::Config>::Balance = 1u128.saturated_into();
-	let _ = Assets::<T>::force_create(
+	let min_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance = 1u128.saturated_into();
+	let _ = pallet_assets::Pallet::<T, pallet_assets::Instance1>::force_create(
 		RawOrigin::Root.into(),
 		asset_id.clone().into(),
 		owner_lookup,
@@ -117,12 +116,12 @@ where
 
 fn ensure_asset_balance<T>(account: &T::AccountId, asset: u32)
 where
-	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 {
 	ensure_asset_exists::<T>(asset);
 	let asset_id: AssetIdOf<T> = asset.into();
-	let current = Assets::<T>::balance(asset_id.clone(), account);
+	let current = pallet_assets::Pallet::<T, pallet_assets::Instance1>::balance(asset_id.clone(), account);
 	let current_u128: u128 = current.saturated_into();
 
 	if current_u128 >= CUSTOM_ASSET_BALANCE_TARGET {
@@ -134,11 +133,11 @@ where
 		return;
 	}
 
-	let delta_balance: <T as pallet_assets::Config>::Balance = delta.saturated_into();
+	let delta_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance = delta.saturated_into();
 	let owner = asset_admin_account::<T>();
 	ensure_native_balance::<T>(&owner);
 	let beneficiary = T::Lookup::unlookup(account.clone());
-	let _ = Assets::<T>::mint(
+	let _ = pallet_assets::Pallet::<T, pallet_assets::Instance1>::mint(
 		RawOrigin::Signed(owner).into(),
 		asset_id.into(),
 		beneficiary,
@@ -148,8 +147,8 @@ where
 
 fn ensure_account_ready<T>(account: &T::AccountId)
 where
-	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 {
 	ensure_native_balance::<T>(account);
 	ensure_asset_balance::<T>(account, USDC);
@@ -159,8 +158,8 @@ where
 
 fn funded_account<T>(id: u8) -> T::AccountId
 where
-	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 {
 	let account = mock_account_id::<T>(id);
 	ensure_account_ready::<T>(&account);
@@ -169,8 +168,8 @@ where
 
 fn register_operator<T>(blueprint_id: u64, id: u8) -> T::AccountId
 where
-	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 {
 	let operator = funded_account::<T>(id);
 	assert_ok!(Pallet::<T>::register(
@@ -185,8 +184,8 @@ where
 
 fn prepare_blueprint_with_operators<T>(operator_ids: &[u8]) -> (T::AccountId, Vec<T::AccountId>)
 where
-	T: Config + pallet_assets::Config<AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config>::Balance: SaturatedConversion,
+	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
+	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 {
 	let owner = funded_account::<T>(1u8);
 	setup_master_blueprint_manager::<T>();
@@ -261,8 +260,8 @@ benchmarks! {
 	where_clause {
 		where
 			<T as crate::module::Config>::AssetId: From<u32>,
-			T: pallet_assets::Config<AssetId = <T as crate::module::Config>::AssetId>,
-			<T as pallet_assets::Config>::Balance: SaturatedConversion,
+			T: pallet_assets::Config<pallet_assets::Instance1, AssetId = <T as crate::module::Config>::AssetId>,
+			<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 	}
 
 	create_blueprint {
