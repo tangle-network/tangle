@@ -66,10 +66,11 @@ fn rewards_aggregate_for_same_service() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		// Make 10 job calls to the SAME service and process payments
 		let payment_amount = 100; // Blueprint pricing is 100 native tokens
@@ -178,10 +179,11 @@ fn aggregation_works_across_different_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id_0, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id_0,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		let service_id_1 = Services::next_instance_id();
 		assert_ok!(Services::request(
@@ -201,10 +203,11 @@ fn aggregation_works_across_different_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id_1, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id_1,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		// Make 5 calls to service 0 with payments
 		let payment_amount = 100; // Blueprint pricing is 100 native tokens
@@ -319,10 +322,11 @@ fn aggregation_prevents_bounded_vec_overflow() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		// Make 50 job calls - WITHOUT aggregation, this would overflow BoundedVec
 		// WITH aggregation, all 50 collapse into 1 entry
@@ -408,10 +412,11 @@ fn aggregation_works_with_claim_in_between() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		// Make 5 calls with payments
 		let payment_amount = 100; // Blueprint pricing is 100 native tokens

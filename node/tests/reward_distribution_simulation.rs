@@ -67,7 +67,6 @@ where
 
 		let alice = TestAccount::Alice;
 
-
 		// Setup MBSM using sudo
 		let mbsm_address = H160([0x13; 20]);
 		let update_mbsm_call = api::tx().sudo().sudo(
@@ -415,8 +414,8 @@ fn test_payonce_job_complete_reward_flow() {
 				let events = block.wait_for_success().await?;
 				for event in events.iter() {
 					let event = event?;
-					if event.pallet_name() == "Services" &&
-						event.variant_name() == "BlueprintCreated"
+					if event.pallet_name() == "Services"
+						&& event.variant_name() == "BlueprintCreated"
 					{
 						info!(
 							"✅ Blueprint created (ID: {blueprint_id}) with PayOnce job ({payment_amount} TNT)"
@@ -543,16 +542,17 @@ fn test_payonce_job_complete_reward_flow() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				match block.wait_for_success().await {
-					Ok(events) =>
+					Ok(events) => {
 						for event in events.iter() {
 							let event = event?;
-							if event.pallet_name() == "Services" &&
-								event.variant_name() == "ServiceRequested"
+							if event.pallet_name() == "Services"
+								&& event.variant_name() == "ServiceRequested"
 							{
 								info!("✅ Service requested (ID: {service_id})");
 								break;
 							}
-						},
+						}
+					},
 					Err(e) => {
 						error!("Service request failed: {e:?}");
 					},
@@ -600,29 +600,31 @@ fn test_payonce_job_complete_reward_flow() {
 			.await;
 
 		match job_result {
-			Ok(mut events_stream) =>
+			Ok(mut events_stream) => {
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						match block.wait_for_success().await {
-							Ok(events) =>
+							Ok(events) => {
 								for event in events.iter() {
 									let event = event?;
-									if event.pallet_name() == "Services" &&
-										event.variant_name() == "JobCalled"
+									if event.pallet_name() == "Services"
+										&& event.variant_name() == "JobCalled"
 									{
 										info!(
 											"✅✅✅ JOB CALLED SUCCESSFULLY - Payment should be processed!"
 										);
 										break;
 									}
-								},
+								}
+							},
 							Err(e) => {
 								error!("Job call failed: {e:?}");
 							},
 						}
 						break;
 					}
-				},
+				}
+			},
 			Err(e) => {
 				error!("Job call submission failed: {e:?}");
 			},
@@ -941,14 +943,15 @@ fn test_multi_operator_weighted_distribution() {
 			.await;
 
 		match job_result {
-			Ok(mut events_stream) =>
+			Ok(mut events_stream) => {
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						let _ = block.wait_for_success().await;
 						info!("✅ Job called - payment should be distributed");
 						break;
 					}
-				},
+				}
+			},
 			Err(e) => {
 				info!("Job call result: {e:?}");
 			},
@@ -1143,14 +1146,15 @@ fn test_subscription_automatic_billing() {
 			.await;
 
 		match job_result {
-			Ok(mut events_stream) =>
+			Ok(mut events_stream) => {
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						let _ = block.wait_for_success().await;
 						info!("✅ Subscription job called - billing should start");
 						break;
 					}
-				},
+				}
+			},
 			Err(e) => {
 				info!("Subscription job call: {e:?}");
 			},
@@ -2088,8 +2092,8 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 
 		// RIGOROUS ASSERTION: Treasury must receive exactly 5% of all payments
 		assert!(
-			treasury_received >= expected_treasury_total * 99 / 100 &&
-				treasury_received <= expected_treasury_total * 101 / 100,
+			treasury_received >= expected_treasury_total * 99 / 100
+				&& treasury_received <= expected_treasury_total * 101 / 100,
 			"🚨 TREASURY ERROR: Expected {} TNT (5% of {}), got {}",
 			expected_treasury_total,
 			total_payment_expected,
@@ -2378,11 +2382,10 @@ fn test_aggregation_across_multiple_services_e2e() {
 			let expected_amount = expected_per_job * num_jobs as u128;
 
 			// Find reward entry for this service
-			let reward_entry = bob_pending_rewards
-				.0
-				.iter()
-				.find(|r| r.0 == service_id)
-				.unwrap_or_else(|| panic!("Should have reward entry for service {}", service_id));
+			let reward_entry =
+				bob_pending_rewards.0.iter().find(|r| r.0 == service_id).unwrap_or_else(|| {
+					panic!("Should have reward entry for service {}", service_id)
+				});
 
 			assert_eq!(
 				reward_entry.1, expected_amount,
@@ -2928,8 +2931,8 @@ fn test_delegator_rewards_with_commission_split() {
 		// Commission should be 15% of 85,000 = 12,750 TNT
 		let expected_commission = 12_750u128;
 		assert!(
-			bob_commission_total >= expected_commission - 100 &&
-				bob_commission_total <= expected_commission + 100,
+			bob_commission_total >= expected_commission - 100
+				&& bob_commission_total <= expected_commission + 100,
 			"Bob's commission should be ~{} TNT, got {}",
 			expected_commission,
 			bob_commission_total
@@ -3003,8 +3006,8 @@ fn test_delegator_rewards_with_commission_split() {
 		// Bob's pool share should be 60% of 72,250 = 43,350 TNT
 		let expected_bob_pool = 43_350u128;
 		assert!(
-			bob_pool_received >= expected_bob_pool - 100 &&
-				bob_pool_received <= expected_bob_pool + 100,
+			bob_pool_received >= expected_bob_pool - 100
+				&& bob_pool_received <= expected_bob_pool + 100,
 			"Bob's pool share should be ~{} TNT, got {}",
 			expected_bob_pool,
 			bob_pool_received
@@ -3054,8 +3057,8 @@ fn test_delegator_rewards_with_commission_split() {
 		// Charlie's share should be 40% of 72,250 = 28,900 TNT
 		let expected_charlie_pool = 28_900u128;
 		assert!(
-			charlie_rewards_received >= expected_charlie_pool - 100 &&
-				charlie_rewards_received <= expected_charlie_pool + 100,
+			charlie_rewards_received >= expected_charlie_pool - 100
+				&& charlie_rewards_received <= expected_charlie_pool + 100,
 			"Charlie's pool share should be ~{} TNT, got {}",
 			expected_charlie_pool,
 			charlie_rewards_received
@@ -3067,8 +3070,7 @@ fn test_delegator_rewards_with_commission_split() {
 
 		// STEP 13: Verify Dave received developer rewards
 		info!("═══ STEP 13: Verifying Dave's developer rewards ═══");
-		let dave_rewards_key =
-			api::storage().rewards().pending_operator_rewards(dave.account_id());
+		let dave_rewards_key = api::storage().rewards().pending_operator_rewards(dave.account_id());
 		let dave_pending = t
 			.subxt
 			.storage()
@@ -3081,8 +3083,8 @@ fn test_delegator_rewards_with_commission_split() {
 		let dave_rewards_total: u128 = dave_pending.0.iter().map(|r| r.1).sum();
 		let expected_dave_rewards = 10_000u128; // 10% of 100,000
 		assert!(
-			dave_rewards_total >= expected_dave_rewards - 100 &&
-				dave_rewards_total <= expected_dave_rewards + 100,
+			dave_rewards_total >= expected_dave_rewards - 100
+				&& dave_rewards_total <= expected_dave_rewards + 100,
 			"Dave's rewards should be ~{} TNT, got {}",
 			expected_dave_rewards,
 			dave_rewards_total

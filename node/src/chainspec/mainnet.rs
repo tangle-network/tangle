@@ -222,12 +222,15 @@ fn mainnet_genesis(
 		}
 
 		Precompiles::used_addresses_h160().for_each(|address| {
-			map.insert(address, fp_evm::GenesisAccount {
-				nonce: Default::default(),
-				balance: Default::default(),
-				storage: Default::default(),
-				code: revert_bytecode.to_vec(),
-			});
+			map.insert(
+				address,
+				fp_evm::GenesisAccount {
+					nonce: Default::default(),
+					balance: Default::default(),
+					storage: Default::default(),
+					code: revert_bytecode.to_vec(),
+				},
+			);
 		});
 		map
 	};

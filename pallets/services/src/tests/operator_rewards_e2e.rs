@@ -489,9 +489,11 @@ fn test_erc20_pay_once_job_payment_e2e() {
 		));
 
 		// Operator approves
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), 0, vec![
-			get_security_commitment(TNT, 50)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			0,
+			vec![get_security_commitment(TNT, 50)]
+		));
 
 		// Simulate job call that triggers PayOnce payment
 		// Note: In production this would be called via Services::call() extrinsic

@@ -254,8 +254,8 @@ where
 		handle.record_db_read::<Runtime>(136)?;
 
 		// If previous approval exists, we need to clean it
-		if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender) !=
-			0u32.into()
+		if pallet_assets::Pallet::<Runtime, Instance>::allowance(asset_id.clone(), &owner, &spender)
+			!= 0u32.into()
 		{
 			RuntimeHelper::<Runtime>::try_dispatch(
 				handle,

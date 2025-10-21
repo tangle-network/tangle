@@ -901,8 +901,8 @@ pub mod pallet {
 				operator_commission,
 				commission_rate.deconstruct() as f64 / 10_000_000.0,
 				delegator_pool_share,
-				(Perbill::one().saturating_sub(commission_rate)).deconstruct() as f64 /
-					10_000_000.0
+				(Perbill::one().saturating_sub(commission_rate)).deconstruct() as f64
+					/ 10_000_000.0
 			);
 
 			// STEP 1: Record operator's commission (if non-zero)
