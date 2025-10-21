@@ -71,16 +71,13 @@ fn delegate_should_work() {
 		assert_eq!(operator_delegation.asset, asset);
 
 		// Verify that delegation was recorded with credits
-		assert_eq!(
-			MockRewardsManager::record_delegate_calls(),
-			vec![(
-				who.clone(),
-				operator.clone(),
-				asset,
-				amount,
-				None // No lock multiplier for this test
-			)]
-		);
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![(
+			who.clone(),
+			operator.clone(),
+			asset,
+			amount,
+			None // No lock multiplier for this test
+		)]);
 	});
 }
 
@@ -986,10 +983,9 @@ fn delegation_unstake_bug_with_nomination_pending() {
 			nomination_amount,
 			pallet_staking::RewardDestination::Staked
 		));
-		assert_ok!(Staking::nominate(
-			RuntimeOrigin::signed(delegator.clone()),
-			vec![operator.clone()]
-		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(delegator.clone()), vec![
+			operator.clone()
+		]));
 
 		// Create nomination delegation (simulate native restaking)
 		assert_ok!(MultiAssetDelegation::delegate_nomination(

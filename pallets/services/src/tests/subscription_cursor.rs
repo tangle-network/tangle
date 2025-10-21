@@ -71,11 +71,10 @@ fn subscription_processes_with_on_idle() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		// Subscribe to job (creates subscription billing entry)
 		assert_ok!(Services::call(
@@ -171,11 +170,10 @@ fn subscription_respects_weight_limits() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(eve.clone()),
@@ -269,11 +267,10 @@ fn subscription_cursor_persists_across_blocks() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(
-				RuntimeOrigin::signed(bob.clone()),
-				service_id,
-				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-			));
+			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+				get_security_commitment(TNT, 10),
+				get_security_commitment(WETH, 10)
+			],));
 
 			assert_ok!(Services::call(
 				RuntimeOrigin::signed(user.clone()),
@@ -383,11 +380,10 @@ fn subscription_processes_multiple_in_single_block() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(
-				RuntimeOrigin::signed(bob.clone()),
-				service_id,
-				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-			));
+			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+				get_security_commitment(TNT, 10),
+				get_security_commitment(WETH, 10)
+			],));
 
 			assert_ok!(Services::call(
 				RuntimeOrigin::signed(user.clone()),
@@ -478,11 +474,10 @@ fn subscription_skips_processing_when_no_weight() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(eve.clone()),

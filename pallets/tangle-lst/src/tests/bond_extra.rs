@@ -17,14 +17,11 @@ fn bond_extra_from_free_balance_creator() {
 		// then
 		assert_eq!(Currency::free_balance(10), 90);
 
-		assert_eq!(
-			pool_events_since_last_call(),
-			vec![
-				Event::Created { depositor: 10, pool_id: 1 },
-				Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
-				Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: false }
-			]
-		);
+		assert_eq!(pool_events_since_last_call(), vec![
+			Event::Created { depositor: 10, pool_id: 1 },
+			Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: true },
+			Event::Bonded { member: 10, pool_id: 1, bonded: 10, joined: false }
+		]);
 
 		// when
 		assert_ok!(Lst::bond_extra(RuntimeOrigin::signed(10), 1, BondExtra::FreeBalance(20)));
@@ -32,9 +29,11 @@ fn bond_extra_from_free_balance_creator() {
 		// then
 		assert_eq!(Currency::free_balance(10), 70);
 
-		assert_eq!(
-			pool_events_since_last_call(),
-			vec![Event::Bonded { member: 10, pool_id: 1, bonded: 20, joined: false }]
-		);
+		assert_eq!(pool_events_since_last_call(), vec![Event::Bonded {
+			member: 10,
+			pool_id: 1,
+			bonded: 20,
+			joined: false
+		}]);
 	})
 }

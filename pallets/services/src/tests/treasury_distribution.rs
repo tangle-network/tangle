@@ -68,11 +68,10 @@ fn treasury_receives_five_percent_on_payonce_job() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		let treasury_account = TreasuryAccount::get();
 
@@ -199,11 +198,10 @@ fn treasury_accumulates_from_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id_0,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id_0, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		// Request second service
 		let service_id_1 = Services::next_instance_id();
@@ -224,11 +222,10 @@ fn treasury_accumulates_from_multiple_services() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id_1,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id_1, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		let treasury_account = TreasuryAccount::get();
 
@@ -350,17 +347,15 @@ fn treasury_distribution_works_with_multiple_operators() {
 			MembershipModel::Fixed { min_operators: 2 },
 		));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(bob.clone()),
-			service_id,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
-		assert_ok!(Services::approve(
-			RuntimeOrigin::signed(charlie.clone()),
-			service_id,
-			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
-		));
+		assert_ok!(Services::approve(RuntimeOrigin::signed(charlie.clone()), service_id, vec![
+			get_security_commitment(TNT, 10),
+			get_security_commitment(WETH, 10)
+		],));
 
 		let treasury_account = TreasuryAccount::get();
 

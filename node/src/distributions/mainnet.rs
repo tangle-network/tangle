@@ -391,13 +391,10 @@ pub fn get_distribution_for(
 		let amount_after_cliff = (vested_amount as f64 * remaining_fraction) as u128;
 		let amount_unlocked_per_block_after_cliff =
 			vesting_per_block(amount_after_cliff, total_vesting_schedule - vesting_cliff);
-		vesting.push((
-			address,
-			vec![
-				(amount_on_cliff, amount_on_cliff, vesting_cliff),
-				(amount_after_cliff, amount_unlocked_per_block_after_cliff, vesting_cliff),
-			],
-		));
+		vesting.push((address, vec![
+			(amount_on_cliff, amount_on_cliff, vesting_cliff),
+			(amount_after_cliff, amount_unlocked_per_block_after_cliff, vesting_cliff),
+		]));
 	});
 
 	DistributionResult { claims, vesting, vesting_length: total_vesting_schedule, vesting_cliff }

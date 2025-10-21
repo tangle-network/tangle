@@ -281,14 +281,10 @@ impl<T: Config> Pallet<T> {
 		let pool = OperatorRewardPools::<T>::get(operator);
 
 		// Initialize debt at current accumulator (no historical rewards)
-		DelegatorRewardDebts::<T>::insert(
-			delegator,
-			operator,
-			crate::types::DelegatorRewardDebt {
-				last_accumulated_per_share: pool.accumulated_rewards_per_share,
-				staked_amount: initial_stake,
-			},
-		);
+		DelegatorRewardDebts::<T>::insert(delegator, operator, crate::types::DelegatorRewardDebt {
+			last_accumulated_per_share: pool.accumulated_rewards_per_share,
+			staked_amount: initial_stake,
+		});
 
 		// Update pool's total staked amount
 		OperatorRewardPools::<T>::mutate(operator, |p| {

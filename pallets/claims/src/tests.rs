@@ -294,11 +294,9 @@ fn attest_claiming_works() {
 fn cannot_bypass_attest_claiming() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(Balances::free_balance(get_multi_address_account_id(42).to_account_id_32()), 0);
-		let s = sig::<Test>(
-			&dave(),
-			&get_multi_address_account_id(42).to_account_id_32().encode(),
-			&[],
-		);
+		let s =
+			sig::<Test>(&dave(), &get_multi_address_account_id(42).to_account_id_32().encode(), &[
+			]);
 		let r = ClaimsPallet::claim(
 			RuntimeOrigin::none(),
 			Some(get_multi_address_account_id(42)),
@@ -649,18 +647,15 @@ fn validate_unsigned_works() {
 
 	new_test_ext().execute_with(|| {
 		assert_eq!(
-			<Pallet<Test>>::validate_unsigned(
-				source,
-				&ClaimsCall::claim {
-					dest: Some(get_multi_address_account_id(1)),
-					signer: None,
-					signature: sig::<Test>(
-						&alice(),
-						&get_multi_address_account_id(1).to_account_id_32().encode(),
-						&[][..]
-					)
-				}
-			),
+			<Pallet<Test>>::validate_unsigned(source, &ClaimsCall::claim {
+				dest: Some(get_multi_address_account_id(1)),
+				signer: None,
+				signature: sig::<Test>(
+					&alice(),
+					&get_multi_address_account_id(1).to_account_id_32().encode(),
+					&[][..]
+				)
+			}),
 			Ok(ValidTransaction {
 				priority: 100,
 				requires: vec![],
@@ -670,29 +665,23 @@ fn validate_unsigned_works() {
 			})
 		);
 		assert_eq!(
-			<Pallet<Test>>::validate_unsigned(
-				source,
-				&ClaimsCall::claim {
-					dest: Some(get_multi_address_account_id(0)),
-					signer: None,
-					signature: MultiAddressSignature::EVM(EcdsaSignature([0; 65]))
-				}
-			),
+			<Pallet<Test>>::validate_unsigned(source, &ClaimsCall::claim {
+				dest: Some(get_multi_address_account_id(0)),
+				signer: None,
+				signature: MultiAddressSignature::EVM(EcdsaSignature([0; 65]))
+			}),
 			InvalidTransaction::Custom(ValidityError::InvalidEthereumSignature.into()).into(),
 		);
 		assert_eq!(
-			<Pallet<Test>>::validate_unsigned(
-				source,
-				&ClaimsCall::claim {
-					dest: Some(get_multi_address_account_id(1)),
-					signer: None,
-					signature: sig::<Test>(
-						&bob(),
-						&get_multi_address_account_id(1).to_account_id_32().encode(),
-						&[][..]
-					)
-				}
-			),
+			<Pallet<Test>>::validate_unsigned(source, &ClaimsCall::claim {
+				dest: Some(get_multi_address_account_id(1)),
+				signer: None,
+				signature: sig::<Test>(
+					&bob(),
+					&get_multi_address_account_id(1).to_account_id_32().encode(),
+					&[][..]
+				)
+			}),
 			InvalidTransaction::Custom(ValidityError::SignerHasNoClaim.into()).into(),
 		);
 		let s = sig::<Test>(
@@ -717,15 +706,12 @@ fn validate_unsigned_works() {
 			})
 		);
 		assert_eq!(
-			<Pallet<Test>>::validate_unsigned(
-				source,
-				&ClaimsCall::claim_attest {
-					dest: Some(get_multi_address_account_id(1)),
-					signer: None,
-					signature: MultiAddressSignature::EVM(EcdsaSignature([0; 65])),
-					statement: StatementKind::Regular.to_text().to_vec()
-				}
-			),
+			<Pallet<Test>>::validate_unsigned(source, &ClaimsCall::claim_attest {
+				dest: Some(get_multi_address_account_id(1)),
+				signer: None,
+				signature: MultiAddressSignature::EVM(EcdsaSignature([0; 65])),
+				statement: StatementKind::Regular.to_text().to_vec()
+			}),
 			InvalidTransaction::Custom(ValidityError::InvalidEthereumSignature.into()).into(),
 		);
 
