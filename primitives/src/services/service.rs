@@ -185,8 +185,8 @@ impl<C: Constraints> ServiceBlueprint<C> {
 				ethabi::ParamType::String,
 				// Service License
 				ethabi::ParamType::String,
-				// Profiling Data
-				ethabi::ParamType::String,
+				// NOTE: profiling_data is intentionally excluded from EVM encoding
+				// to maintain backward compatibility with existing MBSM contracts
 			]),
 			// Job Definitions ?
 			// Registration Parameters ?
@@ -251,14 +251,8 @@ impl<C: Constraints> ServiceBlueprint<C> {
 				ethabi::Token::String(
 					self.metadata.license.as_ref().map(|v| v.as_str().into()).unwrap_or_default(),
 				),
-				// Profiling Data
-				ethabi::Token::String(
-					self.metadata
-						.profiling_data
-						.as_ref()
-						.map(|v| v.as_str().into())
-						.unwrap_or_default(),
-				),
+				// NOTE: profiling_data is intentionally excluded from EVM encoding
+				// to maintain backward compatibility with existing MBSM contracts
 			]),
 			// Job Definitions ?
 			// Registration Parameters ?
