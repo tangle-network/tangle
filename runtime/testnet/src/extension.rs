@@ -106,9 +106,9 @@ impl SignedExtension for CheckNominatedRestaked<Runtime> {
 				}
 			},
 			// Match on various Utility batch calls
-			RuntimeCall::Utility(pallet_utility::Call::batch { calls })
-			| RuntimeCall::Utility(pallet_utility::Call::batch_all { calls })
-			| RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls }) |
+			RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) |
+			RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
 					self.validate(who, call, _info, _len)?;
 				}

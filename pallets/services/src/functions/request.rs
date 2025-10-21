@@ -49,10 +49,10 @@ impl<T: Config> Pallet<T> {
 
 			// Validate exposure percentages
 			ensure!(
-				requirement.min_exposure_percent > Percent::zero()
-					&& requirement.max_exposure_percent > Percent::zero()
-					&& requirement.min_exposure_percent <= requirement.max_exposure_percent
-					&& requirement.max_exposure_percent <= Percent::from_percent(100),
+				requirement.min_exposure_percent > Percent::zero() &&
+					requirement.max_exposure_percent > Percent::zero() &&
+					requirement.min_exposure_percent <= requirement.max_exposure_percent &&
+					requirement.max_exposure_percent <= Percent::from_percent(100),
 				Error::<T>::InvalidSecurityRequirements,
 			);
 		}
@@ -130,8 +130,8 @@ impl<T: Config> Pallet<T> {
 			.ok_or(Error::<T>::NoNativeAsset)?;
 
 		ensure!(
-			native_asset_requirement.min_exposure_percent
-				>= T::MinimumNativeSecurityRequirement::get(),
+			native_asset_requirement.min_exposure_percent >=
+				T::MinimumNativeSecurityRequirement::get(),
 			Error::<T>::NativeAssetExposureTooLow
 		);
 

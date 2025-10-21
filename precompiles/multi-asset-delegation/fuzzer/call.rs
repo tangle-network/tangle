@@ -275,9 +275,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 	match call {
 		PCall::deposit { asset_id, amount, token_address, lock_multiplier: 0 } => {
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			match deposit_asset {
@@ -306,9 +305,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		},
 		PCall::schedule_withdraw { asset_id, amount, token_address } => {
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			let round = MultiAssetDelegation::current_round();
@@ -337,9 +335,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 			let round = MultiAssetDelegation::current_round();
 
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			assert!(
@@ -356,9 +353,8 @@ fn do_sanity_checks(call: PCall, origin: Address, outcome: PrecompileOutput) {
 		},
 		PCall::delegate { operator, asset_id, amount, token_address, .. } => {
 			let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0.0) {
-				(0, erc20_token) if erc20_token != [0; 20] => {
-					(Asset::Erc20(erc20_token.into()), amount)
-				},
+				(0, erc20_token) if erc20_token != [0; 20] =>
+					(Asset::Erc20(erc20_token.into()), amount),
 				(other_asset, _) => (Asset::Custom(other_asset.into()), amount),
 			};
 			let operator_account = AccountId::from(operator.0);

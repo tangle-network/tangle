@@ -36,7 +36,7 @@ where
 		last_billed: Option<BlockNumber>,
 	) -> Option<BillingCalculation<Balance>> {
 		match self {
-			PricingModel::PayOnce { amount } => {
+			PricingModel::PayOnce { amount } =>
 				if last_billed.is_none() {
 					Some(BillingCalculation {
 						amount: *amount,
@@ -51,8 +51,7 @@ where
 						should_bill: false,
 						skip_reason: Some(BillingSkipReason::AlreadyBilled),
 					})
-				}
-			},
+				},
 			_ => None,
 		}
 	}

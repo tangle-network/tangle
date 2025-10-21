@@ -1831,9 +1831,8 @@ impl<T: Config> Pallet<T> {
 		bonded_pool.ok_to_join()?;
 
 		let (_points_issued, bonded) = match extra {
-			BondExtra::FreeBalance(amount) => {
-				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount)
-			},
+			BondExtra::FreeBalance(amount) =>
+				(bonded_pool.try_bond_funds(&member_account, amount, BondType::Later)?, amount),
 		};
 
 		bonded_pool.ok_to_be_open()?;

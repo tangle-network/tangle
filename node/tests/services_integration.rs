@@ -255,17 +255,16 @@ fn test_blueprint_creation() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				match block.wait_for_success().await {
-					Ok(events) => {
+					Ok(events) =>
 						for event in events.iter() {
 							let event = event?;
-							if event.pallet_name() == "Services"
-								&& event.variant_name() == "BlueprintCreated"
+							if event.pallet_name() == "Services" &&
+								event.variant_name() == "BlueprintCreated"
 							{
 								info!("✅ Blueprint created successfully");
 								return anyhow::Ok(());
 							}
-						}
-					},
+						},
 					Err(e) => {
 						return Err(anyhow::anyhow!("Blueprint creation failed: {e:?}"));
 					},
@@ -322,17 +321,16 @@ fn test_operator_registration() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				match block.wait_for_success().await {
-					Ok(events) => {
+					Ok(events) =>
 						for event in events.iter() {
 							let event = event?;
-							if event.pallet_name() == "Services"
-								&& event.variant_name() == "Registered"
+							if event.pallet_name() == "Services" &&
+								event.variant_name() == "Registered"
 							{
 								info!("✅ Operator registration succeeded");
 								return anyhow::Ok(());
 							}
-						}
-					},
+						},
 					Err(e) => {
 						return Err(anyhow::anyhow!("Operator registration failed: {e:?}"));
 					},
@@ -416,17 +414,16 @@ fn test_service_request_creation() {
 		while let Some(Ok(status)) = result.next().await {
 			if let TxStatus::InBestBlock(block) = status {
 				match block.wait_for_success().await {
-					Ok(events) => {
+					Ok(events) =>
 						for event in events.iter() {
 							let event = event?;
-							if event.pallet_name() == "Services"
-								&& event.variant_name() == "ServiceRequested"
+							if event.pallet_name() == "Services" &&
+								event.variant_name() == "ServiceRequested"
 							{
 								info!("✅ Service request created successfully");
 								return anyhow::Ok(());
 							}
-						}
-					},
+						},
 					Err(e) => {
 						return Err(anyhow::anyhow!("Service request failed: {e:?}"));
 					},
@@ -514,8 +511,8 @@ fn test_job_call_structure() {
 					Ok(events) => {
 						for event in events.iter() {
 							let event = event?;
-							if event.pallet_name() == "Services"
-								&& event.variant_name() == "ServiceRequested"
+							if event.pallet_name() == "Services" &&
+								event.variant_name() == "ServiceRequested"
 							{
 								// Try to extract service_id from event if possible
 								// For now, use 0 as default
@@ -628,29 +625,27 @@ fn test_end_to_end_services_workflow() {
 			.await;
 
 		match blueprint_result {
-			Ok(mut events_stream) => {
+			Ok(mut events_stream) =>
 				while let Some(Ok(status)) = events_stream.next().await {
 					if let TxStatus::InBestBlock(block) = status {
 						match block.wait_for_success().await {
-							Ok(events) => {
+							Ok(events) =>
 								for event in events.iter() {
 									let event = event?;
-									if event.pallet_name() == "Services"
-										&& event.variant_name() == "BlueprintCreated"
+									if event.pallet_name() == "Services" &&
+										event.variant_name() == "BlueprintCreated"
 									{
 										info!("✅ Step 1 Complete: Blueprint created successfully");
 										break;
 									}
-								}
-							},
+								},
 							Err(e) => {
 								info!("Blueprint creation failed: {e:?}");
 							},
 						}
 						break;
 					}
-				}
-			},
+				},
 			Err(e) => {
 				info!("Blueprint submission failed: {e:?}");
 			},

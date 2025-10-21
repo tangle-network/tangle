@@ -100,8 +100,8 @@ impl<T: Config> Pallet<T> {
 				.delegations
 				.iter_mut()
 				.find(|d| {
-					d.operator == unapplied_slash.operator
-						&& d.blueprint_selection.contains(&unapplied_slash.blueprint_id)
+					d.operator == unapplied_slash.operator &&
+						d.blueprint_selection.contains(&unapplied_slash.blueprint_id)
 				})
 				.ok_or(Error::<T>::NoActiveDelegation)?;
 

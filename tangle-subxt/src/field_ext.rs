@@ -22,9 +22,8 @@ impl FieldExt for Field<AccountId32> {
 			Field::Uint64(_) => FieldType::Uint64,
 			Field::Int64(_) => FieldType::Int64,
 			Field::String(_) => FieldType::String,
-			Field::Array(ty, values) => {
-				FieldType::Array(values.0.len() as u64, Box::new(ty.clone()))
-			},
+			Field::Array(ty, values) =>
+				FieldType::Array(values.0.len() as u64, Box::new(ty.clone())),
 			Field::List(ty, _) => FieldType::List(Box::new(ty.clone())),
 			Field::Struct(_, fields) => {
 				let mut type_fields = Vec::with_capacity(fields.0.len());

@@ -628,8 +628,8 @@ fn test_payment_maximum_amount() {
 		let max_erc20_amount = Services::query_erc20_balance_of(USDC_ERC20, charlie_address)
 			.map(|(b, _)| b)
 			.unwrap_or_default()
-			.as_u128()
-			+ 1;
+			.as_u128() +
+			1;
 		assert_err!(
 			Services::request(
 				RuntimeOrigin::signed(charlie_evm_account_id.clone()),

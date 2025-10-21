@@ -106,9 +106,8 @@ where
 
 		match api.query_user_credits_with_asset(at, account_id, asset_id) {
 			Ok(Ok(res)) => Ok(res),
-			Ok(Err(e)) => {
-				Err(map_err(format!("{:?}", e), "Unable to query user credits with asset"))
-			},
+			Ok(Err(e)) =>
+				Err(map_err(format!("{:?}", e), "Unable to query user credits with asset")),
 			Err(e) => Err(map_err(format!("{:?}", e), "Unable to query user credits with asset")),
 		}
 	}
