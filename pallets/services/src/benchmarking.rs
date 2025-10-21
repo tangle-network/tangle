@@ -96,7 +96,9 @@ where
 	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
 {
 	let asset_id: AssetIdOf<T> = asset.into();
-	if pallet_assets::Pallet::<T, pallet_assets::Instance1>::maybe_total_supply(asset_id.clone()).is_some() {
+	if pallet_assets::Pallet::<T, pallet_assets::Instance1>::maybe_total_supply(asset_id.clone())
+		.is_some()
+	{
 		return;
 	}
 
@@ -104,7 +106,8 @@ where
 	ensure_native_balance::<T>(&owner);
 
 	let owner_lookup = T::Lookup::unlookup(owner.clone());
-	let min_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance = 1u128.saturated_into();
+	let min_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance =
+		1u128.saturated_into();
 	let _ = pallet_assets::Pallet::<T, pallet_assets::Instance1>::force_create(
 		RawOrigin::Root.into(),
 		asset_id.clone().into(),
@@ -121,7 +124,8 @@ where
 {
 	ensure_asset_exists::<T>(asset);
 	let asset_id: AssetIdOf<T> = asset.into();
-	let current = pallet_assets::Pallet::<T, pallet_assets::Instance1>::balance(asset_id.clone(), account);
+	let current =
+		pallet_assets::Pallet::<T, pallet_assets::Instance1>::balance(asset_id.clone(), account);
 	let current_u128: u128 = current.saturated_into();
 
 	if current_u128 >= CUSTOM_ASSET_BALANCE_TARGET {
@@ -133,7 +137,8 @@ where
 		return;
 	}
 
-	let delta_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance = delta.saturated_into();
+	let delta_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance =
+		delta.saturated_into();
 	let owner = asset_admin_account::<T>();
 	ensure_native_balance::<T>(&owner);
 	let beneficiary = T::Lookup::unlookup(account.clone());
