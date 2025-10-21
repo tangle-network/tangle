@@ -76,7 +76,7 @@ pub fn new_partial<BIQ>(
 		FullBackend,
 		FullSelectChain,
 		sc_consensus::DefaultImportQueue<Block>,
-		sc_transaction_pool::FullPool<Block, FullClient>,
+		sc_transaction_pool::TransactionPoolHandle<Block, FullClient>,
 		(
 			Option<Telemetry>,
 			BoxBlockImport,
@@ -610,7 +610,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 						block_import,
 						env: proposer_factory,
 						client,
-						pool: transaction_pool,
+						pool: transaction_pool.clone(),
 						commands_stream,
 						select_chain,
 						consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
@@ -623,7 +623,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 					block_import,
 					env: proposer_factory,
 					client,
-					pool: transaction_pool,
+					pool: transaction_pool.clone(),
 					select_chain,
 					consensus_data_provider: Some(Box::new(babe_consensus_data_provider)),
 					create_inherent_data_providers: pending_create_inherent_data_providers,
@@ -660,7 +660,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 					}
 				});
 		}
-		return Ok(task_manager);
 	}
 
 	let grandpa_config = sc_consensus_grandpa::Config {
@@ -728,7 +727,6 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			});
 	}
 
-	network_starter.start_network();
 	Ok(task_manager)
 }
 
