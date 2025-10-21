@@ -231,22 +231,16 @@ fn main() {
 			ext.execute_with(|| {
 				System::set_block_number(block_number);
 				for (call, who) in random_calls(&mut rng) {
-					let mut handle = MockHandle::new(
-						to,
-						Context {
-							address: to,
-							caller: who.into(),
-							apparent_value: Default::default(),
-						},
-					);
-					let mut handle_clone = MockHandle::new(
-						to,
-						Context {
-							address: to,
-							caller: who.into(),
-							apparent_value: Default::default(),
-						},
-					);
+					let mut handle = MockHandle::new(to, Context {
+						address: to,
+						caller: who.into(),
+						apparent_value: Default::default(),
+					});
+					let mut handle_clone = MockHandle::new(to, Context {
+						address: to,
+						caller: who.into(),
+						apparent_value: Default::default(),
+					});
 					let encoded = call.encode();
 					handle.input = encoded.clone();
 					let call_clone = PCall::parse_call_data(&mut handle).unwrap();
