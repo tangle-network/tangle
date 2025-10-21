@@ -46,52 +46,38 @@ fn test_service_payment_distributes_to_operators() {
 		// Bob: 50% TNT + 50% WETH = 100 total percentage points
 		// Charlie: 30% TNT + 30% WETH = 60 total percentage points
 		// Dave: 20% TNT + 20% WETH = 40 total percentage points
-		let service = create_test_service_with_operators(
-			0,
-			0,
-			alice.clone(),
-			vec![
-				(
-					bob.clone(),
-					vec![
-						AssetSecurityCommitment {
-							asset: Asset::Custom(TNT),
-							exposure_percent: Percent::from_percent(50),
-						},
-						AssetSecurityCommitment {
-							asset: Asset::Custom(WETH),
-							exposure_percent: Percent::from_percent(50),
-						},
-					],
-				),
-				(
-					charlie.clone(),
-					vec![
-						AssetSecurityCommitment {
-							asset: Asset::Custom(TNT),
-							exposure_percent: Percent::from_percent(30),
-						},
-						AssetSecurityCommitment {
-							asset: Asset::Custom(WETH),
-							exposure_percent: Percent::from_percent(30),
-						},
-					],
-				),
-				(
-					dave.clone(),
-					vec![
-						AssetSecurityCommitment {
-							asset: Asset::Custom(TNT),
-							exposure_percent: Percent::from_percent(20),
-						},
-						AssetSecurityCommitment {
-							asset: Asset::Custom(WETH),
-							exposure_percent: Percent::from_percent(20),
-						},
-					],
-				),
-			],
-		);
+		let service = create_test_service_with_operators(0, 0, alice.clone(), vec![
+			(bob.clone(), vec![
+				AssetSecurityCommitment {
+					asset: Asset::Custom(TNT),
+					exposure_percent: Percent::from_percent(50),
+				},
+				AssetSecurityCommitment {
+					asset: Asset::Custom(WETH),
+					exposure_percent: Percent::from_percent(50),
+				},
+			]),
+			(charlie.clone(), vec![
+				AssetSecurityCommitment {
+					asset: Asset::Custom(TNT),
+					exposure_percent: Percent::from_percent(30),
+				},
+				AssetSecurityCommitment {
+					asset: Asset::Custom(WETH),
+					exposure_percent: Percent::from_percent(30),
+				},
+			]),
+			(dave.clone(), vec![
+				AssetSecurityCommitment {
+					asset: Asset::Custom(TNT),
+					exposure_percent: Percent::from_percent(20),
+				},
+				AssetSecurityCommitment {
+					asset: Asset::Custom(WETH),
+					exposure_percent: Percent::from_percent(20),
+				},
+			]),
+		]);
 
 		let payment: Balance = 10_000;
 		let pricing_model = PricingModel::PayOnce { amount: payment };
@@ -142,18 +128,13 @@ fn test_single_operator_gets_full_share() {
 		let bob = mock_pub_key(BOB);
 
 		// Single operator with 60% exposure
-		let service = create_test_service_with_operators(
-			0,
-			0,
-			alice.clone(),
-			vec![(
-				bob.clone(),
-				vec![AssetSecurityCommitment {
+		let service =
+			create_test_service_with_operators(0, 0, alice.clone(), vec![(bob.clone(), vec![
+				AssetSecurityCommitment {
 					asset: Asset::Custom(TNT),
 					exposure_percent: Percent::from_percent(60),
-				}],
-			)],
-		);
+				},
+			])]);
 
 		let payment: Balance = 5_000;
 		let pricing_model = PricingModel::PayOnce { amount: payment };
@@ -180,18 +161,13 @@ fn test_zero_payment_handling() {
 		let alice = mock_pub_key(ALICE);
 		let bob = mock_pub_key(BOB);
 
-		let service = create_test_service_with_operators(
-			0,
-			0,
-			alice.clone(),
-			vec![(
-				bob.clone(),
-				vec![AssetSecurityCommitment {
+		let service =
+			create_test_service_with_operators(0, 0, alice.clone(), vec![(bob.clone(), vec![
+				AssetSecurityCommitment {
 					asset: Asset::Custom(TNT),
 					exposure_percent: Percent::from_percent(50),
-				}],
-			)],
-		);
+				},
+			])]);
 
 		let payment: Balance = 0;
 		let pricing_model = PricingModel::PayOnce { amount: payment };
@@ -222,27 +198,16 @@ fn test_unequal_exposure_distribution() {
 		// Operator share: 85% * 10,000 = 8,500
 		// Bob: (40/50) * 8,500 = 6,800
 		// Charlie: (10/50) * 8,500 = 1,700
-		let service = create_test_service_with_operators(
-			0,
-			0,
-			alice.clone(),
-			vec![
-				(
-					bob.clone(),
-					vec![AssetSecurityCommitment {
-						asset: Asset::Custom(TNT),
-						exposure_percent: Percent::from_percent(40),
-					}],
-				),
-				(
-					charlie.clone(),
-					vec![AssetSecurityCommitment {
-						asset: Asset::Custom(TNT),
-						exposure_percent: Percent::from_percent(10),
-					}],
-				),
-			],
-		);
+		let service = create_test_service_with_operators(0, 0, alice.clone(), vec![
+			(bob.clone(), vec![AssetSecurityCommitment {
+				asset: Asset::Custom(TNT),
+				exposure_percent: Percent::from_percent(40),
+			}]),
+			(charlie.clone(), vec![AssetSecurityCommitment {
+				asset: Asset::Custom(TNT),
+				exposure_percent: Percent::from_percent(10),
+			}]),
+		]);
 
 		let payment: Balance = 10_000;
 		let pricing_model = PricingModel::PayOnce { amount: payment };
@@ -296,27 +261,16 @@ fn test_zero_exposure_operator_gets_nothing() {
 		let charlie = mock_pub_key(CHARLIE);
 
 		// Bob has 50% exposure, Charlie has 0% exposure (shouldn't happen but test anyway)
-		let service = create_test_service_with_operators(
-			0,
-			0,
-			alice.clone(),
-			vec![
-				(
-					bob.clone(),
-					vec![AssetSecurityCommitment {
-						asset: Asset::Custom(TNT),
-						exposure_percent: Percent::from_percent(50),
-					}],
-				),
-				(
-					charlie.clone(),
-					vec![AssetSecurityCommitment {
-						asset: Asset::Custom(TNT),
-						exposure_percent: Percent::from_percent(0),
-					}],
-				),
-			],
-		);
+		let service = create_test_service_with_operators(0, 0, alice.clone(), vec![
+			(bob.clone(), vec![AssetSecurityCommitment {
+				asset: Asset::Custom(TNT),
+				exposure_percent: Percent::from_percent(50),
+			}]),
+			(charlie.clone(), vec![AssetSecurityCommitment {
+				asset: Asset::Custom(TNT),
+				exposure_percent: Percent::from_percent(0),
+			}]),
+		]);
 
 		let payment: Balance = 10_000;
 		let pricing_model = PricingModel::PayOnce { amount: payment };

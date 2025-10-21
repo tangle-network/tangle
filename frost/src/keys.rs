@@ -500,10 +500,11 @@ pub fn split<C: Ciphersuite, R: RngCore + CryptoRng>(
 		secret_shares_by_id.insert(secret_share.identifier, secret_share);
 	}
 
-	Ok((
-		secret_shares_by_id,
-		PublicKeyPackage { header: Header::default(), verifying_shares, verifying_key },
-	))
+	Ok((secret_shares_by_id, PublicKeyPackage {
+		header: Header::default(),
+		verifying_shares,
+		verifying_key,
+	}))
 }
 
 /// Evaluate the polynomial with the given coefficients (constant term first)

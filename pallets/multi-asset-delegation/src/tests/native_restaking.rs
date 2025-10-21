@@ -86,16 +86,13 @@ fn native_restaking_should_work() {
 		assert_eq!(locks[1].amount, delegate_amount);
 
 		// Verify that nomination delegation was recorded with credits
-		assert_eq!(
-			MockRewardsManager::record_delegate_calls(),
-			vec![(
-				who.clone(),
-				operator.clone(),
-				Asset::Custom(TNT), // TNT is represented as Asset::Custom(0)
-				delegate_amount,
-				None // No lock multiplier for nomination delegations
-			)]
-		);
+		assert_eq!(MockRewardsManager::record_delegate_calls(), vec![(
+			who.clone(),
+			operator.clone(),
+			Asset::Custom(TNT), // TNT is represented as Asset::Custom(0)
+			delegate_amount,
+			None // No lock multiplier for nomination delegations
+		)]);
 	});
 }
 
@@ -332,10 +329,9 @@ fn native_restake_to_non_operator() {
 			amount,
 			pallet_staking::RewardDestination::Staked
 		));
-		assert_ok!(Staking::nominate(
-			RuntimeOrigin::signed(who.clone()),
-			vec![non_operator.clone()]
-		));
+		assert_ok!(Staking::nominate(RuntimeOrigin::signed(who.clone()), vec![
+			non_operator.clone()
+		]));
 
 		// Try to restake to non-operator
 		assert_noop!(

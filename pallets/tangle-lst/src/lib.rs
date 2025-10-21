@@ -1788,16 +1788,13 @@ impl<T: Config> Pallet<T> {
 			ExistenceRequirement::KeepAlive,
 		)?;
 
-		RewardPools::<T>::insert(
-			pool_id,
-			RewardPool::<T> {
-				last_recorded_reward_counter: Zero::zero(),
-				last_recorded_total_payouts: Zero::zero(),
-				total_rewards_claimed: Zero::zero(),
-				total_commission_pending: Zero::zero(),
-				total_commission_claimed: Zero::zero(),
-			},
-		);
+		RewardPools::<T>::insert(pool_id, RewardPool::<T> {
+			last_recorded_reward_counter: Zero::zero(),
+			last_recorded_total_payouts: Zero::zero(),
+			total_rewards_claimed: Zero::zero(),
+			total_commission_pending: Zero::zero(),
+			total_commission_claimed: Zero::zero(),
+		});
 		ReversePoolIdLookup::<T>::insert(bonded_pool.bonded_account(), pool_id);
 
 		Self::deposit_event(Event::<T>::Created { depositor: who.clone(), pool_id });
