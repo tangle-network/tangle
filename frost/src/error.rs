@@ -126,36 +126,36 @@ where
 		// Use an exhaustive match to make sure that if we add new enum items
 		// then we will explicitly check if they should be added here.
 		match self {
-			Error::InvalidSignatureShare { culprit: identifier }
-			| Error::InvalidProofOfKnowledge { culprit: identifier } => Some(*identifier),
+			Error::InvalidSignatureShare { culprit: identifier } |
+			Error::InvalidProofOfKnowledge { culprit: identifier } => Some(*identifier),
 			Error::InvalidSecretShare { culprit: identifier } => *identifier,
-			Error::InvalidMinSigners
-			| Error::InvalidMaxSigners
-			| Error::InvalidCoefficients
-			| Error::MalformedIdentifier
-			| Error::MalformedSigningKey
-			| Error::MalformedVerifyingKey
-			| Error::MalformedSignature
-			| Error::InvalidSignature
-			| Error::DuplicatedShares
-			| Error::IncorrectNumberOfShares
-			| Error::IdentityCommitment
-			| Error::MissingCommitment
-			| Error::IncorrectCommitment
-			| Error::PackageNotFound
-			| Error::IncorrectNumberOfPackages
-			| Error::IncorrectPackage
-			| Error::DKGNotSupported
-			| Error::FieldError(_)
-			| Error::GroupError(_)
-			| Error::DuplicatedIdentifier
-			| Error::InvalidCoefficient
-			| Error::UnknownIdentifier
-			| Error::IncorrectNumberOfIdentifiers
-			| Error::IncorrectNumberOfCommitments
-			| Error::SerializationError
-			| Error::DeserializationError
-			| Error::IdentifierDerivationNotSupported => None,
+			Error::InvalidMinSigners |
+			Error::InvalidMaxSigners |
+			Error::InvalidCoefficients |
+			Error::MalformedIdentifier |
+			Error::MalformedSigningKey |
+			Error::MalformedVerifyingKey |
+			Error::MalformedSignature |
+			Error::InvalidSignature |
+			Error::DuplicatedShares |
+			Error::IncorrectNumberOfShares |
+			Error::IdentityCommitment |
+			Error::MissingCommitment |
+			Error::IncorrectCommitment |
+			Error::PackageNotFound |
+			Error::IncorrectNumberOfPackages |
+			Error::IncorrectPackage |
+			Error::DKGNotSupported |
+			Error::FieldError(_) |
+			Error::GroupError(_) |
+			Error::DuplicatedIdentifier |
+			Error::InvalidCoefficient |
+			Error::UnknownIdentifier |
+			Error::IncorrectNumberOfIdentifiers |
+			Error::IncorrectNumberOfCommitments |
+			Error::SerializationError |
+			Error::DeserializationError |
+			Error::IdentifierDerivationNotSupported => None,
 		}
 	}
 }

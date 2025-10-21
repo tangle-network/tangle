@@ -305,8 +305,8 @@ fn schedule_operator_unstake_success() {
 
 		// Verify remaining stake is above minimum
 		assert!(
-			operator_info.stake.saturating_sub(unstake_amount)
-				>= MinOperatorBondAmount::get().into()
+			operator_info.stake.saturating_sub(unstake_amount) >=
+				MinOperatorBondAmount::get().into()
 		);
 
 		// Verify event

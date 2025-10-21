@@ -57,14 +57,13 @@ impl super::ResponseFormatter for Formatter {
 						gas_used,
 						trace_address: Some(trace_address.clone()),
 						inner: match inner.clone() {
-							BlockscoutCallInner::Call { input, to, res, call_type } => {
+							BlockscoutCallInner::Call { input, to, res, call_type } =>
 								CallTracerInner::Call {
 									call_type: match call_type {
 										CallType::Call => "CALL".as_bytes().to_vec(),
 										CallType::CallCode => "CALLCODE".as_bytes().to_vec(),
-										CallType::DelegateCall => {
-											"DELEGATECALL".as_bytes().to_vec()
-										},
+										CallType::DelegateCall =>
+											"DELEGATECALL".as_bytes().to_vec(),
 										CallType::StaticCall => "STATICCALL".as_bytes().to_vec(),
 									},
 									to,
@@ -75,8 +74,7 @@ impl super::ResponseFormatter for Formatter {
 										CallResult::Output { .. } => it.logs.clone(),
 										CallResult::Error { .. } => Vec::new(),
 									},
-								}
-							},
+								},
 							BlockscoutCallInner::Create { init, res } => CallTracerInner::Create {
 								input: init,
 								error: match res {
@@ -90,21 +88,19 @@ impl super::ResponseFormatter for Formatter {
 									CreateResult::Error { .. } => None,
 								},
 								output: match res {
-									CreateResult::Success { created_contract_code, .. } => {
-										Some(created_contract_code)
-									},
+									CreateResult::Success { created_contract_code, .. } =>
+										Some(created_contract_code),
 									CreateResult::Error { .. } => None,
 								},
 								value,
 								call_type: "CREATE".as_bytes().to_vec(),
 							},
-							BlockscoutCallInner::SelfDestruct { balance, to } => {
+							BlockscoutCallInner::SelfDestruct { balance, to } =>
 								CallTracerInner::SelfDestruct {
 									value: balance,
 									to,
 									call_type: "SELFDESTRUCT".as_bytes().to_vec(),
-								}
-							},
+								},
 						},
 						calls: Vec::new(),
 					})
@@ -194,11 +190,10 @@ impl super::ResponseFormatter for Formatter {
 							(
 								Call::CallTracer(CallTracerCall { trace_address: Some(a), .. }),
 								Call::CallTracer(CallTracerCall { trace_address: Some(b), .. }),
-							) => {
-								&b[..]
-									== a.get(0..a.len() - 1)
-										.expect("non-root element while traversing trace result")
-							},
+							) =>
+								&b[..] ==
+									a.get(0..a.len() - 1)
+										.expect("non-root element while traversing trace result"),
 							_ => unreachable!(),
 						}) {
 						// Remove `trace_address` from result.

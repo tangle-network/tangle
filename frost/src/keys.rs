@@ -486,9 +486,8 @@ pub fn split<C: Ciphersuite, R: RngCore + CryptoRng>(
 			let identifiers = default_identifiers(max_signers);
 			generate_secret_shares(key, max_signers, min_signers, coefficients, &identifiers)?
 		},
-		IdentifierList::Custom(identifiers) => {
-			generate_secret_shares(key, max_signers, min_signers, coefficients, identifiers)?
-		},
+		IdentifierList::Custom(identifiers) =>
+			generate_secret_shares(key, max_signers, min_signers, coefficients, identifiers)?,
 	};
 	let mut verifying_shares: BTreeMap<Identifier<C>, VerifyingShare<C>> = BTreeMap::new();
 

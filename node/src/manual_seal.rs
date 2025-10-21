@@ -342,8 +342,8 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		})?;
 
 	if config.role.is_authority() {
-		if config.chain_spec.chain_type() == ChainType::Development
-			|| config.chain_spec.chain_type() == ChainType::Local
+		if config.chain_spec.chain_type() == ChainType::Development ||
+			config.chain_spec.chain_type() == ChainType::Local
 		{
 			if auto_insert_keys {
 				crate::utils::insert_controller_account_keys_into_keystore(
