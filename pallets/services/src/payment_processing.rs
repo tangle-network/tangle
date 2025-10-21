@@ -250,8 +250,8 @@ impl<T: Config> Pallet<T> {
 
 		// Determine if payment is due with proper zero handling
 		let blocks_since_last = current_block.saturating_sub(billing.last_billed);
-		let payment_due = if blocks_since_last == BlockNumberFor::<T>::zero() &&
-			billing.last_billed == BlockNumberFor::<T>::zero()
+		let payment_due = if blocks_since_last == BlockNumberFor::<T>::zero()
+			&& billing.last_billed == BlockNumberFor::<T>::zero()
 		{
 			// First payment scenario
 			true
@@ -626,10 +626,11 @@ impl<T: Config> Pallet<T> {
 					has_pay_once_jobs = true;
 					let amount_converted: BalanceOf<T> = (*amount).saturated_into();
 					match min_pay_once_amount {
-						Some(current_min) =>
+						Some(current_min) => {
 							if amount_converted < current_min {
 								min_pay_once_amount = Some(amount_converted);
-							},
+							}
+						},
 						None => {
 							min_pay_once_amount = Some(amount_converted);
 						},
@@ -639,10 +640,11 @@ impl<T: Config> Pallet<T> {
 					has_subscription_jobs = true;
 					let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
 					match min_subscription_rate {
-						Some(current_min) =>
+						Some(current_min) => {
 							if rate_converted < current_min {
 								min_subscription_rate = Some(rate_converted);
-							},
+							}
+						},
 						None => {
 							min_subscription_rate = Some(rate_converted);
 						},

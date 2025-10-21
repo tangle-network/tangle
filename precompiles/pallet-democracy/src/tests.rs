@@ -218,8 +218,9 @@ fn lowest_unbaked_non_zero() {
 			.dispatch(RuntimeOrigin::signed(Alice.into())));
 
 			let voting = match pallet_democracy::VotingOf::<Runtime>::get(AccountId::from(Alice)) {
-				Voting::Direct { votes, delegations, prior } =>
-					(votes.into_inner(), delegations, prior),
+				Voting::Direct { votes, delegations, prior } => {
+					(votes.into_inner(), delegations, prior)
+				},
 				_ => panic!("Votes are not direct"),
 			};
 
@@ -241,9 +242,9 @@ fn lowest_unbaked_non_zero() {
 
 			// Run it through until it is baked
 			roll_to(
-				<Runtime as DemocracyConfig>::VotingPeriod::get() +
-					<Runtime as DemocracyConfig>::LaunchPeriod::get() +
-					1000,
+				<Runtime as DemocracyConfig>::VotingPeriod::get()
+					+ <Runtime as DemocracyConfig>::LaunchPeriod::get()
+					+ 1000,
 			);
 
 			precompiles()
@@ -556,8 +557,9 @@ fn standard_vote_aye_works() {
 			);
 
 			let voting = match pallet_democracy::VotingOf::<Runtime>::get(AccountId::from(Alice)) {
-				Voting::Direct { votes, delegations, prior } =>
-					(votes.into_inner(), delegations, prior),
+				Voting::Direct { votes, delegations, prior } => {
+					(votes.into_inner(), delegations, prior)
+				},
 				_ => panic!("Votes are not direct"),
 			};
 
@@ -640,8 +642,9 @@ fn standard_vote_nay_conviction_works() {
 			);
 
 			let voting = match pallet_democracy::VotingOf::<Runtime>::get(AccountId::from(Alice)) {
-				Voting::Direct { votes, delegations, prior } =>
-					(votes.into_inner(), delegations, prior),
+				Voting::Direct { votes, delegations, prior } => {
+					(votes.into_inner(), delegations, prior)
+				},
 				_ => panic!("Votes are not direct"),
 			};
 
@@ -719,8 +722,9 @@ fn remove_vote_works() {
 			);
 
 			let voting = match pallet_democracy::VotingOf::<Runtime>::get(AccountId::from(Alice)) {
-				Voting::Direct { votes, delegations, prior } =>
-					(votes.into_inner(), delegations, prior),
+				Voting::Direct { votes, delegations, prior } => {
+					(votes.into_inner(), delegations, prior)
+				},
 				_ => panic!("Votes are not direct"),
 			};
 
@@ -791,8 +795,9 @@ fn delegate_works() {
 			);
 			let alice_voting =
 				match pallet_democracy::VotingOf::<Runtime>::get(AccountId::from(Alice)) {
-					Voting::Delegating { balance, target, conviction, delegations, prior } =>
-						(balance, target, conviction, delegations, prior),
+					Voting::Delegating { balance, target, conviction, delegations, prior } => {
+						(balance, target, conviction, delegations, prior)
+					},
 					_ => panic!("Votes are not delegating"),
 				};
 
@@ -805,8 +810,9 @@ fn delegate_works() {
 
 			let bob_voting = match pallet_democracy::VotingOf::<Runtime>::get(AccountId::from(Bob))
 			{
-				Voting::Direct { votes, delegations, prior } =>
-					(votes.into_inner(), delegations, prior),
+				Voting::Direct { votes, delegations, prior } => {
+					(votes.into_inner(), delegations, prior)
+				},
 				_ => panic!("Votes are not direct"),
 			};
 

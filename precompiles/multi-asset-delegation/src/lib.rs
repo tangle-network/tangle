@@ -231,8 +231,9 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-			(0, erc20_token) if erc20_token != [0; 20] =>
-				(Asset::Erc20(erc20_token.into()), amount),
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 		};
 
@@ -263,8 +264,9 @@ where
 		let who = Runtime::AddressMapping::into_account_id(caller);
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-			(0, erc20_token) if erc20_token != [0; 20] =>
-				(Asset::Erc20(erc20_token.into()), amount),
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 		};
 
@@ -298,8 +300,9 @@ where
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-			(0, erc20_token) if erc20_token != [0; 20] =>
-				(Asset::Erc20(erc20_token.into()), amount),
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 		};
 
@@ -338,8 +341,9 @@ where
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-			(0, erc20_token) if erc20_token != [0; 20] =>
-				(Asset::Erc20(erc20_token.into()), amount),
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 		};
 
@@ -384,8 +388,9 @@ where
 		let operator = Runtime::AccountId::from(WrappedAccountId32(operator.0));
 
 		let (deposit_asset, amount) = match (asset_id.as_u32(), token_address.0 .0) {
-			(0, erc20_token) if erc20_token != [0; 20] =>
-				(Asset::Erc20(erc20_token.into()), amount),
+			(0, erc20_token) if erc20_token != [0; 20] => {
+				(Asset::Erc20(erc20_token.into()), amount)
+			},
 			(other_asset_id, _) => (Asset::Custom(other_asset_id.into()), amount),
 		};
 
