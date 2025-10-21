@@ -101,6 +101,7 @@ impl clap::Parser for CliWrapper {}
 pub type RecommendedFillersOf<T> = <T as RecommendedFillers>::RecommendedFillers;
 
 /// A type alias for the Alloy provider with wallet.
+#[allow(dead_code)]
 pub type AlloyProviderWithWallet = FillProvider<
 	JoinFill<RecommendedFillersOf<Ethereum>, WalletFiller<EthereumWallet>>,
 	RootProvider<BoxTransport>,
@@ -116,17 +117,21 @@ pub type AlloyProvider = FillProvider<
 >;
 
 #[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
 pub enum TestAccount {
 	Alice,
 	Bob,
+	#[allow(dead_code)]
 	Charlie,
+	#[allow(dead_code)]
 	Dave,
+	#[allow(dead_code)]
 	Eve,
+	#[allow(dead_code)]
 	Ferdie,
 }
 
 impl TestAccount {
+	#[allow(dead_code)]
 	pub fn address(&self) -> alloy::primitives::Address {
 		self.evm_signer().address()
 	}
@@ -150,6 +155,7 @@ impl TestAccount {
 		alloy::signers::local::PrivateKeySigner::from_bytes((&private_key).into()).unwrap()
 	}
 
+	#[allow(dead_code)]
 	pub fn evm_wallet(&self) -> alloy::network::EthereumWallet {
 		alloy::network::EthereumWallet::from(self.evm_signer())
 	}
@@ -174,6 +180,7 @@ pub async fn alloy_provider() -> AlloyProvider {
 	FillProvider::new(provider.root().clone(), Ethereum::recommended_fillers())
 }
 
+#[allow(dead_code)]
 pub fn alloy_provider_with_wallet(
 	provider: &AlloyProvider,
 	wallet: EthereumWallet,

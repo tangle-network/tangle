@@ -13,7 +13,7 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use alloy::{primitives::*, providers::Provider, sol};
+use alloy::{providers::Provider, sol};
 use core::{future::Future, time::Duration};
 use sp_tracing::{error, info};
 use tangle_subxt::{subxt, subxt::tx::TxStatus, tangle_testnet_runtime::api};
@@ -51,7 +51,6 @@ sol! {
 pub struct RewardSimulationInputs {
 	provider: AlloyProvider,
 	subxt: subxt::OnlineClient<subxt::PolkadotConfig>,
-	usdc: Address,
 }
 
 #[track_caller]
@@ -67,10 +66,7 @@ where
 		wait_for_block(&provider, 1).await;
 
 		let alice = TestAccount::Alice;
-		let wallet = alice.evm_wallet();
-		let alice_provider = alloy_provider_with_wallet(&provider, wallet.clone());
 
-		let usdc_addr = deploy_erc20(alice_provider.clone(), "USD Coin", "USDC", 6).await?;
 
 		// Setup MBSM using sudo
 		let mbsm_address = H160([0x13; 20]);
@@ -97,7 +93,7 @@ where
 
 		// Add delay to allow nonce to update and prevent "Transaction is outdated" error
 		tokio::time::sleep(Duration::from_millis(500)).await;
-		let test_inputs = RewardSimulationInputs { provider, subxt, usdc: usdc_addr };
+		let test_inputs = RewardSimulationInputs { provider, subxt };
 
 		let result = f(test_inputs).await;
 		if result.is_err() {
@@ -106,23 +102,6 @@ where
 		assert!(result.is_ok(), "Reward simulation test failed: {result:?}");
 		result
 	});
-}
-
-async fn deploy_erc20(
-	provider: AlloyProviderWithWallet,
-	name: &str,
-	symbol: &str,
-	decimals: u8,
-) -> anyhow::Result<Address> {
-	let token = MockERC20::deploy(provider.clone()).await?;
-	token
-		.initialize(name.to_string(), symbol.to_string(), decimals)
-		.send()
-		.await?
-		.get_receipt()
-		.await?;
-	info!("Deployed {symbol} token contract at address: {}", token.address());
-	Ok(*token.address())
 }
 
 pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
@@ -288,27 +267,12 @@ async fn query_pending_rewards(
 	client: &subxt::OnlineClient<subxt::PolkadotConfig>,
 	account: &TestAccount,
 ) -> anyhow::Result<u128> {
-	let rewards_key = api::storage().rewards().pending_operator_rewards(&account.account_id());
+	let rewards_key = api::storage().rewards().pending_operator_rewards(account.account_id());
 	let pending = client.storage().at_latest().await?.fetch(&rewards_key).await?;
 
 	let total = pending.map(|rewards| rewards.0.iter().map(|r| r.1).sum()).unwrap_or(0);
 
 	Ok(total)
-}
-
-/// Assert exact pending reward amount
-async fn assert_pending_rewards(
-	client: &subxt::OnlineClient<subxt::PolkadotConfig>,
-	account: &TestAccount,
-	expected: u128,
-) -> anyhow::Result<()> {
-	let actual = query_pending_rewards(client, account).await?;
-	assert_eq!(
-		actual, expected,
-		"{:?} should have EXACTLY {} TNT pending (actual: {})",
-		account, expected, actual
-	);
-	Ok(())
 }
 
 /// Verify claim operation succeeds and balance increases correctly
@@ -322,7 +286,7 @@ async fn verify_claim_succeeds(
 	info!("═══ Verifying {} claim ({} TNT expected) ═══", context, expected_amount);
 
 	// Step 1: Record balance before
-	let account_query = api::storage().system().account(&claimer.account_id());
+	let account_query = api::storage().system().account(claimer.account_id());
 	let balance_before = client
 		.storage()
 		.at_latest()
@@ -334,7 +298,7 @@ async fn verify_claim_succeeds(
 	info!("{} balance before claim: {} TNT", context, balance_before);
 
 	// Step 2: Record pending rewards before
-	let rewards_key = api::storage().rewards().pending_operator_rewards(&claimer.account_id());
+	let rewards_key = api::storage().rewards().pending_operator_rewards(claimer.account_id());
 	let pending_before = client.storage().at_latest().await?.fetch(&rewards_key).await?;
 	let pending_amount_before: u128 =
 		pending_before.as_ref().map(|r| r.0.iter().map(|r| r.1).sum()).unwrap_or(0);
@@ -486,7 +450,7 @@ fn test_payonce_job_complete_reward_flow() {
 		// STEP 4: Record ALL initial balances
 		info!("═══ STEP 4: Recording initial balances ═══");
 
-		let alice_account_query = api::storage().system().account(&alice.account_id());
+		let alice_account_query = api::storage().system().account(alice.account_id());
 		let alice_before = t
 			.subxt
 			.storage()
@@ -498,7 +462,7 @@ fn test_payonce_job_complete_reward_flow() {
 			.unwrap_or(0);
 		info!("Alice (customer) initial balance: {alice_before} TNT");
 
-		let bob_account_query = api::storage().system().account(&bob.account_id());
+		let bob_account_query = api::storage().system().account(bob.account_id());
 		let bob_before = t
 			.subxt
 			.storage()
@@ -510,7 +474,7 @@ fn test_payonce_job_complete_reward_flow() {
 			.unwrap_or(0);
 		info!("Bob (operator) initial balance: {bob_before} TNT");
 
-		let charlie_account_query = api::storage().system().account(&charlie.account_id());
+		let charlie_account_query = api::storage().system().account(charlie.account_id());
 		let charlie_before = t
 			.subxt
 			.storage()
@@ -712,7 +676,7 @@ fn test_payonce_job_complete_reward_flow() {
 		// STEP 9: Query pending rewards
 		info!("═══ STEP 9: Querying pending rewards ═══");
 
-		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
+		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(bob.account_id());
 		let bob_pending_rewards =
 			t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?;
 
@@ -733,7 +697,7 @@ fn test_payonce_job_complete_reward_flow() {
 		);
 
 		let charlie_rewards_key =
-			api::storage().rewards().pending_operator_rewards(&charlie.account_id());
+			api::storage().rewards().pending_operator_rewards(charlie.account_id());
 		let charlie_pending_rewards =
 			t.subxt.storage().at_latest().await?.fetch(&charlie_rewards_key).await?;
 
@@ -1017,7 +981,7 @@ fn test_multi_operator_weighted_distribution() {
 			(&dave, expected_dave, "Dave"),
 		] {
 			let rewards_key =
-				api::storage().rewards().pending_operator_rewards(&operator.account_id());
+				api::storage().rewards().pending_operator_rewards(operator.account_id());
 			let pending = t.subxt.storage().at_latest().await?.fetch(&rewards_key).await?;
 
 			let actual_amount: u128 =
@@ -1156,7 +1120,7 @@ fn test_subscription_automatic_billing() {
 		let initial_block = t.provider.get_block_number().await?;
 		info!("Initial block: {initial_block}");
 
-		let bob_account_query = api::storage().system().account(&bob.account_id());
+		let bob_account_query = api::storage().system().account(bob.account_id());
 		let bob_before = t
 			.subxt
 			.storage()
@@ -1206,7 +1170,7 @@ fn test_subscription_automatic_billing() {
 		// STEP 8: Query and VERIFY accumulated rewards - MANDATORY ASSERTIONS
 		info!("═══ STEP 8: Querying and verifying accumulated rewards (MANDATORY) ═══");
 
-		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
+		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(bob.account_id());
 		let bob_pending =
 			t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?.expect(
 				"Subscription billing MUST create pending rewards - billing did not trigger!",
@@ -1380,7 +1344,7 @@ fn test_payment_fails_with_insufficient_balance() {
 
 		// STEP 6: Record balances before
 		info!("═══ STEP 6: Recording balances before job call ═══");
-		let alice_account_query = api::storage().system().account(&alice.account_id());
+		let alice_account_query = api::storage().system().account(alice.account_id());
 		let alice_before = t
 			.subxt
 			.storage()
@@ -1579,7 +1543,7 @@ fn test_claim_rewards_twice_fails() {
 		info!("═══ STEP 8: First claim (should SUCCEED) ═══");
 		let expected_operator_reward = payment_amount * 85 / 100;
 
-		let bob_account_query = api::storage().system().account(&bob.account_id());
+		let bob_account_query = api::storage().system().account(bob.account_id());
 		let bob_before_first_claim = t
 			.subxt
 			.storage()
@@ -1942,7 +1906,7 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		// STEP 5B: Record INITIAL balances (RIGOROUS E2E VERIFICATION)
 		info!("═══ STEP 5B: Recording initial balances for rigorous flow verification ═══");
 
-		let alice_account_query = api::storage().system().account(&alice.account_id());
+		let alice_account_query = api::storage().system().account(alice.account_id());
 		let alice_before = t
 			.subxt
 			.storage()
@@ -2061,7 +2025,7 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		// STEP 7: Query REAL pallet-rewards storage
 		info!("═══ STEP 7: Querying REAL pallet-rewards storage (CRITICAL CHECK) ═══");
 
-		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
+		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(bob.account_id());
 		let bob_pending_rewards = t
 			.subxt
 			.storage()
@@ -2275,7 +2239,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 		// STEP 4B: Record INITIAL balances for rigorous flow verification
 		info!("═══ STEP 4B: Recording initial balances ═══");
 
-		let alice_account_query = api::storage().system().account(&alice.account_id());
+		let alice_account_query = api::storage().system().account(alice.account_id());
 		let alice_before = t
 			.subxt
 			.storage()
@@ -2302,7 +2266,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 
 		// STEP 5: Call jobs multiple times on EACH service
 		info!("═══ STEP 5: Calling jobs on each service ═══");
-		let jobs_per_service = vec![10, 15, 20]; // Different amounts per service
+		let jobs_per_service = [10, 15, 20]; // Different amounts per service
 
 		for (service_idx, &service_id) in service_ids.iter().enumerate() {
 			let num_jobs = jobs_per_service[service_idx];
@@ -2379,7 +2343,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 		// STEP 6: Query REAL storage - CRITICAL CHECK
 		info!("═══ STEP 6: Querying REAL storage (CRITICAL MULTI-SERVICE CHECK) ═══");
 
-		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
+		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(bob.account_id());
 		let bob_pending_rewards = t
 			.subxt
 			.storage()
@@ -2418,7 +2382,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 				.0
 				.iter()
 				.find(|r| r.0 == service_id)
-				.expect(&format!("Should have reward entry for service {}", service_id));
+				.unwrap_or_else(|| panic!("Should have reward entry for service {}", service_id));
 
 			assert_eq!(
 				reward_entry.1, expected_amount,
@@ -2616,7 +2580,7 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 		let initial_block = t.provider.get_block_number().await?;
 		info!("Initial block: {}", initial_block);
 
-		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
+		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(bob.account_id());
 		let bob_pending_initial =
 			t.subxt.storage().at_latest().await?.fetch(&bob_rewards_key).await?;
 		let initial_entries = bob_pending_initial.as_ref().map(|r| r.0.len()).unwrap_or(0);
@@ -2816,7 +2780,7 @@ fn test_delegator_rewards_with_commission_split() {
 		// STEP 5: Record initial balances
 		info!("═══ STEP 5: Recording initial balances ═══");
 
-		let bob_account_query = api::storage().system().account(&bob.account_id());
+		let bob_account_query = api::storage().system().account(bob.account_id());
 		let bob_balance_before = t
 			.subxt
 			.storage()
@@ -2828,7 +2792,7 @@ fn test_delegator_rewards_with_commission_split() {
 			.unwrap_or(0);
 		info!("Bob (operator) initial balance: {} TNT", bob_balance_before);
 
-		let charlie_account_query = api::storage().system().account(&charlie.account_id());
+		let charlie_account_query = api::storage().system().account(charlie.account_id());
 		let charlie_balance_before = t
 			.subxt
 			.storage()
@@ -2840,7 +2804,7 @@ fn test_delegator_rewards_with_commission_split() {
 			.unwrap_or(0);
 		info!("Charlie (delegator) initial balance: {} TNT", charlie_balance_before);
 
-		let dave_account_query = api::storage().system().account(&dave.account_id());
+		let dave_account_query = api::storage().system().account(dave.account_id());
 		let dave_balance_before = t
 			.subxt
 			.storage()
@@ -2906,7 +2870,7 @@ fn test_delegator_rewards_with_commission_split() {
 
 		// STEP 7: Call the PayOnce job to trigger payment
 		info!("═══ STEP 7: Calling PayOnce job to trigger payment ═══");
-		let call_id = 0u64;
+		let _call_id = 0u64;
 		let job_call = api::tx().services().call(service_id, 0u8, vec![]);
 
 		let mut result = t
@@ -2948,7 +2912,7 @@ fn test_delegator_rewards_with_commission_split() {
 
 		// STEP 9: Verify Bob's commission rewards
 		info!("═══ STEP 9: Verifying Bob's commission rewards ═══");
-		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(&bob.account_id());
+		let bob_rewards_key = api::storage().rewards().pending_operator_rewards(bob.account_id());
 		let bob_pending_commission = t
 			.subxt
 			.storage()
@@ -3104,7 +3068,7 @@ fn test_delegator_rewards_with_commission_split() {
 		// STEP 13: Verify Dave received developer rewards
 		info!("═══ STEP 13: Verifying Dave's developer rewards ═══");
 		let dave_rewards_key =
-			api::storage().rewards().pending_operator_rewards(&dave.account_id());
+			api::storage().rewards().pending_operator_rewards(dave.account_id());
 		let dave_pending = t
 			.subxt
 			.storage()
