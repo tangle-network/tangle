@@ -1,4 +1,6 @@
 #![deny(stable_features, non_shorthand_field_patterns, renamed_and_removed_lints, unsafe_code)]
+// Allow deprecated TestFetcher in generated code - kept for backward compatibility with on-chain data
+#![allow(deprecated)]
 
 pub use parity_scale_codec;
 pub use scale_info;

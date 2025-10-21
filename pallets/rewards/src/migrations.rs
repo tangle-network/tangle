@@ -17,7 +17,7 @@
 use crate::{Config, PendingOperatorRewards, RewardConfigForAssetVault, RewardConfigStorage};
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
 use sp_runtime::{Perbill, Percent};
-use sp_std::marker::PhantomData;
+use sp_std::{marker::PhantomData, vec::Vec};
 
 /// Migration to convert APY from percentage to Perbill in `RewardConfigForAssetVault`
 pub struct PercentageToPerbillMigration<T>(PhantomData<T>);
