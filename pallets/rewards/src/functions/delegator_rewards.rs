@@ -514,6 +514,10 @@ mod tests {
 			let operator = AccountId32::new([1u8; 32]);
 			let delegator = AccountId32::new([2u8; 32]);
 
+			// Fund the pallet account to allow transfers
+			let pallet_account = Rewards::account_id();
+			Balances::make_free_balance_be(&pallet_account, 100000);
+
 			// Setup
 			assert_ok!(Rewards::init_delegator_reward_debt(&delegator, &operator, 100));
 
