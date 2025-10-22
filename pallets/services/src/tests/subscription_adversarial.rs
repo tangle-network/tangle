@@ -39,7 +39,7 @@ fn test_cannot_bypass_subscription_limit() {
 		// Fund attacker with enough for 100 subscriptions
 		mint_tokens(USDC, alice.clone(), attacker.clone(), 200000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
-		let _ = Balances::make_free_balance_be(&attacker, 100000);
+		let _ = Balances::make_free_balance_be(&attacker, 2000 * 10u128.pow(6)); // Enough TNT for 100 payments + existential deposit
 		
 		// Fund rewards pallet for distribution
 
@@ -172,7 +172,7 @@ fn test_cannot_double_process_subscription() {
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
-		let _ = Balances::make_free_balance_be(&user, 100000);
+		let _ = Balances::make_free_balance_be(&user, 1000 * 10u128.pow(6)); // Enough TNT for payments
 
 		let service_id = Services::next_instance_id();
 		assert_ok!(Services::request(
@@ -319,7 +319,7 @@ fn test_graceful_handling_of_terminated_service() {
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
-		let _ = Balances::make_free_balance_be(&user, 100000);
+		let _ = Balances::make_free_balance_be(&user, 1000 * 10u128.pow(6)); // Enough TNT for payments
 
 		let service_id = Services::next_instance_id();
 		assert_ok!(Services::request(
@@ -387,7 +387,9 @@ fn test_graceful_handling_of_terminated_service() {
 	});
 }
 
-/// Test: Payment failure doesn't corrupt billing
+/// Test: Payment failure doesn't corrupt billing state
+/// This test verifies that when a subscription payment fails due to insufficient balance,
+/// the billing state remains consistent (last_billed not updated, subscription count unchanged)
 #[test]
 fn test_payment_failure_doesnt_corrupt_billing() {
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
@@ -395,7 +397,7 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 
 		let alice = mock_pub_key(ALICE);
 		let bob = mock_pub_key(BOB);
-		let poor_user = mock_pub_key(EVE);
+		let user = mock_pub_key(EVE);
 
 		let mut blueprint = cggmp21_blueprint();
 		blueprint.jobs[0].pricing_model = PricingModel::Subscription {
@@ -408,14 +410,14 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
 
-		// Give user enough for first payment
-		mint_tokens(USDC, alice.clone(), poor_user.clone(), 10 * 10u128.pow(6));
+		// Fund user adequately for service setup and first payment
+		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
-		let _ = Balances::make_free_balance_be(&poor_user, 100000);
+		let _ = Balances::make_free_balance_be(&user, 1000 * 10u128.pow(6));
 
 		let service_id = Services::next_instance_id();
 		assert_ok!(Services::request(
-			RuntimeOrigin::signed(poor_user.clone()),
+			RuntimeOrigin::signed(user.clone()),
 			None,
 			0,
 			vec![alice.clone()],
@@ -437,7 +439,7 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 		],));
 
 		assert_ok!(Services::call(
-			RuntimeOrigin::signed(poor_user.clone()),
+			RuntimeOrigin::signed(user.clone()),
 			service_id,
 			KEYGEN_JOB_ID,
 			vec![Field::Uint8(1)].try_into().unwrap()
@@ -448,41 +450,50 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 			service_id,
 			KEYGEN_JOB_ID,
 			0,
-			&poor_user,
-			&poor_user,
+			&user,
+			&user,
 			10 * 10u128.pow(6),
 			1,
 			None,
 			1,
 		));
 
-		let billing_key = (service_id, KEYGEN_JOB_ID, poor_user.clone());
+		let billing_key = (service_id, KEYGEN_JOB_ID, user.clone());
 		let initial_billing = Services::job_subscription_billings(&billing_key).unwrap();
+		assert_eq!(initial_billing.last_billed, 1);
 
-		// Advance block - user now has insufficient balance
+		// Drain user's balance to simulate payment failure
+		let user_balance = Balances::free_balance(&user);
+		let _ = Balances::make_free_balance_be(&user, 1); // Leave only existential deposit
+
+		// Advance block
 		System::set_block_number(2);
 
-		// Attempt to process - should fail
+		// Attempt to process payment - should fail due to insufficient balance
 		let result = Services::process_job_subscription_payment(
 			service_id,
 			KEYGEN_JOB_ID,
 			0,
-			&poor_user,
-			&poor_user,
+			&user,
+			&user,
 			10 * 10u128.pow(6),
 			1,
 			None,
 			2,
 		);
 
-		assert!(result.is_err());
+		assert!(result.is_err(), "Payment should fail with insufficient balance");
 
-		// Verify billing state unchanged (last_billed not updated)
+		// Verify billing state unchanged (last_billed NOT updated to block 2)
 		let final_billing = Services::job_subscription_billings(&billing_key).unwrap();
-		assert_eq!(initial_billing.last_billed, final_billing.last_billed);
+		assert_eq!(initial_billing.last_billed, final_billing.last_billed, "last_billed should not change on payment failure");
+		assert_eq!(final_billing.last_billed, 1, "last_billed should still be 1");
 
-		// Subscription count should still be 1
-		assert_eq!(Services::user_subscription_count(&poor_user), 1);
+		// Subscription count should still be 1 (not decremented on failure)
+		assert_eq!(Services::user_subscription_count(&user), 1);
+
+		// Verify billing entry still exists (not cleaned up on failure)
+		assert!(Services::job_subscription_billings(&billing_key).is_some());
 	});
 }
 
@@ -517,7 +528,7 @@ fn test_storage_cleanup_on_end() {
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
-		let _ = Balances::make_free_balance_be(&user, 100000);
+		let _ = Balances::make_free_balance_be(&user, 1000 * 10u128.pow(6)); // Enough TNT for payments
 
 		let service_id = Services::next_instance_id();
 		assert_ok!(Services::request(
