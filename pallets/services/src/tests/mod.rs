@@ -37,6 +37,7 @@ mod reward_distribution;
 mod security;
 mod service;
 mod slashing;
+mod subscription_adversarial;
 mod subscription_billing;
 mod subscription_cursor;
 mod treasury_distribution;
