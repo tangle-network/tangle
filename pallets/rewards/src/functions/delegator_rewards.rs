@@ -511,11 +511,16 @@ mod tests {
 	fn test_claim_updates_debt() {
 		new_test_ext().execute_with(|| {
 			use sp_core::crypto::AccountId32;
-			let operator = AccountId32::new([1u8; 32]);
-			let delegator = AccountId32::new([2u8; 32]);
+			use sp_keyring::AccountKeyring;
+			let operator: AccountId32 = AccountKeyring::Alice.into();
+			let delegator: AccountId32 = AccountKeyring::Bob.into();
 
 			// Setup
 			assert_ok!(Rewards::init_delegator_reward_debt(&delegator, &operator, 100));
+
+			// Fund the rewards pallet
+			let rewards_account = Rewards::account_id();
+			<pallet_balances::Pallet<crate::mock::Runtime> as frame_support::traits::Currency<_>>::make_free_balance_be(&rewards_account, 10_000u128);
 
 			// Record reward
 			assert_ok!(Rewards::record_operator_reward_to_pool(&operator, 1000));

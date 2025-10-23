@@ -366,6 +366,23 @@ impl EvmRunner<Runtime> for MockedEvmRunner {
 		is_transactional: bool,
 		validate: bool,
 	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
+		if input.len() >= 4 {
+			if target == crate::mock::MBSM || target == crate::mock::CGGMP21_BLUEPRINT {
+				let mut result = vec![0u8; 32];
+				result[31] = 1;
+				return Ok(fp_evm::CallInfo {
+					exit_reason: fp_evm::ExitReason::Succeed(fp_evm::ExitSucceed::Stopped),
+					value: result,
+					used_gas: fp_evm::UsedGas {
+						standard: U256::from(21000),
+						effective: U256::from(21000),
+					},
+					weight_info: None,
+					logs: vec![],
+				});
+			}
+		}
+
 		let max_fee_per_gas = FixedGasPrice::min_gas_price().0;
 		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
 		let nonce = None;
