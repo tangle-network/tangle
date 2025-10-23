@@ -3703,6 +3703,26 @@ declare module '@polkadot/api-base/types/submittable' {
     };
     rewards: {
       /**
+       * Allows a delegator to claim their share of rewards from an operator's pool.
+       * 
+       * This uses the pool-based reward distribution system which calculates rewards
+       * based on the difference between the current pool accumulator and the delegator's
+       * last claim position (debt).
+       * 
+       * # Arguments
+       * * `origin` - The delegator claiming rewards
+       * * `operator` - The operator whose reward pool to claim from
+       * 
+       * # Complexity
+       * O(1) - Constant time regardless of number of delegators or rewards
+       * 
+       * # Errors
+       * * `NoDelegation` - Delegator has no active delegation with this operator
+       * * `NoDelegatorRewards` - No rewards available to claim
+       * * `TransferFailed` - Token transfer failed
+       **/
+      claimDelegatorRewards: AugmentedSubmittable<(operator: AccountId32 | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [AccountId32]>;
+      /**
        * Allows an operator to claim all their currently pending rewards.
        **/
       claimRewards: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>, []>;

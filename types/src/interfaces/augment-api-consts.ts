@@ -750,6 +750,23 @@ declare module '@polkadot/api-base/types/consts' {
     };
     rewards: {
       /**
+       * Default commission rate for operators.
+       * 
+       * When an operator receives rewards, this percentage goes directly to them as commission
+       * for operating the service. The remaining percentage goes to the delegator pool, which
+       * is shared proportionally among all delegators (including the operator via their
+       * self-stake).
+       * 
+       * Example: If set to 15%:
+       * - Operator receives 15% as direct commission (via claim_rewards)
+       * - Remaining 85% goes to pool for all delegators (via claim_delegator_rewards)
+       * - If operator has 60% stake: they get 15% + (60% × 85%) = 66% total
+       * - Delegators with 40% stake: they get 40% × 85% = 34% total
+       * 
+       * This incentivizes operators to run services while also rewarding delegators fairly.
+       **/
+      defaultOperatorCommission: Perbill & AugmentedConst<ApiType>;
+      /**
        * The maximum number of pending reward entries an operator can have.
        **/
       maxPendingRewardsPerOperator: u32 & AugmentedConst<ApiType>;

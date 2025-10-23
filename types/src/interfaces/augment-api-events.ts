@@ -1201,13 +1201,29 @@ declare module '@polkadot/api-base/types/events' {
        **/
       DecayConfigUpdated: AugmentedEvent<ApiType, [startPeriod: u64, rate: Perbill], { startPeriod: u64, rate: Perbill }>;
       /**
+       * Delegator reward debt initialized (first delegation)
+       **/
+      DelegatorDebtInitialized: AugmentedEvent<ApiType, [delegator: AccountId32, operator: AccountId32, initialAccumulatedPerShare: u128, stakedAmount: u128], { delegator: AccountId32, operator: AccountId32, initialAccumulatedPerShare: u128, stakedAmount: u128 }>;
+      /**
+       * Delegator rewards claimed
+       **/
+      DelegatorRewardsClaimed: AugmentedEvent<ApiType, [delegator: AccountId32, operator: AccountId32, amount: u128], { delegator: AccountId32, operator: AccountId32, amount: u128 }>;
+      /**
        * Event emitted when an incentive APY and cap are set for a reward vault
        **/
       IncentiveAPYAndCapSet: AugmentedEvent<ApiType, [vaultId: u32, apy: Perbill, cap: u128], { vaultId: u32, apy: Perbill, cap: u128 }>;
       /**
+       * Operator reward pool updated with new rewards
+       **/
+      OperatorPoolUpdated: AugmentedEvent<ApiType, [operator: AccountId32, rewardAmount: u128, newAccumulatedPerShare: u128, totalStaked: u128], { operator: AccountId32, rewardAmount: u128, newAccumulatedPerShare: u128, totalStaked: u128 }>;
+      /**
        * Operator rewards claimed
        **/
       OperatorRewardsClaimed: AugmentedEvent<ApiType, [operator: AccountId32, amount: u128], { operator: AccountId32, amount: u128 }>;
+      /**
+       * Reward aggregated with existing pending reward
+       **/
+      RewardAggregated: AugmentedEvent<ApiType, [operator: AccountId32, serviceId: u64, previousAmount: u128, addedAmount: u128, newTotal: u128], { operator: AccountId32, serviceId: u64, previousAmount: u128, addedAmount: u128, newTotal: u128 }>;
       /**
        * Reward recorded
        **/

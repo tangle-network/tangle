@@ -1710,6 +1710,14 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       NameTooLong: AugmentedError<ApiType>;
       /**
+       * Delegator has no active delegation with this operator.
+       **/
+      NoDelegation: AugmentedError<ApiType>;
+      /**
+       * No rewards available for delegator to claim.
+       **/
+      NoDelegatorRewards: AugmentedError<ApiType>;
+      /**
        * No rewards available to claim
        **/
       NoRewardsAvailable: AugmentedError<ApiType>;
@@ -1802,6 +1810,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       ApprovalNotRequested: AugmentedError<ApiType>;
       /**
+       * Arithmetic overflow occurred during reward calculation
+       **/
+      ArithmeticOverflow: AugmentedError<ApiType>;
+      /**
        * Asset not found or doesn't exist
        **/
       AssetNotFound: AugmentedError<ApiType>;
@@ -1825,6 +1837,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Custom asset transfer failed
        **/
       CustomAssetTransferFailed: AugmentedError<ApiType>;
+      /**
+       * Division by zero during reward calculation
+       **/
+      DivisionByZero: AugmentedError<ApiType>;
       /**
        * Duplicate assets provided
        **/
@@ -1934,6 +1950,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidRequestInput: AugmentedError<ApiType>;
       /**
+       * Invalid revenue distribution configuration (percentages don't sum to 100%)
+       **/
+      InvalidRevenueDistribution: AugmentedError<ApiType>;
+      /**
        * Invalid security commitments
        **/
       InvalidSecurityCommitments: AugmentedError<ApiType>;
@@ -2039,6 +2059,14 @@ declare module '@polkadot/api-base/types/errors' {
        * Native asset is not found
        **/
       NoNativeAsset: AugmentedError<ApiType>;
+      /**
+       * No operator exposure found for reward distribution
+       **/
+      NoOperatorExposure: AugmentedError<ApiType>;
+      /**
+       * No operators available for reward distribution
+       **/
+      NoOperatorsAvailable: AugmentedError<ApiType>;
       /**
        * Operator has no stake at all
        **/
