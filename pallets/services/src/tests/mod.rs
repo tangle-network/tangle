@@ -40,6 +40,7 @@ mod slashing;
 mod subscription_adversarial;
 mod subscription_billing;
 mod subscription_cursor;
+mod subscription_manual_trigger;
 mod subscription_scale;
 mod treasury_distribution;
 mod type_checking;

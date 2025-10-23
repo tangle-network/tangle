@@ -567,6 +567,10 @@ pub mod module {
 		MetricsDataTooLarge,
 		/// Subscription not valid
 		SubscriptionNotValid,
+		/// Subscription not found for this service, job, and caller
+		SubscriptionNotFound,
+		/// Subscription payment is not due yet
+		PaymentNotDueYet,
 		/// Service not owned by caller
 		ServiceNotOwned,
 		/// No operators available for reward distribution
@@ -745,6 +749,15 @@ pub mod module {
 			job: u8,
 			/// The result of the job.
 			result: Vec<Field<T::Constraints, T::AccountId>>,
+		},
+		/// A subscription payment was manually triggered by the user.
+		SubscriptionPaymentTriggered {
+			/// The account that triggered the payment.
+			caller: T::AccountId,
+			/// The ID of the service.
+			service_id: u64,
+			/// The index of the job.
+			job_index: u8,
 		},
 		/// EVM execution reverted with a reason.
 		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
@@ -1662,6 +1675,100 @@ pub mod module {
 				job,
 				args,
 			});
+
+			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+		}
+
+		/// Manually trigger a subscription payment for a job.
+		///
+		/// This allows users to manually process their subscription payments instead of
+		/// waiting for the automatic `on_idle` processing. This is useful when the automatic
+		/// queue is backed up or the user wants immediate processing of their subscription.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The account triggering the payment (must be the subscriber)
+		/// * `service_id` - The ID of the service
+		/// * `job_index` - The index of the job with the subscription
+		///
+		/// # Errors
+		///
+		/// Returns an error if:
+		/// - The service doesn't exist
+		/// - The job doesn't exist in the blueprint
+		/// - The caller doesn't have an active subscription for this service/job
+		/// - The subscription payment is not due yet
+		/// - The payment processing fails
+		#[pallet::weight({1_000_000})]
+		pub fn trigger_subscription_payment(
+			origin: OriginFor<T>,
+			#[pallet::compact] service_id: u64,
+			job_index: u8,
+		) -> DispatchResultWithPostInfo {
+			let caller = ensure_signed(origin)?;
+
+			// Get service and blueprint
+			let service = Self::services(service_id)?;
+			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+
+			// Verify job exists
+			let job_def = blueprint
+				.jobs
+				.get(job_index as usize)
+				.ok_or(Error::<T>::InvalidJobId)?;
+
+			// Verify this job has subscription pricing
+			let (rate_per_interval, interval, maybe_end) = match &job_def.pricing_model {
+				PricingModel::Subscription { rate_per_interval, interval, maybe_end } => {
+					let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
+					let interval_converted: BlockNumberFor<T> = (*interval).saturated_into();
+					let maybe_end_converted: Option<BlockNumberFor<T>> =
+						maybe_end.map(|end| end.saturated_into());
+					(rate_converted, interval_converted, maybe_end_converted)
+				},
+				_ => return Err(Error::<T>::SubscriptionNotValid.into()),
+			};
+
+			// Get the subscription billing record
+			let billing_key = (service_id, job_index, caller.clone());
+			let billing =
+				JobSubscriptionBillings::<T>::get(&billing_key)
+					.ok_or(Error::<T>::SubscriptionNotFound)?;
+
+			// Check if subscription has ended
+			let current_block = frame_system::Pallet::<T>::block_number();
+			if let Some(end_block) = maybe_end {
+				ensure!(current_block <= end_block, Error::<T>::SubscriptionNotValid);
+			}
+
+			// Verify payment is due
+			let blocks_since_last = current_block.saturating_sub(billing.last_billed);
+			let payment_due = if blocks_since_last == BlockNumberFor::<T>::zero() &&
+				billing.last_billed == BlockNumberFor::<T>::zero()
+			{
+				// First payment scenario
+				true
+			} else {
+				blocks_since_last >= interval
+			};
+
+			ensure!(payment_due, Error::<T>::PaymentNotDueYet);
+
+			// Process the subscription payment
+			Self::process_job_subscription_payment(
+				service_id,
+				job_index,
+				0, // call_id not relevant for manual triggers
+				&caller,
+				&caller,
+				rate_per_interval,
+				interval,
+				maybe_end,
+				current_block,
+			)?;
+
+			// Emit event
+			Self::deposit_event(Event::SubscriptionPaymentTriggered { caller, service_id, job_index });
 
 			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
 		}
