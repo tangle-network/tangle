@@ -492,8 +492,6 @@ pub mod pallet {
 		NoRewardsToClaim,
 		/// An arithmetic operation resulted in an overflow.
 		ArithmeticOverflow,
-		/// Failed to transfer funds.
-		TransferFailed,
 		/// Operator has too many pending rewards.
 		TooManyPendingRewards,
 		/// Delegator has no active delegation with this operator.
@@ -770,9 +768,9 @@ pub mod pallet {
 				&Self::account_id(),
 				&operator,
 				total_reward,
-				ExistenceRequirement::KeepAlive, // Or AllowDeath depending on requirements
-			)
-			.map_err(|_| Error::<T>::TransferFailed)?;
+				// AllowDeath / KeepAlive. depending on requirements
+				ExistenceRequirement::AllowDeath,
+			)?;
 
 			// Emit an event.
 			Self::deposit_event(Event::OperatorRewardsClaimed { operator, amount: total_reward });
@@ -796,7 +794,6 @@ pub mod pallet {
 		/// # Errors
 		/// * `NoDelegation` - Delegator has no active delegation with this operator
 		/// * `NoDelegatorRewards` - No rewards available to claim
-		/// * `TransferFailed` - Token transfer failed
 		#[pallet::call_index(11)]
 		#[pallet::weight(T::DbWeight::get().reads_writes(2, 2))]
 		pub fn claim_delegator_rewards(

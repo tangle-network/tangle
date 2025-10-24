@@ -25598,7 +25598,6 @@ dependencies = [
  "tangle-crypto-primitives",
  "tangle-primitives",
  "tangle-runtime",
- "tangle-subxt 0.24.0",
  "tangle-testnet-runtime",
  "tokio",
 ]

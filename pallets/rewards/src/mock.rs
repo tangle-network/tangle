@@ -238,8 +238,6 @@ impl pallet_assets::Config for Runtime {
 	type CallbackHandle = ();
 	type Extra = ();
 	type RemoveItemsLimit = ConstU32<5>;
-	#[cfg(feature = "runtime-benchmarks")]
-	type BenchmarkHelper = ();
 }
 
 parameter_types! {
@@ -277,9 +275,17 @@ thread_local! {
 	pub static MOCK_DELEGATION_INFO: RefCell<MockDelegationData> = RefCell::new(MockDelegationData::default());
 }
 
-#[derive(Default)]
 pub struct MockDelegationData {
 	pub deposits: BTreeMap<(AccountId, Asset<AssetId>), UserDepositWithLocks<Balance, BlockNumber>>,
+}
+
+impl Default for MockDelegationData {
+	pub fn default() -> Self {
+		let mut default_data = BTreeMap::<
+			(AccountId, Asset<AssetId>),
+			UserDepositWithLocks<Balance, BlockNumber>
+		>::new()
+	}
 }
 
 pub struct MockDelegationManager;

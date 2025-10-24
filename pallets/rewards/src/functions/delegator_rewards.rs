@@ -32,7 +32,7 @@
 //! ## Mathematical Correctness
 //!
 //! For delegator with constant stake `s` from event `m` to `n`:
-//! ```
+//! ```ignore
 //! owed = s * Σ(reward_i / total_stake_i) for i=m+1 to n
 //!      = s * (accumulated_n - accumulated_m)
 //!      = s * accumulated_delta
@@ -139,7 +139,7 @@ impl<T: Config> Pallet<T> {
 	/// Useful for displaying pending rewards in UI.
 	///
 	/// # Formula
-	/// ```
+	/// ```ignore
 	/// owed = stake * (current_accumulated - last_claimed_accumulated)
 	/// ```
 	///
@@ -241,9 +241,9 @@ impl<T: Config> Pallet<T> {
 				&Self::account_id(),
 				delegator,
 				owed,
-				ExistenceRequirement::KeepAlive,
-			)
-			.map_err(|_| Error::<T>::TransferFailed)?;
+				// AllowDeath / KeepAlive. depending on requirements
+				ExistenceRequirement::AllowDeath,
+			)?;
 
 			log::info!("Delegator {:?} claimed {:?} from operator {:?}", delegator, owed, operator);
 		}
