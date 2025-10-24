@@ -2152,6 +2152,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       PaymentCalculationOverflow: AugmentedError<ApiType>;
       /**
+       * Subscription payment is not due yet
+       **/
+      PaymentNotDueYet: AugmentedError<ApiType>;
+      /**
        * Rejection Process is interrupted.
        **/
       RejectionInterrupted: AugmentedError<ApiType>;
@@ -2187,6 +2191,10 @@ declare module '@polkadot/api-base/types/errors' {
        * Signature verification failed
        **/
       SignatureVerificationFailed: AugmentedError<ApiType>;
+      /**
+       * Subscription not found for this service, job, and caller
+       **/
+      SubscriptionNotFound: AugmentedError<ApiType>;
       /**
        * Subscription not valid
        **/

@@ -1394,6 +1394,10 @@ declare module '@polkadot/api-base/types/events' {
        **/
       SubscriptionBillingProcessed: AugmentedEvent<ApiType, [subscriber: AccountId32, serviceId: u64, jobIndex: u8, amount: u128, blockNumber: u64], { subscriber: AccountId32, serviceId: u64, jobIndex: u8, amount: u128, blockNumber: u64 }>;
       /**
+       * A subscription payment was manually triggered by the user.
+       **/
+      SubscriptionPaymentTriggered: AugmentedEvent<ApiType, [caller: AccountId32, serviceId: u64, jobIndex: u8], { caller: AccountId32, serviceId: u64, jobIndex: u8 }>;
+      /**
        * An Operator has an unapplied slash.
        **/
       UnappliedSlash: AugmentedEvent<ApiType, [index: u32, operator: AccountId32, serviceId: u64, blueprintId: u64, slashPercent: Percent, era: u32], { index: u32, operator: AccountId32, serviceId: u64, blueprintId: u64, slashPercent: Percent, era: u32 }>;

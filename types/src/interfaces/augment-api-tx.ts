@@ -4288,6 +4288,29 @@ declare module '@polkadot/api-base/types/submittable' {
        **/
       terminate: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>]>;
       /**
+       * Manually trigger a subscription payment for a job.
+       * 
+       * This allows users to manually process their subscription payments instead of
+       * waiting for the automatic `on_idle` processing. This is useful when the automatic
+       * queue is backed up or the user wants immediate processing of their subscription.
+       * 
+       * # Arguments
+       * 
+       * * `origin` - The account triggering the payment (must be the subscriber)
+       * * `service_id` - The ID of the service
+       * * `job_index` - The index of the job with the subscription
+       * 
+       * # Errors
+       * 
+       * Returns an error if:
+       * - The service doesn't exist
+       * - The job doesn't exist in the blueprint
+       * - The caller doesn't have an active subscription for this service/job
+       * - The subscription payment is not due yet
+       * - The payment processing fails
+       **/
+      triggerSubscriptionPayment: AugmentedSubmittable<(serviceId: Compact<u64> | AnyNumber | Uint8Array, jobIndex: u8 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [Compact<u64>, u8]>;
+      /**
        * Unregisters a service provider from a specific service blueprint.
        * 
        * Can only be called if the no services are active for the blueprint.

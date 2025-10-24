@@ -1740,6 +1740,11 @@ export default {
         job: 'u8',
         result: 'Vec<TanglePrimitivesServicesField>',
       },
+      SubscriptionPaymentTriggered: {
+        caller: 'AccountId32',
+        serviceId: 'u64',
+        jobIndex: 'u8',
+      },
       EvmReverted: {
         from: 'H160',
         to: 'H160',
@@ -4550,6 +4555,10 @@ export default {
         job: 'Compact<u8>',
         args: 'Vec<TanglePrimitivesServicesField>',
       },
+      trigger_subscription_payment: {
+        serviceId: 'Compact<u64>',
+        jobIndex: 'u8',
+      },
       submit_result: {
         serviceId: 'Compact<u64>',
         callId: 'Compact<u64>',
@@ -4567,7 +4576,6 @@ export default {
       update_master_blueprint_service_manager: {
         address: 'H160',
       },
-      __Unused13: 'Null',
       __Unused14: 'Null',
       join_service: {
         instanceId: 'u64',
@@ -6798,6 +6806,8 @@ export default {
       InvalidEventCount: 'Null',
       MetricsDataTooLarge: 'Null',
       SubscriptionNotValid: 'Null',
+      SubscriptionNotFound: 'Null',
+      PaymentNotDueYet: 'Null',
       ServiceNotOwned: 'Null',
       NoOperatorsAvailable: 'Null',
       InvalidRevenueDistribution: 'Null',
