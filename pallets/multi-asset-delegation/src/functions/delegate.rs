@@ -29,7 +29,7 @@ use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::{
 	RoundIndex,
 	services::Asset,
-	traits::{MultiAssetDelegationInfo, RewardsManager},
+	traits::{MultiAssetDelegationDelegation, MultiAssetDelegationInfo, RewardsManager},
 };
 
 pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
@@ -58,6 +58,92 @@ type DelegationUpdates<T> =
 type OperatorUpdates<T> = BTreeMap<(AccountIdOf<T>, Asset<<T as Config>::AssetId>), BalanceOf<T>>;
 type AggregateResult<T> =
 	Result<(DepositUpdates<T>, DelegationUpdates<T>, OperatorUpdates<T>, Vec<usize>), Error<T>>;
+
+impl<T: Config> MultiAssetDelegationDelegation<T::AccountId, BalanceOf<T>, T::AssetId>
+	for Pallet<T>
+{
+	/// Handles the deposit of stake amount and creation of an operator.
+	/// This function is used for testing purposes.
+	/// DO NOT USE IN PRODUCTION.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the operator.
+	/// * `bond_amount` - The amount to be bonded by the operator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is already an operator or if the stake amount is too low.
+	fn process_delegate_be(
+		who: T::AccountId,
+		operator: T::AccountId,
+		asset: Asset<T::AssetId>,
+		amount: BalanceOf<T>,
+	) -> DispatchResult {
+		// Verify operator exists and is active
+		ensure!(Self::is_operator(&operator), Error::<T>::NotAnOperator);
+		ensure!(Self::is_operator_active(&operator), Error::<T>::NotActiveOperator);
+		ensure!(!amount.is_zero(), Error::<T>::InvalidAmount);
+
+		let now = <frame_system::Pallet<T>>::block_number();
+
+		let mut default_delegator_data = DelegatorMetadata::default();
+		default_delegator_data.deposits.insert(asset, Deposit::new(amount, None, now));
+		Delegators::<T>::insert(&who, default_delegator_data);
+
+		Delegators::<T>::try_mutate(&who, |maybe_metadata| {
+			let metadata = maybe_metadata.as_mut().ok_or(Error::<T>::NotDelegator)?;
+
+			// Ensure enough deposited balance and update it
+			let user_deposit =
+				metadata.deposits.get_mut(&asset).ok_or(Error::<T>::InsufficientBalance)?;
+			user_deposit
+				.increase_delegated_amount(amount)
+				.map_err(|_| Error::<T>::InsufficientBalance)?;
+
+			// Extract lock_multiplier for credit recording
+			let lock_multiplier = user_deposit
+				.locks
+				.as_ref()
+				.and_then(|locks| locks.iter().next().map(|lock| lock.lock_multiplier));
+
+			// Find existing delegation or create new one
+			let delegation_exists = metadata
+				.delegations
+				.iter()
+				.position(|d| d.operator == operator && d.asset == asset && !d.is_nomination);
+
+			match delegation_exists {
+				Some(idx) => {
+					// Update existing delegation
+					let delegation = &mut metadata.delegations[idx];
+					delegation.amount =
+						delegation.amount.checked_add(&amount).ok_or(Error::<T>::OverflowRisk)?;
+				},
+				None => {
+					// Create new delegation
+					metadata
+						.delegations
+						.try_push(BondInfoDelegator {
+							operator: operator.clone(),
+							amount,
+							asset,
+							blueprint_selection: DelegatorBlueprintSelection::All,
+							is_nomination: false,
+						})
+						.map_err(|_| Error::<T>::MaxDelegationsExceeded)?;
+
+					metadata.status = DelegatorStatus::Active;
+				},
+			}
+
+			// Update operator metadata
+			Self::update_operator_metadata(&operator, &who, asset, amount, true)?;
+			// Exclusive cross runtime api call
+			Ok(())
+		})
+	}
+}
 
 impl<T: Config> Pallet<T> {
 	/// Processes the delegation of an amount of an asset to an operator.

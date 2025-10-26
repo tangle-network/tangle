@@ -106,7 +106,12 @@ pub mod pallet {
 		Perbill,
 		traits::{AccountIdConversion, Saturating, Zero},
 	};
-	use tangle_primitives::rewards::LockMultiplier;
+	use tangle_primitives::{
+		rewards::LockMultiplier,
+		traits::{
+			MultiAssetDelegationDelegation, MultiAssetDelegationInfo, MultiAssetDelegationOperator,
+		},
+	};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -135,13 +140,14 @@ pub mod pallet {
 			+ TypeInfo;
 
 		/// Manager for getting operator stake and delegation info
-		type DelegationManager: tangle_primitives::traits::MultiAssetDelegationInfo<
+		type DelegationManager: MultiAssetDelegationInfo<
 				Self::AccountId,
 				BalanceOf<Self>,
 				BlockNumberFor<Self>,
 				Self::AssetId,
 				AssetType<Self::AssetId>,
-			>;
+			> + MultiAssetDelegationDelegation<Self::AccountId, BalanceOf<Self>, Self::AssetId>
+			+ MultiAssetDelegationOperator<Self::AccountId, BalanceOf<Self>>;
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;

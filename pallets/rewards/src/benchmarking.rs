@@ -16,19 +16,22 @@
 use super::*;
 use crate::{
 	Call, Config, Pallet,
-	pallet::{UserClaimedReward, PendingOperatorRewards},
+	pallet::{ApyBlocks, DecayRate, DecayStartPeriod, PendingOperatorRewards, UserClaimedReward},
 	types::*,
 };
-use frame_benchmarking::{
-	BenchmarkError, account, benchmarks, impl_benchmark_test_suite,
+use frame_benchmarking::{BenchmarkError, account, benchmarks, impl_benchmark_test_suite};
+use frame_support::{
+	BoundedVec, assert_ok,
+	traits::{Currency, EnsureOrigin},
 };
-use frame_support::BoundedVec;
-use frame_support::traits::{Currency, EnsureOrigin};
 use frame_system::{RawOrigin, pallet_prelude::BlockNumberFor};
-use sp_runtime::Perbill;
-use sp_runtime::Saturating;
+use sp_arithmetic::traits::Zero;
+use sp_runtime::{Perbill, Saturating};
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
-use tangle_primitives::{rewards::UserDepositWithLocks, services::Asset};
+use tangle_primitives::{
+	services::Asset,
+	traits::{MultiAssetDelegationDelegation, MultiAssetDelegationOperator},
+};
 
 const SEED: u32 = 0;
 
@@ -37,6 +40,25 @@ const SEED: u32 = 0;
 /// This ensures that the account has enough balance for the benchmark operations
 fn get_balance<T: Config>(amount: u32) -> BalanceOf<T> {
 	return T::Currency::minimum_balance().saturating_add(amount.into());
+}
+
+fn create_blueprint_selection<T: Config>(
+	delegator: T::AccountId,
+	bond_amount: BalanceOf<T>,
+	operator: T::AccountId,
+	asset: Asset<T::AssetId>,
+	amount: BalanceOf<T>,
+) {
+	assert_ok!(<T::DelegationManager as MultiAssetDelegationOperator<
+		T::AccountId,
+		BalanceOf<T>,
+	>>::handle_deposit_and_create_operator_be(operator.clone(), bond_amount,));
+
+	assert_ok!(<T::DelegationManager as MultiAssetDelegationDelegation<
+		T::AccountId,
+		BalanceOf<T>,
+		T::AssetId,
+	>>::process_delegate_be(delegator, operator, asset, amount));
 }
 
 fn setup_vault<T: Config>() -> (T::VaultId, T::AccountId)
@@ -82,7 +104,7 @@ benchmarks! {
 		let (vault_id, caller) = setup_vault::<T>();
 		let deposit = get_balance::<T>(100u32);
 		let service_id: ServiceId = 1u64;
-		
+
 		// Seed PendingOperatorRewards with a pending reward entry
 		let mut pending_rewards = BoundedVec::<(ServiceId, BalanceOf<T>), T::MaxPendingRewardsPerOperator>::new();
 		pending_rewards.try_push((service_id, deposit)).expect("Failed to push pending reward");
@@ -118,19 +140,78 @@ benchmarks! {
 		assert_eq!(RewardConfigStorage::<T>::get(vault_id), Some(new_config));
 	}
 
-	// // TODO
-	// claim_rewards_other {
-	// 	let (vault_id, caller) = setup_vault::<T>();
-	// 	let deposit_amount = get_balance::<T>(1000u32);
-	// 	let asset = Asset::Custom(1_u32.into());
-	// 	TotalRewardVaultScore::<T>::insert(vault_id, deposit_amount);
-	// 	TotalRewardVaultDeposit::<T>::insert(vault_id, deposit_amount);
-	// 	UserClaimedReward::<T>::insert(caller.clone(), vault_id, (0, 0));
-	// 	RewardVaultsPotAccount::<T>::insert(vault_id, caller.clone());
-	// }: _(RawOrigin::Signed(caller.clone()), caller.clone(), asset)
-	// verify {
-	// 	// Verify that rewards were claimed for the target account
-	// 	assert!(UserClaimedReward::<T>::contains_key(&caller, vault_id));
+	claim_rewards_other {
+		let (vault_id, delegator) = setup_vault::<T>();
+		// operator account
+		let operator: T::AccountId = account("operator", 2, SEED);
+		let operator_balance = get_balance::<T>(10000u32);
+		T::Currency::make_free_balance_be(&operator, operator_balance.clone());
+		// asset to delegate
+		let asset = Asset::Custom(1_u32.into());
+
+		create_blueprint_selection::<T>(
+			// delegator
+			delegator.clone(),
+			// bond amount
+			operator_balance / 10u32.into(),
+			// operator
+			operator.clone(),
+			// asset
+			asset.clone(),
+			// delegating amount
+			100u32.into()
+		);
+
+		// Even larger deposit amount for repeated runs
+		let deposit_amount = get_balance::<T>(1000000u32);
+		// Make total score 10000x user deposit
+		let total_score = deposit_amount * 10000u32.into();
+		TotalRewardVaultScore::<T>::insert(vault_id, total_score);
+		// Make 1000x user deposit
+		TotalRewardVaultDeposit::<T>::insert(vault_id, deposit_amount * 1000u32.into());
+
+		// Simulating previous claims - set to a much earlier block
+		let current_block = frame_system::Pallet::<T>::block_number();
+		let last_claim_block = current_block.saturating_sub(100000u32.into());
+		let last_claim_amount = get_balance::<T>(1000u32);
+		UserClaimedReward::<T>::insert(&delegator, vault_id, (last_claim_block, last_claim_amount));
+
+		// Setup vault pot account with massive balance for repeated runs
+		let pot_account: T::AccountId = account("pot", 2, SEED);
+		let pot_balance = get_balance::<T>(100000000u32);
+		T::Currency::make_free_balance_be(&pot_account, pot_balance);
+		RewardVaultsPotAccount::<T>::insert(vault_id, pot_account);
+
+		// Setup APY blocks to ensure proper reward calculation
+		ApyBlocks::<T>::put(BlockNumberFor::<T>::from(100000u32)); // Set APY blocks to 100000
+
+		// Setup decay config to ensure no decay affects the calculation
+		DecayStartPeriod::<T>::put(BlockNumberFor::<T>::from(10000000u32)); // Extremely high decay start period
+		DecayRate::<T>::put(Perbill::from_percent(0)); // No decay
+
+		// Override the reward config with massive values for repeated runs
+		let reward_config = RewardConfigForAssetVault {
+				apy: Perbill::from_percent(20), // 20% APY for higher rewards
+				deposit_cap: deposit_amount * 10000u32.into(), // Massive deposit cap
+				incentive_cap: deposit_amount * 1000u32.into(), // Massive incentive cap
+				boost_multiplier: Some(1),
+		};
+		RewardConfigStorage::<T>::insert(vault_id, reward_config);
+
+		// Fund the pallet account for transfers with maximum balance
+		let balance = get_balance::<T>(u32::MAX);
+		T::Currency::make_free_balance_be(&Pallet::<T>::account_id(), balance);
+	}: _(RawOrigin::Signed(operator.clone()), delegator.clone(), asset)
+	verify {
+		// Verify that the user's last claim was updated
+		let updated_claim = UserClaimedReward::<T>::get(&delegator, vault_id);
+		assert!(updated_claim.is_some());
+		let (claim_block, claim_amount) = updated_claim.unwrap();
+		assert!(claim_block > last_claim_block);
+
+		// Verify that the target account received some balance
+		let target_balance = T::Currency::free_balance(&delegator);
+		assert!(target_balance > Zero::zero());
 	}
 
 	manage_asset_reward_vault {
@@ -202,7 +283,7 @@ benchmarks! {
 	}
 
 	claim_delegator_rewards {
-		use sp_arithmetic::{FixedU128, traits::Zero};
+		use sp_arithmetic::FixedU128;
 
 		// Setup operator account
 		let operator: T::AccountId = account("operator", 0, SEED);
