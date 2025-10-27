@@ -22,7 +22,7 @@ use crate::{
 use frame_benchmarking::{BenchmarkError, account, benchmarks, impl_benchmark_test_suite};
 use frame_support::{
 	BoundedVec, assert_ok,
-	traits::{Currency, EnsureOrigin},
+	traits::{Currency, EnsureOrigin, Get},
 };
 use frame_system::{RawOrigin, pallet_prelude::BlockNumberFor};
 use sp_arithmetic::traits::Zero;
@@ -97,6 +97,7 @@ benchmarks! {
 	where_clause {
 		where
 			T::ForceOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
+			T::VaultMetadataOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
 			T::AssetId: From<u32>,
 	}
 
@@ -322,6 +323,52 @@ benchmarks! {
 		let updated_debt = crate::pallet::DelegatorRewardDebts::<T>::get(&delegator, &operator);
 		assert!(updated_debt.is_some());
 		assert!(updated_debt.unwrap().last_accumulated_per_share > FixedU128::from(0));
+	}
+
+	set_vault_metadata {
+		let vault_id = Default::default();
+		let caller: T::AccountId = account("caller", 0, SEED);
+		let balance = get_balance::<T>(1000u32);
+		T::Currency::make_free_balance_be(&caller, balance);
+
+		// Create vault metadata (name and logo as byte vectors with worst-case lengths)
+		let name: Vec<u8> = vec![b'A'; T::MaxVaultNameLength::get() as usize];
+		let logo: Vec<u8> = vec![b'B'; T::MaxVaultLogoLength::get() as usize];
+
+		let origin = T::VaultMetadataOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+	}: _<T::RuntimeOrigin>(origin, vault_id, name.clone(), logo.clone())
+	verify {
+		// Verify that the metadata was stored
+		let metadata = crate::pallet::VaultMetadataStore::<T>::get(vault_id);
+		assert!(metadata.is_some());
+		let metadata = metadata.unwrap();
+		assert_eq!(
+			metadata.name,
+			TryInto::<BoundedVec<u8, T::MaxVaultNameLength>>::try_into(name).unwrap()
+		);
+		assert_eq!(
+			metadata.logo,
+			TryInto::<BoundedVec<u8, T::MaxVaultLogoLength>>::try_into(logo).unwrap()
+		);
+	}
+
+	remove_vault_metadata {
+		let vault_id = Default::default();
+		let caller: T::AccountId = account("caller", 0, SEED);
+		let balance = get_balance::<T>(1000u32);
+		T::Currency::make_free_balance_be(&caller, balance);
+
+		// Setup: First set metadata so we can remove it (using worst-case lengths)
+		let name: BoundedVec<u8, T::MaxVaultNameLength> = vec![b'A'; T::MaxVaultNameLength::get() as usize].try_into().unwrap();
+		let logo: BoundedVec<u8, T::MaxVaultLogoLength> = vec![b'B'; T::MaxVaultLogoLength::get() as usize].try_into().unwrap();
+		let metadata = crate::pallet::VaultMetadata::<T> { name, logo };
+		crate::pallet::VaultMetadataStore::<T>::insert(vault_id, metadata);
+
+		let origin = T::VaultMetadataOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+	}: _<T::RuntimeOrigin>(origin, vault_id)
+	verify {
+		// Verify that the metadata was removed
+		assert!(!crate::pallet::VaultMetadataStore::<T>::contains_key(vault_id));
 	}
 }
 

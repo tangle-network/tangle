@@ -755,7 +755,7 @@ pub mod pallet {
 
 		/// Allows an operator to claim all their currently pending rewards.
 		#[pallet::call_index(10)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(1, 1))]
+		#[pallet::weight(<T as Config>::WeightInfo::claim_rewards())]
 		pub fn claim_rewards(origin: OriginFor<T>) -> DispatchResult {
 			let operator = ensure_signed(origin)?;
 
@@ -801,7 +801,7 @@ pub mod pallet {
 		/// * `NoDelegation` - Delegator has no active delegation with this operator
 		/// * `NoDelegatorRewards` - No rewards available to claim
 		#[pallet::call_index(11)]
-		#[pallet::weight(T::DbWeight::get().reads_writes(2, 2))]
+		#[pallet::weight(<T as Config>::WeightInfo::claim_delegator_rewards())]
 		pub fn claim_delegator_rewards(
 			origin: OriginFor<T>,
 			operator: T::AccountId,

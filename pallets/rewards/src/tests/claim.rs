@@ -55,12 +55,7 @@ fn setup_vault(
 	));
 
 	// Set deposit in mock delegation info
-	MOCK_DELEGATION_INFO.with(|m| {
-		m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-			unlocked_amount: MOCK_DEPOSIT,
-			amount_with_locks: None,
-		});
-	});
+	insert_user_deposit(account.clone(), asset, MOCK_DEPOSIT, None);
 
 	// Set total deposit and total score for the vault
 	TotalRewardVaultDeposit::<Runtime>::insert(vault_id, MOCK_DEPOSIT);
@@ -92,12 +87,7 @@ fn test_claim_rewards_zero_deposit() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with zero amount
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: 0,
-				amount_with_locks: None,
-			});
-		});
+		insert_user_deposit(account.clone(), asset, 0, None);
 
 		// Try to claim rewards for the account with zero deposit - should fail
 		assert_noop!(
@@ -132,12 +122,7 @@ fn test_claim_rewards_only_unlocked() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with only unlocked amount
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: None,
-			});
-		});
+		insert_user_deposit(account.clone(), asset, user_deposit, None);
 
 		// Initial balance should be 0
 		assert_eq!(Balances::free_balance(&account), 0);
@@ -178,16 +163,16 @@ fn test_claim_rewards_with_expired_lock() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with expired lock
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![LockInfo {
-					amount: user_deposit,
-					lock_multiplier: LockMultiplier::TwoMonths,
-					expiry_block: 900,
-				}]),
-			});
-		});
+		insert_user_deposit(
+			account.clone(),
+			asset,
+			user_deposit,
+			Some(vec![LockInfo {
+				amount: user_deposit,
+				lock_multiplier: LockMultiplier::TwoMonths,
+				expiry_block: 900,
+			}]),
+		);
 
 		// Run to block 1000 (after lock expiry)
 		run_to_block(1000);
@@ -239,23 +224,23 @@ fn test_claim_rewards_with_active_locks() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with active locks
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![
-					LockInfo {
-						amount: user_deposit * 2,
-						lock_multiplier: LockMultiplier::TwoMonths,
-						expiry_block: 2000,
-					},
-					LockInfo {
-						amount: user_deposit * 3,
-						lock_multiplier: LockMultiplier::ThreeMonths,
-						expiry_block: 2000,
-					},
-				]),
-			});
-		});
+		insert_user_deposit(
+			account.clone(),
+			asset,
+			user_deposit,
+			Some(vec![
+				LockInfo {
+					amount: user_deposit * 2,
+					lock_multiplier: LockMultiplier::TwoMonths,
+					expiry_block: 2000,
+				},
+				LockInfo {
+					amount: user_deposit * 3,
+					lock_multiplier: LockMultiplier::ThreeMonths,
+					expiry_block: 2000,
+				},
+			]),
+		);
 
 		// Run to block 1000
 		run_to_block(1000);
@@ -308,16 +293,16 @@ fn test_claim_rewards_multiple_claims() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with active locks
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: Some(vec![LockInfo {
-					amount: user_deposit,
-					lock_multiplier: LockMultiplier::TwoMonths,
-					expiry_block: 2000,
-				}]),
-			});
-		});
+		insert_user_deposit(
+			account.clone(),
+			asset,
+			user_deposit,
+			Some(vec![LockInfo {
+				amount: user_deposit,
+				lock_multiplier: LockMultiplier::TwoMonths,
+				expiry_block: 2000,
+			}]),
+		);
 
 		// First claim at block 1000
 		run_to_block(1000);
@@ -381,12 +366,7 @@ fn test_claim_rewards_with_zero_cap() {
 		));
 
 		// Mock deposit
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: None,
-			});
-		});
+		insert_user_deposit(account.clone(), asset, user_deposit, None);
 
 		run_to_block(1000);
 
@@ -434,20 +414,10 @@ fn test_claim_frequency_with_decay() {
 		));
 
 		// Set deposit in mock delegation info
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(frequent_claimer.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: deposit_amount, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(frequent_claimer.clone(), asset, deposit_amount, None);
 
 		// Mock deposit for infrequent claimer
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(infrequent_claimer.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: deposit_amount, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(infrequent_claimer.clone(), asset, deposit_amount, None);
 
 		// Set total deposit and total score for the vault
 		TotalRewardVaultDeposit::<Runtime>::insert(vault_id, MOCK_DEPOSIT * 2); // Both users
@@ -533,12 +503,7 @@ fn test_claim_rewards_other() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with only unlocked amount
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert((account.clone(), asset), UserDepositWithLocks {
-				unlocked_amount: user_deposit,
-				amount_with_locks: None,
-			});
-		});
+		insert_user_deposit(account.clone(), asset, user_deposit, None);
 
 		// Initial balance should be 0
 		assert_eq!(Balances::free_balance(&account), 0);
