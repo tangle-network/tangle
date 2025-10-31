@@ -19,7 +19,6 @@ for i in "${!pallets[@]}"; do
   
   ./target/release/tangle benchmark pallet \
     --chain=dev \
-    --execution=wasm \
     --wasm-execution=compiled \
     --pallet="$pallet" \
     --extrinsic='*' \

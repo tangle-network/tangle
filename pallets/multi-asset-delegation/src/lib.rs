@@ -787,18 +787,20 @@ pub mod pallet {
 		/// * [`Error::DepositOverflow`] - Deposit would overflow tracking
 		/// * [`Error::InvalidAsset`] - Asset is not supported
 		#[pallet::call_index(10)]
-		#[pallet::weight(T::WeightInfo::deposit())]
+		#[pallet::weight(T::WeightInfo::deposit_with_no_evm_address())]
 		pub fn deposit(
 			origin: OriginFor<T>,
 			asset: Asset<T::AssetId>,
 			amount: BalanceOf<T>,
 			evm_address: Option<H160>,
 			lock_multiplier: Option<LockMultiplier>,
-		) -> DispatchResult {
+		) -> DispatchResultWithPostInfo {
+			let mut actual_weight = T::WeightInfo::deposit_with_no_evm_address();
 			let who = match (asset, evm_address) {
 				(Asset::Custom(_), None) => ensure_signed(origin)?,
 				(Asset::Erc20(_), Some(addr)) => {
 					ensure_pallet::<T, _>(origin)?;
+					actual_weight = T::WeightInfo::deposit_with_evm_address();
 					T::EvmAddressMapping::into_account_id(addr)
 				},
 				(Asset::Erc20(_), None) => return Err(Error::<T>::NotAuthorized.into()),
@@ -816,7 +818,7 @@ pub mod pallet {
 
 			Self::process_deposit(who.clone(), asset, amount, lock_multiplier)?;
 			Self::deposit_event(Event::Deposited { who, amount, asset });
-			Ok(())
+			Ok(Some(actual_weight).into())
 		}
 
 		/// Schedules a withdraw request.
@@ -869,18 +871,20 @@ pub mod pallet {
 		/// * [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists
 		/// * [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed
 		#[pallet::call_index(12)]
-		#[pallet::weight(T::WeightInfo::execute_withdraw())]
-		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResult {
+		#[pallet::weight(T::WeightInfo::execute_withdraw_with_no_evm_address())]
+		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResultWithPostInfo {
+			let mut actual_weight = T::WeightInfo::execute_withdraw_with_no_evm_address();
 			let who = match evm_address {
 				Some(addr) => {
 					ensure_pallet::<T, _>(origin)?;
+					actual_weight = T::WeightInfo::execute_withdraw_with_evm_address();
 					T::EvmAddressMapping::into_account_id(addr)
 				},
 				None => ensure_signed(origin)?,
 			};
 			Self::process_execute_withdraw(who.clone())?;
 			Self::deposit_event(Event::ExecutedWithdraw { who });
-			Ok(())
+			Ok(Some(actual_weight).into())
 		}
 
 		/// Cancels a scheduled withdraw request.

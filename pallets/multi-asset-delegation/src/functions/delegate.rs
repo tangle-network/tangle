@@ -101,12 +101,6 @@ impl<T: Config> MultiAssetDelegationDelegation<T::AccountId, BalanceOf<T>, T::As
 				.increase_delegated_amount(amount)
 				.map_err(|_| Error::<T>::InsufficientBalance)?;
 
-			// Extract lock_multiplier for credit recording
-			let lock_multiplier = user_deposit
-				.locks
-				.as_ref()
-				.and_then(|locks| locks.iter().next().map(|lock| lock.lock_multiplier));
-
 			// Find existing delegation or create new one
 			let delegation_exists = metadata
 				.delegations
