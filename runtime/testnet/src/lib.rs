@@ -1636,6 +1636,7 @@ mod benches {
 		[pallet_multi_asset_delegation, MultiAssetDelegation]
 		[pallet_rewards, Rewards]
 		[pallet_credits, Credits]
+		[pallet_airdrop_claims, Claims]
 	);
 }
 
