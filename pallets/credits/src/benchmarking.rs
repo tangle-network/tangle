@@ -20,16 +20,21 @@
 
 use super::*;
 use crate::{types::StakeTier, BalanceOf, Config, LastRewardUpdateBlock, Pallet as Credits};
-use frame_benchmarking::{v2::*, BenchmarkError};
+use frame_benchmarking::{account, v2::*, BenchmarkError};
 use frame_support::{
 	traits::{Currency, Get},
 	BoundedVec,
 };
-use frame_system::RawOrigin;
+use frame_system::{RawOrigin, Pallet as System};
 use sp_runtime::{traits::Zero, Saturating};
 use sp_std::prelude::*;
+use tangle_primitives::{
+	services::Asset,
+	traits::{MultiAssetDelegationDelegation, MultiAssetDelegationOperator},
+};
 
 const SEED: u32 = 0;
+const INITIAL_BALANCE: u32 = 1_000_000;
 
 /// Helper function to prepare an account with the given amount of TNT
 fn setup_account<T: Config>(account_index: u32, balance: BalanceOf<T>) -> T::AccountId {
@@ -38,16 +43,50 @@ fn setup_account<T: Config>(account_index: u32, balance: BalanceOf<T>) -> T::Acc
 	account
 }
 
-/// Helper function to simulate delegation for an account
+/// Helper function to fund an account following the pattern from multi-asset-delegation
+fn fund_account<T: Config>(who: &T::AccountId) {
+	let balance = T::Currency::minimum_balance() * INITIAL_BALANCE.into();
+	T::Currency::make_free_balance_be(who, balance);
+}
+
+/// Helper function to setup delegation for benchmarking
+/// Follows the pattern from tests.rs to properly set up MultiAssetDelegation
 fn setup_delegation<T: Config>(
 	delegator: &T::AccountId,
 	stake_amount: BalanceOf<T>,
+	asset_id: Asset<T::AssetId>,
 ) -> Result<(), &'static str> {
-	// For benchmarking purposes, we'll just ensure the account has enough balance
-	let min_balance = stake_amount.saturating_mul(5u32.into());
-	let _ = T::Currency::make_free_balance_be(delegator, min_balance);
+	// Create operator account
+	let operator: T::AccountId = account("operator", 1, SEED);
 
-	let current_block = frame_system::Pallet::<T>::block_number();
+	// Fund accounts following test pattern
+	// Fund operator with enough for bond
+	fund_account::<T>(&operator);
+
+	let bond_amount = T::Currency::minimum_balance() * 100u32.into();
+	
+	// Fund delegator with enough for stake + buffer
+	let delegator_balance = stake_amount.saturating_mul(10u32.into());
+	T::Currency::make_free_balance_be(delegator, delegator_balance);
+
+	// Setup operator using handle_deposit_and_create_operator_be (trait method for benchmarking)
+	T::MultiAssetDelegationInfo::handle_deposit_and_create_operator_be(
+		operator.clone(),
+		bond_amount,
+	)
+	.map_err(|_| "Failed to create operator")?;
+
+	// Delegate assets to operator using process_delegate_be (trait method for benchmarking)
+	T::MultiAssetDelegationInfo::process_delegate_be(
+		delegator.clone(),
+		operator,
+		asset_id,
+		stake_amount,
+	)
+	.map_err(|_| "Failed to delegate")?;
+	
+	// Set initial reward update block to current block
+	let current_block = System::<T>::block_number();
 	LastRewardUpdateBlock::<T>::insert(delegator, current_block);
 
 	Ok(())
@@ -66,15 +105,22 @@ fn create_stake_tiers<T: Config>(tiers_count: u32) -> Vec<StakeTier<BalanceOf<T>
 	tiers
 }
 
-#[benchmarks]
+#[benchmarks(where
+	T::AssetId: From<u32>,
+)]
 mod benchmarks {
 	use super::*;
 
 	#[benchmark]
 	fn burn() -> Result<(), BenchmarkError> {
-		// Setup: Create an account with sufficient balance
-		let burn_amount: BalanceOf<T> = 1000u32.into();
-		let account = setup_account::<T>(1, burn_amount.saturating_mul(2u32.into()));
+		// Setup: Create an account with sufficient balance for worst case scenario
+		// Following the pattern from multi-asset-delegation benchmarks
+		let account: T::AccountId = account("account", 1, SEED);
+		fund_account::<T>(&account);
+		
+		// For worst case, use a large burn amount relative to minimum balance
+		// This ensures we test the maximum burn scenario
+		let burn_amount: BalanceOf<T> = T::Currency::minimum_balance() * 1000u32.into();
 
 		#[extrinsic_call]
 		burn(RawOrigin::Signed(account.clone()), burn_amount);
@@ -84,28 +130,46 @@ mod benchmarks {
 
 	#[benchmark]
 	fn claim_credits() -> Result<(), BenchmarkError> {
-		// Setup: Create an account with sufficient stake to earn credits
-		let stake_amount: BalanceOf<T> = 1000u32.into();
-		let account = setup_account::<T>(1, stake_amount.saturating_mul(2u32.into()));
+		// Setup: Use maximum stake tier threshold for worst case scenario
+		let stored_tiers = Credits::<T>::stake_tiers();
+		let max_stake_amount = if stored_tiers.is_empty() {
+			10_000u32.into() // Fallback if no tiers configured
+		} else {
+			// Use the highest tier threshold
+			stored_tiers.iter().map(|t| t.threshold).max().unwrap_or(10_000u32.into())
+		};
+		let account = setup_account::<T>(1, max_stake_amount.saturating_mul(10u32.into()));
+
+		// asset to delegate
+		let asset_id_u32 = 0_u32;
+		let asset_id = Asset::Custom(asset_id_u32.into());
 
 		// Setup delegation to enable credit accrual
-		setup_delegation::<T>(&account, stake_amount).unwrap();
+		setup_delegation::<T>(&account, max_stake_amount, asset_id).unwrap();
 
-		// Advance blocks to accrue some credits
+		// Setup global stake tiers for the benchmark with maximum rate
+		// claim_credits uses get_current_rate which reads from StoredStakeTiers (global tiers)
+		let max_tiers = T::MaxStakeTiers::get() as u32;
+		let global_tiers = create_stake_tiers::<T>(max_tiers.min(10)); // Limit to reasonable size
+		Credits::<T>::set_stake_tiers(RawOrigin::Root.into(), global_tiers).unwrap();
+
+		// Advance blocks by the full claim window for worst case scenario
+		let window = T::ClaimWindowBlocks::get();
 		let start_block = frame_system::Pallet::<T>::block_number();
-		let blocks_to_advance = 100u32;
-		let end_block = start_block + blocks_to_advance.into();
+		let end_block = start_block.saturating_add(window);
 		frame_system::Pallet::<T>::set_block_number(end_block);
 
-		// Calculate a reasonable claim amount
-		let rate = Credits::<T>::get_current_rate(stake_amount);
-		let claim_amount = if rate.is_zero() {
-			1u32.into()
-		} else {
-			// Convert blocks to the appropriate balance type
-			let blocks_as_balance: BalanceOf<T> = blocks_to_advance.into();
-			rate.saturating_mul(blocks_as_balance)
-		};
+		// Get the actual max claimable amount within the window
+		// This ensures we don't exceed what's actually available
+		let max_claimable = Credits::<T>::get_accrued_amount(&account, Some(end_block))
+			.map_err(|_| BenchmarkError::Weightless)?;
+		
+		// For worst case scenario, we must have credits available
+		// If setup results in zero credits, the benchmark setup is wrong
+		assert!(!max_claimable.is_zero());
+		
+		// Use the maximum claimable amount for worst case
+		let claim_amount = max_claimable;
 
 		// Create a bounded ID for the claim
 		let id_str = b"benchmark_claim_id".to_vec();
@@ -134,34 +198,43 @@ mod benchmarks {
 
 	#[benchmark]
 	fn claim_credits_with_asset() -> Result<(), BenchmarkError> {
-		// Setup: Create an account with sufficient stake to earn credits
-		let stake_amount: BalanceOf<T> = 1000u32.into();
-		let account = setup_account::<T>(1, stake_amount.saturating_mul(2u32.into()));
-		let asset_id = T::AssetId::default(); // Use default asset ID (TNT)
+		// Setup: Use maximum stake tier threshold for worst case scenario
+		let stored_tiers = Credits::<T>::stake_tiers();
+		let max_stake_amount = if stored_tiers.is_empty() {
+			10_000u32.into() // Fallback if no tiers configured
+		} else {
+			// Use the highest tier threshold
+			stored_tiers.iter().map(|t| t.threshold).max().unwrap_or(10_000u32.into())
+		};
+		let account = setup_account::<T>(1, max_stake_amount.saturating_mul(10u32.into()));
+		let asset_id = 0_u32;
+		let asset = Asset::Custom(0_u32.into());
 
 		// Setup delegation to enable credit accrual
-		setup_delegation::<T>(&account, stake_amount).unwrap();
+		setup_delegation::<T>(&account, max_stake_amount, asset).unwrap();
 
-		// Setup asset-specific stake tiers for the benchmark
-		let asset_tiers = create_stake_tiers::<T>(3);
-		Credits::<T>::set_asset_stake_tiers(RawOrigin::Root.into(), asset_id, asset_tiers).unwrap();
+		// Setup asset-specific stake tiers for the benchmark with maximum rate
+		let max_tiers = T::MaxStakeTiers::get() as u32;
+		let asset_tiers = create_stake_tiers::<T>(max_tiers.min(10)); // Limit to reasonable size
+		Credits::<T>::set_asset_stake_tiers(RawOrigin::Root.into(), asset_id.into(), asset_tiers).unwrap();
 
-		// Advance blocks to accrue some credits
+		// Advance blocks by the full claim window for worst case scenario
+		let window = T::ClaimWindowBlocks::get();
 		let start_block = frame_system::Pallet::<T>::block_number();
-		let blocks_to_advance = 100u32;
-		let end_block = start_block + blocks_to_advance.into();
+		let end_block = start_block.saturating_add(window);
 		frame_system::Pallet::<T>::set_block_number(end_block);
 
-		// Calculate a reasonable claim amount based on asset-specific rate
-		let rate = Credits::<T>::get_current_rate_for_asset(stake_amount, asset_id)
-			.unwrap_or_else(|_| 1u32.into());
-		let claim_amount = if rate.is_zero() {
-			1u32.into()
-		} else {
-			// Convert blocks to the appropriate balance type
-			let blocks_as_balance: BalanceOf<T> = blocks_to_advance.into();
-			rate.saturating_mul(blocks_as_balance)
-		};
+		// Get the actual max claimable amount within the window for the specific asset
+		// This ensures we don't exceed what's actually available
+		let max_claimable = Credits::<T>::get_accrued_amount_for_asset(&account, Some(end_block), asset_id.into())
+			.map_err(|_| BenchmarkError::Weightless)?;
+
+		// For worst case scenario, we must have credits available
+		// If setup results in zero credits, the benchmark setup is wrong
+		assert!(!max_claimable.is_zero());
+		
+		// Use the maximum claimable amount for worst case
+		let claim_amount = max_claimable;
 
 		// Create a bounded ID for the claim
 		let id_str = b"benchmark_asset_claim_id".to_vec();
@@ -173,7 +246,7 @@ mod benchmarks {
 			RawOrigin::Signed(account.clone()),
 			claim_amount,
 			bounded_id.clone(),
-			asset_id,
+			asset_id.into(),
 		);
 
 		Ok(())

@@ -87,7 +87,7 @@ pub mod pallet {
 	use scale_info::prelude::vec::Vec;
 	use sp_runtime::traits::{CheckedMul, MaybeDisplay, SaturatedConversion, Saturating, Zero};
 	use sp_std::fmt::Debug;
-	use tangle_primitives::{rewards::AssetType, traits::MultiAssetDelegationInfo};
+	use tangle_primitives::{rewards::AssetType, traits::{MultiAssetDelegationInfo, MultiAssetDelegationDelegation, MultiAssetDelegationOperator}};
 
 	// Move STORAGE_VERSION inside the pallet mod
 	const STORAGE_VERSION: StorageVersion = StorageVersion::new(2);
@@ -127,7 +127,8 @@ pub mod pallet {
 			BlockNumberOf<Self>,
 			Self::AssetId,
 			AssetType<Self::AssetId>,
-		>;
+		> + MultiAssetDelegationDelegation<Self::AccountId, BalanceOf<Self>, Self::AssetId>
+		+ MultiAssetDelegationOperator<Self::AccountId, BalanceOf<Self>>;
 
 		/// The conversion rate for burning TNT to credits.
 		#[pallet::constant]

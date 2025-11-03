@@ -52,7 +52,7 @@ fn create_blueprint_selection<T: Config>(
 	assert_ok!(<T::DelegationManager as MultiAssetDelegationOperator<
 		T::AccountId,
 		BalanceOf<T>,
-	>>::handle_deposit_and_create_operator_be(operator.clone(), bond_amount,));
+	>>::handle_deposit_and_create_operator_be(operator.clone(), bond_amount));
 
 	assert_ok!(<T::DelegationManager as MultiAssetDelegationDelegation<
 		T::AccountId,
