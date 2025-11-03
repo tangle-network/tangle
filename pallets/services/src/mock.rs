@@ -28,6 +28,7 @@ use frame_election_provider_support::{
 use frame_support::{
 	PalletId, construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, Hooks, OneSessionHandler},
+	traits::tokens::fungibles::{Inspect, Mutate, Create},
 };
 use frame_system::EnsureRoot;
 use pallet_evm::GasWeightMapping;
@@ -48,7 +49,7 @@ use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, PricingModel},
-	traits::{RewardRecorder, RewardsManager},
+	traits::{RewardRecorder, RewardsManager, MultiAssetDelegationBenchmarkingHelperDelegation, MultiAssetDelegationBenchmarkingHelperOperator},
 	types::{BlockNumber, rewards::LockMultiplier},
 };
 
@@ -398,6 +399,48 @@ parameter_types! {
 	pub const FallbackWeightWrites: u64 = 100;
 }
 
+pub struct MockBenchmarkingHelper;
+
+impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn asset_exists(asset: AssetId) -> bool {
+		Assets::asset_exists(asset)
+	}
+	
+	fn balance(asset: AssetId, who: &AccountId) -> Balance {
+		Assets::balance(asset, who)
+	}
+
+	fn mint_into(asset: AssetId, who: &AccountId, amount: Balance) -> Result<Balance, DispatchError> {
+		Assets::mint_into(asset, who, amount)
+	}
+
+	fn create(id: AssetId, admin: AccountId, is_sufficient: bool, min_balance: Balance) -> DispatchResult {
+		<Assets as Create<AccountId>>::create(id, admin, is_sufficient, min_balance)
+	}
+}
+
+impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn process_delegate_be(
+		who: AccountId,
+		operator: AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> DispatchResult {
+		MultiAssetDelegation::process_delegate_be(who, operator, asset, amount)
+	}
+}
+
+impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockBenchmarkingHelper {
+	fn handle_deposit_and_create_operator_be(
+		who: AccountId,
+		bond_amount: Balance,
+	) -> DispatchResult {
+		MultiAssetDelegation::handle_deposit_and_create_operator_be(who, bond_amount)
+	}
+}
+
+
+
 impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -447,6 +490,8 @@ impl pallet_services::Config for Runtime {
 	type RewardsManager = MockRewardsManager;
 	type TreasuryAccount = TreasuryAccount;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockBenchmarkingHelper;
 }
 
 type Block = frame_system::mocking::MockBlock<Runtime>;

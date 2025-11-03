@@ -16,6 +16,11 @@
 
 use super::*;
 use tangle_primitives::services::Constraints;
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator
+};
 
 pub type BalanceOf<T> =
 	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
@@ -40,3 +45,19 @@ pub type MaxAssetsPerServiceOf<T> = <ConstraintsFor<T> as Constraints>::MaxAsset
 #[codec(mel_bound(skip_type_params(T)))]
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConstraintsOf<T>(sp_std::marker::PhantomData<T>);
+
+#[cfg(feature = "runtime-benchmarks")]
+pub trait BenchmarkingHelper<AccountId, Balance, AssetId>:
+	MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId>
+	+ MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance>
+{
+	// Take function from `use frame_support::traits::tokens::fungibles::Inspect;`
+	fn asset_exists(_asset: AssetId) -> bool;
+	fn balance(_asset: AssetId, _who: &AccountId) -> Balance;
+
+	// Take function from `use frame_support::traits::tokens::fungibles::Mutate;`
+	fn mint_into(_asset: AssetId, _who: &AccountId, _amount: Balance) -> Result<Balance, DispatchError>;
+
+	// Take function from `use frame_support::traits::tokens::fungibles::Create;`
+	fn create(_id: AssetId, _admin: AccountId, _is_sufficient: bool, _min_balance: Balance) -> DispatchResult;
+}

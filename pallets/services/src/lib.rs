@@ -62,9 +62,6 @@ pub mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 
-#[cfg(feature = "runtime-benchmarks")]
-pub use impls::BenchmarkingOperatorDelegationManager;
-
 #[allow(clippy::too_many_arguments)]
 #[frame_support::pallet(dev_mode)]
 pub mod module {
@@ -282,6 +279,10 @@ pub mod module {
 
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
+
+		/// The benchmarking helper for the pallet.
+		#[cfg(feature = "runtime-benchmarks")]
+		type BenchmarkingHelper: BenchmarkingHelper<Self::AccountId, BalanceOf<Self>, Self::AssetId>;
 	}
 
 	#[pallet::hooks]

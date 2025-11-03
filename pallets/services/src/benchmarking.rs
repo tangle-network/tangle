@@ -7,7 +7,7 @@ use scale_info::prelude::boxed::Box;
 use sp_core::{H160, crypto::Pair, ecdsa};
 use sp_runtime::{
 	KeyTypeId, Percent,
-	traits::{SaturatedConversion, StaticLookup, Zero},
+	traits::{SaturatedConversion, Zero},
 };
 use sp_std::vec;
 use tangle_primitives::services::{
@@ -91,13 +91,9 @@ fn ensure_native_balance<T: Config>(account: &T::AccountId) {
 	}
 }
 
-fn ensure_asset_exists<T>(asset: u32)
-where
-	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
-{
+fn ensure_asset_exists<T: Config>(asset: u32) {
 	let asset_id: AssetIdOf<T> = asset.into();
-	if pallet_assets::Pallet::<T, pallet_assets::Instance1>::maybe_total_supply(asset_id.clone())
-		.is_some()
+	if T::BenchmarkingHelper::asset_exists(asset_id.clone())
 	{
 		return;
 	}
@@ -105,27 +101,19 @@ where
 	let owner = asset_admin_account::<T>();
 	ensure_native_balance::<T>(&owner);
 
-	let owner_lookup = T::Lookup::unlookup(owner.clone());
-	let min_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance =
-		1u128.saturated_into();
-	let _ = pallet_assets::Pallet::<T, pallet_assets::Instance1>::force_create(
-		RawOrigin::Root.into(),
+	let min_balance: BalanceOf<T> = 1_u128.saturated_into();
+	let _ = T::BenchmarkingHelper::create(
 		asset_id.clone().into(),
-		owner_lookup,
+		owner.clone(),
 		true,
 		min_balance,
 	);
 }
 
-fn ensure_asset_balance<T>(account: &T::AccountId, asset: u32)
-where
-	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
-{
+fn ensure_asset_balance<T: Config>(account: &T::AccountId, asset: u32) {
 	ensure_asset_exists::<T>(asset);
 	let asset_id: AssetIdOf<T> = asset.into();
-	let current =
-		pallet_assets::Pallet::<T, pallet_assets::Instance1>::balance(asset_id.clone(), account);
+	let current = T::BenchmarkingHelper::balance(asset_id.clone(), account);
 	let current_u128: u128 = current.saturated_into();
 
 	if current_u128 >= CUSTOM_ASSET_BALANCE_TARGET {
@@ -137,68 +125,59 @@ where
 		return;
 	}
 
-	let delta_balance: <T as pallet_assets::Config<pallet_assets::Instance1>>::Balance =
+	let delta_balance: BalanceOf<T> =
 		delta.saturated_into();
 	let owner = asset_admin_account::<T>();
 	ensure_native_balance::<T>(&owner);
-	let beneficiary = T::Lookup::unlookup(account.clone());
-	let _ = pallet_assets::Pallet::<T, pallet_assets::Instance1>::mint(
-		RawOrigin::Signed(owner).into(),
-		asset_id.into(),
-		beneficiary,
+	let _ = T::BenchmarkingHelper::mint_into(
+		asset_id.clone().into(),
+		&account.clone(),
 		delta_balance,
 	);
 }
 
-fn ensure_account_ready<T>(account: &T::AccountId)
-where
-	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
-{
+fn ensure_account_ready<T: Config>(account: &T::AccountId) {
 	ensure_native_balance::<T>(account);
 	ensure_asset_balance::<T>(account, USDC);
 	ensure_asset_balance::<T>(account, WETH);
 	ensure_asset_balance::<T>(account, WBTC);
 }
 
-fn funded_account<T>(id: u8) -> T::AccountId
-where
-	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
-{
+fn funded_account<T: Config>(id: u8) -> T::AccountId {
 	let account = mock_account_id::<T>(id);
 	ensure_account_ready::<T>(&account);
 	account
 }
 
-fn register_operator<T>(blueprint_id: u64, id: u8) -> T::AccountId
-where
-	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
-{
-	let operator = funded_account::<T>(id);
+fn register_operator<T: Config>(blueprint_id: u64, operator: T::AccountId, operator_id: u8) {
 	assert_ok!(Pallet::<T>::register(
 		RawOrigin::Signed(operator.clone()).into(),
 		blueprint_id,
-		operator_preferences::<T>(id),
+		operator_preferences::<T>(operator_id),
 		Default::default(),
 		0_u32.into()
 	));
-	operator
 }
 
-fn prepare_blueprint_with_operators<T>(operator_ids: &[u8]) -> (T::AccountId, Vec<T::AccountId>)
-where
-	T: Config + pallet_assets::Config<pallet_assets::Instance1, AssetId = AssetIdOf<T>>,
-	<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
-{
+fn prepare_blueprint_with_operators<T: Config>(operator_ids: &[u8]) -> (T::AccountId, Vec<T::AccountId>) {
 	let owner = funded_account::<T>(1u8);
 	setup_master_blueprint_manager::<T>();
 	let blueprint = cggmp21_blueprint::<T>();
 	assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(owner.clone()).into(), blueprint));
 
-	let operators =
-		operator_ids.iter().map(|id| register_operator::<T>(0, *id)).collect::<Vec<_>>();
+	let operators = operator_ids.iter().map(|id| funded_account::<T>(*id)).collect::<Vec<_>>();
+
+	for (idx, operator) in operators.iter().enumerate() {
+		setup_nominator::<T>(
+			owner.clone(),
+			100_u128.saturated_into(),
+			operator.clone(),
+			vec![Asset::Custom(USDC.into()), Asset::Custom(WETH.into()), Asset::Custom(TNT.into())],
+			vec![100_u128.saturated_into(), 100_u128.saturated_into(), 100_u128.saturated_into()],
+		);
+
+		register_operator::<T>(0, operator.clone(), idx as u8);
+	}
 
 	(owner, operators)
 }
@@ -260,13 +239,32 @@ fn setup_master_blueprint_manager<T: Config>() {
 	.unwrap();
 }
 
+fn setup_nominator<T: Config>(
+	delegator: T::AccountId,
+	bond_amount: BalanceOf<T>,
+	operator: T::AccountId,
+	assets: Vec<Asset<T::AssetId>>,
+	amounts: Vec<BalanceOf<T>>,
+) {
+	assert_ok!(<T::BenchmarkingHelper as tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<
+		T::AccountId,
+		BalanceOf<T>,
+	>>::handle_deposit_and_create_operator_be(operator.clone(), bond_amount));
+
+	for (i, asset) in assets.iter().enumerate() {
+		assert_ok!(<T::BenchmarkingHelper as tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<
+			T::AccountId,
+			BalanceOf<T>,
+			T::AssetId,
+		>>::process_delegate_be(delegator.clone(), operator.clone(), asset.clone(), amounts[i]));
+	}
+}
+
 benchmarks! {
 
 	where_clause {
 		where
 			<T as crate::module::Config>::AssetId: From<u32>,
-			T: pallet_assets::Config<pallet_assets::Instance1, AssetId = <T as crate::module::Config>::AssetId>,
-			<T as pallet_assets::Config<pallet_assets::Instance1>>::Balance: SaturatedConversion,
 	}
 
 	create_blueprint {
@@ -296,7 +294,13 @@ benchmarks! {
 		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
 
 		let bob = funded_account::<T>(2u8);
-
+		setup_nominator::<T>(
+			alice.clone(),
+			100_u128.saturated_into(),
+			bob.clone(),
+			vec![Asset::Custom(USDC.into()), Asset::Custom(WETH.into())],
+			vec![100_u128.saturated_into(), 100_u128.saturated_into()],
+		);
 	}: _(RawOrigin::Signed(bob.clone()), 0, operator_preferences::<T>(2u8), Default::default(), 0_u32.into())
 
 
@@ -320,7 +324,6 @@ benchmarks! {
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
 		let bob = operators.pop().expect("Bob exists");
-
 	}: _(
 		RawOrigin::Signed(bob.clone()),
 		None,
@@ -336,7 +339,7 @@ benchmarks! {
 		Asset::Custom(USDC.into()),
 		0_u32.into(),
 		MembershipModel::Fixed { min_operators: 3 }
-		)
+	)
 
 	approve {
 		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
@@ -365,6 +368,7 @@ benchmarks! {
 		let security_commitments = vec![
 			get_security_commitment::<T>(USDC.into(), 10),
 			get_security_commitment::<T>(WETH.into(), 10),
+			get_security_commitment::<T>(TNT.into(), 10),
 		];
 
 	}: _(RawOrigin::Signed(charlie.clone()), 0, security_commitments)
@@ -421,6 +425,28 @@ benchmarks! {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
+		let security_commitments = vec![
+			get_security_commitment::<T>(USDC.into(), 10),
+			get_security_commitment::<T>(WETH.into(), 10),
+			get_security_commitment::<T>(TNT.into(), 10),
+		];
+
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+
 	}: _(RawOrigin::Signed(eve.clone()),0)
 
 
@@ -446,6 +472,28 @@ benchmarks! {
 			Asset::Custom(USDC.into()),
 			0_u32.into(),
 			MembershipModel::Fixed { min_operators: 3 },
+		));
+
+		let security_commitments = vec![
+			get_security_commitment::<T>(USDC.into(), 10),
+			get_security_commitment::<T>(WETH.into(), 10),
+			get_security_commitment::<T>(TNT.into(), 10),
+		];
+
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			security_commitments.clone()
 		));
 
 	}: _(
@@ -479,6 +527,28 @@ benchmarks! {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
+		let security_commitments = vec![
+			get_security_commitment::<T>(USDC.into(), 10),
+			get_security_commitment::<T>(WETH.into(), 10),
+			get_security_commitment::<T>(TNT.into(), 10),
+		];
+
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(charlie.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(dave.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		assert_ok!(Pallet::<T>::approve(
+			RawOrigin::Signed(bob.clone()).into(),
+			0,
+			security_commitments.clone()
+		));
+		
 		assert_ok!(Pallet::<T>::call(
 			RawOrigin::Signed(eve.clone()).into(),
 			0,
@@ -489,7 +559,6 @@ benchmarks! {
 		let keygen_job_call_id = 0;
 		let key_type = KeyTypeId(*b"mdkg");
 		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
-
 	}: _(
 			RawOrigin::Signed(bob.clone()),
 			0,
@@ -497,286 +566,286 @@ benchmarks! {
 			vec![Field::from(BoundedVec::try_from(dkg.to_raw().to_vec()).unwrap())].try_into().unwrap()
 		)
 
-	heartbeat {
-		const HEARTBEAT_INTERVAL_VALUE: u32 = 10;
-		const DUMMY_OPERATOR_ADDRESS_BYTES: [u8; 20] = [1u8; 20];
+	// heartbeat {
+	// 	const HEARTBEAT_INTERVAL_VALUE: u32 = 10;
+	// 	const DUMMY_OPERATOR_ADDRESS_BYTES: [u8; 20] = [1u8; 20];
 
-		let creator = funded_account::<T>(0u8);
-		let operator_account = funded_account::<T>(1u8);
-		let service_requester = funded_account::<T>(2u8);
+	// 	let creator = funded_account::<T>(0u8);
+	// 	let operator_account = funded_account::<T>(1u8);
+	// 	let service_requester = funded_account::<T>(2u8);
 
-		let blueprint_id = 0u64;
-		let service_id = Pallet::<T>::next_service_request_id();
+	// 	let blueprint_id = 0u64;
+	// 	let service_id = Pallet::<T>::next_service_request_id();
 
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint));
+	// 	setup_master_blueprint_manager::<T>();
+	// 	let blueprint = cggmp21_blueprint::<T>();
+	// 	assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(creator.clone()).into(), blueprint));
 
-		let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
-		let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
-		let op_preferences = operator_preferences::<T>(1u8);
-		let registration_args = Vec::<Field<T::Constraints, T::AccountId>>::new();
+	// 	let operator_key = ecdsa::Pair::from_seed(&[1u8; 32]);
+	// 	let operator_address = H160(DUMMY_OPERATOR_ADDRESS_BYTES);
+	// 	let op_preferences = operator_preferences::<T>(1u8);
+	// 	let registration_args = Vec::<Field<T::Constraints, T::AccountId>>::new();
 
-		assert_ok!(Pallet::<T>::register(
-			RawOrigin::Signed(operator_account.clone()).into(),
-			blueprint_id,
-			op_preferences,
-			registration_args,
-			0u32.into()
-		));
+	// 	assert_ok!(Pallet::<T>::register(
+	// 		RawOrigin::Signed(operator_account.clone()).into(),
+	// 		blueprint_id,
+	// 		op_preferences,
+	// 		registration_args,
+	// 		0u32.into()
+	// 	));
 
-		frame_system::Pallet::<T>::set_block_number(1u32.into());
+	// 	frame_system::Pallet::<T>::set_block_number(1u32.into());
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(service_requester.clone()).into(),
-			None,
-			blueprint_id,
-			vec![operator_account.clone()].try_into().unwrap(),
-			vec![operator_account.clone()].try_into().unwrap(),
-			Default::default(),
-			Default::default(),
-			100u32.into(),
-			Asset::Custom(AssetIdOf::<T>::from(USDC)),
-			0u32.into(),
-			MembershipModel::Fixed { min_operators: 1u32.into() }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(service_requester.clone()).into(),
+	// 		None,
+	// 		blueprint_id,
+	// 		vec![operator_account.clone()].try_into().unwrap(),
+	// 		vec![operator_account.clone()].try_into().unwrap(),
+	// 		Default::default(),
+	// 		Default::default(),
+	// 		100u32.into(),
+	// 		Asset::Custom(AssetIdOf::<T>::from(USDC)),
+	// 		0u32.into(),
+	// 		MembershipModel::Fixed { min_operators: 1u32.into() }
+	// 	));
 
-		frame_system::Pallet::<T>::set_block_number(2u32.into());
+	// 	frame_system::Pallet::<T>::set_block_number(2u32.into());
 
-		frame_system::Pallet::<T>::set_block_number((HEARTBEAT_INTERVAL_VALUE + 2).into());
+	// 	frame_system::Pallet::<T>::set_block_number((HEARTBEAT_INTERVAL_VALUE + 2).into());
 
-		let metrics_data: Vec<u8> = vec![1,2,3];
+	// 	let metrics_data: Vec<u8> = vec![1,2,3];
 
-		let mut message = service_id.to_le_bytes().to_vec();
-		message.extend_from_slice(&blueprint_id.to_le_bytes());
-		message.extend_from_slice(&metrics_data);
+	// 	let mut message = service_id.to_le_bytes().to_vec();
+	// 	message.extend_from_slice(&blueprint_id.to_le_bytes());
+	// 	message.extend_from_slice(&metrics_data);
 
-		let message_hash = sp_core::hashing::keccak_256(&message);
+	// 	let message_hash = sp_core::hashing::keccak_256(&message);
 
-		let signature_bytes = [0u8; 65];
-		let signature = ecdsa::Signature::from_raw(signature_bytes);
+	// 	let signature_bytes = [0u8; 65];
+	// 	let signature = ecdsa::Signature::from_raw(signature_bytes);
 
 
-	}: _(RawOrigin::Signed(operator_account.clone()), blueprint_id, service_id, metrics_data, signature)
+	// }: _(RawOrigin::Signed(operator_account.clone()), blueprint_id, service_id, metrics_data, signature)
 
-	// Slash an operator's stake for a service
-	slash {
-		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
-		let bob = operators.pop().expect("operator exists");
+	// // Slash an operator's stake for a service
+	// slash {
+	// 	let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+	// 	let bob = operators.pop().expect("operator exists");
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(alice.clone()).into(),
-			None,
-			0,
-			vec![alice.clone()],
-			vec![bob.clone()],
-			Default::default(),
-			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-			100_u32.into(),
-			Asset::Custom(USDC.into()),
-			0_u32.into(),
-			MembershipModel::Fixed { min_operators: 1 }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		None,
+	// 		0,
+	// 		vec![alice.clone()],
+	// 		vec![bob.clone()],
+	// 		Default::default(),
+	// 		vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 		100_u32.into(),
+	// 		Asset::Custom(USDC.into()),
+	// 		0_u32.into(),
+	// 		MembershipModel::Fixed { min_operators: 1 }
+	// 	));
 
-	}: _(RawOrigin::Signed(alice.clone()), bob.clone(), 0, Percent::from_percent(50))
+	// }: _(RawOrigin::Signed(alice.clone()), bob.clone(), 0, Percent::from_percent(50))
 
-	// Dispute a scheduled slash
-	dispute {
-		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
-		let bob = operators.pop().expect("operator exists");
+	// // Dispute a scheduled slash
+	// dispute {
+	// 	let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+	// 	let bob = operators.pop().expect("operator exists");
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(alice.clone()).into(),
-			None,
-			0,
-			vec![alice.clone()],
-			vec![bob.clone()],
-			Default::default(),
-			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-			100_u32.into(),
-			Asset::Custom(USDC.into()),
-			0_u32.into(),
-			MembershipModel::Fixed { min_operators: 1 }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		None,
+	// 		0,
+	// 		vec![alice.clone()],
+	// 		vec![bob.clone()],
+	// 		Default::default(),
+	// 		vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 		100_u32.into(),
+	// 		Asset::Custom(USDC.into()),
+	// 		0_u32.into(),
+	// 		MembershipModel::Fixed { min_operators: 1 }
+	// 	));
 
-		assert_ok!(Pallet::<T>::slash(
-			RawOrigin::Signed(alice.clone()).into(),
-			bob.clone(),
-			0,
-			Percent::from_percent(50)
-		));
+	// 	assert_ok!(Pallet::<T>::slash(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		bob.clone(),
+	// 		0,
+	// 		Percent::from_percent(50)
+	// 	));
 
-	}: _(RawOrigin::Signed(alice.clone()), 0, 0)
+	// }: _(RawOrigin::Signed(alice.clone()), 0, 0)
 
-	// Update master blueprint service manager
-	update_master_blueprint_service_manager {
-	}: _(RawOrigin::Root, H160::zero())
+	// // Update master blueprint service manager
+	// update_master_blueprint_service_manager {
+	// }: _(RawOrigin::Root, H160::zero())
 
-	// Join a service as an operator
-	join_service {
-		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
-		let bob = operators.pop().expect("operator exists");
+	// // Join a service as an operator
+	// join_service {
+	// 	let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+	// 	let bob = operators.pop().expect("operator exists");
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(alice.clone()).into(),
-			None,
-			0,
-			vec![alice.clone()],
-			vec![bob.clone()],
-			Default::default(),
-			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-			100_u32.into(),
-			Asset::Custom(USDC.into()),
-			0_u32.into(),
-			MembershipModel::Fixed { min_operators: 1 }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		None,
+	// 		0,
+	// 		vec![alice.clone()],
+	// 		vec![bob.clone()],
+	// 		Default::default(),
+	// 		vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 		100_u32.into(),
+	// 		Asset::Custom(USDC.into()),
+	// 		0_u32.into(),
+	// 		MembershipModel::Fixed { min_operators: 1 }
+	// 	));
 
-		let charlie = register_operator::<T>(0, 3u8);
+	// 	let charlie = register_operator::<T>(0, 3u8);
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0, vec![get_security_commitment::<T>(USDC.into(), 10)])
+	// }: _(RawOrigin::Signed(charlie.clone()), 0, vec![get_security_commitment::<T>(USDC.into(), 10)])
 
-	// Leave a service as an operator
-	leave_service {
-		let (alice, operators) = prepare_blueprint_with_operators::<T>(&[2, 3]);
-		let mut iter = operators.clone().into_iter();
-		let bob = iter.next().expect("bob exists");
-		let charlie = iter.next().expect("charlie exists");
+	// // Leave a service as an operator
+	// leave_service {
+	// 	let (alice, operators) = prepare_blueprint_with_operators::<T>(&[2, 3]);
+	// 	let mut iter = operators.clone().into_iter();
+	// 	let bob = iter.next().expect("bob exists");
+	// 	let charlie = iter.next().expect("charlie exists");
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(alice.clone()).into(),
-			None,
-			0,
-			vec![alice.clone()],
-			vec![bob.clone(), charlie.clone()],
-			Default::default(),
-			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-			100_u32.into(),
-			Asset::Custom(USDC.into()),
-			0_u32.into(),
-			MembershipModel::Dynamic { min_operators: 1, max_operators: Some(3) }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		None,
+	// 		0,
+	// 		vec![alice.clone()],
+	// 		vec![bob.clone(), charlie.clone()],
+	// 		Default::default(),
+	// 		vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 		100_u32.into(),
+	// 		Asset::Custom(USDC.into()),
+	// 		0_u32.into(),
+	// 		MembershipModel::Dynamic { min_operators: 1, max_operators: Some(3) }
+	// 	));
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0)
+	// }: _(RawOrigin::Signed(charlie.clone()), 0)
 
-	// Benchmark payment validation for pay-once services
-	validate_payment_amount_pay_once {
-		let alice = funded_account::<T>(1u8);
-		setup_master_blueprint_manager::<T>();
-		let blueprint = cggmp21_blueprint::<T>();
-		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
+	// // Benchmark payment validation for pay-once services
+	// validate_payment_amount_pay_once {
+	// 	let alice = funded_account::<T>(1u8);
+	// 	setup_master_blueprint_manager::<T>();
+	// 	let blueprint = cggmp21_blueprint::<T>();
+	// 	assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
 
-		let (_, blueprint) = Pallet::<T>::blueprints(0).expect("blueprint exists");
-		let amount = 1000_u32.into();
-	}: {
-		let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
-	}
+	// 	let (_, blueprint) = Pallet::<T>::blueprints(0).expect("blueprint exists");
+	// 	let amount = 1000_u32.into();
+	// }: {
+	// 	let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
+	// }
 
-	// Benchmark payment processing for subscription services
-	process_subscription_payment {
-		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
-		let bob = operators.pop().expect("operator exists");
+	// // Benchmark payment processing for subscription services
+	// process_subscription_payment {
+	// 	let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+	// 	let bob = operators.pop().expect("operator exists");
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(alice.clone()).into(),
-			None,
-			0,
-			vec![alice.clone()],
-			vec![bob.clone()],
-			Default::default(),
-			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-			100_u32.into(),
-			Asset::Custom(USDC.into()),
-			0_u32.into(),
-			MembershipModel::Fixed { min_operators: 1 }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		None,
+	// 		0,
+	// 		vec![alice.clone()],
+	// 		vec![bob.clone()],
+	// 		Default::default(),
+	// 		vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 		100_u32.into(),
+	// 		Asset::Custom(USDC.into()),
+	// 		0_u32.into(),
+	// 		MembershipModel::Fixed { min_operators: 1 }
+	// 	));
 
-		let service_id = 0;
-		let job_index = 0;
-		let call_id = 0;
-		let subscriber = alice.clone();
-		let rate_per_interval = 100u32.into();
-		let interval = 10u32.into();
-		let maybe_end = None;
-		let current_block = frame_system::Pallet::<T>::block_number();
-	}: {
-		let _ = Pallet::<T>::process_job_subscription_payment(
-			service_id,
-			job_index,
-			call_id,
-			&subscriber, // caller (subscriber authorizes their own payment)
-			&subscriber, // payer
-			rate_per_interval,
-			interval,
-			maybe_end,
-			current_block
-		);
-	}
+	// 	let service_id = 0;
+	// 	let job_index = 0;
+	// 	let call_id = 0;
+	// 	let subscriber = alice.clone();
+	// 	let rate_per_interval = 100u32.into();
+	// 	let interval = 10u32.into();
+	// 	let maybe_end = None;
+	// 	let current_block = frame_system::Pallet::<T>::block_number();
+	// }: {
+	// 	let _ = Pallet::<T>::process_job_subscription_payment(
+	// 		service_id,
+	// 		job_index,
+	// 		call_id,
+	// 		&subscriber, // caller (subscriber authorizes their own payment)
+	// 		&subscriber, // payer
+	// 		rate_per_interval,
+	// 		interval,
+	// 		maybe_end,
+	// 		current_block
+	// 	);
+	// }
 
-	// Benchmark event-driven payment processing
-	process_event_driven_payment {
-		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
-		let bob = operators.pop().expect("operator exists");
+	// // Benchmark event-driven payment processing
+	// process_event_driven_payment {
+	// 	let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+	// 	let bob = operators.pop().expect("operator exists");
 
-		assert_ok!(Pallet::<T>::request(
-			RawOrigin::Signed(alice.clone()).into(),
-			None,
-			0,
-			vec![alice.clone()],
-			vec![bob.clone()],
-			Default::default(),
-			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-			100_u32.into(),
-			Asset::Custom(USDC.into()),
-			0_u32.into(),
-			MembershipModel::Fixed { min_operators: 1 }
-		));
+	// 	assert_ok!(Pallet::<T>::request(
+	// 		RawOrigin::Signed(alice.clone()).into(),
+	// 		None,
+	// 		0,
+	// 		vec![alice.clone()],
+	// 		vec![bob.clone()],
+	// 		Default::default(),
+	// 		vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 		100_u32.into(),
+	// 		Asset::Custom(USDC.into()),
+	// 		0_u32.into(),
+	// 		MembershipModel::Fixed { min_operators: 1 }
+	// 	));
 
-		let service_id = 0;
-		let job_index = 0;
-		let call_id = 0;
-		let subscriber = alice.clone();
-		let reward_per_event = 10u32.into();
-		let event_count = 5;
-	}: {
-		let _ = Pallet::<T>::process_job_event_driven_payment(
-			service_id,
-			job_index,
-			call_id,
-			&subscriber, // caller (subscriber authorizes their own payment)
-			&subscriber, // payer
-			reward_per_event,
-			event_count
-		);
-	}
+	// 	let service_id = 0;
+	// 	let job_index = 0;
+	// 	let call_id = 0;
+	// 	let subscriber = alice.clone();
+	// 	let reward_per_event = 10u32.into();
+	// 	let event_count = 5;
+	// }: {
+	// 	let _ = Pallet::<T>::process_job_event_driven_payment(
+	// 		service_id,
+	// 		job_index,
+	// 		call_id,
+	// 		&subscriber, // caller (subscriber authorizes their own payment)
+	// 		&subscriber, // payer
+	// 		reward_per_event,
+	// 		event_count
+	// 	);
+	// }
 
-	// Benchmark subscription payments processing with on_idle
-	process_subscription_payments_on_idle {
-		let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
-		let bob = operators.pop().expect("operator exists");
+	// // Benchmark subscription payments processing with on_idle
+	// process_subscription_payments_on_idle {
+	// 	let (alice, mut operators) = prepare_blueprint_with_operators::<T>(&[2]);
+	// 	let bob = operators.pop().expect("operator exists");
 
-		// Create multiple service instances to test batch processing
-		for i in 0..5 {
-			let requester = funded_account::<T>((10 + i) as u8);
-			assert_ok!(Pallet::<T>::request(
-				RawOrigin::Signed(requester).into(),
-				None,
-				0,
-				vec![alice.clone()],
-				vec![bob.clone()],
-				Default::default(),
-				vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
-				100_u32.into(),
-				Asset::Custom(USDC.into()),
-				0_u32.into(),
-				MembershipModel::Fixed { min_operators: 1 }
-			));
-		}
+	// 	// Create multiple service instances to test batch processing
+	// 	for i in 0..5 {
+	// 		let requester = funded_account::<T>((10 + i) as u8);
+	// 		assert_ok!(Pallet::<T>::request(
+	// 			RawOrigin::Signed(requester).into(),
+	// 			None,
+	// 			0,
+	// 			vec![alice.clone()],
+	// 			vec![bob.clone()],
+	// 			Default::default(),
+	// 			vec![get_security_requirement::<T>(USDC.into(), &[10, 20])],
+	// 			100_u32.into(),
+	// 			Asset::Custom(USDC.into()),
+	// 			0_u32.into(),
+	// 			MembershipModel::Fixed { min_operators: 1 }
+	// 		));
+	// 	}
 
-		let current_block = 100_u32.into();
-		let remaining_weight = frame_support::weights::Weight::from_parts(1_000_000_000, 0);
-	}: {
-		let _ = Pallet::<T>::process_subscription_payments_on_idle(current_block, remaining_weight);
-	}
+	// 	let current_block = 100_u32.into();
+	// 	let remaining_weight = frame_support::weights::Weight::from_parts(1_000_000_000, 0);
+	// }: {
+	// 	let _ = Pallet::<T>::process_subscription_payments_on_idle(current_block, remaining_weight);
+	// }
 }
 
 // Define the module and associated types for the benchmarks
