@@ -28,10 +28,7 @@ use frame_system::{RawOrigin, pallet_prelude::BlockNumberFor};
 use sp_arithmetic::traits::Zero;
 use sp_runtime::{Perbill, Saturating};
 use sp_std::{collections::btree_map::BTreeMap, prelude::*};
-use tangle_primitives::{
-	services::Asset,
-	traits::{MultiAssetDelegationDelegation, MultiAssetDelegationOperator},
-};
+use tangle_primitives::services::Asset;
 
 const SEED: u32 = 0;
 
@@ -42,19 +39,19 @@ fn get_balance<T: Config>(amount: u32) -> BalanceOf<T> {
 	return T::Currency::minimum_balance().saturating_add(amount.into());
 }
 
-fn create_blueprint_selection<T: Config>(
+fn setup_nominator<T: Config>(
 	delegator: T::AccountId,
 	bond_amount: BalanceOf<T>,
 	operator: T::AccountId,
 	asset: Asset<T::AssetId>,
 	amount: BalanceOf<T>,
 ) {
-	assert_ok!(<T::DelegationManager as MultiAssetDelegationOperator<
+	assert_ok!(<T::BenchmarkingHelper as tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<
 		T::AccountId,
 		BalanceOf<T>,
 	>>::handle_deposit_and_create_operator_be(operator.clone(), bond_amount));
 
-	assert_ok!(<T::DelegationManager as MultiAssetDelegationDelegation<
+	assert_ok!(<T::BenchmarkingHelper as tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<
 		T::AccountId,
 		BalanceOf<T>,
 		T::AssetId,
@@ -150,7 +147,7 @@ benchmarks! {
 		// asset to delegate
 		let asset = Asset::Custom(1_u32.into());
 
-		create_blueprint_selection::<T>(
+		setup_nominator::<T>(
 			// delegator
 			delegator.clone(),
 			// bond amount

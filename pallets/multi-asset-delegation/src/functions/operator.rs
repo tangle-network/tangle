@@ -24,9 +24,10 @@ use sp_runtime::{
 	DispatchError,
 	traits::{CheckedAdd, CheckedSub},
 };
-use tangle_primitives::traits::{MultiAssetDelegationOperator, ServiceManager};
+use tangle_primitives::traits::ServiceManager;
 
-impl<T: Config> MultiAssetDelegationOperator<T::AccountId, BalanceOf<T>> for Pallet<T> {
+#[cfg(feature = "runtime-benchmarks")]
+impl<T: Config> tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<T::AccountId, BalanceOf<T>> for Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.
 	/// This function is used for testing purposes.
 	/// DO NOT USE IN PRODUCTION.

@@ -155,7 +155,7 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId, Ass
 /// # Functions
 ///
 /// * `delegate`: Delegate an amount of an asset to an operator.
-pub trait MultiAssetDelegationDelegation<AccountId, Balance, AssetId> {
+pub trait MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> {
 	/// Process the delegation of an amount of an asset to an operator.
 	/// This function is used for testing purposes.
 	/// DO NOT USE IN PRODUCTION.
@@ -193,7 +193,7 @@ pub trait MultiAssetDelegationDelegation<AccountId, Balance, AssetId> {
 ///
 /// * `handle_deposit_and_create_operator`: Handles the deposit of stake amount and creation of an
 ///   operator.
-pub trait MultiAssetDelegationOperator<AccountId, Balance> {
+pub trait MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> {
 	/// Handles the deposit of stake amount and creation of an operator.
 	/// This function is used for testing purposes.
 	/// DO NOT USE IN PRODUCTION.

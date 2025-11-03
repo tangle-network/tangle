@@ -6,7 +6,6 @@ use crate::{
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::Perbill;
 use tangle_primitives::{
-	rewards::UserDepositWithLocks,
 	services::Asset,
 	traits::RewardRecorder,
 	types::rewards::{LockInfo, LockMultiplier},

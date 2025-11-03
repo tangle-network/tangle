@@ -1305,6 +1305,8 @@ impl pallet_rewards::Config for Runtime {
 		ConstU32<{ tangle_primitives::types::rewards::MAX_PENDING_REWARDS_PER_OPERATOR }>;
 	type DefaultOperatorCommission = DefaultOperatorCommission;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MultiAssetDelegation;
 }
 
 parameter_types! {
@@ -1415,6 +1417,8 @@ impl pallet_credits::Config for Runtime {
 	type ForceOrigin = EnsureRoot<AccountId>;
 	type MaxRatePerBlock = MaxRatePerBlock;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MultiAssetDelegation;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

@@ -108,9 +108,7 @@ pub mod pallet {
 	};
 	use tangle_primitives::{
 		rewards::LockMultiplier,
-		traits::{
-			MultiAssetDelegationDelegation, MultiAssetDelegationInfo, MultiAssetDelegationOperator,
-		},
+		traits::MultiAssetDelegationInfo,
 	};
 
 	#[pallet::config]
@@ -146,8 +144,7 @@ pub mod pallet {
 				BlockNumberFor<Self>,
 				Self::AssetId,
 				AssetType<Self::AssetId>,
-			> + MultiAssetDelegationDelegation<Self::AccountId, BalanceOf<Self>, Self::AssetId>
-			+ MultiAssetDelegationOperator<Self::AccountId, BalanceOf<Self>>;
+		>;
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;
@@ -201,6 +198,10 @@ pub mod pallet {
 		/// This incentivizes operators to run services while also rewarding delegators fairly.
 		#[pallet::constant]
 		type DefaultOperatorCommission: Get<Perbill>;
+
+		#[cfg(feature = "runtime-benchmarks")]
+		type BenchmarkingHelper: tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<Self::AccountId, BalanceOf<Self>, Self::AssetId>
+			+ tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<Self::AccountId, BalanceOf<Self>>;
 	}
 
 	/// The current storage version

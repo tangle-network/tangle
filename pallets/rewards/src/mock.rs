@@ -272,6 +272,8 @@ impl pallet_rewards::Config for Runtime {
 	type MaxPendingRewardsPerOperator = MaxPendingRewardsPerOperator;
 	type DefaultOperatorCommission = DefaultOperatorCommission;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockDelegationManager;
 }
 
 thread_local! {
@@ -340,10 +342,10 @@ impl
 	}
 }
 
-impl tangle_primitives::traits::MultiAssetDelegationDelegation<AccountId, Balance, AssetId> for MockDelegationManager {
+impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockDelegationManager {
 	fn process_delegate_be(
 		who: AccountId,
-		operator: AccountId,
+		_operator: AccountId,
 		asset: Asset<AssetId>,
 		amount: Balance,
 	) -> DispatchResult {
@@ -352,10 +354,10 @@ impl tangle_primitives::traits::MultiAssetDelegationDelegation<AccountId, Balanc
 	}
 }
 
-impl tangle_primitives::traits::MultiAssetDelegationOperator<AccountId, Balance> for MockDelegationManager {
+impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockDelegationManager {
 	fn handle_deposit_and_create_operator_be(
-		who: AccountId,
-		bond_amount: Balance,
+		_who: AccountId,
+		_bond_amount: Balance,
 	) -> DispatchResult {
 		Ok(())
 	}

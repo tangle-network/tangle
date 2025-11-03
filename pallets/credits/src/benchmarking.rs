@@ -19,76 +19,52 @@
 #![cfg(feature = "runtime-benchmarks")]
 
 use super::*;
-use crate::{types::StakeTier, BalanceOf, Config, LastRewardUpdateBlock, Pallet as Credits};
+use crate::{types::StakeTier, BalanceOf, Config, Pallet as Credits};
 use frame_benchmarking::{account, v2::*, BenchmarkError};
 use frame_support::{
 	traits::{Currency, Get},
-	BoundedVec,
+	BoundedVec, assert_ok
 };
-use frame_system::{RawOrigin, Pallet as System};
+use frame_system::RawOrigin;
 use sp_runtime::{traits::Zero, Saturating};
 use sp_std::prelude::*;
 use tangle_primitives::{
 	services::Asset,
-	traits::{MultiAssetDelegationDelegation, MultiAssetDelegationOperator},
+	traits::{MultiAssetDelegationBenchmarkingHelperOperator, MultiAssetDelegationBenchmarkingHelperDelegation},
 };
 
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;
 
 /// Helper function to prepare an account with the given amount of TNT
-fn setup_account<T: Config>(account_index: u32, balance: BalanceOf<T>) -> T::AccountId {
-	let account: T::AccountId = account("account", account_index, SEED);
-	let _ = T::Currency::make_free_balance_be(&account, balance);
+fn setup_account<T: Config>(acc: &'static str, account_index: u32) -> T::AccountId {
+	let account: T::AccountId = account(acc, account_index, SEED);
+	T::Currency::make_free_balance_be(
+		&account,
+		T::Currency::minimum_balance().saturating_mul(INITIAL_BALANCE.into())
+	);
 	account
 }
 
-/// Helper function to fund an account following the pattern from multi-asset-delegation
-fn fund_account<T: Config>(who: &T::AccountId) {
-	let balance = T::Currency::minimum_balance() * INITIAL_BALANCE.into();
-	T::Currency::make_free_balance_be(who, balance);
-}
-
 /// Helper function to setup delegation for benchmarking
-/// Follows the pattern from tests.rs to properly set up MultiAssetDelegation
-fn setup_delegation<T: Config>(
-	delegator: &T::AccountId,
-	stake_amount: BalanceOf<T>,
-	asset_id: Asset<T::AssetId>,
+fn setup_nominator<T: Config>(
+	delegator: T::AccountId,
+	bond_amount: BalanceOf<T>,
+	operator: T::AccountId,
+	asset: Asset<T::AssetId>,
+	amount: BalanceOf<T>,
 ) -> Result<(), &'static str> {
-	// Create operator account
-	let operator: T::AccountId = account("operator", 1, SEED);
+	assert_ok!(<T::BenchmarkingHelper as MultiAssetDelegationBenchmarkingHelperOperator<
+		T::AccountId,
+		BalanceOf<T>,
+	>>::handle_deposit_and_create_operator_be(operator.clone(), bond_amount));
 
-	// Fund accounts following test pattern
-	// Fund operator with enough for bond
-	fund_account::<T>(&operator);
-
-	let bond_amount = T::Currency::minimum_balance() * 100u32.into();
+	assert_ok!(<T::BenchmarkingHelper as MultiAssetDelegationBenchmarkingHelperDelegation<
+		T::AccountId,
+		BalanceOf<T>,
+		T::AssetId,
+	>>::process_delegate_be(delegator, operator, asset, amount));
 	
-	// Fund delegator with enough for stake + buffer
-	let delegator_balance = stake_amount.saturating_mul(10u32.into());
-	T::Currency::make_free_balance_be(delegator, delegator_balance);
-
-	// Setup operator using handle_deposit_and_create_operator_be (trait method for benchmarking)
-	T::MultiAssetDelegationInfo::handle_deposit_and_create_operator_be(
-		operator.clone(),
-		bond_amount,
-	)
-	.map_err(|_| "Failed to create operator")?;
-
-	// Delegate assets to operator using process_delegate_be (trait method for benchmarking)
-	T::MultiAssetDelegationInfo::process_delegate_be(
-		delegator.clone(),
-		operator,
-		asset_id,
-		stake_amount,
-	)
-	.map_err(|_| "Failed to delegate")?;
-	
-	// Set initial reward update block to current block
-	let current_block = System::<T>::block_number();
-	LastRewardUpdateBlock::<T>::insert(delegator, current_block);
-
 	Ok(())
 }
 
@@ -115,8 +91,7 @@ mod benchmarks {
 	fn burn() -> Result<(), BenchmarkError> {
 		// Setup: Create an account with sufficient balance for worst case scenario
 		// Following the pattern from multi-asset-delegation benchmarks
-		let account: T::AccountId = account("account", 1, SEED);
-		fund_account::<T>(&account);
+		let account: T::AccountId = setup_account::<T>("account", 1);
 		
 		// For worst case, use a large burn amount relative to minimum balance
 		// This ensures we test the maximum burn scenario
@@ -138,14 +113,15 @@ mod benchmarks {
 			// Use the highest tier threshold
 			stored_tiers.iter().map(|t| t.threshold).max().unwrap_or(10_000u32.into())
 		};
-		let account = setup_account::<T>(1, max_stake_amount.saturating_mul(10u32.into()));
+		let account = setup_account::<T>("account", 1);
+		let operator = setup_account::<T>("operator", 1);
 
 		// asset to delegate
 		let asset_id_u32 = 0_u32;
 		let asset_id = Asset::Custom(asset_id_u32.into());
 
 		// Setup delegation to enable credit accrual
-		setup_delegation::<T>(&account, max_stake_amount, asset_id).unwrap();
+		setup_nominator::<T>(account.clone(), max_stake_amount, operator.clone(), asset_id, max_stake_amount).unwrap();
 
 		// Setup global stake tiers for the benchmark with maximum rate
 		// claim_credits uses get_current_rate which reads from StoredStakeTiers (global tiers)
@@ -206,12 +182,13 @@ mod benchmarks {
 			// Use the highest tier threshold
 			stored_tiers.iter().map(|t| t.threshold).max().unwrap_or(10_000u32.into())
 		};
-		let account = setup_account::<T>(1, max_stake_amount.saturating_mul(10u32.into()));
+		let account = setup_account::<T>("account", 1);
+		let operator = setup_account::<T>("operator", 1);
 		let asset_id = 0_u32;
-		let asset = Asset::Custom(0_u32.into());
+		let asset = Asset::Custom(asset_id.into());
 
 		// Setup delegation to enable credit accrual
-		setup_delegation::<T>(&account, max_stake_amount, asset).unwrap();
+		setup_nominator::<T>(account.clone(), max_stake_amount, operator.clone(), asset, max_stake_amount).unwrap();
 
 		// Setup asset-specific stake tiers for the benchmark with maximum rate
 		let max_tiers = T::MaxStakeTiers::get() as u32;

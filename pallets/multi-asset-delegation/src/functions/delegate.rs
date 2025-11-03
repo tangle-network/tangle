@@ -29,7 +29,7 @@ use sp_std::{collections::btree_map::BTreeMap, vec::Vec};
 use tangle_primitives::{
 	RoundIndex,
 	services::Asset,
-	traits::{MultiAssetDelegationDelegation, MultiAssetDelegationInfo, RewardsManager},
+	traits::{MultiAssetDelegationInfo, RewardsManager},
 };
 
 pub const DELEGATION_LOCK_ID: LockIdentifier = *b"delegate";
@@ -59,7 +59,8 @@ type OperatorUpdates<T> = BTreeMap<(AccountIdOf<T>, Asset<<T as Config>::AssetId
 type AggregateResult<T> =
 	Result<(DepositUpdates<T>, DelegationUpdates<T>, OperatorUpdates<T>, Vec<usize>), Error<T>>;
 
-impl<T: Config> MultiAssetDelegationDelegation<T::AccountId, BalanceOf<T>, T::AssetId>
+#[cfg(feature = "runtime-benchmarks")]
+impl<T: Config> tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<T::AccountId, BalanceOf<T>, T::AssetId>
 	for Pallet<T>
 {
 	/// Handles the deposit of stake amount and creation of an operator.

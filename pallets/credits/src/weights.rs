@@ -78,10 +78,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: `Credits::StoredStakeTiers` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	fn claim_credits() -> Weight {
 		// Proof Size summary in bytes:
-		//  Measured:  `556`
-		//  Estimated: `4021`
+		//  Measured:  `478`
+		//  Estimated: `3943`
 		// Minimum execution time: 12_000_000 picoseconds.
-		Weight::from_parts(13_000_000, 4021)
+		Weight::from_parts(12_000_000, 3943)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -92,7 +92,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		//  Measured:  `0`
 		//  Estimated: `0`
 		// Minimum execution time: 4_000_000 picoseconds.
-		Weight::from_parts(5_000_000, 0)
+		Weight::from_parts(4_000_000, 0)
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
 	/// Storage: `Credits::LastRewardUpdateBlock` (r:1 w:1)
@@ -103,10 +103,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// Proof: `Credits::AssetStakeTiers` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn claim_credits_with_asset() -> Weight {
 		// Proof Size summary in bytes:
-		//  Measured:  `600`
-		//  Estimated: `4065`
-		// Minimum execution time: 14_000_000 picoseconds.
-		Weight::from_parts(15_000_000, 4065)
+		//  Measured:  `522`
+		//  Estimated: `3987`
+		// Minimum execution time: 13_000_000 picoseconds.
+		Weight::from_parts(14_000_000, 3987)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -116,7 +116,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `0`
 		//  Estimated: `0`
-		// Minimum execution time: 5_000_000 picoseconds.
+		// Minimum execution time: 4_000_000 picoseconds.
 		Weight::from_parts(5_000_000, 0)
 			.saturating_add(T::DbWeight::get().writes(1_u64))
 	}
@@ -145,10 +145,10 @@ impl WeightInfo for () {
 	/// Proof: `Credits::StoredStakeTiers` (`max_values`: Some(1), `max_size`: None, mode: `Measured`)
 	fn claim_credits() -> Weight {
 		// Proof Size summary in bytes:
-		//  Measured:  `556`
-		//  Estimated: `4021`
+		//  Measured:  `478`
+		//  Estimated: `3943`
 		// Minimum execution time: 12_000_000 picoseconds.
-		Weight::from_parts(13_000_000, 4021)
+		Weight::from_parts(12_000_000, 3943)
 			.saturating_add(RocksDbWeight::get().reads(3_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
@@ -159,7 +159,7 @@ impl WeightInfo for () {
 		//  Measured:  `0`
 		//  Estimated: `0`
 		// Minimum execution time: 4_000_000 picoseconds.
-		Weight::from_parts(5_000_000, 0)
+		Weight::from_parts(4_000_000, 0)
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 	/// Storage: `Credits::LastRewardUpdateBlock` (r:1 w:1)
@@ -170,10 +170,10 @@ impl WeightInfo for () {
 	/// Proof: `Credits::AssetStakeTiers` (`max_values`: None, `max_size`: None, mode: `Measured`)
 	fn claim_credits_with_asset() -> Weight {
 		// Proof Size summary in bytes:
-		//  Measured:  `600`
-		//  Estimated: `4065`
-		// Minimum execution time: 14_000_000 picoseconds.
-		Weight::from_parts(15_000_000, 4065)
+		//  Measured:  `522`
+		//  Estimated: `3987`
+		// Minimum execution time: 13_000_000 picoseconds.
+		Weight::from_parts(14_000_000, 3987)
 			.saturating_add(RocksDbWeight::get().reads(3_u64))
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
@@ -183,7 +183,7 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `0`
 		//  Estimated: `0`
-		// Minimum execution time: 5_000_000 picoseconds.
+		// Minimum execution time: 4_000_000 picoseconds.
 		Weight::from_parts(5_000_000, 0)
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
