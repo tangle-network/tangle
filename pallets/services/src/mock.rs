@@ -28,7 +28,6 @@ use frame_election_provider_support::{
 use frame_support::{
 	PalletId, construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, Hooks, OneSessionHandler},
-	traits::tokens::fungibles::{Inspect, Mutate, Create},
 };
 use frame_system::EnsureRoot;
 use pallet_evm::GasWeightMapping;
@@ -49,9 +48,16 @@ use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, PricingModel},
-	traits::{RewardRecorder, RewardsManager, MultiAssetDelegationBenchmarkingHelperDelegation, MultiAssetDelegationBenchmarkingHelperOperator},
+	traits::{RewardRecorder, RewardsManager},
 	types::{BlockNumber, rewards::LockMultiplier},
 };
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator
+};
+#[cfg(feature = "runtime-benchmarks")]
+use frame_support::traits::tokens::fungibles::{Inspect, Mutate, Create};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -399,8 +405,10 @@ parameter_types! {
 	pub const FallbackWeightWrites: u64 = 100;
 }
 
+#[cfg(feature = "runtime-benchmarks")]
 pub struct MockBenchmarkingHelper;
 
+#[cfg(feature = "runtime-benchmarks")]
 impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
 	fn asset_exists(asset: AssetId) -> bool {
 		Assets::asset_exists(asset)
@@ -419,6 +427,7 @@ impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for
 	}
 }
 
+#[cfg(feature = "runtime-benchmarks")]
 impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
 	fn process_delegate_be(
 		who: AccountId,
@@ -430,6 +439,7 @@ impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetI
 	}
 }
 
+#[cfg(feature = "runtime-benchmarks")]
 impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockBenchmarkingHelper {
 	fn handle_deposit_and_create_operator_be(
 		who: AccountId,
@@ -438,8 +448,6 @@ impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for Mock
 		MultiAssetDelegation::handle_deposit_and_create_operator_be(who, bond_amount)
 	}
 }
-
-
 
 impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
