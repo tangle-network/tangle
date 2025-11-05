@@ -158,6 +158,7 @@ runtime-benchmarks = [
     "pallet-balances/runtime-benchmarks",
     "pallet-ethereum/runtime-benchmarks",
     "pallet-staking/runtime-benchmarks",
+    "tangle-primitives/runtime-benchmarks",
 ]
 fuzzing = [
     "ethereum",

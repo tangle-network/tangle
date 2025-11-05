@@ -2,8 +2,9 @@ use crate::{
 	services::Asset,
 	types::{RoundIndex, rewards::UserDepositWithLocks},
 };
-use sp_runtime::DispatchResult;
 use sp_std::prelude::*;
+#[cfg(feature = "runtime-benchmarks")]
+use sp_runtime::DispatchResult;
 
 /// A trait to provide information about multi-asset delegation.
 ///
@@ -155,6 +156,7 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId, Ass
 /// # Functions
 ///
 /// * `delegate`: Delegate an amount of an asset to an operator.
+#[cfg(feature = "runtime-benchmarks")]
 pub trait MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> {
 	/// Process the delegation of an amount of an asset to an operator.
 	/// This function is used for testing purposes.
@@ -193,6 +195,7 @@ pub trait MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, A
 ///
 /// * `handle_deposit_and_create_operator`: Handles the deposit of stake amount and creation of an
 ///   operator.
+#[cfg(feature = "runtime-benchmarks")]
 pub trait MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> {
 	/// Handles the deposit of stake amount and creation of an operator.
 	/// This function is used for testing purposes.

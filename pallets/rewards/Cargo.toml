@@ -128,4 +128,5 @@ runtime-benchmarks = [
   "pallet-ethereum/runtime-benchmarks",
   "pallet-multi-asset-delegation/runtime-benchmarks",
   "pallet-staking/runtime-benchmarks",
+  "tangle-primitives/runtime-benchmarks",
 ]

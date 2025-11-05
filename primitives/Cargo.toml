@@ -92,3 +92,4 @@ verifying = [
 integration-tests = []
 fast-runtime = []
 manual-seal = []
+runtime-benchmarks = []

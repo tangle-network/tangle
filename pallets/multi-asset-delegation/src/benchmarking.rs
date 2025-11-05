@@ -27,6 +27,7 @@ use sp_std::vec::Vec;
 use sp_std::vec;
 use sp_staking::StakingInterface;
 use tangle_primitives::{BlueprintId, rewards::LockMultiplier, services::{Asset, EvmAddressMapping}};
+use sp_runtime::Saturating;
 
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;
@@ -67,9 +68,11 @@ fn setup_nominator<T: Config>(
 	delegation_amount: BalanceOf<T>,
 	nomination_amount: BalanceOf<T>,
 ) -> Result<(), &'static str> {
+	let delegation_amount = T::MinDelegateAmount::get().saturating_add(delegation_amount);
+
 	assert_ok!(MultiAssetDelegation::<T>::join_operators(
 		RawOrigin::Signed(operator.clone()).into(),
-		stake_amount
+		T::MinOperatorBondAmount::get().saturating_add(stake_amount)
 	));
 
 	assert_ok!(MultiAssetDelegation::<T>::deposit(
@@ -111,7 +114,7 @@ benchmarks! {
 	}
 	join_operators {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 	}: _(RawOrigin::Signed(caller.clone()), bond_amount)
 	verify {
 		assert!(Operators::<T>::contains_key(&caller));
@@ -119,7 +122,7 @@ benchmarks! {
 
 	schedule_leave_operators {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
@@ -132,7 +135,7 @@ benchmarks! {
 
 	cancel_leave_operators {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 		MultiAssetDelegation::<T>::schedule_leave_operators(RawOrigin::Signed(caller.clone()).into())?;
 	}: _(RawOrigin::Signed(caller.clone()))
@@ -143,7 +146,7 @@ benchmarks! {
 
 	execute_leave_operators {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 		MultiAssetDelegation::<T>::schedule_leave_operators(RawOrigin::Signed(caller.clone()).into())?;
 		let current_round = Pallet::<T>::current_round();
@@ -155,7 +158,7 @@ benchmarks! {
 
 	operator_bond_more {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 		let additional_bond: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
 	}: _(RawOrigin::Signed(caller.clone()), additional_bond)
@@ -166,9 +169,9 @@ benchmarks! {
 
 	schedule_operator_unstake {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
-		let unstake_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
+		let unstake_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 5u32.into();
 	}: _(RawOrigin::Signed(caller.clone()), unstake_amount)
 	verify {
 		let operator = Operators::<T>::get(&caller).unwrap();
@@ -178,9 +181,9 @@ benchmarks! {
 
 	execute_operator_unstake {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
-		let unstake_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
+		let unstake_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 5u32.into();
 		MultiAssetDelegation::<T>::schedule_operator_unstake(RawOrigin::Signed(caller.clone()).into(), unstake_amount)?;
 		let current_round = Pallet::<T>::current_round();
 		// Execute withdraw uses LeaveDelegatorsDelay for readiness
@@ -193,9 +196,9 @@ benchmarks! {
 
 	cancel_operator_unstake {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
-		let unstake_amount: BalanceOf<T> = T::Currency::minimum_balance() * 5u32.into();
+		let unstake_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 5u32.into();
 		MultiAssetDelegation::<T>::schedule_operator_unstake(RawOrigin::Signed(caller.clone()).into(), unstake_amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
@@ -205,7 +208,7 @@ benchmarks! {
 
 	go_offline {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 	}: _(RawOrigin::Signed(caller.clone()))
 	verify {
@@ -215,7 +218,7 @@ benchmarks! {
 
 	go_online {
 		let caller = setup_benchmark::<T>()?;
-		let bond_amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
 		MultiAssetDelegation::<T>::go_offline(RawOrigin::Signed(caller.clone()).into())?;
 	}: _(RawOrigin::Signed(caller.clone()))
@@ -226,7 +229,7 @@ benchmarks! {
 
 	deposit_with_no_evm_address {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		let evm_address = None; // For Asset::Custom, evm_address must be None
 		let lock_multiplier = Some(LockMultiplier::default());
 		let asset = Asset::Custom(native_asset_id::<T>());
@@ -238,7 +241,7 @@ benchmarks! {
 	}
 
 	deposit_with_evm_address {
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		let evm_address = Some(H160::repeat_byte(1));
 		let lock_multiplier = Some(LockMultiplier::default());
 		let asset = Asset::Custom(native_asset_id::<T>());
@@ -253,7 +256,7 @@ benchmarks! {
 
 	schedule_withdraw {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -271,7 +274,7 @@ benchmarks! {
 
 	execute_withdraw_with_no_evm_address {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -305,7 +308,7 @@ benchmarks! {
 
 	execute_withdraw_with_evm_address {
 		let pallet_account_id: T::AccountId = MultiAssetDelegation::<T>::pallet_account();
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let evm_address = Some(H160::repeat_byte(1));
 		let evm_account: T::AccountId = T::EvmAddressMapping::into_account_id(evm_address.unwrap());
@@ -348,7 +351,7 @@ benchmarks! {
 
 	cancel_withdraw {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
@@ -371,7 +374,8 @@ benchmarks! {
 	delegate {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let deposit_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
+		let delegation_amount: BalanceOf<T> = T::MinDelegateAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
@@ -379,25 +383,26 @@ benchmarks! {
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
 			asset,
-			amount,
+			deposit_amount,
 			None,
 			None
 		)?;
 		MultiAssetDelegation::<T>::join_operators(
 			RawOrigin::Signed(operator.clone()).into(),
-			amount
+			deposit_amount
 		)?;
-	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, amount, blueprint_selection)
+	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, delegation_amount, blueprint_selection)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
 		let delegation = delegator.delegations.iter().find(|d| d.operator == operator && d.asset == asset).unwrap();
-		assert_eq!(delegation.amount, amount);
+		assert_eq!(delegation.amount, delegation_amount);
 	}
 
 	schedule_delegator_unstake {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let deposit_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
+		let delegation_amount: BalanceOf<T> = T::MinDelegateAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
@@ -405,32 +410,33 @@ benchmarks! {
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
 			asset,
-			amount,
+			deposit_amount,
 			None,
 			None
 		)?;
 		MultiAssetDelegation::<T>::join_operators(
 			RawOrigin::Signed(operator.clone()).into(),
-			amount
+			deposit_amount
 		)?;
 		MultiAssetDelegation::<T>::delegate(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount,
+			delegation_amount,
 			blueprint_selection
 		)?;
-	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, amount)
+	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, delegation_amount)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
 		let request = delegator.delegator_unstake_requests.iter().find(|r| r.operator == operator && r.asset == asset).unwrap();
-		assert_eq!(request.amount, amount);
+		assert_eq!(request.amount, delegation_amount);
 	}
 
 	execute_delegator_unstake {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let deposit_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
+		let delegation_amount: BalanceOf<T> = T::MinDelegateAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
@@ -438,26 +444,26 @@ benchmarks! {
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
 			asset,
-			amount,
+			deposit_amount,
 			None,
 			None
 		)?;
 		MultiAssetDelegation::<T>::join_operators(
 			RawOrigin::Signed(operator.clone()).into(),
-			amount
+			deposit_amount
 		)?;
 		MultiAssetDelegation::<T>::delegate(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount,
+			delegation_amount,
 			blueprint_selection
 		)?;
 		MultiAssetDelegation::<T>::schedule_delegator_unstake(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount
+			delegation_amount
 		)?;
 		let current_round = Pallet::<T>::current_round();
 		CurrentRound::<T>::put(current_round + T::DelegationBondLessDelay::get());
@@ -470,7 +476,8 @@ benchmarks! {
 	cancel_delegator_unstake {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let deposit_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
+		let delegation_amount: BalanceOf<T> = T::MinDelegateAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![1u64]).unwrap());
 
@@ -478,28 +485,28 @@ benchmarks! {
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
 			asset,
-			amount,
+			deposit_amount,
 			None,
 			None
 		)?;
 		MultiAssetDelegation::<T>::join_operators(
 			RawOrigin::Signed(operator.clone()).into(),
-			amount
+			deposit_amount
 		)?;
 		MultiAssetDelegation::<T>::delegate(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount,
+			delegation_amount,
 			blueprint_selection
 		)?;
 		MultiAssetDelegation::<T>::schedule_delegator_unstake(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount
+			delegation_amount
 		)?;
-	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, amount)
+	}: _(RawOrigin::Signed(caller.clone()), operator.clone(), asset, delegation_amount)
 	verify {
 		let delegator = Delegators::<T>::get(&caller).unwrap();
 		assert!(!delegator.delegator_unstake_requests.iter().any(|r| r.operator == operator && r.asset == asset));
@@ -508,7 +515,8 @@ benchmarks! {
 	add_blueprint_id {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let deposit_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
+		let delegation_amount: BalanceOf<T> = T::MinDelegateAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![]).unwrap());
 		let blueprint_id: BlueprintId = 1u64;
@@ -517,19 +525,19 @@ benchmarks! {
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
 			asset,
-			amount,
+			deposit_amount,
 			None,
 			None
 		)?;
 		MultiAssetDelegation::<T>::join_operators(
 			RawOrigin::Signed(operator.clone()).into(),
-			amount
+			deposit_amount
 		)?;
 		MultiAssetDelegation::<T>::delegate(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount,
+			delegation_amount,
 			blueprint_selection
 		)?;
 	}: _(RawOrigin::Signed(caller.clone()), blueprint_id)
@@ -543,7 +551,8 @@ benchmarks! {
 	remove_blueprint_id {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let amount: BalanceOf<T> = T::Currency::minimum_balance() * 10u32.into();
+		let deposit_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
+		let delegation_amount: BalanceOf<T> = T::MinDelegateAmount::get() * 10u32.into();
 		let asset = Asset::Custom(native_asset_id::<T>());
 		let blueprint_id: BlueprintId = 1u64;
 		let blueprint_selection = DelegatorBlueprintSelection::Fixed(BoundedVec::try_from(vec![blueprint_id]).unwrap());
@@ -552,19 +561,19 @@ benchmarks! {
 		MultiAssetDelegation::<T>::deposit(
 			RawOrigin::Signed(caller.clone()).into(),
 			asset,
-			amount,
+			deposit_amount,
 			None,
 			None
 		)?;
 		MultiAssetDelegation::<T>::join_operators(
 			RawOrigin::Signed(operator.clone()).into(),
-			amount
+			deposit_amount
 		)?;
 		MultiAssetDelegation::<T>::delegate(
 			RawOrigin::Signed(caller.clone()).into(),
 			operator.clone(),
 			asset,
-			amount,
+			delegation_amount,
 			blueprint_selection
 		)?;
 	}: _(RawOrigin::Signed(caller.clone()), blueprint_id)
@@ -745,3 +754,9 @@ benchmarks! {
 		);
 	}
 }
+
+frame_benchmarking::impl_benchmark_test_suite!(
+	Pallet,
+	crate::mock::new_test_ext(),
+	crate::mock::Runtime,
+);

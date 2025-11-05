@@ -342,6 +342,7 @@ impl
 	}
 }
 
+#[cfg(feature = "runtime-benchmarks")]
 impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockDelegationManager {
 	fn process_delegate_be(
 		who: AccountId,
@@ -354,6 +355,7 @@ impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation
 	}
 }
 
+#[cfg(feature = "runtime-benchmarks")]
 impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockDelegationManager {
 	fn handle_deposit_and_create_operator_be(
 		_who: AccountId,
