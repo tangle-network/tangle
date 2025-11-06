@@ -1986,6 +1986,7 @@ pub mod module {
 		///
 		/// * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of
 		///   revisions reached
+		#[pallet::weight(T::WeightInfo::update_master_blueprint_service_manager())]
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
 			address: H160,
@@ -2006,7 +2007,7 @@ pub mod module {
 
 		/// Join a service instance as an operator
 		#[pallet::call_index(15)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::join_service())]
 		pub fn join_service(
 			origin: OriginFor<T>,
 			instance_id: u64,
@@ -2046,7 +2047,7 @@ pub mod module {
 
 		/// Leave a service instance as an operator
 		#[pallet::call_index(16)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::leave_service())]
 		pub fn leave_service(origin: OriginFor<T>, instance_id: u64) -> DispatchResult {
 			let operator = ensure_signed(origin)?;
 
@@ -2291,7 +2292,7 @@ pub mod module {
 		/// * [`Error::HeartbeatSignatureVerificationFailed`] - The signature verification failed.
 		/// * [`Error::InvalidHeartbeatData`] - The heartbeat data is invalid.
 		#[pallet::call_index(19)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::heartbeat())]
 		pub fn heartbeat(
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,

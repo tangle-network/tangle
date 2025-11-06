@@ -8,8 +8,8 @@ steps=10
 repeat=2
 
 # List of pallets and their corresponding folder names
-pallets=(pallet_airdrop_claims pallet_credits pallet_multi_asset_delegation pallet_rewards pallet_services pallet_tangle_lst_benchmarking)
-folders=(claims credits multi-asset-delegation rewards services tangle-lst)
+pallets=(pallet_airdrop_claims pallet_credits pallet_multi_asset_delegation pallet_rewards pallet_services)
+folders=(claims credits multi-asset-delegation rewards services)
 
 # Generate weights for testnet runtime
 echo "[testnet] Generating weights with steps: $steps, repeat: $repeat"

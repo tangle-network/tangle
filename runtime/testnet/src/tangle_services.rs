@@ -1,5 +1,13 @@
 use super::*;
 
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator
+};
+#[cfg(feature = "runtime-benchmarks")]
+use frame_support::traits::tokens::fungibles::{Inspect, Mutate, Create};
+
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
 }
@@ -29,39 +37,6 @@ impl tangle_primitives::services::EvmRunner<Runtime> for PalletEvmRunner {
 			source,
 			target,
 			input,
-			value,
-			gas_limit,
-			Some(max_fee_per_gas),
-			Some(max_priority_fee_per_gas),
-			nonce,
-			access_list,
-			is_transactional,
-			validate,
-			weight_limit,
-			proof_size_base_cost,
-			<Runtime as pallet_evm::Config>::config(),
-		)
-		.map_err(|o| tangle_primitives::services::RunnerError { error: o.error, weight: o.weight })
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn create(
-		source: sp_core::H160,
-		init: Vec<u8>,
-		value: sp_core::U256,
-		gas_limit: u64,
-		is_transactional: bool,
-		validate: bool,
-	) -> Result<fp_evm::CreateInfo, tangle_primitives::services::RunnerError<Self::Error>> {
-		let max_fee_per_gas = FixedGasPrice::min_gas_price().0;
-		let max_priority_fee_per_gas = max_fee_per_gas.saturating_mul(U256::from(2));
-		let nonce = None;
-		let access_list = Default::default();
-		let weight_limit = None;
-		let proof_size_boase_cost = None;
-		<<Runtime as pallet_evm::Config>::Runner as pallet_evm::Runner<Runtime>>::create(
-			source,
-			init,
 			value,
 			gas_limit,
 			Some(max_fee_per_gas),
@@ -251,11 +226,54 @@ impl pallet_services::Config for Runtime {
 	type MaxMetricsDataSize = MaxMetricsDataSize;
 	type FallbackWeightReads = FallbackWeightReads;
 	type FallbackWeightWrites = FallbackWeightWrites;
-	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
-	#[cfg(feature = "runtime-benchmarks")]
-	type OperatorDelegationManager =
-		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
 	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockBenchmarkingHelper;
+}
+
+
+#[cfg(feature = "runtime-benchmarks")]
+pub struct MockBenchmarkingHelper;
+
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn asset_exists(asset: AssetId) -> bool {
+		Assets::asset_exists(asset)
+	}
+	
+	fn balance(asset: AssetId, who: &AccountId) -> Balance {
+		Assets::balance(asset, who)
+	}
+
+	fn mint_into(asset: AssetId, who: &AccountId, amount: Balance) -> Result<Balance, sp_runtime::DispatchError> {
+		Assets::mint_into(asset, who, amount)
+	}
+
+	fn create(id: AssetId, admin: AccountId, is_sufficient: bool, min_balance: Balance) -> sp_runtime::DispatchResult {
+		<Assets as Create<AccountId>>::create(id, admin, is_sufficient, min_balance)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn process_delegate_be(
+		who: AccountId,
+		operator: AccountId,
+		asset: tangle_primitives::services::Asset<AssetId>,
+		amount: Balance,
+	) -> sp_runtime::DispatchResult {
+		MultiAssetDelegation::process_delegate_be(who, operator, asset, amount)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockBenchmarkingHelper {
+	fn handle_deposit_and_create_operator_be(
+		who: AccountId,
+		bond_amount: Balance,
+	) -> sp_runtime::DispatchResult {
+		MultiAssetDelegation::handle_deposit_and_create_operator_be(who, bond_amount)
+	}
 }

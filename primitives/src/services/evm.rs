@@ -40,16 +40,6 @@ pub trait EvmRunner<T: Config> {
 		is_transactional: bool,
 		validate: bool,
 	) -> Result<CallInfo, RunnerError<Self::Error>>;
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn create(
-		source: H160,
-		init: Vec<u8>,
-		value: U256,
-		gas_limit: u64,
-		is_transactional: bool,
-		validate: bool,
-	) -> Result<fp_evm::CreateInfo, RunnerError<Self::Error>>;
 }
 
 impl<T: Config> EvmRunner<T> for () {
@@ -67,24 +57,6 @@ impl<T: Config> EvmRunner<T> for () {
 		Ok(CallInfo {
 			exit_reason: ExitReason::Succeed(ExitSucceed::Returned),
 			value: vec![],
-			used_gas: UsedGas { standard: U256::from(0), effective: U256::from(0) },
-			weight_info: None,
-			logs: vec![],
-		})
-	}
-
-	#[cfg(feature = "runtime-benchmarks")]
-	fn create(
-		_source: H160,
-		_init: Vec<u8>,
-		_value: U256,
-		_gas_limit: u64,
-		_is_transactional: bool,
-		_validate: bool,
-	) -> Result<fp_evm::CreateInfo, RunnerError<Self::Error>> {
-		Ok(fp_evm::CreateInfo {
-			exit_reason: ExitReason::Succeed(ExitSucceed::Returned),
-			value: H160::from([0; 20]),
 			used_gas: UsedGas { standard: U256::from(0), effective: U256::from(0) },
 			weight_info: None,
 			logs: vec![],
