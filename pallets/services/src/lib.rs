@@ -2162,7 +2162,7 @@ pub mod module {
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
 		#[pallet::call_index(18)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::request_with_signed_price_quotes())]
 		pub fn request_with_signed_price_quotes(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,

@@ -26,6 +26,35 @@ impl tangle_primitives::services::EvmRunner<Runtime> for PalletEvmRunner {
 		is_transactional: bool,
 		validate: bool,
 	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
+		
+		#[cfg(feature = "runtime-benchmarks")]
+		const MBSM: H160 = H160([0x12; 20]);
+
+		#[cfg(feature = "runtime-benchmarks")]
+		if target == MBSM {
+			if input.len() >= 4 {
+				let selector = &input[0..4];
+				let call_data = &input[4..];
+				// @dev: mock 
+				// - call(0x274ef015): querySlashingOrigin(uint64,uint64):(address)
+				// - call(0x8e6f8c60) queryDispatcher(address):(address)
+				if selector == [0x27, 0x4e, 0xf0, 0x15] || selector == [0x8e, 0x6f, 0x8c, 0x60] {
+					return Ok(fp_evm::CallInfo {
+						exit_reason: fp_evm::ExitReason::Succeed(fp_evm::ExitSucceed::Stopped),
+						// return a mock address 
+						value: vec![0u8; 32],
+						used_gas: fp_evm::UsedGas {
+							standard: U256::from(21000),
+							effective: U256::from(21000),
+						},
+						weight_info: None,
+						logs: vec![],
+					});
+				}
+			}
+		}
+
+
 		let max_fee_per_gas = DefaultBaseFeePerGas::get();
 		let max_priority_fee_per_gas =
 			max_fee_per_gas.saturating_mul(U256::from(3) / U256::from(2));

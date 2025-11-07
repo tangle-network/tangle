@@ -17,9 +17,11 @@ use tangle_primitives::services::{
 	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
 	BoundedString, Field, FieldType, JobDefinition, JobMetadata,
 	MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelType,
-	OperatorPreferences, PricingModel, ServiceBlueprint, ServiceMetadata,
+	OperatorPreferences, PricingModel, PricingQuote, ResourcePricing, ServiceBlueprint, ServiceMetadata,
+	EvmAddressMapping,
 };
 use tangle_primitives::{BlueprintId, InstanceId};
+use tangle_primitives::traits::RewardRecorder;
 
 pub type AssetId = u32;
 pub type AssetIdOf<T> = <T as Config>::AssetId;
@@ -266,6 +268,79 @@ fn operator_preferences<T: Config>(seed: u8) -> OperatorPreferences<T::Constrain
 	}
 }
 
+fn create_and_sign_pricing_quote<T: Config>(
+	blueprint_id: BlueprintId,
+	ttl: BlockNumberFor<T>,
+	total_cost_rate: u128,
+	timestamp: u64,
+	expiry: u64,
+	security_commitments: Vec<AssetSecurityCommitment<T::AssetId>>,
+	operator: T::AccountId,
+	operator_id: u8,
+) -> (PricingQuote<T::Constraints>, ecdsa::Signature) {
+	// Convert security commitments from T::AssetId to u128 and create BoundedVec
+	let security_commitments_u128: BoundedVec<AssetSecurityCommitment<u128>, <T::Constraints as tangle_primitives::services::Constraints>::MaxOperatorsPerService> = BoundedVec::try_from(
+		security_commitments
+			.into_iter()
+			.map(|commitment| AssetSecurityCommitment {
+				asset: match commitment.asset {
+					Asset::Custom(id) => Asset::Custom(id.saturated_into::<u128>()),
+					Asset::Erc20(addr) => Asset::Erc20(addr),
+				},
+				exposure_percent: commitment.exposure_percent,
+			})
+			.collect::<Vec<_>>()
+	)
+	.unwrap();
+
+	// Create pricing quote
+	let quote = PricingQuote {
+		blueprint_id,
+		ttl_blocks: ttl.saturated_into(),
+		total_cost_rate,
+		timestamp,
+		expiry,
+		resources: vec![ResourcePricing {
+			kind: BoundedString::try_from("CPU".to_owned()).unwrap(),
+			count: 1,
+			price_per_unit_rate: total_cost_rate,
+		}]
+		.try_into()
+		.unwrap(),
+		security_commitments: security_commitments_u128,
+	};
+
+	// Hash the quote
+	let message = tangle_primitives::services::pricing::hash_pricing_quote(&quote);
+
+	// Generate the seed using the same algorithm as bench_ecdsa_key
+	let mut seed = [0u8; 32];
+	seed.fill(operator_id);
+	seed[0] = operator_id;
+	seed[15] = operator_id.wrapping_mul(7).wrapping_add(3);
+	seed[31] = operator_id.wrapping_mul(11).wrapping_add(1);
+
+	// Get the operator's preferences to get their public key (matches what's stored)
+	let operator_preferences = crate::Operators::<T>::get(blueprint_id, operator.clone())
+		.expect("operator exists");
+	let public_key = ecdsa::Public::from_full(&operator_preferences.key)
+		.expect("failed to derive public key from operator preferences");
+
+	// Generate key in keystore using the seed (ensures private key is available for signing)
+	// Note: ecdsa_generate might produce a different public key, but we use the one from preferences
+	// The keystore lookup in ecdsa_sign should work if the seed produces the same key pair
+	let key_type = KeyTypeId(*b"mdkg");
+	let seed_hex = format!("0x{}", hex::encode(seed));
+	let _generated_public_key = sp_io::crypto::ecdsa_generate(key_type, Some(seed_hex.as_bytes().to_vec()));
+
+	// Sign the message - ecdsa_sign will look up the private key in keystore by public key
+	// If the generated key doesn't match, this will fail
+	let signature = sp_io::crypto::ecdsa_sign(key_type, &public_key, &message)
+		.expect("failed to sign pricing quote");
+
+	(quote, signature)
+}
+
 fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
 	// Set up master blueprint service manager first
 	assert_ok!(Pallet::<T>::update_master_blueprint_service_manager(
@@ -461,6 +536,87 @@ benchmarks! {
 		let (owner, _, _, _) = prepare_service::<T>();
 	}: _(RawOrigin::Signed(owner),0,0,vec![Field::Uint8(2)].try_into().unwrap())
 
+	request_with_signed_price_quotes {
+		let (alice, mut operators, blueprint_id) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		let dave = operators.pop().expect("Dave exists");
+		let charlie = operators.pop().expect("Charlie exists");
+		let bob = operators.pop().expect("Bob exists");
+
+		let eve = funded_account::<T>(5u8);
+		let ttl: BlockNumberFor<T> = 100_u32.into();
+		let current_block = frame_system::Pallet::<T>::block_number();
+		let timestamp = current_block.saturated_into::<u64>();
+		let expiry = timestamp + 1000;
+
+		let security_commitments = vec![
+			get_security_commitment::<T>(USDC.into(), 10),
+			get_security_commitment::<T>(WETH.into(), 10),
+			get_security_commitment::<T>(TNT.into(), 10),
+		];
+
+		// Create operators list (will be passed to the extrinsic)
+		let operators_list = vec![bob.clone(), charlie.clone(), dave.clone()];
+		
+		// Create a map to store quotes and signatures by operator
+		let mut quotes_and_sigs: sp_std::collections::btree_map::BTreeMap<T::AccountId, (PricingQuote<T::Constraints>, ecdsa::Signature)> = sp_std::collections::btree_map::BTreeMap::new();
+
+		for (idx, operator) in operators_list.iter().enumerate() {
+			// Operator IDs match the index in prepare_blueprint_with_operators (0, 1, 2)
+			let operator_id = idx as u8;
+			let total_cost_rate = 100u128 + (idx as u128 * 10);
+			let (quote, signature) = create_and_sign_pricing_quote::<T>(
+				blueprint_id,
+				ttl,
+				total_cost_rate,
+				timestamp,
+				expiry,
+				security_commitments.clone(),
+				operator.clone(),
+				operator_id,
+			);
+			quotes_and_sigs.insert(operator.clone(), (quote, signature));
+		}
+
+		// Build pricing_quotes and operator_signatures in sorted order (BTreeMap iteration order)
+		// The verification code iterates operator_signatures_map (BTreeMap) and uses pricing_quotes[i]
+		// So we need pricing_quotes to be in the same order as the BTreeMap iterates (sorted)
+		let mut pricing_quotes = Vec::new();
+		let mut operator_signatures = Vec::new();
+		for (operator, (quote, signature)) in quotes_and_sigs.iter() {
+			pricing_quotes.push(quote.clone());
+			operator_signatures.push(*signature);
+		}
+		
+		// Also need to ensure operators_list matches the sorted order for the extrinsic call
+		// The verification code builds operator_signatures_map from operators.iter().zip(operator_signatures.iter())
+		// and then iterates the map in sorted order, using pricing_quotes[i]
+		// So we need operators, signatures, and quotes all in the same sorted order
+		let sorted_operators: Vec<T::AccountId> = quotes_and_sigs.keys().cloned().collect();
+
+		ensure_account_ready::<T>(&Pallet::<T>::pallet_account());
+		let (_, blueprint) = Pallet::<T>::blueprints(blueprint_id).expect("blueprint exists");
+		let mbsm_address = Pallet::<T>::mbsm_address_of(&blueprint).expect("MBSM address exists");
+		let mbsm_account_id = T::EvmAddressMapping::into_account_id(mbsm_address);
+		ensure_account_ready::<T>(&mbsm_account_id);
+	}: _(
+		RawOrigin::Signed(eve.clone()),
+		None,
+		blueprint_id,
+		vec![alice.clone()],
+		sorted_operators,
+		Default::default(),
+		vec![
+			get_security_requirement::<T>(USDC.into(), &[10, 20]),
+			get_security_requirement::<T>(WETH.into(), &[10, 20])
+		],
+		ttl,
+		Asset::Custom(USDC.into()),
+		MembershipModel::Fixed { min_operators: 3 },
+		pricing_quotes,
+		operator_signatures,
+		security_commitments
+	)
+
 	submit_result {
 		let (owner, operators, _, _) = prepare_service::<T>();
 		assert_ok!(Pallet::<T>::call(
@@ -523,25 +679,101 @@ benchmarks! {
 		).expect("failed to sign the message");
 	}: _(RawOrigin::Signed(operators[0].clone()), blueprint_id, service_id, metrics_data, signature)
 	
-	// // Slash an operator's stake for a service
-	// slash {
-	// 	let (owner, operators, _, service_id) = prepare_service::<T>();
-	// 	let service = Pallet::<T>::services(service_id).unwrap();
-	// 	let slash_origin = Pallet::<T>::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
-	// }: _(RawOrigin::Signed(slash_origin.clone()), operators[0].clone(), 0, Percent::from_percent(50))
+	// Slash an operator's stake for a service
+	slash {
+		let (owner, operators, _, service_id) = prepare_service::<T>();
+		let service = Pallet::<T>::services(service_id).unwrap();
+		log::debug!("[SLASH BENCHMARK] service_id: {:?}, blueprint: {:?}", service_id, service.blueprint);
+		
+		let query_result = Pallet::<T>::query_slashing_origin(&service);
+		log::debug!("[SLASH BENCHMARK] query_slashing_origin result: {:?}", query_result);
+		
+		let slash_origin = match query_result {
+			Ok((maybe_origin, weight)) => {
+				log::debug!("[SLASH BENCHMARK] query succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
+				if let Some(origin) = maybe_origin {
+					log::debug!("[SLASH BENCHMARK] slash_origin found: {:?}", origin);
+					log::debug!("[SLASH BENCHMARK] calling slash with origin: {:?}, operator: {:?}, service_id: {:?}", origin, operators[0], service_id);
+					origin
+				} else {
+					log::debug!("[SLASH BENCHMARK] ERROR: query_slashing_origin returned None - no slashing origin found");
+					panic!("No slashing origin found for service {}", service_id);
+				}
+			},
+			Err(e) => {
+				log::debug!("[SLASH BENCHMARK] ERROR: query_slashing_origin failed with error: {:?}", e);
+				panic!("query_slashing_origin failed: {:?}", e);
+			}
+		};
+	}: _(RawOrigin::Signed(slash_origin.clone()), operators[0].clone(), 0, Percent::from_percent(50))
 
-	// // Dispute a scheduled slash
-	// dispute {
-	// 	let (owner, operators, _, service_id) = prepare_service::<T>();
-	// 	let service = Pallet::<T>::services(service_id).unwrap();
-	// 	let slash_origin = Pallet::<T>::query_slashing_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
-	// 	assert_ok!(Pallet::<T>::slash(RawOrigin::Signed(slash_origin.clone()).into(), operators[0].clone(), 0, Percent::from_percent(50)));
-	// 	let dispute_origin = Pallet::<T>::query_dispute_origin(&service).map(|(o, _)| o.unwrap()).unwrap();
-	// }: _(RawOrigin::Signed(dispute_origin.clone()), 0, 0)
+	// Dispute a scheduled slash
+	dispute {
+		let (owner, operators, _, service_id) = prepare_service::<T>();
+		let service = Pallet::<T>::services(service_id).unwrap();
+		log::debug!("[DISPUTE BENCHMARK] service_id: {:?}, blueprint: {:?}", service_id, service.blueprint);
+		
+		let slash_query_result = Pallet::<T>::query_slashing_origin(&service);
+		log::debug!("[DISPUTE BENCHMARK] query_slashing_origin result: {:?}", slash_query_result);
+		
+		let slash_origin = match slash_query_result {
+			Ok((maybe_origin, weight)) => {
+				log::debug!("[DISPUTE BENCHMARK] query_slashing_origin succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
+				if let Some(origin) = maybe_origin {
+					origin
+				} else {
+					log::debug!("[DISPUTE BENCHMARK] ERROR: query_slashing_origin returned None");
+					panic!("No slashing origin found for service {}", service_id);
+				}
+			},
+			Err(e) => {
+				log::debug!("[DISPUTE BENCHMARK] ERROR: query_slashing_origin failed: {:?}", e);
+				panic!("query_slashing_origin failed: {:?}", e);
+			}
+		};
+		log::debug!("[DISPUTE BENCHMARK] slash_origin: {:?}", slash_origin);
+		
+		assert_ok!(Pallet::<T>::slash(RawOrigin::Signed(slash_origin.clone()).into(), operators[0].clone(), 0, Percent::from_percent(50)));
+		
+		let dispute_query_result = Pallet::<T>::query_dispute_origin(&service);
+		log::debug!("[DISPUTE BENCHMARK] query_dispute_origin result: {:?}", dispute_query_result);
+		
+		let dispute_origin = match dispute_query_result {
+			Ok((maybe_origin, weight)) => {
+				log::debug!("[DISPUTE BENCHMARK] query_dispute_origin succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
+				if let Some(origin) = maybe_origin {
+					origin
+				} else {
+					log::debug!("[DISPUTE BENCHMARK] ERROR: query_dispute_origin returned None");
+					panic!("No dispute origin found for service {}", service_id);
+				}
+			},
+			Err(e) => {
+				log::debug!("[DISPUTE BENCHMARK] ERROR: query_dispute_origin failed: {:?}", e);
+				panic!("query_dispute_origin failed: {:?}", e);
+			}
+		};
+		log::debug!("[DISPUTE BENCHMARK] dispute_origin: {:?}", dispute_origin);
+	}: _(RawOrigin::Signed(dispute_origin.clone()), 0, 0)
 
 	// Update master blueprint service manager
 	update_master_blueprint_service_manager {
 	}: _(RawOrigin::Root, H160::zero())
+
+	// Update default heartbeat threshold
+	update_default_heartbeat_threshold {
+		let threshold: u8 = 50;
+	}: _(RawOrigin::Root, threshold)
+
+	// Update default heartbeat interval
+	update_default_heartbeat_interval {
+		let interval: BlockNumberFor<T> = 100_u32.into();
+	}: _(RawOrigin::Root, interval)
+
+	// Update default heartbeat slashing window
+	update_default_heartbeat_slashing_window {
+		let window: BlockNumberFor<T> = 1000_u32.into();
+	}: _(RawOrigin::Root, window)
 
 	// Join a service as an operator
 	join_service {
@@ -757,6 +989,55 @@ benchmarks! {
 	}: {
 		let _ = Pallet::<T>::process_subscription_payments_on_idle(current_block, remaining_weight);
 	}
+
+	// Trigger subscription payment manually
+	trigger_subscription_payment {
+		let (owner, operators, blueprint_id, service_id) = prepare_service::<T>();
+		
+		// Modify blueprint to have subscription pricing
+		let (_, mut blueprint) = Pallet::<T>::blueprints(blueprint_id).expect("blueprint exists");
+		let interval: BlockNumberFor<T> = 10u32.into();
+		blueprint.jobs[0].pricing_model = PricingModel::Subscription {
+			rate_per_interval: 100u128,
+			interval: interval.saturated_into(),
+			maybe_end: None,
+		};
+		// Update the blueprint storage
+		<Blueprints<T>>::insert(blueprint_id, (owner.clone(), blueprint));
+
+		// Call the job to create subscription billing
+		// The billing will be created but may not be saved if payment is not due
+		let current_block = frame_system::Pallet::<T>::block_number();
+		assert_ok!(Pallet::<T>::call(
+			RawOrigin::Signed(owner.clone()).into(),
+			service_id,
+			0u8,
+			vec![Field::Uint8(2)].try_into().unwrap()
+		));
+
+		// Ensure billing exists - if it wasn't created by the call, create it manually
+		let billing_key = (service_id, 0u8, owner.clone());
+		if !<JobSubscriptionBillings<T>>::contains_key(&billing_key) {
+			use tangle_primitives::services::JobSubscriptionBilling;
+			let billing = JobSubscriptionBilling {
+				service_id,
+				job_index: 0u8,
+				subscriber: owner.clone(),
+				last_billed: current_block.saturating_sub(interval), // Set to past so payment is due
+				end_block: None,
+			};
+			<JobSubscriptionBillings<T>>::insert(&billing_key, billing);
+			// Update subscription count
+			let current_count = <UserSubscriptionCount<T>>::get(&owner);
+			<UserSubscriptionCount<T>>::insert(&owner, current_count + 1);
+		}
+
+		// Advance blocks so payment is due (interval is 10)
+		let target_block = current_block.saturating_add(interval);
+		frame_system::Pallet::<T>::set_block_number(target_block);
+
+		ensure_account_ready::<T>(&T::RewardRecorder::account_id());
+	}: _(RawOrigin::Signed(owner.clone()), service_id, 0u8)
 }
 
 // Define the module and associated types for the benchmarks
