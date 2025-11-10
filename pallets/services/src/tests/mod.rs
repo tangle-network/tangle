@@ -26,6 +26,7 @@ use tangle_primitives::services::*;
 mod asset_security;
 mod auto_aggregation;
 mod blueprint;
+mod cursor_edge_cases;
 mod hooks;
 mod jobs;
 mod native_slashing;

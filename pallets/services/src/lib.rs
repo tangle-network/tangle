@@ -62,7 +62,7 @@ pub mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 
-#[frame_support::pallet(dev_mode)]
+#[frame_support::pallet]
 pub mod module {
 	use super::*;
 	use sp_core::H160;
@@ -541,6 +541,8 @@ pub mod module {
 		PaymentCalculationOverflow,
 		/// Too many subscriptions per user
 		TooManySubscriptions,
+		/// Invalid subscription end block (must be in the future)
+		InvalidSubscriptionEndBlock,
 		/// Custom asset transfer failed
 		CustomAssetTransferFailed,
 		/// Asset not found or doesn't exist
