@@ -192,7 +192,7 @@ fn prepare_blueprint_with_operators<T: Config>(operator_ids: &[u8]) -> (T::Accou
 	let owner = funded_account::<T>(1u8);
 	let blueprint = cggmp21_blueprint::<T>();
 	let blueprint_id = Pallet::<T>::next_blueprint_id();
-	assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(owner.clone()).into(), blueprint));
+	create_test_blueprint::<T>(RawOrigin::Signed(owner.clone()).into(), blueprint);
 
 	let operators = operator_ids.iter().map(|id| funded_account::<T>(*id)).collect::<Vec<_>>();
 
@@ -382,10 +382,8 @@ fn cggmp21_blueprint<T: Config>() -> ServiceBlueprint<T::Constraints> {
 fn create_test_blueprint<T: Config>(
 	origin: OriginFor<T>,
 	blueprint: ServiceBlueprint<T::Constraints>,
-) -> Result<(), sp_runtime::DispatchError> {
-	Pallet::<T>::create_blueprint(origin, blueprint)
-		.map(|_| ())
-		.map_err(|e| e.error)
+) {
+	assert_ok!(Pallet::<T>::create_blueprint(origin, blueprint));
 }
 
 benchmarks! {
@@ -406,7 +404,7 @@ benchmarks! {
 	pre_register {
 		let alice = funded_account::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
+		create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob = funded_account::<T>(2u8);
 
@@ -417,7 +415,7 @@ benchmarks! {
 		let alice = funded_account::<T>(1u8);
 		let blueprint_id = Pallet::<T>::next_blueprint_id();
 		let blueprint = cggmp21_blueprint::<T>();
-		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
+		create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob = funded_account::<T>(2u8);
 		setup_nominator::<T>(
@@ -875,7 +873,7 @@ benchmarks! {
 	validate_payment_amount_pay_once {
 		let alice = funded_account::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-		assert_ok!(create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint));
+		create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let (_, blueprint) = Pallet::<T>::blueprints(0).expect("blueprint exists");
 		let amount = 1000_u32.into();

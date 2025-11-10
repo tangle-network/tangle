@@ -51,6 +51,24 @@ impl tangle_primitives::services::EvmRunner<Runtime> for PalletEvmRunner {
 						logs: vec![],
 					});
 				}
+				// getHeartbeatInterval(uint64,uint64)
+				else if selector == [0x68, 0x22, 0x9e, 0x4f] {
+					return Ok(fp_evm::CallInfo {
+						exit_reason: fp_evm::ExitReason::Succeed(fp_evm::ExitSucceed::Stopped),
+						value: {
+							// useDefault is true, interval is 0
+							let mut v = vec![0u8; 128];
+							v[63] = 1; // true as uint256
+							v
+						}.to_vec(),
+						used_gas: fp_evm::UsedGas {
+							standard: U256::from(21000),
+							effective: U256::from(21000),
+						},
+						weight_info: None,
+						logs: vec![],
+					});
+				}
 			}
 		}
 

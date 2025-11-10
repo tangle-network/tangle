@@ -467,7 +467,18 @@ impl<T: Config> Pallet<T> {
 					internal_type: None,
 				},
 			],
-			outputs: Default::default(),
+			outputs: vec![
+				ethabi::Param {
+					name: String::from("useDefault"),
+					kind: ethabi::ParamType::Bool,
+					internal_type: None,
+				},
+				ethabi::Param {
+					name: String::from("interval"),
+					kind: ethabi::ParamType::Uint(64),
+					internal_type: None,
+				},
+			],
 			constant: None,
 			state_mutability: StateMutability::View,
 		};

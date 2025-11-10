@@ -32,21 +32,21 @@ impl<T: Config> Pallet<T> {
 		// Check if service exists
 		ensure!(Instances::<T>::contains_key(service_id), Error::<T>::ServiceNotFound);
 
-		// // Call EVM hook
-		// let (use_default, interval) =
-		// 	Self::get_heartbeat_interval_hook(blueprint, blueprint_id, service_id).map_err(
-		// 		|e| {
-		// 			log::error!("Get heartbeat interval hook failed: {:?}", e);
-		// 			Error::<T>::GetHeartbeatIntervalFailure
-		// 		},
-		// 	)?;
+		// Call EVM hook
+		let (use_default, interval) =
+			Self::get_heartbeat_interval_hook(blueprint, blueprint_id, service_id).map_err(
+				|e| {
+					log::error!("Get heartbeat interval hook failed: {:?}", e);
+					Error::<T>::GetHeartbeatIntervalFailure
+				},
+			)?;
 
 		// If use_default is true, return the default interval
-		// if use_default {
+		if use_default {
 			Ok(DefaultHeartbeatInterval::<T>::get())
-		// } else {
-		// 	Ok(BlockNumberFor::<T>::from(interval))
-		// }
+		} else {
+			Ok(BlockNumberFor::<T>::from(interval))
+		}
 	}
 
 	/// Gets the heartbeat threshold for a service instance.
