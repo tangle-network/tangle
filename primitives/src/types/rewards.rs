@@ -127,10 +127,20 @@ impl<Balance: Default, BlockNumber: Default, AssetId: AssetIdT, MaxServiceReward
 
 /// Lock multiplier for rewards, representing months of lock period
 #[derive(
-	Clone, Copy, Encode, Decode, RuntimeDebug, TypeInfo, PartialEq, Eq, codec::DecodeWithMemTracking,
+	Default,
+	Clone,
+	Copy,
+	Encode,
+	Decode,
+	RuntimeDebug,
+	TypeInfo,
+	PartialEq,
+	Eq,
+	codec::DecodeWithMemTracking,
 )]
 pub enum LockMultiplier {
 	/// One month lock period (1x multiplier)
+	#[default]
 	OneMonth = 1,
 	/// Two months lock period (2x multiplier)
 	TwoMonths = 2,
@@ -138,12 +148,6 @@ pub enum LockMultiplier {
 	ThreeMonths = 3,
 	/// Six months lock period (6x multiplier)
 	SixMonths = 6,
-}
-
-impl Default for LockMultiplier {
-	fn default() -> Self {
-		Self::OneMonth
-	}
 }
 
 impl LockMultiplier {
