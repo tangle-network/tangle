@@ -36,7 +36,7 @@ where
 		last_billed: Option<BlockNumber>,
 	) -> Option<BillingCalculation<Balance>> {
 		match self {
-			PricingModel::PayOnce { amount } => {
+			PricingModel::PayOnce { amount } =>
 				if last_billed.is_none() {
 					Some(BillingCalculation {
 						amount: *amount,
@@ -51,8 +51,7 @@ where
 						should_bill: false,
 						skip_reason: Some(BillingSkipReason::AlreadyBilled),
 					})
-				}
-			},
+				},
 			_ => None,
 		}
 	}
@@ -66,8 +65,8 @@ where
 		match self {
 			PricingModel::Subscription { rate_per_interval, interval, maybe_end } => {
 				// Check if subscription has ended
-				if let Some(end_block) = maybe_end
-					&& current_block > *end_block
+				if let Some(end_block) = maybe_end &&
+					current_block > *end_block
 				{
 					return Some(BillingCalculation {
 						amount: Balance::zero(),
@@ -171,8 +170,8 @@ where
 				let next_block = last_billed_block.saturating_add(*interval);
 
 				// Check if next billing would be after subscription end
-				if let Some(end_block) = maybe_end
-					&& next_block > *end_block
+				if let Some(end_block) = maybe_end &&
+					next_block > *end_block
 				{
 					return None;
 				}

@@ -714,8 +714,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 						&mock_address(i as u8).0,
 					)),
 					ethabi::Token::Uint(
-						ethabi::ethereum_types::U256::from(100_000)
-							* ethabi::ethereum_types::U256::from(10)
+						ethabi::ethereum_types::U256::from(100_000) *
+							ethabi::ethereum_types::U256::from(10)
 								.pow(ethabi::ethereum_types::U256::from(6)),
 					),
 				])

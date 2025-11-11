@@ -101,30 +101,28 @@ impl TransactionExtension<RuntimeCall> for CheckNominatedRestaked<Runtime> {
 					Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
 				}
 			},
-			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) => {
+			RuntimeCall::Proxy(pallet_proxy::Call::proxy { call, real, .. }) =>
 				if let sp_runtime::MultiAddress::Id(account_id) = real {
 					match call.as_ref() {
-						RuntimeCall::Staking(pallet_staking::Call::unbond { value }) => {
+						RuntimeCall::Staking(pallet_staking::Call::unbond { value }) =>
 							if Self::can_unbound(account_id, *value) {
 								Ok(ValidTransaction::default())
 							} else {
 								Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(
 									1,
 								)))
-							}
-						},
+							},
 						_ => Ok(ValidTransaction::default()),
 					}
 				} else {
 					Ok(ValidTransaction::default())
-				}
-			},
-			RuntimeCall::Utility(pallet_utility::Call::batch { calls })
-			| RuntimeCall::Utility(pallet_utility::Call::batch_all { calls })
-			| RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
+				},
+			RuntimeCall::Utility(pallet_utility::Call::batch { calls }) |
+			RuntimeCall::Utility(pallet_utility::Call::batch_all { calls }) |
+			RuntimeCall::Utility(pallet_utility::Call::force_batch { calls }) => {
 				for call in calls {
-					if let RuntimeCall::Staking(pallet_staking::Call::unbond { value }) = call
-						&& !Self::can_unbound(&who, *value)
+					if let RuntimeCall::Staking(pallet_staking::Call::unbond { value }) = call &&
+						!Self::can_unbound(&who, *value)
 					{
 						return Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(
 							1,

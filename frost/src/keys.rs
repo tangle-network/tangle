@@ -471,8 +471,8 @@ pub fn split<C: Ciphersuite, R: RngCore + CryptoRng>(
 ) -> Result<(BTreeMap<Identifier<C>, SecretShare<C>>, PublicKeyPackage<C>), Error<C>> {
 	validate_num_of_signers(min_signers, max_signers)?;
 
-	if let IdentifierList::Custom(identifiers) = &identifiers
-		&& identifiers.len() != max_signers as usize
+	if let IdentifierList::Custom(identifiers) = &identifiers &&
+		identifiers.len() != max_signers as usize
 	{
 		return Err(Error::IncorrectNumberOfIdentifiers);
 	}
@@ -486,9 +486,8 @@ pub fn split<C: Ciphersuite, R: RngCore + CryptoRng>(
 			let identifiers = default_identifiers(max_signers);
 			generate_secret_shares(key, max_signers, min_signers, coefficients, &identifiers)?
 		},
-		IdentifierList::Custom(identifiers) => {
-			generate_secret_shares(key, max_signers, min_signers, coefficients, identifiers)?
-		},
+		IdentifierList::Custom(identifiers) =>
+			generate_secret_shares(key, max_signers, min_signers, coefficients, identifiers)?,
 	};
 	let mut verifying_shares: BTreeMap<Identifier<C>, VerifyingShare<C>> = BTreeMap::new();
 
