@@ -407,13 +407,13 @@ subxt-core = { version = "0.44.0", default-features = false }
 subxt-signer = { version = "0.44.0", default-features = false }
 
 # Blueprint
-# blueprint-manager = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
-# blueprint-runner = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
-# blueprint-keystore = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
+blueprint-manager = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
+blueprint-runner = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
+blueprint-keystore = { default-features = false, git = "https://github.com/tangle-network/blueprint", branch = "polkadot-stable2503" }
 # --
-# blueprint-manager = { default-features = false, path = "../gadget/crates/manager" }
-# blueprint-runner = { default-features = false, path = "../gadget/crates/runner" }
-# blueprint-keystore = { default-features = false, path = "../gadget/crates/keystore" }
+# blueprint-manager = { default-features = false, path = "../blueprint-sdk/crates/manager" }
+# blueprint-runner = { default-features = false, path = "../blueprint-sdk/crates/runner" }
+# blueprint-keystore = { default-features = false, path = "../blueprint-sdk/crates/keystore" }
 
 [profile.release]
 panic = "unwind"
