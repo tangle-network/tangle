@@ -18,9 +18,8 @@ pub use crate::eth::{EthConfiguration, db_config_dir};
 use crate::{
 	cli::Sealing,
 	eth::{
-		BackendType, FrontierBackend, FrontierBlockImport, FrontierPartialComponents,
-		RpcConfig, StorageOverride, StorageOverrideHandler, new_frontier_partial,
-		spawn_frontier_tasks,
+		BackendType, FrontierBackend, FrontierBlockImport, FrontierPartialComponents, RpcConfig,
+		StorageOverride, StorageOverrideHandler, new_frontier_partial, spawn_frontier_tasks,
 	},
 };
 use futures::{FutureExt, future};

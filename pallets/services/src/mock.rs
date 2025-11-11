@@ -712,12 +712,15 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 			raw_hex = format!("0{}", raw_hex);
 		}
 		let code = hex::decode(raw_hex).unwrap();
-		evm_accounts.insert(address, fp_evm::GenesisAccount {
-			code,
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: Default::default(),
-		});
+		evm_accounts.insert(
+			address,
+			fp_evm::GenesisAccount {
+				code,
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: Default::default(),
+			},
+		);
 	};
 
 	create_contract(include_str!("./test-artifacts/CGGMP21Blueprint.hex"), CGGMP21_BLUEPRINT);
@@ -729,31 +732,40 @@ pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestE
 	create_contract(include_str!("./test-artifacts/MockERC20.hex"), USDC_ERC20);
 
 	for i in 1..=authorities.len() {
-		evm_accounts.insert(mock_address(i as u8), fp_evm::GenesisAccount {
-			code: vec![],
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: sp_core::U256::from(1_000u128) *
-				sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
-		});
+		evm_accounts.insert(
+			mock_address(i as u8),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: sp_core::U256::from(1_000u128) *
+					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+			},
+		);
 	}
 
 	for a in &authorities {
-		evm_accounts.insert(account_id_to_address(a.clone()), fp_evm::GenesisAccount {
-			code: vec![],
-			storage: Default::default(),
-			nonce: Default::default(),
-			balance: sp_core::U256::from(1_000u128) *
-				sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
-		});
+		evm_accounts.insert(
+			account_id_to_address(a.clone()),
+			fp_evm::GenesisAccount {
+				code: vec![],
+				storage: Default::default(),
+				nonce: Default::default(),
+				balance: sp_core::U256::from(1_000u128) *
+					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+			},
+		);
 	}
 
-	evm_accounts.insert(USDC_ERC20, fp_evm::GenesisAccount {
-		code: include_bytes!("test-artifacts/MockERC20.bin").to_vec(),
-		storage: Default::default(),
-		nonce: Default::default(),
-		balance: Default::default(),
-	});
+	evm_accounts.insert(
+		USDC_ERC20,
+		fp_evm::GenesisAccount {
+			code: include_bytes!("test-artifacts/MockERC20.bin").to_vec(),
+			storage: Default::default(),
+			nonce: Default::default(),
+			balance: Default::default(),
+		},
+	);
 
 	let evm_config =
 		pallet_evm::GenesisConfig::<Runtime> { accounts: evm_accounts, ..Default::default() };

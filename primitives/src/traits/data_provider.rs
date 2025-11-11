@@ -131,9 +131,13 @@ mod tests {
 	mock_data_provider!(Provider3, MOCK_PRICE_3);
 	mock_data_provider!(Provider4, MOCK_PRICE_4);
 
-	create_median_value_data_provider!(Providers, u8, u8, u8, [
-		Provider1, Provider2, Provider3, Provider4
-	]);
+	create_median_value_data_provider!(
+		Providers,
+		u8,
+		u8,
+		u8,
+		[Provider1, Provider2, Provider3, Provider4]
+	);
 
 	#[test]
 	fn median_value_data_provider_works() {

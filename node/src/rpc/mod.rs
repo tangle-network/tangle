@@ -159,7 +159,8 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe: _, eth: _, babe, select_chain, grandpa, backend } = deps;
+	let FullDeps { client, pool, deny_unsafe: _, eth: _, babe, select_chain, grandpa, backend } =
+		deps;
 
 	let GrandpaDeps {
 		shared_voter_state,
