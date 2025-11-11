@@ -130,6 +130,7 @@ blueprint-keystore = { workspace = true, optional = true }
 sp-tracing = { workspace = true }
 alloy = { version = "0.9", features = ["full", "provider-debug-api"] }
 anyhow = "1.0"
+tangle-subxt = { workspace = true }
 
 [features]
 default = ["with-rocksdb-weights", "rocksdb", "sql"]

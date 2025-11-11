@@ -214,6 +214,13 @@ impl<T: Config> Pallet<T> {
 		let is_new_subscription = !JobSubscriptionBillings::<T>::contains_key(&billing_key);
 
 		if is_new_subscription {
+			// Validate end_block if provided (for new subscriptions only)
+			if let Some(end_block) = maybe_end {
+				ensure!(
+					end_block > current_block,
+					Error::<T>::InvalidSubscriptionEndBlock
+				);
+			}
 			let current_count = UserSubscriptionCount::<T>::get(payer);
 			ensure!(current_count < 100, Error::<T>::TooManySubscriptions);
 			UserSubscriptionCount::<T>::insert(payer, current_count + 1);
@@ -498,6 +505,7 @@ impl<T: Config> Pallet<T> {
 	) -> Weight {
 		let mut total_weight = Weight::zero();
 		let mut processed_count = 0u32;
+		let mut iteration_incomplete = false;
 		const MAX_SUBSCRIPTIONS_PER_BLOCK: u32 = 50;
 		let min_weight = T::DbWeight::get().reads_writes(5, 2);
 
@@ -506,7 +514,29 @@ impl<T: Config> Pallet<T> {
 		}
 
 		let start_cursor = SubscriptionProcessingCursor::<T>::get();
-		let mut skip_until_cursor = start_cursor.is_some();
+		let mut skip_until_cursor = false;
+
+		// SECURITY FIX: Validate cursor existence to prevent permanent billing freeze
+		// If cursor points to deleted subscription, reset to beginning
+		if let Some(ref cursor_key) = start_cursor {
+			if JobSubscriptionBillings::<T>::contains_key(cursor_key) {
+				skip_until_cursor = true;
+				log::debug!(
+					"Resuming subscription processing from cursor: service={}, job={}, subscriber={:?}",
+					cursor_key.0, cursor_key.1, cursor_key.2
+				);
+			} else {
+				log::warn!(
+					"Cursor points to non-existent subscription (service={}, job={}, subscriber={:?}). \
+					Resetting cursor to beginning to prevent billing freeze. \
+					This can happen if a subscription was cancelled while cursor pointed to it.",
+					cursor_key.0, cursor_key.1, cursor_key.2
+				);
+				SubscriptionProcessingCursor::<T>::kill();
+				// skip_until_cursor remains false, will process from beginning
+			}
+		}
+
 		let cursor_key = start_cursor.clone();
 
 		for (key, billing) in JobSubscriptionBillings::<T>::iter() {
@@ -523,13 +553,23 @@ impl<T: Config> Pallet<T> {
 			}
 			// Weight check
 			if total_weight.saturating_add(min_weight).ref_time() > remaining_weight.ref_time() {
-				SubscriptionProcessingCursor::<T>::put(key);
+				SubscriptionProcessingCursor::<T>::put(key.clone());
+				iteration_incomplete = true;
+				log::debug!(
+					"Weight exhausted after processing {} subscriptions. Cursor saved at service={}, job={}, subscriber={:?}",
+					processed_count, key.0, key.1, key.2
+				);
 				break;
 			}
 
 			// Iteration limit
 			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
-				SubscriptionProcessingCursor::<T>::put(key);
+				SubscriptionProcessingCursor::<T>::put(key.clone());
+				iteration_incomplete = true;
+				log::debug!(
+					"MAX_SUBSCRIPTIONS_PER_BLOCK ({}) reached. Cursor saved at service={}, job={}, subscriber={:?}",
+					MAX_SUBSCRIPTIONS_PER_BLOCK, key.0, key.1, key.2
+				);
 				break;
 			}
 
@@ -584,7 +624,16 @@ impl<T: Config> Pallet<T> {
 									Ok(_) => {
 										processed_count += 1;
 									},
-									Err(_) => {
+									Err(e) => {
+										log::error!(
+											"Failed to process subscription payment for service={}, job={}, subscriber={:?}: {:?}. \
+											This subscription will be retried in the next block. \
+											Possible causes: insufficient balance, service terminated, rewards pallet full.",
+											service_id,
+											job_index,
+											subscriber,
+											e
+										);
 										continue;
 									},
 								}
@@ -597,8 +646,13 @@ impl<T: Config> Pallet<T> {
 			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
 		}
 
-		if processed_count < MAX_SUBSCRIPTIONS_PER_BLOCK {
+		// Clear cursor only if iteration completed naturally (not broken by weight/count limits)
+		if !iteration_incomplete {
 			SubscriptionProcessingCursor::<T>::kill();
+			log::debug!(
+				"Subscription iteration completed. Processed {} subscriptions, cursor cleared.",
+				processed_count
+			);
 		}
 
 		total_weight

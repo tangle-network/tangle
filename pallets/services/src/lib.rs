@@ -62,7 +62,8 @@ pub mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 
-#[frame_support::pallet(dev_mode)]
+#[frame_support::pallet]
+#[allow(clippy::too_many_arguments)]
 pub mod module {
 	use super::*;
 	use sp_core::H160;
@@ -541,6 +542,8 @@ pub mod module {
 		PaymentCalculationOverflow,
 		/// Too many subscriptions per user
 		TooManySubscriptions,
+		/// Invalid subscription end block (must be in the future)
+		InvalidSubscriptionEndBlock,
 		/// Custom asset transfer failed
 		CustomAssetTransferFailed,
 		/// Asset not found or doesn't exist
@@ -1125,6 +1128,7 @@ pub mod module {
 		StorageMap<_, Identity, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::call]
+	#[allow(clippy::too_many_arguments)]
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
 		///
@@ -1390,6 +1394,7 @@ pub mod module {
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::request())]
+		#[allow(clippy::too_many_arguments)]
 		pub fn request(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,
@@ -2177,6 +2182,7 @@ pub mod module {
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
 		#[pallet::call_index(18)]
 		#[pallet::weight(T::WeightInfo::request_with_signed_price_quotes())]
+		#[allow(clippy::too_many_arguments)]
 		pub fn request_with_signed_price_quotes(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,

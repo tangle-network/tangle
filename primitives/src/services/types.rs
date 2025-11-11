@@ -198,13 +198,13 @@ impl<T> AssetIdT for T where
 	serde(bound = ""),
 	educe(Debug(bound()))
 )]
-pub enum ApprovalState<AssetId: AssetIdT> {
+pub enum ApprovalState<AssetId: AssetIdT, MaxAssets: Get<u32>> {
 	/// The operator has not yet responded to the request
 	Pending,
 	/// The operator has approved the request with specific asset commitments
 	Approved {
 		/// Asset-specific exposure commitments
-		security_commitments: Vec<AssetSecurityCommitment<AssetId>>,
+		security_commitments: BoundedVec<AssetSecurityCommitment<AssetId>, MaxAssets>,
 	},
 	/// The operator has rejected the request
 	Rejected,

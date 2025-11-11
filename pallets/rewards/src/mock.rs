@@ -35,7 +35,6 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	DispatchResult,
 };
 use tangle_primitives::{
 	services::Asset,

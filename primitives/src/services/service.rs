@@ -27,6 +27,9 @@ use frame_support::pallet_prelude::*;
 use sp_core::H160;
 use sp_std::{vec, vec::Vec};
 
+/// Type alias for operator approval state with bounded security commitments
+pub type OperatorApprovalState<AccountId, AssetId, MaxAssets> = (AccountId, ApprovalState<AssetId, MaxAssets>);
+
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
 #[cfg(feature = "std")]
@@ -315,7 +318,7 @@ pub struct ServiceRequest<C: Constraints, AccountId, BlockNumber, AssetId: Asset
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// Operators and their approval states
 	pub operators_with_approval_state:
-		BoundedVec<(AccountId, ApprovalState<AssetId>), C::MaxOperatorsPerService>,
+		BoundedVec<OperatorApprovalState<AccountId, AssetId, C::MaxAssetsPerService>, C::MaxOperatorsPerService>,
 	/// The membership model to use for this service instance
 	pub membership_model: MembershipModel,
 }
