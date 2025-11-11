@@ -37,8 +37,9 @@ pub use fc_rpc::{EthBlockDataCacheTask, EthConfig};
 pub use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 use fc_storage::StorageOverride;
 use fp_rpc::{ConvertTransaction, ConvertTransactionRuntimeApi, EthereumRuntimeRPCApi};
-#[cfg(feature = "txpool")]
-use rpc_txpool::TxPoolServer;
+// TEMPORARY: Disabled txpool imports due to H256 type mismatches with stable2503
+// #[cfg(feature = "txpool")]
+// use rpc_txpool::TxPoolServer;
 
 use sp_consensus_babe::BabeApi;
 
@@ -157,12 +158,10 @@ where
 	use rpc_debug::{Debug, DebugServer};
 	use rpc_trace::{Trace, TraceServer};
 
-	#[cfg(feature = "txpool")]
-	use fc_rpc::{TxPool, TxPoolApiServer};
 	let EthDeps {
 		client,
 		pool: _pool,
-		graph,
+		graph: _graph,
 		converter: _converter,
 		is_authority: _is_authority,
 		enable_dev_signer,
@@ -250,8 +249,11 @@ where
 
 	io.merge(Web3::new(client.clone()).into_rpc())?;
 
-	#[cfg(feature = "txpool")]
-	io.merge(TxPool::new(Arc::clone(&client), graph).into_rpc())?;
+	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
+	// The local rpc_txpool::TxPool requires B: BlockT<Hash = ethereum_types::H256>
+	// but Tangle's Block uses sp_core::H256, causing trait bound failures
+	// #[cfg(feature = "txpool")]
+	// io.merge(TxPoolServer::into_rpc(TxPool::new(Arc::clone(&client), pool)))?;
 
 	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
 	// if let Some(tracing_config) = tracing_config {
