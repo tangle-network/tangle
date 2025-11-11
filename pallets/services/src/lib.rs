@@ -63,6 +63,7 @@ pub use module::*;
 pub use weights::WeightInfo;
 
 #[frame_support::pallet]
+#[allow(clippy::too_many_arguments)]
 pub mod module {
 	use super::*;
 	use sp_core::H160;
@@ -1127,6 +1128,7 @@ pub mod module {
 		StorageMap<_, Identity, T::AccountId, u32, ValueQuery>;
 
 	#[pallet::call]
+	#[allow(clippy::too_many_arguments)]
 	impl<T: Config> Pallet<T> {
 		/// Create a new service blueprint.
 		///
@@ -1392,6 +1394,7 @@ pub mod module {
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::request())]
+		#[allow(clippy::too_many_arguments)]
 		pub fn request(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,
@@ -2179,6 +2182,7 @@ pub mod module {
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
 		#[pallet::call_index(18)]
 		#[pallet::weight(T::WeightInfo::request_with_signed_price_quotes())]
+		#[allow(clippy::too_many_arguments)]
 		pub fn request_with_signed_price_quotes(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,

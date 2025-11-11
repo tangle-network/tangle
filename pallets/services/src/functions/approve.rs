@@ -18,6 +18,7 @@ use crate::{
 	BalanceOf, Config, Error, Event, Instances, NextInstanceId, OperatorsProfile, Pallet,
 	ServiceRequests, ServiceStatus, StagingServicePayments, UserServices,
 };
+use frame_support::pallet_prelude::DispatchError;
 use frame_support::{
 	BoundedVec,
 	dispatch::DispatchResult,
@@ -181,9 +182,15 @@ impl<T: Config> Pallet<T> {
 			.iter_mut()
 			.find(|(op, _)| op == &operator)
 			.map(|(_, state)| {
-				*state =
-					ApprovalState::Approved { security_commitments: security_commitments.to_vec() }
-			});
+				*state = ApprovalState::Approved {
+					security_commitments: security_commitments
+						.to_vec()
+						.try_into()
+						.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?,
+				};
+				Ok::<_, DispatchError>(())
+			})
+			.transpose()?;
 		ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
 		let blueprint_id = request.blueprint;

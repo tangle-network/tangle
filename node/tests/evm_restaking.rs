@@ -521,12 +521,12 @@ fn operator_join_delegator_delegate_erc20() {
 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
 		assert_eq!(
 			maybe_operator.map(|p| p.delegations.0[0].clone()),
-			Some(DelegatorBond {
-				delegator: bob.address().to_account_id(),
-				amount: delegate_amount.to::<u128>(),
-				asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
-				__ignore: std::marker::PhantomData
-			})
+            Some(DelegatorBond {
+                delegator: bob.address().to_account_id(),
+                amount: delegate_amount.to::<u128>(),
+                asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
+                __ignore: std::marker::PhantomData,
+            })
 		);
 
 		anyhow::Ok(())
@@ -627,8 +627,7 @@ fn operator_join_delegator_delegate_erc20() {
 // 				delegator: bob.address().to_account_id(),
 // 				amount: delegate_amount,
 // 				asset: Asset::Custom(t.usdc_asset_id),
-// 				__ignore: std::marker::PhantomData
-// 			})
+// 	// 			})
 // 		);
 
 // 		anyhow::Ok(())
@@ -954,12 +953,12 @@ fn lrt_deposit_withdraw_erc20() {
 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
 		assert_eq!(
 			maybe_operator.map(|p| p.delegations.0[0].clone()),
-			Some(DelegatorBond {
-				delegator: lrt_address.to_account_id(),
-				amount: deposit_amount.to::<u128>(),
-				asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
-				__ignore: std::marker::PhantomData
-			})
+            Some(DelegatorBond {
+                delegator: lrt_address.to_account_id(),
+                amount: deposit_amount.to::<u128>(),
+                asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+                __ignore: std::marker::PhantomData,
+            })
 		);
 
 		// Wait for a new sessions to happen
@@ -1220,12 +1219,12 @@ fn mad_rewards() {
 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
 		assert_eq!(
 			maybe_operator.map(|p| p.delegations.0[0].clone()),
-			Some(DelegatorBond {
-				delegator: bob.address().to_account_id(),
-				amount: delegate_amount.to::<u128>(),
-				asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
-				__ignore: std::marker::PhantomData
-			})
+            Some(DelegatorBond {
+                delegator: bob.address().to_account_id(),
+                amount: delegate_amount.to::<u128>(),
+                asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
+                __ignore: std::marker::PhantomData,
+            })
 		);
 
 		// Wait for one year to pass
@@ -1448,12 +1447,12 @@ fn lrt_rewards_erc20() {
 		assert_eq!(maybe_operator.as_ref().map(|p| p.delegation_count), Some(1));
 		assert_eq!(
 			maybe_operator.map(|p| p.delegations.0[0].clone()),
-			Some(DelegatorBond {
-				delegator: lrt_address.to_account_id(),
-				amount: deposit_amount.to::<u128>(),
-				asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
-				__ignore: std::marker::PhantomData
-			})
+            Some(DelegatorBond {
+                delegator: lrt_address.to_account_id(),
+                amount: deposit_amount.to::<u128>(),
+                asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
+                __ignore: std::marker::PhantomData,
+            })
 		);
 
 		wait_for_more_blocks(&t.provider, 2).await;

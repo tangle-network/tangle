@@ -788,6 +788,7 @@ pub mod pallet {
 		/// * [`Error::InvalidAsset`] - Asset is not supported
 		#[pallet::call_index(10)]
 		#[pallet::weight(T::WeightInfo::deposit_with_no_evm_address())]
+		#[allow(clippy::useless_conversion)]
 		pub fn deposit(
 			origin: OriginFor<T>,
 			asset: Asset<T::AssetId>,
@@ -872,6 +873,7 @@ pub mod pallet {
 		/// * [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed
 		#[pallet::call_index(12)]
 		#[pallet::weight(T::WeightInfo::execute_withdraw_with_no_evm_address())]
+		#[allow(clippy::useless_conversion)]
 		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResultWithPostInfo {
 			let mut actual_weight = T::WeightInfo::execute_withdraw_with_no_evm_address();
 			let who = match evm_address {
