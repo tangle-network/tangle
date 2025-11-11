@@ -18,7 +18,7 @@ pub use crate::eth::{EthConfiguration, db_config_dir};
 use crate::{
 	cli::Sealing,
 	eth::{
-		BackendType, EthApi, FrontierBackend, FrontierBlockImport, FrontierPartialComponents,
+		BackendType, FrontierBackend, FrontierBlockImport, FrontierPartialComponents,
 		RpcConfig, StorageOverride, StorageOverrideHandler, new_frontier_partial,
 		spawn_frontier_tasks,
 	},
@@ -69,7 +69,7 @@ type GrandpaBlockImport =
 pub fn new_partial<BIQ>(
 	config: &Configuration,
 	eth_config: &EthConfiguration,
-	build_import_queue: BIQ,
+	_build_import_queue: BIQ,
 ) -> Result<
 	sc_service::PartialComponents<
 		FullClient,
@@ -199,9 +199,9 @@ where
 	)?;
 
 	//let slot_duration = babe_link.config().slot_duration();
-	let slot_duration = 0; // This is important to allow continous block
+	let _slot_duration = 0; // This is important to allow continous block
 
-	let target_gas_price = eth_config.target_gas_price;
+	let _target_gas_price = eth_config.target_gas_price;
 
 	let import_queue = sc_consensus_manual_seal::import_queue(
 		Box::new(block_import.clone()),
@@ -263,7 +263,7 @@ pub fn build_manual_seal_import_queue(
 /// Builds a new service for a full client.
 pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
 	RunFullParams {
-		mut config,
+		config,
 		eth_config,
 		rpc_config,
 		debug_output: _,
@@ -289,7 +289,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 				babe_link,
 				frontier_backend,
 				storage_override,
-				babe_worker_handle,
+				_babe_worker_handle,
 			),
 	} = new_partial(&config, &eth_config, build_manual_seal_import_queue)?;
 
@@ -364,7 +364,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		}
 	}
 	let role = config.role.clone();
-	let force_authoring = config.force_authoring;
+	let _force_authoring = config.force_authoring;
 	let name = config.network.node_name.clone();
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
@@ -476,7 +476,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 		pending_create_inherent_data_providers,
 	};
 
-	let keystore = keystore_container.keystore();
+	let _keystore = keystore_container.keystore();
 	let select_chain_clone = select_chain.clone();
 	let rpc_builder = {
 		let client = client.clone();
@@ -587,7 +587,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 			)
 			.expect("failed to create BabeConsensusDataProvider");
 
-		let target_gas_price = eth_config.target_gas_price;
+		let _target_gas_price = eth_config.target_gas_price;
 
 		let manual_seal = match sealing {
 			Sealing::Manual => {

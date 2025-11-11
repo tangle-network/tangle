@@ -162,7 +162,7 @@ where
 	let EthDeps {
 		client,
 		pool: _pool,
-		graph: _graph,
+		graph,
 		converter: _converter,
 		is_authority: _is_authority,
 		enable_dev_signer,
@@ -251,7 +251,7 @@ where
 	io.merge(Web3::new(client.clone()).into_rpc())?;
 
 	#[cfg(feature = "txpool")]
-	io.merge(rpc_txpool::TxPool::new(Arc::clone(&client), graph).into_rpc())?;
+	io.merge(TxPool::new(Arc::clone(&client), graph).into_rpc())?;
 
 	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
 	// if let Some(tracing_config) = tracing_config {

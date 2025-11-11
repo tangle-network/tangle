@@ -111,8 +111,8 @@ where
 #[cfg(feature = "testnet")]
 pub fn create_full<C, P, BE, CT, SC, B, CIDP>(
 	deps: FullDeps<C, P, CT, SC, B, CIDP>,
-	subscription_task_executor: SubscriptionTaskExecutor,
-	pubsub_notification_sinks: Arc<
+	_subscription_task_executor: SubscriptionTaskExecutor,
+	_pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
 			fc_mapping_sync::EthereumBlockNotification<Block>,
 		>,
@@ -159,7 +159,7 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe, eth, babe, select_chain, grandpa, backend } = deps;
+	let FullDeps { client, pool, deny_unsafe: _, eth: _, babe, select_chain, grandpa, backend } = deps;
 
 	let GrandpaDeps {
 		shared_voter_state,
