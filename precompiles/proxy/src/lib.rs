@@ -63,8 +63,9 @@ where
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
 			None => false,
-			Some(selector) =>
-				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector),
+			Some(selector) => {
+				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector)
+			},
 		}
 	}
 
@@ -97,11 +98,12 @@ where
 	fn is_allowed(_caller: H160, selector: Option<u32>) -> bool {
 		match selector {
 			None => false,
-			Some(selector) =>
-				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector) ||
-					ProxyPrecompileCall::<Runtime>::proxy_selectors().contains(&selector) ||
-					ProxyPrecompileCall::<Runtime>::proxy_force_type_selectors()
-						.contains(&selector),
+			Some(selector) => {
+				ProxyPrecompileCall::<Runtime>::is_proxy_selectors().contains(&selector)
+					|| ProxyPrecompileCall::<Runtime>::proxy_selectors().contains(&selector)
+					|| ProxyPrecompileCall::<Runtime>::proxy_force_type_selectors()
+						.contains(&selector)
+			},
 		}
 	}
 
@@ -435,8 +437,9 @@ where
 		// Return subcall result
 		match reason {
 			ExitReason::Fatal(exit_status) => Err(PrecompileFailure::Fatal { exit_status }),
-			ExitReason::Revert(exit_status) =>
-				Err(PrecompileFailure::Revert { exit_status, output }),
+			ExitReason::Revert(exit_status) => {
+				Err(PrecompileFailure::Revert { exit_status, output })
+			},
 			ExitReason::Error(exit_status) => Err(PrecompileFailure::Error { exit_status }),
 			ExitReason::Succeed(_) => Ok(()),
 		}

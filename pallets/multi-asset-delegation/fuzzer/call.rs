@@ -326,7 +326,9 @@ fn do_sanity_checks(call: mad::Call<Runtime>, origin: RuntimeOrigin, outcome: Po
 		Some(signer) => signer,
 		None =>
 		/* Root */
-			[0u8; 32].into(),
+		{
+			[0u8; 32].into()
+		},
 	};
 	match call {
 		mad::Call::join_operators { bond_amount } => {

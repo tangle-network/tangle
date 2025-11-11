@@ -724,14 +724,15 @@ impl ExtBuilder {
 			);
 
 			match &call {
-				Ok(info) =>
+				Ok(info) => {
 					if !info.exit_reason.is_succeed() {
 						eprintln!(
 							"EVM initialize call failed with exit reason: {:?}",
 							info.exit_reason
 						);
 						eprintln!("Return value: {:?}", String::from_utf8_lossy(&info.value));
-					},
+					}
+				},
 				Err(e) => {
 					eprintln!("EVM initialize call error: {:?}", e);
 				},

@@ -261,9 +261,9 @@ impl<T: Config> BondedPool<T> {
 
 		// any unbond must comply with the balance condition:
 		ensure!(
-			is_full_unbond ||
-				balance_after_unbond >=
-					if is_depositor {
+			is_full_unbond
+				|| balance_after_unbond
+					>= if is_depositor {
 						Pallet::<T>::depositor_min_bond()
 					} else {
 						MinJoinBond::<T>::get()

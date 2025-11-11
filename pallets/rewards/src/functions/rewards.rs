@@ -345,8 +345,8 @@ impl<T: Config> Pallet<T> {
 
 		// Add score with lock multipliers if any
 		// only if the admin has enabled boost multiplier for the vault
-		if reward.boost_multiplier.is_some() &&
-			let Some(locks) = deposit.amount_with_locks
+		if reward.boost_multiplier.is_some()
+			&& let Some(locks) = deposit.amount_with_locks
 		{
 			for lock in locks {
 				if lock.expiry_block > last_claim_block {

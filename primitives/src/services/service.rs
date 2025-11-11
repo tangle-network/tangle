@@ -254,15 +254,18 @@ impl<C: Constraints> ServiceBlueprint<C> {
 			// Request Parameters ?
 			// Blueprint Manager
 			match self.manager {
-				BlueprintServiceManager::Evm(addr) =>
-					ethabi::Token::Address(ethabi::ethereum_types::H160::from(addr.0)),
+				BlueprintServiceManager::Evm(addr) => {
+					ethabi::Token::Address(ethabi::ethereum_types::H160::from(addr.0))
+				},
 			},
 			// Master Manager Revision
 			match self.master_manager_revision {
-				MasterBlueprintServiceManagerRevision::Latest =>
-					ethabi::Token::Uint(ethabi::Uint::MAX),
-				MasterBlueprintServiceManagerRevision::Specific(rev) =>
-					ethabi::Token::Uint(rev.into()),
+				MasterBlueprintServiceManagerRevision::Latest => {
+					ethabi::Token::Uint(ethabi::Uint::MAX)
+				},
+				MasterBlueprintServiceManagerRevision::Specific(rev) => {
+					ethabi::Token::Uint(rev.into())
+				},
 			},
 			// Gadget ?
 		])
@@ -329,8 +332,9 @@ impl<C: Constraints, AccountId, BlockNumber, AssetId: AssetIdT>
 
 		match self.membership_model {
 			MembershipModel::Fixed { min_operators } => approved_count >= min_operators as usize,
-			MembershipModel::Dynamic { min_operators, max_operators: _ } =>
-				approved_count >= min_operators as usize,
+			MembershipModel::Dynamic { min_operators, max_operators: _ } => {
+				approved_count >= min_operators as usize
+			},
 		}
 	}
 
@@ -375,9 +379,9 @@ pub fn validate_security<AssetId: AssetIdT>(
 	security_requirements.iter().enumerate().all(|(i, req)| {
 		let commit = &asset_commitments[i];
 		// Check asset matches and exposure percent is within bounds
-		commit.asset == req.asset &&
-			commit.exposure_percent >= req.min_exposure_percent &&
-			commit.exposure_percent <= req.max_exposure_percent
+		commit.asset == req.asset
+			&& commit.exposure_percent >= req.min_exposure_percent
+			&& commit.exposure_percent <= req.max_exposure_percent
 	})
 }
 

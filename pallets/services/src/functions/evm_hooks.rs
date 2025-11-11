@@ -77,8 +77,9 @@ impl<T: Config> Pallet<T> {
 	pub fn mbsm_address_of(blueprint: &ServiceBlueprint<T::Constraints>) -> Result<H160, Error<T>> {
 		match blueprint.master_manager_revision {
 			MasterBlueprintServiceManagerRevision::Specific(rev) => Self::mbsm_address(rev),
-			MasterBlueprintServiceManagerRevision::Latest =>
-				Self::mbsm_address(Self::mbsm_latest_revision()),
+			MasterBlueprintServiceManagerRevision::Latest => {
+				Self::mbsm_address(Self::mbsm_latest_revision())
+			},
 			other => unimplemented!("Got unexpected case for {:?}", other),
 		}
 	}
@@ -1920,8 +1921,8 @@ impl<T: Config> Pallet<T> {
 			info.used_gas.standard.unique_saturated_into(),
 			true,
 		);
-		if let Some(weight_info) = info.weight_info &&
-			let Some(proof_size_usage) = weight_info.proof_size_usage
+		if let Some(weight_info) = info.weight_info
+			&& let Some(proof_size_usage) = weight_info.proof_size_usage
 		{
 			*gas_to_weight.proof_size_mut() = proof_size_usage;
 		}

@@ -92,9 +92,9 @@ where
 		};
 
 		// Check direct unbond call
-		if let Some(staking_call) = call.is_sub_type() &&
-			matches!(staking_call, pallet_staking::Call::unbond { .. }) &&
-			has_restaked_nominations(&who)
+		if let Some(staking_call) = call.is_sub_type()
+			&& matches!(staking_call, pallet_staking::Call::unbond { .. })
+			&& has_restaked_nominations(&who)
 		{
 			return Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)));
 		}

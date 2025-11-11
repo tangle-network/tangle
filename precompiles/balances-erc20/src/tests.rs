@@ -307,8 +307,8 @@ fn transfer_not_enough_funds() {
 					PCall::transfer { to: Address(Bob.into()), value: 1400.into() },
 				)
 				.execute_reverts(|output| {
-					from_utf8(&output).unwrap().contains("Dispatched call failed with error: ") &&
-						from_utf8(&output).unwrap().contains("FundsUnavailable")
+					from_utf8(&output).unwrap().contains("Dispatched call failed with error: ")
+						&& from_utf8(&output).unwrap().contains("FundsUnavailable")
 				});
 		});
 }
