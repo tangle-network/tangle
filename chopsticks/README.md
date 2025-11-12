@@ -10,8 +10,7 @@ This directory contains tools for rigorously testing the Polkadot SDK stable2503
 # Install try-runtime-cli
 cargo install --git https://github.com/paritytech/try-runtime-cli --locked
 
-# Install Chopsticks
-npm install -g @acala-network/chopsticks
+# Chopsticks will be installed automatically via npx (no global install needed)
 ```
 
 ### 2. Build Runtime with try-runtime Feature
@@ -28,6 +27,18 @@ cargo build --release --features try-runtime --package tangle-testnet-runtime
 cd chopsticks
 ./scripts/test-migration.sh mainnet
 ```
+
+## Validation Status
+
+✅ **Chopsticks fork verified working** - Successfully forks mainnet on port 8000
+⚠️  **try-runtime-cli** - Not installed (required for migration testing)
+⚠️  **Runtime WASM** - Not built with try-runtime feature yet
+
+### To Complete Setup:
+
+1. Install try-runtime-cli: `cargo install --git https://github.com/paritytech/try-runtime-cli --locked`
+2. Build runtimes: `cargo build --release --features try-runtime --package tangle-mainnet-runtime`
+3. Run migration test: `cd chopsticks && ./scripts/test-migration.sh mainnet`
 
 ## Directory Structure
 
