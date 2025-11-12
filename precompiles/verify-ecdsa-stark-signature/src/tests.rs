@@ -16,9 +16,9 @@
 
 use crate::mock::*;
 use generic_ec::{
+	Point,
 	coords::{Coordinate, HasAffineXAndParity, Parity},
 	curves::Stark,
-	Point,
 };
 use hex_literal::hex;
 use precompile_utils::testing::*;
