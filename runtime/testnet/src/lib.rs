@@ -508,7 +508,7 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
 	type OldCurrency = Balances;
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type Filter = frame_support::traits::Everything;
+	type Filter = frame_support::traits::Nothing;
 }
 
 parameter_types! {

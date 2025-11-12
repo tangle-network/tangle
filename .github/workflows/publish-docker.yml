@@ -60,7 +60,7 @@ jobs:
         with:
           profile: minimal
           toolchain: nightly
-          target: wasm32-unknown-unknown
+          target: wasm32v1-none
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.3.0

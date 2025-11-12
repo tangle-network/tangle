@@ -5,11 +5,20 @@ trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 #define default ports
 ports=(30333 30305 30308 30311 30313)
+prometheus_ports=(9615 9616 9617 9618 9619)
 
 #check to see process is not orphaned or already running
 for port in ${ports[@]}; do
     if [[ $(lsof -i -P -n | grep LISTEN | grep :$port) ]]; then
       echo "Port $port has a running process. Exiting"
+      exit -1
+    fi
+done
+
+#check prometheus ports
+for port in ${prometheus_ports[@]}; do
+    if [[ $(lsof -i -P -n | grep LISTEN | grep :$port) ]]; then
+      echo "Prometheus port $port has a running process. Exiting"
       exit -1
     fi
 done
@@ -63,6 +72,8 @@ $BINARY -d ./tmp/alice --dev --validator -lerror --alice \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[0]} \
   --rpc-port 9944 \
+  --prometheus-port ${prometheus_ports[0]} \
+  --disable-log-color \
   --rpc-max-request-size 3000 \
   --rpc-max-response-size 3000 \
   --ethapi trace,debug \
@@ -76,6 +87,8 @@ $BINARY -d ./tmp/bob --dev --validator -lerror --bob \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[1]} \
   --rpc-port 9945 \
+  --prometheus-port ${prometheus_ports[1]} \
+  --disable-log-color \
   --ethapi trace,debug \
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
@@ -84,6 +97,8 @@ $BINARY -d ./tmp/charlie --dev --validator -lerror --charlie \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[2]} \
   --rpc-port 9946 \
+  --prometheus-port ${prometheus_ports[2]} \
+  --disable-log-color \
   --ethapi trace,debug \
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
@@ -92,6 +107,8 @@ $BINARY -d ./tmp/dave --dev --validator -lerror --dave \
   --rpc-cors all --rpc-methods=unsafe --rpc-external \
   --port ${ports[3]} \
   --rpc-port 9947 \
+  --prometheus-port ${prometheus_ports[3]} \
+  --disable-log-color \
   --ethapi trace,debug \
   --auto-insert-keys \
   --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp &
@@ -100,6 +117,8 @@ $BINARY -d ./tmp/eve --dev --validator -linfo --eve \
     --rpc-cors all --rpc-methods=unsafe --rpc-external \
     --port ${ports[4]} \
     --rpc-port 9948 \
+    --prometheus-port ${prometheus_ports[4]} \
+    --disable-log-color \
     --ethapi trace,debug \
     --auto-insert-keys \
     -levm=debug \

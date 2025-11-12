@@ -29,8 +29,8 @@ jobs:
       - name: Install cargo-hack
         uses: taiki-e/install-action@cargo-hack
 
-      - name: Ensure wasm32-unknown-unknown is installed
-        run: rustup target add wasm32-unknown-unknown
+      - name: Ensure wasm32v1-none is installed
+        run: rustup target add wasm32v1-none
 
       - name: Test each feature
         run: cargo hack build --each-feature --package=tangle-subxt

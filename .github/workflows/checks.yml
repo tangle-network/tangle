@@ -46,7 +46,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: wasm32-unknown-unknown
+          target: wasm32v1-none
 
       - name: Install cargo-nextest
         uses: taiki-e/install-action@v2
@@ -80,7 +80,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: wasm32-unknown-unknown
+          target: wasm32v1-none
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.3.0
@@ -109,7 +109,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: wasm32-unknown-unknown
+          target: wasm32v1-none
 
       - name: Install cargo-nextest
         uses: taiki-e/install-action@v2
@@ -140,7 +140,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: wasm32-unknown-unknown
+          target: wasm32v1-none
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v1.3.0
