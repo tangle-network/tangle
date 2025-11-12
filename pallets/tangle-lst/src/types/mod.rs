@@ -68,9 +68,10 @@ pub enum AccountType {
 }
 
 /// The permission a pool member can set for other accounts to claim rewards on their behalf.
-#[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
+#[derive(Default, Encode, Decode, MaxEncodedLen, Clone, Copy, Debug, PartialEq, Eq, TypeInfo)]
 pub enum ClaimPermission {
 	/// Only the pool member themself can claim their rewards.
+	#[default]
 	Permissioned,
 	/// Anyone can compound rewards on a pool member's behalf.
 	PermissionlessCompound,
@@ -83,11 +84,5 @@ pub enum ClaimPermission {
 impl ClaimPermission {
 	pub fn can_bond_extra(&self) -> bool {
 		matches!(self, ClaimPermission::PermissionlessAll | ClaimPermission::PermissionlessCompound)
-	}
-}
-
-impl Default for ClaimPermission {
-	fn default() -> Self {
-		Self::Permissioned
 	}
 }
