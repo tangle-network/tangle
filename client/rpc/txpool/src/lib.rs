@@ -40,7 +40,7 @@ where
 	C: ProvideRuntimeApi<B>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B> + 'static,
 	C: Send + Sync + 'static,
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+	B: BlockT + Send + Sync + 'static,
 	P: sc_transaction_pool_api::TransactionPool<Block = B> + 'static,
 	C::Api: TxPoolRuntimeApi<B>,
 {
@@ -149,7 +149,7 @@ where
 	C: ProvideRuntimeApi<B>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+	B: BlockT + Send + Sync + 'static,
 	P: sc_transaction_pool_api::TransactionPool<Block = B> + 'static,
 	C::Api: TxPoolRuntimeApi<B>,
 {
