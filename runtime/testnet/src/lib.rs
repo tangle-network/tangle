@@ -1142,6 +1142,7 @@ parameter_types! {
 
 /// The type used to represent the kinds of proxying allowed.
 #[derive(
+	Default,
 	Copy,
 	Clone,
 	Default,
