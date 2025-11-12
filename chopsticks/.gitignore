@@ -1,0 +1,13 @@
+# Database files (chain state cache)
+db/*.sqlite
+db/*.sqlite-shm
+db/*.sqlite-wal
+
+# Snapshots
+snapshots/*.snap
+
+# Logs
+*.log
+
+# OS files
+.DS_Store

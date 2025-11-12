@@ -1,0 +1,26 @@
+# Tangle Testnet Chopsticks Configuration
+# Fork testnet for testing runtime upgrade to Polkadot SDK stable2503
+
+endpoint: wss://testnet-rpc.tangle.tools
+build-block-mode: Instant
+allow-unresolved-imports: true
+mock-signature-host: true
+runtime-log-level: 5
+
+# Database for caching chain state
+db: ./chopsticks/db/testnet.sqlite
+
+# Optional: Fork at specific block
+# block: 1234567
+
+# Import test accounts
+import-storage:
+  Sudo:
+    Key: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY # Alice
+  System:
+    Account:
+      -
+        - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+        - providers: 1
+          data:
+            free: '100000000000000000000000'
