@@ -81,6 +81,7 @@ type BalanceOf<T> = <CurrencyOf<T> as Currency<<T as frame_system::Config>::Acco
 
 /// The kind of statement an account needs to make for a claim to be valid.
 #[derive(
+	Default,
 	Encode,
 	Decode,
 	Clone,
@@ -94,6 +95,7 @@ type BalanceOf<T> = <CurrencyOf<T> as Currency<<T as frame_system::Config>::Acco
 	parity_scale_codec::DecodeWithMemTracking,
 )]
 pub enum StatementKind {
+	#[default]
 	/// Statement required to be made by non-SAFE holders.
 	Regular,
 	/// Statement required to be made by SAFE holders.
@@ -115,12 +117,6 @@ impl StatementKind {
 				https://statement.tangle.tools/safe-claim-statement)"[..]
 			},
 		}
-	}
-}
-
-impl Default for StatementKind {
-	fn default() -> Self {
-		StatementKind::Regular
 	}
 }
 

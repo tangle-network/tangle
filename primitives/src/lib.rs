@@ -170,9 +170,10 @@ pub mod evm {
 		() => {
 			#[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 			#[derive(
-				Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
+				Copy, Clone, Default, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
 			)]
 			pub enum ProxyType {
+				#[default]
 				/// All calls can be proxied. This is the trivial/most permissive filter.
 				Any = 0,
 				/// Only extrinsics related to governance (democracy and collectives).
@@ -181,12 +182,6 @@ pub mod evm {
 				CancelProxy = 2,
 				/// Allow extrinsic related to Balances.
 				Balances = 3,
-			}
-
-			impl Default for ProxyType {
-				fn default() -> Self {
-					Self::Any
-				}
 			}
 
 			fn is_governance_precompile(address: H160) -> bool {

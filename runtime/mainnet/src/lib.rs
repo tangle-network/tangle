@@ -1138,6 +1138,7 @@ parameter_types! {
 #[derive(
 	Copy,
 	Clone,
+	Default,
 	Eq,
 	PartialEq,
 	Ord,
@@ -1149,15 +1150,11 @@ parameter_types! {
 	scale_info::TypeInfo,
 )]
 pub enum ProxyType {
+	#[default]
 	Any,
 	NonTransfer,
 	Governance,
 	Staking,
-}
-impl Default for ProxyType {
-	fn default() -> Self {
-		Self::Any
-	}
 }
 
 impl parity_scale_codec::DecodeWithMemTracking for ProxyType {}

@@ -53,6 +53,7 @@ const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 #[derive(
 	Eq,
 	PartialEq,
+	Default,
 	Ord,
 	PartialOrd,
 	Clone,
@@ -66,6 +67,7 @@ const PRECOMPILE_ADDRESS_BYTES: [u8; 32] = [
 	scale_info::TypeInfo,
 )]
 pub enum TestAccount {
+	#[default]
 	Empty,
 	Alex,
 	Bobo,
@@ -73,12 +75,6 @@ pub enum TestAccount {
 	Charlie,
 	Eve,
 	PrecompileAddress,
-}
-
-impl Default for TestAccount {
-	fn default() -> Self {
-		Self::Empty
-	}
 }
 
 // needed for associated type in pallet_evm

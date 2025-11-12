@@ -442,9 +442,21 @@ impl pallet_multi_asset_delegation::Config for Runtime {
 
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 #[derive(
-	Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, MaxEncodedLen, TypeInfo,
+	Copy,
+	Clone,
+	Default,
+	Eq,
+	PartialEq,
+	Ord,
+	PartialOrd,
+	Encode,
+	Decode,
+	Debug,
+	MaxEncodedLen,
+	TypeInfo,
 )]
 pub enum ProxyType {
+	#[default]
 	/// All calls can be proxied. This is the trivial/most permissive filter.
 	Any = 0,
 	/// Only extrinsics related to governance (democracy and collectives).
@@ -455,12 +467,6 @@ pub enum ProxyType {
 	Balances = 3,
 	/// Allow extrinsic related to Staking.
 	Staking = 4,
-}
-
-impl Default for ProxyType {
-	fn default() -> Self {
-		Self::Any
-	}
 }
 
 impl frame_support::traits::InstanceFilter<RuntimeCall> for ProxyType {
