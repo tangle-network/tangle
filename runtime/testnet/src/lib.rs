@@ -1145,7 +1145,6 @@ parameter_types! {
 	Default,
 	Copy,
 	Clone,
-	Default,
 	Eq,
 	PartialEq,
 	Ord,
