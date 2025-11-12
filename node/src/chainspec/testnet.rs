@@ -335,8 +335,8 @@ fn testnet_genesis(
 			"stakers" : stakers,
 			"forceEra": "ForceNew",
 			"canceledPayout": 0u128,
-			"minNominatorBond": UNIT,
-			"minValidatorBond": UNIT,
+			"minNominatorBond": 1 * UNIT,
+			"minValidatorBond": 1 * UNIT,
 		},
 		"council": {
 			"members": council_members,

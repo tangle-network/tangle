@@ -18,15 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install latest stable
+      - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly-2025-11-10
           override: true
           components: rustfmt
 
+      - name: Ensure rustfmt is installed
+        run: rustup component add --toolchain nightly-2025-11-10 rustfmt
+
       - name: Rustfmt check
-        run: cargo fmt --all -- --check
+        run: cargo +nightly-2025-11-10 fmt --all -- --check
 
   test:
     env:
