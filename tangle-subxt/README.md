@@ -14,7 +14,7 @@ Use the [`subxt-cli`](https://lib.rs/crates/subxt-cli) tool to download the meta
 1. Install:
 
 ```bash
-cargo install subxt-cli@0.39.0 --force
+cargo install subxt-cli@0.44.0 --force
 ```
 
 2. To Save the metadata of `tangle`:
@@ -35,7 +35,7 @@ subxt codegen --file metadata/tangle-testnet-runtime.scale \
     --attributes-for-type tangle_primitives::services::field::Field='#[codec(dumb_trait_bound)]' \
     --attributes-for-type tangle_primitives::services::sources::TestFetcher='#[deprecated(since = "1.4.4")]' \
     --derive-for-type tangle_primitives::services::service::ServiceBlueprint=serde::Serialize,recursive \
-    --derive-for-type tangle_primitives::services::service::ServiceBlueprint=serde::Deserialize,recursive | rustfmt --edition=2021 --emit=stdout > src/tangle_testnet_runtime.rs
+    --derive-for-type tangle_primitives::services::service::ServiceBlueprint=serde::Deserialize,recursive | rustfmt +nightly --edition=2021 --emit=stdout | awk 'BEGIN{print "#![allow(deprecated)]"}1' > src/tangle_testnet_runtime.rs
 ```
 
 ### Local Testing
