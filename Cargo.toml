@@ -386,9 +386,9 @@ rpc-txpool = { path = "client/rpc/txpool" }
 evm-tracer = { path = "evm-tracer", default-features = false }
 
 # Hyperbridge EVM necessary dependencies
-alloy-sol-macro = "0.7.7"
-alloy-sol-types = { version = "0.7.7", default-features = false }
-alloy-primitives = { version = "0.7.7", default-features = false, features = ["rlp"] }
+alloy-sol-macro = "1.2.1"
+alloy-sol-types = { version = "1.2.1", default-features = false }
+alloy-primitives = { version = "1.2.1", default-features = false, features = ["rlp"] }
 
 # Hyperbridge
 token-gateway-primitives = { path = "pallets/token-gateway/primitives" }

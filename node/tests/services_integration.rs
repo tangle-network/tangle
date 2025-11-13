@@ -218,7 +218,7 @@ fn test_erc20_token_integration() {
 		let usdc = MockERC20::new(t.usdc, &alice_provider);
 
 		let balance = usdc.balanceOf(alice.address()).call().await?;
-		info!("Alice USDC balance: {}", balance._0);
+		info!("Alice USDC balance: {}", balance);
 
 		anyhow::Ok(())
 	});
@@ -599,8 +599,8 @@ fn test_payment_token_setup() {
 		let balance = usdc.balanceOf(alice.address()).call().await?;
 		let allowance = usdc.allowance(alice.address(), SERVICES_PRECOMPILE).call().await?;
 
-		assert_eq!(balance._0, payment_amount);
-		assert_eq!(allowance._0, payment_amount);
+		assert_eq!(balance, payment_amount);
+		assert_eq!(allowance, payment_amount);
 
 		anyhow::Ok(())
 	});
@@ -765,8 +765,8 @@ fn test_end_to_end_services_workflow() {
 		let usdc = MockERC20::new(t.usdc, &alice_provider);
 		let balance = usdc.balanceOf(alice.address()).call().await?;
 
-		if balance._0 > U256::ZERO {
-			info!("✅ EVM integration verified - Token balance: {}", balance._0);
+		if balance > U256::ZERO {
+			info!("✅ EVM integration verified - Token balance: {}", balance);
 		}
 
 		// Test Services precompile interface

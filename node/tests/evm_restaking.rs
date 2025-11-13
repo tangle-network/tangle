@@ -483,7 +483,7 @@ fn operator_join_delegator_delegate_erc20() {
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, mint_amount);
+		assert_eq!(bob_balance, mint_amount);
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
@@ -648,7 +648,7 @@ fn deposits_withdraw_erc20() {
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, mint_amount);
+		assert_eq!(bob_balance, mint_amount);
 
 		// Approve MULTI_ASSET_DELEGATION to spend tokens
 		let approve_result = usdc
@@ -716,7 +716,7 @@ fn deposits_withdraw_erc20() {
 		// So, Bob should have `mint_amount - delegate_amount + withdraw_amount` USDC
 		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, expected_balance);
+		assert_eq!(bob_balance, expected_balance);
 
 		anyhow::Ok(())
 	})
@@ -735,7 +735,7 @@ fn deposits_withdraw_erc20_works_with_batch() {
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, mint_amount);
+		assert_eq!(bob_balance, mint_amount);
 
 		// Initialize the precompiles
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
@@ -785,9 +785,9 @@ fn deposits_withdraw_erc20_works_with_batch() {
 		let bob_balance_after_deposit = usdc.balanceOf(bob.address()).call().await?;
 		let expected_balance_after_deposit = mint_amount - delegate_amount;
 		assert_eq!(
-			bob_balance_after_deposit._0, expected_balance_after_deposit,
+			bob_balance_after_deposit, expected_balance_after_deposit,
 			"Deposit through batch transaction failed: expected {} but got {}",
-			expected_balance_after_deposit, bob_balance_after_deposit._0
+			expected_balance_after_deposit, bob_balance_after_deposit
 		);
 
 		anyhow::Ok(())
@@ -916,7 +916,7 @@ fn lrt_deposit_withdraw_erc20() {
 		info!("Minted {} WETH for Bob", format_ether(weth_amount));
 
 		let bob_balance = weth.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, weth_amount);
+		assert_eq!(bob_balance, weth_amount);
 
 		// Approve LRT contract to spend WETH
 		let deposit_amount = weth_amount.div(U256::from(2));
@@ -939,13 +939,13 @@ fn lrt_deposit_withdraw_erc20() {
 
 		// Bob deposited `deposit_amount` WETH, should receive `deposit_amount` lrtETH in return
 		let lrt_balance = lrt.balanceOf(bob.address()).call().await?;
-		assert_eq!(lrt_balance._0, deposit_amount);
+		assert_eq!(lrt_balance, deposit_amount);
 		// Bob should have `weth_amount - deposit_amount` WETH
 		let bob_balance = weth.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, weth_amount - deposit_amount);
+		assert_eq!(bob_balance, weth_amount - deposit_amount);
 
 		let mad_weth_balance = weth.balanceOf(t.pallet_account_id.to_address()).call().await?;
-		assert_eq!(mad_weth_balance._0, deposit_amount);
+		assert_eq!(mad_weth_balance, deposit_amount);
 
 		// LRT should be a delegator to the operator in the MAD pallet.
 		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());
@@ -1033,7 +1033,7 @@ fn lrt_deposit_withdraw_erc20() {
 		// So, Bob should have `weth_amount - deposit_amount + withdraw_amount` WETH
 		let expected_balance = weth_amount - deposit_amount + withdraw_amount;
 		let bob_balance = weth.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, expected_balance);
+		assert_eq!(bob_balance, expected_balance);
 
 		anyhow::Ok(())
 	});
@@ -1108,7 +1108,7 @@ fn mad_rewards() {
 
 		// Check the balance of the vault pot account
 		let vault_pot_balance =
-			api::storage().system().account(vault_pot_account.as_ref().unwrap());
+			api::storage().system().account(vault_pot_account.as_ref().unwrap().clone());
 		let vault_pot_balance =
 			t.subxt.storage().at_latest().await?.fetch(&vault_pot_balance).await?;
 		assert!(vault_pot_balance.is_some());
@@ -1182,7 +1182,7 @@ fn mad_rewards() {
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
 
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, mint_amount);
+		assert_eq!(bob_balance, mint_amount);
 
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
@@ -1350,7 +1350,7 @@ fn lrt_rewards_erc20() {
 
 		// Check the balance of the vault pot account
 		let vault_pot_balance =
-			api::storage().system().account(vault_pot_account.as_ref().unwrap());
+			api::storage().system().account(vault_pot_account.as_ref().unwrap().clone());
 		let vault_pot_balance =
 			t.subxt.storage().at_latest().await?.fetch(&vault_pot_balance).await?;
 		assert!(vault_pot_balance.is_some());
@@ -1410,7 +1410,7 @@ fn lrt_rewards_erc20() {
 		info!("Minted {} WETH for Bob", format_ether(weth_amount));
 
 		let bob_balance = weth.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, weth_amount);
+		assert_eq!(bob_balance, weth_amount);
 
 		// Approve LRT contract to spend WETH
 		let deposit_amount = weth_amount.div(U256::from(2));
@@ -1433,13 +1433,13 @@ fn lrt_rewards_erc20() {
 
 		// Bob deposited `deposit_amount` WETH, should receive `deposit_amount` lrtETH in return
 		let lrt_balance = lrt.balanceOf(bob.address()).call().await?;
-		assert_eq!(lrt_balance._0, deposit_amount);
+		assert_eq!(lrt_balance, deposit_amount);
 		// Bob should have `weth_amount - deposit_amount` WETH
 		let bob_balance = weth.balanceOf(bob.address()).call().await?;
-		assert_eq!(bob_balance._0, weth_amount - deposit_amount);
+		assert_eq!(bob_balance, weth_amount - deposit_amount);
 
 		let mad_weth_balance = weth.balanceOf(t.pallet_account_id.to_address()).call().await?;
-		assert_eq!(mad_weth_balance._0, deposit_amount);
+		assert_eq!(mad_weth_balance, deposit_amount);
 
 		// LRT should be a delegator to the operator in the MAD pallet.
 		let operator_key = api::storage().multi_asset_delegation().operators(alice.account_id());

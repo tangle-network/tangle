@@ -6,7 +6,6 @@ use alloy::{
 		Provider, RootProvider,
 		fillers::{FillProvider, JoinFill, RecommendedFillers, WalletFiller},
 	},
-	transports::BoxTransport,
 };
 use parity_scale_codec::Encode;
 use sc_cli::{CliConfiguration, SubstrateCli};
@@ -103,17 +102,12 @@ pub type RecommendedFillersOf<T> = <T as RecommendedFillers>::RecommendedFillers
 /// A type alias for the Alloy provider with wallet.
 pub type AlloyProviderWithWallet = FillProvider<
 	JoinFill<RecommendedFillersOf<Ethereum>, WalletFiller<EthereumWallet>>,
-	RootProvider<BoxTransport>,
-	BoxTransport,
+	RootProvider<Ethereum>,
 	Ethereum,
 >;
 /// A type alias for the Alloy provider without wallet.
-pub type AlloyProvider = FillProvider<
-	RecommendedFillersOf<Ethereum>,
-	RootProvider<BoxTransport>,
-	BoxTransport,
-	Ethereum,
->;
+pub type AlloyProvider =
+	FillProvider<RecommendedFillersOf<Ethereum>, RootProvider<Ethereum>, Ethereum>;
 
 #[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
@@ -168,7 +162,7 @@ impl TestAccount {
 
 pub async fn alloy_provider() -> AlloyProvider {
 	let provider = alloy::providers::ProviderBuilder::new()
-		.on_builtin("http://127.0.0.1:9944")
+		.connect("http://127.0.0.1:9944")
 		.await
 		.unwrap();
 	FillProvider::new(provider.root().clone(), Ethereum::recommended_fillers())
@@ -258,12 +252,9 @@ where
 
 			// Handle logger initialization gracefully - it may already be initialized by previous
 			// tests
-			if let Err(e) = command.init(
-				&CliWrapper::support_url(),
-				&CliWrapper::impl_version(),
-				|_| {},
-				&config,
-			) {
+			if let Err(e) =
+				command.init(&CliWrapper::support_url(), &CliWrapper::impl_version(), |_| {})
+			{
 				warn!("Logger initialization failed (likely already initialized): {e:?}");
 			}
 			sc_cli::Runner::<CliWrapper>::new(config, tokio_runtime, signals)
