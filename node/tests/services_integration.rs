@@ -2,7 +2,13 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use alloy::{primitives::*, providers::Provider, sol};
+use alloy::{
+	network::Ethereum,
+	primitives::*,
+	providers::Provider,
+	rpc::types::{BlockId, BlockNumberOrTag},
+	sol,
+};
 use core::{future::Future, time::Duration};
 use sp_tracing::{error, info};
 use tangle_subxt::{subxt, subxt::tx::TxStatus, tangle_testnet_runtime::api};
@@ -125,11 +131,17 @@ async fn deploy_erc20(
 	Ok(*token.address())
 }
 
-pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
-	let mut current_block = provider.get_block_number().await.unwrap();
-	while current_block < block_number {
-		current_block = provider.get_block_number().await.unwrap();
-		info!("Waiting for block #{block_number}, current: {current_block}");
+pub async fn wait_for_block(provider: &impl Provider<Ethereum>, block_number: u64) {
+	loop {
+		let block_id = BlockId::Number(BlockNumberOrTag::Latest);
+		let block = provider.get_block(block_id).await.unwrap();
+		if let Some(block) = block {
+			let current_block = block.header.number;
+			if current_block >= block_number {
+				break;
+			}
+			info!("Waiting for block #{block_number}, current: {current_block}");
+		}
 		tokio::time::sleep(Duration::from_secs(1)).await;
 	}
 }

@@ -7,8 +7,10 @@
 use core::{future::Future, ops::Div, time::Duration};
 
 use alloy::{
+	network::Ethereum,
 	primitives::{utils::*, *},
 	providers::Provider,
+	rpc::types::{BlockId, BlockNumberOrTag},
 	sol,
 };
 use anyhow::bail;
@@ -61,18 +63,26 @@ const REWARDS: Address = address!("0000000000000000000000000000000000000825");
 const BATCH_ADDRESS: Address = address!("0000000000000000000000000000000000000804");
 
 /// Waits for a specific block number to be reached
-pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
-	let mut current_block = provider.get_block_number().await.unwrap();
-	while current_block < block_number {
-		current_block = provider.get_block_number().await.unwrap();
-		info!(%current_block, "Waiting for block #{}...", block_number);
+pub async fn wait_for_block(provider: &impl Provider<Ethereum>, block_number: u64) {
+	loop {
+		let block_id = BlockId::Number(BlockNumberOrTag::Latest);
+		let block = provider.get_block(block_id).await.unwrap();
+		if let Some(block) = block {
+			let current_block = block.header.number;
+			if current_block >= block_number {
+				break;
+			}
+			info!(%current_block, "Waiting for block #{}...", block_number);
+		}
 		tokio::time::sleep(Duration::from_secs(1)).await;
 	}
 }
 
 /// Waits for a specified number of additional blocks
-pub async fn wait_for_more_blocks(provider: &impl Provider, blocks: u64) {
-	let current_block = provider.get_block_number().await.unwrap();
+pub async fn wait_for_more_blocks(provider: &impl Provider<Ethereum>, blocks: u64) {
+	let block_id = BlockId::Number(BlockNumberOrTag::Latest);
+	let block = provider.get_block(block_id).await.unwrap();
+	let current_block = block.unwrap().header.number;
 	wait_for_block(provider, current_block + blocks).await;
 }
 
@@ -640,16 +650,18 @@ fn deposits_withdraw_erc20() {
 	run_mad_test(|t| async move {
 		// Setup Bob as delegator
 		let bob = TestAccount::Bob;
+		println!("daniel 643");
 		let bob_provider = alloy_provider_with_wallet(&t.provider, bob.evm_wallet());
 		let usdc = MockERC20::new(t.usdc, &bob_provider);
+		println!("daniel 646");
 
 		// Mint USDC for Bob
 		let mint_amount = U256::from(100_000_000u128);
 		usdc.mint(bob.address(), mint_amount).send().await?.get_receipt().await?;
-
+		println!("daniel 651");
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
 		assert_eq!(bob_balance, mint_amount);
-
+		println!("daniel 655");
 		// Approve MULTI_ASSET_DELEGATION to spend tokens
 		let approve_result = usdc
 			.approve(Address::from(*MULTI_ASSET_DELEGATION), mint_amount)
@@ -658,7 +670,7 @@ fn deposits_withdraw_erc20() {
 			.get_receipt()
 			.await?;
 		assert!(approve_result.status());
-
+		println!("daniel 663");
 		// Also approve BATCH_ADDRESS to spend tokens
 		let approve_batch_result = usdc
 			.approve(Address::from(*BATCH_ADDRESS), mint_amount)
@@ -667,11 +679,11 @@ fn deposits_withdraw_erc20() {
 			.get_receipt()
 			.await?;
 		assert!(approve_batch_result.status());
-
+		println!("daniel 672");
 		// Delegate assets
 		let precompile = MultiAssetDelegation::new(MULTI_ASSET_DELEGATION, &bob_provider);
 		let delegate_amount = mint_amount.div(U256::from(2));
-
+		println!("daniel 676");
 		let multiplier = 0;
 		// Deposit and delegate
 		let deposit_result = precompile
@@ -683,7 +695,7 @@ fn deposits_withdraw_erc20() {
 			.get_receipt()
 			.await?;
 		assert!(deposit_result.status());
-
+		println!("daniel 688");
 		let withdraw_amount = delegate_amount.div(U256::from(2));
 		// Schedule a withdrawal
 		let sch_withdraw_result = precompile
@@ -694,11 +706,11 @@ fn deposits_withdraw_erc20() {
 			.get_receipt()
 			.await?;
 		assert!(sch_withdraw_result.status());
-
+		println!("daniel 699");
 		// Wait for two new sessions to happen
 		let session_index = wait_for_next_session(&t.subxt).await?;
 		info!("New session started: {}", session_index);
-
+		println!("daniel 703");
 		// Execute the withdrawal
 		let exec_withdraw_result = precompile
 			.executeWithdraw()
@@ -709,7 +721,7 @@ fn deposits_withdraw_erc20() {
 			.await?;
 
 		assert!(exec_withdraw_result.status());
-
+		println!("daniel 714");
 		// Bob deposited `delegate_amount` and withdrew `withdraw_amount`
 		// `delegate_amount` is 1/2 of the minted amount
 		// `withdraw_amount` is 1/2 of the deposited amount
@@ -717,7 +729,7 @@ fn deposits_withdraw_erc20() {
 		let expected_balance = mint_amount - delegate_amount + withdraw_amount;
 		let bob_balance = usdc.balanceOf(bob.address()).call().await?;
 		assert_eq!(bob_balance, expected_balance);
-
+		println!("daniel 724");
 		anyhow::Ok(())
 	})
 }
