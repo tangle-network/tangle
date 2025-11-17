@@ -294,7 +294,12 @@ impl<C: Constraints> ServiceBlueprint<C> {
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT)))
 )]
 
-pub struct ServiceRequest<C: Constraints, AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT> {
+pub struct ServiceRequest<
+	C: Constraints,
+	AccountId: core::fmt::Debug,
+	BlockNumber: core::fmt::Debug,
+	AssetId: AssetIdT,
+> {
 	/// The blueprint ID this request is for
 	pub blueprint: BlueprintId,
 	/// The account that requested the service
@@ -400,7 +405,11 @@ pub fn validate_security<AssetId: AssetIdT>(
     )),
     educe(Debug(bound(AccountId: core::fmt::Debug, Balance: core::fmt::Debug, AssetId: AssetIdT)))
 )]
-pub struct StagingServicePayment<AccountId: core::fmt::Debug, AssetId: AssetIdT, Balance: core::fmt::Debug> {
+pub struct StagingServicePayment<
+	AccountId: core::fmt::Debug,
+	AssetId: AssetIdT,
+	Balance: core::fmt::Debug,
+> {
 	/// The service request ID.
 	pub request_id: u64,
 	/// Where the refund should go.
@@ -443,7 +452,12 @@ pub type OperatorSecurityCommitments<AccountId, AssetId, C> = BoundedVec<
     )),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT)))
 )]
-pub struct Service<C: Constraints, AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug, AssetId: AssetIdT> {
+pub struct Service<
+	C: Constraints,
+	AccountId: core::fmt::Debug,
+	BlockNumber: core::fmt::Debug,
+	AssetId: AssetIdT,
+> {
 	/// Unique identifier for this service instance
 	pub id: u64,
 	/// The blueprint this service was created from

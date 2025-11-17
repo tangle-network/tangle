@@ -47,6 +47,10 @@ echo "✓ Dependencies OK"
 echo "✓ Runtime WASM found"
 echo ""
 
+# Define snapshot file path
+SNAPSHOT_FILE="snapshots/${NETWORK}.snap"
+mkdir -p snapshots
+
 # Start Chopsticks fork
 echo "Starting Chopsticks fork on port $PORT..."
 npx @acala-network/chopsticks \
@@ -79,6 +83,37 @@ fi
 echo "✓ Chopsticks fork ready"
 echo ""
 
+# Create or use existing snapshot
+echo "========================================="
+echo "Creating/Using snapshot..."
+echo "========================================="
+echo ""
+
+if [ ! -f "$SNAPSHOT_FILE" ]; then
+    echo "Snapshot not found. Creating snapshot from live node..."
+    echo "Chopsticks URI: ws://localhost:$PORT"
+    echo "Snapshot file: $SNAPSHOT_FILE"
+    echo ""
+    
+    RUST_LOG=runtime=debug,try-runtime::cli=trace \
+    try-runtime \
+        --runtime existing \
+        create-snapshot \
+        --uri ws://localhost:$PORT \
+        "$SNAPSHOT_FILE"
+    
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to create snapshot"
+        kill $CHOPSTICKS_PID
+        exit 1
+    fi
+    
+    echo "✓ Snapshot created successfully"
+else
+    echo "✓ Using existing snapshot: $SNAPSHOT_FILE"
+fi
+echo ""
+
 # Run migration test
 echo "========================================="
 echo "Running on-runtime-upgrade test..."
@@ -90,7 +125,7 @@ echo ""
 BLOCKTIME=6000
 
 echo "Runtime WASM: $RUNTIME_WASM"
-echo "Chopsticks URI: ws://localhost:$PORT"
+echo "Snapshot file: $SNAPSHOT_FILE"
 echo "Blocktime: ${BLOCKTIME}ms"
 echo ""
 
@@ -100,8 +135,8 @@ try-runtime \
     on-runtime-upgrade \
     --blocktime $BLOCKTIME \
     --checks pre-and-post \
-    live \
-    --uri ws://localhost:$PORT
+    snap \
+    -p "$SNAPSHOT_FILE"
 
 TEST_RESULT=$?
 
