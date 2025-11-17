@@ -185,6 +185,7 @@ sc-rpc-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "sta
 sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503" }
 sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503" }
 sp-tracing = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503" }
+frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503", default-features = false }
 frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503", default-features = false }
 substrate-test-utils = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503" }
 sp-npos-elections = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2503" }
@@ -341,7 +342,7 @@ pallet-evm-precompile-verify-ecdsa-secp256r1-signature = { path = "precompiles/v
 pallet-evm-precompile-verify-schnorr-signatures = { path = "precompiles/verify-schnorr-signatures", default-features = false }
 pallet-evm-precompile-verify-bls381-signature = { path = "precompiles/verify-bls381-signature", default-features = false }
 pallet-evm-precompile-services = { path = "precompiles/services", default-features = false }
-pallet-evm-precompile-tangle-lst = { path = "precompiles/tangle-lst", default-features = false }
+pallet-evm-precompile-tangle-lst    = { path = "precompiles/tangle-lst", default-features = false }
 pallet-evm-precompile-rewards = { path = "precompiles/rewards", default-features = false }
 pallet-evm-precompile-credits = { path = "precompiles/credits", default-features = false }
 

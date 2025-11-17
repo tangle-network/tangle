@@ -37,6 +37,7 @@ sp-storage = { workspace = true }
 sp-transaction-pool = { workspace = true }
 sp-genesis-builder = { workspace = true }
 sp-version = { workspace = true }
+frame-try-runtime = { workspace = true, optional = true }
 frame-metadata-hash-extension = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
 frame-election-provider-support = { workspace = true }
@@ -278,6 +279,7 @@ std = [
     "rpc-primitives-debug/std",
     "rpc-primitives-txpool/std",
     "pallet-evm-precompileset-assets-erc20/std",
+    "frame-try-runtime/std",
     "frame-metadata-hash-extension/std",
     "frame-benchmarking?/std",
 
@@ -304,6 +306,7 @@ std = [
 ]
 
 try-runtime = [
+    "frame-try-runtime",
     "frame-support/try-runtime",
     "frame-executive/try-runtime",
     "frame-system/try-runtime",

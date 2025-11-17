@@ -32,7 +32,7 @@ fi
 
 # Check runtime WASM exists
 if [ "$NETWORK" = "mainnet" ]; then
-    RUNTIME_WASM="../target/release/wbuild/tangle-mainnet-runtime/tangle_mainnet_runtime.wasm"
+    RUNTIME_WASM="../target/release/wbuild/tangle-runtime/tangle_runtime.wasm"
 else
     RUNTIME_WASM="../target/release/wbuild/tangle-testnet-runtime/tangle_testnet_runtime.wasm"
 fi

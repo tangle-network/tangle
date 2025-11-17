@@ -2305,4 +2305,22 @@ impl_runtime_apis! {
 			Credits::get_accrued_amount_for_asset(&account_id, None, asset_id)
 		}
 	}
+
+	#[cfg(feature = "try-runtime")]
+	impl frame_try_runtime::TryRuntime<Block> for Runtime {
+		fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {
+			log::info!("try-runtime::on_runtime_upgrade.");
+			let weight = Executive::try_runtime_upgrade(checks).unwrap();
+			(weight, BlockWeights::get().max_block)
+		}
+
+		fn execute_block(
+			block: Block,
+			state_root_check: bool,
+			signature_check: bool,
+			select: frame_try_runtime::TryStateSelect,
+		) -> Weight {
+			Executive::try_execute_block(block, state_root_check, signature_check, select).unwrap()
+		}
+	}
 }
