@@ -315,6 +315,7 @@ try-runtime = [
     "pallet-collective/try-runtime",
     "pallet-tx-pause/try-runtime",
     "pallet-staking/try-runtime",
+    "pallet-bags-list/try-runtime",
     "sp-runtime/try-runtime",
 
     # Frontier

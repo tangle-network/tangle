@@ -138,7 +138,7 @@ pub struct JobCallResult<C: Constraints, AccountId> {
     serde(bound(serialize = "AccountId: Serialize, BlockNumber: Serialize", deserialize = "AccountId: Deserialize<'de>, BlockNumber: Deserialize<'de>")),
     educe(Debug(bound(AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug)))
 )]
-pub struct JobSubscriptionBilling<AccountId, BlockNumber> {
+pub struct JobSubscriptionBilling<AccountId: core::fmt::Debug, BlockNumber: core::fmt::Debug> {
 	/// The service ID
 	pub service_id: u64,
 	/// The job index within the service
@@ -167,7 +167,7 @@ pub struct JobSubscriptionBilling<AccountId, BlockNumber> {
     serde(bound(serialize = "AccountId: Serialize", deserialize = "AccountId: Deserialize<'de>")),
     educe(Debug(bound(AccountId: core::fmt::Debug)))
 )]
-pub struct JobPayment<AccountId> {
+pub struct JobPayment<AccountId: core::fmt::Debug> {
 	/// The service ID
 	pub service_id: u64,
 	/// The job index within the service

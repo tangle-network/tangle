@@ -58,12 +58,21 @@ echo "Chopsticks PID: $CHOPSTICKS_PID"
 
 # Wait for Chopsticks to be ready
 echo "Waiting for Chopsticks to be ready..."
-sleep 10
+MAX_WAIT=60
+WAIT_COUNT=0
+while [ $WAIT_COUNT -lt $MAX_WAIT ]; do
+    if nc -z localhost $PORT 2>/dev/null; then
+        break
+    fi
+    sleep 1
+    WAIT_COUNT=$((WAIT_COUNT + 1))
+    echo -n "."
+done
+echo ""
 
-# Test connection
-if ! nc -z localhost $PORT 2>/dev/null; then
-    echo "ERROR: Chopsticks not responding on port $PORT"
-    kill $CHOPSTICKS_PID 2>/dev/null || true
+if [ $WAIT_COUNT -eq $MAX_WAIT ]; then
+    echo "ERROR: Chopsticks not responding on port $PORT after ${MAX_WAIT}s"
+    kill $CHOPSTICKS_PID
     exit 1
 fi
 
@@ -76,10 +85,21 @@ echo "Running on-runtime-upgrade test..."
 echo "========================================="
 echo ""
 
+# Blocktime in milliseconds (6 seconds = 6000ms for Tangle)
+# node/src/distributions/mainnet.rs:140
+BLOCKTIME=6000
+
+echo "Runtime WASM: $RUNTIME_WASM"
+echo "Chopsticks URI: ws://localhost:$PORT"
+echo "Blocktime: ${BLOCKTIME}ms"
+echo ""
+
 RUST_LOG=runtime=debug,try-runtime::cli=trace \
 try-runtime \
     --runtime $RUNTIME_WASM \
     on-runtime-upgrade \
+    --blocktime $BLOCKTIME \
+    --checks pre-and-post \
     live \
     --uri ws://localhost:$PORT
 
@@ -88,7 +108,7 @@ TEST_RESULT=$?
 # Cleanup
 echo ""
 echo "Cleaning up..."
-kill $CHOPSTICKS_PID 2>/dev/null || true
+kill $CHOPSTICKS_PID
 
 if [ $TEST_RESULT -eq 0 ]; then
     echo ""

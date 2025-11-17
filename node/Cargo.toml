@@ -159,4 +159,6 @@ fast-runtime = ["tangle-testnet-runtime/fast-runtime", "tangle-runtime/fast-runt
 metadata-hash = ["tangle-testnet-runtime?/metadata-hash", "tangle-runtime/metadata-hash"]
 manual-seal = ["tangle-testnet-runtime/manual-seal"]
 blueprint-manager = ["dep:blueprint-manager", "dep:blueprint-runner", "dep:blueprint-keystore"]
-try-runtime = []
+try-runtime = [
+    "tangle-runtime/try-runtime",
+]
