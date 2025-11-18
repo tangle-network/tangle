@@ -236,11 +236,7 @@ pub fn run() -> sc_cli::Result<()> {
 							);
 						}
 
-						// Combine Substrate host functions with Tangle's EVM tracing host functions
-						type TangleHostFunctions =
-							(sp_io::SubstrateHostFunctions, primitives_ext::ext::HostFunctions);
-
-						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, TangleHostFunctions>(Some(
+						cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, ()>(Some(
 							config.chain_spec,
 						))
 					},

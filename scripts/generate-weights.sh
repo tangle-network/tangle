@@ -11,15 +11,16 @@ repeat=2
 pallets=(pallet_airdrop_claims pallet_credits pallet_multi_asset_delegation pallet_rewards pallet_services)
 folders=(claims credits multi-asset-delegation rewards services)
 
+chain-spec-builder create --runtime target/release/wbuild/tangle-testnet-runtime/tangle_testnet_runtime.wasm default
+
 # Generate weights for testnet runtime
 echo "[testnet] Generating weights with steps: $steps, repeat: $repeat"
 for i in "${!pallets[@]}"; do
   pallet=${pallets[$i]}
   echo "[testnet] Benchmarking $pallet"
   
-  ./target/release/tangle benchmark pallet \
-    --chain=dev \
-    --wasm-execution=compiled \
+  frame-omni-bencher v1 benchmark pallet \
+    --chain=chain_spec.json \
     --pallet="$pallet" \
     --extrinsic='*' \
     --steps="$steps" \
@@ -29,3 +30,9 @@ for i in "${!pallets[@]}"; do
 done
 
 echo "Weight generation complete!"
+
+echo "Cleaning up ..."
+
+rm -rf chain_spec.json
+
+echo "Done!"
