@@ -78,10 +78,11 @@ fn test_manual_trigger_successful_payment() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		// Call job to create subscription
 		assert_ok!(Services::call(
@@ -139,7 +140,13 @@ fn test_manual_trigger_payment_not_due_yet() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
@@ -162,10 +169,11 @@ fn test_manual_trigger_payment_not_due_yet() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -211,7 +219,13 @@ fn test_manual_trigger_subscription_not_found() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
@@ -234,10 +248,11 @@ fn test_manual_trigger_subscription_not_found() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		// Don't create subscription billing
 
@@ -272,7 +287,13 @@ fn test_manual_trigger_expired_subscription() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
@@ -295,10 +316,11 @@ fn test_manual_trigger_expired_subscription() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -343,7 +365,13 @@ fn test_manual_trigger_multiple_payments_in_sequence() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
@@ -366,10 +394,11 @@ fn test_manual_trigger_multiple_payments_in_sequence() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -389,7 +418,9 @@ fn test_manual_trigger_multiple_payments_in_sequence() {
 			KEYGEN_JOB_ID,
 		));
 
-		let billing = JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone())).unwrap();
+		let billing =
+			JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone()))
+				.unwrap();
 		assert_eq!(billing.last_billed, 11);
 
 		// Second payment at block 21
@@ -400,7 +431,9 @@ fn test_manual_trigger_multiple_payments_in_sequence() {
 			KEYGEN_JOB_ID,
 		));
 
-		let billing = JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone())).unwrap();
+		let billing =
+			JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone()))
+				.unwrap();
 		assert_eq!(billing.last_billed, 21);
 
 		// Third payment at block 31
@@ -411,7 +444,9 @@ fn test_manual_trigger_multiple_payments_in_sequence() {
 			KEYGEN_JOB_ID,
 		));
 
-		let billing = JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone())).unwrap();
+		let billing =
+			JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone()))
+				.unwrap();
 		assert_eq!(billing.last_billed, 31);
 	});
 }
@@ -427,13 +462,17 @@ fn test_manual_trigger_with_non_subscription_pricing() {
 
 		// Setup with PayOnce pricing model
 		let mut blueprint = cggmp21_blueprint();
-		blueprint.jobs[0].pricing_model = PricingModel::PayOnce {
-			amount: 100 * 10u128.pow(6),
-		};
+		blueprint.jobs[0].pricing_model = PricingModel::PayOnce { amount: 100 * 10u128.pow(6) };
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
@@ -456,10 +495,11 @@ fn test_manual_trigger_with_non_subscription_pricing() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		// Attempt to trigger for non-subscription job
 		assert_err!(
@@ -491,7 +531,13 @@ fn test_manual_trigger_prevents_double_processing() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		let _ = Balances::make_free_balance_be(&user, 100 * 10u128.pow(6));
@@ -514,10 +560,11 @@ fn test_manual_trigger_prevents_double_processing() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		]));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -547,7 +594,9 @@ fn test_manual_trigger_prevents_double_processing() {
 		);
 
 		// Verify billing updated once
-		let billing = JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone())).unwrap();
+		let billing =
+			JobSubscriptionBillings::<Runtime>::get((service_id, KEYGEN_JOB_ID, user.clone()))
+				.unwrap();
 		assert_eq!(billing.last_billed, 11, "Should have updated exactly once");
 	});
 }
@@ -578,7 +627,7 @@ fn test_manual_trigger_100_users_e2e() {
 		let mut blueprint = cggmp21_blueprint();
 		blueprint.jobs[0].pricing_model = PricingModel::Subscription {
 			rate_per_interval: 10 * 10u128.pow(6), // 10 USDC per interval
-			interval: 10, // Every 10 blocks
+			interval: 10,                          // Every 10 blocks
 			maybe_end: None,
 		};
 
@@ -624,10 +673,11 @@ fn test_manual_trigger_100_users_e2e() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			]));
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(bob.clone()),
+				service_id,
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+			));
 
 			// Call job to create subscription
 			assert_ok!(Services::call(
@@ -667,7 +717,8 @@ fn test_manual_trigger_100_users_e2e() {
 			let billing = JobSubscriptionBillings::<Runtime>::get(&billing_key).unwrap();
 			assert_eq!(
 				billing.last_billed, 11,
-				"User {} billing should be updated to block 11", idx
+				"User {} billing should be updated to block 11",
+				idx
 			);
 		}
 
@@ -693,12 +744,17 @@ fn test_manual_trigger_100_users_e2e() {
 			let billing = JobSubscriptionBillings::<Runtime>::get(&billing_key).unwrap();
 			assert_eq!(
 				billing.last_billed, 21,
-				"User {} second billing should be updated to block 21", idx
+				"User {} second billing should be updated to block 21",
+				idx
 			);
 		}
 
 		println!("E2E test completed successfully!");
-		println!("Verified {} users × 2 payments = {} total manual triggers", NUM_USERS, NUM_USERS * 2);
+		println!(
+			"Verified {} users × 2 payments = {} total manual triggers",
+			NUM_USERS,
+			NUM_USERS * 2
+		);
 	});
 }
 
@@ -726,7 +782,13 @@ fn test_manual_trigger_mixed_timing_e2e() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		println!("Setting up {} subscriptions...", NUM_USERS);
 
@@ -758,10 +820,11 @@ fn test_manual_trigger_mixed_timing_e2e() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			]));
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(bob.clone()),
+				service_id,
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+			));
 
 			assert_ok!(Services::call(
 				RuntimeOrigin::signed(user.clone()),
@@ -795,7 +858,8 @@ fn test_manual_trigger_mixed_timing_e2e() {
 			let billing = JobSubscriptionBillings::<Runtime>::get(&billing_key).unwrap();
 			assert_eq!(
 				billing.last_billed, trigger_block,
-				"User {} should be billed at block {}", idx, trigger_block
+				"User {} should be billed at block {}",
+				idx, trigger_block
 			);
 
 			if idx % 10 == 0 {
@@ -834,7 +898,13 @@ fn test_manual_trigger_stress_1000_users() {
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
 
 		// Use the standard helper which works
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		println!("Creating {} subscriptions...", NUM_USERS);
 
@@ -875,10 +945,11 @@ fn test_manual_trigger_stress_1000_users() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			]));
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(bob.clone()),
+				service_id,
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+			));
 
 			assert_ok!(Services::call(
 				RuntimeOrigin::signed(user.clone()),

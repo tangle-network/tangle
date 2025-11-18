@@ -27,7 +27,12 @@ use sp_runtime::{
 use tangle_primitives::traits::ServiceManager;
 
 #[cfg(feature = "runtime-benchmarks")]
-impl<T: Config> tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<T::AccountId, BalanceOf<T>> for Pallet<T> {
+impl<T: Config>
+	tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<
+		T::AccountId,
+		BalanceOf<T>,
+	> for Pallet<T>
+{
 	/// Handles the deposit of stake amount and creation of an operator.
 	/// This function is used for testing purposes.
 	/// DO NOT USE IN PRODUCTION.

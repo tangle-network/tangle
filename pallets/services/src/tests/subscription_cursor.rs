@@ -80,10 +80,11 @@ fn subscription_cursor_persists_across_blocks() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],));
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(bob.clone()),
+				service_id,
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+			));
 
 			assert_ok!(Services::call(
 				RuntimeOrigin::signed(user.clone()),

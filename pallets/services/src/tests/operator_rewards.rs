@@ -82,16 +82,27 @@ fn test_e2e_pay_once_payment_with_distribution() {
 		// Create service with 2 operators
 		// Bob: 60% TNT exposure
 		// Charlie: 40% TNT exposure
-		let service = create_test_service_with_operators(0, 0, dave.clone(), vec![
-			(bob.clone(), vec![AssetSecurityCommitment {
-				asset: Asset::Custom(TNT),
-				exposure_percent: Percent::from_percent(60),
-			}]),
-			(charlie.clone(), vec![AssetSecurityCommitment {
-				asset: Asset::Custom(TNT),
-				exposure_percent: Percent::from_percent(40),
-			}]),
-		]);
+		let service = create_test_service_with_operators(
+			0,
+			0,
+			dave.clone(),
+			vec![
+				(
+					bob.clone(),
+					vec![AssetSecurityCommitment {
+						asset: Asset::Custom(TNT),
+						exposure_percent: Percent::from_percent(60),
+					}],
+				),
+				(
+					charlie.clone(),
+					vec![AssetSecurityCommitment {
+						asset: Asset::Custom(TNT),
+						exposure_percent: Percent::from_percent(40),
+					}],
+				),
+			],
+		);
 
 		let customer_initial = Balances::free_balance(&customer);
 		let rewards_initial = Balances::free_balance(&rewards_account);
@@ -156,13 +167,18 @@ fn test_e2e_subscription_payment_distribution() {
 		let rewards_account = MockRewardsManager::account_id();
 
 		// Create service with 1 operator
-		let service =
-			create_test_service_with_operators(0, 0, charlie.clone(), vec![(bob.clone(), vec![
-				AssetSecurityCommitment {
+		let service = create_test_service_with_operators(
+			0,
+			0,
+			charlie.clone(),
+			vec![(
+				bob.clone(),
+				vec![AssetSecurityCommitment {
 					asset: Asset::Custom(TNT),
 					exposure_percent: Percent::from_percent(50),
-				},
-			])]);
+				}],
+			)],
+		);
 
 		let customer_initial = Balances::free_balance(&customer);
 		let rewards_initial = Balances::free_balance(&rewards_account);
@@ -217,38 +233,52 @@ fn test_multiple_operators_different_exposures() {
 		// Charlie: 40% TNT + 20% WETH = 60 total
 		// Dave: 30% TNT + 10% WETH = 40 total
 		// Total exposure: 180 percentage points
-		let service = create_test_service_with_operators(0, 0, customer.clone(), vec![
-			(bob.clone(), vec![
-				AssetSecurityCommitment {
-					asset: Asset::Custom(TNT),
-					exposure_percent: Percent::from_percent(50),
-				},
-				AssetSecurityCommitment {
-					asset: Asset::Custom(WETH),
-					exposure_percent: Percent::from_percent(30),
-				},
-			]),
-			(charlie.clone(), vec![
-				AssetSecurityCommitment {
-					asset: Asset::Custom(TNT),
-					exposure_percent: Percent::from_percent(40),
-				},
-				AssetSecurityCommitment {
-					asset: Asset::Custom(WETH),
-					exposure_percent: Percent::from_percent(20),
-				},
-			]),
-			(dave.clone(), vec![
-				AssetSecurityCommitment {
-					asset: Asset::Custom(TNT),
-					exposure_percent: Percent::from_percent(30),
-				},
-				AssetSecurityCommitment {
-					asset: Asset::Custom(WETH),
-					exposure_percent: Percent::from_percent(10),
-				},
-			]),
-		]);
+		let service = create_test_service_with_operators(
+			0,
+			0,
+			customer.clone(),
+			vec![
+				(
+					bob.clone(),
+					vec![
+						AssetSecurityCommitment {
+							asset: Asset::Custom(TNT),
+							exposure_percent: Percent::from_percent(50),
+						},
+						AssetSecurityCommitment {
+							asset: Asset::Custom(WETH),
+							exposure_percent: Percent::from_percent(30),
+						},
+					],
+				),
+				(
+					charlie.clone(),
+					vec![
+						AssetSecurityCommitment {
+							asset: Asset::Custom(TNT),
+							exposure_percent: Percent::from_percent(40),
+						},
+						AssetSecurityCommitment {
+							asset: Asset::Custom(WETH),
+							exposure_percent: Percent::from_percent(20),
+						},
+					],
+				),
+				(
+					dave.clone(),
+					vec![
+						AssetSecurityCommitment {
+							asset: Asset::Custom(TNT),
+							exposure_percent: Percent::from_percent(30),
+						},
+						AssetSecurityCommitment {
+							asset: Asset::Custom(WETH),
+							exposure_percent: Percent::from_percent(10),
+						},
+					],
+				),
+			],
+		);
 
 		let payment: Balance = 9_000; // Reduced to avoid balance issues
 		let pricing_model = PricingModel::PayOnce { amount: payment };
@@ -323,13 +353,18 @@ fn test_zero_payment_no_transfer() {
 		let bob = mock_pub_key(BOB);
 		let rewards_account = MockRewardsManager::account_id();
 
-		let service =
-			create_test_service_with_operators(0, 0, customer.clone(), vec![(bob.clone(), vec![
-				AssetSecurityCommitment {
+		let service = create_test_service_with_operators(
+			0,
+			0,
+			customer.clone(),
+			vec![(
+				bob.clone(),
+				vec![AssetSecurityCommitment {
 					asset: Asset::Custom(TNT),
 					exposure_percent: Percent::from_percent(50),
-				},
-			])]);
+				}],
+			)],
+		);
 
 		let rewards_initial = Balances::free_balance(&rewards_account);
 
@@ -377,13 +412,18 @@ fn test_e2e_event_driven_payment_distribution() {
 		let charlie = mock_pub_key(CHARLIE);
 		let rewards_account = MockRewardsManager::account_id();
 
-		let service =
-			create_test_service_with_operators(0, 0, charlie.clone(), vec![(bob.clone(), vec![
-				AssetSecurityCommitment {
+		let service = create_test_service_with_operators(
+			0,
+			0,
+			charlie.clone(),
+			vec![(
+				bob.clone(),
+				vec![AssetSecurityCommitment {
 					asset: Asset::Custom(TNT),
 					exposure_percent: Percent::from_percent(100),
-				},
-			])]);
+				}],
+			)],
+		);
 
 		let reward_per_event: Balance = 100;
 		let event_count = 10u32;
@@ -432,13 +472,18 @@ fn test_rewards_remain_in_pallet_until_claimed() {
 		let charlie = mock_pub_key(CHARLIE);
 		let rewards_account = MockRewardsManager::account_id();
 
-		let service =
-			create_test_service_with_operators(0, 0, charlie.clone(), vec![(bob.clone(), vec![
-				AssetSecurityCommitment {
+		let service = create_test_service_with_operators(
+			0,
+			0,
+			charlie.clone(),
+			vec![(
+				bob.clone(),
+				vec![AssetSecurityCommitment {
 					asset: Asset::Custom(TNT),
 					exposure_percent: Percent::from_percent(50),
-				},
-			])]);
+				}],
+			)],
+		);
 
 		let payment: Balance = 10_000;
 		let pricing_model = PricingModel::PayOnce { amount: payment };

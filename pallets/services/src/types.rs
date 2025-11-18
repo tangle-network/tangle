@@ -19,7 +19,7 @@ use tangle_primitives::services::Constraints;
 #[cfg(feature = "runtime-benchmarks")]
 use tangle_primitives::traits::{
 	MultiAssetDelegationBenchmarkingHelperDelegation,
-	MultiAssetDelegationBenchmarkingHelperOperator
+	MultiAssetDelegationBenchmarkingHelperOperator,
 };
 
 pub type BalanceOf<T> =
@@ -56,8 +56,17 @@ pub trait BenchmarkingHelper<AccountId, Balance, AssetId>:
 	fn balance(_asset: AssetId, _who: &AccountId) -> Balance;
 
 	// Take function from `use frame_support::traits::tokens::fungibles::Mutate;`
-	fn mint_into(_asset: AssetId, _who: &AccountId, _amount: Balance) -> Result<Balance, DispatchError>;
+	fn mint_into(
+		_asset: AssetId,
+		_who: &AccountId,
+		_amount: Balance,
+	) -> Result<Balance, DispatchError>;
 
 	// Take function from `use frame_support::traits::tokens::fungibles::Create;`
-	fn create(_id: AssetId, _admin: AccountId, _is_sufficient: bool, _min_balance: Balance) -> DispatchResult;
+	fn create(
+		_id: AssetId,
+		_admin: AccountId,
+		_is_sufficient: bool,
+		_min_balance: Balance,
+	) -> DispatchResult;
 }

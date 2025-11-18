@@ -25,8 +25,10 @@ fn test_10k_subscriptions_on_idle() {
 	const SUBS_PER_USER: u32 = NUM_SUBSCRIPTIONS / USERS_COUNT as u32;
 
 	println!("\n=== 10K SUBSCRIPTION SCALE TEST ===");
-	println!("Setting up {} subscriptions across {} users ({} each)...",
-		NUM_SUBSCRIPTIONS, USERS_COUNT, SUBS_PER_USER);
+	println!(
+		"Setting up {} subscriptions across {} users ({} each)...",
+		NUM_SUBSCRIPTIONS, USERS_COUNT, SUBS_PER_USER
+	);
 
 	new_test_ext(vec![1, 2, 3, 4]).execute_with(|| {
 		System::set_block_number(1);
@@ -43,7 +45,13 @@ fn test_10k_subscriptions_on_idle() {
 		};
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		println!("Blueprint created. Creating {} subscriptions...", NUM_SUBSCRIPTIONS);
 
@@ -79,10 +87,11 @@ fn test_10k_subscriptions_on_idle() {
 					MembershipModel::Fixed { min_operators: 1 },
 				));
 
-				assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-					get_security_commitment(TNT, 10),
-					get_security_commitment(WETH, 10)
-				]));
+				assert_ok!(Services::approve(
+					RuntimeOrigin::signed(bob.clone()),
+					service_id,
+					vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)]
+				));
 
 				assert_ok!(Services::call(
 					RuntimeOrigin::signed(user.clone()),
@@ -117,7 +126,10 @@ fn test_10k_subscriptions_on_idle() {
 
 		// Verify initial state
 		let total_billings = JobSubscriptionBillings::<Runtime>::iter().count();
-		assert_eq!(total_billings, NUM_SUBSCRIPTIONS as usize, "Should have created all billing entries");
+		assert_eq!(
+			total_billings, NUM_SUBSCRIPTIONS as usize,
+			"Should have created all billing entries"
+		);
 
 		// Now advance to block 2 and start processing via on_idle
 		System::set_block_number(2);
@@ -141,10 +153,8 @@ fn test_10k_subscriptions_on_idle() {
 			let cursor_before = SubscriptionProcessingCursor::<Runtime>::get();
 
 			// THIS IS THE REAL TEST - using actual on_idle processing
-			let weight_used = Services::process_subscription_payments_on_idle(
-				block_num as u64,
-				realistic_weight
-			);
+			let weight_used =
+				Services::process_subscription_payments_on_idle(block_num as u64, realistic_weight);
 
 			let cursor_after = SubscriptionProcessingCursor::<Runtime>::get();
 
@@ -161,19 +171,33 @@ fn test_10k_subscriptions_on_idle() {
 				blocks_processed += 1;
 				total_subs_processed += processed_this_block;
 
-				cursor_states.push((block_num, cursor_before.clone(), cursor_after.clone(), processed_this_block, weight_used));
+				cursor_states.push((
+					block_num,
+					cursor_before.clone(),
+					cursor_after.clone(),
+					processed_this_block,
+					weight_used,
+				));
 
 				if blocks_processed % 10 == 0 || processed_this_block > 0 {
-					println!("Block {}: Processed {} subs, Weight used: {}, Cursor: {:?} -> {:?}",
-						block_num, processed_this_block, weight_used.ref_time(),
-						cursor_before.as_ref().map(|(s,j,_)| format!("({},{})", s, j)),
-						cursor_after.as_ref().map(|(s,j,_)| format!("({},{})", s, j)));
+					println!(
+						"Block {}: Processed {} subs, Weight used: {}, Cursor: {:?} -> {:?}",
+						block_num,
+						processed_this_block,
+						weight_used.ref_time(),
+						cursor_before.as_ref().map(|(s, j, _)| format!("({},{})", s, j)),
+						cursor_after.as_ref().map(|(s, j, _)| format!("({},{})", s, j))
+					);
 				}
 
 				// Verify MAX_SUBSCRIPTIONS_PER_BLOCK enforced
-				assert!(processed_this_block <= MAX_SUBS_PER_BLOCK,
+				assert!(
+					processed_this_block <= MAX_SUBS_PER_BLOCK,
 					"Block {} processed {} subscriptions, exceeding limit of {}",
-					block_num, processed_this_block, MAX_SUBS_PER_BLOCK);
+					block_num,
+					processed_this_block,
+					MAX_SUBS_PER_BLOCK
+				);
 			}
 
 			// Stop if cursor cleared (all done)
@@ -189,13 +213,19 @@ fn test_10k_subscriptions_on_idle() {
 		}
 
 		// Verify ALL subscriptions were processed
-		assert_eq!(total_subs_processed, NUM_SUBSCRIPTIONS,
+		assert_eq!(
+			total_subs_processed, NUM_SUBSCRIPTIONS,
 			"Should have processed all {} subscriptions, but only processed {}",
-			NUM_SUBSCRIPTIONS, total_subs_processed);
+			NUM_SUBSCRIPTIONS, total_subs_processed
+		);
 
-		assert_eq!(processed_keys.len(), NUM_SUBSCRIPTIONS as usize,
+		assert_eq!(
+			processed_keys.len(),
+			NUM_SUBSCRIPTIONS as usize,
 			"Should have processed {} unique subscriptions, but processed {}",
-			NUM_SUBSCRIPTIONS, processed_keys.len());
+			NUM_SUBSCRIPTIONS,
+			processed_keys.len()
+		);
 
 		// Calculate timing
 		const BLOCK_TIME_SECS: u32 = 6;
@@ -211,8 +241,10 @@ fn test_10k_subscriptions_on_idle() {
 		println!("\n✓ TEST PASSED - All subscriptions processed fairly via on_idle");
 
 		// Verify no cursor left behind
-		assert!(SubscriptionProcessingCursor::<Runtime>::get().is_none(),
-			"Cursor should be cleared after processing all subscriptions");
+		assert!(
+			SubscriptionProcessingCursor::<Runtime>::get().is_none(),
+			"Cursor should be cleared after processing all subscriptions"
+		);
 	});
 }
 
@@ -231,9 +263,11 @@ fn test_100k_subscriptions_on_idle() {
 	println!("Theoretical 100K subscriptions:");
 	println!("  Max subs/block: 50");
 	println!("  Blocks needed: {}", NUM_SUBSCRIPTIONS / 50);
-	println!("  Time (6s blocks): {}m {}s",
+	println!(
+		"  Time (6s blocks): {}m {}s",
 		(NUM_SUBSCRIPTIONS / 50 * 6) / 60,
-		(NUM_SUBSCRIPTIONS / 50 * 6) % 60);
+		(NUM_SUBSCRIPTIONS / 50 * 6) % 60
+	);
 	println!("  = {} minutes to process 100K subscriptions", (NUM_SUBSCRIPTIONS / 50 * 6) / 60);
 }
 

@@ -872,7 +872,10 @@ pub mod pallet {
 		/// * [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed
 		#[pallet::call_index(12)]
 		#[pallet::weight(T::WeightInfo::execute_withdraw_with_no_evm_address())]
-		pub fn execute_withdraw(origin: OriginFor<T>, evm_address: Option<H160>) -> DispatchResultWithPostInfo {
+		pub fn execute_withdraw(
+			origin: OriginFor<T>,
+			evm_address: Option<H160>,
+		) -> DispatchResultWithPostInfo {
 			let mut actual_weight = T::WeightInfo::execute_withdraw_with_no_evm_address();
 			let who = match evm_address {
 				Some(addr) => {

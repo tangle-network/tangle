@@ -66,7 +66,7 @@ pallet-evm-precompile-sha3fips = { workspace = true }
 pallet-evm-precompile-simple = { workspace = true }
 
 precompile-utils = { workspace = true }
-sp-keyring ={ workspace = true}
+sp-keyring = { workspace = true }
 pallet-session = { workspace = true }
 pallet-staking = { workspace = true }
 sp-staking = { workspace = true }

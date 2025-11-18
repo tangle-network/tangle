@@ -30,10 +30,9 @@ use scale_info::TypeInfo;
 use sp_core::{H160, sr25519};
 use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
-	AccountId32, BuildStorage, Perbill,
+	AccountId32, BuildStorage, DispatchResult, Perbill,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
-	DispatchResult,
 };
 use tangle_primitives::{
 	services::Asset,
@@ -345,7 +344,13 @@ impl
 }
 
 #[cfg(feature = "runtime-benchmarks")]
-impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockDelegationManager {
+impl
+	tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<
+		AccountId,
+		Balance,
+		AssetId,
+	> for MockDelegationManager
+{
 	fn process_delegate_be(
 		who: AccountId,
 		_operator: AccountId,
@@ -358,7 +363,9 @@ impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation
 }
 
 #[cfg(feature = "runtime-benchmarks")]
-impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockDelegationManager {
+impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance>
+	for MockDelegationManager
+{
 	fn handle_deposit_and_create_operator_be(
 		_who: AccountId,
 		_bond_amount: Balance,
@@ -428,10 +435,9 @@ pub fn insert_user_deposit(
 	amount_with_locks: Option<Vec<LockInfo<Balance, BlockNumber>>>,
 ) {
 	MOCK_DELEGATION_INFO.with(|m| {
-		m.borrow_mut().deposits.insert(
-			(who, asset),
-			UserDepositWithLocks { unlocked_amount, amount_with_locks },
-		);
+		m.borrow_mut()
+			.deposits
+			.insert((who, asset), UserDepositWithLocks { unlocked_amount, amount_with_locks });
 	});
 }
 
@@ -465,7 +471,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+				balance: sp_core::U256::from(1_000u128) *
+					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 			},
 		);
 	}
@@ -477,7 +484,8 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
+				balance: sp_core::U256::from(1_000u128) *
+					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
 			},
 		);
 	}

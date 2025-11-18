@@ -16,18 +16,20 @@
 use super::*;
 use crate::{Pallet as MultiAssetDelegation, types::*};
 use frame_benchmarking::{account, benchmarks, whitelisted_caller};
-use frame_support::assert_ok;
 use frame_support::{
-	BoundedVec,
+	BoundedVec, assert_ok,
 	traits::{Currency, Get},
 };
 use frame_system::RawOrigin;
 use sp_core::H160;
-use sp_std::vec::Vec;
-use sp_std::vec;
-use sp_staking::StakingInterface;
-use tangle_primitives::{BlueprintId, rewards::LockMultiplier, services::{Asset, EvmAddressMapping}};
 use sp_runtime::Saturating;
+use sp_staking::StakingInterface;
+use sp_std::{vec, vec::Vec};
+use tangle_primitives::{
+	BlueprintId,
+	rewards::LockMultiplier,
+	services::{Asset, EvmAddressMapping},
+};
 
 const SEED: u32 = 0;
 const INITIAL_BALANCE: u32 = 1_000_000;
@@ -41,7 +43,7 @@ where
 
 fn fund_account<T: Config>(who: &T::AccountId)
 where
-    T::AssetId: From<u32>,
+	T::AssetId: From<u32>,
 {
 	let balance = T::Currency::minimum_balance() * INITIAL_BALANCE.into();
 	// Add enough to cover deposits and delegations used in benchmarks (typically 10x minimums)
@@ -54,7 +56,7 @@ where
 
 fn setup_benchmark<T: Config>() -> Result<T::AccountId, &'static str>
 where
-    T::AssetId: From<u32>,
+	T::AssetId: From<u32>,
 {
 	let caller: T::AccountId = whitelisted_caller();
 	// Fund account
@@ -98,17 +100,10 @@ fn setup_nominator<T: Config>(
 	));
 
 	// Create the ledger entry with bonded balance
-	assert_ok!(T::StakingInterface::bond(
-		who,
-		nomination_amount,
-		who
-	));
+	assert_ok!(T::StakingInterface::bond(who, nomination_amount, who));
 
-	assert_ok!(T::StakingInterface::nominate(
-		who,
-		vec![operator.clone()],
-	));
-	
+	assert_ok!(T::StakingInterface::nominate(who, vec![operator.clone()],));
+
 	Ok(())
 }
 
@@ -125,7 +120,7 @@ benchmarks! {
 		assert!(Operators::<T>::contains_key(&caller));
 	}
 
-	schedule_leave_operators {	
+	schedule_leave_operators {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let bond_amount: BalanceOf<T> = T::MinOperatorBondAmount::get() * 10u32.into();
 		MultiAssetDelegation::<T>::join_operators(RawOrigin::Signed(caller.clone()).into(), bond_amount)?;
@@ -592,7 +587,7 @@ benchmarks! {
 	delegate_nomination {
 		let caller: T::AccountId = setup_benchmark::<T>()?;
 		let operator: T::AccountId = account("operator", 1, SEED);
-		let asset_id = Asset::Custom(native_asset_id::<T>());		
+		let asset_id = Asset::Custom(native_asset_id::<T>());
 		let delegation_amount = T::Currency::minimum_balance();
 		let stake_amount = T::Currency::minimum_balance();
 		let nomination_amount = T::Currency::minimum_balance();
@@ -680,7 +675,7 @@ benchmarks! {
 			delegation_amount.clone(),
 			nomination_amount.clone(),
 		)?;
-		
+
 		// Setup nomination delegation
 		assert_ok!(MultiAssetDelegation::<T>::delegate_nomination(
 			RawOrigin::Signed(caller.clone()).into(),

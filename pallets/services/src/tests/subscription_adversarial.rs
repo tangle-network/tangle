@@ -4,8 +4,8 @@
 //! through various attack vectors to prove security.
 
 use super::*;
-use frame_support::{assert_noop, assert_ok, weights::Weight};
 use crate::Error;
+use frame_support::{assert_noop, assert_ok, weights::Weight};
 
 /// Test: Attempt to bypass 100 subscription per-user limit
 #[test]
@@ -40,7 +40,7 @@ fn test_cannot_bypass_subscription_limit() {
 		mint_tokens(USDC, alice.clone(), attacker.clone(), 200000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
 		let _ = Balances::make_free_balance_be(&attacker, 2000 * 10u128.pow(6)); // Enough TNT for 100 payments + existential deposit
-		
+
 		// Fund rewards pallet for distribution
 
 		// Create 100 subscriptions (should all succeed)
@@ -63,10 +63,11 @@ fn test_cannot_bypass_subscription_limit() {
 				MembershipModel::Fixed { min_operators: 1 },
 			));
 
-			assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-				get_security_commitment(TNT, 10),
-				get_security_commitment(WETH, 10)
-			],));
+			assert_ok!(Services::approve(
+				RuntimeOrigin::signed(bob.clone()),
+				service_id,
+				vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+			));
 
 			// Create subscription by calling service
 			assert_ok!(Services::call(
@@ -113,10 +114,11 @@ fn test_cannot_bypass_subscription_limit() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		// Call succeeds (just stores job call)
 		assert_ok!(Services::call(
@@ -168,7 +170,13 @@ fn test_cannot_double_process_subscription() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
@@ -192,10 +200,11 @@ fn test_cannot_double_process_subscription() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -240,7 +249,7 @@ fn test_cannot_double_process_subscription() {
 		let balance_after_second = pallet_assets::Pallet::<Runtime>::balance(USDC, &user);
 		// Balance should be unchanged - no second charge in same block
 		assert_eq!(balance_after_first, balance_after_second);
-		
+
 		// last_billed should still be block 1
 		let billing_final = Services::job_subscription_billings(&billing_key).unwrap();
 		assert_eq!(billing_final.last_billed, 1);
@@ -315,7 +324,13 @@ fn test_graceful_handling_of_terminated_service() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
@@ -339,10 +354,11 @@ fn test_graceful_handling_of_terminated_service() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -408,7 +424,13 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		// Fund user adequately for service setup and first payment
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
@@ -433,10 +455,11 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),
@@ -485,7 +508,10 @@ fn test_payment_failure_doesnt_corrupt_billing() {
 
 		// Verify billing state unchanged (last_billed NOT updated to block 2)
 		let final_billing = Services::job_subscription_billings(&billing_key).unwrap();
-		assert_eq!(initial_billing.last_billed, final_billing.last_billed, "last_billed should not change on payment failure");
+		assert_eq!(
+			initial_billing.last_billed, final_billing.last_billed,
+			"last_billed should not change on payment failure"
+		);
 		assert_eq!(final_billing.last_billed, 1, "last_billed should still be 1");
 
 		// Subscription count should still be 1 (not decremented on failure)
@@ -526,7 +552,13 @@ fn test_storage_cleanup_on_end() {
 
 		assert_ok!(Services::update_master_blueprint_service_manager(RuntimeOrigin::root(), MBSM));
 		assert_ok!(create_test_blueprint(RuntimeOrigin::signed(alice.clone()), blueprint));
-		assert_ok!(join_and_register(bob.clone(), 0, test_ecdsa_key(), 1000, Some("https://example.com/rpc")));
+		assert_ok!(join_and_register(
+			bob.clone(),
+			0,
+			test_ecdsa_key(),
+			1000,
+			Some("https://example.com/rpc")
+		));
 
 		mint_tokens(USDC, alice.clone(), user.clone(), 1000 * 10u128.pow(6));
 		use frame_support::traits::Currency;
@@ -550,10 +582,11 @@ fn test_storage_cleanup_on_end() {
 			MembershipModel::Fixed { min_operators: 1 },
 		));
 
-		assert_ok!(Services::approve(RuntimeOrigin::signed(bob.clone()), service_id, vec![
-			get_security_commitment(TNT, 10),
-			get_security_commitment(WETH, 10)
-		],));
+		assert_ok!(Services::approve(
+			RuntimeOrigin::signed(bob.clone()),
+			service_id,
+			vec![get_security_commitment(TNT, 10), get_security_commitment(WETH, 10)],
+		));
 
 		assert_ok!(Services::call(
 			RuntimeOrigin::signed(user.clone()),

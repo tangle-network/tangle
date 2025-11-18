@@ -22,15 +22,19 @@ use super::*;
 use crate::{types::StakeTier, BalanceOf, Config, Pallet as Credits};
 use frame_benchmarking::{account, v2::*, BenchmarkError};
 use frame_support::{
+	assert_ok,
 	traits::{Currency, Get},
-	BoundedVec, assert_ok
+	BoundedVec,
 };
 use frame_system::RawOrigin;
 use sp_runtime::{traits::Zero, Saturating};
 use sp_std::prelude::*;
 use tangle_primitives::{
 	services::Asset,
-	traits::{MultiAssetDelegationBenchmarkingHelperOperator, MultiAssetDelegationBenchmarkingHelperDelegation},
+	traits::{
+		MultiAssetDelegationBenchmarkingHelperDelegation,
+		MultiAssetDelegationBenchmarkingHelperOperator,
+	},
 };
 
 const SEED: u32 = 0;
@@ -41,7 +45,7 @@ fn setup_account<T: Config>(acc: &'static str, account_index: u32) -> T::Account
 	let account: T::AccountId = account(acc, account_index, SEED);
 	T::Currency::make_free_balance_be(
 		&account,
-		T::Currency::minimum_balance().saturating_mul(INITIAL_BALANCE.into())
+		T::Currency::minimum_balance().saturating_mul(INITIAL_BALANCE.into()),
 	);
 	account
 }
@@ -64,7 +68,7 @@ fn setup_nominator<T: Config>(
 		BalanceOf<T>,
 		T::AssetId,
 	>>::process_delegate_be(delegator, operator, asset, amount));
-	
+
 	Ok(())
 }
 
@@ -92,7 +96,7 @@ mod benchmarks {
 		// Setup: Create an account with sufficient balance for worst case scenario
 		// Following the pattern from multi-asset-delegation benchmarks
 		let account: T::AccountId = setup_account::<T>("account", 1);
-		
+
 		// For worst case, use a large burn amount relative to minimum balance
 		// This ensures we test the maximum burn scenario
 		let burn_amount: BalanceOf<T> = T::Currency::minimum_balance() * 1000u32.into();
@@ -121,7 +125,14 @@ mod benchmarks {
 		let asset_id = Asset::Custom(asset_id_u32.into());
 
 		// Setup delegation to enable credit accrual
-		setup_nominator::<T>(account.clone(), max_stake_amount, operator.clone(), asset_id, max_stake_amount).unwrap();
+		setup_nominator::<T>(
+			account.clone(),
+			max_stake_amount,
+			operator.clone(),
+			asset_id,
+			max_stake_amount,
+		)
+		.unwrap();
 
 		// Setup global stake tiers for the benchmark with maximum rate
 		// claim_credits uses get_current_rate which reads from StoredStakeTiers (global tiers)
@@ -139,11 +150,11 @@ mod benchmarks {
 		// This ensures we don't exceed what's actually available
 		let max_claimable = Credits::<T>::get_accrued_amount(&account, Some(end_block))
 			.map_err(|_| BenchmarkError::Weightless)?;
-		
+
 		// For worst case scenario, we must have credits available
 		// If setup results in zero credits, the benchmark setup is wrong
 		assert!(!max_claimable.is_zero());
-		
+
 		// Use the maximum claimable amount for worst case
 		let claim_amount = max_claimable;
 
@@ -188,12 +199,20 @@ mod benchmarks {
 		let asset = Asset::Custom(asset_id.into());
 
 		// Setup delegation to enable credit accrual
-		setup_nominator::<T>(account.clone(), max_stake_amount, operator.clone(), asset, max_stake_amount).unwrap();
+		setup_nominator::<T>(
+			account.clone(),
+			max_stake_amount,
+			operator.clone(),
+			asset,
+			max_stake_amount,
+		)
+		.unwrap();
 
 		// Setup asset-specific stake tiers for the benchmark with maximum rate
 		let max_tiers = T::MaxStakeTiers::get() as u32;
 		let asset_tiers = create_stake_tiers::<T>(max_tiers.min(10)); // Limit to reasonable size
-		Credits::<T>::set_asset_stake_tiers(RawOrigin::Root.into(), asset_id.into(), asset_tiers).unwrap();
+		Credits::<T>::set_asset_stake_tiers(RawOrigin::Root.into(), asset_id.into(), asset_tiers)
+			.unwrap();
 
 		// Advance blocks by the full claim window for worst case scenario
 		let window = T::ClaimWindowBlocks::get();
@@ -203,13 +222,14 @@ mod benchmarks {
 
 		// Get the actual max claimable amount within the window for the specific asset
 		// This ensures we don't exceed what's actually available
-		let max_claimable = Credits::<T>::get_accrued_amount_for_asset(&account, Some(end_block), asset_id.into())
-			.map_err(|_| BenchmarkError::Weightless)?;
+		let max_claimable =
+			Credits::<T>::get_accrued_amount_for_asset(&account, Some(end_block), asset_id.into())
+				.map_err(|_| BenchmarkError::Weightless)?;
 
 		// For worst case scenario, we must have credits available
 		// If setup results in zero credits, the benchmark setup is wrong
 		assert!(!max_claimable.is_zero());
-		
+
 		// Use the maximum claimable amount for worst case
 		let claim_amount = max_claimable;
 

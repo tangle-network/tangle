@@ -25,6 +25,8 @@ use frame_election_provider_support::{
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
 	onchain,
 };
+#[cfg(feature = "runtime-benchmarks")]
+use frame_support::traits::tokens::fungibles::{Create, Inspect, Mutate};
 use frame_support::{
 	PalletId, construct_runtime, derive_impl, parameter_types,
 	traits::{AsEnsureOriginWithArg, ConstU32, ConstU128, Hooks, OneSessionHandler},
@@ -47,18 +49,16 @@ use sp_staking::currency_to_vote::U128CurrencyToVote;
 use sp_weights::Weight;
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator,
+};
 use tangle_primitives::{
 	services::{Asset, EvmAddressMapping, EvmGasWeightMapping, EvmRunner, PricingModel},
 	traits::{RewardRecorder, RewardsManager},
 	types::{BlockNumber, rewards::LockMultiplier},
 };
-#[cfg(feature = "runtime-benchmarks")]
-use tangle_primitives::traits::{
-	MultiAssetDelegationBenchmarkingHelperDelegation,
-	MultiAssetDelegationBenchmarkingHelperOperator
-};
-#[cfg(feature = "runtime-benchmarks")]
-use frame_support::traits::tokens::fungibles::{Inspect, Mutate, Create};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -416,26 +416,39 @@ impl parity_scale_codec::DecodeWithMemTracking for FallbackWeightWrites {}
 pub struct MockBenchmarkingHelper;
 
 #[cfg(feature = "runtime-benchmarks")]
-impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId>
+	for MockBenchmarkingHelper
+{
 	fn asset_exists(asset: AssetId) -> bool {
 		Assets::asset_exists(asset)
 	}
-	
+
 	fn balance(asset: AssetId, who: &AccountId) -> Balance {
 		Assets::balance(asset, who)
 	}
 
-	fn mint_into(asset: AssetId, who: &AccountId, amount: Balance) -> Result<Balance, DispatchError> {
+	fn mint_into(
+		asset: AssetId,
+		who: &AccountId,
+		amount: Balance,
+	) -> Result<Balance, DispatchError> {
 		Assets::mint_into(asset, who, amount)
 	}
 
-	fn create(id: AssetId, admin: AccountId, is_sufficient: bool, min_balance: Balance) -> DispatchResult {
+	fn create(
+		id: AssetId,
+		admin: AccountId,
+		is_sufficient: bool,
+		min_balance: Balance,
+	) -> DispatchResult {
 		<Assets as Create<AccountId>>::create(id, admin, is_sufficient, min_balance)
 	}
 }
 
 #[cfg(feature = "runtime-benchmarks")]
-impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId>
+	for MockBenchmarkingHelper
+{
 	fn process_delegate_be(
 		who: AccountId,
 		operator: AccountId,
@@ -756,12 +769,14 @@ pub const WBTC: AssetId = 3;
 pub fn new_test_ext_raw_authorities(authorities: Vec<AccountId>) -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::<Runtime>::default().build_storage().unwrap();
 	// We use default for brevity, but you can configure as desired if needed.
-	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 20_000_u128)).collect();
+	// Initial balance is 30_000: 10_000 staked + 20_000 free (enough for payments + existential
+	// deposit)
+	let mut balances: Vec<_> = authorities.iter().map(|i| (i.clone(), 30_000_u128)).collect();
 	// Add pallet account and MBSM account with sufficient balance
 	let pallet_account = Services::pallet_account();
 	let mbsm_account_id = PalletEVMAddressMapping::into_account_id(MBSM);
-	balances.push((pallet_account, 20_000_u128));
-	balances.push((mbsm_account_id, 20_000_u128));
+	balances.push((pallet_account, 30_000_u128));
+	balances.push((mbsm_account_id, 30_000_u128));
 	pallet_balances::GenesisConfig::<Runtime> { balances, dev_accounts: None }
 		.assimilate_storage(&mut t)
 		.unwrap();

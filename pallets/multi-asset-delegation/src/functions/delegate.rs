@@ -60,8 +60,12 @@ type AggregateResult<T> =
 	Result<(DepositUpdates<T>, DelegationUpdates<T>, OperatorUpdates<T>, Vec<usize>), Error<T>>;
 
 #[cfg(feature = "runtime-benchmarks")]
-impl<T: Config> tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<T::AccountId, BalanceOf<T>, T::AssetId>
-	for Pallet<T>
+impl<T: Config>
+	tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<
+		T::AccountId,
+		BalanceOf<T>,
+		T::AssetId,
+	> for Pallet<T>
 {
 	/// Handles the deposit of stake amount and creation of an operator.
 	/// This function is used for testing purposes.

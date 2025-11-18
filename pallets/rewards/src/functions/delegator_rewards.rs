@@ -281,10 +281,14 @@ impl<T: Config> Pallet<T> {
 		let pool = OperatorRewardPools::<T>::get(operator);
 
 		// Initialize debt at current accumulator (no historical rewards)
-		DelegatorRewardDebts::<T>::insert(delegator, operator, crate::types::DelegatorRewardDebt {
-			last_accumulated_per_share: pool.accumulated_rewards_per_share,
-			staked_amount: initial_stake,
-		});
+		DelegatorRewardDebts::<T>::insert(
+			delegator,
+			operator,
+			crate::types::DelegatorRewardDebt {
+				last_accumulated_per_share: pool.accumulated_rewards_per_share,
+				staked_amount: initial_stake,
+			},
+		);
 
 		// Update pool's total staked amount
 		OperatorRewardPools::<T>::mutate(operator, |p| {
@@ -511,9 +515,9 @@ mod tests {
 	fn test_claim_updates_debt() {
 		new_test_ext().execute_with(|| {
 			use sp_core::crypto::AccountId32;
-			use sp_keyring::AccountKeyring;
-			let operator: AccountId32 = AccountKeyring::Alice.into();
-			let delegator: AccountId32 = AccountKeyring::Bob.into();
+			use sp_keyring::sr25519::Keyring;
+			let operator: AccountId32 = Keyring::Alice.into();
+			let delegator: AccountId32 = Keyring::Bob.into();
 
 			// Fund the pallet account to allow transfers
 			let pallet_account = Rewards::account_id();

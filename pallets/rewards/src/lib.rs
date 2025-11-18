@@ -106,10 +106,7 @@ pub mod pallet {
 		Perbill,
 		traits::{AccountIdConversion, Saturating, Zero},
 	};
-	use tangle_primitives::{
-		rewards::LockMultiplier,
-		traits::MultiAssetDelegationInfo,
-	};
+	use tangle_primitives::{rewards::LockMultiplier, traits::MultiAssetDelegationInfo};
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -144,7 +141,7 @@ pub mod pallet {
 				BlockNumberFor<Self>,
 				Self::AssetId,
 				AssetType<Self::AssetId>,
-		>;
+			>;
 
 		/// The origin that can manage reward assets
 		type ForceOrigin: EnsureOrigin<Self::RuntimeOrigin>;

@@ -3,25 +3,25 @@ use crate::OriginFor;
 use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
 use frame_support::{BoundedVec, assert_ok, traits::Currency};
 use frame_system::RawOrigin;
-use scale_info::prelude::boxed::Box;
-use scale_info::prelude::format;
+use hex;
+use scale_info::prelude::{boxed::Box, format};
 use sp_core::{H160, crypto::Pair, ecdsa};
 use sp_runtime::{
-	KeyTypeId, Percent,
+	KeyTypeId, Percent, Saturating,
 	traits::{SaturatedConversion, Zero},
-	Saturating
 };
 use sp_std::{iter, vec};
-use hex;
-use tangle_primitives::services::{
-	Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
-	BoundedString, Field, FieldType, JobDefinition, JobMetadata,
-	MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelType,
-	OperatorPreferences, PricingModel, PricingQuote, ResourcePricing, ServiceBlueprint, ServiceMetadata,
-	EvmAddressMapping,
+use tangle_primitives::{
+	BlueprintId, InstanceId,
+	services::{
+		Asset, AssetSecurityCommitment, AssetSecurityRequirement, BlueprintServiceManager,
+		BoundedString, EvmAddressMapping, Field, FieldType, JobDefinition, JobMetadata,
+		MasterBlueprintServiceManagerRevision, MembershipModel, MembershipModelType,
+		OperatorPreferences, PricingModel, PricingQuote, ResourcePricing, ServiceBlueprint,
+		ServiceMetadata,
+	},
+	traits::RewardRecorder,
 };
-use tangle_primitives::{BlueprintId, InstanceId};
-use tangle_primitives::traits::RewardRecorder;
 
 pub type AssetId = u32;
 pub type AssetIdOf<T> = <T as Config>::AssetId;
@@ -122,8 +122,7 @@ fn ensure_native_balance<T: Config>(account: &T::AccountId) {
 
 fn ensure_asset_exists<T: Config>(asset: u32) {
 	let asset_id: AssetIdOf<T> = asset.into();
-	if T::BenchmarkingHelper::asset_exists(asset_id.clone())
-	{
+	if T::BenchmarkingHelper::asset_exists(asset_id.clone()) {
 		return;
 	}
 
@@ -131,12 +130,8 @@ fn ensure_asset_exists<T: Config>(asset: u32) {
 	ensure_native_balance::<T>(&owner);
 
 	let min_balance: BalanceOf<T> = 1_u128.saturated_into();
-	let _ = T::BenchmarkingHelper::create(
-		asset_id.clone().into(),
-		owner.clone(),
-		true,
-		min_balance,
-	);
+	let _ =
+		T::BenchmarkingHelper::create(asset_id.clone().into(), owner.clone(), true, min_balance);
 }
 
 fn ensure_asset_balance<T: Config>(account: &T::AccountId, asset: u32) {
@@ -154,15 +149,11 @@ fn ensure_asset_balance<T: Config>(account: &T::AccountId, asset: u32) {
 		return;
 	}
 
-	let delta_balance: BalanceOf<T> =
-		delta.saturated_into();
+	let delta_balance: BalanceOf<T> = delta.saturated_into();
 	let owner = asset_admin_account::<T>();
 	ensure_native_balance::<T>(&owner);
-	let _ = T::BenchmarkingHelper::mint_into(
-		asset_id.clone().into(),
-		&account.clone(),
-		delta_balance,
-	);
+	let _ =
+		T::BenchmarkingHelper::mint_into(asset_id.clone().into(), &account.clone(), delta_balance);
 }
 
 fn ensure_account_ready<T: Config>(account: &T::AccountId) {
@@ -188,7 +179,9 @@ fn register_operator<T: Config>(blueprint_id: u64, operator: T::AccountId, opera
 	));
 }
 
-fn prepare_blueprint_with_operators<T: Config>(operator_ids: &[u8]) -> (T::AccountId, Vec<T::AccountId>, BlueprintId) {
+fn prepare_blueprint_with_operators<T: Config>(
+	operator_ids: &[u8],
+) -> (T::AccountId, Vec<T::AccountId>, BlueprintId) {
 	let owner = funded_account::<T>(1u8);
 	let blueprint = cggmp21_blueprint::<T>();
 	let blueprint_id = Pallet::<T>::next_blueprint_id();
@@ -279,7 +272,10 @@ fn create_and_sign_pricing_quote<T: Config>(
 	operator_id: u8,
 ) -> (PricingQuote<T::Constraints>, ecdsa::Signature) {
 	// Convert security commitments from T::AssetId to u128 and create BoundedVec
-	let security_commitments_u128: BoundedVec<AssetSecurityCommitment<u128>, <T::Constraints as tangle_primitives::services::Constraints>::MaxOperatorsPerService> = BoundedVec::try_from(
+	let security_commitments_u128: BoundedVec<
+		AssetSecurityCommitment<u128>,
+		<T::Constraints as tangle_primitives::services::Constraints>::MaxOperatorsPerService,
+	> = BoundedVec::try_from(
 		security_commitments
 			.into_iter()
 			.map(|commitment| AssetSecurityCommitment {
@@ -289,7 +285,7 @@ fn create_and_sign_pricing_quote<T: Config>(
 				},
 				exposure_percent: commitment.exposure_percent,
 			})
-			.collect::<Vec<_>>()
+			.collect::<Vec<_>>(),
 	)
 	.unwrap();
 
@@ -321,17 +317,19 @@ fn create_and_sign_pricing_quote<T: Config>(
 	seed[31] = operator_id.wrapping_mul(11).wrapping_add(1);
 
 	// Get the operator's preferences to get their public key (matches what's stored)
-	let operator_preferences = crate::Operators::<T>::get(blueprint_id, operator.clone())
-		.expect("operator exists");
+	let operator_preferences =
+		crate::Operators::<T>::get(blueprint_id, operator.clone()).expect("operator exists");
 	let public_key = ecdsa::Public::from_full(&operator_preferences.key)
 		.expect("failed to derive public key from operator preferences");
 
 	// Generate key in keystore using the seed (ensures private key is available for signing)
-	// Note: ecdsa_generate might produce a different public key, but we use the one from preferences
-	// The keystore lookup in ecdsa_sign should work if the seed produces the same key pair
+	// Note: ecdsa_generate might produce a different public key, but we use the one from
+	// preferences The keystore lookup in ecdsa_sign should work if the seed produces the same key
+	// pair
 	let key_type = KeyTypeId(*b"mdkg");
 	let seed_hex = format!("0x{}", hex::encode(seed));
-	let _generated_public_key = sp_io::crypto::ecdsa_generate(key_type, Some(seed_hex.as_bytes().to_vec()));
+	let _generated_public_key =
+		sp_io::crypto::ecdsa_generate(key_type, Some(seed_hex.as_bytes().to_vec()));
 
 	// Sign the message - ecdsa_sign will look up the private key in keystore by public key
 	// If the generated key doesn't match, this will fail
@@ -554,7 +552,7 @@ benchmarks! {
 
 		// Create operators list (will be passed to the extrinsic)
 		let operators_list = vec![bob.clone(), charlie.clone(), dave.clone()];
-		
+
 		// Create a map to store quotes and signatures by operator
 		let mut quotes_and_sigs: sp_std::collections::btree_map::BTreeMap<T::AccountId, (PricingQuote<T::Constraints>, ecdsa::Signature)> = sp_std::collections::btree_map::BTreeMap::new();
 
@@ -584,7 +582,7 @@ benchmarks! {
 			pricing_quotes.push(quote.clone());
 			operator_signatures.push(*signature);
 		}
-		
+
 		// Also need to ensure operators_list matches the sorted order for the extrinsic call
 		// The verification code builds operator_signatures_map from operators.iter().zip(operator_signatures.iter())
 		// and then iterates the map in sorted order, using pricing_quotes[i]
@@ -676,16 +674,16 @@ benchmarks! {
 			&message_hash
 		).expect("failed to sign the message");
 	}: _(RawOrigin::Signed(operators[0].clone()), blueprint_id, service_id, metrics_data, signature)
-	
+
 	// Slash an operator's stake for a service
 	slash {
 		let (owner, operators, _, service_id) = prepare_service::<T>();
 		let service = Pallet::<T>::services(service_id).unwrap();
 		log::debug!("[SLASH BENCHMARK] service_id: {:?}, blueprint: {:?}", service_id, service.blueprint);
-		
+
 		let query_result = Pallet::<T>::query_slashing_origin(&service);
 		log::debug!("[SLASH BENCHMARK] query_slashing_origin result: {:?}", query_result);
-		
+
 		let slash_origin = match query_result {
 			Ok((maybe_origin, weight)) => {
 				log::debug!("[SLASH BENCHMARK] query succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
@@ -710,10 +708,10 @@ benchmarks! {
 		let (owner, operators, _, service_id) = prepare_service::<T>();
 		let service = Pallet::<T>::services(service_id).unwrap();
 		log::debug!("[DISPUTE BENCHMARK] service_id: {:?}, blueprint: {:?}", service_id, service.blueprint);
-		
+
 		let slash_query_result = Pallet::<T>::query_slashing_origin(&service);
 		log::debug!("[DISPUTE BENCHMARK] query_slashing_origin result: {:?}", slash_query_result);
-		
+
 		let slash_origin = match slash_query_result {
 			Ok((maybe_origin, weight)) => {
 				log::debug!("[DISPUTE BENCHMARK] query_slashing_origin succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
@@ -730,12 +728,12 @@ benchmarks! {
 			}
 		};
 		log::debug!("[DISPUTE BENCHMARK] slash_origin: {:?}", slash_origin);
-		
+
 		assert_ok!(Pallet::<T>::slash(RawOrigin::Signed(slash_origin.clone()).into(), operators[0].clone(), 0, Percent::from_percent(50)));
-		
+
 		let dispute_query_result = Pallet::<T>::query_dispute_origin(&service);
 		log::debug!("[DISPUTE BENCHMARK] query_dispute_origin result: {:?}", dispute_query_result);
-		
+
 		let dispute_origin = match dispute_query_result {
 			Ok((maybe_origin, weight)) => {
 				log::debug!("[DISPUTE BENCHMARK] query_dispute_origin succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
@@ -991,7 +989,7 @@ benchmarks! {
 	// Trigger subscription payment manually
 	trigger_subscription_payment {
 		let (owner, operators, blueprint_id, service_id) = prepare_service::<T>();
-		
+
 		// Modify blueprint to have subscription pricing
 		let (_, mut blueprint) = Pallet::<T>::blueprints(blueprint_id).expect("blueprint exists");
 		let interval: BlockNumberFor<T> = 10u32.into();

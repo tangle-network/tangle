@@ -372,12 +372,19 @@ impl<T: Config> Pallet<T> {
 		let rewards_account = T::RewardRecorder::account_id();
 
 		// Checks: Validate balances before any state changes
+		// When using KeepAlive, we must ensure the account has at least the existential deposit
+		// remaining
+		let min_balance = T::Currency::minimum_balance();
 		match asset {
 			Asset::Custom(asset_id) => {
 				if *asset_id == T::AssetId::default() {
 					// Native currency - check balance first
 					let free_balance = T::Currency::free_balance(payer);
-					ensure!(free_balance >= amount, Error::<T>::InvalidRequestInput);
+					// Ensure we have enough for the transfer + existential deposit (for KeepAlive)
+					ensure!(
+						free_balance >= amount.saturating_add(min_balance),
+						Error::<T>::InvalidRequestInput
+					);
 				}
 			},
 			Asset::Erc20(_) => {
@@ -555,41 +562,39 @@ impl<T: Config> Pallet<T> {
 					let maybe_end_converted: Option<BlockNumberFor<T>> =
 						maybe_end.map(|end| end.saturated_into());
 
-							let blocks_since_last =
-								current_block.saturating_sub(billing.last_billed);
+					let blocks_since_last = current_block.saturating_sub(billing.last_billed);
 
-							if blocks_since_last >= interval_converted {
-								if let Some(end_block) = maybe_end_converted {
-									if current_block > end_block {
-										continue;
-									}
-								}
-
-								match Self::process_job_subscription_payment(
-									service_id,
-									job_index,
-									0,
-									&subscriber,
-									&subscriber,
-									rate_converted,
-									interval_converted,
-									maybe_end_converted,
-									current_block,
-								) {
-									Ok(_) => {
-										processed_count += 1;
-									},
-									Err(_) => {
-										continue;
-									},
-								}
+					if blocks_since_last >= interval_converted {
+						if let Some(end_block) = maybe_end_converted {
+							if current_block > end_block {
+								continue;
 							}
+						}
+
+						match Self::process_job_subscription_payment(
+							service_id,
+							job_index,
+							0,
+							&subscriber,
+							&subscriber,
+							rate_converted,
+							interval_converted,
+							maybe_end_converted,
+							current_block,
+						) {
+							Ok(_) => {
+								processed_count += 1;
+							},
+							Err(_) => {
+								continue;
+							},
 						}
 					}
 				}
-
-			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
+			}
 		}
+
+		total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
 
 		if processed_count < MAX_SUBSCRIPTIONS_PER_BLOCK {
 			SubscriptionProcessingCursor::<T>::kill();

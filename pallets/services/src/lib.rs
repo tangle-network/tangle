@@ -1532,10 +1532,7 @@ pub mod module {
 		/// * [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook
 		#[pallet::call_index(6)]
 		#[pallet::weight(T::WeightInfo::reject())]
-		pub fn reject(
-			origin: OriginFor<T>,
-			#[pallet::compact] request_id: u64,
-		) -> DispatchResult {
+		pub fn reject(origin: OriginFor<T>, #[pallet::compact] request_id: u64) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			Self::do_reject(caller, request_id)?;
 			Ok(())
@@ -1722,10 +1719,7 @@ pub mod module {
 			let (_, blueprint) = Self::blueprints(service.blueprint)?;
 
 			// Verify job exists
-			let job_def = blueprint
-				.jobs
-				.get(job_index as usize)
-				.ok_or(Error::<T>::InvalidJobId)?;
+			let job_def = blueprint.jobs.get(job_index as usize).ok_or(Error::<T>::InvalidJobId)?;
 
 			// Verify this job has subscription pricing
 			let (rate_per_interval, interval, maybe_end) = match &job_def.pricing_model {
@@ -1741,9 +1735,8 @@ pub mod module {
 
 			// Get the subscription billing record
 			let billing_key = (service_id, job_index, caller.clone());
-			let billing =
-				JobSubscriptionBillings::<T>::get(&billing_key)
-					.ok_or(Error::<T>::SubscriptionNotFound)?;
+			let billing = JobSubscriptionBillings::<T>::get(&billing_key)
+				.ok_or(Error::<T>::SubscriptionNotFound)?;
 
 			// Check if subscription has ended
 			let current_block = frame_system::Pallet::<T>::block_number();
@@ -1778,7 +1771,11 @@ pub mod module {
 			)?;
 
 			// Emit event
-			Self::deposit_event(Event::SubscriptionPaymentTriggered { caller, service_id, job_index });
+			Self::deposit_event(Event::SubscriptionPaymentTriggered {
+				caller,
+				service_id,
+				job_index,
+			});
 
 			Ok(())
 		}
