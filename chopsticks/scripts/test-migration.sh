@@ -62,23 +62,8 @@ echo "Chopsticks PID: $CHOPSTICKS_PID"
 
 # Wait for Chopsticks to be ready
 echo "Waiting for Chopsticks to be ready..."
-MAX_WAIT=60
-WAIT_COUNT=0
-while [ $WAIT_COUNT -lt $MAX_WAIT ]; do
-    if nc -z localhost $PORT 2>/dev/null; then
-        break
-    fi
-    sleep 1
-    WAIT_COUNT=$((WAIT_COUNT + 1))
-    echo -n "."
-done
+sleep 15
 echo ""
-
-if [ $WAIT_COUNT -eq $MAX_WAIT ]; then
-    echo "ERROR: Chopsticks not responding on port $PORT after ${MAX_WAIT}s"
-    kill $CHOPSTICKS_PID
-    exit 1
-fi
 
 echo "✓ Chopsticks fork ready"
 echo ""

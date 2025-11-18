@@ -61,8 +61,13 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
 		I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
 	{
 		if let Some(author_index) = F::find_author(digests) {
-			let authority_id = Babe::authorities()[author_index as usize].clone();
-			return Some(H160::from_slice(&authority_id.0.to_raw_vec()[4..24]));
+			let authorities = Babe::authorities();
+			let index = author_index as usize;
+			// Check bounds to prevent panic when authorities list is empty or index is out of bounds
+			if index < authorities.len() {
+				let authority_id = authorities[index].clone();
+				return Some(H160::from_slice(&authority_id.0.to_raw_vec()[4..24]));
+			}
 		}
 		None
 	}
