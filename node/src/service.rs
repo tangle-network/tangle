@@ -26,7 +26,7 @@ use sc_consensus::BasicQueue;
 use sc_consensus_babe::{BabeWorkerHandle, SlotProportion};
 use sc_consensus_grandpa::SharedVoterState;
 #[allow(deprecated)]
-pub use sc_executor::{WasmExecutor, HeapAllocStrategy, DEFAULT_HEAP_ALLOC_STRATEGY};
+pub use sc_executor::{DEFAULT_HEAP_ALLOC_STRATEGY, HeapAllocStrategy, WasmExecutor};
 use sc_service::{ChainType, Configuration, TaskManager, error::Error as ServiceError};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
@@ -45,14 +45,20 @@ use tangle_testnet_runtime::{self, RuntimeApi, TransactionConverter};
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
+#[cfg(not(feature = "runtime-benchmarks"))]
+type HostFunctions = sp_io::SubstrateHostFunctions;
+
+#[cfg(feature = "runtime-benchmarks")]
+type HostFunctions = (
+	sp_io::SubstrateHostFunctions,
+	frame_benchmarking::benchmarking::HostFunctions,
+);
+
 #[allow(deprecated)]
 pub(crate) type FullClient = sc_service::TFullClient<
 	Block,
 	RuntimeApi,
-	WasmExecutor<(
-		sp_io::SubstrateHostFunctions,
-		frame_benchmarking::benchmarking::HostFunctions,
-	)>
+	WasmExecutor<HostFunctions>,
 >;
 
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
@@ -113,9 +119,7 @@ pub fn new_partial(
 	let heap_pages = config
 		.executor
 		.default_heap_pages
-		.map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static {
-			extra_pages: h as _,
-		});
+		.map_or(DEFAULT_HEAP_ALLOC_STRATEGY, |h| HeapAllocStrategy::Static { extra_pages: h as _ });
 
 	let executor = WasmExecutor::builder()
 		.with_execution_method(config.executor.wasm_method)
@@ -123,6 +127,7 @@ pub fn new_partial(
 		.with_offchain_heap_alloc_strategy(heap_pages)
 		.with_max_runtime_instances(config.executor.max_runtime_instances)
 		.with_runtime_cache_size(config.executor.runtime_cache_size)
+		.with_allow_missing_host_functions(true)
 		.build();
 
 	let (client, backend, keystore_container, task_manager) =

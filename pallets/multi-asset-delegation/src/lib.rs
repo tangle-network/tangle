@@ -83,6 +83,7 @@ pub mod types;
 /// The log target of this pallet.
 pub const LOG_TARGET: &str = "runtime::multi-asset-delegation";
 
+#[allow(clippy::too_many_arguments)]
 #[frame_support::pallet]
 pub mod pallet {
 	use super::functions::*;
@@ -786,6 +787,7 @@ pub mod pallet {
 		///
 		/// * [`Error::DepositOverflow`] - Deposit would overflow tracking
 		/// * [`Error::InvalidAsset`] - Asset is not supported
+		#[allow(clippy::useless_conversion)]
 		#[pallet::call_index(10)]
 		#[pallet::weight(T::WeightInfo::deposit_with_no_evm_address())]
 		pub fn deposit(
@@ -870,6 +872,7 @@ pub mod pallet {
 		///
 		/// * [`Error::NoWithdrawRequestExists`] - No pending withdraw request exists
 		/// * [`Error::WithdrawPeriodNotElapsed`] - Withdraw period has not elapsed
+		#[allow(clippy::useless_conversion)]
 		#[pallet::call_index(12)]
 		#[pallet::weight(T::WeightInfo::execute_withdraw_with_no_evm_address())]
 		pub fn execute_withdraw(

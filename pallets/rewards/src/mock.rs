@@ -30,7 +30,7 @@ use scale_info::TypeInfo;
 use sp_core::{H160, sr25519};
 use sp_keystore::{KeystoreExt, KeystorePtr, testing::MemoryKeystore};
 use sp_runtime::{
-	AccountId32, BuildStorage, DispatchResult, Perbill,
+	AccountId32, BuildStorage, Perbill,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
 };

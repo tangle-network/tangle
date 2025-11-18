@@ -62,6 +62,7 @@ pub mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 
+#[allow(clippy::too_many_arguments)]
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;

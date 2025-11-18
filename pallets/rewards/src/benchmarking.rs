@@ -19,7 +19,7 @@ use crate::{
 	pallet::{ApyBlocks, DecayRate, DecayStartPeriod, PendingOperatorRewards, UserClaimedReward},
 	types::*,
 };
-use frame_benchmarking::{BenchmarkError, account, benchmarks, impl_benchmark_test_suite};
+use frame_benchmarking::{BenchmarkError, account, v2::*};
 use frame_support::{
 	BoundedVec, assert_ok,
 	traits::{Currency, EnsureOrigin, Get},
@@ -90,22 +90,26 @@ where
 	(vault_id, caller)
 }
 
-benchmarks! {
-	where_clause {
-		where
-			T::ForceOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
-			T::VaultMetadataOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
-			T::AssetId: From<u32>,
-	}
+#[benchmarks(where
+	T::ForceOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
+	T::VaultMetadataOrigin: EnsureOrigin<<T as frame_system::Config>::RuntimeOrigin>,
+	T::AssetId: From<u32>,
+)]
+mod benchmarks {
+	use super::*;
 
-	claim_rewards {
-		let (vault_id, caller) = setup_vault::<T>();
+	#[benchmark]
+	fn claim_rewards() -> Result<(), BenchmarkError> {
+		let (_vault_id, caller) = setup_vault::<T>();
 		let deposit = get_balance::<T>(100u32);
 		let service_id: ServiceId = 1u64;
 
 		// Seed PendingOperatorRewards with a pending reward entry
-		let mut pending_rewards = BoundedVec::<(ServiceId, BalanceOf<T>), T::MaxPendingRewardsPerOperator>::new();
-		pending_rewards.try_push((service_id, deposit)).expect("Failed to push pending reward");
+		let mut pending_rewards =
+			BoundedVec::<(ServiceId, BalanceOf<T>), T::MaxPendingRewardsPerOperator>::new();
+		pending_rewards
+			.try_push((service_id, deposit))
+			.expect("Failed to push pending reward");
 		PendingOperatorRewards::<T>::insert(caller.clone(), pending_rewards);
 
 		// Verify the pending reward was inserted correctly
@@ -117,14 +121,19 @@ benchmarks! {
 		// Make balance for pallet's account
 		let balance = get_balance::<T>(u32::MAX);
 		T::Currency::make_free_balance_be(&Pallet::<T>::account_id(), balance);
-	}: _(RawOrigin::Signed(caller.clone()))
-	verify {
-		// Verify that pending rewards were cleared after claiming
+
+		#[extrinsic_call]
+		claim_rewards(RawOrigin::Signed(caller.clone()));
+
+		// Verify
 		let remaining_rewards = PendingOperatorRewards::<T>::get(&caller);
 		assert!(remaining_rewards.is_empty(), "Pending rewards should be cleared after claiming");
+
+		Ok(())
 	}
 
-	update_vault_reward_config {
+	#[benchmark]
+	fn update_vault_reward_config() -> Result<(), BenchmarkError> {
 		let (vault_id, _) = setup_vault::<T>();
 		let new_config = RewardConfigForAssetVault {
 			apy: Perbill::from_percent(20),
@@ -132,17 +141,24 @@ benchmarks! {
 			incentive_cap: get_balance::<T>(2000u32),
 			boost_multiplier: Some(1),
 		};
-		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
-	}: _<T::RuntimeOrigin>(origin, vault_id, new_config.clone())
-	verify {
+		let origin =
+			T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+
+		#[extrinsic_call]
+		update_vault_reward_config(origin, vault_id, new_config.clone());
+
+		// Verify
 		assert_eq!(RewardConfigStorage::<T>::get(vault_id), Some(new_config));
+
+		Ok(())
 	}
 
-	claim_rewards_other {
+	#[benchmark]
+	fn claim_rewards_other() -> Result<(), BenchmarkError> {
 		let (vault_id, delegator) = setup_vault::<T>();
 		// operator account
 		let operator: T::AccountId = account("operator", 2, SEED);
-		let operator_balance = get_balance::<T>(10000u32);
+		let operator_balance = get_balance::<T>(10000000u32);
 		T::Currency::make_free_balance_be(&operator, operator_balance.clone());
 		// asset to delegate
 		let asset = Asset::Custom(1_u32.into());
@@ -157,7 +173,7 @@ benchmarks! {
 			// asset
 			asset.clone(),
 			// delegating amount
-			100u32.into()
+			100u32.into(),
 		);
 
 		// Even larger deposit amount for repeated runs
@@ -176,7 +192,7 @@ benchmarks! {
 
 		// Setup vault pot account with massive balance for repeated runs
 		let pot_account: T::AccountId = account("pot", 2, SEED);
-		let pot_balance = get_balance::<T>(100000000u32);
+		let pot_balance = get_balance::<T>(u32::MAX);
 		T::Currency::make_free_balance_be(&pot_account, pot_balance);
 		RewardVaultsPotAccount::<T>::insert(vault_id, pot_account);
 
@@ -189,34 +205,40 @@ benchmarks! {
 
 		// Override the reward config with massive values for repeated runs
 		let reward_config = RewardConfigForAssetVault {
-				apy: Perbill::from_percent(20), // 20% APY for higher rewards
-				deposit_cap: deposit_amount * 10000u32.into(), // Massive deposit cap
-				incentive_cap: deposit_amount * 1000u32.into(), // Massive incentive cap
-				boost_multiplier: Some(1),
+			apy: Perbill::from_percent(20), // 20% APY for higher rewards
+			deposit_cap: deposit_amount * 10000u32.into(), // Massive deposit cap
+			incentive_cap: deposit_amount * 1000u32.into(), // Massive incentive cap
+			boost_multiplier: Some(1),
 		};
 		RewardConfigStorage::<T>::insert(vault_id, reward_config);
 
 		// Fund the pallet account for transfers with maximum balance
 		let balance = get_balance::<T>(u32::MAX);
 		T::Currency::make_free_balance_be(&Pallet::<T>::account_id(), balance);
-	}: _(RawOrigin::Signed(operator.clone()), delegator.clone(), asset)
-	verify {
-		// Verify that the user's last claim was updated
+
+		#[extrinsic_call]
+		claim_rewards_other(RawOrigin::Signed(operator.clone()), delegator.clone(), asset);
+
+		// Verify
 		let updated_claim = UserClaimedReward::<T>::get(&delegator, vault_id);
 		assert!(updated_claim.is_some());
-		let (claim_block, claim_amount) = updated_claim.unwrap();
+		let (claim_block, _claim_amount) = updated_claim.unwrap();
 		assert!(claim_block > last_claim_block);
 
 		// Verify that the target account received some balance
 		let target_balance = T::Currency::free_balance(&delegator);
 		assert!(target_balance > Zero::zero());
+
+		Ok(())
 	}
 
-	manage_asset_reward_vault {
+	#[benchmark]
+	fn manage_asset_reward_vault() -> Result<(), BenchmarkError> {
 		let (vault_id, _) = setup_vault::<T>();
 		// Use a different asset than the one already in vault
 		let asset = Asset::Custom(T::AssetId::from(20u32.into()));
-		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+		let origin =
+			T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
 		let action = AssetAction::Add;
 
 		// Setup reward config for the new asset
@@ -227,13 +249,18 @@ benchmarks! {
 			boost_multiplier: Some(1),
 		};
 		RewardConfigStorage::<T>::insert(vault_id, reward_config);
-	}: _<T::RuntimeOrigin>(origin, vault_id, asset, action)
-	verify {
-		// Verify that the asset was added to the vault
+
+		#[extrinsic_call]
+		manage_asset_reward_vault(origin, vault_id, asset, action);
+
+		// Verify
 		assert!(RewardVaults::<T>::get(vault_id).unwrap().contains(&asset));
+
+		Ok(())
 	}
 
-	create_reward_vault {
+	#[benchmark]
+	fn create_reward_vault() -> Result<(), BenchmarkError> {
 		let vault_id = Default::default();
 		let new_config = RewardConfigForAssetVault {
 			apy: Perbill::from_percent(10),
@@ -241,46 +268,64 @@ benchmarks! {
 			incentive_cap: get_balance::<T>(1000u32),
 			boost_multiplier: Some(1), // Must be 1
 		};
-		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
-	}: _<T::RuntimeOrigin>(origin, vault_id, new_config.clone())
-	verify {
-		// Verify that the vault was created with the specified config
+		let origin =
+			T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+
+		#[extrinsic_call]
+		create_reward_vault(origin, vault_id, new_config.clone());
+
+		// Verify
 		assert_eq!(RewardConfigStorage::<T>::get(vault_id), Some(new_config));
+
+		Ok(())
 	}
 
-	update_decay_config {
+	#[benchmark]
+	fn update_decay_config() -> Result<(), BenchmarkError> {
 		let start_period = BlockNumberFor::<T>::from(1000u32);
 		let rate = Perbill::from_percent(5);
-		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
-	}: _<T::RuntimeOrigin>(origin, start_period, rate)
-	verify {
-		// Verify that the decay config was updated
+		let origin =
+			T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+
+		#[extrinsic_call]
+		update_decay_config(origin, start_period, rate);
+
+		// Verify
 		let mut configs: BTreeMap<u32, RewardConfigForAssetVault<BalanceOf<T>>> = BTreeMap::new();
 		let asset_id: u32 = 1u32;
-		configs.insert(asset_id, RewardConfigForAssetVault {
-			apy: rate,
-			incentive_cap: 0u32.into(),
-			deposit_cap: 0u32.into(),
-			boost_multiplier: None,
-		});
+		configs.insert(
+			asset_id,
+			RewardConfigForAssetVault {
+				apy: rate,
+				incentive_cap: 0u32.into(),
+				deposit_cap: 0u32.into(),
+				boost_multiplier: None,
+			},
+		);
 
-		let decay_config = RewardConfig {
-			configs,
-			whitelisted_blueprint_ids: vec![],
-		};
+		let decay_config = RewardConfig { configs, whitelisted_blueprint_ids: vec![] };
 		assert_eq!(decay_config.configs.get(&asset_id).unwrap().apy, rate);
+
+		Ok(())
 	}
 
-	update_apy_blocks {
+	#[benchmark]
+	fn update_apy_blocks() -> Result<(), BenchmarkError> {
 		let blocks = BlockNumberFor::<T>::from(100u32);
-		let origin = T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
-	}: _<T::RuntimeOrigin>(origin, blocks)
-	verify {
-		// Verify that the APY blocks were updated
+		let origin =
+			T::ForceOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
+
+		#[extrinsic_call]
+		update_apy_blocks(origin, blocks);
+
+		// Verify
 		assert_eq!(ApyBlocks::<T>::get(), blocks);
+
+		Ok(())
 	}
 
-	claim_delegator_rewards {
+	#[benchmark]
+	fn claim_delegator_rewards() -> Result<(), BenchmarkError> {
 		use sp_arithmetic::FixedU128;
 
 		// Setup operator account
@@ -314,15 +359,20 @@ benchmarks! {
 		// Make balance for pallet's account
 		let balance = get_balance::<T>(u32::MAX);
 		T::Currency::make_free_balance_be(&Pallet::<T>::account_id(), balance);
-	}: _(RawOrigin::Signed(delegator.clone()), operator.clone())
-	verify {
-		// Verify that the debt was updated
+
+		#[extrinsic_call]
+		claim_delegator_rewards(RawOrigin::Signed(delegator.clone()), operator.clone());
+
+		// Verify
 		let updated_debt = crate::pallet::DelegatorRewardDebts::<T>::get(&delegator, &operator);
 		assert!(updated_debt.is_some());
 		assert!(updated_debt.unwrap().last_accumulated_per_share > FixedU128::from(0));
+
+		Ok(())
 	}
 
-	set_vault_metadata {
+	#[benchmark]
+	fn set_vault_metadata() -> Result<(), BenchmarkError> {
 		let vault_id = Default::default();
 		let caller: T::AccountId = account("caller", 0, SEED);
 		let balance = get_balance::<T>(1000u32);
@@ -332,10 +382,13 @@ benchmarks! {
 		let name: Vec<u8> = vec![b'A'; T::MaxVaultNameLength::get() as usize];
 		let logo: Vec<u8> = vec![b'B'; T::MaxVaultLogoLength::get() as usize];
 
-		let origin = T::VaultMetadataOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
-	}: _<T::RuntimeOrigin>(origin, vault_id, name.clone(), logo.clone())
-	verify {
-		// Verify that the metadata was stored
+		let origin = T::VaultMetadataOrigin::try_successful_origin()
+			.map_err(|_| BenchmarkError::Weightless)?;
+
+		#[extrinsic_call]
+		set_vault_metadata(origin, vault_id, name.clone(), logo.clone());
+
+		// Verify
 		let metadata = crate::pallet::VaultMetadataStore::<T>::get(vault_id);
 		assert!(metadata.is_some());
 		let metadata = metadata.unwrap();
@@ -347,26 +400,36 @@ benchmarks! {
 			metadata.logo,
 			TryInto::<BoundedVec<u8, T::MaxVaultLogoLength>>::try_into(logo).unwrap()
 		);
+
+		Ok(())
 	}
 
-	remove_vault_metadata {
+	#[benchmark]
+	fn remove_vault_metadata() -> Result<(), BenchmarkError> {
 		let vault_id = Default::default();
 		let caller: T::AccountId = account("caller", 0, SEED);
 		let balance = get_balance::<T>(1000u32);
 		T::Currency::make_free_balance_be(&caller, balance);
 
 		// Setup: First set metadata so we can remove it (using worst-case lengths)
-		let name: BoundedVec<u8, T::MaxVaultNameLength> = vec![b'A'; T::MaxVaultNameLength::get() as usize].try_into().unwrap();
-		let logo: BoundedVec<u8, T::MaxVaultLogoLength> = vec![b'B'; T::MaxVaultLogoLength::get() as usize].try_into().unwrap();
+		let name: BoundedVec<u8, T::MaxVaultNameLength> =
+			vec![b'A'; T::MaxVaultNameLength::get() as usize].try_into().unwrap();
+		let logo: BoundedVec<u8, T::MaxVaultLogoLength> =
+			vec![b'B'; T::MaxVaultLogoLength::get() as usize].try_into().unwrap();
 		let metadata = crate::pallet::VaultMetadata::<T> { name, logo };
 		crate::pallet::VaultMetadataStore::<T>::insert(vault_id, metadata);
 
-		let origin = T::VaultMetadataOrigin::try_successful_origin().map_err(|_| BenchmarkError::Weightless)?;
-	}: _<T::RuntimeOrigin>(origin, vault_id)
-	verify {
-		// Verify that the metadata was removed
-		assert!(!crate::pallet::VaultMetadataStore::<T>::contains_key(vault_id));
-	}
-}
+		let origin = T::VaultMetadataOrigin::try_successful_origin()
+			.map_err(|_| BenchmarkError::Weightless)?;
 
-impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(), crate::mock::Runtime);
+		#[extrinsic_call]
+		remove_vault_metadata(origin, vault_id);
+
+		// Verify
+		assert!(!crate::pallet::VaultMetadataStore::<T>::contains_key(vault_id));
+
+		Ok(())
+	}
+
+	impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(), crate::mock::Runtime);
+}

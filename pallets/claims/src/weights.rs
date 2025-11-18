@@ -52,6 +52,8 @@ pub trait WeightInfo {
 	fn claim_attest() -> Weight;
 	fn move_claim() -> Weight;
 	fn force_set_expiry_config() -> Weight;
+	fn keccak256(i: u32, ) -> Weight;
+	fn eth_recover(i: u32, ) -> Weight;
 }
 
 /// Weights for `pallet_airdrop_claims` using the Substrate node and recommended hardware.
@@ -77,8 +79,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `514`
 		//  Estimated: `4764`
-		// Minimum execution time: 80_000_000 picoseconds.
-		Weight::from_parts(91_000_000, 4764)
+		// Minimum execution time: 87_000_000 picoseconds.
+		Weight::from_parts(105_000_000, 4764)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -94,8 +96,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `182`
 		//  Estimated: `1667`
-		// Minimum execution time: 7_000_000 picoseconds.
-		Weight::from_parts(9_000_000, 1667)
+		// Minimum execution time: 9_000_000 picoseconds.
+		Weight::from_parts(12_000_000, 1667)
 			.saturating_add(T::DbWeight::get().reads(1_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -119,8 +121,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		// Proof Size summary in bytes:
 		//  Measured:  `514`
 		//  Estimated: `4764`
-		// Minimum execution time: 88_000_000 picoseconds.
-		Weight::from_parts(155_000_000, 4764)
+		// Minimum execution time: 96_000_000 picoseconds.
+		Weight::from_parts(103_000_000, 4764)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
@@ -135,7 +137,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		//  Measured:  `340`
 		//  Estimated: `3805`
 		// Minimum execution time: 16_000_000 picoseconds.
-		Weight::from_parts(19_000_000, 3805)
+		Weight::from_parts(20_000_000, 3805)
 			.saturating_add(T::DbWeight::get().reads(3_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
@@ -146,8 +148,28 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		//  Measured:  `0`
 		//  Estimated: `0`
 		// Minimum execution time: 2_000_000 picoseconds.
-		Weight::from_parts(2_000_000, 0)
+		Weight::from_parts(3_000_000, 0)
 			.saturating_add(T::DbWeight::get().writes(1_u64))
+	}
+	/// The range of component `i` is `[0, 10000]`.
+	fn keccak256(i: u32, ) -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 0_000 picoseconds.
+		Weight::from_parts(3_744_791, 0)
+			// Standard Error: 524
+			.saturating_add(Weight::from_parts(247_550, 0).saturating_mul(i.into()))
+	}
+	/// The range of component `i` is `[0, 1000]`.
+	fn eth_recover(i: u32, ) -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 0_000 picoseconds.
+		Weight::from_parts(0, 0)
+			// Standard Error: 32_976
+			.saturating_add(Weight::from_parts(17_326_700, 0).saturating_mul(i.into()))
 	}
 }
 
@@ -173,8 +195,8 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `514`
 		//  Estimated: `4764`
-		// Minimum execution time: 80_000_000 picoseconds.
-		Weight::from_parts(91_000_000, 4764)
+		// Minimum execution time: 87_000_000 picoseconds.
+		Weight::from_parts(105_000_000, 4764)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
@@ -190,8 +212,8 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `182`
 		//  Estimated: `1667`
-		// Minimum execution time: 7_000_000 picoseconds.
-		Weight::from_parts(9_000_000, 1667)
+		// Minimum execution time: 9_000_000 picoseconds.
+		Weight::from_parts(12_000_000, 1667)
 			.saturating_add(RocksDbWeight::get().reads(1_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
@@ -215,8 +237,8 @@ impl WeightInfo for () {
 		// Proof Size summary in bytes:
 		//  Measured:  `514`
 		//  Estimated: `4764`
-		// Minimum execution time: 88_000_000 picoseconds.
-		Weight::from_parts(155_000_000, 4764)
+		// Minimum execution time: 96_000_000 picoseconds.
+		Weight::from_parts(103_000_000, 4764)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
@@ -231,7 +253,7 @@ impl WeightInfo for () {
 		//  Measured:  `340`
 		//  Estimated: `3805`
 		// Minimum execution time: 16_000_000 picoseconds.
-		Weight::from_parts(19_000_000, 3805)
+		Weight::from_parts(20_000_000, 3805)
 			.saturating_add(RocksDbWeight::get().reads(3_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
@@ -242,7 +264,27 @@ impl WeightInfo for () {
 		//  Measured:  `0`
 		//  Estimated: `0`
 		// Minimum execution time: 2_000_000 picoseconds.
-		Weight::from_parts(2_000_000, 0)
+		Weight::from_parts(3_000_000, 0)
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	/// The range of component `i` is `[0, 10000]`.
+	fn keccak256(i: u32, ) -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 0_000 picoseconds.
+		Weight::from_parts(3_744_791, 0)
+			// Standard Error: 524
+			.saturating_add(Weight::from_parts(247_550, 0).saturating_mul(i.into()))
+	}
+	/// The range of component `i` is `[0, 1000]`.
+	fn eth_recover(i: u32, ) -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 0_000 picoseconds.
+		Weight::from_parts(0, 0)
+			// Standard Error: 32_976
+			.saturating_add(Weight::from_parts(17_326_700, 0).saturating_mul(i.into()))
 	}
 }

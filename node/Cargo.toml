@@ -120,6 +120,7 @@ tangle-crypto-primitives = { workspace = true }
 tangle-primitives = { workspace = true, features = ["std"] }
 tangle-runtime = { workspace = true, features = ["std"] }
 tangle-testnet-runtime = { workspace = true, optional = true }
+tangle-subxt = { workspace = true }
 futures-timer = { workspace = true }
 
 blueprint-manager = { workspace = true, optional = true }

@@ -1,6 +1,6 @@
 use super::*;
 use crate::OriginFor;
-use frame_benchmarking::v1::{benchmarks, impl_benchmark_test_suite};
+use frame_benchmarking::{BenchmarkError, v2::*};
 use frame_support::{BoundedVec, assert_ok, traits::Currency};
 use frame_system::RawOrigin;
 use hex;
@@ -384,32 +384,39 @@ fn create_test_blueprint<T: Config>(
 	assert_ok!(Pallet::<T>::create_blueprint(origin, blueprint));
 }
 
-benchmarks! {
+#[benchmarks(where
+	<T as crate::module::Config>::AssetId: From<u32>,
+)]
+mod benchmarks {
+	use super::*;
 
-	where_clause {
-		where
-			<T as crate::module::Config>::AssetId: From<u32>,
-	}
-
-	create_blueprint {
+	#[benchmark]
+	fn create_blueprint() -> Result<(), BenchmarkError> {
 		let alice = funded_account::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
-	}: _(
-		RawOrigin::Signed(alice.clone()),
-		blueprint
-	)
 
-	pre_register {
+		#[extrinsic_call]
+		create_blueprint(RawOrigin::Signed(alice.clone()), blueprint);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn pre_register() -> Result<(), BenchmarkError> {
 		let alice = funded_account::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let bob = funded_account::<T>(2u8);
 
-	}: _(RawOrigin::Signed(bob.clone()), 0)
+		#[extrinsic_call]
+		pre_register(RawOrigin::Signed(bob.clone()), 0);
 
+		Ok(())
+	}
 
-	register {
+	#[benchmark]
+	fn register() -> Result<(), BenchmarkError> {
 		let alice = funded_account::<T>(1u8);
 		let blueprint_id = Pallet::<T>::next_blueprint_id();
 		let blueprint = cggmp21_blueprint::<T>();
@@ -423,47 +430,73 @@ benchmarks! {
 			vec![Asset::Custom(USDC.into()), Asset::Custom(WETH.into())],
 			vec![100_u128.saturated_into(), 100_u128.saturated_into()],
 		);
-	}: _(RawOrigin::Signed(bob.clone()), blueprint_id, operator_preferences::<T>(2u8), Default::default(), 0_u32.into())
 
+		#[extrinsic_call]
+		register(
+			RawOrigin::Signed(bob.clone()),
+			blueprint_id,
+			operator_preferences::<T>(2u8),
+			Default::default(),
+			0_u32.into(),
+		);
 
-	unregister {
+		Ok(())
+	}
+
+	#[benchmark]
+	fn unregister() -> Result<(), BenchmarkError> {
 		let (_owner, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2]);
 		let bob = operators.pop().expect("Operator exists");
 
-	}: _(RawOrigin::Signed(bob.clone()), 0)
+		#[extrinsic_call]
+		unregister(RawOrigin::Signed(bob.clone()), 0);
 
-	update_rpc_address {
+		Ok(())
+	}
+
+	#[benchmark]
+	fn update_rpc_address() -> Result<(), BenchmarkError> {
 		let (_owner, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2]);
 		let bob = operators.pop().expect("Operator exists");
 		let rpc_address = BoundedString::try_from("https://example.com/rpc".to_owned()).unwrap();
 
-	}: _(RawOrigin::Signed(bob.clone()), 0, rpc_address)
+		#[extrinsic_call]
+		update_rpc_address(RawOrigin::Signed(bob.clone()), 0, rpc_address);
 
+		Ok(())
+	}
 
-	request {
+	#[benchmark]
+	fn request() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2, 3, 4, 5]);
-		let eve = operators.pop().expect("Eve exists");
+		let _eve = operators.pop().expect("Eve exists");
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
 		let bob = operators.pop().expect("Bob exists");
-	}: _(
-		RawOrigin::Signed(bob.clone()),
-		None,
-		0,
-		vec![alice.clone()],
-		vec![bob.clone(), charlie.clone(), dave.clone()],
-		Default::default(),
-		vec![
-			get_security_requirement::<T>(USDC.into(), &[10, 20]),
-			get_security_requirement::<T>(WETH.into(), &[10, 20])
-		],
-		100_u32.into(),
-		Asset::Custom(USDC.into()),
-		0_u32.into(),
-		MembershipModel::Fixed { min_operators: 3 }
-	)
 
-	approve {
+		#[extrinsic_call]
+		request(
+			RawOrigin::Signed(bob.clone()),
+			None,
+			0,
+			vec![alice.clone()],
+			vec![bob.clone(), charlie.clone(), dave.clone()],
+			Default::default(),
+			vec![
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20]),
+			],
+			100_u32.into(),
+			Asset::Custom(USDC.into()),
+			0_u32.into(),
+			MembershipModel::Fixed { min_operators: 3 },
+		);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn approve() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
@@ -493,10 +526,14 @@ benchmarks! {
 			get_security_commitment::<T>(TNT.into(), 10),
 		];
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0, security_commitments)
+		#[extrinsic_call]
+		approve(RawOrigin::Signed(charlie.clone()), 0, security_commitments);
 
+		Ok(())
+	}
 
-	reject {
+	#[benchmark]
+	fn reject() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
@@ -520,20 +557,36 @@ benchmarks! {
 			MembershipModel::Fixed { min_operators: 3 },
 		));
 
-	}: _(RawOrigin::Signed(charlie.clone()), 0)
+		#[extrinsic_call]
+		reject(RawOrigin::Signed(charlie.clone()), 0);
 
+		Ok(())
+	}
 
-	terminate {
+	#[benchmark]
+	fn terminate() -> Result<(), BenchmarkError> {
 		let (owner, _, _, _) = prepare_service::<T>();
-	}: _(RawOrigin::Signed(owner),0)
 
+		#[extrinsic_call]
+		terminate(RawOrigin::Signed(owner), 0);
 
-	call {
+		Ok(())
+	}
+
+	#[benchmark]
+	fn call() -> Result<(), BenchmarkError> {
 		let (owner, _, _, _) = prepare_service::<T>();
-	}: _(RawOrigin::Signed(owner),0,0,vec![Field::Uint8(2)].try_into().unwrap())
 
-	request_with_signed_price_quotes {
-		let (alice, mut operators, blueprint_id) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
+		#[extrinsic_call]
+		call(RawOrigin::Signed(owner), 0, 0, vec![Field::Uint8(2)].try_into().unwrap());
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn request_with_signed_price_quotes() -> Result<(), BenchmarkError> {
+		let (alice, mut operators, blueprint_id) =
+			prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
 		let bob = operators.pop().expect("Bob exists");
@@ -554,7 +607,10 @@ benchmarks! {
 		let operators_list = vec![bob.clone(), charlie.clone(), dave.clone()];
 
 		// Create a map to store quotes and signatures by operator
-		let mut quotes_and_sigs: sp_std::collections::btree_map::BTreeMap<T::AccountId, (PricingQuote<T::Constraints>, ecdsa::Signature)> = sp_std::collections::btree_map::BTreeMap::new();
+		let mut quotes_and_sigs: sp_std::collections::btree_map::BTreeMap<
+			T::AccountId,
+			(PricingQuote<T::Constraints>, ecdsa::Signature),
+		> = sp_std::collections::btree_map::BTreeMap::new();
 
 		for (idx, operator) in operators_list.iter().enumerate() {
 			// Operator IDs match the index in prepare_blueprint_with_operators (0, 1, 2)
@@ -574,19 +630,21 @@ benchmarks! {
 		}
 
 		// Build pricing_quotes and operator_signatures in sorted order (BTreeMap iteration order)
-		// The verification code iterates operator_signatures_map (BTreeMap) and uses pricing_quotes[i]
-		// So we need pricing_quotes to be in the same order as the BTreeMap iterates (sorted)
+		// The verification code iterates operator_signatures_map (BTreeMap) and uses
+		// pricing_quotes[i] So we need pricing_quotes to be in the same order as the BTreeMap
+		// iterates (sorted)
 		let mut pricing_quotes = Vec::new();
 		let mut operator_signatures = Vec::new();
-		for (operator, (quote, signature)) in quotes_and_sigs.iter() {
+		for (_operator, (quote, signature)) in quotes_and_sigs.iter() {
 			pricing_quotes.push(quote.clone());
 			operator_signatures.push(*signature);
 		}
 
 		// Also need to ensure operators_list matches the sorted order for the extrinsic call
-		// The verification code builds operator_signatures_map from operators.iter().zip(operator_signatures.iter())
-		// and then iterates the map in sorted order, using pricing_quotes[i]
-		// So we need operators, signatures, and quotes all in the same sorted order
+		// The verification code builds operator_signatures_map from
+		// operators.iter().zip(operator_signatures.iter()) and then iterates the map in sorted
+		// order, using pricing_quotes[i] So we need operators, signatures, and quotes all in the
+		// same sorted order
 		let sorted_operators: Vec<T::AccountId> = quotes_and_sigs.keys().cloned().collect();
 
 		ensure_account_ready::<T>(&Pallet::<T>::pallet_account());
@@ -594,26 +652,32 @@ benchmarks! {
 		let mbsm_address = Pallet::<T>::mbsm_address_of(&blueprint).expect("MBSM address exists");
 		let mbsm_account_id = T::EvmAddressMapping::into_account_id(mbsm_address);
 		ensure_account_ready::<T>(&mbsm_account_id);
-	}: _(
-		RawOrigin::Signed(eve.clone()),
-		None,
-		blueprint_id,
-		vec![alice.clone()],
-		sorted_operators,
-		Default::default(),
-		vec![
-			get_security_requirement::<T>(USDC.into(), &[10, 20]),
-			get_security_requirement::<T>(WETH.into(), &[10, 20])
-		],
-		ttl,
-		Asset::Custom(USDC.into()),
-		MembershipModel::Fixed { min_operators: 3 },
-		pricing_quotes,
-		operator_signatures,
-		security_commitments
-	)
 
-	submit_result {
+		#[extrinsic_call]
+		request_with_signed_price_quotes(
+			RawOrigin::Signed(eve.clone()),
+			None,
+			blueprint_id,
+			vec![alice.clone()],
+			sorted_operators,
+			Default::default(),
+			vec![
+				get_security_requirement::<T>(USDC.into(), &[10, 20]),
+				get_security_requirement::<T>(WETH.into(), &[10, 20]),
+			],
+			ttl,
+			Asset::Custom(USDC.into()),
+			MembershipModel::Fixed { min_operators: 3 },
+			pricing_quotes,
+			operator_signatures,
+			security_commitments,
+		);
+
+		Ok(())
+	}
+
+	#[benchmark]
+	fn submit_result() -> Result<(), BenchmarkError> {
 		let (owner, operators, _, _) = prepare_service::<T>();
 		assert_ok!(Pallet::<T>::call(
 			RawOrigin::Signed(owner.clone()).into(),
@@ -625,29 +689,43 @@ benchmarks! {
 		let keygen_job_call_id = 0;
 		let key_type = KeyTypeId(*b"mdkg");
 		let dkg = sp_io::crypto::ecdsa_generate(key_type, None);
-	}: _(
+
+		#[extrinsic_call]
+		submit_result(
 			RawOrigin::Signed(operators[0].clone()),
 			0,
 			keygen_job_call_id,
-			vec![Field::from(BoundedVec::try_from(dkg.to_raw().to_vec()).unwrap())].try_into().unwrap()
-		)
+			vec![Field::from(BoundedVec::try_from(dkg.to_raw().to_vec()).unwrap())]
+				.try_into()
+				.unwrap(),
+		);
 
-	heartbeat {
+		Ok(())
+	}
+
+	#[benchmark]
+	fn heartbeat() -> Result<(), BenchmarkError> {
 		const OPERATOR_ID: u8 = 2u8;
 		frame_system::Pallet::<T>::set_block_number(2u32.into());
 
 		let (_, operators, blueprint_id, service_id) = prepare_service::<T>();
 		let (_, blueprint) = Pallet::<T>::blueprints(blueprint_id).expect("blueprint exists");
 		let heartbeat_interval =
-			Pallet::<T>::get_heartbeat_interval(&blueprint, blueprint_id, service_id).expect("failed to get heartbeat interval");
+			Pallet::<T>::get_heartbeat_interval(&blueprint, blueprint_id, service_id)
+				.expect("failed to get heartbeat interval");
 
-		frame_system::Pallet::<T>::set_block_number(frame_system::Pallet::<T>::block_number().saturating_add(heartbeat_interval));
+		frame_system::Pallet::<T>::set_block_number(
+			frame_system::Pallet::<T>::block_number().saturating_add(heartbeat_interval),
+		);
 
-		let metrics_data: Vec<u8> = iter::repeat(1u8).take(T::MaxMetricsDataSize::get() as usize).collect();
+		let metrics_data: Vec<u8> =
+			iter::repeat(1u8).take(T::MaxMetricsDataSize::get() as usize).collect();
 
 		let mut message = service_id.to_le_bytes().to_vec();
 		message.extend_from_slice(&blueprint_id.to_le_bytes());
-		message.extend_from_slice(&frame_system::Pallet::<T>::block_number().saturated_into::<u64>().to_le_bytes());
+		message.extend_from_slice(
+			&frame_system::Pallet::<T>::block_number().saturated_into::<u64>().to_le_bytes(),
+		);
 		message.extend_from_slice(&metrics_data);
 		let message_hash = sp_core::hashing::keccak_256(&message);
 
@@ -668,53 +746,99 @@ benchmarks! {
 		let seed_hex = format!("0x{}", hex::encode(seed));
 		let _ = sp_io::crypto::ecdsa_generate(key_type, Some(seed_hex.as_bytes().to_vec()));
 
-		let signature = sp_io::crypto::ecdsa_sign(
-			key_type,
-			&public_key,
-			&message_hash
-		).expect("failed to sign the message");
-	}: _(RawOrigin::Signed(operators[0].clone()), blueprint_id, service_id, metrics_data, signature)
+		let signature = sp_io::crypto::ecdsa_sign(key_type, &public_key, &message_hash)
+			.expect("failed to sign the message");
+
+		#[extrinsic_call]
+		heartbeat(
+			RawOrigin::Signed(operators[0].clone()),
+			blueprint_id,
+			service_id,
+			metrics_data,
+			signature,
+		);
+
+		Ok(())
+	}
 
 	// Slash an operator's stake for a service
-	slash {
-		let (owner, operators, _, service_id) = prepare_service::<T>();
+	#[benchmark]
+	fn slash() -> Result<(), BenchmarkError> {
+		let (_owner, operators, _, service_id) = prepare_service::<T>();
 		let service = Pallet::<T>::services(service_id).unwrap();
-		log::debug!("[SLASH BENCHMARK] service_id: {:?}, blueprint: {:?}", service_id, service.blueprint);
+		log::debug!(
+			"[SLASH BENCHMARK] service_id: {:?}, blueprint: {:?}",
+			service_id,
+			service.blueprint
+		);
 
 		let query_result = Pallet::<T>::query_slashing_origin(&service);
 		log::debug!("[SLASH BENCHMARK] query_slashing_origin result: {:?}", query_result);
 
 		let slash_origin = match query_result {
 			Ok((maybe_origin, weight)) => {
-				log::debug!("[SLASH BENCHMARK] query succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
+				log::debug!(
+					"[SLASH BENCHMARK] query succeeded, maybe_origin: {:?}, weight: {:?}",
+					maybe_origin,
+					weight
+				);
 				if let Some(origin) = maybe_origin {
 					log::debug!("[SLASH BENCHMARK] slash_origin found: {:?}", origin);
-					log::debug!("[SLASH BENCHMARK] calling slash with origin: {:?}, operator: {:?}, service_id: {:?}", origin, operators[0], service_id);
+					log::debug!(
+						"[SLASH BENCHMARK] calling slash with origin: {:?}, operator: {:?}, service_id: {:?}",
+						origin,
+						operators[0],
+						service_id
+					);
 					origin
 				} else {
-					log::debug!("[SLASH BENCHMARK] ERROR: query_slashing_origin returned None - no slashing origin found");
+					log::debug!(
+						"[SLASH BENCHMARK] ERROR: query_slashing_origin returned None - no slashing origin found"
+					);
 					panic!("No slashing origin found for service {}", service_id);
 				}
 			},
 			Err(e) => {
-				log::debug!("[SLASH BENCHMARK] ERROR: query_slashing_origin failed with error: {:?}", e);
+				log::debug!(
+					"[SLASH BENCHMARK] ERROR: query_slashing_origin failed with error: {:?}",
+					e
+				);
 				panic!("query_slashing_origin failed: {:?}", e);
-			}
+			},
 		};
-	}: _(RawOrigin::Signed(slash_origin.clone()), operators[0].clone(), 0, Percent::from_percent(50))
+
+		#[extrinsic_call]
+		slash(
+			RawOrigin::Signed(slash_origin.clone()),
+			operators[0].clone(),
+			0,
+			Percent::from_percent(50),
+		);
+
+		Ok(())
+	}
 
 	// Dispute a scheduled slash
-	dispute {
-		let (owner, operators, _, service_id) = prepare_service::<T>();
+	#[benchmark]
+	fn dispute() -> Result<(), BenchmarkError> {
+		let (_owner, operators, _, service_id) = prepare_service::<T>();
 		let service = Pallet::<T>::services(service_id).unwrap();
-		log::debug!("[DISPUTE BENCHMARK] service_id: {:?}, blueprint: {:?}", service_id, service.blueprint);
+		log::debug!(
+			"[DISPUTE BENCHMARK] service_id: {:?}, blueprint: {:?}",
+			service_id,
+			service.blueprint
+		);
 
 		let slash_query_result = Pallet::<T>::query_slashing_origin(&service);
 		log::debug!("[DISPUTE BENCHMARK] query_slashing_origin result: {:?}", slash_query_result);
 
 		let slash_origin = match slash_query_result {
 			Ok((maybe_origin, weight)) => {
-				log::debug!("[DISPUTE BENCHMARK] query_slashing_origin succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
+				log::debug!(
+					"[DISPUTE BENCHMARK] query_slashing_origin succeeded, maybe_origin: {:?}, weight: {:?}",
+					maybe_origin,
+					weight
+				);
 				if let Some(origin) = maybe_origin {
 					origin
 				} else {
@@ -725,18 +849,27 @@ benchmarks! {
 			Err(e) => {
 				log::debug!("[DISPUTE BENCHMARK] ERROR: query_slashing_origin failed: {:?}", e);
 				panic!("query_slashing_origin failed: {:?}", e);
-			}
+			},
 		};
 		log::debug!("[DISPUTE BENCHMARK] slash_origin: {:?}", slash_origin);
 
-		assert_ok!(Pallet::<T>::slash(RawOrigin::Signed(slash_origin.clone()).into(), operators[0].clone(), 0, Percent::from_percent(50)));
+		assert_ok!(Pallet::<T>::slash(
+			RawOrigin::Signed(slash_origin.clone()).into(),
+			operators[0].clone(),
+			0,
+			Percent::from_percent(50)
+		));
 
 		let dispute_query_result = Pallet::<T>::query_dispute_origin(&service);
 		log::debug!("[DISPUTE BENCHMARK] query_dispute_origin result: {:?}", dispute_query_result);
 
 		let dispute_origin = match dispute_query_result {
 			Ok((maybe_origin, weight)) => {
-				log::debug!("[DISPUTE BENCHMARK] query_dispute_origin succeeded, maybe_origin: {:?}, weight: {:?}", maybe_origin, weight);
+				log::debug!(
+					"[DISPUTE BENCHMARK] query_dispute_origin succeeded, maybe_origin: {:?}, weight: {:?}",
+					maybe_origin,
+					weight
+				);
 				if let Some(origin) = maybe_origin {
 					origin
 				} else {
@@ -747,32 +880,61 @@ benchmarks! {
 			Err(e) => {
 				log::debug!("[DISPUTE BENCHMARK] ERROR: query_dispute_origin failed: {:?}", e);
 				panic!("query_dispute_origin failed: {:?}", e);
-			}
+			},
 		};
 		log::debug!("[DISPUTE BENCHMARK] dispute_origin: {:?}", dispute_origin);
-	}: _(RawOrigin::Signed(dispute_origin.clone()), 0, 0)
+
+		#[extrinsic_call]
+		dispute(RawOrigin::Signed(dispute_origin.clone()), 0, 0);
+
+		Ok(())
+	}
 
 	// Update master blueprint service manager
-	update_master_blueprint_service_manager {
-	}: _(RawOrigin::Root, H160::zero())
+	#[benchmark]
+	fn update_master_blueprint_service_manager() -> Result<(), BenchmarkError> {
+		#[extrinsic_call]
+		update_master_blueprint_service_manager(RawOrigin::Root, H160::zero());
+
+		Ok(())
+	}
 
 	// Update default heartbeat threshold
-	update_default_heartbeat_threshold {
+	#[benchmark]
+	fn update_default_heartbeat_threshold() -> Result<(), BenchmarkError> {
 		let threshold: u8 = 50;
-	}: _(RawOrigin::Root, threshold)
+
+		#[extrinsic_call]
+		update_default_heartbeat_threshold(RawOrigin::Root, threshold);
+
+		Ok(())
+	}
 
 	// Update default heartbeat interval
-	update_default_heartbeat_interval {
+	#[benchmark]
+	fn update_default_heartbeat_interval() -> Result<(), BenchmarkError> {
 		let interval: BlockNumberFor<T> = 100_u32.into();
-	}: _(RawOrigin::Root, interval)
+
+		#[extrinsic_call]
+		update_default_heartbeat_interval(RawOrigin::Root, interval);
+
+		Ok(())
+	}
 
 	// Update default heartbeat slashing window
-	update_default_heartbeat_slashing_window {
+	#[benchmark]
+	fn update_default_heartbeat_slashing_window() -> Result<(), BenchmarkError> {
 		let window: BlockNumberFor<T> = 1000_u32.into();
-	}: _(RawOrigin::Root, window)
+
+		#[extrinsic_call]
+		update_default_heartbeat_slashing_window(RawOrigin::Root, window);
+
+		Ok(())
+	}
 
 	// Join a service as an operator
-	join_service {
+	#[benchmark]
+	fn join_service() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
@@ -813,10 +975,16 @@ benchmarks! {
 			0,
 			security_commitments.clone()
 		));
-	}: _(RawOrigin::Signed(bob.clone()), service_id, security_commitments)
+
+		#[extrinsic_call]
+		join_service(RawOrigin::Signed(bob.clone()), service_id, security_commitments);
+
+		Ok(())
+	}
 
 	// Leave a service as an operator
-	leave_service {
+	#[benchmark]
+	fn leave_service() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2, 3, 4]);
 		let dave = operators.pop().expect("Dave exists");
 		let charlie = operators.pop().expect("Charlie exists");
@@ -865,22 +1033,33 @@ benchmarks! {
 			security_commitments
 		));
 
-	}: _(RawOrigin::Signed(bob.clone()), service_id)
+		#[extrinsic_call]
+		leave_service(RawOrigin::Signed(bob.clone()), service_id);
+
+		Ok(())
+	}
 
 	// Benchmark payment validation for pay-once services
-	validate_payment_amount_pay_once {
+	#[benchmark]
+	fn validate_payment_amount_pay_once() -> Result<(), BenchmarkError> {
 		let alice = funded_account::<T>(1u8);
 		let blueprint = cggmp21_blueprint::<T>();
 		create_test_blueprint::<T>(RawOrigin::Signed(alice.clone()).into(), blueprint);
 
 		let (_, blueprint) = Pallet::<T>::blueprints(0).expect("blueprint exists");
 		let amount = 1000_u32.into();
-	}: {
-		let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
+
+		#[block]
+		{
+			let _ = Pallet::<T>::validate_payment_amount(&blueprint, amount);
+		}
+
+		Ok(())
 	}
 
 	// Benchmark payment processing for subscription services
-	process_subscription_payment {
+	#[benchmark]
+	fn process_subscription_payment() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2]);
 		let bob = operators.pop().expect("operator exists");
 
@@ -906,22 +1085,28 @@ benchmarks! {
 		let interval = 10u32.into();
 		let maybe_end = None;
 		let current_block = frame_system::Pallet::<T>::block_number();
-	}: {
-		let _ = Pallet::<T>::process_job_subscription_payment(
-			service_id,
-			job_index,
-			call_id,
-			&subscriber, // caller (subscriber authorizes their own payment)
-			&subscriber, // payer
-			rate_per_interval,
-			interval,
-			maybe_end,
-			current_block
-		);
+
+		#[block]
+		{
+			let _ = Pallet::<T>::process_job_subscription_payment(
+				service_id,
+				job_index,
+				call_id,
+				&subscriber, // caller (subscriber authorizes their own payment)
+				&subscriber, // payer
+				rate_per_interval,
+				interval,
+				maybe_end,
+				current_block,
+			);
+		}
+
+		Ok(())
 	}
 
 	// Benchmark event-driven payment processing
-	process_event_driven_payment {
+	#[benchmark]
+	fn process_event_driven_payment() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2]);
 		let bob = operators.pop().expect("operator exists");
 
@@ -945,20 +1130,26 @@ benchmarks! {
 		let subscriber = alice.clone();
 		let reward_per_event = 10u32.into();
 		let event_count = 5;
-	}: {
-		let _ = Pallet::<T>::process_job_event_driven_payment(
-			service_id,
-			job_index,
-			call_id,
-			&subscriber, // caller (subscriber authorizes their own payment)
-			&subscriber, // payer
-			reward_per_event,
-			event_count
-		);
+
+		#[block]
+		{
+			let _ = Pallet::<T>::process_job_event_driven_payment(
+				service_id,
+				job_index,
+				call_id,
+				&subscriber, // caller (subscriber authorizes their own payment)
+				&subscriber, // payer
+				reward_per_event,
+				event_count,
+			);
+		}
+
+		Ok(())
 	}
 
 	// Benchmark subscription payments processing with on_idle
-	process_subscription_payments_on_idle {
+	#[benchmark]
+	fn process_subscription_payments_on_idle() -> Result<(), BenchmarkError> {
 		let (alice, mut operators, _) = prepare_blueprint_with_operators::<T>(&[2]);
 		let bob = operators.pop().expect("operator exists");
 
@@ -982,13 +1173,20 @@ benchmarks! {
 
 		let current_block = 100_u32.into();
 		let remaining_weight = frame_support::weights::Weight::from_parts(1_000_000_000, 0);
-	}: {
-		let _ = Pallet::<T>::process_subscription_payments_on_idle(current_block, remaining_weight);
+
+		#[block]
+		{
+			let _ =
+				Pallet::<T>::process_subscription_payments_on_idle(current_block, remaining_weight);
+		}
+
+		Ok(())
 	}
 
 	// Trigger subscription payment manually
-	trigger_subscription_payment {
-		let (owner, operators, blueprint_id, service_id) = prepare_service::<T>();
+	#[benchmark]
+	fn trigger_subscription_payment() -> Result<(), BenchmarkError> {
+		let (owner, _operators, blueprint_id, service_id) = prepare_service::<T>();
 
 		// Modify blueprint to have subscription pricing
 		let (_, mut blueprint) = Pallet::<T>::blueprints(blueprint_id).expect("blueprint exists");
@@ -1019,7 +1217,8 @@ benchmarks! {
 				service_id,
 				job_index: 0u8,
 				subscriber: owner.clone(),
-				last_billed: current_block.saturating_sub(interval), // Set to past so payment is due
+				last_billed: current_block.saturating_sub(interval), /* Set to past so payment is
+				                                                      * due */
 				end_block: None,
 			};
 			<JobSubscriptionBillings<T>>::insert(&billing_key, billing);
@@ -1033,12 +1232,16 @@ benchmarks! {
 		frame_system::Pallet::<T>::set_block_number(target_block);
 
 		ensure_account_ready::<T>(&T::RewardRecorder::account_id());
-	}: _(RawOrigin::Signed(owner.clone()), service_id, 0u8)
-}
 
-// Define the module and associated types for the benchmarks
-impl_benchmark_test_suite!(
-	Pallet,
-	crate::mock::new_test_ext(vec![1, 2, 3, 4]),
-	crate::mock::Runtime,
-);
+		#[extrinsic_call]
+		trigger_subscription_payment(RawOrigin::Signed(owner.clone()), service_id, 0u8);
+
+		Ok(())
+	}
+
+	impl_benchmark_test_suite!(
+		Pallet,
+		crate::mock::new_test_ext(vec![1, 2, 3, 4]),
+		crate::mock::Runtime
+	);
+}

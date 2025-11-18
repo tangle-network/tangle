@@ -518,14 +518,12 @@ impl<T: Config> Pallet<T> {
 
 		for (key, billing) in JobSubscriptionBillings::<T>::iter() {
 			// Skip entries until we reach the cursor position
-			if skip_until_cursor {
-				if let Some(ref cursor) = cursor_key {
-					if &key == cursor {
-						skip_until_cursor = false;
-						// Don't continue - we want to process this entry
-					} else {
-						continue; // Only skip if we haven't reached the cursor yet
-					}
+			if skip_until_cursor && let Some(ref cursor) = cursor_key {
+				if &key == cursor {
+					skip_until_cursor = false;
+					// Don't continue - we want to process this entry
+				} else {
+					continue; // Only skip if we haven't reached the cursor yet
 				}
 			}
 			// Weight check
@@ -565,10 +563,8 @@ impl<T: Config> Pallet<T> {
 					let blocks_since_last = current_block.saturating_sub(billing.last_billed);
 
 					if blocks_since_last >= interval_converted {
-						if let Some(end_block) = maybe_end_converted {
-							if current_block > end_block {
-								continue;
-							}
+						if let Some(end_block) = maybe_end_converted && current_block > end_block {
+							continue;
 						}
 
 						match Self::process_job_subscription_payment(

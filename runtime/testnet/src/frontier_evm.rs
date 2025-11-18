@@ -65,7 +65,8 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
 		if let Some(author_index) = F::find_author(digests) {
 			let authorities = Babe::authorities();
 			let index = author_index as usize;
-			// Check bounds to prevent panic when authorities list is empty or index is out of bounds
+			// Check bounds to prevent panic when authorities list is empty or index is out of
+			// bounds
 			if index < authorities.len() {
 				let authority_id = authorities[index].clone();
 				return Some(H160::from_slice(&authority_id.0.to_raw_vec()[4..24]));
