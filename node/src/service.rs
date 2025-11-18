@@ -49,17 +49,12 @@ const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 type HostFunctions = sp_io::SubstrateHostFunctions;
 
 #[cfg(feature = "runtime-benchmarks")]
-type HostFunctions = (
-	sp_io::SubstrateHostFunctions,
-	frame_benchmarking::benchmarking::HostFunctions,
-);
+type HostFunctions =
+	(sp_io::SubstrateHostFunctions, frame_benchmarking::benchmarking::HostFunctions);
 
 #[allow(deprecated)]
-pub(crate) type FullClient = sc_service::TFullClient<
-	Block,
-	RuntimeApi,
-	WasmExecutor<HostFunctions>,
->;
+pub(crate) type FullClient =
+	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<HostFunctions>>;
 
 pub(crate) type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;

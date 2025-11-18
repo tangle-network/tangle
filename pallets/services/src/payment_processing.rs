@@ -563,7 +563,9 @@ impl<T: Config> Pallet<T> {
 					let blocks_since_last = current_block.saturating_sub(billing.last_billed);
 
 					if blocks_since_last >= interval_converted {
-						if let Some(end_block) = maybe_end_converted && current_block > end_block {
+						if let Some(end_block) = maybe_end_converted &&
+							current_block > end_block
+						{
 							continue;
 						}
 
