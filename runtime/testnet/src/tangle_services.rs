@@ -1,5 +1,13 @@
 use super::*;
 
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator
+};
+#[cfg(feature = "runtime-benchmarks")]
+use frame_support::traits::tokens::fungibles::{Inspect, Mutate, Create};
+
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
 }
@@ -18,6 +26,53 @@ impl tangle_primitives::services::EvmRunner<Runtime> for PalletEvmRunner {
 		is_transactional: bool,
 		validate: bool,
 	) -> Result<fp_evm::CallInfo, tangle_primitives::services::RunnerError<Self::Error>> {
+		
+		#[cfg(feature = "runtime-benchmarks")]
+		const MBSM: H160 = H160([0x12; 20]);
+
+		#[cfg(feature = "runtime-benchmarks")]
+		if target == MBSM {
+			if input.len() >= 4 {
+				let selector = &input[0..4];
+				let call_data = &input[4..];
+				// @dev: mock 
+				// - call(0x274ef015): querySlashingOrigin(uint64,uint64):(address)
+				// - call(0x8e6f8c60) queryDispatcher(address):(address)
+				if selector == [0x27, 0x4e, 0xf0, 0x15] || selector == [0x8e, 0x6f, 0x8c, 0x60] {
+					return Ok(fp_evm::CallInfo {
+						exit_reason: fp_evm::ExitReason::Succeed(fp_evm::ExitSucceed::Stopped),
+						// return a mock address 
+						value: vec![0u8; 32],
+						used_gas: fp_evm::UsedGas {
+							standard: U256::from(21000),
+							effective: U256::from(21000),
+						},
+						weight_info: None,
+						logs: vec![],
+					});
+				}
+				// getHeartbeatInterval(uint64,uint64)
+				else if selector == [0x68, 0x22, 0x9e, 0x4f] {
+					return Ok(fp_evm::CallInfo {
+						exit_reason: fp_evm::ExitReason::Succeed(fp_evm::ExitSucceed::Stopped),
+						value: {
+							// useDefault is true, interval is 0
+							let mut v = vec![0u8; 128];
+							v[63] = 1; // true as uint256
+							v
+						}.to_vec(),
+						used_gas: fp_evm::UsedGas {
+							standard: U256::from(21000),
+							effective: U256::from(21000),
+						},
+						weight_info: None,
+						logs: vec![],
+					});
+				}
+			}
+		}
+
+
 		let max_fee_per_gas = DefaultBaseFeePerGas::get();
 		let max_priority_fee_per_gas =
 			max_fee_per_gas.saturating_mul(U256::from(3) / U256::from(2));
@@ -212,6 +267,7 @@ impl pallet_services::Config for Runtime {
 	type Fungibles = Assets;
 	type RewardRecorder = Rewards;
 	type RewardsManager = Rewards;
+	type TreasuryAccount = TreasuryAccount;
 	type PalletEvmAccount = ServicesPalletEvmAccount;
 	type SlashManager = ();
 	type EvmRunner = PalletEvmRunner;
@@ -250,11 +306,54 @@ impl pallet_services::Config for Runtime {
 	type MaxMetricsDataSize = MaxMetricsDataSize;
 	type FallbackWeightReads = FallbackWeightReads;
 	type FallbackWeightWrites = FallbackWeightWrites;
-	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
-	#[cfg(feature = "runtime-benchmarks")]
-	type OperatorDelegationManager =
-		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
 	type RoleKeyId = RoleKeyId;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockBenchmarkingHelper;
+}
+
+
+#[cfg(feature = "runtime-benchmarks")]
+pub struct MockBenchmarkingHelper;
+
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn asset_exists(asset: AssetId) -> bool {
+		Assets::asset_exists(asset)
+	}
+	
+	fn balance(asset: AssetId, who: &AccountId) -> Balance {
+		Assets::balance(asset, who)
+	}
+
+	fn mint_into(asset: AssetId, who: &AccountId, amount: Balance) -> Result<Balance, sp_runtime::DispatchError> {
+		Assets::mint_into(asset, who, amount)
+	}
+
+	fn create(id: AssetId, admin: AccountId, is_sufficient: bool, min_balance: Balance) -> sp_runtime::DispatchResult {
+		<Assets as Create<AccountId>>::create(id, admin, is_sufficient, min_balance)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn process_delegate_be(
+		who: AccountId,
+		operator: AccountId,
+		asset: tangle_primitives::services::Asset<AssetId>,
+		amount: Balance,
+	) -> sp_runtime::DispatchResult {
+		MultiAssetDelegation::process_delegate_be(who, operator, asset, amount)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockBenchmarkingHelper {
+	fn handle_deposit_and_create_operator_be(
+		who: AccountId,
+		bond_amount: Balance,
+	) -> sp_runtime::DispatchResult {
+		MultiAssetDelegation::handle_deposit_and_create_operator_be(who, bond_amount)
+	}
 }

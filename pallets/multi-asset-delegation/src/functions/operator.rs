@@ -26,6 +26,39 @@ use sp_runtime::{
 };
 use tangle_primitives::traits::ServiceManager;
 
+#[cfg(feature = "runtime-benchmarks")]
+impl<T: Config> tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<T::AccountId, BalanceOf<T>> for Pallet<T> {
+	/// Handles the deposit of stake amount and creation of an operator.
+	/// This function is used for testing purposes.
+	/// DO NOT USE IN PRODUCTION.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the operator.
+	/// * `bond_amount` - The amount to be bonded by the operator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is already an operator or if the stake amount is too low.
+	fn handle_deposit_and_create_operator_be(
+		who: T::AccountId,
+		bond_amount: BalanceOf<T>,
+	) -> DispatchResult {
+		let operator_metadata = OperatorMetadata {
+			delegations: BoundedVec::default(),
+			delegation_count: 0,
+			blueprint_ids: BoundedVec::default(),
+			stake: bond_amount,
+			request: None,
+			status: OperatorStatus::Active,
+		};
+
+		Operators::<T>::insert(&who, operator_metadata);
+
+		Ok(())
+	}
+}
+
 impl<T: Config> Pallet<T> {
 	/// Handles the deposit of stake amount and creation of an operator.
 	///

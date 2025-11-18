@@ -8,8 +8,8 @@ steps=10
 repeat=2
 
 # List of pallets and their corresponding folder names
-pallets=(pallet_multi_asset_delegation pallet_tangle_lst pallet_services pallet_rewards)
-folders=(multi-asset-delegation tangle-lst services rewards)
+pallets=(pallet_airdrop_claims pallet_credits pallet_multi_asset_delegation pallet_rewards pallet_services)
+folders=(claims credits multi-asset-delegation rewards services)
 
 # Generate weights for testnet runtime
 echo "[testnet] Generating weights with steps: $steps, repeat: $repeat"
@@ -19,7 +19,6 @@ for i in "${!pallets[@]}"; do
   
   ./target/release/tangle benchmark pallet \
     --chain=dev \
-    --execution=wasm \
     --wasm-execution=compiled \
     --pallet="$pallet" \
     --extrinsic='*' \

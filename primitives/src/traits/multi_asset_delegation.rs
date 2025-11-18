@@ -3,6 +3,8 @@ use crate::{
 	types::{RoundIndex, rewards::UserDepositWithLocks},
 };
 use sp_std::prelude::*;
+#[cfg(feature = "runtime-benchmarks")]
+use sp_runtime::DispatchResult;
 
 /// A trait to provide information about multi-asset delegation.
 ///
@@ -136,4 +138,79 @@ pub trait MultiAssetDelegationInfo<AccountId, Balance, BlockNumber, AssetId, Ass
 	/// An `Option` containing the user's deposit information if it exists:
 	/// - `Some(UserDepositWithLocks)` containing the unlocked amount and any time-locks
 	fn get_user_deposit_by_asset_type(who: &AccountId, asset_type: AssetType) -> Option<Balance>;
+}
+
+/// A trait to provide delegation functions for multi-asset delegation.
+///
+/// This trait defines methods to perform operations on multi-asset delegation,
+/// such as delegating an amount of an asset to an operator.
+///
+/// # Type Parameters
+///
+/// * `AccountId`: The type representing an account identifier.
+/// * `Balance`: The type representing a balance or amount.
+/// * `AssetId`: The type representing an asset identifier.
+/// * `DelegatorBlueprintSelection`: The type representing the strategy for selecting which
+///   blueprints to work with.
+///
+/// # Functions
+///
+/// * `delegate`: Delegate an amount of an asset to an operator.
+#[cfg(feature = "runtime-benchmarks")]
+pub trait MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> {
+	/// Process the delegation of an amount of an asset to an operator.
+	/// This function is used for testing purposes.
+	/// DO NOT USE IN PRODUCTION.
+	///	
+	/// # Parameters
+	///
+	/// * `who`: The account identifier of the delegator.
+	/// * `operator`: The account identifier of the operator.
+	/// * `asset`: The asset for which to delegate.
+	/// * `amount`: The amount to delegate.
+	/// * `blueprint_selection`: The strategy for selecting which blueprints to work with.
+	///
+	/// # Returns
+	///
+	/// A `DispatchResult` indicating the success or failure of the delegation.
+	fn process_delegate_be(
+		who: AccountId,
+		operator: AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> DispatchResult;
+}
+
+/// A trait to provide operator functions for multi-asset delegation.
+///
+/// This trait defines methods to perform operations on multi-asset operator,
+/// such as creating an operator and handling the deposit of stake amount.
+///
+/// # Type Parameters
+///
+/// * `AccountId`: The type representing an account identifier.
+/// * `Balance`: The type representing a balance or amount.
+///
+/// # Functions
+///
+/// * `handle_deposit_and_create_operator`: Handles the deposit of stake amount and creation of an
+///   operator.
+#[cfg(feature = "runtime-benchmarks")]
+pub trait MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> {
+	/// Handles the deposit of stake amount and creation of an operator.
+	/// This function is used for testing purposes.
+	/// DO NOT USE IN PRODUCTION.
+	///
+	/// # Arguments
+	///
+	/// * `who` - The account ID of the operator.
+	/// * `bond_amount` - The amount to be bonded by the operator.
+	///
+	/// # Errors
+	///
+	/// Returns an error if the user is already an operator or if the stake amount is too low.
+	fn handle_deposit_and_create_operator_be(
+		who: AccountId,
+		bond_amount: Balance,
+	) -> DispatchResult;
 }

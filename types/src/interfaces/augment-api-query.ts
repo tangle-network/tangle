@@ -10,7 +10,7 @@ import type { Data } from '@polkadot/types';
 import type { BTreeSet, Bytes, Null, Option, U256, U8aFixed, Vec, bool, u128, u32, u64, u8 } from '@polkadot/types-codec';
 import type { AnyNumber, ITuple } from '@polkadot/types-codec/types';
 import type { AccountId32, Call, H160, H256, Perbill, Percent, Permill } from '@polkadot/types/interfaces/runtime';
-import type { EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSupportTokensMiscIdAmountRuntimeFreezeReason, FrameSupportTokensMiscIdAmountRuntimeHoldReason, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, IsmpConsensusStateCommitment, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpHostStateMachine, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAssetsApproval, PalletAssetsAssetAccount, PalletAssetsAssetDetails, PalletAssetsAssetMetadata, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletCreditsStakeTier, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletHyperbridgeVersionedHostParams, PalletIdentityAuthorityProperties, PalletIdentityRegistrarInfo, PalletIdentityRegistration, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationDelegatorDelegatorMetadata, PalletMultiAssetDelegationOperatorOperatorMetadata, PalletMultiAssetDelegationOperatorOperatorSnapshot, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageOldRequestStatus, PalletPreimageRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletRewardsRewardConfigForAssetVault, PalletRewardsVaultMetadata, PalletSchedulerRetryConfig, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTangleLstBondedPoolBondedPoolInner, PalletTangleLstClaimPermission, PalletTangleLstPoolsPoolMember, PalletTangleLstSubPools, PalletTangleLstSubPoolsRewardPool, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusBabeDigestsPreDigest, SpConsensusGrandpaAppPublic, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingExposure, SpStakingExposurePage, SpStakingOffenceOffenceDetails, SpStakingPagedExposureMetadata, TanglePrimitivesServicesJobsJobCall, TanglePrimitivesServicesJobsJobCallResult, TanglePrimitivesServicesJobsJobPayment, TanglePrimitivesServicesJobsJobSubscriptionBilling, TanglePrimitivesServicesQosHeartbeatStats, TanglePrimitivesServicesService, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesServiceServiceRequest, TanglePrimitivesServicesServiceStagingServicePayment, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesOperatorProfile, TanglePrimitivesServicesTypesUnappliedSlash, TangleTestnetRuntimeOpaqueSessionKeys } from '@polkadot/types/lookup';
+import type { EthereumBlock, EthereumReceiptReceiptV3, EthereumTransactionTransactionV2, FpRpcTransactionStatus, FrameSupportDispatchPerDispatchClassWeight, FrameSupportPreimagesBounded, FrameSupportTokensMiscIdAmountRuntimeFreezeReason, FrameSupportTokensMiscIdAmountRuntimeHoldReason, FrameSystemAccountInfo, FrameSystemCodeUpgradeAuthorization, FrameSystemEventRecord, FrameSystemLastRuntimeUpgradeInfo, FrameSystemPhase, IsmpConsensusStateCommitment, IsmpConsensusStateMachineHeight, IsmpConsensusStateMachineId, IsmpHostStateMachine, PalletAirdropClaimsStatementKind, PalletAirdropClaimsUtilsMultiAddress, PalletAssetsApproval, PalletAssetsAssetAccount, PalletAssetsAssetDetails, PalletAssetsAssetMetadata, PalletBagsListListBag, PalletBagsListListNode, PalletBalancesAccountData, PalletBalancesBalanceLock, PalletBalancesReserveData, PalletBountiesBounty, PalletChildBountiesChildBounty, PalletCollectiveVotes, PalletCreditsStakeTier, PalletDemocracyMetadataOwner, PalletDemocracyReferendumInfo, PalletDemocracyVoteThreshold, PalletDemocracyVoteVoting, PalletElectionProviderMultiPhasePhase, PalletElectionProviderMultiPhaseReadySolution, PalletElectionProviderMultiPhaseRoundSnapshot, PalletElectionProviderMultiPhaseSignedSignedSubmission, PalletElectionProviderMultiPhaseSolutionOrSnapshotSize, PalletElectionsPhragmenSeatHolder, PalletElectionsPhragmenVoter, PalletEvmCodeMetadata, PalletGrandpaStoredPendingChange, PalletGrandpaStoredState, PalletHyperbridgeVersionedHostParams, PalletIdentityAuthorityProperties, PalletIdentityRegistrarInfo, PalletIdentityRegistration, PalletImOnlineSr25519AppSr25519Public, PalletMultiAssetDelegationDelegatorDelegatorMetadata, PalletMultiAssetDelegationOperatorOperatorMetadata, PalletMultiAssetDelegationOperatorOperatorSnapshot, PalletMultisigMultisig, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsClaimPermission, PalletNominationPoolsPoolMember, PalletNominationPoolsRewardPool, PalletNominationPoolsSubPools, PalletPreimageOldRequestStatus, PalletPreimageRequestStatus, PalletProxyAnnouncement, PalletProxyProxyDefinition, PalletRewardsDelegatorRewardDebt, PalletRewardsOperatorRewardPool, PalletRewardsRewardConfigForAssetVault, PalletRewardsVaultMetadata, PalletSchedulerRetryConfig, PalletSchedulerScheduled, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingForcing, PalletStakingNominations, PalletStakingRewardDestination, PalletStakingSlashingSlashingSpans, PalletStakingSlashingSpanRecord, PalletStakingStakingLedger, PalletStakingUnappliedSlash, PalletStakingValidatorPrefs, PalletTangleLstBondedPoolBondedPoolInner, PalletTangleLstClaimPermission, PalletTangleLstPoolsPoolMember, PalletTangleLstSubPools, PalletTangleLstSubPoolsRewardPool, PalletTransactionPaymentReleases, PalletTreasuryProposal, PalletTreasurySpendStatus, PalletVestingReleases, PalletVestingVestingInfo, SpConsensusBabeAppPublic, SpConsensusBabeBabeEpochConfiguration, SpConsensusBabeDigestsNextConfigDescriptor, SpConsensusBabeDigestsPreDigest, SpConsensusGrandpaAppPublic, SpCoreCryptoKeyTypeId, SpNposElectionsElectionScore, SpRuntimeDigest, SpStakingExposure, SpStakingExposurePage, SpStakingOffenceOffenceDetails, SpStakingPagedExposureMetadata, TanglePrimitivesServicesJobsJobCall, TanglePrimitivesServicesJobsJobCallResult, TanglePrimitivesServicesJobsJobPayment, TanglePrimitivesServicesJobsJobSubscriptionBilling, TanglePrimitivesServicesQosHeartbeatStats, TanglePrimitivesServicesService, TanglePrimitivesServicesServiceServiceBlueprint, TanglePrimitivesServicesServiceServiceRequest, TanglePrimitivesServicesServiceStagingServicePayment, TanglePrimitivesServicesTypesAssetU128, TanglePrimitivesServicesTypesOperatorPreferences, TanglePrimitivesServicesTypesOperatorProfile, TanglePrimitivesServicesTypesUnappliedSlash, TangleTestnetRuntimeOpaqueSessionKeys } from '@polkadot/types/lookup';
 import type { Observable } from '@polkadot/types/types';
 
 export type __AugmentedQuery<ApiType extends ApiTypes> = AugmentedQuery<ApiType, () => unknown>;
@@ -1186,6 +1186,27 @@ declare module '@polkadot/api-base/types/storage' {
        **/
       decayStartPeriod: AugmentedQuery<ApiType, () => Observable<u64>, []> & QueryableStorageEntry<ApiType, []>;
       /**
+       * Tracks each delegator's position in their operators' reward pools.
+       * 
+       * This acts as a "checkpoint" or "debt" - the difference between the operator's
+       * current `accumulated_rewards_per_share` and the delegator's `last_accumulated_per_share`
+       * determines the rewards earned since last claim.
+       * 
+       * Storage Structure: DelegatorRewardDebts[Delegator][Operator] = RewardDebt
+       **/
+      delegatorRewardDebts: AugmentedQuery<ApiType, (arg1: AccountId32 | string | Uint8Array, arg2: AccountId32 | string | Uint8Array) => Observable<Option<PalletRewardsDelegatorRewardDebt>>, [AccountId32, AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32, AccountId32]>;
+      /**
+       * Pool-based reward accumulator for each operator.
+       * 
+       * This storage enables O(1) reward distribution to delegators regardless of delegator count.
+       * When a reward is recorded for an operator, only this single storage item is updated:
+       * `accumulated_rewards_per_share += reward / total_staked`
+       * 
+       * Delegators calculate their owed rewards at claim time by comparing their
+       * `DelegatorRewardDebt` against this accumulator.
+       **/
+      operatorRewardPools: AugmentedQuery<ApiType, (arg: AccountId32 | string | Uint8Array) => Observable<PalletRewardsOperatorRewardPool>, [AccountId32]> & QueryableStorageEntry<ApiType, [AccountId32]>;
+      /**
        * Storage map from Operator AccountId to a list of pending rewards.
        * Each reward entry is a tuple of (ServiceId, Amount).
        **/
@@ -1357,6 +1378,21 @@ declare module '@polkadot/api-base/types/storage' {
        * Service Requst ID -> Service Payment
        **/
       stagingServicePayments: AugmentedQuery<ApiType, (arg: u64 | AnyNumber | Uint8Array) => Observable<Option<TanglePrimitivesServicesServiceStagingServicePayment>>, [u64]> & QueryableStorageEntry<ApiType, [u64]>;
+      /**
+       * Cursor for resumable subscription processing.
+       * 
+       * Stores the last processed subscription key to enable round-robin
+       * processing across blocks when >50 subscriptions are active.
+       * 
+       * Format: (ServiceId, JobIndex, AccountId)
+       * 
+       * - When set: Processing resumes from this key in next block's `on_idle`
+       * - When None: Processing starts from beginning of storage map
+       * 
+       * This enables fair, bounded subscription billing that doesn't compete
+       * with user transactions for block space.
+       **/
+      subscriptionProcessingCursor: AugmentedQuery<ApiType, () => Observable<Option<ITuple<[u64, u8, AccountId32]>>>, []> & QueryableStorageEntry<ApiType, []>;
       /**
        * All unapplied slashes that are queued for later.
        * 

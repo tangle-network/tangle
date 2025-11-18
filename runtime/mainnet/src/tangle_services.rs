@@ -1,6 +1,14 @@
 use super::*;
 use crate::frontier_evm::DefaultBaseFeePerGas;
 
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator
+};
+#[cfg(feature = "runtime-benchmarks")]
+use frame_support::traits::tokens::fungibles::{Inspect, Mutate, Create};
+
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
 }
@@ -251,11 +259,57 @@ impl pallet_services::Config for Runtime {
 	type MaxMetricsDataSize = MaxMetricsDataSize;
 	type FallbackWeightReads = FallbackWeightReads;
 	type FallbackWeightWrites = FallbackWeightWrites;
-	#[cfg(not(feature = "runtime-benchmarks"))]
 	type OperatorDelegationManager = MultiAssetDelegation;
-	#[cfg(feature = "runtime-benchmarks")]
-	type OperatorDelegationManager =
-		pallet_services::BenchmarkingOperatorDelegationManager<Runtime, Balance>;
 	type RoleKeyId = RoleKeyId;
-	type WeightInfo = ();
+	type WeightInfo = pallet_services::weights::WeightInfo;
+	type RewardRecorder = Rewards;
+	type RewardsManager = Rewards;
+	type TreasuryAccount = TreasuryAccount;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockBenchmarkingHelper;
+}
+
+
+#[cfg(feature = "runtime-benchmarks")]
+pub struct MockBenchmarkingHelper;
+
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn asset_exists(asset: AssetId) -> bool {
+		Assets::asset_exists(asset)
+	}
+	
+	fn balance(asset: AssetId, who: &AccountId) -> Balance {
+		Assets::balance(asset, who)
+	}
+
+	fn mint_into(asset: AssetId, who: &AccountId, amount: Balance) -> Result<Balance, sp_runtime::DispatchError> {
+		Assets::mint_into(asset, who, amount)
+	}
+
+	fn create(id: AssetId, admin: AccountId, is_sufficient: bool, min_balance: Balance) -> sp_runtime::DispatchResult {
+		<Assets as Create<AccountId>>::create(id, admin, is_sufficient, min_balance)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn process_delegate_be(
+		who: AccountId,
+		operator: AccountId,
+		asset: tangle_primitives::services::Asset<AssetId>,
+		amount: Balance,
+	) -> sp_runtime::DispatchResult {
+		MultiAssetDelegation::process_delegate_be(who, operator, asset, amount)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockBenchmarkingHelper {
+	fn handle_deposit_and_create_operator_be(
+		who: AccountId,
+		bond_amount: Balance,
+	) -> sp_runtime::DispatchResult {
+		MultiAssetDelegation::handle_deposit_and_create_operator_be(who, bond_amount)
+	}
 }

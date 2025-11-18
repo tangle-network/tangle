@@ -52,6 +52,13 @@ use tangle_primitives::{
 	traits::{RewardRecorder, RewardsManager},
 	types::{BlockNumber, rewards::LockMultiplier},
 };
+#[cfg(feature = "runtime-benchmarks")]
+use tangle_primitives::traits::{
+	MultiAssetDelegationBenchmarkingHelperDelegation,
+	MultiAssetDelegationBenchmarkingHelperOperator
+};
+#[cfg(feature = "runtime-benchmarks")]
+use frame_support::traits::tokens::fungibles::{Inspect, Mutate, Create};
 
 pub type AccountId = AccountId32;
 pub type Balance = u128;
@@ -231,6 +238,8 @@ parameter_types! {
 		0xfa, 0x9c, 0xc0, 0xe3
 	]);
 	pub const SlashRecipient: AccountId = AccountId32::new([9u8; 32]);
+	/// Treasury account for protocol revenue (5% share)
+	pub const TreasuryAccount: AccountId = AccountId32::new([10u8; 32]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -403,6 +412,50 @@ impl parity_scale_codec::DecodeWithMemTracking for MaxMetricsDataSize {}
 impl parity_scale_codec::DecodeWithMemTracking for FallbackWeightReads {}
 impl parity_scale_codec::DecodeWithMemTracking for FallbackWeightWrites {}
 
+#[cfg(feature = "runtime-benchmarks")]
+pub struct MockBenchmarkingHelper;
+
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_services::types::BenchmarkingHelper<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn asset_exists(asset: AssetId) -> bool {
+		Assets::asset_exists(asset)
+	}
+	
+	fn balance(asset: AssetId, who: &AccountId) -> Balance {
+		Assets::balance(asset, who)
+	}
+
+	fn mint_into(asset: AssetId, who: &AccountId, amount: Balance) -> Result<Balance, DispatchError> {
+		Assets::mint_into(asset, who, amount)
+	}
+
+	fn create(id: AssetId, admin: AccountId, is_sufficient: bool, min_balance: Balance) -> DispatchResult {
+		<Assets as Create<AccountId>>::create(id, admin, is_sufficient, min_balance)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockBenchmarkingHelper {
+	fn process_delegate_be(
+		who: AccountId,
+		operator: AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> DispatchResult {
+		MultiAssetDelegation::process_delegate_be(who, operator, asset, amount)
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockBenchmarkingHelper {
+	fn handle_deposit_and_create_operator_be(
+		who: AccountId,
+		bond_amount: Balance,
+	) -> DispatchResult {
+		MultiAssetDelegation::handle_deposit_and_create_operator_be(who, bond_amount)
+	}
+}
+
 impl pallet_services::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
@@ -450,7 +503,10 @@ impl pallet_services::Config for Runtime {
 	type RoleKeyId = RoleKeyId;
 	type RewardRecorder = MockRewardsManager;
 	type RewardsManager = MockRewardsManager;
+	type TreasuryAccount = TreasuryAccount;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockBenchmarkingHelper;
 }
 
 type Block = frame_system::mocking::MockBlock<Runtime>;
@@ -458,6 +514,7 @@ type Block = frame_system::mocking::MockBlock<Runtime>;
 thread_local! {
 	static DELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance, Option<LockMultiplier>)>> = RefCell::new(Vec::new());
 	static UNDELEGATE_CALLS: RefCell<Vec<(AccountId, AccountId, Asset<AssetId>, Balance)>> = RefCell::new(Vec::new());
+	static PENDING_REWARDS: RefCell<BTreeMap<AccountId, Vec<(u64, Balance)>>> = RefCell::new(BTreeMap::new());
 }
 
 pub struct MockRewardsManager;
@@ -523,21 +580,52 @@ impl MockRewardsManager {
 		UNDELEGATE_CALLS.with(|calls| calls.borrow().clone())
 	}
 
+	pub fn get_pending_rewards(operator: &AccountId) -> Vec<(u64, Balance)> {
+		PENDING_REWARDS.with(|rewards| rewards.borrow().get(operator).cloned().unwrap_or_default())
+	}
+
+	pub fn clear_pending_rewards(operator: &AccountId) {
+		PENDING_REWARDS.with(|rewards| {
+			rewards.borrow_mut().remove(operator);
+		});
+	}
+
 	pub fn clear_all() {
 		DELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
 		UNDELEGATE_CALLS.with(|calls| calls.borrow_mut().clear());
+		PENDING_REWARDS.with(|rewards| rewards.borrow_mut().clear());
 	}
 }
 
 impl RewardRecorder<AccountId, u64, Balance> for MockRewardsManager {
 	type PricingModel = PricingModel<BlockNumber, Balance>;
 
+	fn account_id() -> AccountId {
+		// Mock rewards pallet account
+		mock_pub_key(100)
+	}
+
 	fn record_reward(
-		_operator: &AccountId,
-		_service_id: u64,
-		_amount: Balance,
+		operator: &AccountId,
+		service_id: u64,
+		amount: Balance,
 		_model: &Self::PricingModel,
 	) -> DispatchResult {
+		PENDING_REWARDS.with(|rewards| {
+			let mut rewards_map = rewards.borrow_mut();
+			let operator_rewards = rewards_map.entry(operator.clone()).or_insert_with(Vec::new);
+
+			// AUTO-AGGREGATION: Search for existing entry with same service_id
+			if let Some(existing_entry) =
+				operator_rewards.iter_mut().find(|(sid, _)| *sid == service_id)
+			{
+				// Aggregate: Add to existing amount
+				existing_entry.1 = existing_entry.1.saturating_add(amount);
+			} else {
+				// No existing entry - create new one
+				operator_rewards.push((service_id, amount));
+			}
+		});
 		Ok(())
 	}
 }

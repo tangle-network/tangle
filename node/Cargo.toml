@@ -127,7 +127,6 @@ blueprint-runner = { workspace = true, optional = true }
 blueprint-keystore = { workspace = true, optional = true }
 
 [dev-dependencies]
-tangle-subxt = { workspace = true }
 sp-tracing = { workspace = true }
 alloy = { version = "1.0.35", features = ["full", "provider-debug-api"] }
 anyhow = "1.0"

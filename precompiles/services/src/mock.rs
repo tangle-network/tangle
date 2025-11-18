@@ -226,6 +226,7 @@ impl pallet_staking::Config for Runtime {
 
 parameter_types! {
 	pub const ServicesPalletId: PalletId = PalletId(*b"Services");
+	pub TreasuryAccount: AccountId = AccountId32::from([100u8; 32]);
 }
 
 pub struct PalletEVMGasWeightMapping;
@@ -607,6 +608,10 @@ impl RewardsManager<AccountId, AssetId, Balance, u64> for MockRewardsManager {
 impl RewardRecorder<AccountId, u64, Balance> for MockRewardsManager {
 	type PricingModel = PricingModel<u64, Balance>;
 
+	fn account_id() -> AccountId {
+		AccountId32::from([99u8; 32])
+	}
+
 	fn record_reward(
 		_operator: &AccountId,
 		_service_id: u64,
@@ -664,6 +669,7 @@ impl pallet_services::Config for Runtime {
 	type RoleKeyId = RoleKeyId;
 	type RewardRecorder = MockRewardsManager;
 	type RewardsManager = MockRewardsManager;
+	type TreasuryAccount = TreasuryAccount;
 	type WeightInfo = ();
 }
 

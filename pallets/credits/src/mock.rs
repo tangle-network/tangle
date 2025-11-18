@@ -571,6 +571,8 @@ impl pallet_credits::Config for Runtime {
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
 	type MaxRatePerBlock = MaxRatePerBlock;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MultiAssetDelegation;
 }
 
 construct_runtime!(

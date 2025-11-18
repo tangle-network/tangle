@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
+// Allow deprecated TestFetcher - kept for backward compatibility with on-chain data
 #![allow(deprecated)]
 
 use super::{BoundedString, constraints::Constraints};
@@ -42,6 +43,7 @@ pub enum BlueprintSource<C: Constraints> {
 	/// A blueprint contained in a container image.
 	Container(ImageRegistryFetcher<C>),
 	/// A binary source used for testing the blueprint.
+	#[allow(deprecated)]
 	Testing(TestFetcher<C>),
 }
 
@@ -150,6 +152,7 @@ pub struct GithubFetcher<C: Constraints> {
 #[codec(decode_bound(skip_type_params(C)))]
 #[codec(mel_bound(skip_type_params(C)))]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize), serde(bound = ""))]
+#[allow(deprecated)]
 #[deprecated(
 	since = "1.4.4",
 	note = "No longer used for its initial purpose, may be used in the future to allow for testing with a local manager-in-node setup"

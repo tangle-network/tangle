@@ -158,6 +158,11 @@ pub mod pallet {
 
 		/// The weight information for the pallet.
 		type WeightInfo: WeightInfo;
+
+		/// The benchmarking helper for the pallet.
+		#[cfg(feature = "runtime-benchmarks")]
+		type BenchmarkingHelper: tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<Self::AccountId, BalanceOf<Self>, Self::AssetId>
+			+ tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<Self::AccountId, BalanceOf<Self>>;
 	}
 
 	// --- Storage Items ---

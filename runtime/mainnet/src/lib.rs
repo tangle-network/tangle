@@ -1295,6 +1295,8 @@ parameter_types! {
 	pub const MinIncentiveCap: Balance = tangle_primitives::types::rewards::MIN_INCENTIVE_CAP;
 	pub const MaxVaultNameLen: u32 = tangle_primitives::types::rewards::MAX_VAULT_NAME_LENGTH;
 	pub const MaxVaultLogoLen: u32 = tangle_primitives::types::rewards::MAX_VAULT_LOGO_LENGTH;
+	/// Operators receive 15% commission on service rewards, with remaining 85% distributed to delegators
+	pub const DefaultOperatorCommission: Perbill = Perbill::from_percent(15);
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -1315,7 +1317,10 @@ impl pallet_rewards::Config for Runtime {
 	type VaultMetadataOrigin = EnsureRootOrHalfCouncil;
 	type MaxPendingRewardsPerOperator =
 		ConstU32<{ tangle_primitives::types::rewards::MAX_PENDING_REWARDS_PER_OPERATOR }>;
+	type DefaultOperatorCommission = DefaultOperatorCommission;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MultiAssetDelegation;
 }
 
 parameter_types! {
@@ -1426,6 +1431,8 @@ impl pallet_credits::Config for Runtime {
 	type ForceOrigin = EnsureRoot<AccountId>;
 	type MaxRatePerBlock = MaxRatePerBlock;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MultiAssetDelegation;
 }
 
 impl<LocalCall> frame_system::offchain::CreateInherent<LocalCall> for Runtime

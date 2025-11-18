@@ -6,8 +6,8 @@ use crate::{
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::Perbill;
 use tangle_primitives::{
-	rewards::UserDepositWithLocks,
 	services::Asset,
+	traits::RewardRecorder,
 	types::rewards::{LockInfo, LockMultiplier},
 };
 
@@ -54,12 +54,7 @@ fn setup_vault(
 	));
 
 	// Set deposit in mock delegation info
-	MOCK_DELEGATION_INFO.with(|m| {
-		m.borrow_mut().deposits.insert(
-			(account.clone(), asset),
-			UserDepositWithLocks { unlocked_amount: MOCK_DEPOSIT, amount_with_locks: None },
-		);
-	});
+	insert_user_deposit(account.clone(), asset, MOCK_DEPOSIT, None);
 
 	// Set total deposit and total score for the vault
 	TotalRewardVaultDeposit::<Runtime>::insert(vault_id, MOCK_DEPOSIT);
@@ -91,12 +86,7 @@ fn test_claim_rewards_zero_deposit() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with zero amount
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: 0, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(account.clone(), asset, 0, None);
 
 		// Try to claim rewards for the account with zero deposit - should fail
 		assert_noop!(
@@ -131,12 +121,7 @@ fn test_claim_rewards_only_unlocked() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with only unlocked amount
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(account.clone(), asset, user_deposit, None);
 
 		// Initial balance should be 200_000 (from genesis config)
 		let initial_balance = Balances::free_balance(&account);
@@ -175,19 +160,16 @@ fn test_claim_rewards_with_expired_lock() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with expired lock
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks {
-					unlocked_amount: user_deposit,
-					amount_with_locks: Some(vec![LockInfo {
-						amount: user_deposit,
-						lock_multiplier: LockMultiplier::TwoMonths,
-						expiry_block: 900,
-					}]),
-				},
-			);
-		});
+		insert_user_deposit(
+			account.clone(),
+			asset,
+			user_deposit,
+			Some(vec![LockInfo {
+				amount: user_deposit,
+				lock_multiplier: LockMultiplier::TwoMonths,
+				expiry_block: 900,
+			}]),
+		);
 
 		// Run to block 1000 (after lock expiry)
 		run_to_block(1000);
@@ -235,26 +217,23 @@ fn test_claim_rewards_with_active_locks() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with active locks
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks {
-					unlocked_amount: user_deposit,
-					amount_with_locks: Some(vec![
-						LockInfo {
-							amount: user_deposit * 2,
-							lock_multiplier: LockMultiplier::TwoMonths,
-							expiry_block: 2000,
-						},
-						LockInfo {
-							amount: user_deposit * 3,
-							lock_multiplier: LockMultiplier::ThreeMonths,
-							expiry_block: 2000,
-						},
-					]),
+		insert_user_deposit(
+			account.clone(),
+			asset,
+			user_deposit,
+			Some(vec![
+				LockInfo {
+					amount: user_deposit * 2,
+					lock_multiplier: LockMultiplier::TwoMonths,
+					expiry_block: 2000,
 				},
-			);
-		});
+				LockInfo {
+					amount: user_deposit * 3,
+					lock_multiplier: LockMultiplier::ThreeMonths,
+					expiry_block: 2000,
+				},
+			]),
+		);
 
 		// Run to block 1000
 		run_to_block(1000);
@@ -303,19 +282,16 @@ fn test_claim_rewards_multiple_claims() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with active locks
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks {
-					unlocked_amount: user_deposit,
-					amount_with_locks: Some(vec![LockInfo {
-						amount: user_deposit,
-						lock_multiplier: LockMultiplier::TwoMonths,
-						expiry_block: 2000,
-					}]),
-				},
-			);
-		});
+		insert_user_deposit(
+			account.clone(),
+			asset,
+			user_deposit,
+			Some(vec![LockInfo {
+				amount: user_deposit,
+				lock_multiplier: LockMultiplier::TwoMonths,
+				expiry_block: 2000,
+			}]),
+		);
 
 		// First claim at block 1000
 		run_to_block(1000);
@@ -379,12 +355,7 @@ fn test_claim_rewards_with_zero_cap() {
 		));
 
 		// Mock deposit
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(account.clone(), asset, user_deposit, None);
 
 		run_to_block(1000);
 
@@ -432,20 +403,10 @@ fn test_claim_frequency_with_decay() {
 		));
 
 		// Set deposit in mock delegation info
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(frequent_claimer.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: deposit_amount, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(frequent_claimer.clone(), asset, deposit_amount, None);
 
 		// Mock deposit for infrequent claimer
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(infrequent_claimer.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: deposit_amount, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(infrequent_claimer.clone(), asset, deposit_amount, None);
 
 		// Set total deposit and total score for the vault
 		TotalRewardVaultDeposit::<Runtime>::insert(vault_id, MOCK_DEPOSIT * 2); // Both users
@@ -531,12 +492,7 @@ fn test_claim_rewards_other() {
 		setup_vault(account.clone(), vault_id, asset).unwrap();
 
 		// Mock deposit with only unlocked amount
-		MOCK_DELEGATION_INFO.with(|m| {
-			m.borrow_mut().deposits.insert(
-				(account.clone(), asset),
-				UserDepositWithLocks { unlocked_amount: user_deposit, amount_with_locks: None },
-			);
-		});
+		insert_user_deposit(account.clone(), asset, user_deposit, None);
 
 		// Initial balance should be 200_000 (from genesis config)
 		let initial_balance = Balances::free_balance(&account);
@@ -585,5 +541,332 @@ fn test_update_apy_blocks() {
 		// Update to a different value
 		assert_ok!(RewardsPallet::<Runtime>::update_apy_blocks(RuntimeOrigin::root(), 2000));
 		assert_eq!(RewardsPallet::<Runtime>::blocks_for_apy(), 2000);
+	});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DELEGATOR REWARD TESTS WITH COMMISSION SPLIT
+// ═══════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn test_commission_split_on_reward_recording() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let service_id = 0u64;
+		let payment = 1000u128;
+
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+
+		// Record a reward for the operator
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			service_id,
+			payment,
+			&pricing_model
+		));
+
+		// Verify commission was recorded (15% of 1000 = 150)
+		let pending = RewardsPallet::<Runtime>::pending_operator_rewards(&operator);
+		assert!(!pending.is_empty());
+		assert_eq!(pending.len(), 1);
+		assert_eq!(pending[0].1, 150); // 15% commission
+
+		// Verify pool was updated with remaining 85% (850)
+		let pool = RewardsPallet::<Runtime>::operator_reward_pools(&operator);
+		// Pool accumulator should be 850 / 0 = undefined, so pool should have zero total_staked
+		// This is expected when no delegators exist yet
+		assert_eq!(pool.total_staked, 0);
+	});
+}
+
+#[test]
+fn test_delegator_reward_distribution_proportional() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let delegator_a: AccountId = AccountId::new([2u8; 32]);
+		let delegator_b: AccountId = AccountId::new([3u8; 32]);
+
+		// Initialize delegator debts with different stake amounts (60/40 split)
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&delegator_a,
+			&operator,
+			600u128
+		));
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&delegator_b,
+			&operator,
+			400u128
+		));
+
+		// Verify pool total stake
+		let pool = RewardsPallet::<Runtime>::operator_reward_pools(&operator);
+		assert_eq!(pool.total_staked, 1000);
+
+		// Record a reward (commission + pool distribution)
+		let service_id = 0u64;
+		let payment = 1000u128;
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			service_id,
+			payment,
+			&pricing_model
+		));
+
+		// Calculate pending rewards for each delegator
+		let pending_a =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator_a, &operator);
+		let pending_b =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator_b, &operator);
+
+		assert_ok!(&pending_a);
+		assert_ok!(&pending_b);
+
+		// Verify proportional distribution of the 85% pool (850 tokens)
+		// Delegator A should get 60% of 850 = 510
+		// Delegator B should get 40% of 850 = 340
+		assert_eq!(pending_a.unwrap(), 510);
+		assert_eq!(pending_b.unwrap(), 340);
+	});
+}
+
+#[test]
+fn test_operator_receives_commission_plus_pool_share() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let service_id = 0u64;
+		let payment = 1000u128;
+
+		// Operator self-delegates 600, delegator has 400 (60/40 split)
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&operator, &operator, 600u128
+		));
+
+		let delegator: AccountId = AccountId::new([2u8; 32]);
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&delegator, &operator, 400u128
+		));
+
+		// Fund the rewards pallet account for transfers
+		let rewards_account = RewardsPallet::<Runtime>::account_id();
+		Balances::make_free_balance_be(&rewards_account, 10_000u128);
+
+		// Record reward
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			service_id,
+			payment,
+			&pricing_model
+		));
+
+		// Verify operator's commission (15% of 1000 = 150)
+		let pending_commission = RewardsPallet::<Runtime>::pending_operator_rewards(&operator);
+		assert!(!pending_commission.is_empty());
+		assert_eq!(pending_commission[0].1, 150);
+
+		// Verify operator's pool share (60% of 850 = 510)
+		let pool_share =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&operator, &operator);
+		assert_ok!(&pool_share);
+		assert_eq!(pool_share.unwrap(), 510);
+
+		// Total operator earnings should be 150 + 510 = 660
+		// This is approximately 66% of the original 1000 payment
+		// Operator has 60% stake but gets extra 15% commission = ~66% total
+	});
+}
+
+#[test]
+fn test_delegator_only_receives_pool_share_no_commission() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let delegator: AccountId = AccountId::new([2u8; 32]);
+		let service_id = 0u64;
+		let payment = 1000u128;
+
+		// Setup delegation: operator has 600, delegator has 400
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&operator, &operator, 600u128
+		));
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&delegator, &operator, 400u128
+		));
+
+		// Record reward
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			service_id,
+			payment,
+			&pricing_model
+		));
+
+		// Verify delegator has NO commission rewards
+		let delegator_commission = RewardsPallet::<Runtime>::pending_operator_rewards(&delegator);
+		assert!(delegator_commission.is_empty());
+
+		// Verify delegator only has pool share (40% of 850 = 340)
+		let pool_share =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator, &operator);
+		assert_ok!(&pool_share);
+		assert_eq!(pool_share.unwrap(), 340);
+	});
+}
+
+#[test]
+fn test_claim_delegator_rewards_updates_balance() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let delegator: AccountId = AccountId::new([2u8; 32]);
+		let service_id = 0u64;
+		let payment = 1000u128;
+
+		// Setup delegation
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&delegator, &operator, 1000u128 // 100% stake for simplicity
+		));
+
+		// Fund the rewards pallet
+		let rewards_account = RewardsPallet::<Runtime>::account_id();
+		Balances::make_free_balance_be(&rewards_account, 10_000u128);
+
+		// Record reward
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			service_id,
+			payment,
+			&pricing_model
+		));
+
+		// Get delegator's initial balance
+		let balance_before = Balances::free_balance(&delegator);
+
+		// Claim delegator rewards
+		let claimed =
+			RewardsPallet::<Runtime>::calculate_and_claim_delegator_rewards(&delegator, &operator);
+		assert_ok!(&claimed);
+
+		// Verify balance increased by pool share (85% of 1000 = 850)
+		let balance_after = Balances::free_balance(&delegator);
+		assert_eq!(balance_after - balance_before, 850);
+		assert_eq!(claimed.unwrap(), 850);
+
+		// Verify pending rewards are now zero after claim
+		let pending_after =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator, &operator);
+		assert_ok!(&pending_after);
+		assert_eq!(pending_after.unwrap(), 0);
+	});
+}
+
+#[test]
+fn test_multiple_rewards_accumulate_in_pool() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let delegator: AccountId = AccountId::new([2u8; 32]);
+
+		// Setup delegation (50/50 split)
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&operator, &operator, 500u128
+		));
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&delegator, &operator, 500u128
+		));
+
+		// Record multiple rewards
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+		for service_id in 0..3 {
+			assert_ok!(RewardsPallet::<Runtime>::record_reward(
+				&operator,
+				service_id,
+				100u128,
+				&pricing_model
+			));
+		}
+
+		// Total rewards: 3 × 100 = 300
+		// Commission per reward: 15 (total 45)
+		// Pool per reward: 85 (total 255)
+		// Each delegator should get 50% of 255 = 127.5 ≈ 127
+
+		let delegator_pending =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&delegator, &operator);
+		assert_ok!(&delegator_pending);
+		assert_eq!(delegator_pending.unwrap(), 127); // 50% of 255
+
+		// Verify operator has both commission and pool share
+		let operator_commission = RewardsPallet::<Runtime>::pending_operator_rewards(&operator);
+		assert!(!operator_commission.is_empty());
+		let total_commission: u128 = operator_commission.iter().map(|r| r.1).sum();
+		assert_eq!(total_commission, 45); // 3 × 15
+
+		let operator_pool =
+			RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(&operator, &operator);
+		assert_ok!(&operator_pool);
+		assert_eq!(operator_pool.unwrap(), 127); // 50% of 255
+	});
+}
+
+#[test]
+fn test_delegator_joins_mid_period_no_historical_rewards() {
+	new_test_ext().execute_with(|| {
+		let operator: AccountId = AccountId::new([1u8; 32]);
+		let early_delegator: AccountId = AccountId::new([2u8; 32]);
+		let late_delegator: AccountId = AccountId::new([3u8; 32]);
+
+		// Early delegator joins with 100% stake
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&early_delegator,
+			&operator,
+			100u128
+		));
+
+		// Record first reward (early delegator gets 100%)
+		let pricing_model = tangle_primitives::services::PricingModel::default();
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			0u64,
+			1000u128,
+			&pricing_model
+		));
+
+		// Late delegator joins (now 50/50 split)
+		assert_ok!(RewardsPallet::<Runtime>::init_delegator_reward_debt(
+			&late_delegator,
+			&operator,
+			100u128
+		));
+
+		// Record second reward (both get 50%)
+		assert_ok!(RewardsPallet::<Runtime>::record_reward(
+			&operator,
+			1u64,
+			1000u128,
+			&pricing_model
+		));
+
+		// Early delegator should have:
+		// - 100% of first 850 = 850
+		// - 50% of second 850 = 425
+		// - Total = 1275
+		let early_pending = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
+			&early_delegator,
+			&operator,
+		);
+		assert_ok!(&early_pending);
+		assert_eq!(early_pending.unwrap(), 1275);
+
+		// Late delegator should have:
+		// - 0 from first reward (not delegated yet)
+		// - 50% of second 850 = 425
+		// - Total = 425
+		let late_pending = RewardsPallet::<Runtime>::calculate_pending_delegator_rewards(
+			&late_delegator,
+			&operator,
+		);
+		assert_ok!(&late_pending);
+		assert_eq!(late_pending.unwrap(), 425);
 	});
 }

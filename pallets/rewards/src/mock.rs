@@ -33,10 +33,11 @@ use sp_runtime::{
 	AccountId32, BuildStorage, Perbill,
 	testing::UintAuthorityId,
 	traits::{ConvertInto, IdentityLookup},
+	DispatchResult,
 };
 use tangle_primitives::{
 	services::Asset,
-	types::rewards::{AssetType, UserDepositWithLocks},
+	types::rewards::{AssetType, LockInfo, UserDepositWithLocks},
 };
 
 use std::{cell::RefCell, collections::BTreeMap, sync::Arc};
@@ -251,6 +252,7 @@ parameter_types! {
 	pub const MaxApy: Perbill = Perbill::from_percent(20);
 	pub const MinDepositCap: u128 = 0;
 	pub const MinIncentiveCap: u128 = 0;
+	pub const DefaultOperatorCommission: Perbill = Perbill::from_percent(15);
 }
 
 impl pallet_rewards::Config for Runtime {
@@ -270,7 +272,10 @@ impl pallet_rewards::Config for Runtime {
 	type MaxVaultLogoLength = ConstU32<256>;
 	type VaultMetadataOrigin = frame_system::EnsureSigned<AccountId>;
 	type MaxPendingRewardsPerOperator = MaxPendingRewardsPerOperator;
+	type DefaultOperatorCommission = DefaultOperatorCommission;
 	type WeightInfo = ();
+	#[cfg(feature = "runtime-benchmarks")]
+	type BenchmarkingHelper = MockDelegationManager;
 }
 
 thread_local! {
@@ -339,6 +344,29 @@ impl
 	}
 }
 
+#[cfg(feature = "runtime-benchmarks")]
+impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperDelegation<AccountId, Balance, AssetId> for MockDelegationManager {
+	fn process_delegate_be(
+		who: AccountId,
+		_operator: AccountId,
+		asset: Asset<AssetId>,
+		amount: Balance,
+	) -> DispatchResult {
+		insert_user_deposit(who, asset, amount, None);
+		Ok(())
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl tangle_primitives::traits::MultiAssetDelegationBenchmarkingHelperOperator<AccountId, Balance> for MockDelegationManager {
+	fn handle_deposit_and_create_operator_be(
+		_who: AccountId,
+		_bond_amount: Balance,
+	) -> DispatchResult {
+		Ok(())
+	}
+}
+
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
 	pub const MaxLocks: u32 = 50;
@@ -392,6 +420,21 @@ pub fn account_id_to_address(account_id: AccountId) -> H160 {
 	H160::from_slice(&AsRef::<[u8; 32]>::as_ref(&account_id)[0..20])
 }
 
+/// Helper function to insert a user deposit into the mock delegation info
+pub fn insert_user_deposit(
+	who: AccountId,
+	asset: Asset<AssetId>,
+	unlocked_amount: Balance,
+	amount_with_locks: Option<Vec<LockInfo<Balance, BlockNumber>>>,
+) {
+	MOCK_DELEGATION_INFO.with(|m| {
+		m.borrow_mut().deposits.insert(
+			(who, asset),
+			UserDepositWithLocks { unlocked_amount, amount_with_locks },
+		);
+	});
+}
+
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	new_test_ext_raw_authorities()
 }
@@ -422,8 +465,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: sp_core::U256::from(1_000u128) *
-					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
 			},
 		);
 	}
@@ -435,8 +477,7 @@ pub fn new_test_ext_raw_authorities() -> sp_io::TestExternalities {
 				code: vec![],
 				storage: Default::default(),
 				nonce: Default::default(),
-				balance: sp_core::U256::from(1_000u128) *
-					sp_core::U256::from(10u128).pow(sp_core::U256::from(18)),
+				balance: Uint::from(1_000).mul(Uint::from(10).pow(Uint::from(18))),
 			},
 		);
 	}

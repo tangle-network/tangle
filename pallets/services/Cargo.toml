@@ -25,6 +25,7 @@ itertools = { workspace = true, features = ["use_alloc"] }
 serde = { workspace = true, features = ["derive"], optional = true }
 hex = { workspace = true, features = ["alloc"] }
 k256 = { workspace = true }
+pallet-assets = { workspace = true, optional = true }
 
 [dev-dependencies]
 ethereum = { workspace = true, features = ["with-scale"] }
@@ -130,7 +131,11 @@ runtime-benchmarks = [
  "frame-support/runtime-benchmarks",
  "frame-system/runtime-benchmarks",
  "sp-runtime/runtime-benchmarks",
+ "pallet-assets/runtime-benchmarks",
  "pallet-balances/runtime-benchmarks",
  "pallet-ethereum/runtime-benchmarks",
  "pallet-evm/runtime-benchmarks",
+ "pallet-multi-asset-delegation/runtime-benchmarks",
+ "pallet-staking/runtime-benchmarks",
+ "tangle-primitives/runtime-benchmarks",
 ]

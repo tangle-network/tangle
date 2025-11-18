@@ -2,7 +2,6 @@
 
 use alloc::{vec, vec::Vec};
 use frame_benchmarking::v1::{account, whitelist_account};
-use frame_election_provider_support::SortedListProvider;
 use frame_support::{
 	BoundedVec,
 	traits::{Currency, Get},
@@ -49,7 +48,7 @@ fn create_funded_user_with_balance<T: pallet_tangle_lst::Config>(
 fn create_pool_account<T: pallet_tangle_lst::Config>(
 	n: u32,
 	balance: BalanceOf<T>,
-	commission: Option<(Perbill, T::AccountId)>,
+	_commission: Option<(Perbill, T::AccountId)>,
 ) -> (T::AccountId, T::AccountId) {
 	let ed = CurrencyOf::<T>::minimum_balance();
 	let pool_creator: T::AccountId =

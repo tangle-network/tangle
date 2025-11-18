@@ -17449,6 +17449,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+<<<<<<< HEAD
  "sp-core 36.1.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2503)",
  "sp-io 40.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2503)",
  "sp-keyring 41.0.0",
@@ -17456,6 +17457,16 @@ dependencies = [
  "sp-runtime 41.1.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2503)",
  "sp-staking 38.0.0",
  "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2503)",
+=======
+ "sp-arithmetic 26.0.0",
+ "sp-core 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-io 38.0.1 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-keyring 39.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-keystore 0.40.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-runtime 39.0.3",
+ "sp-staking 34.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+ "sp-std 14.0.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2407)",
+>>>>>>> drew/rewards-updates
  "tangle-primitives",
 ]
 
@@ -28554,7 +28565,6 @@ dependencies = [
  "tangle-crypto-primitives",
  "tangle-primitives",
  "tangle-runtime",
- "tangle-subxt 0.24.0",
  "tangle-testnet-runtime",
  "tokio",
 ]

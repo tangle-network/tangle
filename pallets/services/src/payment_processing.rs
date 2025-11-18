@@ -1,12 +1,12 @@
 use crate::{
 	BalanceOf, BlockNumberFor, Config, Error, JobPayments, JobSubscriptionBillings, Pallet,
-	ServiceStatus, UserSubscriptionCount,
+	ServiceStatus, SubscriptionProcessingCursor, UserSubscriptionCount,
 };
 use frame_support::{
 	dispatch::DispatchResult,
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ReservableCurrency, fungibles::Mutate},
+	traits::{Currency, ExistenceRequirement, ReservableCurrency, fungibles::Mutate},
 };
 use sp_runtime::traits::{CheckedMul, SaturatedConversion, Saturating, Zero};
 use tangle_primitives::{
@@ -14,7 +14,7 @@ use tangle_primitives::{
 		Asset, JobPayment, JobSubscriptionBilling, PricingModel, ServiceBlueprint,
 		StagingServicePayment,
 	},
-	traits::RewardRecorder as RewardRecorderTrait,
+	traits::RewardRecorder,
 };
 
 impl<T: Config> Pallet<T> {
@@ -155,10 +155,17 @@ impl<T: Config> Pallet<T> {
 			},
 		};
 
-		T::RewardRecorder::record_reward(payer, service_id, amount, &runtime_pricing_model)?;
+		// Distribute payment to operators, developer, and protocol
+		let (blueprint_owner, _) = Self::blueprints(service.blueprint)?;
+		Self::distribute_service_payment(
+			&service,
+			&blueprint_owner,
+			amount,
+			&runtime_pricing_model,
+		)?;
 
 		log::debug!(
-			"Processed pay-once payment for job call {}-{}-{}: {:?}",
+			"Processed and distributed pay-once payment for job call {}-{}-{}: {:?}",
 			service_id,
 			job_index,
 			call_id,
@@ -269,9 +276,9 @@ impl<T: Config> Pallet<T> {
 			billing.last_billed = current_block;
 			JobSubscriptionBillings::<T>::insert(&billing_key, &billing);
 
-			// Record the reward
+			// Distribute payment to operators, developer, and protocol
 			let service = Self::services(service_id)?;
-			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+			let (blueprint_owner, blueprint) = Self::blueprints(service.blueprint)?;
 			let _job_def =
 				blueprint.jobs.get(job_index as usize).ok_or(Error::<T>::InvalidJobId)?;
 
@@ -279,9 +286,9 @@ impl<T: Config> Pallet<T> {
 			let runtime_pricing_model =
 				PricingModel::Subscription { rate_per_interval, interval, maybe_end };
 
-			T::RewardRecorder::record_reward(
-				payer,
-				service_id,
+			Self::distribute_service_payment(
+				&service,
+				&blueprint_owner,
 				rate_per_interval,
 				&runtime_pricing_model,
 			)?;
@@ -330,9 +337,15 @@ impl<T: Config> Pallet<T> {
 		// Charge the payment with authorization check
 		Self::charge_payment(caller, payer, total_reward)?;
 
-		// Record the reward with the rewards pallet
+		// Distribute payment to operators, developer, and protocol
+		let (blueprint_owner, _) = Self::blueprints(service.blueprint)?;
 		let runtime_pricing_model = PricingModel::EventDriven { reward_per_event };
-		T::RewardRecorder::record_reward(payer, service_id, total_reward, &runtime_pricing_model)?;
+		Self::distribute_service_payment(
+			&service,
+			&blueprint_owner,
+			total_reward,
+			&runtime_pricing_model,
+		)?;
 
 		log::debug!(
 			"Processed event-driven payment for service {} job {}: {} events, total reward: {:?}",
@@ -346,7 +359,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Charge payment from a user account with proper authorization checks
-	fn charge_payment_with_asset(
+	pub(crate) fn charge_payment_with_asset(
 		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,
@@ -354,6 +367,9 @@ impl<T: Config> Pallet<T> {
 	) -> DispatchResult {
 		// SECURITY CHECK: Ensure the caller has authorization to charge the payer
 		ensure!(caller == payer, Error::<T>::InvalidRequestInput);
+
+		// Get the rewards pallet account where funds should be transferred
+		let rewards_account = T::RewardRecorder::account_id();
 
 		// Checks: Validate balances before any state changes
 		match asset {
@@ -371,18 +387,24 @@ impl<T: Config> Pallet<T> {
 			},
 		}
 
-		// Effects & Interactions: Execute transfers after validation
+		// Effects & Interactions: Transfer funds to rewards pallet account
+		// This ensures operators can claim rewards via claim_rewards() extrinsic
 		match asset {
 			Asset::Custom(asset_id) => {
 				if *asset_id == T::AssetId::default() {
-					// Native currency
-					T::Currency::reserve(payer, amount)?;
+					// Native currency - transfer to rewards pallet account
+					T::Currency::transfer(
+						payer,
+						&rewards_account,
+						amount,
+						ExistenceRequirement::KeepAlive,
+					)?;
 				} else {
-					// Custom asset
+					// Custom asset - transfer to rewards pallet account
 					T::Fungibles::transfer(
 						asset_id.clone(),
 						payer,
-						&Self::pallet_account(),
+						&rewards_account,
 						amount,
 						frame_support::traits::tokens::Preservation::Expendable,
 					)
@@ -390,8 +412,13 @@ impl<T: Config> Pallet<T> {
 				}
 			},
 			Asset::Erc20(_) => {
-				// ERC20 handled separately
-				T::Currency::reserve(payer, amount)?;
+				// ERC20 - transfer to rewards pallet account
+				T::Currency::transfer(
+					payer,
+					&rewards_account,
+					amount,
+					ExistenceRequirement::KeepAlive,
+				)?;
 			},
 		}
 
@@ -399,7 +426,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	/// Charge payment from a user account with proper authorization checks (native currency)
-	fn charge_payment(
+	pub(crate) fn charge_payment(
 		caller: &T::AccountId,
 		payer: &T::AccountId,
 		amount: BalanceOf<T>,
@@ -453,35 +480,70 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Hook called on every block to process subscription payments
+	/// Process subscription payments with cursor-based resumable iteration.
+	///
+	/// Called in `on_idle` hook for automatic subscription billing using ONLY
+	/// remaining weight after transactions (zero competition with user txs).
+	///
+	/// # DDOS Protection
+	/// - Bounded by remaining_weight (busy blocks skip naturally)
+	/// - Further bounded by MAX_SUBSCRIPTIONS_PER_BLOCK (50 iterations max)
+	/// - Cursor enables fair round-robin processing
 	///
 	/// # Security Note
-	/// This function processes automatic subscription payments. Since these are
-	/// pre-authorized through the service registration process, we use the
-	/// subscriber as both caller and payer for automated billing.
-	pub fn process_subscription_payments_on_block(current_block: BlockNumberFor<T>) -> Weight {
+	/// Pre-authorized through service registration, subscriber pays automatically.
+	pub fn process_subscription_payments_on_idle(
+		current_block: BlockNumberFor<T>,
+		remaining_weight: Weight,
+	) -> Weight {
 		let mut total_weight = Weight::zero();
 		let mut processed_count = 0u32;
 		const MAX_SUBSCRIPTIONS_PER_BLOCK: u32 = 50;
+		let min_weight = T::DbWeight::get().reads_writes(5, 2);
 
-		for ((service_id, job_index, subscriber), billing) in JobSubscriptionBillings::<T>::iter() {
-			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
+		if remaining_weight.ref_time() < min_weight.ref_time() {
+			return Weight::zero();
+		}
+
+		let start_cursor = SubscriptionProcessingCursor::<T>::get();
+		let mut skip_until_cursor = start_cursor.is_some();
+		let cursor_key = start_cursor.clone();
+
+		for (key, billing) in JobSubscriptionBillings::<T>::iter() {
+			// Skip entries until we reach the cursor position
+			if skip_until_cursor {
+				if let Some(ref cursor) = cursor_key {
+					if &key == cursor {
+						skip_until_cursor = false;
+						// Don't continue - we want to process this entry
+					} else {
+						continue; // Only skip if we haven't reached the cursor yet
+					}
+				}
+			}
+			// Weight check
+			if total_weight.saturating_add(min_weight).ref_time() > remaining_weight.ref_time() {
+				SubscriptionProcessingCursor::<T>::put(key);
 				break;
 			}
 
-			// Validate subscription before processing
+			// Iteration limit
+			if processed_count >= MAX_SUBSCRIPTIONS_PER_BLOCK {
+				SubscriptionProcessingCursor::<T>::put(key);
+				break;
+			}
+
+			let (service_id, job_index, subscriber) = key.clone();
+
 			if let Ok(service_instance) = Self::services(service_id) {
-				// Check if service is still active
 				if !ServiceStatus::<T>::contains_key(service_instance.blueprint, service_id) {
 					continue;
 				}
 
-				// Check if subscriber is still authorized
-				if !service_instance.permitted_callers.is_empty() &&
-					!service_instance.permitted_callers.contains(&subscriber)
-				{
-					continue;
-				}
+				// NOTE: We skip permitted_callers check for on_idle subscription processing
+				// because if a billing entry exists, the subscription was already authorized
+				// when initially created. The subscriber is paying for their own subscription,
+				// not making a new service call.
 
 				if let Ok((_, blueprint)) = Self::blueprints(service_instance.blueprint) &&
 					let Some(job_def) = blueprint.jobs.get(job_index as usize) &&
@@ -493,36 +555,44 @@ impl<T: Config> Pallet<T> {
 					let maybe_end_converted: Option<BlockNumberFor<T>> =
 						maybe_end.map(|end| end.saturated_into());
 
-					let blocks_since_last = current_block.saturating_sub(billing.last_billed);
-					if blocks_since_last >= interval_converted {
-						if let Some(end_block) = maybe_end_converted &&
-							current_block > end_block
-						{
-							continue;
-						}
+							let blocks_since_last =
+								current_block.saturating_sub(billing.last_billed);
 
-						if Self::process_job_subscription_payment(
-							service_id,
-							job_index,
-							0,
-							&subscriber,
-							&subscriber,
-							rate_converted,
-							interval_converted,
-							maybe_end_converted,
-							current_block,
-						)
-						.is_err()
-						{
-							break;
-						}
+							if blocks_since_last >= interval_converted {
+								if let Some(end_block) = maybe_end_converted {
+									if current_block > end_block {
+										continue;
+									}
+								}
 
-						processed_count += 1;
+								match Self::process_job_subscription_payment(
+									service_id,
+									job_index,
+									0,
+									&subscriber,
+									&subscriber,
+									rate_converted,
+									interval_converted,
+									maybe_end_converted,
+									current_block,
+								) {
+									Ok(_) => {
+										processed_count += 1;
+									},
+									Err(_) => {
+										continue;
+									},
+								}
+							}
+						}
 					}
 				}
-			}
 
 			total_weight = total_weight.saturating_add(T::DbWeight::get().reads_writes(3, 1));
+		}
+
+		if processed_count < MAX_SUBSCRIPTIONS_PER_BLOCK {
+			SubscriptionProcessingCursor::<T>::kill();
 		}
 
 		total_weight

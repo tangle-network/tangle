@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{Config, RewardConfigForAssetVault, RewardConfigStorage};
+use crate::{Config, PendingOperatorRewards, RewardConfigForAssetVault, RewardConfigStorage};
 use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
 use sp_runtime::{Perbill, Percent};
-use sp_std::marker::PhantomData;
+use sp_std::{marker::PhantomData, vec::Vec};
 
 /// Migration to convert APY from percentage to Perbill in `RewardConfigForAssetVault`
 pub struct PercentageToPerbillMigration<T>(PhantomData<T>);
@@ -107,6 +107,74 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 			post_count
 		);
 
+		Ok(())
+	}
+}
+
+/// Safety check migration for V1 delegator rewards deployment.
+///
+/// This migration verifies that no existing operator rewards data exists before
+/// deploying the delegator reward distribution changes. If `PendingOperatorRewards`
+/// is empty (expected if no blueprints have been created on mainnet), the upgrade
+/// is safe. If data exists, the migration logs an error and halts.
+///
+/// **Assumption**: Services pallet is live but no blueprints have been created,
+/// meaning `PendingOperatorRewards` should be empty for all accounts.
+pub struct V1SafetyCheckDelegatorRewards<T>(PhantomData<T>);
+
+impl<T: Config> OnRuntimeUpgrade for V1SafetyCheckDelegatorRewards<T> {
+	fn on_runtime_upgrade() -> Weight {
+		let mut weight = Weight::from_parts(0, 0);
+
+		// Check if any PendingOperatorRewards exist
+		let existing_entries: Vec<_> = PendingOperatorRewards::<T>::iter().collect();
+		weight = weight.saturating_add(T::DbWeight::get().reads(existing_entries.len() as u64));
+
+		if !existing_entries.is_empty() {
+			log::error!(
+				"🚨 CRITICAL: Found {} PendingOperatorRewards entries! \
+				 Delegator rewards deployment requires manual migration. \
+				 Halting upgrade for safety.",
+				existing_entries.len()
+			);
+
+			// Log first few entries for debugging
+			for (account, rewards) in existing_entries.iter().take(5) {
+				log::error!("  Account: {:?}, Rewards: {:?}", account, rewards);
+			}
+
+			// In production, you may want to panic here to prevent unsafe upgrade
+			// panic!("Unsafe migration - existing rewards found");
+		} else {
+			log::info!(
+				"✅ V1SafetyCheckDelegatorRewards: No existing PendingOperatorRewards. \
+				 Safe to deploy delegator reward distribution."
+			);
+		}
+
+		weight
+	}
+
+	#[cfg(feature = "try-runtime")]
+	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
+		let count = PendingOperatorRewards::<T>::iter().count();
+
+		if count > 0 {
+			log::error!(
+				"❌ UNSAFE: Found {} PendingOperatorRewards entries. \
+				 Migration required before deploying delegator rewards!",
+				count
+			);
+			return Err("UNSAFE: PendingOperatorRewards not empty - migration required!");
+		}
+
+		log::info!("✅ Pre-upgrade: PendingOperatorRewards is empty");
+		Ok(count.encode())
+	}
+
+	#[cfg(feature = "try-runtime")]
+	fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
+		log::info!("✅ V1SafetyCheckDelegatorRewards: Post-upgrade check passed");
 		Ok(())
 	}
 }

@@ -20,7 +20,7 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 use frame_support::{
-	dispatch::{DispatchResult, DispatchResultWithPostInfo, Pays, PostDispatchInfo},
+	dispatch::{DispatchResult, DispatchResultWithPostInfo},
 	ensure,
 	pallet_prelude::*,
 	traits::{
@@ -62,10 +62,6 @@ pub mod weights;
 pub use module::*;
 pub use weights::WeightInfo;
 
-#[cfg(feature = "runtime-benchmarks")]
-pub use impls::BenchmarkingOperatorDelegationManager;
-
-#[allow(clippy::too_many_arguments)]
 #[frame_support::pallet(dev_mode)]
 pub mod module {
 	use super::*;
@@ -259,8 +255,33 @@ pub mod module {
 		#[pallet::constant]
 		type FallbackWeightWrites: Get<u64> + Default + Parameter + MaybeSerializeDeserialize;
 
+		/// The treasury account that receives protocol share (5%) of all service payments.
+		/// Typically derived from the Treasury pallet's PalletId.
+		///
+		/// Treasury rewards are recorded just like operator rewards and can be claimed
+		/// using the standard `claim_rewards()` extrinsic.
+		///
+		/// # Example Runtime Configuration
+		/// ```ignore
+		/// parameter_types! {
+		///     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
+		/// }
+		///
+		/// pub struct TreasuryAccountId;
+		/// impl Get<AccountId> for TreasuryAccountId {
+		///     fn get() -> AccountId {
+		///         TreasuryPalletId::get().into_account_truncating()
+		///     }
+		/// }
+		/// ```
+		type TreasuryAccount: Get<Self::AccountId>;
+
 		/// Weight information for the extrinsics in this module.
 		type WeightInfo: WeightInfo;
+
+		/// The benchmarking helper for the pallet.
+		#[cfg(feature = "runtime-benchmarks")]
+		type BenchmarkingHelper: BenchmarkingHelper<Self::AccountId, BalanceOf<Self>, Self::AssetId>;
 	}
 
 	#[pallet::hooks]
@@ -277,8 +298,7 @@ pub mod module {
 		}
 
 		/// On initialize, we should check for any unapplied slashes and apply them.
-		/// Also process subscription payments for active services.
-		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+		fn on_initialize(_n: BlockNumberFor<T>) -> Weight {
 			let mut weight: Weight = Weight::zero();
 			let current_era = T::OperatorDelegationManager::get_current_round();
 			let slash_defer_duration = T::SlashDeferDuration::get();
@@ -314,11 +334,30 @@ pub mod module {
 				}
 			}
 
-			// Process subscription payments
-			let subscription_weight = Self::process_subscription_payments_on_block(n);
-			weight = weight.saturating_add(subscription_weight);
-
 			weight
+		}
+
+		/// Process subscription payments using remaining block weight.
+		///
+		/// This hook executes AFTER all transactions have been processed,
+		/// using only leftover weight. This ensures subscription billing
+		/// never competes with user transactions for block space.
+		///
+		/// # Why `on_idle` vs `on_finalize`
+		/// - ✅ Uses remaining weight (no competition with transactions)
+		/// - ✅ Busy blocks naturally skip (built-in DDOS protection)
+		/// - ✅ Quiet blocks can process more subscriptions
+		/// - ✅ Better resource utilization
+		///
+		/// # Parameters
+		/// * `n` - Current block number
+		/// * `remaining_weight` - Weight remaining after all transactions
+		///
+		/// # Returns
+		/// Weight consumed by subscription processing
+		fn on_idle(n: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
+			// Process subscriptions using remaining weight
+			Self::process_subscription_payments_on_idle(n, remaining_weight)
 		}
 	}
 
@@ -528,8 +567,22 @@ pub mod module {
 		MetricsDataTooLarge,
 		/// Subscription not valid
 		SubscriptionNotValid,
+		/// Subscription not found for this service, job, and caller
+		SubscriptionNotFound,
+		/// Subscription payment is not due yet
+		PaymentNotDueYet,
 		/// Service not owned by caller
 		ServiceNotOwned,
+		/// No operators available for reward distribution
+		NoOperatorsAvailable,
+		/// Invalid revenue distribution configuration (percentages don't sum to 100%)
+		InvalidRevenueDistribution,
+		/// No operator exposure found for reward distribution
+		NoOperatorExposure,
+		/// Arithmetic overflow occurred during reward calculation
+		ArithmeticOverflow,
+		/// Division by zero during reward calculation
+		DivisionByZero,
 	}
 
 	#[pallet::event]
@@ -697,6 +750,15 @@ pub mod module {
 			/// The result of the job.
 			result: Vec<Field<T::Constraints, T::AccountId>>,
 		},
+		/// A subscription payment was manually triggered by the user.
+		SubscriptionPaymentTriggered {
+			/// The account that triggered the payment.
+			caller: T::AccountId,
+			/// The ID of the service.
+			service_id: u64,
+			/// The index of the job.
+			job_index: u8,
+		},
 		/// EVM execution reverted with a reason.
 		EvmReverted { from: H160, to: H160, data: Vec<u8>, reason: Vec<u8> },
 		/// An Operator has an unapplied slash.
@@ -780,7 +842,11 @@ pub mod module {
 		},
 	}
 
+	/// The current storage version.
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+
 	#[pallet::pallet]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(_);
 
 	/// Slashing is enabled.
@@ -813,6 +879,23 @@ pub mod module {
 	#[pallet::storage]
 	#[pallet::getter(fn next_unapplied_slash_index)]
 	pub type NextUnappliedSlashIndex<T> = StorageValue<_, u32, ValueQuery>;
+
+	/// Cursor for resumable subscription processing.
+	///
+	/// Stores the last processed subscription key to enable round-robin
+	/// processing across blocks when >50 subscriptions are active.
+	///
+	/// Format: (ServiceId, JobIndex, AccountId)
+	///
+	/// - When set: Processing resumes from this key in next block's `on_idle`
+	/// - When None: Processing starts from beginning of storage map
+	///
+	/// This enables fair, bounded subscription billing that doesn't compete
+	/// with user transactions for block space.
+	#[pallet::storage]
+	#[pallet::getter(fn subscription_processing_cursor)]
+	pub type SubscriptionProcessingCursor<T: Config> =
+		StorageValue<_, (ServiceId, u8, T::AccountId), OptionQuery>;
 
 	/// The service blueprints along with their owner.
 	#[pallet::storage]
@@ -1075,8 +1158,9 @@ pub mod module {
 		///
 		/// # Returns
 		///
-		/// Returns a `DispatchResultWithPostInfo` which on success emits a
+		/// Returns a `DispatchResult` which on success emits a
 		/// [`Event::BlueprintCreated`] event containing the owner and blueprint ID.
+		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::create_blueprint())]
 		pub fn create_blueprint(
 			origin: OriginFor<T>,
@@ -1103,7 +1187,7 @@ pub mod module {
 			NextBlueprintId::<T>::set(blueprint_id.saturating_add(1));
 
 			Self::deposit_event(Event::BlueprintCreated { owner, blueprint_id });
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::create_blueprint()).into())
 		}
 
 		/// Pre-register the caller as an operator for a specific blueprint.
@@ -1136,6 +1220,7 @@ pub mod module {
 		/// # Errors
 		///
 		/// * [`Error::BadOrigin`] - The origin was not signed.
+		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::pre_register())]
 		pub fn pre_register(
 			origin: OriginFor<T>,
@@ -1182,6 +1267,7 @@ pub mod module {
 		/// * [`Error::InvalidRegistrationInput`] - Registration hook rejected the registration
 		/// * [`Error::MaxServicesPerProviderExceeded`] - Operator has reached maximum services
 		///   limit
+		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::register())]
 		pub fn register(
 			origin: OriginFor<T>,
@@ -1215,7 +1301,7 @@ pub mod module {
 			}
 
 			Self::do_register(&operator, blueprint_id, preferences, registration_args, value)?;
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::register()).into())
 		}
 
 		/// Unregisters a service provider from a specific service blueprint.
@@ -1238,6 +1324,7 @@ pub mod module {
 		/// * [`Error::NotRegistered`] - The caller is not registered for this blueprint
 		/// * [`Error::NotAllowedToUnregister`] - Unregistration is currently restricted
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist
+		#[pallet::call_index(3)]
 		#[pallet::weight(T::WeightInfo::unregister())]
 		pub fn unregister(
 			origin: OriginFor<T>,
@@ -1268,7 +1355,7 @@ pub mod module {
 
 			ensure!(removed, Error::<T>::NotRegistered);
 			Self::deposit_event(Event::Unregistered { operator: caller.clone(), blueprint_id });
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::unregister()).into())
 		}
 
 		/// Request a new service using a blueprint and specified operators.
@@ -1301,6 +1388,7 @@ pub mod module {
 		/// * [`Error::ERC20TransferFailed`] - ERC20 token transfer failed.
 		/// * [`Error::NotRegistered`] - One or more operators not registered for blueprint.
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
+		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::request())]
 		pub fn request(
 			origin: OriginFor<T>,
@@ -1380,7 +1468,7 @@ pub mod module {
 				membership_model,
 			)?;
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::request()).into())
 		}
 
 		/// Approve a service request, allowing it to be initiated once all required approvals are
@@ -1402,6 +1490,7 @@ pub mod module {
 		/// * [`Error::ApprovalNotRequested`] - Caller is not in the pending approvals list
 		/// * [`Error::ApprovalInterrupted`] - Approval was rejected by blueprint hooks
 		/// * [`Error::InvalidSecurityCommitments`] - Security commitments don't meet requirements
+		#[pallet::call_index(5)]
 		#[pallet::weight(T::WeightInfo::approve())]
 		pub fn approve(
 			origin: OriginFor<T>,
@@ -1416,7 +1505,7 @@ pub mod module {
 				&security_commitments,
 			)?;
 			Self::do_approve(caller, request_id, &security_commitments)?;
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::approve()).into())
 		}
 
 		/// Reject a service request, preventing its initiation.
@@ -1441,14 +1530,15 @@ pub mod module {
 		/// * [`Error::ExpectedAccountId`] - Failed to convert refund address to account ID when
 		///   refunding payment
 		/// * [`Error::RejectionInterrupted`] - Rejection was interrupted by blueprint hook
+		#[pallet::call_index(6)]
 		#[pallet::weight(T::WeightInfo::reject())]
 		pub fn reject(
 			origin: OriginFor<T>,
 			#[pallet::compact] request_id: u64,
-		) -> DispatchResultWithPostInfo {
+		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 			Self::do_reject(caller, request_id)?;
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(())
 		}
 
 		/// Terminates a running service instance.
@@ -1468,6 +1558,7 @@ pub mod module {
 		/// * [`Error::NotRegistered`] - Service operator not registered
 		/// * [`Error::TerminationInterrupted`] - Service termination was interrupted by hooks
 		/// * [`DispatchError::BadOrigin`] - Caller is not the service owner
+		#[pallet::call_index(7)]
 		#[pallet::weight(T::WeightInfo::terminate())]
 		pub fn terminate(
 			origin: OriginFor<T>,
@@ -1530,7 +1621,7 @@ pub mod module {
 				service_id,
 				blueprint_id,
 			});
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::terminate()).into())
 		}
 
 		/// Call a job in the service with the provided arguments.
@@ -1554,6 +1645,7 @@ pub mod module {
 		/// * [`Error::TypeCheck`] - Arguments fail type checking
 		/// * [`Error::InvalidJobCallInput`] - Job call was rejected by hooks
 		/// * [`DispatchError::BadOrigin`] - Caller is not owner or permitted caller
+		#[pallet::call_index(8)]
 		#[pallet::weight(T::WeightInfo::call())]
 		pub fn call(
 			origin: OriginFor<T>,
@@ -1593,7 +1685,102 @@ pub mod module {
 				args,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::call()).into())
+		}
+
+		/// Manually trigger a subscription payment for a job.
+		///
+		/// This allows users to manually process their subscription payments instead of
+		/// waiting for the automatic `on_idle` processing. This is useful when the automatic
+		/// queue is backed up or the user wants immediate processing of their subscription.
+		///
+		/// # Arguments
+		///
+		/// * `origin` - The account triggering the payment (must be the subscriber)
+		/// * `service_id` - The ID of the service
+		/// * `job_index` - The index of the job with the subscription
+		///
+		/// # Errors
+		///
+		/// Returns an error if:
+		/// - The service doesn't exist
+		/// - The job doesn't exist in the blueprint
+		/// - The caller doesn't have an active subscription for this service/job
+		/// - The subscription payment is not due yet
+		/// - The payment processing fails
+		#[pallet::call_index(9)]
+		#[pallet::weight(T::WeightInfo::trigger_subscription_payment())]
+		pub fn trigger_subscription_payment(
+			origin: OriginFor<T>,
+			#[pallet::compact] service_id: u64,
+			job_index: u8,
+		) -> DispatchResult {
+			let caller = ensure_signed(origin)?;
+
+			// Get service and blueprint
+			let service = Self::services(service_id)?;
+			let (_, blueprint) = Self::blueprints(service.blueprint)?;
+
+			// Verify job exists
+			let job_def = blueprint
+				.jobs
+				.get(job_index as usize)
+				.ok_or(Error::<T>::InvalidJobId)?;
+
+			// Verify this job has subscription pricing
+			let (rate_per_interval, interval, maybe_end) = match &job_def.pricing_model {
+				PricingModel::Subscription { rate_per_interval, interval, maybe_end } => {
+					let rate_converted: BalanceOf<T> = (*rate_per_interval).saturated_into();
+					let interval_converted: BlockNumberFor<T> = (*interval).saturated_into();
+					let maybe_end_converted: Option<BlockNumberFor<T>> =
+						maybe_end.map(|end| end.saturated_into());
+					(rate_converted, interval_converted, maybe_end_converted)
+				},
+				_ => return Err(Error::<T>::SubscriptionNotValid.into()),
+			};
+
+			// Get the subscription billing record
+			let billing_key = (service_id, job_index, caller.clone());
+			let billing =
+				JobSubscriptionBillings::<T>::get(&billing_key)
+					.ok_or(Error::<T>::SubscriptionNotFound)?;
+
+			// Check if subscription has ended
+			let current_block = frame_system::Pallet::<T>::block_number();
+			if let Some(end_block) = maybe_end {
+				ensure!(current_block <= end_block, Error::<T>::SubscriptionNotValid);
+			}
+
+			// Verify payment is due
+			let blocks_since_last = current_block.saturating_sub(billing.last_billed);
+			let payment_due = if blocks_since_last == BlockNumberFor::<T>::zero() &&
+				billing.last_billed == BlockNumberFor::<T>::zero()
+			{
+				// First payment scenario
+				true
+			} else {
+				blocks_since_last >= interval
+			};
+
+			ensure!(payment_due, Error::<T>::PaymentNotDueYet);
+
+			// Process the subscription payment
+			Self::process_job_subscription_payment(
+				service_id,
+				job_index,
+				0, // call_id not relevant for manual triggers
+				&caller,
+				&caller,
+				rate_per_interval,
+				interval,
+				maybe_end,
+				current_block,
+			)?;
+
+			// Emit event
+			Self::deposit_event(Event::SubscriptionPaymentTriggered { caller, service_id, job_index });
+
+			Ok(())
 		}
 
 		/// Submit a result for a previously called job.
@@ -1617,6 +1804,7 @@ pub mod module {
 		/// * [`Error::TypeCheck`] - Result fields fail type checking
 		/// * [`Error::InvalidJobResult`] - Job result was rejected by hooks
 		/// * [`DispatchError::BadOrigin`] - Caller is not an operator
+		#[pallet::call_index(10)]
 		#[pallet::weight(T::WeightInfo::submit_result())]
 		pub fn submit_result(
 			origin: OriginFor<T>,
@@ -1665,7 +1853,7 @@ pub mod module {
 				result,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::submit_result()).into())
 		}
 
 		/// Slash an operator's stake for a service by scheduling a deferred slashing action.
@@ -1694,6 +1882,8 @@ pub mod module {
 		/// * `BadOrigin` - Caller is not the authorized slashing origin
 		/// * `OffenderNotOperator` - Target account is not an operator for this service
 		/// * `OffenderNotActiveOperator` - Target operator is not currently active
+		#[pallet::call_index(11)]
+		#[pallet::weight(T::WeightInfo::slash())]
 		pub fn slash(
 			origin: OriginFor<T>,
 			offender: T::AccountId,
@@ -1745,7 +1935,7 @@ pub mod module {
 				era: unapplied_slash.era,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::slash()).into())
 		}
 
 		/// Disputes and removes an [UnappliedSlash] from storage.
@@ -1766,7 +1956,8 @@ pub mod module {
 		///
 		/// * [Error::NoDisputeOrigin] - Service has no dispute origin configured
 		/// * [DispatchError::BadOrigin] - Caller is not the authorized dispute origin
-
+		#[pallet::call_index(12)]
+		#[pallet::weight(T::WeightInfo::dispute())]
 		pub fn dispute(
 			origin: OriginFor<T>,
 			#[pallet::compact] era: u32,
@@ -1790,7 +1981,7 @@ pub mod module {
 				era,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::dispute()).into())
 		}
 
 		/// Updates the Master Blueprint Service Manager by adding a new revision.
@@ -1808,10 +1999,12 @@ pub mod module {
 		///
 		/// * [Error::MaxMasterBlueprintServiceManagerVersionsExceeded] - Maximum number of
 		///   revisions reached
+		#[pallet::call_index(13)]
+		#[pallet::weight(T::WeightInfo::update_master_blueprint_service_manager())]
 		pub fn update_master_blueprint_service_manager(
 			origin: OriginFor<T>,
 			address: H160,
-		) -> DispatchResultWithPostInfo {
+		) -> DispatchResult {
 			T::MasterBlueprintServiceManagerUpdateOrigin::ensure_origin(origin)?;
 
 			MasterBlueprintServiceManagerRevisions::<T>::try_append(address)
@@ -1823,12 +2016,12 @@ pub mod module {
 				address,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(())
 		}
 
 		/// Join a service instance as an operator
 		#[pallet::call_index(15)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::join_service())]
 		pub fn join_service(
 			origin: OriginFor<T>,
 			instance_id: u64,
@@ -1868,7 +2061,7 @@ pub mod module {
 
 		/// Leave a service instance as an operator
 		#[pallet::call_index(16)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::leave_service())]
 		pub fn leave_service(origin: OriginFor<T>, instance_id: u64) -> DispatchResult {
 			let operator = ensure_signed(origin)?;
 
@@ -1938,7 +2131,7 @@ pub mod module {
 				rpc_address,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::update_rpc_address()).into())
 		}
 
 		/// Request a service with a pre-approved quote from operators.
@@ -1983,7 +2176,7 @@ pub mod module {
 		/// * [`Error::BlueprintNotFound`] - The blueprint_id does not exist.
 		/// * [`Error::InvalidQuoteSignature`] - One or more quote signatures are invalid.
 		#[pallet::call_index(18)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::request_with_signed_price_quotes())]
 		pub fn request_with_signed_price_quotes(
 			origin: OriginFor<T>,
 			evm_origin: Option<H160>,
@@ -2084,7 +2277,7 @@ pub mod module {
 				Self::do_approve(operator.clone(), service_id, &security_commitments)?;
 			}
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(Some(T::WeightInfo::request()).into())
 		}
 
 		/// Send a heartbeat for a service.
@@ -2113,14 +2306,14 @@ pub mod module {
 		/// * [`Error::HeartbeatSignatureVerificationFailed`] - The signature verification failed.
 		/// * [`Error::InvalidHeartbeatData`] - The heartbeat data is invalid.
 		#[pallet::call_index(19)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::heartbeat())]
 		pub fn heartbeat(
 			origin: OriginFor<T>,
 			#[pallet::compact] service_id: u64,
 			#[pallet::compact] blueprint_id: u64,
 			metrics_data: Vec<u8>,
 			signature: ecdsa::Signature,
-		) -> DispatchResultWithPostInfo {
+		) -> DispatchResult {
 			let caller = ensure_signed(origin)?;
 
 			// Validate metrics data size before processing
@@ -2250,7 +2443,7 @@ pub mod module {
 				block_number: current_block,
 			});
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::No })
+			Ok(())
 		}
 
 		/// Updates the default heartbeat threshold for all services.
@@ -2264,18 +2457,18 @@ pub mod module {
 		/// * `origin` - Origin of the call
 		/// * `threshold` - New default heartbeat threshold
 		#[pallet::call_index(20)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::update_default_heartbeat_threshold())]
 		pub fn update_default_heartbeat_threshold(
 			origin: OriginFor<T>,
 			threshold: u8,
-		) -> DispatchResultWithPostInfo {
+		) -> DispatchResult {
 			T::DefaultParameterUpdateOrigin::ensure_origin(origin)?;
 
 			DefaultHeartbeatThreshold::<T>::set(threshold);
 
 			Self::deposit_event(Event::<T>::DefaultHeartbeatThresholdUpdated { threshold });
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(())
 		}
 
 		/// Updates the default heartbeat interval for all services.
@@ -2289,18 +2482,18 @@ pub mod module {
 		/// * `origin` - Origin of the call
 		/// * `interval` - New default heartbeat interval
 		#[pallet::call_index(21)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::update_default_heartbeat_interval())]
 		pub fn update_default_heartbeat_interval(
 			origin: OriginFor<T>,
 			interval: BlockNumberFor<T>,
-		) -> DispatchResultWithPostInfo {
+		) -> DispatchResult {
 			T::DefaultParameterUpdateOrigin::ensure_origin(origin)?;
 
 			DefaultHeartbeatInterval::<T>::set(interval);
 
 			Self::deposit_event(Event::<T>::DefaultHeartbeatIntervalUpdated { interval });
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(())
 		}
 
 		/// Updates the default heartbeat slashing window for all services.
@@ -2314,18 +2507,18 @@ pub mod module {
 		/// * `origin` - Origin of the call
 		/// * `window` - New default heartbeat slashing window
 		#[pallet::call_index(22)]
-		#[pallet::weight(10_000)]
+		#[pallet::weight(T::WeightInfo::update_default_heartbeat_slashing_window())]
 		pub fn update_default_heartbeat_slashing_window(
 			origin: OriginFor<T>,
 			window: BlockNumberFor<T>,
-		) -> DispatchResultWithPostInfo {
+		) -> DispatchResult {
 			T::DefaultParameterUpdateOrigin::ensure_origin(origin)?;
 
 			DefaultSlashingWindow::<T>::set(window);
 
 			Self::deposit_event(Event::<T>::DefaultHeartbeatSlashingWindowUpdated { window });
 
-			Ok(PostDispatchInfo { actual_weight: None, pays_fee: Pays::Yes })
+			Ok(())
 		}
 	}
 }

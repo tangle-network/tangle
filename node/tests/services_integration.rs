@@ -161,6 +161,7 @@ fn create_test_blueprint() -> ServiceBlueprint {
 			logo: None,
 			website: Some(BoundedString(BoundedVec(b"https://tangle.tools".to_vec()))),
 			license: Some(BoundedString(BoundedVec(b"MIT".to_vec()))),
+			profiling_data: None,
 		},
 		manager: BlueprintServiceManager::Evm(H160([0x13; 20])),
 		master_manager_revision: MasterBlueprintServiceManagerRevision::Latest,

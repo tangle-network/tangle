@@ -115,6 +115,7 @@ impl<T: Config> Pallet<T> {
 			&pot_account,
 			account_id,
 			rewards_to_be_paid,
+			// AllowDeath / KeepAlive. depending on requirements
 			frame_support::traits::ExistenceRequirement::AllowDeath,
 		)?;
 
