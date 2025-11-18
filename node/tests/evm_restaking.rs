@@ -127,7 +127,7 @@ async fn deploy_erc20(
 async fn create_asset(
 	subxt: &subxt::OnlineClient<subxt::PolkadotConfig>,
 	signer: &TestAccount,
-	asset_id: u128,
+	asset_id: u32,
 	name: &str,
 	symbol: &str,
 	decimals: u8,
@@ -535,7 +535,6 @@ fn operator_join_delegator_delegate_erc20() {
 				delegator: bob.address().to_account_id(),
 				amount: delegate_amount.to::<u128>(),
 				asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
-				__ignore: std::marker::PhantomData
 			})
 		);
 
@@ -970,7 +969,6 @@ fn lrt_deposit_withdraw_erc20() {
 				delegator: lrt_address.to_account_id(),
 				amount: deposit_amount.to::<u128>(),
 				asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
-				__ignore: std::marker::PhantomData
 			})
 		);
 
@@ -1236,7 +1234,6 @@ fn mad_rewards() {
 				delegator: bob.address().to_account_id(),
 				amount: delegate_amount.to::<u128>(),
 				asset: Asset::Erc20((<[u8; 20]>::from(*usdc.address())).into()),
-				__ignore: std::marker::PhantomData
 			})
 		);
 
@@ -1464,7 +1461,6 @@ fn lrt_rewards_erc20() {
 				delegator: lrt_address.to_account_id(),
 				amount: deposit_amount.to::<u128>(),
 				asset: Asset::Erc20((<[u8; 20]>::from(t.weth)).into()),
-				__ignore: std::marker::PhantomData
 			})
 		);
 

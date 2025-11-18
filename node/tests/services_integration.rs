@@ -399,7 +399,7 @@ fn test_service_request_creation() {
 
 		// Step 4: Create a service request (with zero payment for testing)
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -412,7 +412,7 @@ fn test_service_request_creation() {
 			vec![],                 // request_args
 			security_requirements,  // asset_security_requirements
 			1000u64,                // ttl
-			Asset::Custom(0u128),   // payment_asset
+			Asset::Custom(0u32),   // payment_asset
 			0u128,                  // value (free service for testing)
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -492,7 +492,7 @@ fn test_job_call_structure() {
 
 		// Step 4: Create a service request (with zero payment for testing)
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -505,7 +505,7 @@ fn test_job_call_structure() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128, // value (free service for testing)
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -699,7 +699,7 @@ fn test_end_to_end_services_workflow() {
 		// Step 3: Create a service request
 		info!("Step 3: Creating service request for blueprint {blueprint_id}");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -712,7 +712,7 @@ fn test_end_to_end_services_workflow() {
 			vec![], // service providers
 			security_requirements,
 			1000u64, // ttl
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128, // value (free service for testing)
 			MembershipModel::Fixed { min_operators: 1 },
 		);

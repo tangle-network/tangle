@@ -236,7 +236,7 @@ async fn get_rewards_pallet_account(
 	let account = subxt::utils::AccountId32(account_bytes);
 
 	// Verify it exists by querying its balance
-	let account_query = api::storage().system().account(&account);
+	let account_query = api::storage().system().account(account.clone());
 	let account_info = client.storage().at_latest().await?.fetch(&account_query).await?;
 
 	if account_info.is_some() {
@@ -486,7 +486,7 @@ fn test_payonce_job_complete_reward_flow() {
 		info!("Charlie (developer) initial balance: {charlie_before} TNT");
 
 		let rewards_account = get_rewards_pallet_account(&t.subxt).await?;
-		let rewards_account_query = api::storage().system().account(&rewards_account);
+		let rewards_account_query = api::storage().system().account(rewards_account);
 		let rewards_before = t
 			.subxt
 			.storage()
@@ -499,7 +499,7 @@ fn test_payonce_job_complete_reward_flow() {
 		info!("Rewards pallet initial balance: {rewards_before} TNT");
 
 		let treasury_account = get_treasury_account();
-		let treasury_account_query = api::storage().system().account(&treasury_account);
+		let treasury_account_query = api::storage().system().account(treasury_account);
 		let treasury_before = t
 			.subxt
 			.storage()
@@ -514,7 +514,7 @@ fn test_payonce_job_complete_reward_flow() {
 		// STEP 5: Create service request
 		info!("═══ STEP 5: Creating service request ═══");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -527,7 +527,7 @@ fn test_payonce_job_complete_reward_flow() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128, // No upfront payment - payment happens on job call!
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -877,7 +877,7 @@ fn test_multi_operator_weighted_distribution() {
 		// STEP 4: Create service with all operators
 		info!("═══ STEP 4: Creating service with all operators ═══");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -890,7 +890,7 @@ fn test_multi_operator_weighted_distribution() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128,
 			MembershipModel::Fixed { min_operators: 3 },
 		);
@@ -1081,7 +1081,7 @@ fn test_subscription_automatic_billing() {
 		// STEP 4: Create service
 		info!("═══ STEP 4: Creating subscription service ═══");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -1094,7 +1094,7 @@ fn test_subscription_automatic_billing() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128,
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -1293,7 +1293,7 @@ fn test_payment_fails_with_insufficient_balance() {
 		// STEP 4: Create service
 		info!("═══ STEP 4: Creating service ═══");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -1306,7 +1306,7 @@ fn test_payment_fails_with_insufficient_balance() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128,
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -1476,7 +1476,7 @@ fn test_claim_rewards_twice_fails() {
 		}
 
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -1489,7 +1489,7 @@ fn test_claim_rewards_twice_fails() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128,
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -1687,7 +1687,7 @@ fn test_unauthorized_job_call_fails() {
 		}
 
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -1700,7 +1700,7 @@ fn test_unauthorized_job_call_fails() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128,
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -1853,7 +1853,7 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		// STEP 4: Create service
 		info!("═══ STEP 4: Creating service ═══");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -1866,7 +1866,7 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128,
 			MembershipModel::Fixed { min_operators: 1 },
 		);
@@ -1918,7 +1918,7 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		info!("Alice (customer) initial balance: {} TNT", alice_before);
 
 		let rewards_account = get_rewards_pallet_account(&t.subxt).await?;
-		let rewards_account_query = api::storage().system().account(&rewards_account);
+		let rewards_account_query = api::storage().system().account(rewards_account);
 		let rewards_before = t
 			.subxt
 			.storage()
@@ -1931,7 +1931,7 @@ fn test_auto_aggregation_prevents_storage_overflow_e2e() {
 		info!("Rewards pallet initial balance: {} TNT", rewards_before);
 
 		let treasury_account = get_treasury_account();
-		let treasury_account_query = api::storage().system().account(&treasury_account);
+		let treasury_account_query = api::storage().system().account(treasury_account);
 		let treasury_before = t
 			.subxt
 			.storage()
@@ -2183,7 +2183,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 		let mut service_ids = Vec::new();
 
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -2197,7 +2197,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 				vec![],
 				security_requirements.clone(),
 				1000u64,
-				Asset::Custom(0u128),
+				Asset::Custom(0u32),
 				0u128,
 				MembershipModel::Fixed { min_operators: 1 },
 			);
@@ -2251,7 +2251,7 @@ fn test_aggregation_across_multiple_services_e2e() {
 		info!("Alice (customer) initial balance: {} TNT", alice_before);
 
 		let rewards_account = get_rewards_pallet_account(&t.subxt).await?;
-		let rewards_account_query = api::storage().system().account(&rewards_account);
+		let rewards_account_query = api::storage().system().account(rewards_account);
 		let rewards_before = t
 			.subxt
 			.storage()
@@ -2496,7 +2496,7 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 		);
 
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -2511,7 +2511,7 @@ fn test_subscription_cursor_prevents_timeout_e2e() {
 				vec![],
 				security_requirements.clone(),
 				1000u64,
-				Asset::Custom(0u128),
+				Asset::Custom(0u32),
 				0u128,
 				MembershipModel::Fixed { min_operators: 1 },
 			);
@@ -2709,7 +2709,7 @@ fn test_delegator_rewards_with_commission_split() {
 		let delegator_stake = 40_000u128; // 40% of total stake
 		let delegate_call = api::tx().multi_asset_delegation().delegate(
 			bob.account_id(),
-			Asset::Custom(0u128), // Native TNT
+			Asset::Custom(0u32), // Native TNT
 			delegator_stake,
 			DelegatorBlueprintSelection::All, // No blueprint restriction
 		);
@@ -2817,7 +2817,7 @@ fn test_delegator_rewards_with_commission_split() {
 		// STEP 6: Create and approve service
 		info!("═══ STEP 6: Creating and approving service ═══");
 		let security_requirements = vec![AssetSecurityRequirement {
-			asset: Asset::Custom(0u128),
+			asset: Asset::Custom(0u32),
 			min_exposure_percent: Percent(10),
 			max_exposure_percent: Percent(100),
 		}];
@@ -2830,7 +2830,7 @@ fn test_delegator_rewards_with_commission_split() {
 			vec![],
 			security_requirements,
 			1000u64,
-			Asset::Custom(0u128),
+			Asset::Custom(0u32),
 			0u128, // No upfront payment
 			MembershipModel::Fixed { min_operators: 1 },
 		);
