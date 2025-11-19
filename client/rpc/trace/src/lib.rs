@@ -48,6 +48,7 @@ use substrate_prometheus_endpoint::{
 use ethereum_types::H256;
 use fc_storage::StorageOverride;
 use fp_rpc::EthereumRuntimeRPCApi;
+use sp_core::H256 as SpH256;
 
 use client_evm_tracing::{
 	formatters::ResponseFormatter,
@@ -80,7 +81,7 @@ impl<B, C> Clone for Trace<B, C> {
 
 impl<B, C> Trace<B, C>
 where
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+	B: BlockT<Hash = SpH256> + Send + Sync + 'static,
 	B::Header: HeaderT<Number = u64>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
@@ -155,7 +156,7 @@ where
 	async fn fetch_traces(
 		&self,
 		req: FilterRequest,
-		block_hashes: &[H256],
+		block_hashes: &[SpH256],
 		count: usize,
 	) -> TxsTraceRes {
 		let from_address = req.from_address.unwrap_or_default();
@@ -224,7 +225,7 @@ where
 #[jsonrpsee::core::async_trait]
 impl<B, C> TraceServer for Trace<B, C>
 where
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+	B: BlockT<Hash = SpH256> + Send + Sync + 'static,
 	B::Header: HeaderT<Number = u64>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
@@ -249,7 +250,7 @@ enum CacheRequest {
 		/// Returns the ID of the batch for cancellation.
 		sender: oneshot::Sender<CacheBatchId>,
 		/// List of block hash to trace.
-		blocks: Vec<H256>,
+		blocks: Vec<SpH256>,
 	},
 	/// Fetch the traces for given block hash.
 	/// The task will answer only when it has processed this block.
@@ -257,7 +258,7 @@ enum CacheRequest {
 		/// Returns the array of traces or an error.
 		sender: oneshot::Sender<TxsTraceRes>,
 		/// Hash of the block.
-		block: H256,
+		block: SpH256,
 	},
 	/// Notify the cache that it can stop the batch with that ID. Any block contained only in
 	/// this batch and still not started will be discarded.
@@ -272,7 +273,7 @@ impl CacheRequester {
 	/// Request to start caching the provided range of blocks.
 	/// The task will add to blocks to its pool and immediately return the batch ID.
 	#[instrument(skip(self))]
-	pub async fn start_batch(&self, blocks: Vec<H256>) -> Result<CacheBatchId, String> {
+	pub async fn start_batch(&self, blocks: Vec<SpH256>) -> Result<CacheBatchId, String> {
 		let (response_tx, response_rx) = oneshot::channel();
 		let sender = self.0.clone();
 
@@ -292,7 +293,7 @@ impl CacheRequester {
 	/// The block should be part of a batch first. If no batch has requested the block it will
 	/// return an error.
 	#[instrument(skip(self))]
-	pub async fn get_traces(&self, block: H256) -> TxsTraceRes {
+	pub async fn get_traces(&self, block: SpH256) -> TxsTraceRes {
 		let (response_tx, response_rx) = oneshot::channel();
 		let sender = self.0.clone();
 
@@ -362,9 +363,9 @@ enum BlockingTaskMessage {
 	/// Notify the tracing for this block has started as the blocking task got a permit from
 	/// the semaphore. This is used to prevent the deletion of a cache entry for a block that has
 	/// started being traced.
-	Started { block_hash: H256 },
+	Started { block_hash: SpH256 },
 	/// The tracing is finished and the result is send to the main task.
-	Finished { block_hash: H256, result: TxsTraceRes },
+	Finished { block_hash: SpH256, result: TxsTraceRes },
 }
 
 /// Type wrapper for the cache task, generic over the Client, Block and Backend types.
@@ -372,8 +373,8 @@ pub struct CacheTask<B, C, BE> {
 	client: Arc<C>,
 	backend: Arc<BE>,
 	blocking_permits: Arc<Semaphore>,
-	cached_blocks: BTreeMap<H256, CacheBlock>,
-	batches: BTreeMap<u64, Vec<H256>>,
+	cached_blocks: BTreeMap<SpH256, CacheBlock>,
+	batches: BTreeMap<u64, Vec<SpH256>>,
 	next_batch_id: u64,
 	metrics: Option<Metrics>,
 	_phantom: PhantomData<B>,
@@ -387,7 +388,7 @@ where
 	C: StorageProvider<B, BE>,
 	C: HeaderMetadata<B, Error = BlockChainError> + HeaderBackend<B>,
 	C: Send + Sync + 'static,
-	B: BlockT<Hash = H256> + Send + Sync + 'static,
+	B: BlockT<Hash = SpH256> + Send + Sync + 'static,
 	B::Header: HeaderT<Number = u64>,
 	C::Api: BlockBuilder<B>,
 	C::Api: DebugRuntimeApi<B>,
@@ -495,7 +496,7 @@ where
 		&mut self,
 		blocking_tx: &mpsc::Sender<BlockingTaskMessage>,
 		sender: oneshot::Sender<CacheBatchId>,
-		blocks: Vec<H256>,
+		blocks: Vec<SpH256>,
 		overrides: Arc<dyn StorageOverride<B>>,
 	) {
 		tracing::trace!("Starting batch {}", self.next_batch_id);
@@ -598,7 +599,7 @@ where
 	/// - If this block is missing from the cache, it means no batch asked for it. All requested
 	///   blocks should be contained in a batch beforehand, and thus an error is returned.
 	#[instrument(skip(self))]
-	fn request_get_traces(&mut self, sender: oneshot::Sender<TxsTraceRes>, block: H256) {
+	fn request_get_traces(&mut self, sender: oneshot::Sender<TxsTraceRes>, block: SpH256) {
 		if let Some(block_cache) = self.cached_blocks.get_mut(&block) {
 			match &mut block_cache.state {
 				CacheBlockState::Pooled { ref mut waiting_requests, .. } => {
@@ -671,7 +672,7 @@ where
 	/// A tracing blocking task notifies it got a permit and is starting the tracing.
 	/// This started status is stored to avoid removing this block entry.
 	#[instrument(skip(self))]
-	fn blocking_started(&mut self, block_hash: H256) {
+	fn blocking_started(&mut self, block_hash: SpH256) {
 		if let Some(block_cache) = self.cached_blocks.get_mut(&block_hash) {
 			if let CacheBlockState::Pooled { ref mut started, .. } = block_cache.state {
 				*started = true;
@@ -681,7 +682,7 @@ where
 
 	/// A tracing blocking task notifies it has finished the tracing and provide the result.
 	#[instrument(skip(self, result))]
-	fn blocking_finished(&mut self, block_hash: H256, result: TxsTraceRes) {
+	fn blocking_finished(&mut self, block_hash: SpH256, result: TxsTraceRes) {
 		// In some cases it might be possible to receive traces of a block
 		// that has no entry in the cache because it was removed of the pool
 		// and received a permit concurrently. We just ignore it.
@@ -736,7 +737,7 @@ where
 	fn cache_block(
 		client: Arc<C>,
 		backend: Arc<BE>,
-		substrate_hash: H256,
+		substrate_hash: B::Hash,
 		overrides: Arc<dyn StorageOverride<B>>,
 	) -> TxsTraceRes {
 		// Get Subtrate block data.
@@ -765,11 +766,11 @@ where
 		};
 
 		let eth_block_hash = eth_block.header.hash();
-		let eth_tx_hashes: Vec<ethereum_types::H256> = eth_transactions
+		let eth_tx_hashes: Vec<H256> = eth_transactions
 			.iter()
 			.map(|t| {
 				let bytes: [u8; 32] = t.transaction_hash.0;
-				ethereum_types::H256::from(bytes)
+				H256::from(bytes)
 			})
 			.collect();
 
@@ -841,7 +842,7 @@ where
 			.iter()
 			.map(|t| {
 				let bytes: [u8; 32] = t.transaction_hash.0;
-				(t.transaction_index, ethereum_types::H256::from(bytes))
+				(t.transaction_index, H256::from(bytes))
 			})
 			.collect();
 
@@ -856,7 +857,7 @@ where
 					match eth_transactions_by_index.get(&trace.transaction_position) {
 						Some(transaction_hash) => {
 							let block_hash_bytes: [u8; 32] = eth_block_hash.0;
-							trace.block_hash = ethereum_types::H256::from(block_hash_bytes);
+							trace.block_hash = H256::from(block_hash_bytes);
 							trace.block_number = height;
 							trace.transaction_hash = *transaction_hash;
 

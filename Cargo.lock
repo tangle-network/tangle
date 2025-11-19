@@ -21994,6 +21994,7 @@ dependencies = [
  "sp-api 36.0.1",
  "sp-block-builder 36.0.0",
  "sp-blockchain",
+ "sp-core 36.1.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2503)",
  "sp-runtime 41.1.0 (git+https://github.com/paritytech/polkadot-sdk?branch=stable2503)",
  "substrate-prometheus-endpoint",
  "tokio",

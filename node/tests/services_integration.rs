@@ -412,7 +412,7 @@ fn test_service_request_creation() {
 			vec![],                 // request_args
 			security_requirements,  // asset_security_requirements
 			1000u64,                // ttl
-			Asset::Custom(0u32),   // payment_asset
+			Asset::Custom(0u32),    // payment_asset
 			0u128,                  // value (free service for testing)
 			MembershipModel::Fixed { min_operators: 1 },
 		);

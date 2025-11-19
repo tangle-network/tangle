@@ -22,6 +22,7 @@ use frame_support::{
 	BoundedVec,
 	dispatch::DispatchResult,
 	ensure,
+	pallet_prelude::DispatchError,
 	traits::{
 		Currency, ExistenceRequirement,
 		fungibles::{Inspect, Mutate},
@@ -181,9 +182,15 @@ impl<T: Config> Pallet<T> {
 			.iter_mut()
 			.find(|(op, _)| op == &operator)
 			.map(|(_, state)| {
-				*state =
-					ApprovalState::Approved { security_commitments: security_commitments.to_vec() }
-			});
+				*state = ApprovalState::Approved {
+					security_commitments: security_commitments
+						.to_vec()
+						.try_into()
+						.map_err(|_| Error::<T>::MaxAssetsPerServiceExceeded)?,
+				};
+				Ok::<_, DispatchError>(())
+			})
+			.transpose()?;
 		ensure!(updated.is_some(), Error::<T>::ApprovalNotRequested);
 
 		let blueprint_id = request.blueprint;

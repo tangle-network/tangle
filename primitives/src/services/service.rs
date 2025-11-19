@@ -323,8 +323,10 @@ pub struct ServiceRequest<
 	/// Accounts permitted to call service functions
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// Operators and their approval states
-	pub operators_with_approval_state:
-		BoundedVec<(AccountId, ApprovalState<AssetId>), C::MaxOperatorsPerService>,
+	pub operators_with_approval_state: BoundedVec<
+		(AccountId, ApprovalState<AssetId, C::MaxAssetsPerService>),
+		C::MaxOperatorsPerService,
+	>,
 	/// The membership model to use for this service instance
 	pub membership_model: MembershipModel,
 }

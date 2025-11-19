@@ -75,6 +75,8 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 	#[cfg(feature = "try-runtime")]
 	fn pre_upgrade() -> Result<Vec<u8>, sp_runtime::DispatchError> {
 		// Count how many entries we have pre-migration
+		// @dev: Error " the method `encode` exists for type `usize`, but its trait bounds were not
+		// satisfied" With u32, Max ~4.2 billion entries
 		let count = RewardConfigStorage::<T>::iter().count() as u32;
 		Ok(count.encode())
 	}
@@ -156,8 +158,8 @@ impl<T: Config> OnRuntimeUpgrade for V1SafetyCheckDelegatorRewards<T> {
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn pre_upgrade() -> Result<Vec<u8>, &'static str> {
-		let count = PendingOperatorRewards::<T>::iter().count();
+	fn pre_upgrade() -> Result<Vec<u8>, sp_runtime::DispatchError> {
+		let count = PendingOperatorRewards::<T>::iter().count() as u32;
 
 		if count > 0 {
 			log::error!(
@@ -165,7 +167,9 @@ impl<T: Config> OnRuntimeUpgrade for V1SafetyCheckDelegatorRewards<T> {
 				 Migration required before deploying delegator rewards!",
 				count
 			);
-			return Err("UNSAFE: PendingOperatorRewards not empty - migration required!");
+			return Err(DispatchError::Other(
+				"UNSAFE: PendingOperatorRewards not empty - migration required!",
+			));
 		}
 
 		log::info!("✅ Pre-upgrade: PendingOperatorRewards is empty");
@@ -173,7 +177,7 @@ impl<T: Config> OnRuntimeUpgrade for V1SafetyCheckDelegatorRewards<T> {
 	}
 
 	#[cfg(feature = "try-runtime")]
-	fn post_upgrade(_state: Vec<u8>) -> Result<(), &'static str> {
+	fn post_upgrade(_state: Vec<u8>) -> Result<(), sp_runtime::DispatchError> {
 		log::info!("✅ V1SafetyCheckDelegatorRewards: Post-upgrade check passed");
 		Ok(())
 	}
