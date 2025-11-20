@@ -42,6 +42,7 @@ use tangle_primitives::{
 
 pub mod functions;
 mod impls;
+pub mod migrations;
 mod payment_processing;
 mod rpc;
 pub mod types;

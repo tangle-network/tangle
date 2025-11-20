@@ -2,12 +2,7 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use alloy::{
-	network::Ethereum,
-	primitives::*,
-	providers::Provider,
-	sol,
-};
+use alloy::{network::Ethereum, primitives::*, providers::Provider, sol};
 use core::{future::Future, time::Duration};
 use sp_tracing::{error, info};
 use tangle_subxt::{subxt, subxt::tx::TxStatus, tangle_testnet_runtime::api};

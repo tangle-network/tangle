@@ -68,7 +68,7 @@ pub async fn wait_for_block(provider: &impl Provider<Ethereum>, block_number: u6
 		if current_block >= block_number {
 			break;
 		}
-		
+
 		info!(%current_block, "Waiting for block #{}...", block_number);
 		tokio::time::sleep(Duration::from_secs(1)).await;
 	}

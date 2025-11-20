@@ -17,8 +17,10 @@ use crate::{
 	cli::{Cli, Subcommand},
 	service,
 };
+use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
+use sc_service::PartialComponents;
 use tangle_primitives::types::Block;
 
 #[allow(dead_code)]
