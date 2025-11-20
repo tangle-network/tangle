@@ -17,10 +17,8 @@ use crate::{
 	cli::{Cli, Subcommand},
 	service,
 };
-use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use futures::TryFutureExt;
 use sc_cli::SubstrateCli;
-use sc_service::PartialComponents;
 use tangle_primitives::types::Block;
 
 #[allow(dead_code)]
@@ -148,7 +146,7 @@ pub fn run() -> sc_cli::Result<()> {
 		Some(Subcommand::ExportBlocks(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
-				let (client, _, import_queue, task_manager, _) =
+				let (client, _, _import_queue, task_manager, _) =
 					service::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.database), task_manager))
 			})
@@ -166,7 +164,7 @@ pub fn run() -> sc_cli::Result<()> {
 		Some(Subcommand::ExportState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
-				let (client, _, import_queue, task_manager, _) =
+				let (client, _, _import_queue, task_manager, _) =
 					service::new_chain_ops(&mut config, &cli.eth)?;
 				Ok((cmd.run(client, config.chain_spec), task_manager))
 			})
@@ -210,7 +208,7 @@ pub fn run() -> sc_cli::Result<()> {
 		Some(Subcommand::Revert(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.async_run(|mut config| {
-				let (client, backend, import_queue, task_manager, _) =
+				let (client, backend, _import_queue, task_manager, _) =
 					service::new_chain_ops(&mut config, &cli.eth)?;
 				let aux_revert = Box::new(|client, _, blocks| {
 					sc_consensus_grandpa::revert(client, blocks)?;
@@ -268,7 +266,7 @@ pub fn run() -> sc_cli::Result<()> {
 			})
 		},
 		#[cfg(feature = "manual-seal")]
-		Some(Subcommand::Benchmark(cmd)) => {
+		Some(Subcommand::Benchmark(_cmd)) => {
 			unimplemented!()
 		},
 		Some(Subcommand::FrontierDb(cmd)) => {

@@ -6,7 +6,6 @@ use alloy::{
 	network::Ethereum,
 	primitives::*,
 	providers::Provider,
-	rpc::types::{BlockId, BlockNumberOrTag},
 	sol,
 };
 use core::{future::Future, time::Duration};
@@ -133,15 +132,11 @@ async fn deploy_erc20(
 
 pub async fn wait_for_block(provider: &impl Provider<Ethereum>, block_number: u64) {
 	loop {
-		let block_id = BlockId::Number(BlockNumberOrTag::Latest);
-		let block = provider.get_block(block_id).await.unwrap();
-		if let Some(block) = block {
-			let current_block = block.header.number;
-			if current_block >= block_number {
-				break;
-			}
-			info!("Waiting for block #{block_number}, current: {current_block}");
+		let current_block = provider.get_block_number().await.unwrap();
+		if current_block >= block_number {
+			break;
 		}
+		info!(%current_block, "Waiting for block #{}...", block_number);
 		tokio::time::sleep(Duration::from_secs(1)).await;
 	}
 }

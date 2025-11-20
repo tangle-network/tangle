@@ -323,10 +323,7 @@ pub struct ServiceRequest<
 	/// Accounts permitted to call service functions
 	pub permitted_callers: BoundedVec<AccountId, C::MaxPermittedCallers>,
 	/// Operators and their approval states
-	pub operators_with_approval_state: BoundedVec<
-		(AccountId, ApprovalState<AssetId, C::MaxAssetsPerService>),
-		C::MaxOperatorsPerService,
-	>,
+	pub operators_with_approval_state: OperatorsWithApprovalState<AccountId, AssetId, C>,
 	/// The membership model to use for this service instance
 	pub membership_model: MembershipModel,
 }
@@ -437,6 +434,12 @@ pub type OperatorAssetCommitments<AssetId, C> =
 /// Type alias for operator security commitments
 pub type OperatorSecurityCommitments<AccountId, AssetId, C> = BoundedVec<
 	(AccountId, OperatorAssetCommitments<AssetId, C>),
+	<C as Constraints>::MaxOperatorsPerService,
+>;
+
+/// Type alias for operators with their approval states
+pub type OperatorsWithApprovalState<AccountId, AssetId, C> = BoundedVec<
+	(AccountId, ApprovalState<AssetId, <C as Constraints>::MaxAssetsPerService>),
 	<C as Constraints>::MaxOperatorsPerService,
 >;
 

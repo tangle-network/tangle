@@ -10,7 +10,6 @@ use alloy::{
 	network::Ethereum,
 	primitives::{utils::*, *},
 	providers::Provider,
-	rpc::types::{BlockId, BlockNumberOrTag},
 	sol,
 };
 use anyhow::bail;
@@ -65,24 +64,19 @@ const BATCH_ADDRESS: Address = address!("000000000000000000000000000000000000080
 /// Waits for a specific block number to be reached
 pub async fn wait_for_block(provider: &impl Provider<Ethereum>, block_number: u64) {
 	loop {
-		let block_id = BlockId::Number(BlockNumberOrTag::Latest);
-		let block = provider.get_block(block_id).await.unwrap();
-		if let Some(block) = block {
-			let current_block = block.header.number;
-			if current_block >= block_number {
-				break;
-			}
-			info!(%current_block, "Waiting for block #{}...", block_number);
+		let current_block = provider.get_block_number().await.unwrap();
+		if current_block >= block_number {
+			break;
 		}
+		
+		info!(%current_block, "Waiting for block #{}...", block_number);
 		tokio::time::sleep(Duration::from_secs(1)).await;
 	}
 }
 
 /// Waits for a specified number of additional blocks
 pub async fn wait_for_more_blocks(provider: &impl Provider<Ethereum>, blocks: u64) {
-	let block_id = BlockId::Number(BlockNumberOrTag::Latest);
-	let block = provider.get_block(block_id).await.unwrap();
-	let current_block = block.unwrap().header.number;
+	let current_block = provider.get_block_number().await.unwrap();
 	wait_for_block(provider, current_block + blocks).await;
 }
 

@@ -104,9 +104,12 @@ where
 }
 
 pub async fn wait_for_block(provider: &impl Provider, block_number: u64) {
-	let mut current_block = provider.get_block_number().await.unwrap();
-	while current_block < block_number {
-		current_block = provider.get_block_number().await.unwrap();
+	loop {
+		let current_block = provider.get_block_number().await.unwrap();
+		if current_block >= block_number {
+			break;
+		}
+		info!(%current_block, "Waiting for block #{}...", block_number);
 		tokio::time::sleep(Duration::from_secs(1)).await;
 	}
 }
