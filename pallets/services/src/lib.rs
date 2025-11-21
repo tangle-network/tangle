@@ -844,11 +844,8 @@ pub mod module {
 		},
 	}
 
-	/// The current storage version.
-	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
-
 	#[pallet::pallet]
-	#[pallet::storage_version(STORAGE_VERSION)]
+	#[pallet::storage_version(migrations::STORAGE_VERSION)]
 	pub struct Pallet<T>(_);
 
 	/// Slashing is enabled.
