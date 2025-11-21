@@ -21,11 +21,7 @@ use crate::{
 		MaxPermittedCallersOf,
 	},
 };
-use frame_support::{
-	pallet_prelude::*,
-	traits::UncheckedOnRuntimeUpgrade,
-	weights::Weight,
-};
+use frame_support::{pallet_prelude::*, traits::UncheckedOnRuntimeUpgrade, weights::Weight};
 use frame_system::pallet_prelude::BlockNumberFor;
 use sp_std::{marker::PhantomData, vec::Vec};
 use tangle_primitives::{
@@ -69,21 +65,15 @@ mod v0 {
 		pub ttl: BlockNumberFor<T>,
 		pub args: BoundedVec<Field<ConstraintsFor<T>, T::AccountId>, MaxFieldsOf<T>>,
 		pub permitted_callers: BoundedVec<T::AccountId, MaxPermittedCallersOf<T>>,
-		pub operators_with_approval_state: BoundedVec<
-			(T::AccountId, OldApprovalState<T::AssetId>),
-			MaxOperatorsPerServiceOf<T>,
-		>,
+		pub operators_with_approval_state:
+			BoundedVec<(T::AccountId, OldApprovalState<T::AssetId>), MaxOperatorsPerServiceOf<T>>,
 		pub membership_model: MembershipModel,
 	}
 
 	/// V0 type for [`crate::ServiceRequests`].
 	#[storage_alias]
-	pub type ServiceRequests<T: Config> = StorageMap<
-		crate::Pallet<T>,
-		Identity,
-		u64,
-		OldServiceRequest<T>,
-	>;
+	pub type ServiceRequests<T: Config> =
+		StorageMap<crate::Pallet<T>, Identity, u64, OldServiceRequest<T>>;
 }
 
 /// Implements [`UncheckedOnRuntimeUpgrade`], migrating the state of this pallet from V0 to V1.
@@ -181,7 +171,7 @@ impl<T: Config> UncheckedOnRuntimeUpgrade for ApprovalStateOfServiceRequestsMigr
 
 		if pre_count != post_count {
 			return Err(sp_runtime::TryRuntimeError::Other(
-				"Number of service requests changed during migration"
+				"Number of service requests changed during migration",
 			));
 		}
 
@@ -194,8 +184,8 @@ impl<T: Config> UncheckedOnRuntimeUpgrade for ApprovalStateOfServiceRequestsMigr
 	}
 }
 
-/// [`UncheckedOnRuntimeUpgrade`] implementation [`ApprovalStateOfServiceRequestsMigration`] wrapped in a
-/// [`VersionedMigration`](frame_support::migrations::VersionedMigration), which ensures that:
+/// [`UncheckedOnRuntimeUpgrade`] implementation [`ApprovalStateOfServiceRequestsMigration`] wrapped
+/// in a [`VersionedMigration`](frame_support::migrations::VersionedMigration), which ensures that:
 /// - The migration only runs once when the on-chain storage version is 0
 /// - The on-chain storage version is updated to `1` after the migration executes
 /// - Reads/Writes from checking/settings the on-chain storage version are accounted for
