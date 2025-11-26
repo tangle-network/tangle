@@ -58,7 +58,7 @@ pub mod api {
 		"TokenGateway",
 		"Credits",
 	];
-	pub static RUNTIME_APIS: [&str; 20usize] = [
+	pub static RUNTIME_APIS: [&str; 21usize] = [
 		"Core",
 		"Metadata",
 		"BlockBuilder",
@@ -79,6 +79,7 @@ pub mod api {
 		"GenesisBuilder",
 		"IsmpRuntimeApi",
 		"Benchmark",
+		"TryRuntime",
 	];
 	#[doc = r" The error type that is returned when there is a runtime issue."]
 	pub type DispatchError = runtime_types::sp_runtime::DispatchError;
@@ -172,6 +173,9 @@ pub mod api {
 			}
 			pub fn benchmark(&self) -> benchmark::Benchmark {
 				benchmark::Benchmark
+			}
+			pub fn try_runtime(&self) -> try_runtime::TryRuntime {
+				try_runtime::TryRuntime
 			}
 		}
 		pub mod core {
@@ -648,9 +652,9 @@ pub mod api {
 						"query_service_requests_with_blueprints_by_operator",
 						types::QueryServiceRequestsWithBlueprintsByOperator { operator },
 						[
-							205u8, 178u8, 13u8, 139u8, 7u8, 173u8, 113u8, 13u8, 69u8, 129u8, 156u8,
-							180u8, 89u8, 102u8, 252u8, 68u8, 211u8, 50u8, 241u8, 33u8, 251u8, 86u8,
-							152u8, 47u8, 11u8, 183u8, 225u8, 222u8, 19u8, 134u8, 136u8, 129u8,
+							221u8, 145u8, 160u8, 230u8, 238u8, 50u8, 56u8, 51u8, 86u8, 5u8, 51u8,
+							25u8, 250u8, 244u8, 238u8, 222u8, 58u8, 19u8, 142u8, 127u8, 45u8, 79u8,
+							60u8, 31u8, 1u8, 77u8, 42u8, 157u8, 9u8, 191u8, 186u8, 120u8,
 						],
 					)
 				}
@@ -3577,6 +3581,124 @@ pub mod api {
 				}
 			}
 		}
+		pub mod try_runtime {
+			use super::{root_mod, runtime_types};
+			#[doc = " Runtime api for testing the execution of a runtime upgrade."]
+			pub struct TryRuntime;
+			impl TryRuntime {
+				#[doc = " dry-run runtime upgrades, returning the total weight consumed."]
+				#[doc = ""]
+				#[doc = " This should do EXACTLY the same operations as the runtime would have done in the case of"]
+				#[doc = " a runtime upgrade (e.g. pallet ordering must be the same)"]
+				#[doc = ""]
+				#[doc = " Returns the consumed weight of the migration in case of a successful one, combined with"]
+				#[doc = " the total allowed block weight of the runtime."]
+				#[doc = ""]
+				#[doc = " If `checks` is `true`, `pre_migrate` and `post_migrate` of each migration and"]
+				#[doc = " `try_state` of all pallets will be executed. Else, no. If checks are executed, the PoV"]
+				#[doc = " tracking is likely inaccurate."]
+				pub fn on_runtime_upgrade(
+					&self,
+					checks: types::on_runtime_upgrade::Checks,
+				) -> ::subxt_core::runtime_api::payload::StaticPayload<
+					types::OnRuntimeUpgrade,
+					types::on_runtime_upgrade::output::Output,
+				> {
+					::subxt_core::runtime_api::payload::StaticPayload::new_static(
+						"TryRuntime",
+						"on_runtime_upgrade",
+						types::OnRuntimeUpgrade { checks },
+						[
+							150u8, 201u8, 232u8, 214u8, 43u8, 235u8, 45u8, 66u8, 76u8, 181u8,
+							112u8, 104u8, 161u8, 108u8, 100u8, 105u8, 208u8, 181u8, 53u8, 123u8,
+							71u8, 197u8, 104u8, 9u8, 56u8, 73u8, 204u8, 19u8, 138u8, 3u8, 80u8,
+							169u8,
+						],
+					)
+				}
+				#[doc = " Execute the given block, but optionally disable state-root and signature checks."]
+				#[doc = ""]
+				#[doc = " Optionally, a number of `try_state` hooks can also be executed after the block"]
+				#[doc = " execution."]
+				pub fn execute_block(
+					&self,
+					block: types::execute_block::Block,
+					state_root_check: types::execute_block::StateRootCheck,
+					signature_check: types::execute_block::SignatureCheck,
+					try_state: types::execute_block::TryState,
+				) -> ::subxt_core::runtime_api::payload::StaticPayload<
+					types::ExecuteBlock,
+					types::execute_block::output::Output,
+				> {
+					::subxt_core::runtime_api::payload::StaticPayload::new_static(
+						"TryRuntime",
+						"execute_block",
+						types::ExecuteBlock { block, state_root_check, signature_check, try_state },
+						[
+							254u8, 193u8, 161u8, 105u8, 247u8, 148u8, 63u8, 134u8, 105u8, 252u8,
+							125u8, 89u8, 224u8, 144u8, 198u8, 46u8, 144u8, 51u8, 126u8, 139u8,
+							155u8, 250u8, 102u8, 28u8, 153u8, 165u8, 37u8, 122u8, 240u8, 50u8,
+							51u8, 13u8,
+						],
+					)
+				}
+			}
+			pub mod types {
+				use super::runtime_types;
+				pub mod on_runtime_upgrade {
+					use super::runtime_types;
+					pub type Checks =
+						runtime_types::frame_support::traits::try_runtime::UpgradeCheckSelect;
+					pub mod output {
+						use super::runtime_types;
+						pub type Output = (
+							runtime_types::sp_weights::weight_v2::Weight,
+							runtime_types::sp_weights::weight_v2::Weight,
+						);
+					}
+				}
+				#[derive(
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				pub struct OnRuntimeUpgrade {
+					pub checks: on_runtime_upgrade::Checks,
+				}
+				pub mod execute_block {
+					use super::runtime_types;
+					pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u64 > , runtime_types :: fp_self_contained :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt_core :: utils :: MultiAddress < :: subxt_core :: utils :: AccountId32 , :: core :: primitive :: u32 > , runtime_types :: tangle_testnet_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: tangle_testnet_runtime :: extension :: CheckNominatedRestaked ,) > > ;
+					pub type StateRootCheck = ::core::primitive::bool;
+					pub type SignatureCheck = ::core::primitive::bool;
+					pub type TryState = runtime_types::frame_support::traits::try_runtime::Select;
+					pub mod output {
+						use super::runtime_types;
+						pub type Output = runtime_types::sp_weights::weight_v2::Weight;
+					}
+				}
+				#[derive(
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				pub struct ExecuteBlock {
+					pub block: execute_block::Block,
+					pub state_root_check: execute_block::StateRootCheck,
+					pub signature_check: execute_block::SignatureCheck,
+					pub try_state: execute_block::TryState,
+				}
+			}
+		}
 	}
 	pub fn view_functions() -> ViewFunctionsApi {
 		ViewFunctionsApi
@@ -3980,9 +4102,9 @@ pub mod api {
 			.hash();
 		runtime_metadata_hash ==
 			[
-				228u8, 25u8, 69u8, 236u8, 175u8, 91u8, 19u8, 29u8, 54u8, 183u8, 216u8, 196u8, 68u8,
-				16u8, 255u8, 158u8, 110u8, 40u8, 193u8, 111u8, 52u8, 156u8, 240u8, 119u8, 40u8,
-				179u8, 175u8, 173u8, 186u8, 77u8, 213u8, 96u8,
+				92u8, 135u8, 97u8, 52u8, 135u8, 157u8, 108u8, 22u8, 7u8, 243u8, 5u8, 122u8, 153u8,
+				137u8, 93u8, 208u8, 60u8, 34u8, 74u8, 91u8, 68u8, 54u8, 18u8, 109u8, 234u8, 77u8,
+				56u8, 143u8, 242u8, 208u8, 164u8, 215u8,
 			]
 	}
 	pub mod system {
@@ -47229,10 +47351,9 @@ pub mod api {
 						"ServiceRequests",
 						(),
 						[
-							184u8, 172u8, 88u8, 104u8, 242u8, 190u8, 207u8, 186u8, 173u8, 185u8,
-							156u8, 231u8, 75u8, 112u8, 204u8, 211u8, 171u8, 102u8, 198u8, 234u8,
-							20u8, 55u8, 56u8, 194u8, 224u8, 19u8, 248u8, 8u8, 111u8, 133u8, 208u8,
-							2u8,
+							249u8, 183u8, 195u8, 121u8, 61u8, 105u8, 211u8, 231u8, 7u8, 38u8, 46u8,
+							188u8, 159u8, 216u8, 6u8, 48u8, 125u8, 146u8, 104u8, 239u8, 206u8,
+							238u8, 81u8, 188u8, 55u8, 160u8, 10u8, 209u8, 48u8, 105u8, 78u8, 217u8,
 						],
 					)
 				}
@@ -47255,10 +47376,9 @@ pub mod api {
 						"ServiceRequests",
 						::subxt_core::storage::address::StaticStorageKey::new(_0),
 						[
-							184u8, 172u8, 88u8, 104u8, 242u8, 190u8, 207u8, 186u8, 173u8, 185u8,
-							156u8, 231u8, 75u8, 112u8, 204u8, 211u8, 171u8, 102u8, 198u8, 234u8,
-							20u8, 55u8, 56u8, 194u8, 224u8, 19u8, 248u8, 8u8, 111u8, 133u8, 208u8,
-							2u8,
+							249u8, 183u8, 195u8, 121u8, 61u8, 105u8, 211u8, 231u8, 7u8, 38u8, 46u8,
+							188u8, 159u8, 216u8, 6u8, 48u8, 125u8, 146u8, 104u8, 239u8, 206u8,
+							238u8, 81u8, 188u8, 55u8, 160u8, 10u8, 209u8, 48u8, 105u8, 78u8, 217u8,
 						],
 					)
 				}
@@ -57320,6 +57440,53 @@ pub mod api {
 							pub id: _0,
 							pub amount: _1,
 						}
+					}
+				}
+				pub mod try_runtime {
+					use super::runtime_types;
+					#[derive(
+						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+					pub enum Select {
+						#[codec(index = 0)]
+						None,
+						#[codec(index = 1)]
+						All,
+						#[codec(index = 2)]
+						RoundRobin(::core::primitive::u32),
+						#[codec(index = 3)]
+						Only(
+							::subxt_core::alloc::vec::Vec<
+								::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+							>,
+						),
+					}
+					#[derive(
+						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+						Clone,
+						Debug,
+						Eq,
+						PartialEq,
+					)]
+					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+					pub enum UpgradeCheckSelect {
+						#[codec(index = 0)]
+						None,
+						#[codec(index = 1)]
+						All,
+						#[codec(index = 2)]
+						PreAndPost,
+						#[codec(index = 3)]
+						TryState,
 					}
 				}
 			}
@@ -73567,7 +73734,7 @@ pub mod api {
 					)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub struct ServiceRequest < _1 , _2 , _3 > { pub blueprint : :: core :: primitive :: u64 , pub owner : _1 , pub security_requirements : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < _3 > > , pub ttl : _2 , pub args : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: field :: Field < _1 > > , pub permitted_callers : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < _1 > , pub operators_with_approval_state : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < (_1 , runtime_types :: tangle_primitives :: services :: types :: ApprovalState < _3 > ,) > , pub membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , }
+					pub struct ServiceRequest < _1 , _2 , _3 > { pub blueprint : :: core :: primitive :: u64 , pub owner : _1 , pub security_requirements : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityRequirement < _3 > > , pub ttl : _2 , pub args : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: field :: Field < _1 > > , pub permitted_callers : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < _1 > , pub operators_with_approval_state : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < (_1 , runtime_types :: tangle_primitives :: services :: types :: ApprovalState < _3 , runtime_types :: tangle_testnet_runtime :: tangle_services :: MaxAssetsPerService > ,) > , pub membership_model : runtime_types :: tangle_primitives :: services :: types :: MembershipModel , }
 					#[derive(
 						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
 						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -73812,8 +73979,8 @@ pub mod api {
 					)]
 					#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
 					#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
-					pub enum ApprovalState<_0> {
-						# [codec (index = 0)] Pending , # [codec (index = 1)] Approved { security_commitments : :: subxt_core :: alloc :: vec :: Vec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < _0 > > , } , # [codec (index = 2)] Rejected , }
+					pub enum ApprovalState<_0, _1> {
+						# [codec (index = 0)] Pending , # [codec (index = 1)] Approved { security_commitments : runtime_types :: bounded_collections :: bounded_vec :: BoundedVec < runtime_types :: tangle_primitives :: services :: types :: AssetSecurityCommitment < _0 > > , } , # [codec (index = 2)] Rejected , __Ignore (:: core :: marker :: PhantomData < _1 >) , }
 					#[derive(
 						:: subxt_core :: ext :: scale_decode :: DecodeAsType,
 						:: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -74095,6 +74262,20 @@ pub mod api {
 					pub grandpa: runtime_types::sp_consensus_grandpa::app::Public,
 					pub im_online: runtime_types::pallet_im_online::sr25519::app_sr25519::Public,
 				}
+			}
+			pub mod tangle_services {
+				use super::runtime_types;
+				#[derive(
+					:: subxt_core :: ext :: scale_decode :: DecodeAsType,
+					:: subxt_core :: ext :: scale_encode :: EncodeAsType,
+					Clone,
+					Debug,
+					Eq,
+					PartialEq,
+				)]
+				#[decode_as_type(crate_path = ":: subxt_core :: ext :: scale_decode")]
+				#[encode_as_type(crate_path = ":: subxt_core :: ext :: scale_encode")]
+				pub struct MaxAssetsPerService;
 			}
 			#[derive(
 				:: subxt_core :: ext :: scale_decode :: DecodeAsType,
