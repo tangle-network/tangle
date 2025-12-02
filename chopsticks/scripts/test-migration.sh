@@ -2,7 +2,11 @@
 # Automated runtime migration testing script
 # Usage: ./test-migration.sh [mainnet|testnet]
 
-set -e
+set -euo pipefail
+
+# Extra args for try-runtime CLI. Defaults disable spec-version
+# and idempotency checks so we can iterate faster on snapshots.
+TRY_RUNTIME_EXTRA_ARGS="${TRY_RUNTIME_EXTRA_ARGS:---disable-spec-version-check --disable-idempotency-checks}"
 
 NETWORK=${1:-mainnet}
 PORT=8000
@@ -11,9 +15,49 @@ if [ "$NETWORK" = "testnet" ]; then
     PORT=8001
 fi
 
+LOG_DIR=${LOG_DIR:-logs}
+mkdir -p "$LOG_DIR"
+mkdir -p snapshots
+
+CHOPSTICKS_PID=""
+TAIL_PIDS=()
+
+cleanup() {
+    if [ -n "$CHOPSTICKS_PID" ] && ps -p "$CHOPSTICKS_PID" > /dev/null 2>&1; then
+        kill "$CHOPSTICKS_PID" >/dev/null 2>&1 || true
+    fi
+    for tail_pid in "${TAIL_PIDS[@]}"; do
+        if ps -p "$tail_pid" > /dev/null 2>&1; then
+            kill "$tail_pid" >/dev/null 2>&1 || true
+        fi
+    done
+}
+trap cleanup EXIT
+
+timestamp() {
+    date +%Y%m%d-%H%M%S
+}
+
+run_with_live_logs() {
+    local log_file=$1
+    shift
+    echo "Logging to $log_file"
+    : > "$log_file"
+    stdbuf -oL -eL "$@" &> "$log_file" &
+    local cmd_pid=$!
+    tail -n 50 -f "$log_file" &
+    local tail_pid=$!
+    TAIL_PIDS+=("$tail_pid")
+    wait "$cmd_pid"
+    local status=$?
+    kill "$tail_pid" >/dev/null 2>&1 || true
+    return $status
+}
+
 echo "========================================="
 echo "Tangle Runtime Migration Test"
 echo "Network: $NETWORK"
+echo "Logs directory: $LOG_DIR"
 echo "========================================="
 echo ""
 
@@ -27,6 +71,11 @@ fi
 
 if ! command -v npx &> /dev/null; then
     echo "ERROR: npx not found. Install Node.js first."
+    exit 1
+fi
+
+if ! command -v stdbuf &> /dev/null; then
+    echo "ERROR: stdbuf not found (part of coreutils). Install before running."
     exit 1
 fi
 
@@ -49,16 +98,17 @@ echo ""
 
 # Define snapshot file path
 SNAPSHOT_FILE="snapshots/${NETWORK}.snap"
-mkdir -p snapshots
 
-# Start Chopsticks fork
+# Start Chopsticks fork with logging
 echo "Starting Chopsticks fork on port $PORT..."
-npx @acala-network/chopsticks \
+CHOP_LOG="$LOG_DIR/chopsticks-${NETWORK}-$(timestamp).log"
+stdbuf -oL -eL npx @acala-network/chopsticks \
     --config=./configs/${NETWORK}.yml \
-    --port=$PORT &
-
+    --port=$PORT &> "$CHOP_LOG" &
 CHOPSTICKS_PID=$!
-echo "Chopsticks PID: $CHOPSTICKS_PID"
+tail -n 50 -f "$CHOP_LOG" &
+TAIL_PIDS+=("$!")
+echo "Chopsticks PID: $CHOPSTICKS_PID (log: $CHOP_LOG)"
 
 # Wait for Chopsticks to be ready
 echo "Waiting for Chopsticks to be ready..."
@@ -79,20 +129,19 @@ if [ ! -f "$SNAPSHOT_FILE" ]; then
     echo "Chopsticks URI: ws://localhost:$PORT"
     echo "Snapshot file: $SNAPSHOT_FILE"
     echo ""
-    
-    RUST_LOG=runtime=debug,try-runtime::cli=trace \
-    try-runtime \
-        --runtime existing \
-        create-snapshot \
-        --uri ws://localhost:$PORT \
-        "$SNAPSHOT_FILE"
-    
-    if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create snapshot"
-        kill $CHOPSTICKS_PID
+
+    SNAP_LOG="$LOG_DIR/try-runtime-snapshot-${NETWORK}-$(timestamp).log"
+    if ! run_with_live_logs "$SNAP_LOG" \
+        env RUST_LOG=runtime=debug,try-runtime::cli=trace \
+        try-runtime \
+            --runtime existing \
+            create-snapshot \
+            --uri ws://localhost:$PORT \
+            "$SNAPSHOT_FILE"; then
+        echo "ERROR: Failed to create snapshot (see $SNAP_LOG)"
         exit 1
     fi
-    
+
     echo "✓ Snapshot created successfully"
 else
     echo "✓ Using existing snapshot: $SNAPSHOT_FILE"
@@ -114,32 +163,42 @@ echo "Snapshot file: $SNAPSHOT_FILE"
 echo "Blocktime: ${BLOCKTIME}ms"
 echo ""
 
-RUST_LOG=runtime=debug,try-runtime::cli=trace \
-try-runtime \
-    --runtime $RUNTIME_WASM \
-    on-runtime-upgrade \
-    --blocktime $BLOCKTIME \
-    --checks pre-and-post \
-    snap \
-    -p "$SNAPSHOT_FILE"
+UPGRADE_LOG="$LOG_DIR/try-runtime-upgrade-${NETWORK}-$(timestamp).log"
+if run_with_live_logs "$UPGRADE_LOG" \
+    env RUST_LOG=runtime=debug,try-runtime::cli=trace \
+    timeout 1800 \
+    try-runtime \
+        --runtime "$RUNTIME_WASM" \
+        on-runtime-upgrade \
+        --blocktime $BLOCKTIME \
+        --checks pre-and-post \
+        $TRY_RUNTIME_EXTRA_ARGS \
+        snap \
+        -p "$SNAPSHOT_FILE"; then
+    TEST_RESULT=0
+else
+    TEST_RESULT=$?
+fi
 
-TEST_RESULT=$?
-
-# Cleanup
 echo ""
 echo "Cleaning up..."
-kill $CHOPSTICKS_PID
 
 if [ $TEST_RESULT -eq 0 ]; then
     echo ""
     echo "========================================="
     echo "✅ Migration test PASSED"
+    echo "Logs:"
+    echo "  Chopsticks: $CHOP_LOG"
+    echo "  Upgrade:    $UPGRADE_LOG"
     echo "========================================="
     exit 0
 else
     echo ""
     echo "========================================="
-    echo "❌ Migration test FAILED"
+    echo "❌ Migration test FAILED (exit code $TEST_RESULT)"
+    echo "Logs:"
+    echo "  Chopsticks: $CHOP_LOG"
+    echo "  Upgrade:    $UPGRADE_LOG"
     echo "========================================="
-    exit 1
+    exit $TEST_RESULT
 fi

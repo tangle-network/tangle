@@ -15,7 +15,11 @@
 // along with Tangle.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{Config, PendingOperatorRewards, RewardConfigForAssetVault, RewardConfigStorage};
-use frame_support::{pallet_prelude::*, traits::OnRuntimeUpgrade, weights::Weight};
+use frame_support::{
+	pallet_prelude::*,
+	traits::{OnRuntimeUpgrade, StorageVersion},
+	weights::Weight,
+};
 use sp_runtime::{Perbill, Percent};
 use sp_std::{marker::PhantomData, vec::Vec};
 
@@ -68,6 +72,10 @@ impl<T: Config> OnRuntimeUpgrade for PercentageToPerbillMigration<T> {
 			"PercentageToPerbillMigration: Migrated {} reward configurations",
 			migrated_count
 		);
+
+		// Mark pallet storage version as upgraded so future migrations run once.
+		StorageVersion::new(1).put::<crate::Pallet<T>>();
+		weight = weight.saturating_add(T::DbWeight::get().writes(1));
 
 		weight
 	}

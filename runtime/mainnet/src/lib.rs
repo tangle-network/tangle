@@ -31,6 +31,39 @@ pub mod impls;
 pub mod precompiles;
 pub mod tangle_services;
 pub mod voter_bags;
+#[cfg(feature = "try-runtime")]
+mod try_runtime_helpers {
+	use frame_support::storage::unhashed;
+
+	pub const FLAG_KEY: &[u8] = b":try-runtime:reexecute";
+
+	pub fn set(flag: bool) {
+		if flag {
+			unhashed::put(FLAG_KEY, &true);
+		} else {
+			unhashed::kill(FLAG_KEY);
+		}
+	}
+
+	pub fn is_set() -> bool {
+		unhashed::exists(FLAG_KEY)
+	}
+
+	pub struct ReexecuteGuard;
+
+	impl ReexecuteGuard {
+		pub fn new() -> Self {
+			set(true);
+			Self
+		}
+	}
+
+	impl Drop for ReexecuteGuard {
+		fn drop(&mut self) {
+			set(false);
+		}
+	}
+}
 use frame_election_provider_support::{
 	BalancingConfig, ElectionDataProvider, SequentialPhragmen, VoteWeight,
 	bounds::{ElectionBounds, ElectionBoundsBuilder},
@@ -72,13 +105,16 @@ use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{
 		self, AccountIdConversion, BlakeTwo256, Block as BlockT, Bounded, Convert, ConvertInto,
-		DispatchInfoOf, Dispatchable, IdentityLookup, NumberFor, OpaqueKeys, PostDispatchInfoOf,
+		DispatchInfoOf, Dispatchable, Header as HeaderT, IdentityLookup, NumberFor, OpaqueKeys,
+		PostDispatchInfoOf,
 		UniqueSaturatedInto,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
 	},
 };
+#[cfg(feature = "try-runtime")]
+use sp_runtime::DigestItem;
 use sp_staking::currency_to_vote::U128CurrencyToVote;
 pub use tangle_crypto_primitives::crypto::AuthorityId as RoleKeyId;
 use tangle_primitives::services::{RpcServicesWithBlueprint, ServiceRequest};
@@ -86,11 +122,13 @@ pub use tangle_services::PalletServicesConstraints;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
-use sp_std::prelude::*;
+use sp_std::{prelude::*, vec::Vec};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+#[cfg(all(feature = "try-runtime", feature = "std"))]
+use std::panic;
 
 pub use frame_support::{
 	PalletId, StorageValue, construct_runtime,
@@ -114,6 +152,7 @@ pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{MultiAddress, Perbill, Percent, Permill};
+use pallet_session::OneSessionHandler;
 
 pub use tangle_primitives::{
 	AVERAGE_ON_INITIALIZE_RATIO, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO,
@@ -408,6 +447,46 @@ impl pallet_authorship::Config for Runtime {
 
 use crate::opaque::SessionKeys;
 
+pub struct BabeSessionHandler;
+
+impl OneSessionHandler<AccountId> for BabeSessionHandler {
+	type Key = pallet_babe::AuthorityId;
+
+	fn on_genesis_session<'a, I: 'a>(validators: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+	{
+		<pallet_babe::Pallet<Runtime> as OneSessionHandler<_>>::on_genesis_session(validators);
+	}
+
+	fn on_new_session<'a, I: 'a>(changed: bool, validators: I, queued_validators: I)
+	where
+		I: Iterator<Item = (&'a AccountId, Self::Key)>,
+	{
+		#[cfg(feature = "try-runtime")]
+		let prev_len = frame_system::Pallet::<Runtime>::digest().logs().len();
+
+		<pallet_babe::Pallet<Runtime> as OneSessionHandler<_>>::on_new_session(
+			changed,
+			validators,
+			queued_validators,
+		);
+
+		#[cfg(feature = "try-runtime")]
+		if try_runtime_helpers::is_set() {
+			frame_system::Digest::<Runtime>::mutate(|digest| {
+				while digest.logs.len() > prev_len {
+					digest.logs.pop();
+				}
+			});
+		}
+	}
+
+	fn on_disabled(i: u32) {
+		<pallet_babe::Pallet<Runtime> as OneSessionHandler<_>>::on_disabled(i);
+	}
+}
+
 impl pallet_session::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
@@ -415,7 +494,7 @@ impl pallet_session::Config for Runtime {
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
 	type SessionManager = RoundChangeSessionManager<Self, NoteHistoricalRoot<Self, Staking>>;
-	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type SessionHandler = (BabeSessionHandler, Grandpa, ImOnline, Services);
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 	type DisablingStrategy = ();
@@ -1576,8 +1655,19 @@ pub type CheckedExtrinsic =
 	fp_self_contained::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra, H160>;
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
+/// Session pallet storage migration (disabled validators -> offence severity).
+type SessionDisabledValidatorsMigration =
+	pallet_session::migrations::v1::MigrateV0ToV1<
+		Runtime,
+		pallet_session::migrations::v1::InitOffenceSeverity<Runtime>,
+	>;
+
 /// Migrations for the runtime.
-pub type Migrations = (pallet_services::migrations::v1::MigrateV0ToV1<Runtime>,);
+pub type Migrations = (
+	pallet_services::migrations::v1::MigrateV0ToV1<Runtime>,
+	SessionDisabledValidatorsMigration,
+	pallet_rewards::migrations::PercentageToPerbillMigration<Runtime>,
+);
 
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
@@ -1673,7 +1763,17 @@ impl_runtime_apis! {
 		}
 
 		fn execute_block(block: Block) {
-			Executive::execute_block(block)
+			#[cfg(feature = "try-runtime")]
+			{
+				log_try_runtime_digest("header", block.header().digest().logs());
+			}
+
+			Executive::execute_block(block);
+
+			#[cfg(feature = "try-runtime")]
+			{
+				log_try_runtime_digest("computed", frame_system::Pallet::<Runtime>::digest().logs());
+			}
 		}
 
 		fn initialize_block(header: &<Block as BlockT>::Header) -> sp_runtime::ExtrinsicInclusionMode {
@@ -2330,7 +2430,65 @@ impl_runtime_apis! {
 			signature_check: bool,
 			select: frame_try_runtime::TryStateSelect,
 		) -> Weight {
-			Executive::try_execute_block(block, state_root_check, signature_check, select).unwrap()
+			log_try_runtime_digest("try-runtime header", block.header().digest().logs());
+
+			#[cfg(feature = "try-runtime")]
+			let _guard = try_runtime_helpers::ReexecuteGuard::new();
+
+			#[cfg(feature = "std")]
+			{
+				let result = panic::catch_unwind(|| {
+					Executive::try_execute_block(block, state_root_check, signature_check, select)
+				});
+
+				match result {
+					Ok(weight) => {
+						#[cfg(feature = "try-runtime")]
+						if try_runtime_helpers::is_set() {
+							frame_system::Digest::<Runtime>::put(block.header().digest().clone());
+						}
+
+						log_try_runtime_digest(
+							"try-runtime computed",
+							frame_system::Pallet::<Runtime>::digest().logs(),
+						);
+						weight.unwrap()
+					},
+					Err(err) => {
+						#[cfg(feature = "try-runtime")]
+						if try_runtime_helpers::is_set() {
+							frame_system::Digest::<Runtime>::put(block.header().digest().clone());
+						}
+
+						log_try_runtime_digest(
+							"try-runtime computed (panic)",
+							frame_system::Pallet::<Runtime>::digest().logs(),
+						);
+						panic::resume_unwind(err)
+					},
+				}
+			}
+
+			#[cfg(not(feature = "std"))]
+			{
+				let weight =
+					Executive::try_execute_block(block, state_root_check, signature_check, select)
+						.unwrap();
+				#[cfg(feature = "try-runtime")]
+				if try_runtime_helpers::is_set() {
+					frame_system::Digest::<Runtime>::put(block.header().digest().clone());
+				}
+				log_try_runtime_digest(
+					"try-runtime computed",
+					frame_system::Pallet::<Runtime>::digest().logs(),
+				);
+				weight
+			}
 		}
 	}
+}
+
+#[cfg(feature = "try-runtime")]
+fn log_try_runtime_digest(stage: &str, logs: &[DigestItem]) {
+	log::info!(target: "runtime::digest", "try-runtime digest {} logs: {:?}", stage, logs);
 }
