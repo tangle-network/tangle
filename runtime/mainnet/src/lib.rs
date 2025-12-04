@@ -26,7 +26,7 @@ pub mod extension;
 mod filters;
 pub mod frontier_evm;
 pub mod impls;
-// TEMPORARY: Migration has Currency trait bound issues with stable2503
+// TODO(stable2503): Migration has Currency trait bound issues with stable2503
 // pub mod migrations;
 pub mod precompiles;
 pub mod tangle_services;
@@ -203,7 +203,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle"),
 	impl_name: create_runtime_str!("tangle"),
 	authoring_version: 1,
-	spec_version: 1503, // v1.5.3
+	spec_version: 1500, // v1.5.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -575,7 +575,7 @@ impl pallet_staking::Config for Runtime {
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
 	type OldCurrency = Balances;
 	type RuntimeHoldReason = RuntimeHoldReason;
-	type Filter = frame_support::traits::Everything;
+	type Filter = frame_support::traits::Nothing;
 }
 
 parameter_types! {
@@ -884,7 +884,7 @@ parameter_types! {
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::MAX / 2;
 }
 
-// TEMPORARY: Commented out due to API changes in stable2503
+// TODO(stable2503): Commented out due to API changes in stable2503
 // impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 // where
 // 	RuntimeCall: From<LocalCall>,
@@ -930,7 +930,7 @@ impl frame_system::offchain::SigningTypes for Runtime {
 	type Signature = Signature;
 }
 
-// TEMPORARY: SendTransactionTypes trait no longer exists in stable2503
+// TODO(stable2503): SendTransactionTypes trait no longer exists in stable2503
 // impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
 // where
 // 	RuntimeCall: From<C>,

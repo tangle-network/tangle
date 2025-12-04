@@ -401,7 +401,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let pubsub_notification_sinks = Arc::new(pubsub_notification_sinks);
 
 	// for ethereum-compatibility rpc.
-	// TEMPORARY: rpc_id_provider field removed in stable2503
+	// TODO(stable2503): rpc_id_provider field removed in stable2503
 	// config.rpc_id_provider = Some(Box::new(fc_rpc::EthereumSubIdProvider));
 
 	let slot_duration = babe_link.config().slot_duration();
@@ -409,7 +409,7 @@ pub async fn new_full<Network: sc_network::NetworkBackend<Block, <Block as Block
 	let frontier_backend = Arc::new(frontier_backend);
 
 	let _ethapi_cmd = rpc_config.ethapi.clone();
-	// TEMPORARY: Tracing has Hash type mismatches with stable2503
+	// TODO(stable2503): Tracing has Hash type mismatches with stable2503
 	// let tracing_requesters =
 	// 	if ethapi_cmd.contains(&EthApi::Debug) || ethapi_cmd.contains(&EthApi::Trace) {
 	// 		crate::rpc::tracing::spawn_tracing_tasks(

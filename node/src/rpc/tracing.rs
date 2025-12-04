@@ -39,7 +39,7 @@ pub struct RpcRequesters {
 }
 
 // Spawn the tasks that are required to run a tracing node.
-// TEMPORARY: Disabled due to H256 type mismatches with stable2503
+// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
 #[allow(dead_code)]
 pub fn spawn_tracing_tasks(
 	_task_manager: &TaskManager,
@@ -50,7 +50,7 @@ pub fn spawn_tracing_tasks(
 	_rpc_config: &RpcConfig,
 	_prometheus: Option<PrometheusRegistry>,
 ) -> RpcRequesters {
-	// TEMPORARY: Commented out due to H256 type mismatches with stable2503
+	// TODO(stable2503): Commented out due to H256 type mismatches with stable2503
 	// let permit_pool = Arc::new(Semaphore::new(rpc_config.ethapi_max_permits as usize));
 
 	// let (trace_filter_task, trace_filter_requester) = if

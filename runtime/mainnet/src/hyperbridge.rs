@@ -58,7 +58,7 @@ impl pallet_ismp::Config for Runtime {
 	// algorithms supported by this protocol deployment
 	type ConsensusClients = (::ismp_grandpa::consensus::GrandpaConsensusClient<Runtime>,);
 	type OffchainDB = ();
-	type FeeHandler = (); // TEMPORARY: FeeHandler API needs update for stable2503
+	type FeeHandler = (); // TODO(stable2503): FeeHandler API needs update for stable2503
 }
 
 impl ::ismp_grandpa::Config for Runtime {

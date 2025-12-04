@@ -111,8 +111,8 @@ where
 #[cfg(feature = "testnet")]
 pub fn create_full<C, P, BE, CT, SC, B, CIDP>(
 	deps: FullDeps<C, P, CT, SC, B, CIDP>,
-	subscription_task_executor: SubscriptionTaskExecutor,
-	pubsub_notification_sinks: Arc<
+	_subscription_task_executor: SubscriptionTaskExecutor,
+	_pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
 			fc_mapping_sync::EthereumBlockNotification<Block>,
 		>,
@@ -133,7 +133,7 @@ where
 	C::Api: pallet_credits_rpc::CreditsRuntimeApi<Block, AccountId, Balance, AssetId>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
-	// TEMPORARY: Debug and Trace APIs have Hash type mismatches with stable2503
+	// TODO(stable2503): Debug and Trace APIs have Hash type mismatches with stable2503
 	// C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
@@ -159,7 +159,16 @@ where
 	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	let mut io = RpcModule::new(());
-	let FullDeps { client, pool, deny_unsafe: _, eth, babe, select_chain, grandpa, backend } = deps;
+	let FullDeps {
+		client,
+		pool,
+		deny_unsafe: _deny_unsafe,
+		eth: _eth,
+		babe,
+		select_chain,
+		grandpa,
+		backend,
+	} = deps;
 
 	let GrandpaDeps {
 		shared_voter_state,
@@ -193,12 +202,13 @@ where
 	)?;
 
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
-		io,
-		eth,
-		subscription_task_executor,
-		pubsub_notification_sinks,
-	)?;
+	// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
+	// let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	// 	io,
+	// 	eth,
+	// 	subscription_task_executor,
+	// 	pubsub_notification_sinks,
+	// )?;
 
 	Ok(io)
 }
@@ -221,7 +231,7 @@ where
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: fp_rpc::ConvertTransactionRuntimeApi<Block>,
 	C::Api: fp_rpc::EthereumRuntimeRPCApi<Block>,
-	// TEMPORARY: Debug and Trace APIs have Hash type mismatches with stable2503
+	// TODO(stable2503): Debug and Trace APIs have Hash type mismatches with stable2503
 	// C::Api: rpc_primitives_debug::DebugRuntimeApi<Block>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<Block>,
 	C::Api: BabeApi<Block>,
@@ -230,6 +240,7 @@ where
 		+ HeaderMetadata<Block, Error = BlockChainError>
 		+ StorageProvider<Block, BE>,
 	BE: Backend<Block> + 'static,
+	// TODO(stable2503): Debug and Trace APIs have Hash type mismatches with stable2503
 	// C::Api: pallet_ismp_runtime_api::IsmpRuntimeApi<Block, H256>,
 	P: TransactionPool<Block = Block, Hash = sp_core::H256> + 'static,
 	CT: fp_rpc::ConvertTransaction<<Block as BlockT>::Extrinsic> + Send + Sync + 'static,
@@ -277,6 +288,7 @@ where
 	io.merge(ServicesClient::new(client.clone()).into_rpc())?;
 	io.merge(RewardsClient::new(client.clone()).into_rpc())?;
 	io.merge(CreditsClient::new(client.clone()).into_rpc())?;
+	// TODO(stable2503): Debug and Trace APIs have Hash type mismatches with stable2503
 	//io.merge(IsmpRpcHandler::new(client.clone(), backend)?.into_rpc())?;
 
 	io.merge(
@@ -291,12 +303,13 @@ where
 	)?;
 
 	// Ethereum compatibility RPCs
-	let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
-		io,
-		eth,
-		subscription_task_executor,
-		pubsub_notification_sinks,
-	)?;
+	// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
+	// let io = create_eth::<_, _, _, _, _, _, DefaultEthConfig<C, BE>>(
+	// 	io,
+	// 	eth,
+	// 	subscription_task_executor,
+	// 	pubsub_notification_sinks,
+	// )?;
 
 	Ok(io)
 }

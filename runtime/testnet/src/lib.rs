@@ -178,7 +178,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("tangle-testnet"),
 	impl_name: create_runtime_str!("tangle-testnet"),
 	authoring_version: 1,
-	spec_version: 1503, // v1.5.3
+	spec_version: 1500, // v1.5.0
 	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -400,7 +400,7 @@ impl pallet_babe::Config for Runtime {
 	type MaxNominators = MaxNominatorRewardedPerValidator;
 	type KeyOwnerProof =
 		<Historical as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
-	// TEMPORARY: CreateInherent trait bound issue in stable2503
+	// TODO(stable2503): CreateInherent trait bound issue in stable2503
 	type EquivocationReportSystem = ();
 }
 
@@ -484,9 +484,9 @@ impl pallet_staking::Config for Runtime {
 	type AdminOrigin = EnsureRoot<AccountId>;
 	type UnixTime = Timestamp;
 	type CurrencyToVote = U128CurrencyToVote;
-	type RewardRemainder = (); // TEMPORARY: NegativeImbalance type changed in stable2503
+	type RewardRemainder = (); // TODO(stable2503): NegativeImbalance type changed in stable2503
 	type RuntimeEvent = RuntimeEvent;
-	type Slash = (); // TEMPORARY: NegativeImbalance type changed in stable2503
+	type Slash = (); // TODO(stable2503): NegativeImbalance type changed in stable2503
 	type Reward = ();
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
@@ -817,7 +817,7 @@ parameter_types! {
 	pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::MAX / 2;
 }
 
-// TEMPORARY: Commented out due to API changes in stable2503
+// TODO(stable2503): Commented out due to API changes in stable2503
 // The offchain transaction signing API has changed and needs to be updated
 // impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
 // where
@@ -864,7 +864,7 @@ impl frame_system::offchain::SigningTypes for Runtime {
 	type Signature = Signature;
 }
 
-// TEMPORARY: SendTransactionTypes trait no longer exists in stable2503
+// TODO(stable2503): SendTransactionTypes trait no longer exists in stable2503
 // impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
 // where
 // 	RuntimeCall: From<C>,

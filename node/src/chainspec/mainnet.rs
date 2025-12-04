@@ -276,6 +276,10 @@ fn mainnet_genesis(
 			"invulnerables": initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
 			"slashRewardFraction": Perbill::from_percent(10),
 			"stakers" : stakers,
+			"forceEra": "ForceNew",
+			"canceledPayout": 0u128,
+			"minNominatorBond": UNIT,
+			"minValidatorBond": UNIT,
 		},
 		"council": {
 			"members": council_members,

@@ -126,8 +126,8 @@ impl<C, P, CT: Clone, B: BlockT, CIDP: Clone> Clone for EthDeps<C, P, CT, B, CID
 pub fn create_eth<B, C, BE, P, CT, CIDP, EC>(
 	mut io: RpcModule<()>,
 	deps: EthDeps<C, P, CT, B, CIDP>,
-	subscription_task_executor: SubscriptionTaskExecutor,
-	pubsub_notification_sinks: Arc<
+	_subscription_task_executor: SubscriptionTaskExecutor,
+	_pubsub_notification_sinks: Arc<
 		fc_mapping_sync::EthereumBlockNotificationSinks<
 			fc_mapping_sync::EthereumBlockNotification<B>,
 		>,
@@ -140,7 +140,7 @@ where
 		+ BlockBuilderApi<B>
 		+ ConvertTransactionRuntimeApi<B>
 		+ EthereumRuntimeRPCApi<B>,
-	// TEMPORARY: Debug and Trace APIs have Hash type mismatches with stable2503
+	// TODO(stable2503): Debug and Trace APIs have Hash type mismatches with stable2503
 	// C::Api: rpc_primitives_debug::DebugRuntimeApi<B>,
 	C::Api: rpc_primitives_txpool::TxPoolRuntimeApi<B>,
 	C: BlockchainEvents<B> + StorageProvider<B, BE> + 'static,
@@ -162,23 +162,23 @@ where
 	let EthDeps {
 		client,
 		pool,
-		graph,
-		converter,
-		is_authority,
+		graph: _graph,
+		converter: _converter,
+		is_authority: _is_authority,
 		enable_dev_signer,
 		network,
-		sync,
-		frontier_backend,
-		storage_override,
-		block_data_cache,
-		filter_pool,
-		max_past_logs,
-		fee_history_cache,
-		fee_history_cache_limit,
-		execute_gas_limit_multiplier,
-		forced_parent_hashes,
+		sync: _sync,
+		frontier_backend: _frontier_backend,
+		storage_override: _storage_override,
+		block_data_cache: _block_data_cache,
+		filter_pool: _filter_pool,
+		max_past_logs: _max_past_logs,
+		fee_history_cache: _fee_history_cache,
+		fee_history_cache_limit: _fee_history_cache_limit,
+		execute_gas_limit_multiplier: _execute_gas_limit_multiplier,
+		forced_parent_hashes: _forced_parent_hashes,
 		tracing_config: _tracing_config,
-		pending_create_inherent_data_providers,
+		pending_create_inherent_data_providers: _pending_create_inherent_data_providers,
 	} = deps;
 
 	let mut signers = Vec::new();
@@ -186,55 +186,58 @@ where
 		signers.push(Box::new(EthDevSigner::new()) as Box<dyn EthSigner>);
 	}
 
-	io.merge(
-		Eth::<B, C, P, CT, BE, CIDP, EC>::new(
-			client.clone(),
-			pool.clone(),
-			graph.clone(),
-			converter,
-			sync.clone(),
-			signers,
-			storage_override.clone(),
-			frontier_backend.clone(),
-			is_authority,
-			block_data_cache.clone(),
-			fee_history_cache,
-			fee_history_cache_limit,
-			execute_gas_limit_multiplier,
-			forced_parent_hashes,
-			pending_create_inherent_data_providers,
-			None,
-		)
-		.replace_config::<EC>()
-		.into_rpc(),
-	)?;
+	// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
+	// io.merge(
+	// 	Eth::<B, C, P, CT, BE, CIDP, EC>::new(
+	// 		client.clone(),
+	// 		pool.clone(),
+	// 		graph.clone(),
+	// 		converter,
+	// 		sync.clone(),
+	// 		signers,
+	// 		storage_override.clone(),
+	// 		frontier_backend.clone(),
+	// 		is_authority,
+	// 		block_data_cache.clone(),
+	// 		fee_history_cache,
+	// 		fee_history_cache_limit,
+	// 		execute_gas_limit_multiplier,
+	// 		forced_parent_hashes,
+	// 		pending_create_inherent_data_providers,
+	// 		None,
+	// 	)
+	// 	.replace_config::<EC>()
+	// 	.into_rpc(),
+	// )?;
 
-	if let Some(filter_pool) = filter_pool {
-		io.merge(
-			EthFilter::new(
-				client.clone(),
-				frontier_backend,
-				graph.clone(),
-				filter_pool,
-				500_usize, // max stored filters
-				max_past_logs,
-				block_data_cache,
-			)
-			.into_rpc(),
-		)?;
-	}
+	// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
+	// if let Some(filter_pool) = filter_pool {
+	// 	io.merge(
+	// 		EthFilter::new(
+	// 			client.clone(),
+	// 			frontier_backend,
+	// 			graph.clone(),
+	// 			filter_pool,
+	// 			500_usize, // max stored filters
+	// 			max_past_logs,
+	// 			block_data_cache,
+	// 		)
+	// 		.into_rpc(),
+	// 	)?;
+	// }
 
-	io.merge(
-		EthPubSub::new(
-			pool.clone(),
-			client.clone(),
-			sync,
-			subscription_task_executor,
-			storage_override.clone(),
-			pubsub_notification_sinks,
-		)
-		.into_rpc(),
-	)?;
+	// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
+	// io.merge(
+	// 	EthPubSub::new(
+	// 		pool.clone(),
+	// 		client.clone(),
+	// 		sync,
+	// 		subscription_task_executor,
+	// 		storage_override.clone(),
+	// 		pubsub_notification_sinks,
+	// 	)
+	// 	.into_rpc(),
+	// )?;
 
 	io.merge(
 		Net::new(
@@ -251,7 +254,7 @@ where
 	#[cfg(feature = "txpool")]
 	io.merge(TxPoolServer::into_rpc(TxPool::new(Arc::clone(&client), pool)))?;
 
-	// TEMPORARY: Disabled due to H256 type mismatches with stable2503
+	// TODO(stable2503): Disabled due to H256 type mismatches with stable2503
 	// if let Some(tracing_config) = tracing_config {
 	// 	if let Some(trace_filter_requester) = tracing_config.tracing_requesters.trace {
 	// 		io.merge(
@@ -264,5 +267,6 @@ where
 	// 		io.merge(Debug::new(debug_requester).into_rpc())?;
 	// 	}
 	// }
+
 	Ok(io)
 }
